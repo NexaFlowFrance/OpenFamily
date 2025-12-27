@@ -109,3 +109,10 @@ temp/
 *.keystore
 *.jks
 key.properties
+
+# Private documentation and guides
+GUIDE-*.md
+DEPLOY_DOCKER.md
+ideas.md
+SECURITY.md
+android/keystore-instructions.md

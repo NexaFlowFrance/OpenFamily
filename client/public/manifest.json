@@ -1,0 +1,26 @@
+{
+  "name": "OpenFamily",
+  "short_name": "OpenFamily",
+  "description": "Application de gestion familiale : courses, tâches, rendez-vous, recettes et repas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A1E3D",
+  "theme_color": "#0A1E3D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/OpenFamily.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/OpenFamily.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "productivity"],
+  "screenshots": []
+}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>OpenFamily - Gestionnaire Familial</title>
+    <meta name="description" content="Organisez votre vie de famille : achats de bébé, emploi du temps, tâches ménagères et rendez-vous." />
+    <meta name="theme-color" content="#0A1E3D" />
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/OpenFamily.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/OpenFamily.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/OpenFamily.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="OpenFamily" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <style>
+      :root {
+        --font-display: 'Montserrat', sans-serif;
+        --font-sans: 'Montserrat', sans-serif;
+        --font-accent: 'Montserrat', sans-serif;
+      }
+      
+      body {
+        font-family: var(--font-sans);
+      }
+      
+      h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display);
+      }
+      
+      .font-accent {
+        font-family: var(--font-accent);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+
+</html>

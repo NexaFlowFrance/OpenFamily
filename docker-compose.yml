@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      target: web
+    image: openfamily_web:latest
+    ports:
+      # expose on all interfaces by default; to bind only to localhost use 127.0.0.1:80:80
+      - "80:80"
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      target: api
+    image: openfamily_api:latest
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: openfamily_net

@@ -1,0 +1,49 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+
+    - name: 🔧 Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+
+    - name: 📦 Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: 🏗️ Build project
+      run: pnpm build
+
+    - name: 📊 Check build size
+      run: |
+        echo "Build completed successfully"
+        du -sh dist/
+
+    - name: 📤 Upload build artifacts
+      uses: actions/upload-artifact@v3
+      if: matrix.node-version == '20.x'
+      with:
+        name: build-artifacts
+        path: dist/
+        retention-days: 7

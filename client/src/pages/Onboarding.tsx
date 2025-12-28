@@ -52,12 +52,16 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   const handleFinish = async () => {
-    // Configurer le mode de stockage
-    RepositoryFactory.setStorageMode(storageMode, storageMode === 'server' ? {
-      apiUrl: serverUrl,
-      authToken: authToken || undefined,
-      familyId: familyId || undefined,
-    } : undefined);
+    // En mode serveur auto-détecté, NE PAS utiliser RepositoryFactory.setStorageMode
+    // car cela enregistre dans localStorage
+    if (!autoServer) {
+      // Mode manuel : configurer le stockage
+      RepositoryFactory.setStorageMode(storageMode, storageMode === 'server' ? {
+        apiUrl: serverUrl,
+        authToken: authToken || undefined,
+        familyId: familyId || undefined,
+      } : undefined);
+    }
 
     // Ajouter les membres de la famille
     tempMembers.forEach(member => {
@@ -73,7 +77,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       });
     });
 
-    // Marquer l'onboarding comme terminé (localStorage + serveur si configuré)
+    // Marquer l'onboarding comme terminé
+    // En mode serveur : sauvegarde UNIQUEMENT en base PostgreSQL
+    // En mode local : sauvegarde dans localStorage
     await markOnboardingCompleted(theme as 'light' | 'dark', language);
     onComplete();
   };
@@ -97,8 +103,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       <Card className="w-full max-w-2xl p-8 shadow-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">{t.onboarding.title}</h1>
-          <p className="text-muted-foreground">{t.onboarding.subtitle}</p>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">{t.onboarding.title}</h1>
+          <p className="text-foreground/70">{t.onboarding.subtitle}</p>
         </div>
 
         {/* Progress */}
@@ -189,7 +195,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   <Smartphone className="w-6 h-6 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0 overflow-hidden">
                     <div className="text-base font-semibold text-foreground">{t.onboarding.localMode}</div>
-                    <div className="text-xs text-muted-foreground mt-1 break-words">{t.onboarding.localModeDesc}</div>
+                    <div className="text-xs text-foreground/60 mt-1 break-words">{t.onboarding.localModeDesc}</div>
                   </div>
                   {storageMode === 'local' && <Check className="w-5 h-5 flex-shrink-0" />}
                 </div>
@@ -205,7 +211,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   <Server className="w-6 h-6 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0 overflow-hidden">
                     <div className="text-base font-semibold text-foreground">{t.onboarding.serverMode}</div>
-                    <div className="text-xs text-muted-foreground mt-1 break-words">{t.onboarding.serverModeDesc}</div>
+                    <div className="text-xs text-foreground/60 mt-1 break-words">{t.onboarding.serverModeDesc}</div>
                     {autoServer && <div className="text-xs text-primary mt-1 font-medium">✓ {t.onboarding.autoDetected || 'Détecté automatiquement'}</div>}
                   </div>
                   {storageMode === 'server' && <Check className="w-5 h-5 flex-shrink-0" />}
@@ -248,7 +254,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
                   <div className="text-foreground">
                     <div className="font-medium">{t.onboarding.serverAutoConfigured || 'Configuration automatique'}</div>
-                    <div className="text-muted-foreground text-xs mt-1">
+                    <div className="text-foreground/60 text-xs mt-1">
                       {t.onboarding.serverAutoConfiguredDesc || 'Le serveur a été détecté automatiquement. Aucune configuration manuelle nécessaire.'}
                     </div>
                   </div>
@@ -302,7 +308,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
             )}
 
             {tempMembers.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-foreground/60">
                 <Users className="w-16 h-16 mx-auto mb-3 opacity-50" />
                 <p>{t.onboarding.addFamilyMembers}</p>
               </div>

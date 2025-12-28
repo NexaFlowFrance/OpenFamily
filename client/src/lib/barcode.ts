@@ -15,7 +15,7 @@ export const checkBarcodePermission = async (): Promise<boolean> => {
     
     // Demander la permission
     const permission = await BarcodeScanner.checkPermission({ force: true });
-    return permission.granted;
+    return permission.granted ?? false;
   } catch (error) {
     console.error('Erreur vérification permission:', error);
     return false;

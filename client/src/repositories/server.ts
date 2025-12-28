@@ -44,9 +44,9 @@ export class ServerRepository implements IDataRepository {
     });
   }
 
-  async updateShoppingItem(id: string, updates: Partial<ShoppingItem>): Promise<void> {
-    await this.request(`/shopping-items/${id}`, {
-      method: 'PATCH',
+  async updateShoppingItem(id: string, updates: Partial<ShoppingItem>): Promise<ShoppingItem> {
+    return this.request<ShoppingItem>(`/shopping-items/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(updates),
     });
   }
@@ -67,9 +67,9 @@ export class ServerRepository implements IDataRepository {
     });
   }
 
-  async updateTask(id: string, updates: Partial<Task>): Promise<void> {
-    await this.request(`/tasks/${id}`, {
-      method: 'PATCH',
+  async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
+    return this.request<Task>(`/tasks/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(updates),
     });
   }
@@ -90,9 +90,9 @@ export class ServerRepository implements IDataRepository {
     });
   }
 
-  async updateAppointment(id: string, updates: Partial<Appointment>): Promise<void> {
-    await this.request(`/appointments/${id}`, {
-      method: 'PATCH',
+  async updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment> {
+    return this.request<Appointment>(`/appointments/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(updates),
     });
   }
@@ -113,9 +113,9 @@ export class ServerRepository implements IDataRepository {
     });
   }
 
-  async updateFamilyMember(id: string, updates: Partial<FamilyMember>): Promise<void> {
-    await this.request(`/family-members/${id}`, {
-      method: 'PATCH',
+  async updateFamilyMember(id: string, updates: Partial<FamilyMember>): Promise<FamilyMember> {
+    return this.request<FamilyMember>(`/family-members/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(updates),
     });
   }
@@ -136,9 +136,9 @@ export class ServerRepository implements IDataRepository {
     });
   }
 
-  async updateRecipe(id: string, updates: Partial<Recipe>): Promise<void> {
-    await this.request(`/recipes/${id}`, {
-      method: 'PATCH',
+  async updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe> {
+    return this.request<Recipe>(`/recipes/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(updates),
     });
   }
@@ -159,9 +159,9 @@ export class ServerRepository implements IDataRepository {
     });
   }
 
-  async updateMeal(id: string, updates: Partial<Meal>): Promise<void> {
-    await this.request(`/meals/${id}`, {
-      method: 'PATCH',
+  async updateMeal(id: string, updates: Partial<Meal>): Promise<Meal> {
+    return this.request<Meal>(`/meals/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(updates),
     });
   }
@@ -182,9 +182,9 @@ export class ServerRepository implements IDataRepository {
     });
   }
 
-  async updateBudget(id: string, updates: Partial<Budget>): Promise<void> {
-    await this.request(`/budgets/${id}`, {
-      method: 'PATCH',
+  async updateBudget(id: string, updates: Partial<Budget>): Promise<Budget> {
+    return this.request<Budget>(`/budgets/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(updates),
     });
   }

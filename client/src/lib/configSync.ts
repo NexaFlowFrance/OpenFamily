@@ -1,6 +1,7 @@
 /**
  * Configuration synchronization utility
- * Gère la synchronisation de la configuration entre localStorage et le serveur
+ * En mode serveur : TOUT dans PostgreSQL, ZERO localStorage
+ * En mode local : localStorage uniquement pour les données, pas la config
  */
 
 import { shouldAutoConfigureServer, getApiUrl, checkServerAvailability } from './serverDetection';
@@ -79,10 +80,11 @@ export async function saveServerConfig(
 
 /**
  * Vérifie si l'onboarding a été complété
- * En mode serveur auto-détecté, vérifie TOUJOURS le serveur en priorité
+ * En mode serveur : UNIQUEMENT vérification base de données, JAMAIS localStorage
+ * En mode local : localStorage uniquement
  */
 export async function isOnboardingCompleted(): Promise<boolean> {
-  // Si l'app est hébergée sur un serveur, vérifier le serveur en PRIORITÉ
+  // Si l'app est hébergée sur un serveur, vérifier UNIQUEMENT la base de données
   if (shouldAutoConfigureServer()) {
     const apiUrl = getApiUrl();
     const serverAvailable = await checkServerAvailability(apiUrl);
@@ -93,67 +95,42 @@ export async function isOnboardingCompleted(): Promise<boolean> {
       const authToken = 'default-token';
       
       const serverConfig = await fetchServerConfig(apiUrl, authToken, familyId);
-      if (serverConfig && serverConfig.onboarding_completed) {
-        // Mettre à jour le localStorage pour éviter les requêtes futures
-        localStorage.setItem('openfamily_onboarding_completed', 'true');
-        localStorage.setItem('openfamily_storage_mode', 'server');
-        localStorage.setItem('openfamily_server_url', apiUrl);
-        localStorage.setItem('openfamily_server_token', authToken);
-        localStorage.setItem('openfamily_family_id', familyId);
-        return true;
-      }
-      // Si pas de config serveur, l'onboarding n'est pas complété
-      return false;
+      // Retourner directement le résultat du serveur, PAS de localStorage
+      return serverConfig ? serverConfig.onboarding_completed : false;
     }
+    // Si serveur pas disponible, considérer comme non complété
+    return false;
   }
 
-  // Mode local ou serveur non disponible : vérifier localStorage
+  // Mode local uniquement : vérifier localStorage
   const onboardingCompleted = localStorage.getItem('openfamily_onboarding_completed');
-  const storageMode = localStorage.getItem('openfamily_storage_mode');
-
-  // Si le mode serveur est configuré manuellement, vérifier le serveur
-  if (storageMode === 'server') {
-    const serverUrl = localStorage.getItem('openfamily_server_url');
-    const authToken = localStorage.getItem('openfamily_server_token');
-    const familyId = localStorage.getItem('openfamily_family_id');
-
-    if (serverUrl && authToken && familyId) {
-      const serverConfig = await fetchServerConfig(serverUrl, authToken, familyId);
-      if (serverConfig) {
-        return serverConfig.onboarding_completed;
-      }
-    }
-  }
-
-  // Fallback sur le localStorage
-  return onboardingCompleted === 'true' || storageMode !== null;
+  return onboardingCompleted === 'true';
 }
 
 /**
  * Marque l'onboarding comme complété
- * Sauvegarde à la fois localement et sur le serveur si configuré
+ * En mode serveur : UNIQUEMENT dans PostgreSQL
+ * En mode local : UNIQUEMENT dans localStorage
  */
 export async function markOnboardingCompleted(
   theme: 'light' | 'dark',
   language: string
 ): Promise<void> {
-  // Toujours sauvegarder localement
-  localStorage.setItem('openfamily_onboarding_completed', 'true');
-
-  // Si en mode serveur, sauvegarder aussi sur le serveur
-  const storageMode = localStorage.getItem('openfamily_storage_mode');
-  if (storageMode === 'server') {
-    const serverUrl = localStorage.getItem('openfamily_server_url');
-    const authToken = localStorage.getItem('openfamily_server_token');
-    const familyId = localStorage.getItem('openfamily_family_id');
-
-    if (serverUrl && authToken && familyId) {
-      await saveServerConfig(serverUrl, authToken, familyId, {
-        onboarding_completed: true,
-        storage_mode: 'server',
-        theme,
-        language,
-      });
-    }
+  // Si mode serveur auto-détecté, sauvegarder UNIQUEMENT en base
+  if (shouldAutoConfigureServer()) {
+    const apiUrl = getApiUrl();
+    const familyId = 'family-default';
+    const authToken = 'default-token';
+    
+    await saveServerConfig(apiUrl, authToken, familyId, {
+      onboarding_completed: true,
+      storage_mode: 'server',
+      theme,
+      language,
+    });
+    return;
   }
+
+  // Mode local : sauvegarder dans localStorage
+  localStorage.setItem('openfamily_onboarding_completed', 'true');
 }

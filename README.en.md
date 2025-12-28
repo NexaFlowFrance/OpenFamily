@@ -42,14 +42,17 @@
 
 ## 🎯 About
 
-OpenFamily is a comprehensive family management application offered as open source by [NexaFlow](http://nexaflow.fr), that prioritizes your privacy. All your data stays on your device, no central server, no account required. Manage your shopping lists, tasks, appointments, recipes, meal planning, and family budget securely.
+OpenFamily is a comprehensive family management application offered as open source by [NexaFlow](http://nexaflow.fr), designed to be self-hosted. Keep total control of your data by hosting the application on your own server. Manage your shopping lists, tasks, appointments, recipes, meal planning, and family budget securely, accessible from all your devices.
+
+**Version 1.0.3 - Server-only architecture**  
+This version completely removes localStorage mode in favor of a centralized server architecture with PostgreSQL, ensuring reliable synchronization across all family devices.
 
 ## 🚀 Key Features
 
-- ✅ **100% Local or Self-Hosted** - Choose between local storage or self-hosted server for family synchronization
+- ✅ **100% Self-Hosted** - Your data on your own server, no third-party services
 - 📱 **PWA** - Install the app as a native application on mobile/tablet
-- 🔒 **Private** - Your data never leaves your device (local mode) or stays on your server (server mode)
-- 🌐 **Offline** - Works without internet connection in local mode
+- 🔒 **Private** - Your data stays on your server, never on third-party servers
+- 🔄 **Synchronized** - Access your data from all your devices
 - 🆓 **Open Source** - Free and modifiable source code
 - 🌍 **Multi-language** - Interface available in French, English, German, and Spanish
 - 🌙 **Dark theme** - Light and dark modes available
@@ -113,44 +116,66 @@ OpenFamily is a comprehensive family management application offered as open sour
 
 ## 🚀 Quick Start
 
-### Local Mode (Without server)
+### ⚡ Automatic Installation with Docker
 
 ```bash
-# Clone the repository
-git clone https://github.com/NexaFlowFrance/OpenFamily.git
-
-# Install dependencies
-cd OpenFamily
-pnpm install
-
-# Run in development mode
-pnpm dev
-
-# Open http://localhost:3000
+curl -sSL https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/install-docker.sh | bash
 ```
 
-### Server Mode (Self-hosted with Docker)
-
-```bash
-# Clone the repository
-git clone https://github.com/NexaFlowFrance/OpenFamily.git
-cd OpenFamily
-
-# Create the .env file
-cp .env.example .env
-# Modify DB_PASSWORD in .env with a secure password
-
-# Launch with Docker Compose
-docker-compose up -d
-
-# The application will be available at http://localhost:3000
-```
-
-See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for more details on server deployment.
+This script will:
+- Install Docker and Docker Compose (if needed)
+- Clone the OpenFamily repository
+- Configure PostgreSQL
+- Start the application on port 3000
 
 ---
 
 ## 📦 Installation
+
+### Prerequisites
+
+- **Linux Server** (Ubuntu 20.04+ recommended) or Windows with WSL
+- **Docker & Docker Compose** (automatically installed by the script)
+- **2 GB RAM minimum**
+- **10 GB disk space**
+
+### Manual Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/NexaFlowFrance/OpenFamily.git
+cd OpenFamily
+
+# 2. Create the .env file
+cp .env.example .env
+
+# 3. Modify PostgreSQL password in .env
+nano .env  # Change DB_PASSWORD
+
+# 4. Launch with Docker Compose
+docker-compose up -d
+
+# 5. Access the application
+# http://localhost:3000 (local)
+# http://your-ip:3000 (local network)
+# https://your-domain.com (with reverse proxy)
+```
+
+### Network Configuration
+
+#### Local access only
+The application works immediately on `http://localhost:3000`
+
+#### Local network access (LAN)
+1. Find your server's IP: `ip addr show` or `ipconfig`
+2. Access from any device: `http://192.168.X.X:3000`
+3. **Automatic detection**: The app detects it's hosted and enables server mode
+
+#### Internet access (optional)
+See the [Deployment Guide](docs/DEPLOYMENT.md) for:
+- Configuring a domain name
+- Installing an SSL certificate (HTTPS)
+- Securing access with authentication
 
 ### For Developers
 
@@ -158,78 +183,133 @@ See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for more details on server deployment.
 # Install dependencies
 pnpm install
 
+# Start PostgreSQL locally
+docker-compose up -d postgres
+
 # Run in development mode
 pnpm dev
 
 # Build for production
 pnpm build
 
-# Build for Android (APK)
-pnpm cap:android
-
-# Build for iOS (IPA)
-pnpm cap:ios
+# Start production server
+pnpm start
 ```
+
+**Note**: Development mode (`pnpm dev`) requires PostgreSQL. Use Docker Compose to start only the database.
 
 ### For Users
 
 #### Option 1: PWA (Recommended)
-1. Open the application in your browser (Chrome, Safari, Edge)
+1. Access your OpenFamily instance (e.g., `http://192.168.1.100:3000`)
 2. On mobile: click "Add to Home Screen"
 3. On desktop: click the install icon in the address bar
+4. The app will install like a native app
 
-#### Option 2: Native Applications
-- **Android**: Download the APK from releases
-- **iOS**: Install via TestFlight or an alternative store
+#### Option 2: Native Mobile Applications
+- **Android**: Install the APK available in releases
+- **iOS**: Use TestFlight or compile from source code
 
-#### Option 3: Self-hosting
-1. Clone this repository
-2. Run `pnpm install && pnpm build`
-3. Host the contents of the `dist/public` folder on any static web server
-4. Or simply use `pnpm start` for a local server
-
-#### Option 4: Local HTML File
-1. After building, simply open `dist/public/index.html` in your browser
-2. The application will work entirely locally
+#### Option 3: Web Browser
+Simply access your OpenFamily server URL from any modern browser (Chrome, Safari, Firefox, Edge).
 
 ## 💾 Data Storage
 
-OpenFamily offers **two storage modes** that you can choose during initial setup:
+OpenFamily uses a **centralized server architecture with PostgreSQL**:
 
-### 📱 Local Mode (Default)
+### 🗄️ Architecture
 
-All data is stored in your browser's **localStorage**:
-- ✅ **100% private** - Data never leaves your device
-- ✅ **Works offline** - No internet connection required
-- ✅ **Free** - No server to host
-- ⚠️ **No synchronization** - Data stays on a single device
+- **Database**: PostgreSQL (included in Docker Compose)
+- **API Server**: Express.js (Node.js)
+- **Synchronization**: Real-time via REST API
+- **Security**: Authentication token, family isolation
 
-Stored data:
-- `openfamily_shopping` - Shopping list
-- `openfamily_tasks` - Tasks and schedule
-- `openfamily_appointments` - Appointments
-- `openfamily_members` - Family members (with health info)
-- `openfamily_recipes` - Recipes
-- `openfamily_meals` - Meal planning
-- `openfamily_budgets` - Monthly budgets
+### 📊 Stored Data
 
-### 🔄 Server Mode (Self-hosted)
+All data is stored in PostgreSQL:
+- `shopping_items` - Shopping list
+- `tasks` - Tasks and schedule
+- `appointments` - Appointments
+- `family_members` - Family members (with health info)
+- `recipes` - Recipes
+- `meals` - Meal planning
+- `budgets` - Monthly budgets
+- `families` - Family configuration
 
-Data stored on your own server with PostgreSQL:
-- ✅ **Family synchronization** - Share data with the whole family
-- ✅ **Multi-device access** - Use the app on multiple devices
-- ✅ **Centralized backup** - All data on your server
-- ✅ **Full control** - You manage your infrastructure
-- 📝 **Configuration required** - Linux server, Docker, domain name (optional)
+### 🔄 Automatic Synchronization
 
-To configure server mode, see the [Deployment Guide](docs/DEPLOYMENT.md).
+- ✅ **Multi-device**: Access from PC, tablet, smartphone
+- ✅ **Real-time**: Changes are instant
+- ✅ **Automatic detection**: The app detects the server on the network
+- ✅ **Default family**: Automatic initial configuration
 
-### Backup and Restore (Local Mode)
+### 💾 Backup
 
-From the application's **Settings**:
-- 📥 **Download backup**: Complete JSON export of all your data
-- 📤 **Import backup**: Restore from a JSON file
-- 🗑️ **Reset**: Delete all data (with confirmation)
+PostgreSQL data is persisted via Docker volumes:
+
+```bash
+# Manual backup
+docker exec openfamily-db pg_dump -U openfamily openfamily > backup.sql
+
+# Restore from backup
+docker exec -i openfamily-db psql -U openfamily openfamily < backup.sql
+```
+
+**Recommendation**: Configure daily automatic backups with cron or a PostgreSQL backup tool.
+2. On mobile: click "Add to Home Screen"
+3. On desktop: click the install icon in the address bar
+4. The app will install like a native app
+
+#### Option 2: Native Mobile Applications
+- **Android**: Install the APK available in releases
+- **iOS**: Use TestFlight or compile from source code
+
+#### Option 3: Web Browser
+Simply access your OpenFamily server URL from any modern browser (Chrome, Safari, Firefox, Edge).
+
+## 💾 Data Storage
+
+OpenFamily uses a **centralized server architecture with PostgreSQL**:
+
+### 🗄️ Architecture
+
+- **Database**: PostgreSQL (included in Docker Compose)
+- **API Server**: Express.js (Node.js)
+- **Synchronization**: Real-time via REST API
+- **Security**: Authentication token, family isolation
+
+### 📊 Stored Data
+
+All data is stored in PostgreSQL:
+- `shopping_items` - Shopping list
+- `tasks` - Tasks and schedule
+- `appointments` - Appointments
+- `family_members` - Family members (with health info)
+- `recipes` - Recipes
+- `meals` - Meal planning
+- `budgets` - Monthly budgets
+- `families` - Family configuration
+
+### 🔄 Automatic Synchronization
+
+- ✅ **Multi-device**: Access from PC, tablet, smartphone
+- ✅ **Real-time**: Changes are instant
+- ✅ **Automatic detection**: The app detects the server on the network
+- ✅ **Default family**: Automatic initial configuration
+
+### 💾 Backup
+
+PostgreSQL data is persisted via Docker volumes:
+
+```bash
+# Manual backup
+docker exec openfamily-db pg_dump -U openfamily openfamily > backup.sql
+
+# Restore from backup
+docker exec -i openfamily-db psql -U openfamily openfamily < backup.sql
+```
+
+**Recommendation**: Configure daily automatic backups with cron or a PostgreSQL backup tool.
 
 ## ✨ Advanced Features
 
@@ -298,16 +378,16 @@ From the application's **Settings**:
 - **date-fns** - Date manipulation
 - **Recharts** - Charts and visualizations
 
-### Backend (Server Mode)
+### Backend
 - **Node.js 20+ + Express** - REST API
 - **PostgreSQL 16** - Relational database
 - **TypeScript** - Backend typing
 - **Docker + Docker Compose** - Containerization and deployment
 
 ### Storage
-- **localStorage** - Local mode (browser)
-- **PostgreSQL** - Server mode (self-hosted)
-- **Repository Pattern** - Storage abstraction for both modes
+- **PostgreSQL** - Centralized database with automatic synchronization
+- **Repository Pattern** - Clean data access abstraction
+- **Docker Volumes** - Data persistence
 
 ### Mobile
 - **Capacitor** - Android/iOS build
@@ -322,54 +402,51 @@ From the application's **Settings**:
 
 ## 🔐 Privacy
 
-This application respects your privacy according to the chosen mode:
+OpenFamily is designed with privacy in mind:
 
-### Local Mode
-- ❌ Sends **no data** to external servers
-- ❌ Uses **no centralized database**
-- ❌ Requires **no user account**
-- ✅ Stores **everything locally** on your device
-- ✅ Works **entirely offline**
-
-### Server Mode
-- ✅ **You control the infrastructure** - Host on your own server
-- ✅ **No third party involved** - No external cloud
-- ✅ **Encryption in transit** - HTTPS recommended
+- ✅ **Self-hosted** - You control the infrastructure
+- ✅ **No third party** - No external cloud services
+- ✅ **Encryption** - HTTPS recommended for secure communication
 - ✅ **Open Source** - Verifiable and auditable code
-- 📝 **Responsibility** - You manage your server's security
+- ✅ **Family isolation** - Each family's data is completely separate
+- 📝 **Your responsibility** - You manage your server's security
 
 ---
 
 ## ❓ FAQ
 
 ### Are my data secure?
-**Local Mode**: Yes, all your data is stored locally in your browser. It never leaves your device.
-
-**Server Mode**: Your data is stored on your own server. You have full control and responsibility for security.
+Yes, your data is stored on your own server. You have full control and responsibility for security. We recommend:
+- Using strong PostgreSQL passwords
+- Enabling HTTPS with SSL certificates
+- Keeping your server updated
+- Configuring regular backups
 
 ### Can I use the application offline?
-**Local Mode**: Absolutely! Once installed as a PWA, the application works entirely offline.
-
-**Server Mode**: A connection to the server is necessary to synchronize data. Offline features may be limited.
+A connection to the server is required to synchronize data. Once data is loaded, the PWA can cache content for brief offline periods, but changes won't sync until connection is restored.
 
 ### How do I backup my data?
-**Local Mode**: Go to Settings → Backup to download a JSON file containing all your data.
+Configure automatic backups of your PostgreSQL database:
+```bash
+# Manual backup
+docker exec openfamily-db pg_dump -U openfamily openfamily > backup.sql
 
-**Server Mode**: Configure automatic backups of your PostgreSQL database (see [DEPLOYMENT.md](docs/DEPLOYMENT.md)).
+# Automatic backup with cron (daily at 2am)
+0 2 * * * docker exec openfamily-db pg_dump -U openfamily openfamily > /backups/openfamily-$(date +\%Y\%m\%d).sql
+```
+See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for more details.
 
 ### Is the application available in multiple languages?
-Yes! The interface is available in **French 🇫🇷**, **English 🇬🇧**, **German 🇩🇪**, and **Spanish 🇪🇸**. You can change the language during initial setup or in Settings.
+Yes! The interface is available in **French 🇫🇷**, **English 🇬🇧**, **German 🇩🇪**, and **Spanish 🇪🇸**. You can change the language in Settings.
 
 ### Does the application work on iOS?
-Yes, you can install it as a PWA from Safari. On Android, you can also install the APK.
+Yes, you can install it as a PWA from Safari. Access your OpenFamily server URL and add it to your home screen. On Android, you can also install the APK.
 
 ### Can I synchronize between multiple devices?
-**Local Mode**: Use the export/import function to manually transfer your data.
-
-**Server Mode**: Yes! Self-hosted server mode allows automatic synchronization between all family devices.
+Yes! That's the main advantage of the server architecture. All family members can access the same data from their own devices (PC, tablet, smartphone). Changes sync instantly.
 
 ### Is the application really free?
-Yes, 100% free and open source. No hidden fees, no subscription.
+Yes, 100% free and open source. No hidden fees, no subscription. You only need to host it on your own server (or use a free tier on cloud providers).
 
 ---
 

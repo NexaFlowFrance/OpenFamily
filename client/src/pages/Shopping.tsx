@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, Check, Lightbulb } from 'lucide-react';
+import { Trash2, Plus, Check, Lightbulb, Save, BookmarkPlus, ScanLine } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { startBarcodeScanner } from '@/lib/barcode';
+import { Capacitor } from '@capacitor/core';
 
 const CATEGORIES = [
   { value: 'baby', label: 'Bébé', color: '#f0d4a8' },
@@ -16,9 +18,17 @@ const CATEGORIES = [
 ];
 
 export default function Shopping() {
-  const { shoppingItems, addShoppingItem, updateShoppingItem, deleteShoppingItem, meals, recipes } = useApp();
+  const { 
+    shoppingItems, shoppingTemplates,
+    addShoppingItem, updateShoppingItem, deleteShoppingItem,
+    addShoppingTemplate, deleteShoppingTemplate, applyShoppingTemplate,
+    meals, recipes 
+  } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     category: 'baby' as const,
@@ -27,6 +37,43 @@ export default function Shopping() {
     notes: '',
   });
   const [filter, setFilter] = useState<string | null>(null);
+
+  const handleSaveAsTemplate = () => {
+    if (!templateName.trim() || shoppingItems.length === 0) return;
+
+    const items = shoppingItems
+      .filter(item => !item.completed)
+      .map(item => ({
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+      }));
+
+    addShoppingTemplate({
+      name: templateName,
+      items,
+    });
+
+    setTemplateName('');
+    setShowSaveTemplate(false);
+  };
+
+  const handleBarcodeScan = async () => {
+    const barcode = await startBarcodeScanner();
+    if (barcode) {
+      // Utiliser le code-barres comme nom d'article (ou rechercher dans une API de produits)
+      addShoppingItem({
+        name: `Produit ${barcode}`,
+        category: 'food',
+        quantity: 1,
+        price: 0,
+        completed: false,
+        notes: `Code-barres: ${barcode}`,
+      });
+    }
+  };
+
+  const isNativePlatform = Capacitor.isNativePlatform();
 
   // Get ingredient suggestions from upcoming meals
   const getIngredientSuggestions = () => {
@@ -100,18 +147,86 @@ export default function Shopping() {
       <div className="sticky top-0 bg-background/95 backdrop-blur z-10 p-4 border-b border-border">
         <h1 className="text-3xl font-bold text-foreground mb-4">Liste d'achats</h1>
         
-        <div className="flex gap-2 mb-3">
+        <div className="grid grid-cols-2 gap-2 mb-3">
           <Button
             onClick={() => setShowForm(true)}
-            className="flex-1"
+            className="w-full"
           >
             <Plus className="w-4 h-4 mr-2" />
             Ajouter
           </Button>
-          {suggestions.length > 0 && (
-            <Dialog open={showSuggestions} onOpenChange={setShowSuggestions}>
+          
+          {isNativePlatform ? (
+            <Button
+              variant="outline"
+              onClick={handleBarcodeScan}
+              className="w-full"
+            >
+              <ScanLine className="w-4 h-4 mr-2" />
+              Scanner
+            </Button>
+          ) : (
+            <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="w-full">
+                  <BookmarkPlus className="w-4 h-4 mr-2" />
+                  Templates ({shoppingTemplates.length})
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Mes templates de listes</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  {shoppingTemplates.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Aucun template enregistré. Créez-en un en sauvegardant votre liste actuelle.
+                    </p>
+                  ) : (
+                    shoppingTemplates.map(template => (
+                      <Card key={template.id} className="p-3">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-medium">{template.name}</h3>
+                            <p className="text-xs text-muted-foreground">
+                              {template.items.length} article(s)
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (confirm('Supprimer ce template ?')) {
+                                deleteShoppingTemplate(template.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          onClick={() => {
+                            applyShoppingTemplate(template.id);
+                            setShowTemplates(false);
+                          }}
+                        >
+                          Appliquer ce template
+                        </Button>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+
+        {suggestions.length > 0 && (
+          <Dialog open={showSuggestions} onOpenChange={setShowSuggestions}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full">
                   <Lightbulb className="w-4 h-4 mr-2" />
                   Suggestions ({suggestions.length})
                 </Button>
@@ -148,7 +263,6 @@ export default function Shopping() {
               </DialogContent>
             </Dialog>
           )}
-        </div>
         
         <div className="flex gap-2 overflow-x-auto pb-2">
           <Button
@@ -235,6 +349,55 @@ export default function Shopping() {
               </div>
             </Card>
           ))
+        )}
+
+        {shoppingItems.filter(item => !item.completed).length > 0 && (
+          <Dialog open={showSaveTemplate} onOpenChange={setShowSaveTemplate}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full">
+                <Save className="w-4 h-4 mr-2" />
+                Sauvegarder comme template
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Créer un template</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Sauvegarder les {shoppingItems.filter(item => !item.completed).length} article(s) non cochés comme template réutilisable.
+                </p>
+                <div>
+                  <label className="text-sm font-medium">Nom du template</label>
+                  <Input
+                    placeholder="Ex: Courses du weekend"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowSaveTemplate(false);
+                      setTemplateName('');
+                    }}
+                    className="flex-1"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={handleSaveAsTemplate}
+                    disabled={!templateName.trim()}
+                    className="flex-1"
+                  >
+                    Sauvegarder
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
 

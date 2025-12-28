@@ -16,6 +16,9 @@ importers:
 
   .:
     dependencies:
+      '@capacitor-community/barcode-scanner':
+        specifier: ^4.0.1
+        version: 4.0.1(@capacitor/core@7.4.4)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.64.0(react@19.2.1))
@@ -378,6 +381,11 @@ packages:
     resolution: {integrity: sha512-iAHFkaLBDJBC+EkGO1hF7hnIW2+oKKYVOl8NFAQH//3xeNEzvGdS9tOALRPR+JjR/M5NLyj+FG0VV7WFb1aJmw==}
     peerDependencies:
       vite: ^4.0.0 || ^5.0.0
+
+  '@capacitor-community/barcode-scanner@4.0.1':
+    resolution: {integrity: sha512-acuhDU2mqskSeCIQMc5TGNnDszXXs4IqEES+3C2JDiq+MkJMTr+B2Dhq4k55hlkRFMOumMhlnbr2R9G6qyFPhw==}
+    peerDependencies:
+      '@capacitor/core': ^5.0.0
 
   '@capacitor/android@7.4.4':
     resolution: {integrity: sha512-y8knfV1JXNrd6XZZLZireGT+EBCN0lvOo+HZ/s7L8LkrPBu4nY5UZn0Wxz4yOezItEII9rqYJSHsS5fMJG9gdw==}
@@ -2114,6 +2122,18 @@ packages:
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
+
+  '@zxing/browser@0.1.5':
+    resolution: {integrity: sha512-4Lmrn/il4+UNb87Gk8h1iWnhj39TASEHpd91CwwSJtY5u+wa0iH9qS0wNLAWbNVYXR66WmT5uiMhZ7oVTrKfxw==}
+    peerDependencies:
+      '@zxing/library': ^0.21.0
+
+  '@zxing/library@0.20.0':
+    resolution: {integrity: sha512-6Ev6rcqVjMakZFIDvbUf0dtpPGeZMTfyxYg4HkVWioWeN7cRcnUWT3bU6sdohc82O1nPXcjq6WiGfXX2Pnit6A==}
+    engines: {node: '>= 10.4.0'}
+
+  '@zxing/text-encoding@0.9.0':
+    resolution: {integrity: sha512-U/4aVJ2mxI0aDNI8Uq0wEhMgY+u4CNtEb0om3+y3+niDAsoTCOB33UF0sxpzqzdqXLqmvc+vZyAt4O8pPdfkwA==}
 
   JSONStream@1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
@@ -4871,6 +4891,10 @@ packages:
   trough@2.2.0:
     resolution: {integrity: sha512-tmMpK00BjZiUyVyvrBK7knerNgmgvcV/KLVyuma/SC+TQN167GrMRciANTz09+k3zW8L8t60jWO1GpfkZdjTaw==}
 
+  ts-custom-error@3.3.1:
+    resolution: {integrity: sha512-5OX1tzOjxWEgsr/YEUWSuPrQ00deKLh6D7OTWcvNHm12/7QPyRh8SYpyWvA4IZv8H/+GQWQEh/kwo95Q9OVW1A==}
+    engines: {node: '>=14.0.0'}
+
   ts-dedent@2.2.0:
     resolution: {integrity: sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==}
     engines: {node: '>=6.10'}
@@ -5443,6 +5467,12 @@ snapshots:
     dependencies:
       '@builder.io/jsx-loc-internals': 0.0.1
       vite: 7.1.9(@types/node@24.7.0)(jiti@2.6.1)(lightningcss@1.30.1)(tsx@4.20.6)
+
+  '@capacitor-community/barcode-scanner@4.0.1(@capacitor/core@7.4.4)':
+    dependencies:
+      '@capacitor/core': 7.4.4
+      '@zxing/browser': 0.1.5(@zxing/library@0.20.0)
+      '@zxing/library': 0.20.0
 
   '@capacitor/android@7.4.4(@capacitor/core@7.4.4)':
     dependencies:
@@ -7207,6 +7237,21 @@ snapshots:
   '@xmldom/xmldom@0.7.13': {}
 
   '@xmldom/xmldom@0.8.11': {}
+
+  '@zxing/browser@0.1.5(@zxing/library@0.20.0)':
+    dependencies:
+      '@zxing/library': 0.20.0
+    optionalDependencies:
+      '@zxing/text-encoding': 0.9.0
+
+  '@zxing/library@0.20.0':
+    dependencies:
+      ts-custom-error: 3.3.1
+    optionalDependencies:
+      '@zxing/text-encoding': 0.9.0
+
+  '@zxing/text-encoding@0.9.0':
+    optional: true
 
   JSONStream@1.3.5:
     dependencies:
@@ -10450,6 +10495,8 @@ snapshots:
   trim-newlines@3.0.1: {}
 
   trough@2.2.0: {}
+
+  ts-custom-error@3.3.1: {}
 
   ts-dedent@2.2.0: {}
 

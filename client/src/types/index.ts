@@ -9,6 +9,17 @@ export interface ShoppingItem {
   notes?: string;
 }
 
+export interface ShoppingTemplate {
+  id: string;
+  name: string;
+  items: Array<{
+    name: string;
+    category: 'baby' | 'food' | 'household' | 'health' | 'other';
+    quantity: number;
+  }>;
+  createdAt: string;
+}
+
 export interface Task {
   id: string;
   title: string;

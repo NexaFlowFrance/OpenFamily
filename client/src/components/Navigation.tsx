@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Home, ArrowLeft, Plus, ShoppingCart, CheckSquare, BarChart3 } from 'lucide-react';
+import { Settings, Home, ArrowLeft, Plus, ShoppingCart, CheckSquare, BarChart3, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,9 +8,10 @@ import { useApp } from '@/contexts/AppContext';
 interface NavigationProps {
   currentPage: 'home' | 'shopping' | 'tasks' | 'appointments' | 'settings' | 'recipes' | 'meals' | 'budget' | 'statistics';
   onPageChange: (page: 'home' | 'shopping' | 'tasks' | 'appointments' | 'settings' | 'recipes' | 'meals' | 'budget' | 'statistics') => void;
+  onSearchClick?: () => void;
 }
 
-export default function Navigation({ currentPage, onPageChange }: NavigationProps) {
+export default function Navigation({ currentPage, onPageChange, onSearchClick }: NavigationProps) {
   const { addShoppingItem, addTask } = useApp();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [mode, setMode] = useState<'shopping' | 'task'>('task');

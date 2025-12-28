@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, Check, AlertCircle, Edit2 } from 'lucide-react';
+import { Trash2, Plus, Check, AlertCircle, Edit2, Archive, TrendingUp } from 'lucide-react';
 import DaySchedule from '@/components/DaySchedule';
 import { getDayOfWeek, getDayOfMonth } from '@/lib/recurrence';
+import { scheduleTaskNotification } from '@/lib/notifications';
 
 const CATEGORIES = [
   { value: 'household', label: 'Ménage', color: '#6b8e7f' },
@@ -26,7 +27,7 @@ export default function Tasks() {
   const { tasks, familyMembers, appointments, addTask, updateTask, deleteTask } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('pending');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'completed' | 'history'>('pending');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [formData, setFormData] = useState({
     title: '',
@@ -65,7 +66,7 @@ export default function Tasks() {
         setEditingTask(null);
       } else {
         // Mode ajout
-        addTask({
+        const newTask = {
           title: formData.title,
           description: formData.description,
           category: formData.category,
@@ -76,7 +77,13 @@ export default function Tasks() {
           completed: false,
           priority: formData.priority,
           recurring: recurringConfig,
-        });
+        };
+        const taskId = addTask(newTask);
+        
+        // Planifier la notification
+        if (taskId && formData.dueTime) {
+          scheduleTaskNotification({ ...newTask, id: taskId });
+        }
       }
       
       setFormData({
@@ -115,8 +122,21 @@ export default function Tasks() {
   const filteredTasks = tasks.filter(task => {
     if (filter === 'pending') return !task.completed;
     if (filter === 'completed') return task.completed;
+    if (filter === 'history') return task.completed;
     return true;
   });
+
+  // Statistiques pour l'historique
+  const completedTasks = tasks.filter(t => t.completed);
+  const completedThisWeek = completedTasks.filter(t => {
+    const completedDate = new Date(t.createdAt);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return completedDate >= weekAgo;
+  });
+  const completionRate = tasks.length > 0 
+    ? Math.round((completedTasks.length / tasks.length) * 100) 
+    : 0;
 
   const getCategoryColor = (category: string) => {
     return CATEGORIES.find(c => c.value === category)?.color || '#e8e6e3';
@@ -181,7 +201,7 @@ export default function Tasks() {
           </Button>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto">
           <Button
             variant={filter === 'pending' ? 'default' : 'outline'}
             size="sm"
@@ -195,6 +215,14 @@ export default function Tasks() {
             onClick={() => setFilter('completed')}
           >
             Complétées ({tasks.filter(t => t.completed).length})
+          </Button>
+          <Button
+            variant={filter === 'history' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFilter('history')}
+          >
+            <Archive className="w-4 h-4 mr-1" />
+            Historique
           </Button>
           <Button
             variant={filter === 'all' ? 'default' : 'outline'}
@@ -217,6 +245,39 @@ export default function Tasks() {
       </div>
 
       <div className="p-4 space-y-3">
+        {/* Statistiques pour l'historique */}
+        {filter === 'history' && (
+          <Card className="p-4 bg-gradient-to-br from-green-500/10 to-green-600/10 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="w-5 h-5 text-green-600" />
+              <h3 className="font-semibold text-foreground">Statistiques</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-foreground">{completedTasks.length}</div>
+                <div className="text-xs text-muted-foreground">Terminées</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">{completedThisWeek.length}</div>
+                <div className="text-xs text-muted-foreground">Cette semaine</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">{completionRate}%</div>
+                <div className="text-xs text-muted-foreground">Taux global</div>
+              </div>
+            </div>
+            {completedTasks.length > 0 && (
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-sm text-muted-foreground">
+                  Dernière tâche complétée : <span className="font-medium text-foreground">
+                    {completedTasks[completedTasks.length - 1]?.title}
+                  </span>
+                </p>
+              </div>
+            )}
+          </Card>
+        )}
+
         {filteredTasks.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">Aucune tâche à afficher</p>

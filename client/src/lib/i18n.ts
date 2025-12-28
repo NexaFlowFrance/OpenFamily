@@ -47,6 +47,9 @@ export const translations = {
       finish: 'Terminer',
       next: 'Suivant',
       previous: 'Précédent',
+      autoDetected: 'Détecté automatiquement',
+      serverAutoConfigured: 'Configuration automatique',
+      serverAutoConfiguredDesc: 'Le serveur a été détecté automatiquement. Aucune configuration manuelle nécessaire.',
     },
     
     // Navigation
@@ -124,6 +127,9 @@ export const translations = {
       finish: 'Finish',
       next: 'Next',
       previous: 'Previous',
+      autoDetected: 'Auto-detected',
+      serverAutoConfigured: 'Automatic configuration',
+      serverAutoConfiguredDesc: 'The server was detected automatically. No manual configuration needed.',
     },
     
     // Navigation
@@ -201,6 +207,9 @@ export const translations = {
       finish: 'Fertig',
       next: 'Weiter',
       previous: 'Zurück',
+      autoDetected: 'Automatisch erkannt',
+      serverAutoConfigured: 'Automatische Konfiguration',
+      serverAutoConfiguredDesc: 'Der Server wurde automatisch erkannt. Keine manuelle Konfiguration erforderlich.',
     },
     
     // Navigation
@@ -278,6 +287,9 @@ export const translations = {
       finish: 'Terminar',
       next: 'Siguiente',
       previous: 'Anterior',
+      autoDetected: 'Detectado automáticamente',
+      serverAutoConfigured: 'Configuración automática',
+      serverAutoConfiguredDesc: 'El servidor se detectó automáticamente. No se necesita configuración manual.',
     },
     
     // Navegación

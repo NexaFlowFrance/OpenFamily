@@ -21,6 +21,12 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    commonjsOptions: {
+      include: [/date-fns/, /node_modules/],
+    },
+  },
+  optimizeDeps: {
+    include: ['date-fns/locale'],
   },
   server: {
     port: 3000,

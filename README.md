@@ -182,7 +182,7 @@ Cette application :
 
 ## 📄 Licence
 
-MIT - Libre d'utilisation, modification et distribution
+AGPL-3.0 avec clause non-commerciale - Le projet est open source et forkable, mais l'utilisation commerciale nécessite une autorisation explicite. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ## 🤝 Contribuer
 
@@ -190,12 +190,3 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 - Ouvrir des issues pour signaler des bugs
 - Proposer des améliorations
 - Soumettre des pull requests
-
-## 🚧 Roadmap
-
-- [ ] Export/Import des données (JSON)
-- [ ] Synchronisation optionnelle via cloud personnel (Google Drive, Dropbox)
-- [ ] Thème sombre
-- [ ] Notifications push (rappels)
-- [ ] Widget pour écran d'accueil
-- [ ] Support multi-langues

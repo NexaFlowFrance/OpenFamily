@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## 🚀 ${{ github.ref_name }} - Server-Only Architecture
+
+            **Major Release: Complete migration to server-only architecture**
+
+            ### ✨ Key Changes
+            - ✅ **Server-only architecture** with PostgreSQL
+            - ✅ **Automatic synchronization** between all family devices  
+            - ✅ **Repository pattern fully integrated** - Clean data flow
+            - ✅ **Removed localStorage mode** completely
+            - ✅ **Better dark mode visibility** on onboarding
+            - ✅ **Auto-detection** of hosted environment
+
+            ### ⚠️ Breaking Changes
+            - **Requires PostgreSQL database** - No more local-only mode
+            - **Migration required** for existing users
+            - All data now stored in centralized database
+
+            ### 🐛 Bug Fixes
+            - Fixed TypeScript error in barcode.ts (optional boolean)
+            - Fixed configuration re-request on multiple devices
+            - Fixed synchronization issues between PC and mobile
+            - Improved dark mode text contrast
+
+            ### 📦 Installation
+
+            **Quick install with Docker:**
+            ```bash
+            curl -sSL https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/install-docker.sh | bash
+            ```
+
+            **Manual install:**
+            ```bash
+            git clone https://github.com/NexaFlowFrance/OpenFamily.git
+            cd OpenFamily
+            cp .env.example .env
+            # Edit .env and change DB_PASSWORD
+            docker-compose up -d
+            ```
+
+            Access at `http://localhost:3000` or `http://your-server-ip:3000`
+
+            ### 📚 Documentation
+            - Updated all README files (FR, EN, DE, ES)
+            - New deployment guide for server configuration
+            - PostgreSQL backup instructions
+            - Network configuration guide
+
+            ### 🔧 Technical Details
+            - AppContext now uses RepositoryFactory pattern
+            - All CRUD operations are async with proper error handling
+            - Loading states during data fetch
+            - Automatic family initialization on server startup
+
+            **Full Changelog:** [CHANGELOG.md](https://github.com/NexaFlowFrance/OpenFamily/blob/main/CHANGELOG.md)
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-push-docker:
+    runs-on: ubuntu-latest
+    needs: create-release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            nexaflow/openfamily:${{ steps.version.outputs.VERSION }}
+            nexaflow/openfamily:latest
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

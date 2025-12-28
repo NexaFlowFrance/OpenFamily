@@ -17,6 +17,7 @@ import Budget from "./pages/Budget";
 import Statistics from "./pages/Statistics";
 import Onboarding from "./pages/Onboarding";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { isOnboardingCompleted } from "./lib/configSync";
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<'home' | 'shopping' | 'tasks' | 'appointments' | 'settings' | 'recipes' | 'meals' | 'budget' | 'statistics'>('home');
@@ -24,14 +25,15 @@ function AppContent() {
   const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
-    // Vérifier si l'onboarding a été complété
-    // On vérifie aussi le mode de stockage comme indicateur de configuration
-    const onboardingCompleted = localStorage.getItem('openfamily_onboarding_completed');
-    const storageMode = localStorage.getItem('openfamily_storage_mode');
-    
-    if (!onboardingCompleted && !storageMode) {
-      setShowOnboarding(true);
-    }
+    // Vérifier si l'onboarding a été complété (vérifie serveur si mode serveur)
+    const checkOnboarding = async () => {
+      const completed = await isOnboardingCompleted();
+      if (!completed) {
+        setShowOnboarding(true);
+      }
+    };
+
+    checkOnboarding();
 
     // Raccourci clavier pour la recherche (Ctrl+K ou Cmd+K)
     const handleKeyDown = (e: KeyboardEvent) => {

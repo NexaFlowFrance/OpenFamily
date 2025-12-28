@@ -97,6 +97,19 @@ CREATE TABLE IF NOT EXISTS budgets (
     UNIQUE(family_id, category, month)
 );
 
+-- Table: family_configuration
+CREATE TABLE IF NOT EXISTS family_configuration (
+    id VARCHAR(255) PRIMARY KEY,
+    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    onboarding_completed BOOLEAN DEFAULT FALSE,
+    storage_mode VARCHAR(50) DEFAULT 'local',
+    theme VARCHAR(50) DEFAULT 'light',
+    language VARCHAR(10) DEFAULT 'fr',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(family_id)
+);
+
 -- Indexes pour améliorer les performances
 CREATE INDEX IF NOT EXISTS idx_family_members_family_id ON family_members(family_id);
 CREATE INDEX IF NOT EXISTS idx_shopping_items_family_id ON shopping_items(family_id);
@@ -108,6 +121,7 @@ CREATE INDEX IF NOT EXISTS idx_meals_family_id ON meals(family_id);
 CREATE INDEX IF NOT EXISTS idx_meals_date ON meals(date);
 CREATE INDEX IF NOT EXISTS idx_budgets_family_id ON budgets(family_id);
 CREATE INDEX IF NOT EXISTS idx_budgets_month ON budgets(month);
+CREATE INDEX IF NOT EXISTS idx_family_configuration_family_id ON family_configuration(family_id);
 
 -- Données d'exemple (optionnel, pour les tests)
 -- INSERT INTO families (id, name) VALUES ('family-demo', 'Famille Démo');

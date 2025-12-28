@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Language, languageNames, languageFlags } from '@/lib/i18n';
 import { Sun, Moon, Check, Users, Globe, Palette, ArrowRight, ArrowLeft, Smartphone, Server } from 'lucide-react';
 import { RepositoryFactory } from '@/repositories/factory';
+import { markOnboardingCompleted } from '@/lib/configSync';
 
 const COLORS = [
   '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
@@ -48,7 +49,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     // Configurer le mode de stockage
     RepositoryFactory.setStorageMode(storageMode, storageMode === 'server' ? {
       apiUrl: serverUrl,
@@ -70,8 +71,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       });
     });
 
-    // Marquer l'onboarding comme terminé
-    localStorage.setItem('openfamily_onboarding_completed', 'true');
+    // Marquer l'onboarding comme terminé (localStorage + serveur si configuré)
+    await markOnboardingCompleted(theme as 'light' | 'dark', language);
     onComplete();
   };
 

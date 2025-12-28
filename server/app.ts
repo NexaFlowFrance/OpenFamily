@@ -87,6 +87,17 @@ interface Budget {
   created_at: Date;
 }
 
+interface FamilyConfiguration {
+  id: string;
+  family_id: string;
+  onboarding_completed: boolean;
+  storage_mode: string;
+  theme: string;
+  language: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
 // Middleware d'authentification simple
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authToken = req.headers.authorization?.replace('Bearer ', '');
@@ -649,6 +660,60 @@ export function createApp(pool: Pool) {
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting budget:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // ===== Family Configuration =====
+  app.get('/api/family/config', async (req: Request, res: Response) => {
+    try {
+      const familyId = (req as any).familyId;
+      const result = await pool.query(
+        'SELECT * FROM family_configuration WHERE family_id = $1',
+        [familyId]
+      );
+      
+      if (result.rows.length === 0) {
+        // Retourner une config par défaut si elle n'existe pas
+        return res.json({
+          family_id: familyId,
+          onboarding_completed: false,
+          storage_mode: 'local',
+          theme: 'light',
+          language: 'fr'
+        });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error fetching family configuration:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/family/config', async (req: Request, res: Response) => {
+    try {
+      const familyId = (req as any).familyId;
+      const { id, onboarding_completed, storage_mode, theme, language } = req.body;
+      
+      // Upsert: INSERT avec ON CONFLICT UPDATE
+      const result = await pool.query(
+        `INSERT INTO family_configuration (id, family_id, onboarding_completed, storage_mode, theme, language, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
+         ON CONFLICT (family_id)
+         DO UPDATE SET 
+           onboarding_completed = EXCLUDED.onboarding_completed,
+           storage_mode = EXCLUDED.storage_mode,
+           theme = EXCLUDED.theme,
+           language = EXCLUDED.language,
+           updated_at = NOW()
+         RETURNING *`,
+        [id, familyId, onboarding_completed, storage_mode, theme, language]
+      );
+      
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error('Error saving family configuration:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });

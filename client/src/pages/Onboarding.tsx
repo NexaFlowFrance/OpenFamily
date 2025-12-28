@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Language, languageNames, languageFlags } from '@/lib/i18n';
 import { Sun, Moon, Check, Users, Globe, Palette, ArrowRight, ArrowLeft, Smartphone, Server } from 'lucide-react';
 import { RepositoryFactory } from '@/repositories/factory';
+import { markOnboardingCompleted } from '@/lib/configSync';
 
 const COLORS = [
   '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
@@ -48,7 +49,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     // Configurer le mode de stockage
     RepositoryFactory.setStorageMode(storageMode, storageMode === 'server' ? {
       apiUrl: serverUrl,
@@ -61,18 +62,17 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       addFamilyMember({
         name: member.name,
         color: member.color,
-        healthInfo: {
-          bloodType: '',
-          allergies: [],
-          vaccinations: [],
-          notes: '',
-          emergencyContact: { name: '', phone: '', relation: '' },
-        },
+        role: 'other',
+        bloodType: '',
+        allergies: [],
+        medicalNotes: '',
+        vaccines: [],
+        emergencyContact: { name: '', phone: '', relation: '' },
       });
     });
 
-    // Marquer l'onboarding comme terminé
-    localStorage.setItem('openfamily_onboarding_completed', 'true');
+    // Marquer l'onboarding comme terminé (localStorage + serveur si configuré)
+    await markOnboardingCompleted(theme as 'light' | 'dark', language);
     onComplete();
   };
 
@@ -179,31 +179,31 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <Button
                 variant={storageMode === 'local' ? 'default' : 'outline'}
                 size="lg"
-                className="h-auto flex-col gap-3 p-6 text-left items-start"
+                className="h-auto p-6 text-left"
                 onClick={() => setStorageMode('local')}
               >
                 <div className="flex items-center gap-3 w-full">
-                  <Smartphone className="w-8 h-8" />
-                  <div className="flex-1">
+                  <Smartphone className="w-8 h-8 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <div className="text-lg font-semibold">{t.onboarding.localMode}</div>
                     <div className="text-sm text-muted-foreground mt-1">{t.onboarding.localModeDesc}</div>
                   </div>
-                  {storageMode === 'local' && <Check className="w-5 h-5" />}
+                  {storageMode === 'local' && <Check className="w-5 h-5 flex-shrink-0" />}
                 </div>
               </Button>
               <Button
                 variant={storageMode === 'server' ? 'default' : 'outline'}
                 size="lg"
-                className="h-auto flex-col gap-3 p-6 text-left items-start"
+                className="h-auto p-6 text-left"
                 onClick={() => setStorageMode('server')}
               >
                 <div className="flex items-center gap-3 w-full">
-                  <Server className="w-8 h-8" />
-                  <div className="flex-1">
+                  <Server className="w-8 h-8 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <div className="text-lg font-semibold">{t.onboarding.serverMode}</div>
                     <div className="text-sm text-muted-foreground mt-1">{t.onboarding.serverModeDesc}</div>
                   </div>
-                  {storageMode === 'server' && <Check className="w-5 h-5" />}
+                  {storageMode === 'server' && <Check className="w-5 h-5 flex-shrink-0" />}
                 </div>
               </Button>
             </div>

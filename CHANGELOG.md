@@ -15,6 +15,59 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [1.0.2] - 2024-12-28
+
+### 🚀 Architecture serveur intelligente
+
+#### ✨ Ajouté
+- **Détection automatique du serveur**
+  - L'app détecte si elle est hébergée sur un serveur (pas localhost)
+  - Configuration automatique de l'URL API
+  - Identifiants par défaut pour simplification
+  - Aucune configuration manuelle nécessaire en mode auto
+  
+- **Nouveau module `serverDetection.ts`**
+  - `isHostedOnServer()`: Détection hébergement
+  - `getApiUrl()`: Calcul automatique URL API
+  - `checkServerAvailability()`: Vérification disponibilité
+  - `shouldAutoConfigureServer()`: Détermination auto-config
+
+#### 🐛 Corrigé
+- **Configuration redemandée après suppression données navigateur**
+  - Vérification serveur EN PRIORITÉ si mode auto-détecté
+  - Récupération automatique config depuis PostgreSQL
+  - Mise à jour automatique localStorage après vérification
+
+- **Texte débordant des boutons de stockage**
+  - Réduction tailles texte (text-base, text-xs)
+  - Ajout `break-words` pour wrapping automatique
+  - Icônes optimisées (w-6 h-6)
+  - Padding réduit (p-4)
+  - Alignement `items-start` pour mobile
+
+- **Couleurs mal affichées en mode sombre**
+  - Utilisation `text-foreground` au lieu couleurs fixes
+  - Utilisation `text-muted-foreground` pour descriptions
+  - Adaptation automatique au thème actif
+
+#### 🎨 Améliorations UI
+- Interface onboarding plus compacte et responsive
+- Message de confirmation "Configuration automatique"
+- Désactivation choix local/serveur si auto-détecté
+- Masquage champs URL/token/familyId si auto-config
+
+#### 🌍 Traductions
+- Nouvelles clés i18n (FR/EN/DE/ES):
+  - `onboarding.autoDetected`
+  - `onboarding.serverAutoConfigured`
+  - `onboarding.serverAutoConfiguredDesc`
+
+#### 📋 Migration
+- Mode serveur : Supprimer données navigateur sur tous appareils, reconfigurer une fois
+- Mode local : Aucun changement requis
+
+---
+
 ## [1.0.1] - 2024-12-28
 
 ### 🐛 Corrections de bugs critiques

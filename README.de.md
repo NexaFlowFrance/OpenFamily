@@ -1,0 +1,136 @@
+# OpenFamily
+
+<div align="center">
+
+![License](https://img.shields.io/badge/License-AGPL--3.0--NC-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white)
+
+**100% lokale und Open-Source-Anwendung für Familienverwaltung**
+
+[🇫🇷 Français](README.md) | [🇬🇧 English](README.en.md) | 🇩🇪 Deutsch | [🇪🇸 Español](README.es.md)
+
+[Funktionen](#-funktionen) •
+[Installation](#-installation) •
+[Dokumentation](#-dokumentation) •
+[Mitwirken](#-mitwirken) •
+[Lizenz](#-lizenz)
+
+</div>
+
+---
+
+## 🎯 Über
+
+OpenFamily ist eine umfassende Familienverwaltungsanwendung, die Ihre Privatsphäre priorisiert. Alle Ihre Daten bleiben auf Ihrem Gerät, kein zentraler Server, kein Konto erforderlich. Verwalten Sie Ihre Einkaufslisten, Aufgaben, Termine, Rezepte, Essensplanung und Familienbudget sicher.
+
+## 🚀 Hauptmerkmale
+
+- ✅ **100% Lokal oder Selbst-gehostet** - Wählen Sie zwischen lokalem Speicher oder selbst-gehostetem Server für Familiensynchronisation
+- 📱 **PWA** - Installieren Sie die App als native Anwendung auf Mobil/Tablet
+- 🔒 **Privat** - Ihre Daten verlassen nie Ihr Gerät (lokaler Modus) oder bleiben auf Ihrem Server (Server-Modus)
+- 🌐 **Offline** - Funktioniert ohne Internetverbindung im lokalen Modus
+- 🆓 **Open Source** - Freier und modifizierbarer Quellcode
+- 🌍 **Mehrsprachig** - Oberfläche verfügbar auf Französisch, Englisch, Deutsch und Spanisch
+- 🌙 **Dunkles Design** - Helle und dunkle Modi verfügbar
+- 💡 **Intelligente Liste** - Zutatvorschläge basierend auf Ihren geplanten Mahlzeiten
+- 👨‍👩‍👧‍👦 **Mehrbenutzer** - Verwalten Sie die ganze Familie mit Gesundheitsinformationen
+
+## 📋 Funktionen
+
+- 🛒 **Einkaufsliste** - Automatische Kategorisierung, Preise und Mengen
+- ✅ **Aufgaben** - Wiederkehrende Aufgaben, Familienzuweisung
+- 📅 **Termine** - Monatskalender mit französischer Ansicht
+- 🍳 **Rezepte** - Familienrezeptbibliothek
+- 🍽️ **Essensplanung** - Wochenansicht mit automatischer Verknüpfung
+- 💰 **Budget** - Monatliche Ausgabenverfolgung
+- 👨‍👩‍👧‍👦 **Familienverwaltung** - Profile mit Gesundheitsinformationen
+
+## 🚀 Schnellstart
+
+### Lokaler Modus (Ohne Server)
+
+```bash
+git clone https://github.com/NexaFlowFrance/OpenFamily.git
+cd OpenFamily
+pnpm install
+pnpm dev
+# Öffnen Sie http://localhost:3000
+```
+
+### Server-Modus (Selbst-gehostet mit Docker)
+
+```bash
+git clone https://github.com/NexaFlowFrance/OpenFamily.git
+cd OpenFamily
+cp .env.example .env
+# Ändern Sie DB_PASSWORD in .env
+docker-compose up -d
+```
+
+Siehe [DEPLOYMENT.md](docs/DEPLOYMENT.md) für weitere Details.
+
+## 💾 Datenspeicherung
+
+### 📱 Lokaler Modus
+- ✅ 100% privat - Daten verlassen nie Ihr Gerät
+- ✅ Funktioniert offline
+- ⚠️ Keine Synchronisation
+
+### 🔄 Server-Modus
+- ✅ Familiensynchronisation
+- ✅ Multi-Geräte-Zugriff
+- ✅ Vollständige Kontrolle
+
+## 🛠️ Technologien
+
+- **Frontend**: React 19 + TypeScript + Vite 7 + TailwindCSS
+- **Backend**: Node.js 20+ + Express + PostgreSQL 16
+- **Mobile**: Capacitor + PWA
+
+## 🔐 Datenschutz
+
+**Lokaler Modus**: Keine Daten werden an externe Server gesendet.
+
+**Server-Modus**: Sie kontrollieren die Infrastruktur auf Ihrem eigenen Server.
+
+## ❓ FAQ
+
+### Sind meine Daten sicher?
+**Lokaler Modus**: Ja, alle Daten werden lokal in Ihrem Browser gespeichert.
+**Server-Modus**: Ja, auf Ihrem eigenen Server mit voller Kontrolle.
+
+### Ist die Anwendung in mehreren Sprachen verfügbar?
+Ja! Verfügbar auf **Französisch 🇫🇷**, **Englisch 🇬🇧**, **Deutsch 🇩🇪** und **Spanisch 🇪🇸**.
+
+### Kann ich zwischen mehreren Geräten synchronisieren?
+**Lokaler Modus**: Verwenden Sie Export/Import für manuellen Transfer.
+**Server-Modus**: Ja! Automatische Synchronisation zwischen allen Geräten.
+
+## 📄 Lizenz
+
+AGPL-3.0 mit nicht-kommerzieller Klausel. Siehe [LICENSE](LICENSE) für Details.
+
+## 🤝 Mitwirken
+
+Beiträge sind willkommen! Siehe [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 📚 Dokumentation
+
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Technische Architektur
+- [DEPLOYMENT.md](docs/DEPLOYMENT.md) - Server-Bereitstellungsanleitung
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Beitragsleitfaden
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - Verhaltenskodex
+- [CHANGELOG.md](CHANGELOG.md) - Versionshistorie
+
+---
+
+<div align="center">
+
+Mit ❤️ gemacht von [NexaFlow](https://github.com/NexaFlowFrance)
+
+[⬆ Zurück nach oben](#openfamily)
+
+</div>

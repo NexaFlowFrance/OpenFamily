@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Language, languageNames, languageFlags } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Trash2, Plus, Moon, Sun, Heart, Bell } from 'lucide-react';
+import { Trash2, Plus, Moon, Sun, Heart, Bell, Globe, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,6 +28,7 @@ const COLORS = [
 export default function Settings() {
   const { familyMembers, addFamilyMember, updateFamilyMember, deleteFamilyMember } = useApp();
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [showForm, setShowForm] = useState(false);
   const [selectedMemberHealth, setSelectedMemberHealth] = useState<string | null>(null);
   const [notificationStatus, setNotificationStatus] = useState(getNotificationStatus());
@@ -57,17 +60,45 @@ export default function Settings() {
         <h1 className="text-3xl font-bold text-foreground">Paramètres</h1>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div cLanguage Section */}
+        <div>
+          <h2 className="text-xl font-bold text-foreground mb-4">{t.settings.language}</h2>
+          
+          <Card className="p-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-3">
+                <Globe className="w-5 h-5 text-primary" />
+                <h3 className="font-medium text-foreground">{t.settings.language}</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {(['fr', 'en', 'de', 'es'] as Language[]).map(lang => (
+                  <Button
+                    key={lang}
+                    variant={language === lang ? 'default' : 'outline'}
+                    className="justify-start gap-2"
+                    onClick={() => setLanguage(lang)}
+                  >
+                    <span className="text-xl">{languageFlags[lang]}</span>
+                    <span>{languageNames[lang]}</span>
+                    {language === lang && <Check className="w-4 h-4 ml-auto" />}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+
         {/* Appearance Section */}
         <div>
+          <h2 className="text-xl font-bold text-foreground mb-4">{t.settings.appearance}
           <h2 className="text-xl font-bold text-foreground mb-4">Apparence</h2>
           
           <Card className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium text-foreground">Thème</h3>
+                <h3 className="font-medium text-foreground">{t.settings.theme}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {theme === 'dark' ? 'Mode sombre' : 'Mode clair'}
+                  {theme === 'dark' ? t.onboarding.darkMode : t.onboarding.lightMode}
                 </p>
               </div>
               <Button

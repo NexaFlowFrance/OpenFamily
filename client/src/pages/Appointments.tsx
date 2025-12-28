@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Trash2, Plus, MapPin, Clock, Briefcase, Plane } from 'lucide-react';
+import { fr } from 'date-fns/locale';
 import { scheduleAppointmentNotification } from '@/lib/notifications';
 import { getDayOfWeek, getDayOfMonth } from '@/lib/recurrence';
 import { WorkSchedule } from '@/types';
@@ -239,12 +240,12 @@ export default function Appointments() {
           <div className="p-4">{/* Existing calendar code */}
         <Card className="p-4">
           <h2 className="text-lg font-semibold mb-3">Calendrier global - Rendez-vous & Tâches</h2>
-          <div className="flex justify-center">
+          <div className="flex justify-center overflow-x-auto">
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              locale="fr"
+              locale={fr}
               modifiers={{
                 hasAppointment: appointmentDates,
                 hasTask: taskDates,
@@ -253,7 +254,7 @@ export default function Appointments() {
                 hasAppointment: "bg-primary/20 font-bold",
                 hasTask: "bg-secondary/30 font-semibold",
               }}
-              className="rounded-md border w-full [--cell-size:3rem] text-base"
+              className="rounded-md border max-w-full [--cell-size:2.5rem] sm:[--cell-size:3rem] text-sm sm:text-base"
             />
           </div>
           

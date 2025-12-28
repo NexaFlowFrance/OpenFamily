@@ -91,8 +91,7 @@ export default function Settings() {
 
         {/* Appearance Section */}
         <div>
-          <h2 className="text-xl font-bold text-foreground mb-4">{t.settings.appearance}
-          <h2 className="text-xl font-bold text-foreground mb-4">Apparence</h2>
+          <h2 className="text-xl font-bold text-foreground mb-4">{t.settings.appearance}</h2>
           
           <Card className="p-4">
             <div className="flex items-center justify-between">

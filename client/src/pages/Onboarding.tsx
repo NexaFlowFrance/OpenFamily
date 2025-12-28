@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Language, languageNames, languageFlags } from '@/lib/i18n';
-import { Sun, Moon, Check, Users, Globe, Palette, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Sun, Moon, Check, Users, Globe, Palette, ArrowRight, ArrowLeft, Smartphone, Server } from 'lucide-react';
+import { RepositoryFactory } from '@/repositories/factory';
 
 const COLORS = [
   '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
@@ -22,10 +23,14 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const { theme, setTheme } = useTheme();
   const { addFamilyMember } = useApp();
   const [step, setStep] = useState(1);
+  const [storageMode, setStorageMode] = useState<'local' | 'server'>('local');
+  const [serverUrl, setServerUrl] = useState('');
+  const [authToken, setAuthToken] = useState('');
+  const [familyId, setFamilyId] = useState('');
   const [tempMembers, setTempMembers] = useState<Array<{ name: string; color: string }>>([]);
   const [newMemberName, setNewMemberName] = useState('');
 
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   const handleLanguageSelect = (lang: Language) => {
     setLanguage(lang);
@@ -44,6 +49,13 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   const handleFinish = () => {
+    // Configurer le mode de stockage
+    RepositoryFactory.setStorageMode(storageMode, storageMode === 'server' ? {
+      apiUrl: serverUrl,
+      authToken: authToken || undefined,
+      familyId: familyId || undefined,
+    } : undefined);
+
     // Ajouter les membres de la famille
     tempMembers.forEach(member => {
       addFamilyMember({
@@ -89,7 +101,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
         {/* Progress */}
         <div className="flex justify-center gap-2 mb-8">
-          {[1, 2, 3].map(i => (
+          {[1, 2, 3, 4].map(i => (
             <div
               key={i}
               className={`h-2 rounded-full transition-all ${
@@ -156,8 +168,80 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           </div>
         )}
 
-        {/* Step 3: Family Members */}
+        {/* Step 3: Storage Mode */}
         {step === 3 && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <Server className="w-6 h-6 text-primary" />
+              <h2 className="text-xl font-semibold">{t.onboarding.selectStorageMode}</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              <Button
+                variant={storageMode === 'local' ? 'default' : 'outline'}
+                size="lg"
+                className="h-auto flex-col gap-3 p-6 text-left items-start"
+                onClick={() => setStorageMode('local')}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <Smartphone className="w-8 h-8" />
+                  <div className="flex-1">
+                    <div className="text-lg font-semibold">{t.onboarding.localMode}</div>
+                    <div className="text-sm text-muted-foreground mt-1">{t.onboarding.localModeDesc}</div>
+                  </div>
+                  {storageMode === 'local' && <Check className="w-5 h-5" />}
+                </div>
+              </Button>
+              <Button
+                variant={storageMode === 'server' ? 'default' : 'outline'}
+                size="lg"
+                className="h-auto flex-col gap-3 p-6 text-left items-start"
+                onClick={() => setStorageMode('server')}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <Server className="w-8 h-8" />
+                  <div className="flex-1">
+                    <div className="text-lg font-semibold">{t.onboarding.serverMode}</div>
+                    <div className="text-sm text-muted-foreground mt-1">{t.onboarding.serverModeDesc}</div>
+                  </div>
+                  {storageMode === 'server' && <Check className="w-5 h-5" />}
+                </div>
+              </Button>
+            </div>
+
+            {storageMode === 'server' && (
+              <div className="space-y-4 mt-6 p-4 border rounded-lg bg-card">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">{t.onboarding.serverUrl}</label>
+                  <Input
+                    placeholder={t.onboarding.serverUrlPlaceholder}
+                    value={serverUrl}
+                    onChange={(e) => setServerUrl(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">{t.onboarding.authToken}</label>
+                  <Input
+                    placeholder={t.onboarding.authTokenPlaceholder}
+                    value={authToken}
+                    onChange={(e) => setAuthToken(e.target.value)}
+                    type="password"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">{t.onboarding.familyId}</label>
+                  <Input
+                    placeholder={t.onboarding.familyIdPlaceholder}
+                    value={familyId}
+                    onChange={(e) => setFamilyId(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 4: Family Members */}
+        {step === 4 && (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-6">
               <Users className="w-6 h-6 text-primary" />
@@ -220,7 +304,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           </Button>
 
           <div className="flex gap-2">
-            {step === 3 && (
+            {step === 4 && (
               <Button variant="ghost" onClick={handleFinish}>
                 {t.onboarding.skipForNow}
               </Button>

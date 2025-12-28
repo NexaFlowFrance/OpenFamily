@@ -60,7 +60,8 @@ export default function Settings() {
         <h1 className="text-3xl font-bold text-foreground">Paramètres</h1>
       </div>
 
-      <div cLanguage Section */}
+      {/* Language Section */}
+      <div className="p-4 space-y-6">
         <div>
           <h2 className="text-xl font-bold text-foreground mb-4">{t.settings.language}</h2>
           
@@ -90,8 +91,7 @@ export default function Settings() {
 
         {/* Appearance Section */}
         <div>
-          <h2 className="text-xl font-bold text-foreground mb-4">{t.settings.appearance}
-          <h2 className="text-xl font-bold text-foreground mb-4">Apparence</h2>
+          <h2 className="text-xl font-bold text-foreground mb-4">{t.settings.appearance}</h2>
           
           <Card className="p-4">
             <div className="flex items-center justify-between">

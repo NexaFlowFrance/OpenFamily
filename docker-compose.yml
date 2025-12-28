@@ -1,25 +1,78 @@
 version: '3.8'
 
 services:
-  web:
-    build:
-      context: .
-      target: web
-    image: openfamily_web:latest
-    ports:
-      # expose on all interfaces by default; to bind only to localhost use 127.0.0.1:80:80
-      - "80:80"
+  # Base de données PostgreSQL
+  db:
+    image: postgres:16-alpine
+    container_name: openfamily-db
     restart: unless-stopped
+    environment:
+      POSTGRES_DB: openfamily
+      POSTGRES_USER: openfamily
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-openfamily_secure_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openfamily"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - openfamily_net
 
-  api:
+  # Application OpenFamily (Web + API)
+  app:
     build:
       context: .
-      target: api
-    image: openfamily_api:latest
+      dockerfile: Dockerfile
+    image: openfamily:latest
+    container_name: openfamily-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: openfamily
+      DB_USER: openfamily
+      DB_PASSWORD: ${DB_PASSWORD:-openfamily_secure_password}
     ports:
       - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - app_data:/app/data
+    networks:
+      - openfamily_net
+
+  # Nginx reverse proxy (optionnel, pour HTTPS)
+  nginx:
+    image: nginx:alpine
+    container_name: openfamily-nginx
     restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - openfamily_net
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  app_data:
+    driver: local
 
 networks:
-  default:
-    name: openfamily_net
+  openfamily_net:
+    driver: bridge

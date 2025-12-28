@@ -25,8 +25,11 @@ function AppContent() {
 
   useEffect(() => {
     // Vérifier si l'onboarding a été complété
+    // On vérifie aussi le mode de stockage comme indicateur de configuration
     const onboardingCompleted = localStorage.getItem('openfamily_onboarding_completed');
-    if (!onboardingCompleted) {
+    const storageMode = localStorage.getItem('openfamily_storage_mode');
+    
+    if (!onboardingCompleted && !storageMode) {
       setShowOnboarding(true);
     }
 

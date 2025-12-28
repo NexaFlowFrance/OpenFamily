@@ -61,13 +61,12 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       addFamilyMember({
         name: member.name,
         color: member.color,
-        healthInfo: {
-          bloodType: '',
-          allergies: [],
-          vaccinations: [],
-          notes: '',
-          emergencyContact: { name: '', phone: '', relation: '' },
-        },
+        role: 'other',
+        bloodType: '',
+        allergies: [],
+        medicalNotes: '',
+        vaccines: [],
+        emergencyContact: { name: '', phone: '', relation: '' },
       });
     });
 
@@ -179,31 +178,31 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <Button
                 variant={storageMode === 'local' ? 'default' : 'outline'}
                 size="lg"
-                className="h-auto flex-col gap-3 p-6 text-left items-start"
+                className="h-auto p-6 text-left"
                 onClick={() => setStorageMode('local')}
               >
                 <div className="flex items-center gap-3 w-full">
-                  <Smartphone className="w-8 h-8" />
-                  <div className="flex-1">
+                  <Smartphone className="w-8 h-8 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <div className="text-lg font-semibold">{t.onboarding.localMode}</div>
                     <div className="text-sm text-muted-foreground mt-1">{t.onboarding.localModeDesc}</div>
                   </div>
-                  {storageMode === 'local' && <Check className="w-5 h-5" />}
+                  {storageMode === 'local' && <Check className="w-5 h-5 flex-shrink-0" />}
                 </div>
               </Button>
               <Button
                 variant={storageMode === 'server' ? 'default' : 'outline'}
                 size="lg"
-                className="h-auto flex-col gap-3 p-6 text-left items-start"
+                className="h-auto p-6 text-left"
                 onClick={() => setStorageMode('server')}
               >
                 <div className="flex items-center gap-3 w-full">
-                  <Server className="w-8 h-8" />
-                  <div className="flex-1">
+                  <Server className="w-8 h-8 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <div className="text-lg font-semibold">{t.onboarding.serverMode}</div>
                     <div className="text-sm text-muted-foreground mt-1">{t.onboarding.serverModeDesc}</div>
                   </div>
-                  {storageMode === 'server' && <Check className="w-5 h-5" />}
+                  {storageMode === 'server' && <Check className="w-5 h-5 flex-shrink-0" />}
                 </div>
               </Button>
             </div>

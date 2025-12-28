@@ -113,6 +113,20 @@ OpenFamily est une application de gestion familiale complète proposée en open 
 
 ## 🚀 Démarrage rapide
 
+### ⚡ Installation en 1 ligne
+
+#### Mode Local (Développement)
+```bash
+curl -sSL https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/install-local.sh | bash
+```
+
+#### Mode Serveur (Docker)
+```bash
+curl -sSL https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/install-docker.sh | bash
+```
+
+---
+
 ### Mode Local (Sans serveur)
 
 ```bash

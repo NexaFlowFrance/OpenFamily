@@ -9,6 +9,7 @@ import { Language, languageNames, languageFlags } from '@/lib/i18n';
 import { Sun, Moon, Check, Users, Globe, Palette, ArrowRight, ArrowLeft, Smartphone, Server } from 'lucide-react';
 import { RepositoryFactory } from '@/repositories/factory';
 import { markOnboardingCompleted } from '@/lib/configSync';
+import { shouldAutoConfigureServer, getApiUrl } from '@/lib/serverDetection';
 
 const COLORS = [
   '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
@@ -24,10 +25,11 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const { theme, setTheme } = useTheme();
   const { addFamilyMember } = useApp();
   const [step, setStep] = useState(1);
-  const [storageMode, setStorageMode] = useState<'local' | 'server'>('local');
-  const [serverUrl, setServerUrl] = useState('');
-  const [authToken, setAuthToken] = useState('');
-  const [familyId, setFamilyId] = useState('');
+  const autoServer = shouldAutoConfigureServer();
+  const [storageMode, setStorageMode] = useState<'local' | 'server'>(autoServer ? 'server' : 'local');
+  const [serverUrl, setServerUrl] = useState(autoServer ? getApiUrl() : '');
+  const [authToken, setAuthToken] = useState('default-token');
+  const [familyId, setFamilyId] = useState('family-default');
   const [tempMembers, setTempMembers] = useState<Array<{ name: string; color: string }>>([]);
   const [newMemberName, setNewMemberName] = useState('');
 
@@ -179,14 +181,15 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <Button
                 variant={storageMode === 'local' ? 'default' : 'outline'}
                 size="lg"
-                className="h-auto p-6 text-left"
-                onClick={() => setStorageMode('local')}
+                className="h-auto p-4 text-left disabled:opacity-50"
+                onClick={() => !autoServer && setStorageMode('local')}
+                disabled={autoServer}
               >
-                <div className="flex items-center gap-3 w-full">
-                  <Smartphone className="w-8 h-8 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-lg font-semibold">{t.onboarding.localMode}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{t.onboarding.localModeDesc}</div>
+                <div className="flex items-start gap-3 w-full">
+                  <Smartphone className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="text-base font-semibold text-foreground">{t.onboarding.localMode}</div>
+                    <div className="text-xs text-muted-foreground mt-1 break-words">{t.onboarding.localModeDesc}</div>
                   </div>
                   {storageMode === 'local' && <Check className="w-5 h-5 flex-shrink-0" />}
                 </div>
@@ -194,24 +197,26 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <Button
                 variant={storageMode === 'server' ? 'default' : 'outline'}
                 size="lg"
-                className="h-auto p-6 text-left"
-                onClick={() => setStorageMode('server')}
+                className="h-auto p-4 text-left disabled:opacity-50"
+                onClick={() => !autoServer && setStorageMode('server')}
+                disabled={autoServer}
               >
-                <div className="flex items-center gap-3 w-full">
-                  <Server className="w-8 h-8 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-lg font-semibold">{t.onboarding.serverMode}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{t.onboarding.serverModeDesc}</div>
+                <div className="flex items-start gap-3 w-full">
+                  <Server className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="text-base font-semibold text-foreground">{t.onboarding.serverMode}</div>
+                    <div className="text-xs text-muted-foreground mt-1 break-words">{t.onboarding.serverModeDesc}</div>
+                    {autoServer && <div className="text-xs text-primary mt-1 font-medium">✓ {t.onboarding.autoDetected || 'Détecté automatiquement'}</div>}
                   </div>
                   {storageMode === 'server' && <Check className="w-5 h-5 flex-shrink-0" />}
                 </div>
               </Button>
             </div>
 
-            {storageMode === 'server' && (
+            {storageMode === 'server' && !autoServer && (
               <div className="space-y-4 mt-6 p-4 border rounded-lg bg-card">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t.onboarding.serverUrl}</label>
+                  <label className="text-sm font-medium mb-2 block text-foreground">{t.onboarding.serverUrl}</label>
                   <Input
                     placeholder={t.onboarding.serverUrlPlaceholder}
                     value={serverUrl}
@@ -219,7 +224,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t.onboarding.authToken}</label>
+                  <label className="text-sm font-medium mb-2 block text-foreground">{t.onboarding.authToken}</label>
                   <Input
                     placeholder={t.onboarding.authTokenPlaceholder}
                     value={authToken}
@@ -228,12 +233,25 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t.onboarding.familyId}</label>
+                  <label className="text-sm font-medium mb-2 block text-foreground">{t.onboarding.familyId}</label>
                   <Input
                     placeholder={t.onboarding.familyIdPlaceholder}
                     value={familyId}
                     onChange={(e) => setFamilyId(e.target.value)}
                   />
+                </div>
+              </div>
+            )}
+            {storageMode === 'server' && autoServer && (
+              <div className="mt-6 p-4 border rounded-lg bg-card">
+                <div className="flex items-center gap-3 text-sm">
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <div className="text-foreground">
+                    <div className="font-medium">{t.onboarding.serverAutoConfigured || 'Configuration automatique'}</div>
+                    <div className="text-muted-foreground text-xs mt-1">
+                      {t.onboarding.serverAutoConfiguredDesc || 'Le serveur a été détecté automatiquement. Aucune configuration manuelle nécessaire.'}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

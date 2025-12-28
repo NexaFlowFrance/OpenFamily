@@ -3,6 +3,8 @@
  * Gère la synchronisation de la configuration entre localStorage et le serveur
  */
 
+import { shouldAutoConfigureServer, getApiUrl, checkServerAvailability } from './serverDetection';
+
 export interface FamilyConfiguration {
   family_id?: string;
   onboarding_completed: boolean;
@@ -77,14 +79,39 @@ export async function saveServerConfig(
 
 /**
  * Vérifie si l'onboarding a été complété
- * Vérifie d'abord le serveur si en mode serveur, sinon le localStorage
+ * En mode serveur auto-détecté, vérifie TOUJOURS le serveur en priorité
  */
 export async function isOnboardingCompleted(): Promise<boolean> {
-  // Vérifier d'abord le localStorage pour le mode et la config locale
+  // Si l'app est hébergée sur un serveur, vérifier le serveur en PRIORITÉ
+  if (shouldAutoConfigureServer()) {
+    const apiUrl = getApiUrl();
+    const serverAvailable = await checkServerAvailability(apiUrl);
+    
+    if (serverAvailable) {
+      // Utiliser des identifiants par défaut pour la famille
+      const familyId = 'family-default';
+      const authToken = 'default-token';
+      
+      const serverConfig = await fetchServerConfig(apiUrl, authToken, familyId);
+      if (serverConfig && serverConfig.onboarding_completed) {
+        // Mettre à jour le localStorage pour éviter les requêtes futures
+        localStorage.setItem('openfamily_onboarding_completed', 'true');
+        localStorage.setItem('openfamily_storage_mode', 'server');
+        localStorage.setItem('openfamily_server_url', apiUrl);
+        localStorage.setItem('openfamily_server_token', authToken);
+        localStorage.setItem('openfamily_family_id', familyId);
+        return true;
+      }
+      // Si pas de config serveur, l'onboarding n'est pas complété
+      return false;
+    }
+  }
+
+  // Mode local ou serveur non disponible : vérifier localStorage
   const onboardingCompleted = localStorage.getItem('openfamily_onboarding_completed');
   const storageMode = localStorage.getItem('openfamily_storage_mode');
 
-  // Si le mode serveur est configuré, vérifier le serveur
+  // Si le mode serveur est configuré manuellement, vérifier le serveur
   if (storageMode === 'server') {
     const serverUrl = localStorage.getItem('openfamily_server_url');
     const authToken = localStorage.getItem('openfamily_server_token');

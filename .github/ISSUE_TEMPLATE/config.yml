@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Discussion générale
+    url: https://github.com/NexaFlowFrance/OpenFamily/discussions
+    about: Posez une question ou discutez du projet
+  - name: 📧 Contact
+    url: mailto:contact@nexaflow.fr
+    about: Contactez-nous directement par email

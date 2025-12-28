@@ -1,6 +1,46 @@
 # OpenFamily
 
-Application 100% locale et open source pour gérer la vie de famille : courses, tâches, rendez-vous, recettes, planning des repas et budget familial.
+<div align="center">
+
+![License](https://img.shields.io/badge/License-AGPL--3.0--NC-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white)
+
+**Application 100% locale et open source pour gérer la vie de famille**
+
+[Fonctionnalités](#-fonctionnalités) •
+[Installation](#-installation) •
+[Documentation](#-documentation) •
+[Contribuer](#-contribuer) •
+[Licence](#-licence)
+
+</div>
+
+---
+
+## 📖 Table des matières
+
+- [À propos](#-à-propos)
+- [Caractéristiques](#-caractéristiques)
+- [Fonctionnalités](#-fonctionnalités)
+- [Démarrage rapide](#-démarrage-rapide)
+- [Installation](#-installation)
+- [Stockage des données](#-stockage-des-données)
+- [Fonctionnalités avancées](#-fonctionnalités-avancées)
+- [Technologies](#️-technologies)
+- [Compatibilité](#-compatibilité)
+- [Vie privée](#-vie-privée)
+- [FAQ](#-faq)
+- [Licence](#-licence)
+- [Contribuer](#-contribuer)
+
+---
+
+## 🎯 À propos
+
+OpenFamily est une application de gestion familiale complète qui privilégie votre vie privée. Toutes vos données restent sur votre appareil, aucun serveur central, aucun compte requis. Gérez vos courses, tâches, rendez-vous, recettes, planning des repas et budget familial en toute sécurité.
 
 ## 🚀 Caractéristiques
 
@@ -58,6 +98,26 @@ Application 100% locale et open source pour gérer la vie de famille : courses, 
 - Contact d'urgence
 - Notes médicales
 - Code couleur personnalisé
+
+---
+
+## 🚀 Démarrage rapide
+
+```bash
+# Cloner le repository
+git clone https://github.com/NexaFlowFrance/OpenFamily.git
+
+# Installer les dépendances
+cd OpenFamily
+pnpm install
+
+# Lancer en mode développement
+pnpm dev
+
+# Ouvrir http://localhost:5173
+```
+
+---
 
 ## 📦 Installation
 
@@ -179,6 +239,30 @@ Cette application :
 - ❌ Ne nécessite **aucun compte utilisateur**
 - ✅ Stocke **tout localement** sur votre appareil
 - ✅ Fonctionne **entièrement hors ligne**
+
+---
+
+## ❓ FAQ
+
+### Mes données sont-elles sécurisées ?
+Oui, toutes vos données sont stockées localement dans votre navigateur. Elles ne quittent jamais votre appareil.
+
+### Puis-je utiliser l'application hors ligne ?
+Absolument ! Une fois installée comme PWA, l'application fonctionne entièrement hors ligne.
+
+### Comment sauvegarder mes données ?
+Allez dans Paramètres → Sauvegarde pour télécharger un fichier JSON contenant toutes vos données. Vous pouvez le restaurer à tout moment.
+
+### L'application fonctionne-t-elle sur iOS ?
+Oui, vous pouvez l'installer comme PWA depuis Safari. Sur Android, vous pouvez également installer l'APK.
+
+### Puis-je synchroniser entre plusieurs appareils ?
+Actuellement non, chaque appareil conserve ses propres données. Utilisez la fonction d'export/import pour transférer manuellement vos données.
+
+### L'application est-elle vraiment gratuite ?
+Oui, 100% gratuite et open source. Aucun frais caché, aucun abonnement.
+
+---
 
 ## 📄 Licence
 

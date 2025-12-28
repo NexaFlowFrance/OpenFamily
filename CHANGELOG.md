@@ -11,12 +11,49 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Synchronisation optionnelle via cloud personnel
 - Mode multi-utilisateurs avec partage sécurisé
 - Widget pour écran d'accueil
-- Support multi-langues
 - Export PDF des plannings et listes
 
 ---
 
-## [1.0.0] - 2025-12-28
+## [1.0.1] - 2024-12-28
+
+### 🐛 Corrections de bugs critiques
+
+#### Corrigé
+- **Onboarding - Mode sombre non cliquable**
+  - Ajout de `setTheme()` dans ThemeContext pour permettre la sélection directe du thème
+  - Le bouton de sélection du thème sombre fonctionne maintenant correctement
+
+- **Onboarding - Texte débordant des boutons**
+  - Correction du layout des boutons de mode de stockage
+  - Ajout de `flex-shrink-0` et `min-w-0` pour un wrapping correct du texte
+  - Les descriptions ne débordent plus à droite des boutons
+
+- **Onboarding - Configuration redemandée sur chaque appareil**
+  - Implémentation d'une synchronisation serveur complète de la configuration
+  - En mode serveur, la configuration est maintenant partagée entre tous les appareils
+  - Nouvelle table PostgreSQL `family_configuration`
+  - Nouveaux endpoints API GET/POST `/api/family/config`
+
+#### ✨ Ajouté
+- **Docker Hub automation**
+  - Workflow GitHub Actions pour builds automatiques
+  - Support multi-architecture (amd64, arm64)
+  - Push automatique vers `nexaflow/openfamily`
+  - BuildKit caching pour optimisation des builds
+
+- **Utilitaire de synchronisation de configuration**
+  - Nouveau module `configSync.ts` pour gestion localStorage/serveur
+  - Vérification automatique du serveur en mode serveur
+  - Backward compatible avec le mode local
+
+#### 📋 Migration
+- Pour les utilisateurs en mode serveur : exécuter le nouveau schema.sql pour créer la table `family_configuration`
+- Mode local : aucune action requise
+
+---
+
+## [1.0.0] - 2024-12-28
 
 ### 🎉 Version initiale
 

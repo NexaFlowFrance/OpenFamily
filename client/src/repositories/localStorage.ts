@@ -44,13 +44,15 @@ export class LocalStorageRepository implements IDataRepository {
     return newItem;
   }
 
-  async updateShoppingItem(id: string, updates: Partial<ShoppingItem>): Promise<void> {
+  async updateShoppingItem(id: string, updates: Partial<ShoppingItem>): Promise<ShoppingItem> {
     const items = await this.getShoppingItems();
     const index = items.findIndex(item => item.id === id);
     if (index !== -1) {
       items[index] = { ...items[index], ...updates };
       this.saveToStorage(this.KEYS.shopping, items);
+      return items[index];
     }
+    throw new Error(`Shopping item ${id} not found`);
   }
 
   async deleteShoppingItem(id: string): Promise<void> {
@@ -76,13 +78,15 @@ export class LocalStorageRepository implements IDataRepository {
     return newTask;
   }
 
-  async updateTask(id: string, updates: Partial<Task>): Promise<void> {
+  async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
     const tasks = await this.getTasks();
     const index = tasks.findIndex(task => task.id === id);
     if (index !== -1) {
       tasks[index] = { ...tasks[index], ...updates };
       this.saveToStorage(this.KEYS.tasks, tasks);
+      return tasks[index];
     }
+    throw new Error(`Task ${id} not found`);
   }
 
   async deleteTask(id: string): Promise<void> {
@@ -108,13 +112,15 @@ export class LocalStorageRepository implements IDataRepository {
     return newAppointment;
   }
 
-  async updateAppointment(id: string, updates: Partial<Appointment>): Promise<void> {
+  async updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment> {
     const appointments = await this.getAppointments();
     const index = appointments.findIndex(apt => apt.id === id);
     if (index !== -1) {
       appointments[index] = { ...appointments[index], ...updates };
       this.saveToStorage(this.KEYS.appointments, appointments);
+      return appointments[index];
     }
+    throw new Error(`Appointment ${id} not found`);
   }
 
   async deleteAppointment(id: string): Promise<void> {
@@ -139,13 +145,15 @@ export class LocalStorageRepository implements IDataRepository {
     return newMember;
   }
 
-  async updateFamilyMember(id: string, updates: Partial<FamilyMember>): Promise<void> {
+  async updateFamilyMember(id: string, updates: Partial<FamilyMember>): Promise<FamilyMember> {
     const members = await this.getFamilyMembers();
     const index = members.findIndex(member => member.id === id);
     if (index !== -1) {
       members[index] = { ...members[index], ...updates };
       this.saveToStorage(this.KEYS.members, members);
+      return members[index];
     }
+    throw new Error(`Family member ${id} not found`);
   }
 
   async deleteFamilyMember(id: string): Promise<void> {
@@ -171,13 +179,15 @@ export class LocalStorageRepository implements IDataRepository {
     return newRecipe;
   }
 
-  async updateRecipe(id: string, updates: Partial<Recipe>): Promise<void> {
+  async updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe> {
     const recipes = await this.getRecipes();
     const index = recipes.findIndex(recipe => recipe.id === id);
     if (index !== -1) {
       recipes[index] = { ...recipes[index], ...updates };
       this.saveToStorage(this.KEYS.recipes, recipes);
+      return recipes[index];
     }
+    throw new Error(`Recipe ${id} not found`);
   }
 
   async deleteRecipe(id: string): Promise<void> {
@@ -203,13 +213,15 @@ export class LocalStorageRepository implements IDataRepository {
     return newMeal;
   }
 
-  async updateMeal(id: string, updates: Partial<Meal>): Promise<void> {
+  async updateMeal(id: string, updates: Partial<Meal>): Promise<Meal> {
     const meals = await this.getMeals();
     const index = meals.findIndex(meal => meal.id === id);
     if (index !== -1) {
       meals[index] = { ...meals[index], ...updates };
       this.saveToStorage(this.KEYS.meals, meals);
+      return meals[index];
     }
+    throw new Error(`Meal ${id} not found`);
   }
 
   async deleteMeal(id: string): Promise<void> {
@@ -235,13 +247,15 @@ export class LocalStorageRepository implements IDataRepository {
     return newBudget;
   }
 
-  async updateBudget(id: string, updates: Partial<Budget>): Promise<void> {
+  async updateBudget(id: string, updates: Partial<Budget>): Promise<Budget> {
     const budgets = await this.getBudgets();
     const index = budgets.findIndex(budget => budget.id === id);
     if (index !== -1) {
       budgets[index] = { ...budgets[index], ...updates };
       this.saveToStorage(this.KEYS.budgets, budgets);
+      return budgets[index];
     }
+    throw new Error(`Budget ${id} not found`);
   }
 
   async deleteBudget(id: string): Promise<void> {

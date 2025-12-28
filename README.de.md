@@ -24,14 +24,17 @@
 
 ## 🎯 Über
 
-OpenFamily ist eine umfassende Familienverwaltungsanwendung, die als Open Source von [NexaFlow](http://nexaflow.fr) angeboten wird und Ihre Privatsphäre priorisiert. Alle Ihre Daten bleiben auf Ihrem Gerät, kein zentraler Server, kein Konto erforderlich. Verwalten Sie Ihre Einkaufslisten, Aufgaben, Termine, Rezepte, Essensplanung und Familienbudget sicher.
+OpenFamily ist eine umfassende Familienverwaltungsanwendung, die als Open Source von [NexaFlow](http://nexaflow.fr) angeboten wird und für Selbst-Hosting konzipiert ist. Behalten Sie die vollständige Kontrolle über Ihre Daten, indem Sie die Anwendung auf Ihrem eigenen Server hosten. Verwalten Sie Ihre Einkaufslisten, Aufgaben, Termine, Rezepte, Essensplanung und Familienbudget sicher, zugänglich von allen Ihren Geräten.
+
+**Version 1.0.3 - Nur Server-Architektur**  
+Diese Version entfernt den localStorage-Modus vollständig zugunsten einer zentralisierten Server-Architektur mit PostgreSQL, die eine zuverlässige Synchronisation über alle Familiengeräte hinweg gewährleistet.
 
 ## 🚀 Hauptmerkmale
 
-- ✅ **100% Lokal oder Selbst-gehostet** - Wählen Sie zwischen lokalem Speicher oder selbst-gehostetem Server für Familiensynchronisation
+- ✅ **100% Selbst-gehostet** - Ihre Daten auf Ihrem eigenen Server, keine Drittanbieter
 - 📱 **PWA** - Installieren Sie die App als native Anwendung auf Mobil/Tablet
-- 🔒 **Privat** - Ihre Daten verlassen nie Ihr Gerät (lokaler Modus) oder bleiben auf Ihrem Server (Server-Modus)
-- 🌐 **Offline** - Funktioniert ohne Internetverbindung im lokalen Modus
+- 🔒 **Privat** - Ihre Daten bleiben auf Ihrem Server, nie auf Servern Dritter
+- 🔄 **Synchronisiert** - Greifen Sie von allen Ihren Geräten auf Ihre Daten zu
 - 🆓 **Open Source** - Freier und modifizierbarer Quellcode
 - 🌍 **Mehrsprachig** - Oberfläche verfügbar auf Französisch, Englisch, Deutsch und Spanisch
 - 🌙 **Dunkles Design** - Helle und dunkle Modi verfügbar

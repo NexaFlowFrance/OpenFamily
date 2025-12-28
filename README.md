@@ -42,14 +42,17 @@
 
 ## 🎯 À propos
 
-OpenFamily est une application de gestion familiale complète proposée en open source par [NexaFlow](http://nexaflow.fr), qui privilégie votre vie privée. Toutes vos données restent sur votre appareil, aucun serveur central, aucun compte requis. Gérez vos courses, tâches, rendez-vous, recettes, planning des repas et budget familial en toute sécurité.
+OpenFamily est une application de gestion familiale complète proposée en open source par [NexaFlow](http://nexaflow.fr), conçue pour être auto-hébergée. Gardez le contrôle total de vos données en hébergeant l'application sur votre propre serveur. Gérez vos courses, tâches, rendez-vous, recettes, planning des repas et budget familial en toute sécurité, accessible depuis tous vos appareils.
+
+**Version 1.0.3 - Architecture serveur uniquement**  
+Cette version supprime complètement le mode localStorage au profit d'une architecture serveur centralisée avec PostgreSQL, garantissant une synchronisation fiable entre tous les appareils de la famille.
 
 ## 🚀 Caractéristiques
 
-- ✅ **100% Local ou Auto-hébergé** - Choisissez entre stockage local ou serveur auto-hébergé pour synchronisation familiale
+- ✅ **100% Auto-hébergé** - Vos données sur votre propre serveur, aucun service tiers
 - 📱 **PWA** - Installez l'app comme une application native sur mobile/tablette
-- 🔒 **Privé** - Vos données ne quittent jamais votre appareil (mode local) ou restent sur votre serveur (mode serveur)
-- 🌐 **Offline** - Fonctionne sans connexion internet en mode local
+- 🔒 **Privé** - Vos données restent sur votre serveur, jamais sur des serveurs tiers
+- 🔄 **Synchronisé** - Accédez à vos données depuis tous vos appareils
 - 🆓 **Open Source** - Code source libre et modifiable
 - 🌍 **Multi-langue** - Interface disponible en Français, Anglais, Allemand et Espagnol
 - 🌙 **Thème sombre** - Mode clair et sombre disponibles
@@ -113,58 +116,66 @@ OpenFamily est une application de gestion familiale complète proposée en open 
 
 ## 🚀 Démarrage rapide
 
-### ⚡ Installation en 1 ligne
+### ⚡ Installation automatique avec Docker
 
-#### Mode Local (Développement)
-```bash
-curl -sSL https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/install-local.sh | bash
-```
-
-#### Mode Serveur (Docker)
 ```bash
 curl -sSL https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/install-docker.sh | bash
 ```
 
----
-
-### Mode Local (Sans serveur)
-
-```bash
-# Cloner le repository
-git clone https://github.com/NexaFlowFrance/OpenFamily.git
-
-# Installer les dépendances
-cd OpenFamily
-pnpm install
-
-# Lancer en mode développement
-pnpm dev
-
-# Ouvrir http://localhost:3000
-```
-
-### Mode Serveur (Auto-hébergé avec Docker)
-
-```bash
-# Cloner le repository
-git clone https://github.com/NexaFlowFrance/OpenFamily.git
-cd OpenFamily
-
-# Créer le fichier .env
-cp .env.example .env
-# Modifier DB_PASSWORD dans .env avec un mot de passe sécurisé
-
-# Lancer avec Docker Compose
-docker-compose up -d
-
-# L'application sera disponible sur http://localhost:3000
-```
-
-Voir [DEPLOYMENT.md](docs/DEPLOYMENT.md) pour plus de détails sur le déploiement serveur.
+Ce script va :
+- Installer Docker et Docker Compose (si nécessaire)
+- Cloner le dépôt OpenFamily
+- Configurer PostgreSQL
+- Démarrer l'application sur le port 3000
 
 ---
 
 ## 📦 Installation
+
+### Prérequis
+
+- **Serveur Linux** (Ubuntu 20.04+ recommandé) ou Windows avec WSL
+- **Docker & Docker Compose** (installés automatiquement par le script)
+- **2 Go de RAM minimum**
+- **10 Go d'espace disque**
+
+### Installation manuelle
+
+```bash
+# 1. Cloner le repository
+git clone https://github.com/NexaFlowFrance/OpenFamily.git
+cd OpenFamily
+
+# 2. Créer le fichier .env
+cp .env.example .env
+
+# 3. Modifier le mot de passe PostgreSQL dans .env
+nano .env  # Changez DB_PASSWORD
+
+# 4. Lancer avec Docker Compose
+docker-compose up -d
+
+# 5. Accéder à l'application
+# http://localhost:3000 (local)
+# http://votre-ip:3000 (réseau local)
+# https://votre-domaine.com (avec reverse proxy)
+```
+
+### Configuration réseau
+
+#### Accès local uniquement
+L'application fonctionne immédiatement sur `http://localhost:3000`
+
+#### Accès réseau local (LAN)
+1. Trouvez l'IP de votre serveur : `ip addr show` ou `ipconfig`
+2. Accédez depuis n'importe quel appareil : `http://192.168.X.X:3000`
+3. **Détection automatique** : L'application détecte qu'elle est hébergée et active le mode serveur
+
+#### Accès internet (optionnel)
+Consultez le [Guide de Déploiement](docs/DEPLOYMENT.md) pour :
+- Configurer un nom de domaine
+- Installer un certificat SSL (HTTPS)
+- Sécuriser l'accès avec authentification
 
 ### Pour les développeurs
 
@@ -172,78 +183,79 @@ Voir [DEPLOYMENT.md](docs/DEPLOYMENT.md) pour plus de détails sur le déploieme
 # Installer les dépendances
 pnpm install
 
+# Démarrer PostgreSQL en local
+docker-compose up -d postgres
+
 # Lancer en mode développement
 pnpm dev
 
 # Build pour production
 pnpm build
 
-# Build pour Android (APK)
-pnpm cap:android
-
-# Build pour iOS (IPA)
-pnpm cap:ios
+# Démarrer le serveur de production
+pnpm start
 ```
+
+**Note** : Le mode développement (`pnpm dev`) nécessite PostgreSQL. Utilisez Docker Compose pour démarrer uniquement la base de données.
 
 ### Pour les utilisateurs
 
 #### Option 1: PWA (Recommandé)
-1. Ouvrez l'application dans votre navigateur (Chrome, Safari, Edge)
+1. Accédez à votre instance OpenFamily (ex: `http://192.168.1.100:3000`)
 2. Sur mobile : cliquez sur "Ajouter à l'écran d'accueil"
 3. Sur desktop : cliquez sur l'icône d'installation dans la barre d'adresse
+4. L'application s'installera comme une app native
 
-#### Option 2: Applications natives
-- **Android** : Téléchargez l'APK depuis les releases
-- **iOS** : Installez via TestFlight ou un store alternatif
+#### Option 2: Applications natives mobiles
+- **Android** : Installez l'APK disponible dans les releases
+- **iOS** : Utilisez TestFlight ou compilez depuis le code source
 
-#### Option 3: Auto-hébergement
-1. Clonez ce dépôt
-2. Exécutez `pnpm install && pnpm build`
-3. Hébergez le contenu du dossier `dist/public` sur n'importe quel serveur web statique
-4. Ou utilisez simplement `pnpm start` pour un serveur local
-
-#### Option 4: Fichier HTML local
-1. Après le build, ouvrez simplement `dist/public/index.html` dans votre navigateur
-2. L'application fonctionnera entièrement en local
+#### Option 3: Navigateur web
+Accédez simplement à l'URL de votre serveur OpenFamily depuis n'importe quel navigateur moderne (Chrome, Safari, Firefox, Edge).
 
 ## 💾 Stockage des données
 
-OpenFamily propose **deux modes de stockage** que vous pouvez choisir lors de la configuration initiale :
+OpenFamily utilise une architecture **serveur centralisée avec PostgreSQL** :
 
-### 📱 Mode Local (Par défaut)
+### 🗄️ Architecture
 
-Toutes les données sont stockées dans le **localStorage** de votre navigateur :
-- ✅ **100% privé** - Les données ne quittent jamais votre appareil
-- ✅ **Fonctionne offline** - Aucune connexion internet requise
-- ✅ **Gratuit** - Aucun serveur à héberger
-- ⚠️ **Pas de synchronisation** - Les données restent sur un seul appareil
+- **Base de données** : PostgreSQL (inclus dans Docker Compose)
+- **Serveur API** : Express.js (Node.js)
+- **Synchronisation** : Temps réel via API REST
+- **Sécurité** : Token d'authentification, isolation par famille
 
-Données stockées :
-- `openfamily_shopping` - Liste de courses
-- `openfamily_tasks` - Tâches et emploi du temps
-- `openfamily_appointments` - Rendez-vous
-- `openfamily_members` - Membres de la famille (avec infos santé)
-- `openfamily_recipes` - Recettes
-- `openfamily_meals` - Planning des repas
-- `openfamily_budgets` - Budgets mensuels
+### 📊 Données stockées
 
-### 🔄 Mode Serveur (Auto-hébergé)
+Toutes les données sont stockées dans PostgreSQL :
+- `shopping_items` - Liste de courses
+- `tasks` - Tâches et emploi du temps
+- `appointments` - Rendez-vous
+- `family_members` - Membres de la famille (avec infos santé)
+- `recipes` - Recettes
+- `meals` - Planning des repas
+- `budgets` - Budgets mensuels
+- `families` - Configuration des familles
 
-Données stockées sur votre propre serveur avec PostgreSQL :
-- ✅ **Synchronisation familiale** - Partagez les données avec toute la famille
-- ✅ **Accès multi-appareils** - Utilisez l'app sur plusieurs appareils
-- ✅ **Sauvegarde centralisée** - Toutes les données sur votre serveur
-- ✅ **Contrôle total** - Vous gérez votre infrastructure
-- 📝 **Configuration requise** - Serveur Linux, Docker, nom de domaine (optionnel)
+### 🔄 Synchronisation automatique
 
-Pour configurer le mode serveur, consultez le [Guide de Déploiement](docs/DEPLOYMENT.md).
+- ✅ **Multi-appareils** : Accédez depuis PC, tablette, smartphone
+- ✅ **Temps réel** : Les modifications sont instantanées
+- ✅ **Détection automatique** : L'app détecte le serveur sur le réseau
+- ✅ **Famille par défaut** : Configuration initiale automatique
 
-### Sauvegarde et restauration (Mode Local)
+### 💾 Sauvegarde
 
-Depuis les **Paramètres** de l'application :
-- 📥 **Télécharger une sauvegarde** : Export JSON complet de toutes vos données
-- 📤 **Importer une sauvegarde** : Restaurer depuis un fichier JSON
-- 🗑️ **Réinitialiser** : Effacer toutes les données (avec confirmation)
+Les données PostgreSQL sont persistées via Docker volumes :
+
+```bash
+# Sauvegarder manuellement
+docker exec openfamily-db pg_dump -U openfamily openfamily > backup.sql
+
+# Restaurer depuis une sauvegarde
+docker exec -i openfamily-db psql -U openfamily openfamily < backup.sql
+```
+
+**Recommandation** : Configurez des sauvegardes automatiques quotidiennes avec cron ou un outil de backup PostgreSQL.
 
 ## ✨ Fonctionnalités avancées
 

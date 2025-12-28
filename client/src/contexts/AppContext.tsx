@@ -1,8 +1,8 @@
-import React, { createContext, useContext } from 'react';
-import { useStorage } from '@/hooks/useStorage';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ShoppingItem, ShoppingTemplate, Task, Appointment, FamilyMember, Recipe, Meal, Budget } from '@/types';
 import { nanoid } from 'nanoid';
 import { scheduleTaskNotification } from '@/lib/notifications';
+import { RepositoryFactory } from '@/repositories/factory';
 
 interface AppContextType {
   shoppingItems: ShoppingItem[];
@@ -13,11 +13,12 @@ interface AppContextType {
   recipes: Recipe[];
   meals: Meal[];
   budgets: Budget[];
+  loading: boolean;
   
   // Shopping actions
-  addShoppingItem: (item: Omit<ShoppingItem, 'id' | 'createdAt'>) => void;
-  updateShoppingItem: (id: string, item: Partial<ShoppingItem>) => void;
-  deleteShoppingItem: (id: string) => void;
+  addShoppingItem: (item: Omit<ShoppingItem, 'id' | 'createdAt'>) => Promise<void>;
+  updateShoppingItem: (id: string, item: Partial<ShoppingItem>) => Promise<void>;
+  deleteShoppingItem: (id: string) => Promise<void>;
   
   // Shopping template actions
   addShoppingTemplate: (template: Omit<ShoppingTemplate, 'id' | 'createdAt'>) => void;
@@ -25,68 +26,126 @@ interface AppContextType {
   applyShoppingTemplate: (templateId: string) => void;
   
   // Task actions
-  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => string;
-  updateTask: (id: string, task: Partial<Task>) => void;
-  deleteTask: (id: string) => void;
+  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => Promise<string>;
+  updateTask: (id: string, task: Partial<Task>) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
   
   // Appointment actions
-  addAppointment: (appointment: Omit<Appointment, 'id' | 'createdAt'>) => void;
-  updateAppointment: (id: string, appointment: Partial<Appointment>) => void;
-  deleteAppointment: (id: string) => void;
+  addAppointment: (appointment: Omit<Appointment, 'id' | 'createdAt'>) => Promise<void>;
+  updateAppointment: (id: string, appointment: Partial<Appointment>) => Promise<void>;
+  deleteAppointment: (id: string) => Promise<void>;
   
   // Family member actions
-  addFamilyMember: (member: Omit<FamilyMember, 'id'>) => void;
-  updateFamilyMember: (id: string, member: Partial<FamilyMember>) => void;
-  deleteFamilyMember: (id: string) => void;
+  addFamilyMember: (member: Omit<FamilyMember, 'id'>) => Promise<void>;
+  updateFamilyMember: (id: string, member: Partial<FamilyMember>) => Promise<void>;
+  deleteFamilyMember: (id: string) => Promise<void>;
   
   // Recipe actions
-  addRecipe: (recipe: Omit<Recipe, 'id' | 'createdAt'>) => void;
-  updateRecipe: (id: string, recipe: Partial<Recipe>) => void;
-  deleteRecipe: (id: string) => void;
+  addRecipe: (recipe: Omit<Recipe, 'id' | 'createdAt'>) => Promise<void>;
+  updateRecipe: (id: string, recipe: Partial<Recipe>) => Promise<void>;
+  deleteRecipe: (id: string) => Promise<void>;
   
   // Meal actions
-  addMeal: (meal: Omit<Meal, 'id' | 'createdAt'>) => void;
-  updateMeal: (id: string, meal: Partial<Meal>) => void;
-  deleteMeal: (id: string) => void;
+  addMeal: (meal: Omit<Meal, 'id' | 'createdAt'>) => Promise<void>;
+  updateMeal: (id: string, meal: Partial<Meal>) => Promise<void>;
+  deleteMeal: (id: string) => Promise<void>;
   
   // Budget actions
-  addBudget: (budget: Omit<Budget, 'id' | 'createdAt'>) => void;
-  updateBudget: (id: string, budget: Partial<Budget>) => void;
-  deleteBudget: (id: string) => void;
-  addExpense: (budgetId: string, expense: Omit<Budget['expenses'][0], 'id'>) => void;
-  deleteExpense: (budgetId: string, expenseId: string) => void;
+  addBudget: (budget: Omit<Budget, 'id' | 'createdAt'>) => Promise<void>;
+  updateBudget: (id: string, budget: Partial<Budget>) => Promise<void>;
+  deleteBudget: (id: string) => Promise<void>;
+  addExpense: (budgetId: string, expense: Omit<Budget['expenses'][0], 'id'>) => Promise<void>;
+  deleteExpense: (budgetId: string, expenseId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [shoppingItems, setShoppingItems] = useStorage<ShoppingItem[]>('openfamily_shopping', []);
-  const [shoppingTemplates, setShoppingTemplates] = useStorage<ShoppingTemplate[]>('openfamily_shopping_templates', []);
-  const [tasks, setTasks] = useStorage<Task[]>('openfamily_tasks', []);
-  const [appointments, setAppointments] = useStorage<Appointment[]>('openfamily_appointments', []);
-  const [familyMembers, setFamilyMembers] = useStorage<FamilyMember[]>('openfamily_members', [
+  // États locaux
+  const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
+  const [shoppingTemplates, setShoppingTemplates] = useState<ShoppingTemplate[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([
     { id: 'parent1', name: 'Parent 1', role: 'parent', color: '#6b8e7f' }
   ]);
-  const [recipes, setRecipes] = useStorage<Recipe[]>('openfamily_recipes', []);
-  const [meals, setMeals] = useStorage<Meal[]>('openfamily_meals', []);
-  const [budgets, setBudgets] = useStorage<Budget[]>('openfamily_budgets', []);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Charger toutes les données au démarrage
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const repo = RepositoryFactory.getRepository();
+        
+        const [
+          loadedShopping,
+          loadedTasks,
+          loadedAppointments,
+          loadedMembers,
+          loadedRecipes,
+          loadedMeals,
+          loadedBudgets
+        ] = await Promise.all([
+          repo.getShoppingItems(),
+          repo.getTasks(),
+          repo.getAppointments(),
+          repo.getFamilyMembers(),
+          repo.getRecipes(),
+          repo.getMeals(),
+          repo.getBudgets()
+        ]);
+
+        setShoppingItems(loadedShopping);
+        setTasks(loadedTasks);
+        setAppointments(loadedAppointments);
+        setFamilyMembers(loadedMembers.length > 0 ? loadedMembers : [
+          { id: 'parent1', name: 'Parent 1', role: 'parent', color: '#6b8e7f' }
+        ]);
+        setRecipes(loadedRecipes);
+        setMeals(loadedMeals);
+        setBudgets(loadedBudgets);
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Shopping actions
-  const addShoppingItem = (item: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
-    const newItem: ShoppingItem = {
-      ...item,
-      id: nanoid(),
-      createdAt: new Date().toISOString(),
-    };
-    setShoppingItems([...shoppingItems, newItem]);
+  const addShoppingItem = async (item: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const newItem = await repo.addShoppingItem(item);
+      setShoppingItems([...shoppingItems, newItem]);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'un article:', error);
+    }
   };
 
-  const updateShoppingItem = (id: string, updates: Partial<ShoppingItem>) => {
-    setShoppingItems(shoppingItems.map(item => item.id === id ? { ...item, ...updates } : item));
+  const updateShoppingItem = async (id: string, updates: Partial<ShoppingItem>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const updated = await repo.updateShoppingItem(id, updates);
+      setShoppingItems(shoppingItems.map(item => item.id === id ? updated : item));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour d\'un article:', error);
+    }
   };
 
-  const deleteShoppingItem = (id: string) => {
-    setShoppingItems(shoppingItems.filter(item => item.id !== id));
+  const deleteShoppingItem = async (id: string) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      await repo.deleteShoppingItem(id);
+      setShoppingItems(shoppingItems.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'un article:', error);
+    }
   };
 
   // Shopping template actions
@@ -120,141 +179,242 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Task actions
-  const addTask = (task: Omit<Task, 'id' | 'createdAt'>) => {
-    const newTask: Task = {
-      ...task,
-      id: nanoid(),
-      createdAt: new Date().toISOString(),
-    };
-    setTasks([...tasks, newTask]);
-    return newTask.id;
-  };
-
-  const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks(tasks.map(task => {
-      if (task.id === id) {
-        const updatedTask = { ...task, ...updates };
-        // Replanifier la notification si la date/heure change
-        if (updatedTask.dueTime && (updates.dueDate || updates.dueTime)) {
-          scheduleTaskNotification(updatedTask);
-        }
-        return updatedTask;
+  const addTask = async (task: Omit<Task, 'id' | 'createdAt'>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const newTask = await repo.addTask(task);
+      setTasks([...tasks, newTask]);
+      
+      // Planifier la notification si nécessaire
+      if (newTask.dueTime) {
+        scheduleTaskNotification(newTask);
       }
-      return task;
-    }));
+      return newTask.id;
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'une tâche:', error);
+      return '';
+    }
   };
 
-  const deleteTask = (id: string) => {
-    setTasks(tasks.filter(task => task.id !== id));
+  const updateTask = async (id: string, updates: Partial<Task>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const updated = await repo.updateTask(id, updates);
+      setTasks(tasks.map(task => task.id === id ? updated : task));
+      
+      // Replanifier la notification si la date/heure change
+      if (updated.dueTime && (updates.dueDate || updates.dueTime)) {
+        scheduleTaskNotification(updated);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour d\'une tâche:', error);
+    }
+  };
+
+  const deleteTask = async (id: string) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      await repo.deleteTask(id);
+      setTasks(tasks.filter(task => task.id !== id));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'une tâche:', error);
+    }
   };
 
   // Appointment actions
-  const addAppointment = (appointment: Omit<Appointment, 'id' | 'createdAt'>) => {
-    const newAppointment: Appointment = {
-      ...appointment,
-      id: nanoid(),
-      createdAt: new Date().toISOString(),
-    };
-    setAppointments([...appointments, newAppointment]);
+  const addAppointment = async (appointment: Omit<Appointment, 'id' | 'createdAt'>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const newAppointment = await repo.addAppointment(appointment);
+      setAppointments([...appointments, newAppointment]);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'un rendez-vous:', error);
+    }
   };
 
-  const updateAppointment = (id: string, updates: Partial<Appointment>) => {
-    setAppointments(appointments.map(apt => apt.id === id ? { ...apt, ...updates } : apt));
+  const updateAppointment = async (id: string, updates: Partial<Appointment>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const updated = await repo.updateAppointment(id, updates);
+      setAppointments(appointments.map(apt => apt.id === id ? updated : apt));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour d\'un rendez-vous:', error);
+    }
   };
 
-  const deleteAppointment = (id: string) => {
-    setAppointments(appointments.filter(apt => apt.id !== id));
+  const deleteAppointment = async (id: string) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      await repo.deleteAppointment(id);
+      setAppointments(appointments.filter(apt => apt.id !== id));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'un rendez-vous:', error);
+    }
   };
 
   // Family member actions
-  const addFamilyMember = (member: Omit<FamilyMember, 'id'>) => {
-    const newMember: FamilyMember = {
-      ...member,
-      id: nanoid(),
-    };
-    setFamilyMembers([...familyMembers, newMember]);
+  const addFamilyMember = async (member: Omit<FamilyMember, 'id'>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const newMember = await repo.addFamilyMember(member);
+      setFamilyMembers([...familyMembers, newMember]);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'un membre:', error);
+    }
   };
 
-  const updateFamilyMember = (id: string, updates: Partial<FamilyMember>) => {
-    setFamilyMembers(familyMembers.map(member => member.id === id ? { ...member, ...updates } : member));
+  const updateFamilyMember = async (id: string, updates: Partial<FamilyMember>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const updated = await repo.updateFamilyMember(id, updates);
+      setFamilyMembers(familyMembers.map(member => member.id === id ? updated : member));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour d\'un membre:', error);
+    }
   };
 
-  const deleteFamilyMember = (id: string) => {
-    setFamilyMembers(familyMembers.filter(member => member.id !== id));
+  const deleteFamilyMember = async (id: string) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      await repo.deleteFamilyMember(id);
+      setFamilyMembers(familyMembers.filter(member => member.id !== id));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'un membre:', error);
+    }
   };
 
   // Recipe actions
-  const addRecipe = (recipe: Omit<Recipe, 'id' | 'createdAt'>) => {
-    const newRecipe: Recipe = {
-      ...recipe,
-      id: nanoid(),
-      createdAt: new Date().toISOString(),
-    };
-    setRecipes([...recipes, newRecipe]);
+  const addRecipe = async (recipe: Omit<Recipe, 'id' | 'createdAt'>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const newRecipe = await repo.addRecipe(recipe);
+      setRecipes([...recipes, newRecipe]);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'une recette:', error);
+    }
   };
 
-  const updateRecipe = (id: string, updates: Partial<Recipe>) => {
-    setRecipes(recipes.map(recipe => recipe.id === id ? { ...recipe, ...updates } : recipe));
+  const updateRecipe = async (id: string, updates: Partial<Recipe>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const updated = await repo.updateRecipe(id, updates);
+      setRecipes(recipes.map(recipe => recipe.id === id ? updated : recipe));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour d\'une recette:', error);
+    }
   };
 
-  const deleteRecipe = (id: string) => {
-    setRecipes(recipes.filter(recipe => recipe.id !== id));
+  const deleteRecipe = async (id: string) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      await repo.deleteRecipe(id);
+      setRecipes(recipes.filter(recipe => recipe.id !== id));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'une recette:', error);
+    }
   };
 
   // Meal actions
-  const addMeal = (meal: Omit<Meal, 'id' | 'createdAt'>) => {
-    const newMeal: Meal = {
-      ...meal,
-      id: nanoid(),
-      createdAt: new Date().toISOString(),
-    };
-    setMeals([...meals, newMeal]);
+  const addMeal = async (meal: Omit<Meal, 'id' | 'createdAt'>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const newMeal = await repo.addMeal(meal);
+      setMeals([...meals, newMeal]);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'un repas:', error);
+    }
   };
 
-  const updateMeal = (id: string, updates: Partial<Meal>) => {
-    setMeals(meals.map(meal => meal.id === id ? { ...meal, ...updates } : meal));
+  const updateMeal = async (id: string, updates: Partial<Meal>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const updated = await repo.updateMeal(id, updates);
+      setMeals(meals.map(meal => meal.id === id ? updated : meal));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour d\'un repas:', error);
+    }
   };
 
-  const deleteMeal = (id: string) => {
-    setMeals(meals.filter(meal => meal.id !== id));
+  const deleteMeal = async (id: string) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      await repo.deleteMeal(id);
+      setMeals(meals.filter(meal => meal.id !== id));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'un repas:', error);
+    }
   };
 
   // Budget actions
-  const addBudget = (budget: Omit<Budget, 'id' | 'createdAt'>) => {
-    const newBudget: Budget = {
-      ...budget,
-      id: nanoid(),
-      createdAt: new Date().toISOString(),
-    };
-    setBudgets([...budgets, newBudget]);
+  const addBudget = async (budget: Omit<Budget, 'id' | 'createdAt'>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const newBudget = await repo.addBudget(budget);
+      setBudgets([...budgets, newBudget]);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'un budget:', error);
+    }
   };
 
-  const updateBudget = (id: string, updates: Partial<Budget>) => {
-    setBudgets(budgets.map(budget => budget.id === id ? { ...budget, ...updates } : budget));
+  const updateBudget = async (id: string, updates: Partial<Budget>) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      const updated = await repo.updateBudget(id, updates);
+      setBudgets(budgets.map(budget => budget.id === id ? updated : budget));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour d\'un budget:', error);
+    }
   };
 
-  const deleteBudget = (id: string) => {
-    setBudgets(budgets.filter(budget => budget.id !== id));
+  const deleteBudget = async (id: string) => {
+    try {
+      const repo = RepositoryFactory.getRepository();
+      await repo.deleteBudget(id);
+      setBudgets(budgets.filter(budget => budget.id !== id));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'un budget:', error);
+    }
   };
 
-  const addExpense = (budgetId: string, expense: Omit<Budget['expenses'][0], 'id'>) => {
-    const newExpense = {
-      ...expense,
-      id: nanoid(),
-    };
-    setBudgets(budgets.map(budget => 
-      budget.id === budgetId 
-        ? { ...budget, expenses: [...budget.expenses, newExpense] }
-        : budget
-    ));
+  const addExpense = async (budgetId: string, expense: Omit<Budget['expenses'][0], 'id'>) => {
+    try {
+      const budget = budgets.find(b => b.id === budgetId);
+      if (!budget) return;
+
+      const newExpense = {
+        ...expense,
+        id: nanoid(),
+      };
+      
+      const updatedBudget = {
+        ...budget,
+        expenses: [...budget.expenses, newExpense]
+      };
+
+      const repo = RepositoryFactory.getRepository();
+      await repo.updateBudget(budgetId, updatedBudget);
+      setBudgets(budgets.map(b => b.id === budgetId ? updatedBudget : b));
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'une dépense:', error);
+    }
   };
 
-  const deleteExpense = (budgetId: string, expenseId: string) => {
-    setBudgets(budgets.map(budget =>
-      budget.id === budgetId
-        ? { ...budget, expenses: budget.expenses.filter(exp => exp.id !== expenseId) }
-        : budget
-    ));
+  const deleteExpense = async (budgetId: string, expenseId: string) => {
+    try {
+      const budget = budgets.find(b => b.id === budgetId);
+      if (!budget) return;
+
+      const updatedBudget = {
+        ...budget,
+        expenses: budget.expenses.filter(exp => exp.id !== expenseId)
+      };
+
+      const repo = RepositoryFactory.getRepository();
+      await repo.updateBudget(budgetId, updatedBudget);
+      setBudgets(budgets.map(b => b.id === budgetId ? updatedBudget : b));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'une dépense:', error);
+    }
   };
 
   const value: AppContextType = {
@@ -266,6 +426,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     recipes,
     meals,
     budgets,
+    loading,
     addShoppingItem,
     updateShoppingItem,
     deleteShoppingItem,
@@ -296,7 +457,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={value}>
-      {children}
+      {loading ? (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        children
+      )}
     </AppContext.Provider>
   );
 }

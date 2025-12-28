@@ -42,7 +42,7 @@
 
 ## 🎯 À propos
 
-OpenFamily est une application de gestion familiale complète qui privilégie votre vie privée. Toutes vos données restent sur votre appareil, aucun serveur central, aucun compte requis. Gérez vos courses, tâches, rendez-vous, recettes, planning des repas et budget familial en toute sécurité.
+OpenFamily est une application de gestion familiale complète proposée en open source par [NexaFlow](http://nexaflow.fr), qui privilégie votre vie privée. Toutes vos données restent sur votre appareil, aucun serveur central, aucun compte requis. Gérez vos courses, tâches, rendez-vous, recettes, planning des repas et budget familial en toute sécurité.
 
 ## 🚀 Caractéristiques
 
@@ -63,30 +63,36 @@ OpenFamily est une application de gestion familiale complète qui privilégie vo
 - Prix et quantités
 - Suggestions intelligentes basées sur les recettes planifiées
 - Export/Import des listes
+- **📋 Templates de listes** - Sauvegardez et réutilisez vos listes récurrentes
+- **📱 Scan de codes-barres** - Ajoutez des articles en scannant (mobile uniquement)
 
 ### ✅ Tâches et listes
 - Tâches récurrentes (quotidiennes, hebdomadaires, mensuelles, annuelles)
 - Assignation aux membres de la famille
 - Notes et priorités
 - Vue calendrier intégrée
+- **📊 Historique et statistiques** - Taux de complétion, tendances hebdomadaires
 
 ### 📅 Rendez-vous
 - Calendrier mensuel avec vue française
 - Intégration des tâches et rendez-vous
 - Rappels et notes
 - Code couleur par membre de la famille
+- **🔔 Notifications automatiques** - Rappels 30min et 1h avant chaque rendez-vous
 
 ### 🍳 Recettes
 - Bibliothèque de recettes familiales
 - Catégories (Entrée, Plat, Dessert, Snack)
 - Temps de préparation et cuisson
 - Portions et tags
+- **🔍 Filtres avancés** - Par catégorie, temps de préparation, difficulté
 
 ### 🍽️ Planning des repas
 - Vue hebdomadaire (Lundi-Dimanche)
 - 4 types de repas par jour (Petit-déjeuner, Déjeuner, Dîner, Snack)
 - Liaison automatique avec les recettes
 - Export du planning
+- **📄 Export PDF** - Imprimez votre planning hebdomadaire
 
 ### 💰 Budget familial
 - Suivi mensuel des dépenses
@@ -94,6 +100,7 @@ OpenFamily est une application de gestion familiale complète qui privilégie vo
 - Définition de budgets par catégorie
 - Graphiques de progression
 - Alertes de dépassement
+- **📊 Statistiques avancées** - Évolution sur 6 mois, répartition par catégorie
 
 ### 👨‍👩‍👧‍👦 Gestion familiale
 - Profils pour chaque membre
@@ -227,8 +234,8 @@ Depuis les **Paramètres** de l'application :
 ## ✨ Fonctionnalités avancées
 
 ### 🔔 Notifications intelligentes
-- Rappels automatiques 30 minutes avant chaque rendez-vous
-- Notification à l'heure exacte du rendez-vous
+- Rappels automatiques 30 minutes et 1 heure avant chaque rendez-vous
+- Rappels 15 minutes et à l'heure exacte pour les tâches avec échéance
 - Support des notifications navigateur (permission requise)
 
 ### 💡 Liste de courses intelligente
@@ -239,7 +246,7 @@ Depuis les **Paramètres** de l'application :
 ### 📊 Statistiques et tableau de bord
 - Vue d'ensemble de toutes vos activités
 - Taux de complétion des tâches (global et hebdomadaire)
-- Utilisation du budget en temps réel
+- Utilisation du budget en temps réel avec graphiques d'évolution
 - Tendances de planification des repas
 - Graphiques et indicateurs visuels
 
@@ -248,6 +255,26 @@ Depuis les **Paramètres** de l'application :
 - Sélection intelligente basée sur les catégories de recettes
 - Évite les répétitions sur plusieurs jours
 - Intégration avec vos recettes existantes
+
+### 🔍 Recherche globale
+- Recherche instantanée dans toutes vos données (Ctrl/Cmd+K)
+- Résultats groupés par catégorie : courses, tâches, rendez-vous, recettes, repas
+- Navigation rapide vers n'importe quelle page
+
+### 🚀 Actions rapides
+- Widgets sur la page d'accueil pour créer rapidement tâches et articles
+- Ajout via formulaires inline avec support clavier (touche Entrée)
+- Accès direct aux fonctionnalités principales
+
+### 🌙 Thème automatique
+- Mode clair, sombre ou automatique
+- Détection automatique des préférences système
+- Cycle entre les 3 modes d'un simple clic
+
+### 💾 Import/Export de données
+- Export complet au format JSON avec versioning
+- Import de sauvegarde avec confirmation
+- Sauvegarde manuelle ou automatique de toutes vos données
 
 ### ⚡ Ajout rapide
 - Bouton flottant accessible depuis toute l'application

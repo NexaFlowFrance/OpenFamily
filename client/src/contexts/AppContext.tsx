@@ -1,10 +1,12 @@
 import React, { createContext, useContext } from 'react';
 import { useStorage } from '@/hooks/useStorage';
-import { ShoppingItem, Task, Appointment, FamilyMember, Recipe, Meal, Budget } from '@/types';
+import { ShoppingItem, ShoppingTemplate, Task, Appointment, FamilyMember, Recipe, Meal, Budget } from '@/types';
 import { nanoid } from 'nanoid';
+import { scheduleTaskNotification } from '@/lib/notifications';
 
 interface AppContextType {
   shoppingItems: ShoppingItem[];
+  shoppingTemplates: ShoppingTemplate[];
   tasks: Task[];
   appointments: Appointment[];
   familyMembers: FamilyMember[];
@@ -17,8 +19,13 @@ interface AppContextType {
   updateShoppingItem: (id: string, item: Partial<ShoppingItem>) => void;
   deleteShoppingItem: (id: string) => void;
   
+  // Shopping template actions
+  addShoppingTemplate: (template: Omit<ShoppingTemplate, 'id' | 'createdAt'>) => void;
+  deleteShoppingTemplate: (id: string) => void;
+  applyShoppingTemplate: (templateId: string) => void;
+  
   // Task actions
-  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => string;
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   
@@ -54,6 +61,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [shoppingItems, setShoppingItems] = useStorage<ShoppingItem[]>('openfamily_shopping', []);
+  const [shoppingTemplates, setShoppingTemplates] = useStorage<ShoppingTemplate[]>('openfamily_shopping_templates', []);
   const [tasks, setTasks] = useStorage<Task[]>('openfamily_tasks', []);
   const [appointments, setAppointments] = useStorage<Appointment[]>('openfamily_appointments', []);
   const [familyMembers, setFamilyMembers] = useStorage<FamilyMember[]>('openfamily_members', [
@@ -81,6 +89,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setShoppingItems(shoppingItems.filter(item => item.id !== id));
   };
 
+  // Shopping template actions
+  const addShoppingTemplate = (template: Omit<ShoppingTemplate, 'id' | 'createdAt'>) => {
+    const newTemplate: ShoppingTemplate = {
+      ...template,
+      id: nanoid(),
+      createdAt: new Date().toISOString(),
+    };
+    setShoppingTemplates([...shoppingTemplates, newTemplate]);
+  };
+
+  const deleteShoppingTemplate = (id: string) => {
+    setShoppingTemplates(shoppingTemplates.filter(t => t.id !== id));
+  };
+
+  const applyShoppingTemplate = (templateId: string) => {
+    const template = shoppingTemplates.find(t => t.id === templateId);
+    if (!template) return;
+
+    template.items.forEach(item => {
+      addShoppingItem({
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        price: 0,
+        completed: false,
+        notes: '',
+      });
+    });
+  };
+
   // Task actions
   const addTask = (task: Omit<Task, 'id' | 'createdAt'>) => {
     const newTask: Task = {
@@ -89,10 +127,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date().toISOString(),
     };
     setTasks([...tasks, newTask]);
+    return newTask.id;
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks(tasks.map(task => task.id === id ? { ...task, ...updates } : task));
+    setTasks(tasks.map(task => {
+      if (task.id === id) {
+        const updatedTask = { ...task, ...updates };
+        // Replanifier la notification si la date/heure change
+        if (updatedTask.dueTime && (updates.dueDate || updates.dueTime)) {
+          scheduleTaskNotification(updatedTask);
+        }
+        return updatedTask;
+      }
+      return task;
+    }));
   };
 
   const deleteTask = (id: string) => {
@@ -210,6 +259,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value: AppContextType = {
     shoppingItems,
+    shoppingTemplates,
     tasks,
     appointments,
     familyMembers,
@@ -219,6 +269,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addShoppingItem,
     updateShoppingItem,
     deleteShoppingItem,
+    addShoppingTemplate,
+    deleteShoppingTemplate,
+    applyShoppingTemplate,
     addTask,
     updateTask,
     deleteTask,

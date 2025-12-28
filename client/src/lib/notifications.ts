@@ -1,4 +1,4 @@
-import { Appointment } from '@/types';
+import { Appointment, Task } from '@/types';
 
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!('Notification' in window)) {
@@ -54,6 +54,51 @@ export const scheduleAppointmentNotification = (appointment: Appointment) => {
       });
     }, timeDiff);
   }
+};
+
+export const scheduleTaskNotification = (task: Task) => {
+  if (Notification.permission !== 'granted') {
+    return;
+  }
+
+  if (!task.dueDate || !task.dueTime) {
+    return;
+  }
+
+  const taskDateTime = new Date(`${task.dueDate}T${task.dueTime}`);
+  const now = new Date();
+  const timeDiff = taskDateTime.getTime() - now.getTime();
+
+  // Ne pas planifier si la tâche est dans le passé
+  if (timeDiff <= 0) {
+    return;
+  }
+
+  // Notification 15 minutes avant
+  const notifyTime = timeDiff - 15 * 60 * 1000;
+
+  if (notifyTime > 0) {
+    setTimeout(() => {
+      new Notification('Rappel de tâche', {
+        body: `${task.title} dans 15 minutes`,
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        tag: task.id,
+        requireInteraction: false,
+      });
+    }, notifyTime);
+  }
+
+  // Notification à l'heure exacte
+  setTimeout(() => {
+    new Notification('Tâche à faire maintenant !', {
+      body: task.title,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      tag: `${task.id}-now`,
+      requireInteraction: true,
+    });
+  }, timeDiff);
 };
 
 export const getNotificationStatus = (): 'granted' | 'denied' | 'default' | 'unsupported' => {

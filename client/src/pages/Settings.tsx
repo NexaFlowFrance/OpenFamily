@@ -6,7 +6,7 @@ import { Language, languageNames, languageFlags } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Trash2, Plus, Moon, Sun, Heart, Bell, Globe, Check } from 'lucide-react';
+import { Trash2, Plus, Moon, Sun, Heart, Bell, Globe, Check, Download, Upload, FileJson } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,8 +26,11 @@ const COLORS = [
 ];
 
 export default function Settings() {
-  const { familyMembers, addFamilyMember, updateFamilyMember, deleteFamilyMember } = useApp();
-  const { theme, toggleTheme } = useTheme();
+  const { 
+    familyMembers, addFamilyMember, updateFamilyMember, deleteFamilyMember,
+    shoppingItems, tasks, appointments, recipes, meals, budget
+  } = useApp();
+  const { theme, toggleTheme, actualTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const [showForm, setShowForm] = useState(false);
   const [selectedMemberHealth, setSelectedMemberHealth] = useState<string | null>(null);
@@ -37,6 +40,65 @@ export default function Settings() {
     role: 'parent' as const,
     color: COLORS[0],
   });
+
+  const handleExportData = () => {
+    const data = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      data: {
+        shoppingItems,
+        tasks,
+        appointments,
+        recipes,
+        meals,
+        budget,
+        familyMembers,
+      }
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `openfamily-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const imported = JSON.parse(content);
+        
+        if (!imported.data) {
+          alert('Fichier invalide : structure de données incorrecte');
+          return;
+        }
+
+        const confirmImport = confirm(
+          `Voulez-vous importer les données du ${new Date(imported.exportDate).toLocaleDateString()} ?\n\n` +
+          `Cela remplacera toutes vos données actuelles.`
+        );
+
+        if (confirmImport) {
+          // Recharger la page après avoir importé les données dans localStorage
+          localStorage.setItem('openfamily-data', JSON.stringify(imported.data));
+          window.location.reload();
+        }
+      } catch (error) {
+        alert('Erreur lors de l\'importation : fichier JSON invalide');
+        console.error(error);
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const handleAddMember = () => {
     if (formData.name.trim()) {
@@ -98,7 +160,9 @@ export default function Settings() {
               <div>
                 <h3 className="font-medium text-foreground">{t.settings.theme}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {theme === 'dark' ? t.onboarding.darkMode : t.onboarding.lightMode}
+                  {theme === 'auto' 
+                    ? `Auto (${actualTheme === 'dark' ? t.onboarding.darkMode : t.onboarding.lightMode})`
+                    : theme === 'dark' ? t.onboarding.darkMode : t.onboarding.lightMode}
                 </p>
               </div>
               <Button
@@ -106,7 +170,12 @@ export default function Settings() {
                 size="icon"
                 onClick={toggleTheme}
               >
-                {theme === 'dark' ? (
+                {theme === 'auto' ? (
+                  <div className="relative w-5 h-5">
+                    <Sun className="w-5 h-5 absolute top-0 left-0 opacity-50" />
+                    <Moon className="w-5 h-5 absolute top-0 left-0 opacity-50" />
+                  </div>
+                ) : theme === 'dark' ? (
                   <Sun className="w-5 h-5" />
                 ) : (
                   <Moon className="w-5 h-5" />
@@ -150,6 +219,50 @@ export default function Settings() {
               {notificationStatus === 'granted' && (
                 <Bell className="w-5 h-5 text-green-600" />
               )}
+            </div>
+          </Card>
+        </div>
+
+        {/* Data Management Section */}
+        <div>
+          <h2 className="text-xl font-bold text-foreground mb-4">Gestion des données</h2>
+          
+          <Card className="p-4 space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <FileJson className="w-5 h-5 text-primary" />
+                <h3 className="font-medium text-foreground">Sauvegarde et restauration</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Exportez toutes vos données (courses, tâches, rendez-vous, recettes, planning, budget, famille) pour les sauvegarder ou les transférer vers un autre appareil.
+              </p>
+              
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={handleExportData}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Exporter mes données
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => document.getElementById('import-file-input')?.click()}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Importer des données
+                </Button>
+                <input
+                  id="import-file-input"
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportData}
+                  className="hidden"
+                />
+              </div>
             </div>
           </Card>
         </div>

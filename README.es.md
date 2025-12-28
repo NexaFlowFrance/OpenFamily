@@ -24,7 +24,7 @@
 
 ## 🎯 Acerca de
 
-OpenFamily es una aplicación completa de gestión familiar que prioriza su privacidad. Todos sus datos permanecen en su dispositivo, sin servidor central, sin cuenta requerida. Gestione sus listas de compras, tareas, citas, recetas, planificación de comidas y presupuesto familiar de forma segura.
+OpenFamily es una aplicación completa de gestión familiar ofrecida como código abierto por [NexaFlow](http://nexaflow.fr), que prioriza su privacidad. Todos sus datos permanecen en su dispositivo, sin servidor central, sin cuenta requerida. Gestione sus listas de compras, tareas, citas, recetas, planificación de comidas y presupuesto familiar de forma segura.
 
 ## 🚀 Características principales
 
@@ -40,13 +40,84 @@ OpenFamily es una aplicación completa de gestión familiar que prioriza su priv
 
 ## 📋 Funcionalidades
 
-- 🛒 **Lista de compras** - Categorización automática, precios y cantidades
-- ✅ **Tareas** - Tareas recurrentes, asignación familiar
-- 📅 **Citas** - Calendario mensual con vista francesa
-- 🍳 **Recetas** - Biblioteca de recetas familiares
-- 🍽️ **Planificación de comidas** - Vista semanal con enlace automático
-- 💰 **Presupuesto** - Seguimiento mensual de gastos
-- 👨‍👩‍👧‍👦 **Gestión familiar** - Perfiles con información de salud
+### 🛒 Lista de compras
+- Categorización automática (Bebé, Alimentación, Hogar, Salud, Otro)
+- Precios y cantidades
+- Sugerencias inteligentes basadas en recetas planificadas
+- **📋 Plantillas de listas** - Guarde y reutilice sus listas recurrentes
+- **📱 Escaneo de códigos de barras** - Agregue artículos escaneando (solo móvil)
+
+### ✅ Tareas y listas
+- Tareas recurrentes (diarias, semanales, mensuales, anuales)
+- Asignación a miembros de la familia
+- Notas y prioridades
+- Vista de calendario integrada
+- **📊 Historial y estadísticas** - Tasa de finalización, tendencias semanales
+
+### 📅 Citas
+- Calendario mensual con vista francesa
+- Integración de tareas y citas
+- Recordatorios y notas
+- Código de color por miembro de la familia
+- **🔔 Notificaciones automáticas** - Recordatorios 30 min y 1h antes de cada cita
+
+### 🍳 Recetas
+- Biblioteca de recetas familiares
+- Categorías (Entrada, Plato principal, Postre, Merienda)
+- Tiempo de preparación y cocción
+- Porciones y etiquetas
+- **🔍 Filtros avanzados** - Por categoría, tiempo de preparación, dificultad
+
+### 🍽️ Planificación de comidas
+- Vista semanal (Lunes-Domingo)
+- 4 tipos de comidas por día (Desayuno, Almuerzo, Cena, Merienda)
+- Enlace automático con recetas
+- Exportación de planificación
+- **📄 Exportación PDF** - Imprima su plan de comidas semanal
+
+### 💰 Presupuesto familiar
+- Seguimiento mensual de gastos
+- 6 categorías: Alimentación, Salud, Niños, Hogar, Ocio, Otro
+- Definición de presupuestos por categoría
+- Gráficos de progreso
+- Alertas de exceso
+- **📊 Estadísticas avanzadas** - Tendencias de 6 meses, desglose por categoría
+
+### 👨‍👩‍👧‍👦 Gestión familiar
+- Perfiles para cada miembro
+- Información de salud (grupo sanguíneo, alergias, vacunas)
+- Contacto de emergencia
+- Notas médicas
+- Código de color personalizado
+
+---
+
+## ✨ Funcionalidades avanzadas
+
+### 🔔 Notificaciones inteligentes
+- Recordatorios automáticos 30 minutos y 1 hora antes de cada cita
+- Recordatorios 15 minutos antes y a la hora exacta para tareas con fecha límite
+- Soporte de notificaciones del navegador (permiso requerido)
+
+### 🔍 Búsqueda global
+- Búsqueda instantánea en todos sus datos (Ctrl/Cmd+K)
+- Resultados agrupados por categoría: compras, tareas, citas, recetas, comidas
+- Navegación rápida a cualquier página
+
+### 🚀 Acciones rápidas
+- Widgets en la página de inicio para crear rápidamente tareas y artículos
+- Formularios en línea con soporte de teclado (tecla Enter)
+- Acceso directo a las funciones principales
+
+### 🌙 Tema automático
+- Modo claro, oscuro o automático
+- Detección automática de preferencias del sistema
+- Cambio entre 3 modos con un solo clic
+
+### 💾 Importar/Exportar datos
+- Exportación JSON completa con versionado
+- Importación de copia de seguridad con confirmación
+- Copia de seguridad manual o automática de todos sus datos
 
 ## 🚀 Inicio rápido
 

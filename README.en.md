@@ -42,7 +42,7 @@
 
 ## 🎯 About
 
-OpenFamily is a comprehensive family management application that prioritizes your privacy. All your data stays on your device, no central server, no account required. Manage your shopping lists, tasks, appointments, recipes, meal planning, and family budget securely.
+OpenFamily is a comprehensive family management application offered as open source by [NexaFlow](http://nexaflow.fr), that prioritizes your privacy. All your data stays on your device, no central server, no account required. Manage your shopping lists, tasks, appointments, recipes, meal planning, and family budget securely.
 
 ## 🚀 Key Features
 
@@ -63,30 +63,36 @@ OpenFamily is a comprehensive family management application that prioritizes you
 - Prices and quantities
 - Smart suggestions based on planned recipes
 - Export/Import lists
+- **📋 List templates** - Save and reuse your recurring lists
+- **📱 Barcode scanning** - Add items by scanning (mobile only)
 
 ### ✅ Tasks and Lists
 - Recurring tasks (daily, weekly, monthly, annual)
 - Assignment to family members
 - Notes and priorities
 - Integrated calendar view
+- **📊 History and statistics** - Completion rate, weekly trends
 
 ### 📅 Appointments
 - Monthly calendar with French view
 - Integration of tasks and appointments
 - Reminders and notes
 - Color coding by family member
+- **🔔 Automatic notifications** - Reminders 30min and 1h before each appointment
 
 ### 🍳 Recipes
 - Family recipe library
 - Categories (Appetizer, Main Course, Dessert, Snack)
 - Preparation and cooking time
 - Portions and tags
+- **🔍 Advanced filters** - By category, preparation time, difficulty
 
 ### 🍽️ Meal Planning
 - Weekly view (Monday-Sunday)
 - 4 meal types per day (Breakfast, Lunch, Dinner, Snack)
 - Automatic linking with recipes
 - Planning export
+- **📄 PDF Export** - Print your weekly meal plan
 
 ### 💰 Family Budget
 - Monthly expense tracking
@@ -94,6 +100,7 @@ OpenFamily is a comprehensive family management application that prioritizes you
 - Budget definition per category
 - Progress charts
 - Overspending alerts
+- **📊 Advanced statistics** - 6-month trends, category breakdown
 
 ### 👨‍👩‍👧‍👦 Family Management
 - Profiles for each member
@@ -227,8 +234,8 @@ From the application's **Settings**:
 ## ✨ Advanced Features
 
 ### 🔔 Smart Notifications
-- Automatic reminders 30 minutes before each appointment
-- Notification at the exact appointment time
+- Automatic reminders 30 minutes and 1 hour before each appointment
+- Reminders 15 minutes before and at exact time for tasks with due dates
 - Browser notification support (permission required)
 
 ### 💡 Smart Shopping List
@@ -239,7 +246,7 @@ From the application's **Settings**:
 ### 📊 Statistics and Dashboard
 - Overview of all your activities
 - Task completion rate (global and weekly)
-- Real-time budget usage
+- Real-time budget usage with trend charts
 - Meal planning trends
 - Charts and visual indicators
 
@@ -248,6 +255,26 @@ From the application's **Settings**:
 - Smart selection based on recipe categories
 - Avoids repetitions over several days
 - Integration with your existing recipes
+
+### 🔍 Global Search
+- Instant search across all your data (Ctrl/Cmd+K)
+- Results grouped by category: shopping, tasks, appointments, recipes, meals
+- Quick navigation to any page
+
+### 🚀 Quick Actions
+- Widgets on homepage to quickly create tasks and items
+- Inline forms with keyboard support (Enter key)
+- Direct access to main features
+
+### 🌙 Automatic Theme
+- Light, dark or automatic mode
+- Automatic detection of system preferences
+- Cycle between 3 modes with a single click
+
+### 💾 Data Import/Export
+- Complete JSON export with versioning
+- Backup import with confirmation
+- Manual or automatic backup of all your data
 
 ### ⚡ Quick Add
 - Floating button accessible from anywhere in the app

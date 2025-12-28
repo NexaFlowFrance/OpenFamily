@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2, Plus, Clock, Users, ChefHat } from 'lucide-react';
+import { Trash2, Plus, Clock, Users, ChefHat, Filter } from 'lucide-react';
 
 const CATEGORIES = [
   { value: 'starter', label: 'Entrée', color: '#c8dfe8' },
@@ -15,10 +15,20 @@ const CATEGORIES = [
   { value: 'other', label: 'Autre', color: '#d97b7b' },
 ];
 
+const PREP_TIME_FILTERS = [
+  { value: 'all', label: 'Tous' },
+  { value: '0-15', label: '< 15min' },
+  { value: '15-30', label: '15-30min' },
+  { value: '30-60', label: '30-60min' },
+  { value: '60+', label: '> 60min' },
+];
+
 export default function Recipes() {
   const { recipes, addRecipe, updateRecipe, deleteRecipe } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterPrepTime, setFilterPrepTime] = useState<string>('all');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -67,6 +77,35 @@ export default function Recipes() {
     return CATEGORIES.find(c => c.value === category)?.label || category;
   };
 
+  // Filtrer les recettes
+  const filteredRecipes = recipes.filter(recipe => {
+    // Filtre par catégorie
+    if (filterCategory !== 'all' && recipe.category !== filterCategory) {
+      return false;
+    }
+
+    // Filtre par temps de préparation
+    if (filterPrepTime !== 'all') {
+      const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
+      switch (filterPrepTime) {
+        case '0-15':
+          if (totalTime >= 15) return false;
+          break;
+        case '15-30':
+          if (totalTime < 15 || totalTime > 30) return false;
+          break;
+        case '30-60':
+          if (totalTime < 30 || totalTime > 60) return false;
+          break;
+        case '60+':
+          if (totalTime < 60) return false;
+          break;
+      }
+    }
+
+    return true;
+  });
+
   const selectedRecipeData = recipes.find(r => r.id === selectedRecipe);
 
   return (
@@ -74,19 +113,66 @@ export default function Recipes() {
       <div className="sticky top-0 bg-background/95 backdrop-blur z-10 p-4 border-b border-border">
         <h1 className="text-3xl font-bold text-foreground mb-4">Recettes</h1>
         
+        {/* Filtres */}
+        <div className="space-y-3 mb-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Filter className="w-4 h-4" />
+            <span>Filtres</span>
+          </div>
+          
+          {/* Filtre catégorie */}
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <Button
+              variant={filterCategory === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilterCategory('all')}
+            >
+              Toutes
+            </Button>
+            {CATEGORIES.map(cat => (
+              <Button
+                key={cat.value}
+                variant={filterCategory === cat.value ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterCategory(cat.value)}
+                style={filterCategory === cat.value ? { backgroundColor: cat.color } : {}}
+              >
+                {cat.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Filtre temps */}
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {PREP_TIME_FILTERS.map(filter => (
+              <Button
+                key={filter.value}
+                variant={filterPrepTime === filter.value ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterPrepTime(filter.value)}
+              >
+                <Clock className="w-3 h-3 mr-1" />
+                {filter.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+        
         <div className="text-sm text-muted-foreground">
-          {recipes.length} recette(s) enregistrée(s)
+          {filteredRecipes.length} recette(s) {filterCategory !== 'all' || filterPrepTime !== 'all' ? 'trouvée(s)' : 'enregistrée(s)'}
         </div>
       </div>
 
       <div className="p-4 space-y-3">
-        {recipes.length === 0 ? (
+        {filteredRecipes.length === 0 ? (
           <div className="text-center py-12">
             <ChefHat className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Aucune recette enregistrée</p>
+            <p className="text-muted-foreground">
+              {recipes.length === 0 ? 'Aucune recette enregistrée' : 'Aucune recette ne correspond aux filtres'}
+            </p>
           </div>
         ) : (
-          recipes.map(recipe => (
+          filteredRecipes.map(recipe => (
             <Card
               key={recipe.id}
               className="p-4 transition-all cursor-pointer hover:shadow-md"
@@ -325,6 +411,14 @@ export default function Recipes() {
           </Card>
         </div>
       )}
+
+      {/* Bouton flottant d'ajout */}
+      <button
+        onClick={() => setShowForm(true)}
+        className="fixed bottom-20 right-4 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all z-40"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
     </div>
   );
 }

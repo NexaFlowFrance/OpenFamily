@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, ChefHat, Calendar, Sparkles } from 'lucide-react';
+import { Trash2, Plus, ChefHat, Calendar, Sparkles, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { generateWeeklyMealPlan } from '@/lib/mealPlanner';
 
@@ -78,6 +78,101 @@ export default function Meals() {
     return MEAL_TYPES.find(t => t.value === type)?.label || type;
   };
 
+  // Export PDF du planning hebdomadaire
+  const exportWeeklyPlanToPDF = () => {
+    const weekDays = getWeekDays();
+    const startDate = weekDays[0].toLocaleDateString('fr-FR');
+    const endDate = weekDays[6].toLocaleDateString('fr-FR');
+    
+    let htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Planning des repas - ${startDate} au ${endDate}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { text-align: center; color: #333; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+          th { background-color: #6b8e7f; color: white; }
+          tr:nth-child(even) { background-color: #f9f9f9; }
+          .meal-type { font-weight: bold; color: #6b8e7f; }
+          .recipe { font-style: italic; }
+          .notes { color: #666; font-size: 0.9em; }
+          .footer { margin-top: 30px; text-align: center; color: #999; font-size: 0.9em; }
+        </style>
+      </head>
+      <body>
+        <h1>Planning des repas</h1>
+        <p style="text-align: center; color: #666;">Du ${startDate} au ${endDate}</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Jour</th>
+              <th>Petit-déjeuner</th>
+              <th>Déjeuner</th>
+              <th>Dîner</th>
+              <th>Goûter</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    weekDays.forEach(day => {
+      const dayName = day.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+      htmlContent += `<tr><td><strong>${dayName}</strong></td>`;
+      
+      ['breakfast', 'lunch', 'dinner', 'snack'].forEach(mealType => {
+        const dayMeals = getMealsForDate(day, mealType);
+        htmlContent += '<td>';
+        
+        if (dayMeals.length > 0) {
+          dayMeals.forEach(meal => {
+            const recipeTitle = getRecipeTitle(meal.recipeId);
+            if (recipeTitle) {
+              htmlContent += `<div class="recipe">${recipeTitle}</div>`;
+            } else if (meal.title) {
+              htmlContent += `<div>${meal.title}</div>`;
+            }
+            if (meal.notes) {
+              htmlContent += `<div class="notes">${meal.notes}</div>`;
+            }
+          });
+        } else {
+          htmlContent += '<span style="color: #ccc;">-</span>';
+        }
+        
+        htmlContent += '</td>';
+      });
+      
+      htmlContent += '</tr>';
+    });
+
+    htmlContent += `
+          </tbody>
+        </table>
+        <div class="footer">
+          <p>Généré avec OpenFamily le ${new Date().toLocaleDateString('fr-FR')}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Créer un blob et télécharger
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `planning-repas-${weekDays[0].toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    alert('Planning exporté ! Ouvrez le fichier HTML et utilisez "Imprimer" (Ctrl+P) pour générer un PDF.');
+  };
+
   const getMealTypeEmoji = (type: string) => {
     return MEAL_TYPES.find(t => t.value === type)?.emoji || '🍽️';
   };
@@ -134,6 +229,16 @@ export default function Meals() {
           >
             Mois
           </Button>
+          {viewMode === 'week' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportWeeklyPlanToPDF}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export PDF
+            </Button>
+          )}
         </div>
 
         {recipes.length > 0 && (

@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark" | "auto";
 
 interface ThemeContextType {
   theme: Theme;
   toggleTheme?: () => void;
   switchable: boolean;
+  actualTheme: "light" | "dark"; // Le thème réellement appliqué
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -18,7 +19,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({
   children,
-  defaultTheme = "light",
+  defaultTheme = "auto",
   switchable = false,
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
@@ -29,9 +30,35 @@ export function ThemeProvider({
     return defaultTheme;
   });
 
+  const [actualTheme, setActualTheme] = useState<"light" | "dark">("light");
+
+  // Détecter le thème système
+  useEffect(() => {
+    if (theme !== "auto") {
+      setActualTheme(theme);
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const updateTheme = () => {
+      setActualTheme(mediaQuery.matches ? "dark" : "light");
+    };
+
+    // Initialiser
+    updateTheme();
+
+    // Écouter les changements
+    mediaQuery.addEventListener("change", updateTheme);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateTheme);
+    };
+  }, [theme]);
+
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === "dark") {
+    if (actualTheme === "dark") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
@@ -40,16 +67,20 @@ export function ThemeProvider({
     if (switchable) {
       localStorage.setItem("theme", theme);
     }
-  }, [theme, switchable]);
+  }, [actualTheme, theme, switchable]);
 
   const toggleTheme = switchable
     ? () => {
-        setTheme(prev => (prev === "light" ? "dark" : "light"));
+        setTheme(prev => {
+          if (prev === "light") return "dark";
+          if (prev === "dark") return "auto";
+          return "light";
+        });
       }
     : undefined;
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, switchable }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, switchable, actualTheme }}>
       {children}
     </ThemeContext.Provider>
   );

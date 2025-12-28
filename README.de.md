@@ -24,7 +24,7 @@
 
 ## 🎯 Über
 
-OpenFamily ist eine umfassende Familienverwaltungsanwendung, die Ihre Privatsphäre priorisiert. Alle Ihre Daten bleiben auf Ihrem Gerät, kein zentraler Server, kein Konto erforderlich. Verwalten Sie Ihre Einkaufslisten, Aufgaben, Termine, Rezepte, Essensplanung und Familienbudget sicher.
+OpenFamily ist eine umfassende Familienverwaltungsanwendung, die als Open Source von [NexaFlow](http://nexaflow.fr) angeboten wird und Ihre Privatsphäre priorisiert. Alle Ihre Daten bleiben auf Ihrem Gerät, kein zentraler Server, kein Konto erforderlich. Verwalten Sie Ihre Einkaufslisten, Aufgaben, Termine, Rezepte, Essensplanung und Familienbudget sicher.
 
 ## 🚀 Hauptmerkmale
 
@@ -40,13 +40,84 @@ OpenFamily ist eine umfassende Familienverwaltungsanwendung, die Ihre Privatsph�
 
 ## 📋 Funktionen
 
-- 🛒 **Einkaufsliste** - Automatische Kategorisierung, Preise und Mengen
-- ✅ **Aufgaben** - Wiederkehrende Aufgaben, Familienzuweisung
-- 📅 **Termine** - Monatskalender mit französischer Ansicht
-- 🍳 **Rezepte** - Familienrezeptbibliothek
-- 🍽️ **Essensplanung** - Wochenansicht mit automatischer Verknüpfung
-- 💰 **Budget** - Monatliche Ausgabenverfolgung
-- 👨‍👩‍👧‍👦 **Familienverwaltung** - Profile mit Gesundheitsinformationen
+### 🛒 Einkaufsliste
+- Automatische Kategorisierung (Baby, Lebensmittel, Haushalt, Gesundheit, Sonstiges)
+- Preise und Mengen
+- Intelligente Vorschläge basierend auf geplanten Rezepten
+- **📋 Listen-Vorlagen** - Speichern und wiederverwenden Sie wiederkehrende Listen
+- **📱 Barcode-Scannen** - Artikel per Scan hinzufügen (nur Mobil)
+
+### ✅ Aufgaben und Listen
+- Wiederkehrende Aufgaben (täglich, wöchentlich, monatlich, jährlich)
+- Zuweisung an Familienmitglieder
+- Notizen und Prioritäten
+- Integrierte Kalenderansicht
+- **📊 Verlauf und Statistiken** - Abschlussrate, wöchentliche Trends
+
+### 📅 Termine
+- Monatskalender mit französischer Ansicht
+- Integration von Aufgaben und Terminen
+- Erinnerungen und Notizen
+- Farbcodierung nach Familienmitglied
+- **🔔 Automatische Benachrichtigungen** - Erinnerungen 30 Min. und 1 Std. vor jedem Termin
+
+### 🍳 Rezepte
+- Familienrezeptbibliothek
+- Kategorien (Vorspeise, Hauptgericht, Dessert, Snack)
+- Zubereitungs- und Kochzeit
+- Portionen und Tags
+- **🔍 Erweiterte Filter** - Nach Kategorie, Zubereitungszeit, Schwierigkeit
+
+### 🍽️ Essensplanung
+- Wochenansicht (Montag-Sonntag)
+- 4 Mahlzeitentypen pro Tag (Frühstück, Mittagessen, Abendessen, Snack)
+- Automatische Verknüpfung mit Rezepten
+- Planungsexport
+- **📄 PDF-Export** - Drucken Sie Ihren wöchentlichen Essensplan
+
+### 💰 Familienbudget
+- Monatliche Ausgabenverfolgung
+- 6 Kategorien: Lebensmittel, Gesundheit, Kinder, Haus, Freizeit, Sonstiges
+- Budgetdefinition pro Kategorie
+- Fortschrittsdiagramme
+- Überschreitungswarnungen
+- **📊 Erweiterte Statistiken** - 6-Monats-Trends, Kategorieaufschlüsselung
+
+### 👨‍👩‍👧‍👦 Familienverwaltung
+- Profile für jedes Mitglied
+- Gesundheitsinformationen (Blutgruppe, Allergien, Impfungen)
+- Notfallkontakt
+- Medizinische Notizen
+- Benutzerdefinierte Farbcodierung
+
+---
+
+## ✨ Erweiterte Funktionen
+
+### 🔔 Intelligente Benachrichtigungen
+- Automatische Erinnerungen 30 Minuten und 1 Stunde vor jedem Termin
+- Erinnerungen 15 Minuten vor und zur genauen Zeit für Aufgaben mit Fälligkeitsdatum
+- Browser-Benachrichtigungsunterstützung (Berechtigung erforderlich)
+
+### 🔍 Globale Suche
+- Sofortsuche in allen Ihren Daten (Strg/Cmd+K)
+- Ergebnisse gruppiert nach Kategorie: Einkäufe, Aufgaben, Termine, Rezepte, Mahlzeiten
+- Schnelle Navigation zu jeder Seite
+
+### 🚀 Schnellaktionen
+- Widgets auf der Startseite zum schnellen Erstellen von Aufgaben und Artikeln
+- Inline-Formulare mit Tastaturunterstützung (Enter-Taste)
+- Direkter Zugriff auf Hauptfunktionen
+
+### 🌙 Automatisches Design
+- Heller, dunkler oder automatischer Modus
+- Automatische Erkennung von Systemeinstellungen
+- Wechsel zwischen 3 Modi mit einem Klick
+
+### 💾 Datenimport/-export
+- Vollständiger JSON-Export mit Versionierung
+- Backup-Import mit Bestätigung
+- Manuelle oder automatische Sicherung aller Ihrer Daten
 
 ## 🚀 Schnellstart
 

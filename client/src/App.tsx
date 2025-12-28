@@ -5,6 +5,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AppProvider } from "./contexts/AppContext";
 import Navigation from "./components/Navigation";
+import SearchBar from "./components/SearchBar";
 import Home from "./pages/Home";
 import Shopping from "./pages/Shopping";
 import Tasks from "./pages/Tasks";
@@ -20,6 +21,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<'home' | 'shopping' | 'tasks' | 'appointments' | 'settings' | 'recipes' | 'meals' | 'budget' | 'statistics'>('home');
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
     // Vérifier si l'onboarding a été complété
@@ -27,6 +29,17 @@ function AppContent() {
     if (!onboardingCompleted) {
       setShowOnboarding(true);
     }
+
+    // Raccourci clavier pour la recherche (Ctrl+K ou Cmd+K)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowSearch(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const handleOnboardingComplete = () => {
@@ -49,7 +62,18 @@ function AppContent() {
       {currentPage === 'budget' && <Budget />}
       {currentPage === 'statistics' && <Statistics />}
       
-      <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+      <Navigation 
+        currentPage={currentPage} 
+        onPageChange={setCurrentPage}
+        onSearchClick={() => setShowSearch(true)}
+      />
+
+      {showSearch && (
+        <SearchBar 
+          onNavigate={setCurrentPage} 
+          onClose={() => setShowSearch(false)}
+        />
+      )}
     </div>
   );
 }

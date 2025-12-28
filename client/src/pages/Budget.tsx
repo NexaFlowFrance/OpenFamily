@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, BarChart3, PieChart } from 'lucide-react';
 
 const categoryLabels = {
   food: 'Alimentation',
@@ -31,6 +31,7 @@ export default function Budget() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
   const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   
   const [newExpense, setNewExpense] = useState({
     category: 'food' as const,
@@ -98,6 +99,34 @@ export default function Budget() {
 
   const totals = calculateTotals();
   const remaining = totals.limit - totals.total;
+
+  // Calcul des statistiques sur les 6 derniers mois
+  const getMonthlyStats = () => {
+    const stats = [];
+    const currentDate = new Date(selectedMonth);
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(currentDate);
+      date.setMonth(date.getMonth() - i);
+      const monthStr = date.toISOString().slice(0, 7);
+      const budget = budgets.find(b => b.month === monthStr);
+      
+      if (budget) {
+        const total = budget.expenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const limit = Object.values(budget.categories).reduce((sum, val) => sum + val, 0);
+        stats.push({
+          month: monthStr,
+          monthLabel: date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }),
+          total,
+          limit,
+        });
+      }
+    }
+    
+    return stats;
+  };
+
+  const monthlyStats = getMonthlyStats();
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -214,6 +243,95 @@ export default function Budget() {
         </Card>
       ) : (
         <>
+          {/* Bouton statistiques */}
+          <div className="mb-4">
+            <Button
+              variant={showStats ? 'default' : 'outline'}
+              onClick={() => setShowStats(!showStats)}
+            >
+              {showStats ? <BarChart3 className="w-4 h-4 mr-2" /> : <PieChart className="w-4 h-4 mr-2" />}
+              {showStats ? 'Masquer les statistiques' : 'Voir les statistiques'}
+            </Button>
+          </div>
+
+          {/* Statistiques */}
+          {showStats && monthlyStats.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Évolution des 6 derniers mois
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Graphique en barres simple */}
+                <div className="space-y-4">
+                  {monthlyStats.map((stat) => {
+                    const percentage = (stat.total / stat.limit) * 100;
+                    const isOver = percentage > 100;
+                    
+                    return (
+                      <div key={stat.month} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium">{stat.monthLabel}</span>
+                          <span className={isOver ? 'text-red-500 font-semibold' : 'text-muted-foreground'}>
+                            {stat.total.toFixed(0)}€ / {stat.limit}€
+                          </span>
+                        </div>
+                        <div className="relative h-8 bg-muted rounded-lg overflow-hidden">
+                          <div
+                            className={`h-full ${isOver ? 'bg-red-500' : 'bg-primary'} transition-all`}
+                            style={{ width: `${Math.min(percentage, 100)}%` }}
+                          />
+                          {isOver && (
+                            <div
+                              className="absolute top-0 h-full bg-red-600 opacity-50"
+                              style={{ width: `${((percentage - 100) / percentage) * 100}%`, right: 0 }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Répartition par catégorie */}
+                <div className="mt-8 pt-8 border-t">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <PieChart className="w-5 h-5" />
+                    Répartition par catégorie (mois en cours)
+                  </h3>
+                  <div className="space-y-3">
+                    {Object.entries(totals.spent)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([category, amount]) => {
+                        const limit = currentBudget.categories[category as keyof typeof currentBudget.categories];
+                        const percentage = limit > 0 ? (amount / limit) * 100 : 0;
+                        const isOver = percentage > 100;
+                        
+                        return (
+                          <div key={category}>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>{categoryLabels[category as keyof typeof categoryLabels]}</span>
+                              <span className={isOver ? 'text-red-500 font-semibold' : ''}>
+                                {amount.toFixed(0)}€ / {limit}€
+                              </span>
+                            </div>
+                            <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${categoryColors[category as keyof typeof categoryColors]} transition-all`}
+                                style={{ width: `${Math.min(percentage, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Vue d'ensemble */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>

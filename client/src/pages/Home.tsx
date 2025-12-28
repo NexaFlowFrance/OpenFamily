@@ -1,7 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useApp } from "@/contexts/AppContext";
+import { useState } from "react";
 import { 
   Calendar, 
   ListChecks, 
@@ -23,7 +25,11 @@ interface HomeProps {
 }
 
 export default function Home({ onNavigate }: HomeProps) {
-  const { shoppingItems, tasks, appointments, recipes, meals, budgets, familyMembers } = useApp();
+  const { shoppingItems, tasks, appointments, recipes, meals, budgets, familyMembers, addShoppingItem, addTask } = useApp();
+  const [showQuickTask, setShowQuickTask] = useState(false);
+  const [showQuickShopping, setShowQuickShopping] = useState(false);
+  const [quickTaskName, setQuickTaskName] = useState('');
+  const [quickShoppingName, setQuickShoppingName] = useState('');
 
   const today = new Date().toISOString().split('T')[0];
   const todayTasks = tasks.filter(task => task.dueDate === today && !task.completed);
@@ -128,6 +134,168 @@ export default function Home({ onNavigate }: HomeProps) {
       </div>
 
       <div className="p-4">
+        {/* Widgets raccourcis rapides */}
+        <Card className="p-4 mb-6 bg-gradient-to-br from-blue-500/10 to-blue-600/10">
+          <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Plus className="w-5 h-5 text-blue-600" />
+            Actions rapides
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            {!showQuickTask ? (
+              <Button
+                variant="outline"
+                className="h-auto py-3 flex-col gap-2"
+                onClick={() => setShowQuickTask(true)}
+              >
+                <ClipboardList className="w-5 h-5" />
+                <span className="text-xs">Ajouter tâche</span>
+              </Button>
+            ) : (
+              <div className="col-span-2 space-y-2">
+                <Input
+                  placeholder="Nouvelle tâche..."
+                  value={quickTaskName}
+                  onChange={(e) => setQuickTaskName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && quickTaskName.trim()) {
+                      addTask({
+                        title: quickTaskName,
+                        category: 'household',
+                        dueDate: new Date().toISOString().split('T')[0],
+                        completed: false,
+                        priority: 'medium',
+                      });
+                      setQuickTaskName('');
+                      setShowQuickTask(false);
+                    }
+                  }}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setShowQuickTask(false);
+                      setQuickTaskName('');
+                    }}
+                    className="flex-1"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (quickTaskName.trim()) {
+                        addTask({
+                          title: quickTaskName,
+                          category: 'household',
+                          dueDate: new Date().toISOString().split('T')[0],
+                          completed: false,
+                          priority: 'medium',
+                        });
+                        setQuickTaskName('');
+                        setShowQuickTask(false);
+                      }
+                    }}
+                    className="flex-1"
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {!showQuickShopping && !showQuickTask && (
+              <Button
+                variant="outline"
+                className="h-auto py-3 flex-col gap-2"
+                onClick={() => setShowQuickShopping(true)}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span className="text-xs">Ajouter article</span>
+              </Button>
+            )}
+            
+            {showQuickShopping && (
+              <div className="col-span-2 space-y-2">
+                <Input
+                  placeholder="Nouvel article..."
+                  value={quickShoppingName}
+                  onChange={(e) => setQuickShoppingName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && quickShoppingName.trim()) {
+                      addShoppingItem({
+                        name: quickShoppingName,
+                        category: 'food',
+                        quantity: 1,
+                        price: 0,
+                        completed: false,
+                      });
+                      setQuickShoppingName('');
+                      setShowQuickShopping(false);
+                    }
+                  }}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setShowQuickShopping(false);
+                      setQuickShoppingName('');
+                    }}
+                    className="flex-1"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (quickShoppingName.trim()) {
+                        addShoppingItem({
+                          name: quickShoppingName,
+                          category: 'food',
+                          quantity: 1,
+                          price: 0,
+                          completed: false,
+                        });
+                        setQuickShoppingName('');
+                        setShowQuickShopping(false);
+                      }
+                    }}
+                    className="flex-1"
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {!showQuickTask && !showQuickShopping && (
+              <>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex-col gap-2"
+                  onClick={() => onNavigate?.('meals')}
+                >
+                  <UtensilsCrossed className="w-5 h-5" />
+                  <span className="text-xs">Planning repas</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex-col gap-2"
+                  onClick={() => onNavigate?.('recipes')}
+                >
+                  <ChefHat className="w-5 h-5" />
+                  <span className="text-xs">Voir recettes</span>
+                </Button>
+              </>
+            )}
+          </div>
+        </Card>
+
         {/* Widgets détaillés */}
         <div className="grid grid-cols-1 gap-4 mb-6">
           {/* Widget Tâches du jour */}

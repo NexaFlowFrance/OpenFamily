@@ -48,8 +48,6 @@
 
 OpenFamily est une application de gestion familiale complète proposée en open source par [NexaFlow](http://nexaflow.fr), conçue pour être auto-hébergée. Gardez le contrôle total de vos données en hébergeant l'application sur votre propre serveur. Gérez vos courses, tâches, rendez-vous, recettes, planning des repas et budget familial en toute sécurité, accessible depuis tous vos appareils.
 
-**Version 1.0.3 - Architecture serveur uniquement**  
-Cette version supprime complètement le mode localStorage au profit d'une architecture serveur centralisée avec PostgreSQL, garantissant une synchronisation fiable entre tous les appareils de la famille.
 
 ## 🚀 Caractéristiques
 

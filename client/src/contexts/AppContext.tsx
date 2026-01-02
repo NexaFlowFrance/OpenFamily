@@ -16,6 +16,7 @@ interface AppContextType {
   meals: Meal[];
   budgets: Budget[];
   loading: boolean;
+  isInitialized: boolean;
   reloadData: () => Promise<void>;
   
   // Shopping actions
@@ -64,6 +65,9 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  // État d'initialisation pour éviter les problèmes en production
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   // États locaux
   const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
   const [shoppingTemplates, setShoppingTemplates] = useState<ShoppingTemplate[]>([]);
@@ -126,6 +130,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         logger.error('Erreur lors du chargement des données:', error);
       } finally {
         setLoading(false);
+        setIsInitialized(true); // Marquer comme initialisé
       }
     };
 
@@ -449,6 +454,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     meals,
     budgets,
     loading,
+    isInitialized,
     addShoppingItem,
     updateShoppingItem,
     deleteShoppingItem,
@@ -484,7 +490,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={value}>
-      {loading ? (
+      {!isInitialized || loading ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
@@ -498,7 +504,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 export function useApp() {
   const context = useContext(AppContext);
   if (!context) {
-    throw new Error('useApp must be used within AppProvider');
+    logger.error('❌ useApp hook called outside AppProvider. Component tree:', 
+      new Error().stack?.split('\n').slice(0, 5).join('\n'));
+    throw new Error('useApp must be used within AppProvider. Make sure the component using this hook is wrapped inside <AppProvider>.');
   }
   return context;
 }

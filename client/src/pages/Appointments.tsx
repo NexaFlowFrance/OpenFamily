@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
+import { logger } from '../lib/logger';
 import { Trash2, Plus, MapPin, Clock, Briefcase, Plane, CalendarDays } from 'lucide-react';
 import { fr } from 'date-fns/locale';
 import { scheduleAppointmentNotification } from '@/lib/webPush';
@@ -112,17 +113,17 @@ export default function Appointments() {
         addAppointment(appointmentData);
         
         // Planifier notifications Web Push si activées
-        console.log('🔔 Vérification notifications...', {
+        logger.log('🔔 Vérification notifications...', {
           enabled: notificationSettings.appointmentReminders.enabled,
           timings: notificationSettings.appointmentReminders.timings
         });
         
         if (notificationSettings.appointmentReminders.enabled) {
           const enabledTimings = getEnabledAppointmentTimings();
-          console.log('🔔 Délais activés:', enabledTimings);
+          logger.log('🔔 Délais activés:', enabledTimings);
           
           if (enabledTimings.length > 0) {
-            console.log('🔔 Programmation notifications pour RDV:', {
+            logger.log('🔔 Programmation notifications pour RDV:', {
               id: newId,
               date: formData.date,
               time: formData.time,
@@ -137,15 +138,15 @@ export default function Appointments() {
               formData.title,
               enabledTimings.map(t => ({ minutes: t.minutes, label: t.label }))
             ).then(() => {
-              console.log('✅ Notifications programmées avec succès');
+              logger.log('✅ Notifications programmées avec succès');
             }).catch(err => {
-              console.error('❌ Erreur programmation notification:', err);
+              logger.error('❌ Erreur programmation notification:', err);
             });
           } else {
-            console.warn('⚠️ Aucun délai de notification activé');
+            logger.warn('⚠️ Aucun délai de notification activé');
           }
         } else {
-          console.warn('⚠️ Notifications désactivées dans les paramètres');
+          logger.warn('⚠️ Notifications désactivées dans les paramètres');
         }
       }
       

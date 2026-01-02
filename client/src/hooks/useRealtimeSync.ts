@@ -1,7 +1,7 @@
 // Hook React pour gérer la synchronisation WebSocket en temps réel
 import { useEffect, useRef, useCallback } from 'react';
-import { useApp } from '@/contexts/AppContext';
-
+import { logger } from '../lib/logger';
+import { useApp } from '../contexts/AppContext';
 interface SyncEvent {
   type: 'sync';
   entity: string;
@@ -31,11 +31,11 @@ export function useRealtimeSync(familyId: string | null, enabled: boolean = true
       const host = window.location.host;
       const wsUrl = `${protocol}//${host}/ws`;
       
-      console.log(`[Sync] Connecting to WebSocket: ${wsUrl}`);
+      logger.log(`[Sync] Connecting to WebSocket: ${wsUrl}`);
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log('[Sync] WebSocket connected');
+        logger.log('[Sync] WebSocket connected');
         reconnectAttempts.current = 0;
         
         // S'authentifier avec le family_id
@@ -51,10 +51,10 @@ export function useRealtimeSync(familyId: string | null, enabled: boolean = true
           const message = JSON.parse(event.data);
           
           if (message.type === 'auth_success') {
-            console.log('[Sync] Authentication successful');
+            logger.log('[Sync] Authentication successful');
           } else if (message.type === 'sync') {
             const syncEvent = message as SyncEvent;
-            console.log(`[Sync] Received: ${syncEvent.entity} ${syncEvent.action}`);
+            logger.log(`[Sync] Received: ${syncEvent.entity} ${syncEvent.action}`);
             
             // Reload data for the affected entity
             handleSyncEvent(syncEvent);
@@ -62,29 +62,29 @@ export function useRealtimeSync(familyId: string | null, enabled: boolean = true
             // Réponse au ping, connexion OK
           }
         } catch (error) {
-          console.error('[Sync] Error parsing message:', error);
+          logger.error('[Sync] Error parsing message:', error);
         }
       };
 
       ws.onerror = (error) => {
-        console.error('[Sync] WebSocket error:', error);
+        logger.error('[Sync] WebSocket error:', error);
       };
 
       ws.onclose = () => {
-        console.log('[Sync] WebSocket disconnected');
+        logger.log('[Sync] WebSocket disconnected');
         wsRef.current = null;
         
         // Tenter de reconnecter avec backoff exponentiel
         if (reconnectAttempts.current < maxReconnectAttempts) {
           const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
-          console.log(`[Sync] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
+          logger.log(`[Sync] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
           
           reconnectTimeoutRef.current = setTimeout(() => {
             reconnectAttempts.current++;
             connectWebSocket();
           }, delay);
         } else {
-          console.error('[Sync] Max reconnection attempts reached');
+          logger.error('[Sync] Max reconnection attempts reached');
         }
       };
 
@@ -103,13 +103,13 @@ export function useRealtimeSync(familyId: string | null, enabled: boolean = true
       });
 
     } catch (error) {
-      console.error('[Sync] Error creating WebSocket:', error);
+      logger.error('[Sync] Error creating WebSocket:', error);
     }
   }, [familyId, enabled]);
 
   const handleSyncEvent = (event: SyncEvent) => {
     // Reload data for the modified entity
-    console.log(`[Sync] Reloading data for ${event.entity}`);
+    logger.log(`[Sync] Reloading data for ${event.entity}`);
     
     // Reload all data for simplicity
     // TODO: Optimize to reload only the affected entity
@@ -139,7 +139,7 @@ export function useRealtimeSync(familyId: string | null, enabled: boolean = true
       if (document.visibilityState === 'visible' && enabled && familyId) {
         // Check if connection is still active
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-          console.log('[Sync] App became visible, reconnecting...');
+          logger.log('[Sync] App became visible, reconnecting...');
           connectWebSocket();
         }
       }

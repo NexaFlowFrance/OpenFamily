@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Capacitor } from '@capacitor/core';
+import { logger } from '../lib/logger';
 
 type Theme = "light" | "dark" | "auto";
 
@@ -90,7 +91,7 @@ export function ThemeProvider({
             await StatusBar.setStyle({ style: 'LIGHT' }); // Contenu sombre sur fond clair
           }
         } catch (error) {
-          console.log('StatusBar API not available:', error);
+          logger.log('StatusBar API not available:', error);
         }
       }
     };

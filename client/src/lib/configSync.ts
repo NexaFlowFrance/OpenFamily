@@ -3,6 +3,8 @@
  * TOUJOURS utilise PostgreSQL via serveur
  */
 
+import { logger } from './logger';
+
 export interface FamilyConfiguration {
   family_id?: string;
   onboarding_completed: boolean;
@@ -42,7 +44,7 @@ async function checkServerAvailability(): Promise<boolean> {
     
     return response.ok;
   } catch (error) {
-    console.error('Server not available:', error);
+    logger.error('Server not available:', error);
     return false;
   }
 }
@@ -65,13 +67,13 @@ export async function fetchServerConfig(
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch server config:', response.statusText);
+      logger.error('Failed to fetch server config:', response.statusText);
       return null;
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching server config:', error);
+    logger.error('Error fetching server config:', error);
     return null;
   }
 }
@@ -100,13 +102,13 @@ export async function saveServerConfig(
     });
 
     if (!response.ok) {
-      console.error('Failed to save server config:', response.statusText);
+      logger.error('Failed to save server config:', response.statusText);
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error('Error saving server config:', error);
+    logger.error('Error saving server config:', error);
     return false;
   }
 }

@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import { scheduleTaskNotification } from '@/lib/notifications';
 import { RepositoryFactory } from '@/repositories/factory';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { logger } from '../lib/logger';
 
 interface AppContextType {
   shoppingItems: ShoppingItem[];
@@ -79,7 +80,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Fonction pour recharger toutes les données (utilisée par le WebSocket et le refresh manuel)
   const reloadData = async () => {
     try {
-      console.log('🔄 Reloading data...');
+      logger.log('🔄 Reloading data...');
       const repo = RepositoryFactory.getRepository();
       
       const results = await Promise.allSettled([
@@ -109,20 +110,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setRecipes(loadedRecipes);
       setMeals(loadedMeals);
       setBudgets(loadedBudgets);
-      console.log('✅ Data reloaded successfully');
+      logger.log('✅ Data reloaded successfully');
     } catch (error) {
-      console.error('❌ Error reloading data:', error);
+      logger.error('❌ Error reloading data:', error);
     }
   };
 
   // Charger toutes les données au démarrage
   useEffect(() => {
-    console.log('🚀 AppContext useEffect - Starting to load data');
+    logger.log('🚀 AppContext useEffect - Starting to load data');
     const loadData = async () => {
       try {
         await reloadData();
       } catch (error) {
-        console.error('Erreur lors du chargement des données:', error);
+        logger.error('Erreur lors du chargement des données:', error);
       } finally {
         setLoading(false);
       }
@@ -138,7 +139,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newItem = await repo.addShoppingItem(item);
       setShoppingItems([...shoppingItems, newItem]);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'un article:', error);
+      logger.error('Erreur lors de l\'ajout d\'un article:', error);
     }
   };
 
@@ -148,7 +149,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updated = await repo.updateShoppingItem(id, updates);
       setShoppingItems(shoppingItems.map(item => item.id === id ? updated : item));
     } catch (error) {
-      console.error('Erreur lors de la mise à jour d\'un article:', error);
+      logger.error('Erreur lors de la mise à jour d\'un article:', error);
     }
   };
 
@@ -158,7 +159,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await repo.deleteShoppingItem(id);
       setShoppingItems(shoppingItems.filter(item => item.id !== id));
     } catch (error) {
-      console.error('Erreur lors de la suppression d\'un article:', error);
+      logger.error('Erreur lors de la suppression d\'un article:', error);
     }
   };
 
@@ -205,7 +206,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return newTask.id;
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'une tâche:', error);
+      logger.error('Erreur lors de l\'ajout d\'une tâche:', error);
       return '';
     }
   };
@@ -221,7 +222,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleTaskNotification(updated);
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour d\'une tâche:', error);
+      logger.error('Erreur lors de la mise à jour d\'une tâche:', error);
     }
   };
 
@@ -231,7 +232,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await repo.deleteTask(id);
       setTasks(tasks.filter(task => task.id !== id));
     } catch (error) {
-      console.error('Erreur lors de la suppression d\'une tâche:', error);
+      logger.error('Erreur lors de la suppression d\'une tâche:', error);
     }
   };
 
@@ -242,7 +243,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newAppointment = await repo.addAppointment(appointment);
       setAppointments([...appointments, newAppointment]);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'un rendez-vous:', error);
+      logger.error('Erreur lors de l\'ajout d\'un rendez-vous:', error);
     }
   };
 
@@ -252,7 +253,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updated = await repo.updateAppointment(id, updates);
       setAppointments(appointments.map(apt => apt.id === id ? updated : apt));
     } catch (error) {
-      console.error('Erreur lors de la mise à jour d\'un rendez-vous:', error);
+      logger.error('Erreur lors de la mise à jour d\'un rendez-vous:', error);
     }
   };
 
@@ -264,10 +265,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       // Si le rendez-vous n'existe pas côté serveur, on le supprime quand même côté client
       if (error instanceof Error && error.message.includes('Not Found')) {
-        console.warn('Rendez-vous introuvable côté serveur, suppression côté client uniquement');
+        logger.warn('Rendez-vous introuvable côté serveur, suppression côté client uniquement');
         setAppointments(appointments.filter(apt => apt.id !== id));
       } else {
-        console.error('Erreur lors de la suppression d\'un rendez-vous:', error);
+        logger.error('Erreur lors de la suppression d\'un rendez-vous:', error);
         throw error; // Re-lancer l'erreur si ce n'est pas un problème de "Not Found"
       }
     }
@@ -280,7 +281,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newMember = await repo.addFamilyMember(member);
       setFamilyMembers([...familyMembers, newMember]);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'un membre:', error);
+      logger.error('Erreur lors de l\'ajout d\'un membre:', error);
     }
   };
 
@@ -290,7 +291,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updated = await repo.updateFamilyMember(id, updates);
       setFamilyMembers(familyMembers.map(member => member.id === id ? updated : member));
     } catch (error) {
-      console.error('Erreur lors de la mise à jour d\'un membre:', error);
+      logger.error('Erreur lors de la mise à jour d\'un membre:', error);
     }
   };
 
@@ -300,7 +301,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await repo.deleteFamilyMember(id);
       setFamilyMembers(familyMembers.filter(member => member.id !== id));
     } catch (error) {
-      console.error('Erreur lors de la suppression d\'un membre:', error);
+      logger.error('Erreur lors de la suppression d\'un membre:', error);
     }
   };
 
@@ -311,7 +312,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newRecipe = await repo.addRecipe(recipe);
       setRecipes([...recipes, newRecipe]);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'une recette:', error);
+      logger.error('Erreur lors de l\'ajout d\'une recette:', error);
     }
   };
 
@@ -321,7 +322,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updated = await repo.updateRecipe(id, updates);
       setRecipes(recipes.map(recipe => recipe.id === id ? updated : recipe));
     } catch (error) {
-      console.error('Erreur lors de la mise à jour d\'une recette:', error);
+      logger.error('Erreur lors de la mise à jour d\'une recette:', error);
     }
   };
 
@@ -331,7 +332,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await repo.deleteRecipe(id);
       setRecipes(recipes.filter(recipe => recipe.id !== id));
     } catch (error) {
-      console.error('Erreur lors de la suppression d\'une recette:', error);
+      logger.error('Erreur lors de la suppression d\'une recette:', error);
     }
   };
 
@@ -342,7 +343,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newMeal = await repo.addMeal(meal);
       setMeals([...meals, newMeal]);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'un repas:', error);
+      logger.error('Erreur lors de l\'ajout d\'un repas:', error);
     }
   };
 
@@ -352,7 +353,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updated = await repo.updateMeal(id, updates);
       setMeals(meals.map(meal => meal.id === id ? updated : meal));
     } catch (error) {
-      console.error('Erreur lors de la mise à jour d\'un repas:', error);
+      logger.error('Erreur lors de la mise à jour d\'un repas:', error);
     }
   };
 
@@ -362,7 +363,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await repo.deleteMeal(id);
       setMeals(meals.filter(meal => meal.id !== id));
     } catch (error) {
-      console.error('Erreur lors de la suppression d\'un repas:', error);
+      logger.error('Erreur lors de la suppression d\'un repas:', error);
     }
   };
 
@@ -373,7 +374,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newBudget = await repo.addBudget(budget);
       setBudgets([...budgets, newBudget]);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'un budget:', error);
+      logger.error('Erreur lors de l\'ajout d\'un budget:', error);
     }
   };
 
@@ -383,7 +384,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updated = await repo.updateBudget(id, updates);
       setBudgets(budgets.map(budget => budget.id === id ? updated : budget));
     } catch (error) {
-      console.error('Erreur lors de la mise à jour d\'un budget:', error);
+      logger.error('Erreur lors de la mise à jour d\'un budget:', error);
     }
   };
 
@@ -393,7 +394,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await repo.deleteBudget(id);
       setBudgets(budgets.filter(budget => budget.id !== id));
     } catch (error) {
-      console.error('Erreur lors de la suppression d\'un budget:', error);
+      logger.error('Erreur lors de la suppression d\'un budget:', error);
     }
   };
 
@@ -416,7 +417,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await repo.updateBudget(budgetId, updatedBudget);
       setBudgets(budgets.map(b => b.id === budgetId ? updatedBudget : b));
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'une dépense:', error);
+      logger.error('Erreur lors de l\'ajout d\'une dépense:', error);
     }
   };
 
@@ -434,7 +435,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await repo.updateBudget(budgetId, updatedBudget);
       setBudgets(budgets.map(b => b.id === budgetId ? updatedBudget : b));
     } catch (error) {
-      console.error('Erreur lors de la suppression d\'une dépense:', error);
+      logger.error('Erreur lors de la suppression d\'une dépense:', error);
     }
   };
 
@@ -501,3 +502,4 @@ export function useApp() {
   }
   return context;
 }
+

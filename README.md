@@ -115,17 +115,57 @@ OpenFamily est une application de gestion familiale complète proposée en open 
 
 ## 🚀 Démarrage rapide
 
-### ⚡ Installation automatique avec Docker
+### Option 1 : Docker (Recommandé) ⭐
+
+La méthode la plus simple ! Utilisez notre image Docker pré-configurée :
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/install-docker.sh | bash
+# 1. Téléchargez les fichiers de configuration
+mkdir openfamily && cd openfamily
+curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/.env.example
+cp .env.example .env
+
+# 2. Modifiez le mot de passe (optionnel)
+nano .env  # Changez DB_PASSWORD
+
+# 3. Démarrez OpenFamily
+docker compose up -d
+
+# 4. Accédez à l'application
+# http://localhost:3000
 ```
 
-Ce script va :
-- Installer Docker et Docker Compose (si nécessaire)
-- Cloner le dépôt OpenFamily
-- Configurer PostgreSQL
-- Démarrer l'application sur le port 3000
+**C'est tout !** 🎉 L'application et la base de données sont automatiquement configurées.
+
+### Option 2 : Installation manuelle
+
+Pour les développeurs ou si vous ne pouvez pas utiliser Docker :
+
+```bash
+# 1. Cloner le repository
+git clone https://github.com/NexaFlowFrance/OpenFamily.git
+cd OpenFamily
+
+# 2. Installer PostgreSQL (si pas déjà installé)
+# Windows: https://www.postgresql.org/download/windows/
+# Linux: sudo apt install postgresql
+# macOS: brew install postgresql
+
+# 3. Créer la base de données
+psql -U postgres
+CREATE DATABASE openfamily;
+\q
+
+# 4. Configurer l'environnement
+cp .env.example .env
+nano .env  # Ajustez DATABASE_URL avec vos identifiants
+
+# 5. Installer et démarrer
+pnpm install
+pnpm build
+pnpm start
+```
 
 ---
 
@@ -133,32 +173,22 @@ Ce script va :
 
 ### Prérequis
 
-- **Serveur Linux** (Ubuntu 20.04+ recommandé) ou Windows avec WSL
-- **Docker & Docker Compose** (installés automatiquement par le script)
+#### Avec Docker (Recommandé)
+- **Docker Desktop** (Windows/Mac) ou **Docker Engine** (Linux)
+- **2 Go de RAM minimum**
+- **5 Go d'espace disque**
+
+#### Sans Docker
+- **Node.js 20+** et **pnpm**
+- **PostgreSQL 14+**
 - **2 Go de RAM minimum**
 - **10 Go d'espace disque**
 
-### Installation manuelle
+### Installation détaillée
 
-```bash
-# 1. Cloner le repository
-git clone https://github.com/NexaFlowFrance/OpenFamily.git
-cd OpenFamily
+📖 **Guide complet** : [FIRST_INSTALLATION.md](FIRST_INSTALLATION.md)
 
-# 2. Créer le fichier .env
-cp .env.example .env
-
-# 3. Modifier le mot de passe PostgreSQL dans .env
-nano .env  # Changez DB_PASSWORD
-
-# 4. Lancer avec Docker Compose
-docker-compose up -d
-
-# 5. Accéder à l'application
-# http://localhost:3000 (local)
-# http://votre-ip:3000 (réseau local)
-# https://votre-domaine.com (avec reverse proxy)
-```
+L'image Docker officielle est disponible sur Docker Hub : [nexaflow/openfamily](https://hub.docker.com/r/nexaflow/openfamily)
 
 ### Configuration réseau
 
@@ -166,38 +196,31 @@ docker-compose up -d
 L'application fonctionne immédiatement sur `http://localhost:3000`
 
 #### Accès réseau local (LAN)
-1. Trouvez l'IP de votre serveur : `ip addr show` ou `ipconfig`
+1. Trouvez l'IP de votre serveur : `ip addr show` (Linux) ou `ipconfig` (Windows)
 2. Accédez depuis n'importe quel appareil : `http://192.168.X.X:3000`
 3. **Détection automatique** : L'application détecte qu'elle est hébergée et active le mode serveur
 
 #### Accès internet (optionnel)
-Consultez le [Guide de Déploiement](docs/DEPLOYMENT.md) pour :
+Consultez le [Guide de Déploiement](PRODUCTION.md) pour :
 - Configurer un nom de domaine
 - Installer un certificat SSL (HTTPS)
-- Sécuriser l'accès avec authentification
+- Sécuriser l'accès
 
-### Pour les développeurs
+### Mise à jour
 
+#### Avec Docker
 ```bash
-# Installer les dépendances
-pnpm install
-
-# Démarrer PostgreSQL en local
-docker-compose up -d postgres
-
-# Lancer en mode développement
-pnpm dev
-
-# Build pour production
-pnpm build
-
-# Démarrer le serveur de production
-pnpm start
+docker compose pull
+docker compose up -d
 ```
 
-**Note** : Le mode développement (`pnpm dev`) nécessite PostgreSQL. Utilisez Docker Compose pour démarrer uniquement la base de données.
-
-### Pour les utilisateurs
+#### Sans Docker
+```bash
+git pull
+pnpm install
+pnpm build
+pnpm start
+```
 
 #### Option 1: PWA (Recommandé)
 1. Accédez à votre instance OpenFamily (ex: `http://192.168.1.100:3000`)

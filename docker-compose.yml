@@ -6,136 +6,40 @@ services:
     image: postgres:16-alpine
     container_name: openfamily-postgres
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    user: "999:999"
     environment:
-      POSTGRES_DB: ${DB_NAME:-openfamily}
-      POSTGRES_USER: ${DB_USER:-openfamily}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      POSTGRES_DB: openfamily
+      POSTGRES_USER: openfamily
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-openfamily_secure_2026}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
-    networks:
-      - openfamily_internal
+    ports:
+      - "${DB_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-openfamily} -d ${DB_NAME:-openfamily}"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    command: >
-      postgres 
-      -c shared_buffers=256MB 
-      -c max_connections=100
-      -c log_statement=all
-      -c log_destination=stderr
-      -c logging_collector=on
-      -c log_directory=/var/log/postgresql
-      -c log_filename=postgresql.log
-      -c log_rotation_age=1d
-      -c log_rotation_size=100MB
+      test: ["CMD-SHELL", "pg_isready -U openfamily"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # OpenFamily Application (Web + API)
+  # OpenFamily Application
   app:
-    # Option 1: Build locally
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    # Option 2: Use pre-built image from Docker Hub
     image: nexaflow/openfamily:latest
     container_name: openfamily-app
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
-      - /var/tmp
-    user: "1001:1001"
+    ports:
+      - "${APP_PORT:-3000}:3000"
     environment:
       NODE_ENV: production
+      DATABASE_URL: postgresql://openfamily:${DB_PASSWORD:-openfamily_secure_2026}@postgres:5432/openfamily
       PORT: 3000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-openfamily}
-      DB_USER: ${DB_USER:-openfamily}
-      DB_PASSWORD: ${DB_PASSWORD}
-      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
-      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
-      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
-    ports:
-      - "${PORT:-3000}:3000"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - app_data:/app/data
-      - app_logs:/app/logs
-    networks:
-      - openfamily_internal
-      - openfamily_external
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-
-  # Nginx reverse proxy (optional, for HTTPS and better performance)
-  nginx:
-    image: nginx:alpine
-    container_name: openfamily-nginx
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /var/cache/nginx
-      - /var/run
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/ssl:/etc/nginx/ssl:ro
-      - nginx_logs:/var/log/nginx
-    depends_on:
-      app:
-        condition: service_healthy
-    networks:
-      - openfamily_external
-    profiles:
-      - production
-      - ssl
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 volumes:
   postgres_data:
     driver: local
   app_data:
     driver: local
-  app_logs:
-    driver: local
-  nginx_logs:
-    driver: local
-
-networks:
-  openfamily_internal:
-    driver: bridge
-    internal: true
-  openfamily_external:
-    driver: bridge

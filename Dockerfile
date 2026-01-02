@@ -1,5 +1,8 @@
-FROM node:20-alpine AS deps
+FROM node:20-alpine3.21 AS deps
 WORKDIR /app
+
+# Update Alpine packages for security
+RUN apk update && apk upgrade --no-cache
 
 # Install build dependencies for native modules
 RUN apk add --no-cache python3 make g++ jq
@@ -31,13 +34,15 @@ COPY --from=deps /app/package.json ./package.json
 # Build the application
 RUN pnpm build
 
-FROM nginx:stable-alpine AS web
+FROM nginx:stable-alpine3.21 AS web
+RUN apk update && apk upgrade --no-cache
 COPY --from=builder /app/dist/public /usr/share/nginx/html
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 
-FROM node:20-alpine AS api
+FROM node:20-alpine3.21 AS api
+RUN apk update && apk upgrade --no-cache
 WORKDIR /app
 COPY --from=builder /app/dist /app/dist
 ENV NODE_ENV=production

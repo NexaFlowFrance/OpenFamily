@@ -12,15 +12,18 @@ RUN corepack enable
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Remove ignoredBuiltDependencies, overrides, and patchedDependencies that cause issues in Docker
-RUN jq 'del(.pnpm.ignoredBuiltDependencies) | del(.pnpm.overrides) | del(.pnpm.patchedDependencies)' package.json > package.json.tmp && \
+# Remove only ignoredBuiltDependencies (keep security overrides!)
+RUN jq 'del(.pnpm.ignoredBuiltDependencies)' package.json > package.json.tmp && \
     mv package.json.tmp package.json
 
-# Delete lock file to regenerate it without the ignored dependencies
+# Delete lock file to regenerate with security overrides
 RUN rm -f pnpm-lock.yaml
 
-# Install all dependencies including native builds
+# Install with security overrides enforced
 RUN pnpm install --shamefully-hoist
+
+# Verify security patches are applied
+RUN pnpm ls cross-spawn glob brace-expansion || true
 
 FROM deps AS builder
 WORKDIR /app

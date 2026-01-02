@@ -6,9 +6,8 @@ RUN apk add --no-cache python3 make g++ jq
 
 RUN corepack enable
 
-# Copy package files and patches
+# Copy package files
 COPY package.json pnpm-lock.yaml ./
-COPY patches ./patches
 
 # Remove ignoredBuiltDependencies, overrides, and patchedDependencies that cause issues in Docker
 RUN jq 'del(.pnpm.ignoredBuiltDependencies) | del(.pnpm.overrides) | del(.pnpm.patchedDependencies)' package.json > package.json.tmp && \

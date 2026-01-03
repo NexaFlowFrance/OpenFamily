@@ -186,7 +186,7 @@ pnpm start
 
 ### Detailed Installation
 
-📖 **Complete guide**: [FIRST_INSTALLATION.md](FIRST_INSTALLATION.md)
+📖 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for deployment details.
 
 The official Docker image is available on Docker Hub: [nexaflow/openfamily](https://hub.docker.com/r/nexaflow/openfamily)
 
@@ -201,10 +201,7 @@ The application works immediately on `http://localhost:3000`
 3. **Automatic detection**: The app detects it's hosted and enables server mode
 
 #### Internet access (optional)
-See the [Deployment Guide](PRODUCTION.md) for:
-- Configuring a domain name
-- Installing an SSL certificate (HTTPS)
-- Securing access
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for domain/HTTPS setup.
 
 ### Updates
 

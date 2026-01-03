@@ -98,8 +98,8 @@ OpenFamily intègre plusieurs couches de sécurité :
 
 ## 📚 Documentation
 
-- **Installation complète** : https://github.com/NexaFlowFrance/OpenFamily/blob/main/INSTALLATION.md
-- **Guide de production** : https://github.com/NexaFlowFrance/OpenFamily/blob/main/PRODUCTION.md
+- **Démarrage rapide / Installation** : https://github.com/NexaFlowFrance/OpenFamily#-d%C3%A9marrage-rapide
+- **Déploiement (domaine/HTTPS)** : https://github.com/NexaFlowFrance/OpenFamily/blob/main/docs/DEPLOYMENT.md
 - **Configuration sécurité** : https://github.com/NexaFlowFrance/OpenFamily/blob/main/SECURITY.md
 - **Code source** : https://github.com/NexaFlowFrance/OpenFamily
 

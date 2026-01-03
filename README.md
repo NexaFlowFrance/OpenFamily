@@ -120,23 +120,24 @@ OpenFamily est une application de gestion familiale complète proposée en open 
 La méthode la plus simple ! Utilisez notre image Docker pré-configurée :
 
 ```bash
-# 1. Téléchargez les fichiers de configuration
+# 1. Téléchargez le fichier docker-compose.yml
 mkdir openfamily && cd openfamily
 curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.yml
-curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/.env.example
-cp .env.example .env
 
-# 2. Modifiez le mot de passe (optionnel)
-nano .env  # Changez DB_PASSWORD
-
-# 3. Démarrez OpenFamily
+# 2. Démarrez OpenFamily (Docker Hub)
 docker compose up -d
 
-# 4. Accédez à l'application
+# 3. Accédez à l'application
 # http://localhost:3000
 ```
 
-**C'est tout !** 🎉 L'application et la base de données sont automatiquement configurées.
+**C'est tout !** 🎉 La base de données et l'application sont automatiquement configurées.
+
+Au premier démarrage, un mot de passe PostgreSQL est généré automatiquement et affiché dans les logs du service `init`.
+
+```bash
+docker compose logs init
+```
 
 ### Option 2 : Installation manuelle
 
@@ -186,8 +187,6 @@ pnpm start
 
 ### Installation détaillée
 
-📖 **Guide complet** : [FIRST_INSTALLATION.md](FIRST_INSTALLATION.md)
-
 L'image Docker officielle est disponible sur Docker Hub : [nexaflow/openfamily](https://hub.docker.com/r/nexaflow/openfamily)
 
 ### Configuration réseau
@@ -201,10 +200,7 @@ L'application fonctionne immédiatement sur `http://localhost:3000`
 3. **Détection automatique** : L'application détecte qu'elle est hébergée et active le mode serveur
 
 #### Accès internet (optionnel)
-Consultez le [Guide de Déploiement](PRODUCTION.md) pour :
-- Configurer un nom de domaine
-- Installer un certificat SSL (HTTPS)
-- Sécuriser l'accès
+Pour un déploiement avec nom de domaine / HTTPS, voir [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ### Mise à jour
 

@@ -68,7 +68,7 @@ services:
 
   # OpenFamily Application avec configuration automatique
   app:
-    build: .
+    image: nexaflow/openfamily:latest
     container_name: openfamily-app
     restart: unless-stopped
     ports:

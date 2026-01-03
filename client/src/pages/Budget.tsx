@@ -170,12 +170,12 @@ export default function Budget() {
     for (let i = 5; i >= 0; i--) {
       const date = new Date(currentDate);
       date.setMonth(date.getMonth() - i);
-      const monthStr = date.toISOString().slice(0, 7);
+      const monthStr = formatYearMonth(date);
       const budget = budgets.find(b => b.month === monthStr);
       
       if (budget) {
-        const total = budget.expenses ? budget.expenses.reduce((sum, exp) => sum + exp.amount, 0) : 0;
-        const limit = budget.categories ? Object.values(budget.categories).reduce((sum, val) => sum + val, 0) : 0;
+        const total = budget.expenses ? budget.expenses.reduce((sum, exp) => sum + Number(exp.amount), 0) : 0;
+        const limit = budget.categories ? Object.values(budget.categories).reduce((sum, val) => sum + Number(val), 0) : 0;
         stats.push({
           month: monthStr,
           monthLabel: date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }),

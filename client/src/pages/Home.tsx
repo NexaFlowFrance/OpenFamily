@@ -8,6 +8,7 @@ import { useAddButton } from "@/contexts/AddButtonContext";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useState, useEffect } from "react";
 import { generateTaskOccurrences } from "@/lib/recurrence";
+import { formatDateOnly, formatYearMonth } from "@/lib/dateOnly";
 import { 
   Calendar, 
   ListChecks, 
@@ -44,7 +45,7 @@ export default function Home({ onNavigate }: HomeProps) {
     return () => setAddAction(null);
   }, [setAddAction]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = formatDateOnly(new Date());
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todayEnd = new Date();
@@ -79,7 +80,7 @@ export default function Home({ onNavigate }: HomeProps) {
   }).slice(0, 3);
   const nextAppointment = upcomingAppointments[0];
   const pendingShoppingItems = shoppingItems.filter(item => !item.completed);
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = formatYearMonth(new Date());
   const currentBudget = budgets.find(b => b.month === currentMonth);
   
   // Calculs pour les widgets

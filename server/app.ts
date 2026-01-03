@@ -102,6 +102,19 @@ interface FamilyConfiguration {
   updated_at: Date;
 }
 
+function formatDateOnlyLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatYearMonthLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
 // Helper functions to map between DB (snake_case) and client (camelCase)
 function mapRecipeToClient(dbRecipe: any) {
   return {
@@ -122,7 +135,8 @@ function mapRecipeToClient(dbRecipe: any) {
 function mapMealToClient(dbMeal: any) {
   return {
     id: dbMeal.id,
-    date: dbMeal.date instanceof Date ? dbMeal.date.toISOString().split('T')[0] : dbMeal.date,
+    // Keep DATE as date-only (avoid timezone shifts from toISOString)
+    date: dbMeal.date instanceof Date ? formatDateOnlyLocal(dbMeal.date) : dbMeal.date,
     mealType: dbMeal.type,
     recipeId: dbMeal.recipe_id,
     title: dbMeal.notes || '',
@@ -939,9 +953,18 @@ export function createApp(pool: Pool) {
       
       // Add expenses
       expenseResults.rows.forEach(expense => {
-        const month = expense.date.slice(0, 7); // Extraire YYYY-MM
+        const dateOnly = expense.date instanceof Date ? formatDateOnlyLocal(expense.date) : String(expense.date);
+        const month = expense.date instanceof Date ? formatYearMonthLocal(expense.date) : dateOnly.slice(0, 7); // YYYY-MM
+
         if (budgetsByMonth[month]) {
-          budgetsByMonth[month].expenses.push(expense);
+          budgetsByMonth[month].expenses.push({
+            id: expense.id,
+            category: expense.category,
+            amount: Number(expense.amount),
+            description: expense.description,
+            date: dateOnly,
+            createdAt: expense.created_at,
+          });
         }
       });
       

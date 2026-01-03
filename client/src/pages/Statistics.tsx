@@ -2,6 +2,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { formatYearMonth } from '@/lib/dateOnly';
 import { 
   CheckCircle2, 
   Circle, 
@@ -38,7 +39,7 @@ export default function Statistics() {
   const weekCompletionRate = weekTasks.length > 0 ? (weekCompletedTasks / weekTasks.length) * 100 : 0;
 
   // Statistiques de budget
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = formatYearMonth(new Date());
   const currentBudget = budgets.find(b => b.month === currentMonth);
   const totalBudget = currentBudget && currentBudget.categories
     ? Object.values(currentBudget.categories).reduce((sum, val) => sum + (Number(val) || 0), 0)

@@ -1,9 +1,21 @@
 import { Appointment, Task, NotificationSettings } from '@/types';
 import { logger } from './logger';
 
+const isSecureContextOrLocalhost = (): boolean => {
+  const host = window.location.hostname;
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+  return window.isSecureContext || isLocalhost;
+};
+
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!('Notification' in window)) {
     logger.warn('Ce navigateur ne supporte pas les notifications');
+    return false;
+  }
+
+  // On HTTP (non-secure context), most browsers block the permission prompt and SW.
+  if (!isSecureContextOrLocalhost()) {
+    logger.warn('Notifications bloquées: contexte non sécurisé (HTTPS requis)');
     return false;
   }
 

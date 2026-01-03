@@ -131,6 +131,73 @@ docker compose up -d
 # http://localhost:3000
 ```
 
+### 🔒 HTTPS (recommandé pour Notifications / Service Worker)
+
+Les **notifications** et le **Service Worker** sont bloqués par la plupart des navigateurs en **HTTP** (hors `localhost`).
+Pour activer les notifications, utilisez **HTTPS**.
+
+#### A) Déploiement sur un domaine public (certificat auto Let’s Encrypt)
+
+1. Téléchargez l'override HTTPS public :
+
+```bash
+curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.https-public.yml
+```
+
+2. Tlchargez le fichier Caddyfile public :
+
+```bash
+mkdir -p docker
+curl -o docker/Caddyfile.public https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker/Caddyfile.public
+```
+
+3. Crez un fichier `.env` dans le dossier et configurez :
+
+```bash
+OPENFAMILY_DOMAIN=openfamily.votre-domaine.com
+ACME_EMAIL=votre-email@domaine.com
+```
+
+4. Dmarrez avec HTTPS :
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.https-public.yml up -d
+```
+
+Accès : `https://openfamily.votre-domaine.com`
+
+#### B) Serveur local à domicile (LAN) — HTTPS “simple” via CA interne
+
+1. Téléchargez l'override HTTPS local :
+
+```bash
+curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.https-local.yml
+```
+
+2. Tlchargez le fichier Caddyfile local :
+
+```bash
+mkdir -p docker
+curl -o docker/Caddyfile.local https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker/Caddyfile.local
+```
+
+3. Dmarrez :
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.https-local.yml up -d
+```
+
+Accès : `https://IP_DU_SERVEUR` (ex: `https://192.168.1.10`)
+
+⚠️ Pour éviter l'avertissement navigateur et **autoriser notifications/SW**, il faut **faire confiance** au certificat CA interne de Caddy sur vos appareils.
+Vous pouvez exporter le CA depuis le conteneur (exemple) :
+
+```bash
+docker cp openfamily-caddy:/data/caddy/pki/authorities/local/root.crt ./openfamily-local-ca.crt
+```
+
+Puis installez ce certificat en tant qu’**autorité de confiance** sur le PC/mobile.
+
 **C'est tout !** 🎉 La base de données et l'application sont automatiquement configurées.
 
 Au premier démarrage, un mot de passe PostgreSQL est généré automatiquement et affiché dans les logs du service `init`.

@@ -45,6 +45,10 @@ export default function Settings() {
   const [showForm, setShowForm] = useState(false);
   const [selectedMemberHealth, setSelectedMemberHealth] = useState<string | null>(null);
   const [notificationStatus, setNotificationStatus] = useState(getNotificationStatus());
+
+  const host = window.location.hostname;
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+  const isSecureContextOrLocalhost = window.isSecureContext || isLocalhost;
   const [formData, setFormData] = useState({
     name: '',
     role: 'parent' as const,
@@ -181,6 +185,16 @@ export default function Settings() {
           <h2 className="text-lg font-bold text-foreground mb-3">{t.settings.notifications}</h2>
           
           <Card className="p-3 space-y-4">
+            {!isSecureContextOrLocalhost && (
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
+                <p className="text-sm font-medium text-foreground">{t.settings.httpsRequiredTitle}</p>
+                <p className="text-sm text-muted-foreground">{t.settings.httpsRequiredDesc}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t.settings.currentProtocol}: <span className="font-medium">{window.location.protocol}</span>
+                </p>
+              </div>
+            )}
+
             {/* Activation générale */}
             <div className="flex items-center justify-between">
               <div>
@@ -197,6 +211,10 @@ export default function Settings() {
                   variant="outline"
                   size="sm"
                   onClick={async () => {
+                    if (!isSecureContextOrLocalhost) {
+                      alert(t.settings.httpsRequiredDesc);
+                      return;
+                    }
                     const granted = await requestNotificationPermission();
                     setNotificationStatus(getNotificationStatus());
                     if (granted) {
@@ -204,6 +222,7 @@ export default function Settings() {
                     }
                   }}
                   className="h-8"
+                  disabled={!isSecureContextOrLocalhost}
                 >
                   <Bell className="w-4 h-4 mr-2" />
                   {t.settings.activate}

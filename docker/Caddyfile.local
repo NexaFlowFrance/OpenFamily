@@ -1,0 +1,14 @@
+{
+	# Local/LAN mode: Caddy issues certs from its internal CA.
+	# Clients must trust the CA certificate to avoid browser warnings
+	# and to enable Service Worker + Notifications.
+}
+
+:80 {
+	redir https://{host}{uri} permanent
+}
+
+:443 {
+	tls internal
+	reverse_proxy app:3000
+}

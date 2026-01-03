@@ -1,0 +1,23 @@
+services:
+  app:
+    ports: []
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: openfamily-caddy
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile.local:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local

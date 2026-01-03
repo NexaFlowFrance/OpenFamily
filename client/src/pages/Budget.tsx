@@ -98,6 +98,7 @@ export default function Budget() {
       alert(t.budget.createBudgetFirst);
       return;
     }
+
     addExpense(currentBudget.id, newExpense);
     setNewExpense({
       category: 'food',
@@ -191,7 +192,7 @@ export default function Budget() {
   const monthlyStats = getMonthlyStats();
 
   return (
-    <div className="container mx-auto p-4 md:p-6 pb-32 md:pb-8 max-w-7xl min-h-screen">
+    <div className="container mx-auto p-4 md:p-6 pb-[calc(8rem+env(safe-area-inset-bottom))] max-w-7xl h-screen overflow-y-auto">
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">{t.budget.title}</h1>
         <div className="flex gap-2 items-center">

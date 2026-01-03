@@ -2,6 +2,12 @@
 import { logger } from './logger';
 const VAPID_PUBLIC_KEY = 'BKwpdHIzJUphggpc46Pk5oso5SjruMjWiqM5z9ae0lxCnFrbSGihQ5azEWcVhDtiiuqUfsZiJXDHDm857ZyeIeQ';
 
+const isSecureContextOrLocalhost = (): boolean => {
+  const host = window.location.hostname;
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+  return window.isSecureContext || isLocalhost;
+};
+
 // Convertir la clé VAPID publique en Uint8Array
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -18,6 +24,11 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!('serviceWorker' in navigator)) {
     logger.warn('Service Worker non supporté');
+    return null;
+  }
+
+  if (!isSecureContextOrLocalhost()) {
+    logger.warn('Service Worker bloqué: HTTPS requis (ou localhost)');
     return null;
   }
 
@@ -41,6 +52,11 @@ export function isPushSupported(): boolean {
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) {
     logger.warn('Notifications non supportées');
+    return false;
+  }
+
+  if (!isSecureContextOrLocalhost()) {
+    logger.warn('Notifications bloquées: HTTPS requis (ou localhost)');
     return false;
   }
 

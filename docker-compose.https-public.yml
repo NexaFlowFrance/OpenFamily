@@ -1,0 +1,34 @@
+services:
+  app:
+    ports: []
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: openfamily-caddy
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      # Required: your public domain name (e.g. openfamily.example.com)
+      OPENFAMILY_DOMAIN: ${OPENFAMILY_DOMAIN}
+      # Recommended: email for Let's Encrypt notifications
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    command:
+      - sh
+      - -c
+      - |
+        if [ -n "$$ACME_EMAIL" ]; then echo "email $$ACME_EMAIL" > /etc/caddy/email.conf; else : > /etc/caddy/email.conf; fi
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile.public:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local

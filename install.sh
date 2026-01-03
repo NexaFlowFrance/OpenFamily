@@ -120,6 +120,63 @@ else
     echo "ℹ️  Fichier .env existe déjà"
 fi
 
+# Choix SSL
+echo ""
+echo "🔒 Configuration HTTPS (important pour Notifications / Service Worker)"
+echo "1) HTTP simple (pas de notifications push en navigateur)"
+echo "2) HTTPS avec domaine public (Let's Encrypt automatique)"
+echo "3) HTTPS en local/LAN (certificat interne Caddy)"
+echo -n "Choix [1]: "
+read -r SSL_CHOICE
+SSL_CHOICE=${SSL_CHOICE:-1}
+
+COMPOSE_FILES=("docker-compose.yml")
+
+download_file() {
+    local url="$1"
+    local out="$2"
+    if command_exists curl; then
+        curl -o "$out" "$url"
+    else
+        wget -O "$out" "$url"
+    fi
+}
+
+if [[ "$SSL_CHOICE" == "2" ]]; then
+    echo "➡️  Mode HTTPS public sélectionné"
+    download_file "https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.https-public.yml" "docker-compose.https-public.yml"
+    mkdir -p docker
+    download_file "https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker/Caddyfile.public" "docker/Caddyfile.public"
+    COMPOSE_FILES+=("docker-compose.https-public.yml")
+
+    echo -n "Nom de domaine (ex: openfamily.example.com): "
+    read -r OPENFAMILY_DOMAIN
+    if [ -z "$OPENFAMILY_DOMAIN" ]; then
+        echo "❌ Domaine requis pour HTTPS public"
+        exit 1
+    fi
+
+    echo -n "Email Let's Encrypt (optionnel mais recommandé): "
+    read -r ACME_EMAIL
+
+    # Ajouter à .env pour que docker compose resolve les variables
+    {
+        echo "OPENFAMILY_DOMAIN=$OPENFAMILY_DOMAIN"
+        if [ -n "$ACME_EMAIL" ]; then
+            echo "ACME_EMAIL=$ACME_EMAIL"
+        fi
+    } >> .env
+
+elif [[ "$SSL_CHOICE" == "3" ]]; then
+    echo "➡️  Mode HTTPS local/LAN sélectionné"
+    download_file "https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.https-local.yml" "docker-compose.https-local.yml"
+    mkdir -p docker
+    download_file "https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker/Caddyfile.local" "docker/Caddyfile.local"
+    COMPOSE_FILES+=("docker-compose.https-local.yml")
+else
+    echo "➡️  Mode HTTP simple sélectionné"
+fi
+
 # Demander si l'utilisateur veut changer le mot de passe
 echo ""
 echo "🔐 Configuration du mot de passe"
@@ -152,21 +209,33 @@ else
     exit 1
 fi
 
+COMPOSE_ARGS=()
+for f in "${COMPOSE_FILES[@]}"; do
+  COMPOSE_ARGS+=("-f" "$f")
+done
+
 echo "Téléchargement des images Docker (peut prendre quelques minutes)..."
 
-if $COMPOSE_CMD up -d; then
+if $COMPOSE_CMD "${COMPOSE_ARGS[@]}" up -d; then
     echo ""
     echo "🎉 OpenFamily a été installé avec succès!"
     echo ""
-    echo "📊 Application web: http://localhost:3000"
+        if [[ "$SSL_CHOICE" == "2" ]]; then
+            echo "📊 Application web: https://$OPENFAMILY_DOMAIN"
+        elif [[ "$SSL_CHOICE" == "3" ]]; then
+            echo "📊 Application web: https://localhost (ou https://IP_DU_SERVEUR)"
+            echo "⚠️  Pour activer notifications/SW, installez le CA local de Caddy sur vos appareils."
+        else
+            echo "📊 Application web: http://localhost:3000"
+        fi
     echo "🐘 Base de données: localhost:5432"
     echo ""
     echo "📁 Dossier d'installation: $FOLDER_PATH"
     echo ""
     echo "Commandes utiles:"
-    echo "  - Voir les logs: $COMPOSE_CMD logs -f"
-    echo "  - Arrêter: $COMPOSE_CMD down"
-    echo "  - Mettre à jour: $COMPOSE_CMD pull && $COMPOSE_CMD up -d"
+        echo "  - Voir les logs: $COMPOSE_CMD ${COMPOSE_ARGS[*]} logs -f"
+        echo "  - Arrêter: $COMPOSE_CMD ${COMPOSE_ARGS[*]} down"
+        echo "  - Mettre à jour: $COMPOSE_CMD ${COMPOSE_ARGS[*]} pull && $COMPOSE_CMD ${COMPOSE_ARGS[*]} up -d"
     echo ""
     
     # Demander si on ouvre le navigateur
@@ -175,9 +244,21 @@ if $COMPOSE_CMD up -d; then
         read -r open_browser
         if [[ $open_browser != "n" && $open_browser != "N" ]]; then
             if command_exists xdg-open; then
-                xdg-open http://localhost:3000 >/dev/null 2>&1 &
+                if [[ "$SSL_CHOICE" == "2" ]]; then
+                    xdg-open "https://$OPENFAMILY_DOMAIN" >/dev/null 2>&1 &
+                elif [[ "$SSL_CHOICE" == "3" ]]; then
+                    xdg-open "https://localhost" >/dev/null 2>&1 &
+                else
+                    xdg-open "http://localhost:3000" >/dev/null 2>&1 &
+                fi
             elif command_exists open; then
-                open http://localhost:3000
+                if [[ "$SSL_CHOICE" == "2" ]]; then
+                    open "https://$OPENFAMILY_DOMAIN"
+                elif [[ "$SSL_CHOICE" == "3" ]]; then
+                    open "https://localhost"
+                else
+                    open "http://localhost:3000"
+                fi
             fi
         fi
     fi

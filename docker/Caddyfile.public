@@ -1,0 +1,9 @@
+{
+	# Optional: the container entrypoint writes /etc/caddy/email.conf when ACME_EMAIL is set.
+	import /etc/caddy/email.conf
+}
+
+# Public domain (Let's Encrypt) — requires OPENFAMILY_DOMAIN
+{$OPENFAMILY_DOMAIN} {
+	reverse_proxy app:3000
+}

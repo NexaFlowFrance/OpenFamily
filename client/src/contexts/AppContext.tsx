@@ -486,7 +486,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Activer la synchronisation en temps réel via WebSocket
   const familyId = 'family-default'; // TODO: Récupérer depuis la configuration utilisateur
-  useRealtimeSync(familyId, true);
+  useRealtimeSync(familyId, reloadData, true);
 
   return (
     <AppContext.Provider value={value}>

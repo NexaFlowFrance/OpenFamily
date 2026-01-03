@@ -102,6 +102,35 @@ interface FamilyConfiguration {
   updated_at: Date;
 }
 
+// Helper functions to map between DB (snake_case) and client (camelCase)
+function mapRecipeToClient(dbRecipe: any) {
+  return {
+    id: dbRecipe.id,
+    title: dbRecipe.name,
+    description: dbRecipe.description,
+    category: dbRecipe.category,
+    prepTime: dbRecipe.prep_time,
+    cookTime: dbRecipe.cook_time,
+    servings: dbRecipe.servings,
+    ingredients: dbRecipe.ingredients,
+    instructions: Array.isArray(dbRecipe.instructions) ? dbRecipe.instructions.join('\n') : dbRecipe.instructions,
+    image: dbRecipe.image_url,
+    createdAt: dbRecipe.created_at
+  };
+}
+
+function mapMealToClient(dbMeal: any) {
+  return {
+    id: dbMeal.id,
+    date: dbMeal.date instanceof Date ? dbMeal.date.toISOString().split('T')[0] : dbMeal.date,
+    mealType: dbMeal.type,
+    recipeId: dbMeal.recipe_id,
+    title: dbMeal.notes || '',
+    notes: dbMeal.notes,
+    createdAt: dbMeal.created_at
+  };
+}
+
 // Middleware d'authentification simple
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authToken = req.headers.authorization?.replace('Bearer ', '');
@@ -145,16 +174,15 @@ export function createApp(pool: Pool) {
     }
   }));
 
-  // Rate limiting
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.',
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
-  
-  app.use(limiter);
+  // Rate limiting disabled for development/Docker
+  // const limiter = rateLimit({
+  //   windowMs: 15 * 60 * 1000,
+  //   max: 100,
+  //   message: 'Too many requests from this IP, please try again later.',
+  //   standardHeaders: true,
+  //   legacyHeaders: false,
+  // });
+  // app.use(limiter);
   
   // CORS and body parsing
   app.use(cors());
@@ -629,10 +657,11 @@ export function createApp(pool: Pool) {
     try {
       const familyId = (req as any).familyId;
       const { id, name, color, health_info } = req.body;
+      const memberId = id || randomUUID();
       
       const result = await pool.query(
         'INSERT INTO family_members (id, family_id, name, color, health_info) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [id, familyId, name, color, JSON.stringify(health_info)]
+        [memberId, familyId, name, color, JSON.stringify(health_info ?? {})]
       );
       
       notifySync(req, 'members', 'create', result.rows[0]);
@@ -696,7 +725,7 @@ export function createApp(pool: Pool) {
         'SELECT * FROM recipes WHERE family_id = $1 ORDER BY created_at DESC',
         [familyId]
       );
-      res.json(result.rows);
+      res.json(result.rows.map(mapRecipeToClient));
     } catch (error) {
       console.error('Error fetching recipes:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -706,15 +735,36 @@ export function createApp(pool: Pool) {
   app.post('/recipes', async (req: Request, res: Response) => {
     try {
       const familyId = (req as any).familyId;
-      const { id, name, category, prep_time, cook_time, servings, ingredients, instructions, image_url } = req.body;
+      // Client sends: title, description, category, ingredients, instructions, prepTime, cookTime, servings, image
+      const { id, title, description, category, ingredients, instructions, prepTime, cookTime, servings, image } = req.body;
+
+      const recipeId = id || randomUUID();
+      
+      // Convert instructions string to array if needed
+      const instructionsArray = Array.isArray(instructions) 
+        ? instructions 
+        : (instructions ? instructions.split('\n').filter((s: string) => s.trim()) : []);
       
       const result = await pool.query(
-        'INSERT INTO recipes (id, family_id, name, category, prep_time, cook_time, servings, ingredients, instructions, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-        [id, familyId, name, category, prep_time, cook_time, servings, JSON.stringify(ingredients), JSON.stringify(instructions), image_url]
+        'INSERT INTO recipes (id, family_id, name, description, category, prep_time, cook_time, servings, ingredients, instructions, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+        [
+          recipeId,
+          familyId,
+          title || 'Sans titre',
+          description ?? null,
+          category || 'other',
+          prepTime ?? null,
+          cookTime ?? null,
+          servings ?? 1,
+          JSON.stringify(ingredients ?? []),
+          JSON.stringify(instructionsArray),
+          image ?? null,
+        ]
       );
       
-      notifySync(req, 'recipes', 'create', result.rows[0]);
-      res.status(201).json(result.rows[0]);
+      const mapped = mapRecipeToClient(result.rows[0]);
+      notifySync(req, 'recipes', 'create', mapped);
+      res.status(201).json(mapped);
     } catch (error) {
       console.error('Error creating recipe:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -725,19 +775,25 @@ export function createApp(pool: Pool) {
     try {
       const familyId = (req as any).familyId;
       const { id } = req.params;
-      const { name, category, prep_time, cook_time, servings, ingredients, instructions, image_url } = req.body;
+      const { title, description, category, prepTime, cookTime, servings, ingredients, instructions, image } = req.body;
+      
+      // Convert instructions string to array if needed
+      const instructionsArray = Array.isArray(instructions) 
+        ? instructions 
+        : (instructions ? instructions.split('\n').filter((s: string) => s.trim()) : []);
       
       const result = await pool.query(
-        'UPDATE recipes SET name = $1, category = $2, prep_time = $3, cook_time = $4, servings = $5, ingredients = $6, instructions = $7, image_url = $8 WHERE id = $9 AND family_id = $10 RETURNING *',
-        [name, category, prep_time, cook_time, servings, JSON.stringify(ingredients), JSON.stringify(instructions), image_url, id, familyId]
+        'UPDATE recipes SET name = $1, description = $2, category = $3, prep_time = $4, cook_time = $5, servings = $6, ingredients = $7, instructions = $8, image_url = $9 WHERE id = $10 AND family_id = $11 RETURNING *',
+        [title, description, category, prepTime, cookTime, servings, JSON.stringify(ingredients), JSON.stringify(instructionsArray), image, id, familyId]
       );
       
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Recipe not found' });
       }
       
-      notifySync(req, 'recipes', 'update', result.rows[0]);
-      res.json(result.rows[0]);
+      const mapped = mapRecipeToClient(result.rows[0]);
+      notifySync(req, 'recipes', 'update', mapped);
+      res.json(mapped);
     } catch (error) {
       console.error('Error updating recipe:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -774,7 +830,7 @@ export function createApp(pool: Pool) {
         'SELECT * FROM meals WHERE family_id = $1 ORDER BY date DESC',
         [familyId]
       );
-      res.json(result.rows);
+      res.json(result.rows.map(mapMealToClient));
     } catch (error) {
       console.error('Error fetching meals:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -784,15 +840,19 @@ export function createApp(pool: Pool) {
   app.post('/meals', async (req: Request, res: Response) => {
     try {
       const familyId = (req as any).familyId;
-      const { id, date, type, recipe_id, notes } = req.body;
+      // Client sends: date, mealType, recipeId, title, notes
+      const { id, date, mealType, recipeId, title, notes } = req.body;
+
+      const mealId = id || randomUUID();
       
       const result = await pool.query(
         'INSERT INTO meals (id, family_id, date, type, recipe_id, notes) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [id, familyId, date, type, recipe_id, notes]
+        [mealId, familyId, date, mealType || 'lunch', recipeId ?? null, title || notes || '']
       );
       
-      notifySync(req, 'meals', 'create', result.rows[0]);
-      res.status(201).json(result.rows[0]);
+      const mapped = mapMealToClient(result.rows[0]);
+      notifySync(req, 'meals', 'create', mapped);
+      res.status(201).json(mapped);
     } catch (error) {
       console.error('Error creating meal:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -803,19 +863,20 @@ export function createApp(pool: Pool) {
     try {
       const familyId = (req as any).familyId;
       const { id } = req.params;
-      const { date, type, recipe_id, notes } = req.body;
+      const { date, mealType, recipeId, title, notes } = req.body;
       
       const result = await pool.query(
         'UPDATE meals SET date = $1, type = $2, recipe_id = $3, notes = $4 WHERE id = $5 AND family_id = $6 RETURNING *',
-        [date, type, recipe_id, notes, id, familyId]
+        [date, mealType, recipeId, title || notes, id, familyId]
       );
       
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Meal not found' });
       }
       
-      notifySync(req, 'meals', 'update', result.rows[0]);
-      res.json(result.rows[0]);
+      const mapped = mapMealToClient(result.rows[0]);
+      notifySync(req, 'meals', 'update', mapped);
+      res.json(mapped);
     } catch (error) {
       console.error('Error updating meal:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -935,9 +996,9 @@ export function createApp(pool: Pool) {
     try {
       const familyId = (req as any).familyId;
       const { month } = req.params;
-      const { categories } = req.body;
+      const { categories, expenses } = req.body;
       
-      console.log('Updating budget for month:', month, 'with categories:', categories);
+      console.log('Updating budget for month:', month, 'with categories:', categories, 'and expenses:', expenses);
       
       // Supprimer les anciennes catégories pour ce mois
       await pool.query(
@@ -955,12 +1016,38 @@ export function createApp(pool: Pool) {
       
       await Promise.all(insertPromises);
       
+      // Handle expenses if provided
+      if (expenses && Array.isArray(expenses)) {
+        // Delete old expenses for this month (date range: [monthStart, nextMonthStart))
+        const monthStart = `${month}-01`;
+        const nextMonthStartDate = new Date(`${month}-01T00:00:00Z`);
+        nextMonthStartDate.setUTCMonth(nextMonthStartDate.getUTCMonth() + 1);
+        const nextMonthStart = nextMonthStartDate.toISOString().slice(0, 10);
+
+        await pool.query(
+          `DELETE FROM budget_expenses
+           WHERE family_id = $1 AND date >= $2::date AND date < $3::date`,
+          [familyId, monthStart, nextMonthStart]
+        );
+        
+        // Insert new expenses
+        const expenseInserts = expenses.map(exp => {
+          const expId = exp.id || randomUUID();
+          return pool.query(
+            'INSERT INTO budget_expenses (id, family_id, category, amount, description, date) VALUES ($1, $2, $3, $4, $5, $6)',
+            [expId, familyId, exp.category, exp.amount, exp.description || '', exp.date]
+          );
+        });
+        
+        await Promise.all(expenseInserts);
+      }
+      
       // Return updated budget
       const result = {
         id: month,
         month,
         categories,
-        expenses: []
+        expenses: expenses || []
       };
       
       notifySync(req, 'budgets', 'update', result);
@@ -1031,6 +1118,8 @@ export function createApp(pool: Pool) {
     try {
       const familyId = (req as any).familyId;
       const { id, onboarding_completed, storage_mode, theme, language } = req.body;
+
+      const configId = id || `config-${familyId}`;
       
       // Upsert: INSERT avec ON CONFLICT UPDATE
       const result = await pool.query(
@@ -1044,7 +1133,7 @@ export function createApp(pool: Pool) {
            language = EXCLUDED.language,
            updated_at = NOW()
          RETURNING *`,
-        [id, familyId, onboarding_completed, storage_mode, theme, language]
+        [configId, familyId, onboarding_completed, storage_mode, theme, language]
       );
       
       res.status(201).json(result.rows[0]);

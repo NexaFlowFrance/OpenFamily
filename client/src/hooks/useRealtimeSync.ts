@@ -1,7 +1,6 @@
 // Hook React pour gérer la synchronisation WebSocket en temps réel
 import { useEffect, useRef, useCallback } from 'react';
 import { logger } from '../lib/logger';
-import { useApp } from '../contexts/AppContext';
 interface SyncEvent {
   type: 'sync';
   entity: string;
@@ -10,12 +9,21 @@ interface SyncEvent {
   timestamp: string;
 }
 
-export function useRealtimeSync(familyId: string | null, enabled: boolean = true) {
+export function useRealtimeSync(
+  familyId: string | null,
+  reloadData: () => void | Promise<void>,
+  enabled: boolean = true
+) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const { reloadData } = useApp();
+  const reloadDataRef = useRef(reloadData);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 10;
+
+  // Keep latest reloadData without forcing reconnects on every render
+  useEffect(() => {
+    reloadDataRef.current = reloadData;
+  }, [reloadData]);
 
   const connectWebSocket = useCallback(() => {
     if (!familyId || !enabled) return;
@@ -113,7 +121,9 @@ export function useRealtimeSync(familyId: string | null, enabled: boolean = true
     
     // Reload all data for simplicity
     // TODO: Optimize to reload only the affected entity
-    reloadData();
+    Promise.resolve(reloadDataRef.current()).catch((error) => {
+      logger.error('[Sync] Error reloading data:', error);
+    });
   };
 
   // Connecter au montage et reconnecter si familyId change

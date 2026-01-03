@@ -198,16 +198,16 @@ export default function TasksKanban() {
   const handleSaveTask = () => {
     if (!formData.title.trim()) return;
 
+    const taskData = {
+      ...formData,
+      dueDate: formData.dueDate || new Date().toISOString().split('T')[0], // Default to today if empty
+      completed: formData.status === 'done',
+    };
+
     if (editingTask) {
-      updateTask(editingTask, {
-        ...formData,
-        completed: formData.status === 'done',
-      });
+      updateTask(editingTask, taskData);
     } else {
-      addTask({
-        ...formData,
-        completed: formData.status === 'done',
-      });
+      addTask(taskData);
     }
 
     setShowForm(false);

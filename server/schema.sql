@@ -4,9 +4,17 @@
 -- Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Add missing columns to existing shopping_items table
-ALTER TABLE shopping_items ADD COLUMN IF NOT EXISTS price DECIMAL(10,2) DEFAULT 0;
-ALTER TABLE shopping_items ADD COLUMN IF NOT EXISTS notes TEXT;
+-- Add missing columns only if the table already exists (avoids first-run errors)
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'shopping_items'
+    ) THEN
+        ALTER TABLE shopping_items ADD COLUMN IF NOT EXISTS price DECIMAL(10,2) DEFAULT 0;
+        ALTER TABLE shopping_items ADD COLUMN IF NOT EXISTS notes TEXT;
+    END IF;
+END $$;
 
 -- Table: families
 CREATE TABLE IF NOT EXISTS families (
@@ -49,6 +57,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     status VARCHAR(50) DEFAULT 'todo',
     assigned_to VARCHAR(255),
     due_date TIMESTAMP,
+    data JSONB DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -74,6 +83,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     id VARCHAR(255) PRIMARY KEY,
     family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
+    description TEXT,
     category VARCHAR(100) DEFAULT 'other',
     prep_time INTEGER DEFAULT 0,
     cook_time INTEGER DEFAULT 0,

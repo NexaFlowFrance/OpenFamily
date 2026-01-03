@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAddButton } from "@/contexts/AddButtonContext";
 import { useDragScroll } from "@/hooks/useDragScroll";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateTaskOccurrences } from "@/lib/recurrence";
 import { 
   Calendar, 
@@ -31,11 +32,17 @@ interface HomeProps {
 export default function Home({ onNavigate }: HomeProps) {
   const { shoppingItems, tasks, appointments, recipes, meals, budgets, familyMembers, addShoppingItem, addTask } = useApp();
   const { t } = useLanguage();
+  const { setAddAction } = useAddButton();
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const [showQuickTask, setShowQuickTask] = useState(false);
   const [showQuickShopping, setShowQuickShopping] = useState(false);
   const [quickTaskName, setQuickTaskName] = useState('');
   const [quickShoppingName, setQuickShoppingName] = useState('');
+
+  useEffect(() => {
+    setAddAction(() => setShowQuickTask(true));
+    return () => setAddAction(null);
+  }, [setAddAction]);
 
   const today = new Date().toISOString().split('T')[0];
   const todayStart = new Date();

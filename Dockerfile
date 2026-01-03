@@ -47,7 +47,15 @@ CMD ["nginx", "-g", "daemon off;"]
 FROM node:20-alpine3.21 AS api
 RUN apk update && apk upgrade --no-cache
 WORKDIR /app
+
+# Copy package files and install production dependencies
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm@latest
+RUN pnpm install --prod --frozen-lockfile
+
+# Copy built application
 COPY --from=builder /app/dist /app/dist
+
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD ["node", "dist/index.js"]

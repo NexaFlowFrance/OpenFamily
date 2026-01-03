@@ -19,15 +19,10 @@ export class RepositoryFactory {
   }
 
   private static getApiUrl(): string {
-    const { protocol, hostname } = window.location;
-    
-    // Si hébergé sur serveur distant
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '') {
-      return `${protocol}//${hostname}:3001/api`;
-    }
-    
-    // En développement local
-    return 'http://localhost:3001/api';
+    // Always use same-origin API.
+    // - Dev: Vite proxy can forward /api
+    // - Prod/Docker: Node server serves /api on the same host/port
+    return '/api';
   }
 
   private static getServerConfig(): ServerConfig {

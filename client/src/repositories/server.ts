@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import { IDataRepository, ServerConfig } from './interface';
 import { ShoppingItem, Task, Appointment, FamilyMember, Recipe, Meal, Budget } from '@/types';
+import { logger } from '../lib/logger';
 
 /**
  * Implémentation du repository utilisant un serveur auto-hébergé
@@ -17,12 +18,12 @@ export class ServerRepository implements IDataRepository {
       'Authorization': `Bearer ${config.authToken || 'default-token'}`,
       'X-Family-Id': config.familyId || 'family-default',
     };
-    console.log('📡 ServerRepository initialized:', { baseUrl: this.baseUrl, headers: this.headers });
+    logger.log('📡 ServerRepository initialized:', { baseUrl: this.baseUrl, headers: this.headers });
   }
 
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log('📤 CLIENT REQUEST:', {
+    logger.log('📤 CLIENT REQUEST:', {
       method: options?.method || 'GET',
       url,
       headers: this.headers,
@@ -34,7 +35,7 @@ export class ServerRepository implements IDataRepository {
       headers: { ...this.headers, ...options?.headers },
     });
 
-    console.log('📥 CLIENT RESPONSE:', {
+    logger.log('📥 CLIENT RESPONSE:', {
       status: response.status,
       statusText: response.statusText,
       ok: response.ok
@@ -42,18 +43,18 @@ export class ServerRepository implements IDataRepository {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('🔴 CLIENT ERROR RESPONSE:', errorText);
+      logger.error('🔴 CLIENT ERROR RESPONSE:', errorText);
       throw new Error(`API Error: ${response.statusText}`);
     }
 
     // Gérer les réponses 204 (No Content) qui n'ont pas de JSON
     if (response.status === 204) {
-      console.log('✅ CLIENT SUCCESS: No Content (204)');
+      logger.log('✅ CLIENT SUCCESS: No Content (204)');
       return null as T;
     }
 
     const data = await response.json();
-    console.log('✅ CLIENT SUCCESS DATA:', data);
+    logger.log('✅ CLIENT SUCCESS DATA:', data);
     return data;
   }
 
@@ -82,9 +83,9 @@ export class ServerRepository implements IDataRepository {
 
   // Tasks
   async getTasks(): Promise<Task[]> {
-    console.log('🔍 ServerRepository.getTasks() called');
+    logger.log('🔍 ServerRepository.getTasks() called');
     const result = await this.request<Task[]>('/tasks');
-    console.log('🔍 ServerRepository.getTasks() result:', result);
+    logger.log('🔍 ServerRepository.getTasks() result:', result);
     return result;
   }
 

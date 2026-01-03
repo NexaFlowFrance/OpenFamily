@@ -1,141 +1,107 @@
-version: '3.8'
-
 services:
-  # PostgreSQL Database
+  # Service d'initialisation pour générer le mot de passe automatiquement
+  init:
+    image: alpine:latest
+    container_name: openfamily-init
+    volumes:
+      - shared_data:/shared
+    command: >
+      sh -c "
+        if [ ! -f /shared/.db_password ]; then
+            echo 'Generation automatique du mot de passe securise...'
+            RANDOM_STRING=$$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)
+            SECURE_PASSWORD=\"OF_$${RANDOM_STRING}\"
+            SECURE_PASSWORD=$$(echo -n \"$$SECURE_PASSWORD\" | head -c 32)
+            if [ -z \"$$SECURE_PASSWORD\" ]; then
+              echo 'ERROR: password generation failed'
+              exit 1
+            fi
+            printf '%s' \"$$SECURE_PASSWORD\" > /shared/.db_password
+            echo ''
+            echo '=============================================='
+            echo '          MOT DE PASSE GENERE'
+            echo '=============================================='
+            echo ''
+            echo '   IMPORTANT: NOTEZ BIEN CE MOT DE PASSE'
+            echo ''
+            echo \"   $$SECURE_PASSWORD\"
+            echo ''
+            echo '   SAUVEGARDEZ-LE MAINTENANT !'
+            echo '   Necessaire pour administration'
+            echo ''
+            echo '=============================================='
+            echo ''
+            echo 'Demarrage des services dans 15 secondes...'
+            sleep 15
+        else
+            echo 'Configuration existante detectee'
+            SECURE_PASSWORD=$$(cat /shared/.db_password)
+            echo \"Mot de passe: $$SECURE_PASSWORD\"
+        fi
+        echo 'Initialisation terminee'
+      "
+
+  # PostgreSQL Database avec mot de passe automatique
   postgres:
     image: postgres:16-alpine
     container_name: openfamily-postgres
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    user: "999:999"
     environment:
-      POSTGRES_DB: ${DB_NAME:-openfamily}
-      POSTGRES_USER: ${DB_USER:-openfamily}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      POSTGRES_DB: openfamily
+      POSTGRES_USER: openfamily
+      POSTGRES_PASSWORD_FILE: /shared/.db_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./server/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
-    networks:
-      - openfamily_internal
+      - shared_data:/shared:ro
+      - ./server/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5433:5432"  # Port différent pour éviter conflits
+    depends_on:
+      init:
+        condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-openfamily} -d ${DB_NAME:-openfamily}"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    command: >
-      postgres 
-      -c shared_buffers=256MB 
-      -c max_connections=100
-      -c log_statement=all
-      -c log_destination=stderr
-      -c logging_collector=on
-      -c log_directory=/var/log/postgresql
-      -c log_filename=postgresql.log
-      -c log_rotation_age=1d
-      -c log_rotation_size=100MB
+      test: ["CMD-SHELL", "pg_isready -U openfamily -d openfamily"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  # OpenFamily Application (Web + API)
+  # OpenFamily Application avec configuration automatique
   app:
-    # Option 1: Build locally
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    # Option 2: Use pre-built image from Docker Hub
-    image: nexaflow/openfamily:latest
+    build: .
     container_name: openfamily-app
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
-      - /var/tmp
-    user: "1001:1001"
+    ports:
+      - "3000:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-openfamily}
-      DB_USER: ${DB_USER:-openfamily}
-      DB_PASSWORD: ${DB_PASSWORD}
-      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
-      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
-      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
-    ports:
-      - "${PORT:-3000}:3000"
+    volumes:
+      - shared_data:/shared:ro
+      - app_data:/app/data
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - app_data:/app/data
-      - app_logs:/app/logs
-    networks:
-      - openfamily_internal
-      - openfamily_external
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-
-  # Nginx reverse proxy (optional, for HTTPS and better performance)
-  nginx:
-    image: nginx:alpine
-    container_name: openfamily-nginx
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /var/cache/nginx
-      - /var/run
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/ssl:/etc/nginx/ssl:ro
-      - nginx_logs:/var/log/nginx
-    depends_on:
-      app:
-        condition: service_healthy
-    networks:
-      - openfamily_external
-    profiles:
-      - production
-      - ssl
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    entrypoint: >
+      sh -c "
+        set -e
+        echo 'Starting OpenFamily...'
+        if [ ! -s /shared/.db_password ]; then
+          echo 'ERROR: /shared/.db_password is missing or empty'
+          ls -la /shared || true
+          exit 1
+        fi
+        DB_PASSWORD=$$(head -n1 /shared/.db_password | tr -d '\r\n')
+        export DATABASE_URL=\"postgresql://openfamily:$${DB_PASSWORD}@postgres:5432/openfamily\"
+        echo 'DATABASE_URL configured for postgres service'
+        echo 'Database configuration applied'
+        exec node /app/dist/index.js
+      "
 
 volumes:
   postgres_data:
     driver: local
   app_data:
     driver: local
-  app_logs:
+  shared_data:
     driver: local
-  nginx_logs:
-    driver: local
-
-networks:
-  openfamily_internal:
-    driver: bridge
-    internal: true
-  openfamily_external:
-    driver: bridge

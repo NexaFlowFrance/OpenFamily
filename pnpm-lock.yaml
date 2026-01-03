@@ -258,16 +258,16 @@ importers:
         specifier: ^10.4.23
         version: 10.4.23(postcss@8.5.6)
       brace-expansion:
-        specifier: ^4.0.1
+        specifier: '>=2.0.2'
         version: 4.0.1
       cross-spawn:
-        specifier: ^7.0.6
+        specifier: '>=7.0.6'
         version: 7.0.6
       esbuild:
         specifier: ^0.27.2
         version: 0.27.2
       glob:
-        specifier: ^13.0.0
+        specifier: '>=10.4.5'
         version: 13.0.0
       pnpm:
         specifier: ^10.27.0

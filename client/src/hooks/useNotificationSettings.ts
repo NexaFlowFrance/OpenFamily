@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../lib/logger';
 import type { NotificationSettings } from '@/types';
 import { 
   registerServiceWorker, 
@@ -53,7 +54,7 @@ export const useNotificationSettings = () => {
         setSettings({ ...DEFAULT_NOTIFICATION_SETTINGS, ...parsed });
       }
     } catch (error) {
-      console.warn('Erreur lors du chargement des paramètres de notification:', error);
+      logger.warn('Erreur lors du chargement des paramètres de notification:', error);
     }
   }, []);
 
@@ -63,7 +64,7 @@ export const useNotificationSettings = () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (error) {
-      console.warn('Erreur lors de la sauvegarde des paramètres de notification:', error);
+      logger.warn('Erreur lors de la sauvegarde des paramètres de notification:', error);
     }
   };
 
@@ -72,7 +73,7 @@ export const useNotificationSettings = () => {
       // S'abonner aux notifications push
       const subscription = await subscribeToPush(userId);
       if (!subscription) {
-        console.error('Impossible de s\'abonner aux notifications push');
+        logger.error('Impossible de s\'abonner aux notifications push');
         return;
       }
     } else if (!enabled && userId) {

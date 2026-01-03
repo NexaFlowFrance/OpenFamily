@@ -1,4 +1,5 @@
 // Gestion des subscriptions Web Push
+import { logger } from './logger';
 const VAPID_PUBLIC_KEY = 'BKwpdHIzJUphggpc46Pk5oso5SjruMjWiqM5z9ae0lxCnFrbSGihQ5azEWcVhDtiiuqUfsZiJXDHDm857ZyeIeQ';
 
 // Convertir la clé VAPID publique en Uint8Array
@@ -16,16 +17,16 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 // Enregistrer le service worker
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!('serviceWorker' in navigator)) {
-    console.warn('Service Worker non supporté');
+    logger.warn('Service Worker non supporté');
     return null;
   }
 
   try {
     const registration = await navigator.serviceWorker.register('/sw.js');
-    console.log('Service Worker enregistré:', registration);
+    logger.log('Service Worker enregistré:', registration);
     return registration;
   } catch (error) {
-    console.error('Erreur lors de l\'enregistrement du Service Worker:', error);
+    logger.error('Erreur lors de l\'enregistrement du Service Worker:', error);
     return null;
   }
 }
@@ -38,7 +39,7 @@ export function isPushSupported(): boolean {
 // Demander la permission pour les notifications
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) {
-    console.warn('Notifications non supportées');
+    logger.warn('Notifications non supportées');
     return false;
   }
 
@@ -57,7 +58,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
 // S'abonner aux notifications push
 export async function subscribeToPush(userId: string): Promise<PushSubscription | null> {
   if (!isPushSupported()) {
-    console.warn('Push non supporté');
+    logger.warn('Push non supporté');
     return null;
   }
 
@@ -101,10 +102,10 @@ export async function subscribeToPush(userId: string): Promise<PushSubscription 
       })
     });
 
-    console.log('Subscription push enregistrée:', subscription);
+    logger.log('Subscription push enregistrée:', subscription);
     return subscription;
   } catch (error) {
-    console.error('Erreur lors de la subscription push:', error);
+    logger.error('Erreur lors de la subscription push:', error);
     return null;
   }
 }
@@ -131,13 +132,13 @@ export async function unsubscribeFromPush(userId: string): Promise<boolean> {
         body: JSON.stringify({ userId })
       });
 
-      console.log('Désabonnement push réussi');
+      logger.log('Désabonnement push réussi');
       return true;
     }
 
     return false;
   } catch (error) {
-    console.error('Erreur lors du désabonnement push:', error);
+    logger.error('Erreur lors du désabonnement push:', error);
     return false;
   }
 }
@@ -158,7 +159,7 @@ export async function getPushSubscriptionStatus(): Promise<{
       const subscription = await registration.pushManager.getSubscription();
       subscribed = !!subscription;
     } catch (error) {
-      console.error('Erreur lors de la vérification de la subscription:', error);
+      logger.error('Erreur lors de la vérification de la subscription:', error);
     }
   }
 
@@ -192,8 +193,8 @@ export async function scheduleAppointmentNotification(
         familyId
       })
     });
-    console.log('Notifications de rendez-vous programmées');
+    logger.log('Notifications de rendez-vous programmées');
   } catch (error) {
-    console.error('Erreur lors de la programmation des notifications:', error);
+    logger.error('Erreur lors de la programmation des notifications:', error);
   }
 }

@@ -3,6 +3,8 @@
  * TOUJOURS utilise PostgreSQL via serveur
  */
 
+import { logger } from './logger';
+
 export interface FamilyConfiguration {
   family_id?: string;
   onboarding_completed: boolean;
@@ -15,15 +17,10 @@ export interface FamilyConfiguration {
  * Obtient l'URL de l'API
  */
 function getApiUrl(): string {
-  const { protocol, hostname } = window.location;
-  
-  // Si hébergé sur serveur distant
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '') {
-    return `${protocol}//${hostname}:3001/api`;
-  }
-  
-  // En développement local
-  return 'http://localhost:3001/api';
+  // Always use same-origin API.
+  // - Dev: Vite proxy can forward /api
+  // - Prod/Docker: Node server serves /api on the same host/port
+  return '/api';
 }
 
 /**
@@ -42,7 +39,7 @@ async function checkServerAvailability(): Promise<boolean> {
     
     return response.ok;
   } catch (error) {
-    console.error('Server not available:', error);
+    logger.error('Server not available:', error);
     return false;
   }
 }
@@ -65,13 +62,13 @@ export async function fetchServerConfig(
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch server config:', response.statusText);
+      logger.error('Failed to fetch server config:', response.statusText);
       return null;
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching server config:', error);
+    logger.error('Error fetching server config:', error);
     return null;
   }
 }
@@ -100,13 +97,13 @@ export async function saveServerConfig(
     });
 
     if (!response.ok) {
-      console.error('Failed to save server config:', response.statusText);
+      logger.error('Failed to save server config:', response.statusText);
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error('Error saving server config:', error);
+    logger.error('Error saving server config:', error);
     return false;
   }
 }

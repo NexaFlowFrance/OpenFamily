@@ -92,6 +92,36 @@ async function migratePushNotificationTables(pool: Pool) {
 }
 
 /**
+ * Ensure tasks table has a JSONB data column (used to store full task objects)
+ */
+async function migrateTasksDataColumn(pool: Pool) {
+  try {
+    await pool.query(`
+      ALTER TABLE tasks
+      ADD COLUMN IF NOT EXISTS data JSONB DEFAULT '{}'
+    `);
+    console.log('✅ Tasks data column migrated');
+  } catch (error) {
+    console.error('⚠️ Error migrating tasks data column:', error);
+  }
+}
+
+/**
+ * Ajoute la colonne description à la table recipes
+ */
+async function migrateRecipesDescriptionColumn(pool: Pool) {
+  try {
+    await pool.query(`
+      ALTER TABLE recipes
+      ADD COLUMN IF NOT EXISTS description TEXT
+    `);
+    console.log('✅ Recipes description column migrated');
+  } catch (error) {
+    console.error('⚠️ Error migrating recipes description column:', error);
+  }
+}
+
+/**
  * Crée la table budget_expenses
  */
 async function migrateBudgetExpensesTable(pool: Pool) {
@@ -151,16 +181,26 @@ async function initializeDefaultFamily(pool: Pool) {
 }
 
 // Database configuration
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'openfamily',
-  user: process.env.DB_USER || 'openfamily',
-  password: process.env.DB_PASSWORD || 'openfamily',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+// Prefer a full DATABASE_URL when provided (e.g. in Docker).
+const databaseUrl = process.env.DATABASE_URL;
+
+const pool = databaseUrl
+  ? new Pool({
+      connectionString: databaseUrl,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    })
+  : new Pool({
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '5432'),
+      database: process.env.DB_NAME || 'openfamily',
+      user: process.env.DB_USER || 'openfamily',
+      password: process.env.DB_PASSWORD || 'openfamily',
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    });
 
 async function startServer() {
   try {
@@ -173,6 +213,12 @@ async function startServer() {
     
     // Migrer les colonnes manquantes pour shopping_items
     await migrateShoppingItemsColumns(pool);
+
+    // Ensure tasks.data exists
+    await migrateTasksDataColumn(pool);
+    
+    // Ensure recipes.description exists
+    await migrateRecipesDescriptionColumn(pool);
     
     // Create push notifications tables
     await migratePushNotificationTables(pool);
@@ -214,7 +260,7 @@ async function startServer() {
   app.use(express.static(staticPath));
 
   // Handle client-side routing - serve index.html for all routes
-  app.get("*", (_req, res) => {
+  app.get(/.*/, (_req, res) => {
     res.sendFile(path.join(staticPath, "index.html"));
   });
 

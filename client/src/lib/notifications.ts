@@ -1,8 +1,9 @@
 import { Appointment, Task, NotificationSettings } from '@/types';
+import { logger } from './logger';
 
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!('Notification' in window)) {
-    console.warn('Ce navigateur ne supporte pas les notifications');
+    logger.warn('Ce navigateur ne supporte pas les notifications');
     return false;
   }
 
@@ -25,7 +26,7 @@ const getNotificationSettings = (): NotificationSettings => {
       return JSON.parse(saved);
     }
   } catch (error) {
-    console.warn('Erreur lors du chargement des paramètres de notification:', error);
+    logger.warn('Erreur lors du chargement des paramètres de notification:', error);
   }
   
   // Valeurs par défaut

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Plus, Check, AlertCircle, Edit2, Archive, TrendingUp } from 'lucide-react';
 import { getDayOfWeek, getDayOfMonth, generateTaskOccurrences } from '@/lib/recurrence';
+import { logger } from '../lib/logger';
 import { scheduleTaskNotification } from '@/lib/notifications';
 import type { Task } from '@/types';
 
@@ -142,19 +143,19 @@ export default function Tasks() {
     const dayEnd = new Date(selectedDate);
     dayEnd.setHours(23, 59, 59, 999);
     
-    console.log('📅 getDayTasks - selectedDate:', dateStr);
-    console.log('📅 All tasks:', tasks);
+    logger.log('📅 getDayTasks - selectedDate:', dateStr);
+    logger.log('📅 All tasks:', tasks);
     
     const dayTasks: Array<{ task: Task; occurrence: { date: string; time?: string }; isCompleted: boolean }> = [];
     const taskIdsInDay = new Set<string>();
     
     tasks.forEach(task => {
-      console.log('🔍 Processing task:', task.title, 'recurring:', task.recurring, 'dueDate:', task.dueDate);
+      logger.log('🔍 Processing task:', task.title, 'recurring:', task.recurring, 'dueDate:', task.dueDate);
       const occurrences = task.recurring 
         ? generateTaskOccurrences(task, dayStart, dayEnd)
         : [{ date: task.dueDate, time: task.dueTime }];
       
-      console.log('🔍 Occurrences for', task.title, ':', occurrences);
+      logger.log('🔍 Occurrences for', task.title, ':', occurrences);
       
       occurrences.forEach(occ => {
         if (occ.date === dateStr) {
@@ -167,7 +168,7 @@ export default function Tasks() {
       });
     });
     
-    console.log('📅 Day tasks for', dateStr, ':', dayTasks);
+    logger.log('📅 Day tasks for', dateStr, ':', dayTasks);
     
     return { dayTasks, taskIdsInDay };
   };

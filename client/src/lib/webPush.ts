@@ -63,15 +63,9 @@ export async function subscribeToPush(userId: string): Promise<PushSubscription 
   }
 
   try {
-    // Enregistrer le service worker si pas déjà fait
-    let registration = await navigator.serviceWorker.ready;
-    
-    if (!registration) {
-      registration = await registerServiceWorker();
-      if (!registration) {
-        throw new Error('Impossible d\'enregistrer le service worker');
-      }
-    }
+    // S'assurer qu'un service worker est enregistré
+    await registerServiceWorker();
+    const registration = await navigator.serviceWorker.ready;
 
     // Check permissions
     const permissionGranted = await requestNotificationPermission();
@@ -85,7 +79,7 @@ export async function subscribeToPush(userId: string): Promise<PushSubscription 
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as unknown as BufferSource
       });
     }
 

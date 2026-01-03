@@ -29,6 +29,7 @@ export interface Task {
   dueDate: string;
   dueTime?: string; // Heure de la tâche (HH:mm)
   duration?: number; // Durée en minutes
+  status?: 'todo' | 'in-progress' | 'done';
   completed: boolean;
   completedDates?: string[]; // Pour les tâches récurrentes: liste des dates (YYYY-MM-DD) où l'occurrence a été complétée
   recurring?: {

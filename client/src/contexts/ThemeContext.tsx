@@ -82,13 +82,13 @@ export function ThemeProvider({
     const updateNativeStatusBar = async () => {
       if (Capacitor.isNativePlatform()) {
         try {
-          const { StatusBar } = await import('@capacitor/status-bar');
+          const { StatusBar, Style } = await import('@capacitor/status-bar');
           if (actualTheme === 'dark') {
             await StatusBar.setBackgroundColor({ color: darkBg });
-            await StatusBar.setStyle({ style: 'DARK' }); // Contenu clair sur fond sombre
+            await StatusBar.setStyle({ style: Style.Dark }); // Contenu clair sur fond sombre
           } else {
             await StatusBar.setBackgroundColor({ color: lightBg });
-            await StatusBar.setStyle({ style: 'LIGHT' }); // Contenu sombre sur fond clair
+            await StatusBar.setStyle({ style: Style.Light }); // Contenu sombre sur fond clair
           }
         } catch (error) {
           logger.log('StatusBar API not available:', error);

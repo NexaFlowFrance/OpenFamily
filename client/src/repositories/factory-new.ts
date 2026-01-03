@@ -1,6 +1,5 @@
 import { IDataRepository, ServerConfig } from './interface';
 import { ServerRepository } from './server';
-import { getApiUrl } from '../lib/serverDetection';
 
 /**
  * Factory pour créer le repository serveur PostgreSQL uniquement
@@ -22,7 +21,7 @@ export class RepositoryFactory {
 
   private static getServerConfig(): ServerConfig {
     return {
-      apiUrl: getApiUrl(),
+      apiUrl: '/api',
       authToken: 'default-token',
       familyId: 'family-default',
     };

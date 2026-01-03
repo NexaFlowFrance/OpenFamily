@@ -17,6 +17,10 @@ import { WorkSchedule } from '@/types';
 import { nanoid } from 'nanoid';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 
+type AppointmentType = 'doctor' | 'school' | 'work' | 'personal' | 'other';
+type AppointmentReminder = 'none' | '15min' | '30min' | '1hour' | '1day';
+type AppointmentFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
 const getTypeLabels = (t: any) => [
   { value: 'doctor' as const, label: t.appointments.types.doctor, color: '#d97b7b' },
   { value: 'school' as const, label: t.appointments.types.school, color: '#6b8e7f' },
@@ -51,17 +55,28 @@ export default function Appointments() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [activeTab, setActiveTab] = useState<'appointments' | 'workSchedule'>('appointments');
   const [viewMode, setViewMode] = useState<'weekly' | 'monthly'>('weekly');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    duration: number;
+    location: string;
+    type: AppointmentType;
+    reminder: AppointmentReminder;
+    recurring: boolean;
+    frequency: AppointmentFrequency;
+  }>({
     title: '',
     description: '',
     date: new Date().toISOString().split('T')[0],
     time: '10:00',
     duration: 60,
     location: '',
-    type: 'doctor' as const,
-    reminder: 'none' as const,
+    type: 'doctor',
+    reminder: 'none',
     recurring: false,
-    frequency: 'weekly' as const,
+    frequency: 'weekly',
   });
 
   const [workScheduleData, setWorkScheduleData] = useState<WorkSchedule>({
@@ -584,7 +599,7 @@ export default function Appointments() {
                 <label className="text-sm font-medium text-foreground">{t.appointments.form.frequency}</label>
                 <select
                   value={formData.frequency}
-                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value as AppointmentFrequency })}
                   className="w-full mt-1 p-2 border border-border rounded-md bg-background text-foreground"
                 >
                   <option value="daily">{t.appointments.frequencies.daily}</option>

@@ -9,8 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Plus, Check, AlertCircle, Edit2, Archive, TrendingUp } from 'lucide-react';
 import { getDayOfWeek, getDayOfMonth, generateTaskOccurrences } from '@/lib/recurrence';
 import { logger } from '../lib/logger';
-import { scheduleTaskNotification } from '@/lib/notifications';
+import { formatDateOnly, parseDateOnly } from '@/lib/dateOnly';
 import type { Task } from '@/types';
+
+type TaskFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
+type TaskPriority = 'low' | 'medium' | 'high';
+type TaskCategory = 'household' | 'baby' | 'personal' | 'other';
 
 const getCategoryDefaults = (t: any) => [
   { value: 'household', label: t.tasks.household, color: '#6b8e7f' },
@@ -37,17 +41,28 @@ export default function Tasks() {
   const [editingTask, setEditingTask] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed' | 'history'>('pending');
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    category: TaskCategory;
+    assignedTo: string;
+    dueDate: string;
+    dueTime: string;
+    duration: number;
+    priority: TaskPriority;
+    recurring: boolean;
+    frequency: TaskFrequency;
+  }>({
     title: '',
     description: '',
-    category: 'household' as const,
+    category: 'household',
     assignedTo: '',
-    dueDate: new Date().toISOString().split('T')[0],
+    dueDate: formatDateOnly(new Date()),
     dueTime: '',
     duration: 30,
-    priority: 'medium' as const,
+    priority: 'medium',
     recurring: false,
-    frequency: 'weekly' as const,
+    frequency: 'weekly',
   });
 
   useEffect(() => {
@@ -58,7 +73,7 @@ export default function Tasks() {
     return () => setAddAction(null);
   }, [setAddAction]);
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (formData.title.trim()) {
       const recurringConfig = formData.recurring ? {
         frequency: formData.frequency,
@@ -94,12 +109,7 @@ export default function Tasks() {
           priority: formData.priority,
           recurring: recurringConfig,
         };
-        const taskId = addTask(newTask);
-        
-        // Planifier la notification
-        if (taskId && formData.dueTime) {
-          scheduleTaskNotification({ ...newTask, id: taskId });
-        }
+        await addTask(newTask);
       }
       
       setFormData({
@@ -107,7 +117,7 @@ export default function Tasks() {
         description: '',
         category: 'household',
         assignedTo: '',
-        dueDate: new Date().toISOString().split('T')[0],
+        dueDate: formatDateOnly(new Date()),
         dueTime: '',
         duration: 30,
         priority: 'medium',
@@ -137,7 +147,7 @@ export default function Tasks() {
 
   // Calculer les tâches du jour sélectionné
   const getDayTasks = () => {
-    const dateStr = selectedDate.toISOString().split('T')[0];
+    const dateStr = formatDateOnly(selectedDate);
     const dayStart = new Date(selectedDate);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(selectedDate);
@@ -235,7 +245,11 @@ export default function Tasks() {
   };
 
   const isOverdue = (dueDate: string) => {
-    return new Date(dueDate) < new Date() && dueDate !== new Date().toISOString().split('T')[0];
+    if (!dueDate) return false;
+    const due = parseDateOnly(dueDate);
+    const todayStr = formatDateOnly(new Date());
+    const today = parseDateOnly(todayStr);
+    return due < today && dueDate !== todayStr;
   };
 
   const pendingTasksCount = dayTasks.filter(t => !t.isCompleted).length;
@@ -254,7 +268,7 @@ export default function Tasks() {
                 description: '',
                 category: 'household',
                 assignedTo: '',
-                dueDate: selectedDate.toISOString().split('T')[0],
+                  dueDate: formatDateOnly(selectedDate),
                 dueTime: '',
                 duration: 30,
                 priority: 'medium',

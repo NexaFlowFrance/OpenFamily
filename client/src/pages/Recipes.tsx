@@ -9,7 +9,10 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Trash2, Plus, Clock, Users, ChefHat, Filter } from 'lucide-react';
-import type { TranslationFunction } from '@/lib/i18n';
+import type { Language } from '@/lib/i18n';
+import { translations } from '@/lib/i18n';
+
+type TranslationFunction = (typeof translations)[Language];
 
 const getCategoryDefaults = (t: TranslationFunction) => [
   { value: 'starter', label: t.recipes.categories.starter, color: '#c8dfe8' },

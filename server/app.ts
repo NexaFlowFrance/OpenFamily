@@ -1087,6 +1087,68 @@ export function createApp(pool: Pool) {
     }
   });
 
+  // Budget expenses (avoid rewriting budget rows for simple expense changes)
+  app.post('/budgets/:month/expenses', async (req: Request, res: Response) => {
+    try {
+      const familyId = (req as any).familyId;
+      const { month } = req.params;
+      const { category, amount, description, date } = req.body;
+
+      if (!category || typeof category !== 'string') {
+        return res.status(400).json({ error: 'Invalid category' });
+      }
+      if (amount === undefined || amount === null || Number.isNaN(Number(amount))) {
+        return res.status(400).json({ error: 'Invalid amount' });
+      }
+      if (!date || typeof date !== 'string') {
+        return res.status(400).json({ error: 'Invalid date' });
+      }
+
+      // Optional sanity check: expense date should belong to the requested month
+      if (date.slice(0, 7) !== month) {
+        return res.status(400).json({ error: 'Expense date does not match month' });
+      }
+
+      const expId = randomUUID();
+      const result = await pool.query(
+        'INSERT INTO budget_expenses (id, family_id, category, amount, description, date) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [expId, familyId, category, amount, description || '', date]
+      );
+
+      const created = result.rows[0];
+      notifySync(req, 'budgets', 'update', { month });
+      res.status(201).json(created);
+    } catch (error) {
+      console.error('Error creating budget expense:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.delete('/budgets/:month/expenses/:expenseId', async (req: Request, res: Response) => {
+    try {
+      const familyId = (req as any).familyId;
+      const { month, expenseId } = req.params;
+
+      const result = await pool.query(
+        'DELETE FROM budget_expenses WHERE id = $1 AND family_id = $2 RETURNING id, date',
+        [expenseId, familyId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Expense not found' });
+      }
+
+      // Keep updates scoped to the month if possible
+      const deletedDate = result.rows[0].date;
+      const deletedMonth = typeof deletedDate === 'string' ? deletedDate.slice(0, 7) : month;
+      notifySync(req, 'budgets', 'update', { month: deletedMonth });
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting budget expense:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // ===== Family Configuration =====
   app.get('/family/config', async (req: Request, res: Response) => {
     try {

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Plus, ChefHat, Calendar, Sparkles, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { generateWeeklyMealPlan } from '@/lib/mealPlanner';
+import { formatDateOnly } from '@/lib/dateOnly';
 
 const getMealTypeLabels = (t: any) => [
   { value: 'breakfast' as const, label: t.meals.mealTypes.breakfast, emoji: '🌅' },
@@ -25,7 +26,7 @@ export default function Meals() {
   const [showAutoPlanner, setShowAutoPlanner] = useState(false);
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: formatDateOnly(new Date()),
     mealType: 'lunch' as const,
     recipeId: '',
     title: '',
@@ -63,7 +64,7 @@ export default function Meals() {
         notes: formData.notes,
       });
       setFormData({
-        date: new Date().toISOString().split('T')[0],
+        date: formatDateOnly(new Date()),
         mealType: 'lunch',
         recipeId: '',
         title: '',
@@ -74,7 +75,7 @@ export default function Meals() {
   };
 
   const getMealsForDate = (date: Date, mealType: string) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatDateOnly(date);
     return meals.filter(m => m.date === dateStr && m.mealType === mealType);
   };
 
@@ -173,7 +174,7 @@ export default function Meals() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `planning-repas-${weekDays[0].toISOString().split('T')[0]}.html`;
+    a.download = `planning-repas-${formatDateOnly(weekDays[0])}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -216,7 +217,7 @@ export default function Meals() {
 
   const weekDays = getWeekDays();
   const monthDays = getMonthDays();
-  const today = new Date().toISOString().split('T')[0];
+  const today = formatDateOnly(new Date());
 
   return (
     <div className="pb-24">
@@ -279,7 +280,7 @@ export default function Meals() {
                         date.setDate(monday.getDate() + dayIndex);
                         
                         addMeal({
-                          date: date.toISOString().split('T')[0],
+                          date: formatDateOnly(date),
                           mealType: suggestion.mealType,
                           recipeId: suggestion.recipeId,
                           title: '',
@@ -304,7 +305,7 @@ export default function Meals() {
         {viewMode === 'week' && (
           <div className="space-y-4">
             {weekDays.map(day => {
-              const dateStr = day.toISOString().split('T')[0];
+              const dateStr = formatDateOnly(day);
               const isToday = dateStr === today;
 
               return (
@@ -411,7 +412,7 @@ export default function Meals() {
               {/* Grille du calendrier */}
               <div className="grid grid-cols-7 gap-1">
                 {monthDays.map((day, index) => {
-                  const dateStr = day.toISOString().split('T')[0];
+                  const dateStr = formatDateOnly(day);
                   const isToday = dateStr === today;
                   const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
                   const dayMeals = meals.filter(m => m.date === dateStr);

@@ -92,7 +92,18 @@ export default function Home({ onNavigate }: HomeProps) {
   const budgetRemaining = totalBudget - totalSpent;
   const budgetPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
-  const cards = [
+  type HomeCard = {
+    title: string;
+    icon: any;
+    color: string;
+    iconColor: string;
+    description: string;
+    page?: NonNullable<HomeProps['onNavigate']> extends (page: infer P) => void ? P : never;
+    badge?: number;
+    comingSoon?: boolean;
+  };
+
+  const cards: HomeCard[] = [
     {
       title: t.home.cards.todayTasks,
       icon: ClipboardList,

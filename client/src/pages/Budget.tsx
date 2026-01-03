@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, TrendingUp, TrendingDown, BarChart3, PieChart, Edit, Trash, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatDateOnly, formatYearMonth } from '@/lib/dateOnly';
 
 const getCategoryLabels = (t: any) => ({
   food: t.budget.food,
@@ -36,7 +37,7 @@ export default function Budget() {
   const { t } = useLanguage();
   
   const categoryLabels = getCategoryLabels(t);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState(formatYearMonth(new Date()));
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
   const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
   const [isEditBudgetDialogOpen, setIsEditBudgetDialogOpen] = useState(false);
@@ -46,7 +47,7 @@ export default function Budget() {
     category: 'food' as const,
     amount: 0,
     description: '',
-    date: new Date().toISOString().split('T')[0],
+    date: formatDateOnly(new Date()),
   });
 
   const [newBudgetLimits, setNewBudgetLimits] = useState({
@@ -102,7 +103,7 @@ export default function Budget() {
       category: 'food',
       amount: 0,
       description: '',
-      date: new Date().toISOString().split('T')[0],
+      date: formatDateOnly(new Date()),
     });
     setIsExpenseDialogOpen(false);
   };
@@ -144,13 +145,13 @@ export default function Budget() {
   const goToPreviousMonth = () => {
     const date = new Date(selectedMonth + '-01');
     date.setMonth(date.getMonth() - 1);
-    setSelectedMonth(date.toISOString().slice(0, 7));
+    setSelectedMonth(formatYearMonth(date));
   };
 
   const goToNextMonth = () => {
     const date = new Date(selectedMonth + '-01');
     date.setMonth(date.getMonth() + 1);
-    setSelectedMonth(date.toISOString().slice(0, 7));
+    setSelectedMonth(formatYearMonth(date));
   };
 
   const formatMonthYear = (monthString: string) => {
@@ -190,7 +191,7 @@ export default function Budget() {
   const monthlyStats = getMonthlyStats();
 
   return (
-    <div className="container mx-auto p-4 md:p-6 pb-24 md:pb-8 max-w-7xl min-h-screen">
+    <div className="container mx-auto p-4 md:p-6 pb-32 md:pb-8 max-w-7xl min-h-screen">
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">{t.budget.title}</h1>
         <div className="flex gap-2 items-center">

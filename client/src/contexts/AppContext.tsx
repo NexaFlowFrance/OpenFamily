@@ -405,22 +405,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const addExpense = async (budgetId: string, expense: Omit<Budget['expenses'][0], 'id'>) => {
     try {
-      const budget = budgets.find(b => b.id === budgetId);
-      if (!budget) return;
-
-      const newExpense = {
-        ...expense,
-        id: nanoid(),
-      };
-      
-      const updatedBudget = {
-        ...budget,
-        expenses: [...budget.expenses, newExpense]
-      };
-
       const repo = RepositoryFactory.getRepository();
-      await repo.updateBudget(budgetId, updatedBudget);
-      setBudgets(budgets.map(b => b.id === budgetId ? updatedBudget : b));
+      await repo.addExpense(budgetId, expense);
+      const refreshed = await repo.getBudgets();
+      setBudgets(refreshed);
     } catch (error) {
       logger.error('Erreur lors de l\'ajout d\'une dépense:', error);
     }
@@ -428,17 +416,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteExpense = async (budgetId: string, expenseId: string) => {
     try {
-      const budget = budgets.find(b => b.id === budgetId);
-      if (!budget) return;
-
-      const updatedBudget = {
-        ...budget,
-        expenses: budget.expenses.filter(exp => exp.id !== expenseId)
-      };
-
       const repo = RepositoryFactory.getRepository();
-      await repo.updateBudget(budgetId, updatedBudget);
-      setBudgets(budgets.map(b => b.id === budgetId ? updatedBudget : b));
+      await repo.deleteExpense(budgetId, expenseId);
+      const refreshed = await repo.getBudgets();
+      setBudgets(refreshed);
     } catch (error) {
       logger.error('Erreur lors de la suppression d\'une dépense:', error);
     }

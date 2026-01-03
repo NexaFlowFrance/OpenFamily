@@ -1,4 +1,5 @@
 import { Recipe } from '@/types';
+import { formatDateOnly } from '@/lib/dateOnly';
 
 interface MealSuggestion {
   mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -24,7 +25,7 @@ export const generateWeeklyMealPlan = (
   for (let day = 0; day < 7; day++) {
     const currentDate = new Date(startDate);
     currentDate.setDate(startDate.getDate() + day);
-    const dateStr = currentDate.toISOString().split('T')[0];
+    const dateStr = formatDateOnly(currentDate);
 
     // Vérifier si des repas existent déjà pour ce jour
     const existingDayMeals = existingMeals.filter(m => m.date === dateStr);

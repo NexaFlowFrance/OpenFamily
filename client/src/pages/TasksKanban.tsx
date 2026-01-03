@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, GripVertical, Calendar, User, AlertCircle, Edit2, X } from 'lucide-react';
+import { formatDateOnly, parseDateOnly } from '@/lib/dateOnly';
+import type { Task } from '@/types';
 
 const getCategoriesLabels = (t: any) => [
   { value: 'household', label: t.tasks.categories.household, color: '#6b8e7f' },
@@ -69,15 +71,26 @@ export default function TasksKanban() {
     }
   };
 
+  const todayStr = formatDateOnly(new Date());
+
   const isOverdue = (dueDate: string) => {
-    return new Date(dueDate) < new Date() && dueDate !== new Date().toISOString().split('T')[0];
+    if (!dueDate) return false;
+    const due = parseDateOnly(dueDate);
+    const today = parseDateOnly(todayStr);
+    return due < today && dueDate !== todayStr;
+  };
+
+  const isDoneToday = (task: Task) => {
+    if (task.completed) return true;
+    if (!task.recurring) return false;
+    return Array.isArray(task.completedDates) && task.completedDates.includes(todayStr);
   };
 
   const getTasksByStatus = (status: string) => {
     if (status === 'done') {
-      return tasks.filter(t => t.completed);
+      return tasks.filter(t => isDoneToday(t));
     }
-    return tasks.filter(t => !t.completed && (t.status === status || (!t.status && status === 'todo')));
+    return tasks.filter(t => !isDoneToday(t) && (t.status === status || (!t.status && status === 'todo')));
   };
 
   const handleDragStart = (taskId: string) => {
@@ -92,10 +105,24 @@ export default function TasksKanban() {
     if (draggedTask) {
       const task = tasks.find(t => t.id === draggedTask);
       if (task) {
-        if (status === 'done') {
-          updateTask(draggedTask, { completed: true, status: 'done' as const });
+        if (task.recurring) {
+          const completedDates = Array.isArray(task.completedDates) ? task.completedDates : [];
+
+          if (status === 'done') {
+            const nextDates = completedDates.includes(todayStr)
+              ? completedDates
+              : [...completedDates, todayStr];
+            updateTask(draggedTask, { completedDates: nextDates, status: 'done' as const });
+          } else {
+            const nextDates = completedDates.filter((d: string) => d !== todayStr);
+            updateTask(draggedTask, { completedDates: nextDates, status: status as 'todo' | 'in-progress' });
+          }
         } else {
-          updateTask(draggedTask, { completed: false, status: status as 'todo' | 'in-progress' });
+          if (status === 'done') {
+            updateTask(draggedTask, { completed: true, status: 'done' as const });
+          } else {
+            updateTask(draggedTask, { completed: false, status: status as 'todo' | 'in-progress' });
+          }
         }
       }
       setDraggedTask(null);
@@ -104,7 +131,7 @@ export default function TasksKanban() {
   };
 
   // Support tactile pour mobile
-  const handleTouchStart = (taskId: string, e: React.TouchEvent) => {
+  const handleTouchStart = (taskId: string, e: React.TouchEvent<HTMLDivElement>) => {
     // Empêcher la sélection de texte
     e.currentTarget.style.userSelect = 'none';
     e.currentTarget.style.webkitUserSelect = 'none';
@@ -156,7 +183,7 @@ export default function TasksKanban() {
     }
   };
 
-  const handleTouchEnd = (taskId: string, e: React.TouchEvent) => {
+  const handleTouchEnd = (taskId: string, e: React.TouchEvent<HTMLDivElement>) => {
     // Réactiver la sélection de texte
     e.currentTarget.style.userSelect = '';
     e.currentTarget.style.webkitUserSelect = '';
@@ -200,7 +227,7 @@ export default function TasksKanban() {
 
     const taskData = {
       ...formData,
-      dueDate: formData.dueDate || new Date().toISOString().split('T')[0], // Default to today if empty
+      dueDate: formData.dueDate || todayStr, // Default to today if empty
       completed: formData.status === 'done',
     };
 

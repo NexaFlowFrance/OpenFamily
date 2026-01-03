@@ -10,9 +10,9 @@ proxmox-scripts/
 │   ├── openfamily.sh          # Script de création du container LXC
 │   └── headers/
 │       └── openfamily         # Header ASCII personnalisé
-└── install/
-    └── openfamily-install.sh  # Script d'installation dans le container
 ```
+
+> Note : l'installation applicative est **intégrée** dans `ct/openfamily.sh` (script unique).
 
 ## 🚀 Utilisation
 
@@ -49,16 +49,16 @@ cat /root/openfamily.creds
 ### HTTPS local/LAN : faire confiance à la CA de Caddy
 
 En mode **HTTPS local/LAN**, Caddy utilise une **CA interne** (`tls internal`).
-Pour enlever l'avertissement navigateur et activer Notifications/SW sur vos appareils, il faut installer le certificat CA comme autorité de confiance.
+Pour enlever le blocage navigateur et activer Notifications/SW sur vos appareils, il faut installer cette CA comme autorité de confiance.
 
-- Chemin (dans le container) : `/var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt`
-- Copie simple (depuis le shell du container) :
+Le script expose automatiquement le certificat CA sur HTTP (pas besoin de commandes Proxmox) :
 
-```bash
-cp /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt /root/openfamily-local-ca.crt
-```
+- Téléchargement : `http://[IP_DU_CONTAINER]/openfamily-local-ca.crt`
+- Import : importer ce fichier comme Autorité de confiance sur PC/mobile.
 
-Vous pouvez ensuite récupérer `/root/openfamily-local-ca.crt` et l'importer sur PC/mobile.
+Si le navigateur affiche "n'autorise pas la connexion" / "Your connection is not private", c'est généralement **normal** tant que le CA n'est pas importé.
+
+> Important : sur un réseau local, il n'existe pas de solution 100% automatisable côté appareils sans domaine + certificat public (Let's Encrypt). Pour une expérience “zéro manipulation” côté utilisateurs, utilisez **HTTPS public** avec un domaine.
 
 ## 🔧 Fonctionnalités
 
@@ -71,17 +71,9 @@ Vous pouvez ensuite récupérer `/root/openfamily-local-ca.crt` et l'importer su
 - ✅ Unprivileged container par défaut
 - ✅ Choix interactif du mode HTTPS (HTTP / HTTPS public / HTTPS local)
 
-### Installation Script (`install/openfamily-install.sh`)
+### Installation
 
-- ✅ Installation Node.js 20
-- ✅ Installation PostgreSQL 17
-- ✅ Configuration automatique de la base de données
-- ✅ Installation pnpm
-- ✅ Clonage et build de l'application
-- ✅ Variables d'environnement sécurisées
-- ✅ Service systemd
-- ✅ Sauvegarde des credentials
-- ✅ (Optionnel) Reverse proxy HTTPS via Caddy
+Le script `ct/openfamily.sh` crée le CT et exécute ensuite l'installation OpenFamily dans le container (Node.js, PostgreSQL, build client/server, service systemd, et optionnellement Caddy).
 
 ## 📝 Standards Respectés
 
@@ -129,12 +121,11 @@ update
    ```bash
    cp /path/to/proxmox-scripts/ct/openfamily.sh ct/
    cp /path/to/proxmox-scripts/ct/headers/openfamily ct/headers/
-   cp /path/to/proxmox-scripts/install/openfamily-install.sh install/
    ```
 
 4. **Commit et push** :
    ```bash
-   git add ct/openfamily.sh ct/headers/openfamily install/openfamily-install.sh
+   git add ct/openfamily.sh ct/headers/openfamily
    git commit -m "feat: Add OpenFamily - Family Organization Platform"
    git push origin feat/openfamily
    ```
@@ -190,9 +181,6 @@ Pour tester les scripts localement avant soumission :
 ```bash
 # Tester le script de container
 bash proxmox-scripts/ct/openfamily.sh
-
-# Tester le script d'installation (dans un container existant)
-bash proxmox-scripts/install/openfamily-install.sh
 ```
 
 ## 📚 Ressources

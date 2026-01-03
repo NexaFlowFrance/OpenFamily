@@ -98,6 +98,12 @@ Vous pouvez aussi accéder à OpenFamily sans installation :
 - Vérifiez que vous utilisez un navigateur compatible (Chrome, Edge, Safari)
 - Assurez-vous d'être sur HTTPS (pas HTTP)
 
+### HTTPS local (certificat interne) : page bloquée / notifications impossibles
+Si OpenFamily est accessible en HTTPS via un certificat **interne** (ex: Caddy `tls internal`), le navigateur peut bloquer l'accès tant que la **CA** n'est pas approuvée sur l'appareil.
+
+- Il n'est pas possible d'"autoriser" une CA via une popup web : c'est volontairement bloqué par les navigateurs/OS (sécurité).
+- Solution : installer/importer la CA sur chaque appareil (PC/mobile) comme Autorité de confiance, ou utiliser un domaine + certificat public (Let's Encrypt) pour une expérience sans manipulation côté utilisateurs.
+
 ### L'application ne fonctionne pas offline
 - Visitez l'application au moins une fois avec connexion
 - Les données se mettent en cache automatiquement

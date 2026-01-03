@@ -257,7 +257,19 @@ async function startServer() {
       ? path.resolve(__dirname, "public")
       : path.resolve(__dirname, "..", "dist", "public");
 
-  app.use(express.static(staticPath));
+  app.use(
+    express.static(staticPath, {
+      setHeaders(res, filePath) {
+        if (filePath.endsWith(`${path.sep}sw.js`) || filePath.endsWith('/sw.js')) {
+          // Ensure SW updates are picked up quickly
+          res.setHeader('Cache-Control', 'no-store, must-revalidate');
+          // Allow SW to control the whole origin (useful behind some proxies)
+          res.setHeader('Service-Worker-Allowed', '/');
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        }
+      },
+    })
+  );
 
   // Handle client-side routing - serve index.html for all routes
   app.get(/.*/, (_req, res) => {

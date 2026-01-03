@@ -7,7 +7,8 @@ createRoot(document.getElementById("root")!).render(<App />);
 // Service Worker (PWA)
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
-		navigator.serviceWorker.register('/sw.js').catch(() => {
+		const swUrl = `${import.meta.env.BASE_URL}sw.js`;
+		navigator.serviceWorker.register(swUrl, { scope: import.meta.env.BASE_URL }).catch(() => {
 			// Silent fail: app should work without SW
 		});
 	});

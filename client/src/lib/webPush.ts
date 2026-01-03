@@ -22,7 +22,8 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   }
 
   try {
-    const registration = await navigator.serviceWorker.register('/sw.js');
+    const swUrl = `${import.meta.env.BASE_URL}sw.js`;
+    const registration = await navigator.serviceWorker.register(swUrl, { scope: import.meta.env.BASE_URL });
     logger.log('Service Worker enregistré:', registration);
     return registration;
   } catch (error) {

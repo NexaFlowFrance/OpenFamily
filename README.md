@@ -144,21 +144,21 @@ Pour activer les notifications, utilisez **HTTPS**.
 curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.https-public.yml
 ```
 
-2. Tlchargez le fichier Caddyfile public :
+2. Téléchargez le fichier Caddyfile public :
 
 ```bash
 mkdir -p docker
 curl -o docker/Caddyfile.public https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker/Caddyfile.public
 ```
 
-3. Crez un fichier `.env` dans le dossier et configurez :
+3. Créez un fichier `.env` dans le dossier et configurez :
 
 ```bash
 OPENFAMILY_DOMAIN=openfamily.votre-domaine.com
 ACME_EMAIL=votre-email@domaine.com
 ```
 
-4. Dmarrez avec HTTPS :
+4. Démarrez avec HTTPS :
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.https-public.yml up -d
@@ -174,7 +174,7 @@ Accès : `https://openfamily.votre-domaine.com`
 curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.https-local.yml
 ```
 
-2. Tlchargez le fichier Caddyfile local :
+2. Téléchargez le fichier Caddyfile local :
 
 ```bash
 mkdir -p docker
@@ -307,7 +307,6 @@ OpenFamily utilise une architecture **serveur centralisée avec PostgreSQL** :
 - **Base de données** : PostgreSQL (inclus dans Docker Compose)
 - **Serveur API** : Express.js (Node.js)
 - **Synchronisation** : Temps réel via API REST
-- **Sécurité** : Token d'authentification, isolation par famille
 
 ### 📊 Données stockées
 
@@ -405,7 +404,6 @@ docker exec -i openfamily-db psql -U openfamily openfamily < backup.sql
 - **React 19 + TypeScript** - Interface utilisateur moderne et typée
 - **Vite 7** - Build tool ultra-rapide
 - **TailwindCSS + shadcn/ui** - Design system élégant et cohérent
-- **Wouter** - Routage léger
 - **date-fns** - Manipulation des dates
 - **Recharts** - Graphiques et visualisations
 
@@ -416,9 +414,7 @@ docker exec -i openfamily-db psql -U openfamily openfamily < backup.sql
 - **Docker + Docker Compose** - Conteneurisation et déploiement
 
 ### Stockage
-- **localStorage** - Mode local (navigateur)
 - **PostgreSQL** - Mode serveur (auto-hébergé)
-- **Repository Pattern** - Abstraction du stockage pour les deux modes
 
 ### Mobile
 - **Capacitor** - Build Android/iOS
@@ -429,18 +425,12 @@ docker exec -i openfamily-db psql -U openfamily openfamily < backup.sql
 - Chrome/Edge (desktop & mobile)
 - Safari (iOS & macOS)
 - Firefox
-- Tout navigateur moderne supportant localStorage et Service Workers
+- Tout navigateur moderne supportant Service Workers
 
 ## 🔐 Vie privée
 
-Cette application respecte votre vie privée selon le mode choisi :
+Cette application respecte votre vie privée :
 
-### Mode Local
-- ❌ N'envoie **aucune donnée** à des serveurs externes
-- ❌ N'utilise **aucune base de données** centralisée
-- ❌ Ne nécessite **aucun compte utilisateur**
-- ✅ Stocke **tout localement** sur votre appareil
-- ✅ Fonctionne **entièrement hors ligne**
 
 ### Mode Serveur
 - ✅ **Vous contrôlez l'infrastructure** - Hébergez sur votre propre serveur
@@ -454,17 +444,14 @@ Cette application respecte votre vie privée selon le mode choisi :
 ## ❓ FAQ
 
 ### Mes données sont-elles sécurisées ?
-**Mode Local** : Oui, toutes vos données sont stockées localement dans votre navigateur. Elles ne quittent jamais votre appareil.
 
 **Mode Serveur** : Vos données sont stockées sur votre propre serveur. Vous avez le contrôle total et la responsabilité de la sécurité.
 
 ### Puis-je utiliser l'application hors ligne ?
-**Mode Local** : Absolument ! Une fois installée comme PWA, l'application fonctionne entièrement hors ligne.
 
 **Mode Serveur** : Une connexion au serveur est nécessaire pour synchroniser les données. Les fonctionnalités offline peuvent être limitées.
 
 ### Comment sauvegarder mes données ?
-**Mode Local** : Allez dans Paramètres → Sauvegarde pour télécharger un fichier JSON contenant toutes vos données.
 
 **Mode Serveur** : Configurez des sauvegardes automatiques de votre base de données PostgreSQL (voir [DEPLOYMENT.md](docs/DEPLOYMENT.md)).
 
@@ -475,7 +462,6 @@ Oui ! L'interface est disponible en **Français 🇫🇷**, **Anglais 🇬🇧**
 Oui, vous pouvez l'installer comme PWA depuis Safari. Sur Android, vous pouvez également installer l'APK.
 
 ### Puis-je synchroniser entre plusieurs appareils ?
-**Mode Local** : Utilisez la fonction d'export/import pour transférer manuellement vos données.
 
 **Mode Serveur** : Oui ! Le mode serveur auto-hébergé permet la synchronisation automatique entre tous les appareils de la famille.
 

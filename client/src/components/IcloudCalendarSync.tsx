@@ -1,32 +1,25 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useApp } from '@/contexts/AppContext';
 
 type StatusResponse =
   | { connected: false }
   | { connected: true; account: { id: string; username: string; updatedAt: string } };
 
 type SyncResponse = {
-  ok: boolean;
-  result?: { created: number; updated: number; skipped: number; errors: number };
-  error?: string;
+  ok: true;
+  result: { created: number; updated: number; skipped: number; errors: number };
 };
 
-function getToken(): string | null {
-  return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('accessToken') ||
-    localStorage.getItem('authToken') ||
-    null
-  );
-}
-
-function getFamilyId(): string | null {
-  return localStorage.getItem('familyId') || localStorage.getItem('currentFamilyId') || null;
-}
-
 export default function IcloudCalendarSync(): JSX.Element {
+  const app = useApp();
+
+  // Dans ton projet, le repository (ServerRepository) est très probablement exposé
+  // via le contexte App. Selon l’implémentation, le champ peut s’appeler repository ou dataRepository.
+  const repository = (app as any).repository ?? (app as any).dataRepository;
+
   const [username, setUsername] = useState('');
   const [appPassword, setAppPassword] = useState('');
   const [status, setStatus] = useState<StatusResponse | null>(null);
@@ -34,22 +27,18 @@ export default function IcloudCalendarSync(): JSX.Element {
   const [syncLoading, setSyncLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const headers = useMemo(() => {
-    const token = getToken();
-    const familyId = getFamilyId();
-
-    const h: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) h.Authorization = `Bearer ${token}`;
-    if (familyId) h['x-family-id'] = familyId;
-
-    return h;
-  }, []);
-
   const loadStatus = async (): Promise<void> => {
     try {
-      const res = await fetch('/api/calendar-sync/icloud/status', { headers });
-      const data = (await res.json()) as StatusResponse & { error?: string };
-      if (!res.ok) throw new Error(data.error ?? `Erreur HTTP ${res.status}`);
+      setMessage(null);
+
+      if (!repository?.getIcloudCalendarStatus) {
+        setMessage(
+          "Repository non trouvé. Vérifie que AppContext expose repository/dataRepository et que ServerRepository contient bien les méthodes iCloud.",
+        );
+        return;
+      }
+
+      const data = (await repository.getIcloudCalendarStatus()) as StatusResponse;
       setStatus(data);
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Erreur inconnue');
@@ -66,14 +55,7 @@ export default function IcloudCalendarSync(): JSX.Element {
       setLoading(true);
       setMessage(null);
 
-      const res = await fetch('/api/calendar-sync/icloud/connect', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ username, appPassword }),
-      });
-
-      const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok) throw new Error(data.error ?? `Erreur HTTP ${res.status}`);
+      await repository.connectIcloudCalendar({ username, appPassword });
 
       setMessage('Compte iCloud enregistré. Vous pouvez lancer une synchronisation.');
       setAppPassword('');
@@ -90,19 +72,12 @@ export default function IcloudCalendarSync(): JSX.Element {
       setSyncLoading(true);
       setMessage(null);
 
-      const res = await fetch('/api/calendar-sync/icloud/sync', {
-        method: 'POST',
-        headers,
-      });
-
-      const data = (await res.json()) as SyncResponse;
-      if (!res.ok) throw new Error(data.error ?? `Erreur HTTP ${res.status}`);
+      const data = (await repository.syncIcloudCalendar()) as SyncResponse;
 
       setMessage(
-        `Sync terminée — créés: ${data.result?.created ?? 0}, mis à jour: ${
-          data.result?.updated ?? 0
-        }, ignorés: ${data.result?.skipped ?? 0}, erreurs: ${data.result?.errors ?? 0}`,
+        `Sync terminée — créés: ${data.result.created}, mis à jour: ${data.result.updated}, ignorés: ${data.result.skipped}, erreurs: ${data.result.errors}`,
       );
+
       await loadStatus();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Erreur inconnue');

@@ -192,3 +192,36 @@ CREATE INDEX IF NOT EXISTS idx_scheduled_notifications_family_id ON scheduled_no
 -- INSERT INTO family_members (id, family_id, name, color) VALUES 
 --   ('member-1', 'family-demo', 'Papa', '#3b82f6'),
 --   ('member-2', 'family-demo', 'Maman', '#ec4899');
+
+CREATE TABLE IF NOT EXISTS external_calendar_accounts (
+  id VARCHAR(255) PRIMARY KEY,
+  family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  provider VARCHAR(50) NOT NULL, -- 'icloud'
+  username VARCHAR(255) NOT NULL, -- Apple ID email
+  password_encrypted TEXT NOT NULL,
+  caldav_url TEXT NOT NULL DEFAULT 'https://caldav.icloud.com',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(family_id, provider, username)
+);
+
+CREATE INDEX IF NOT EXISTS idx_external_calendar_accounts_family_id
+  ON external_calendar_accounts(family_id);
+
+CREATE TABLE IF NOT EXISTS external_calendar_event_links (
+  id VARCHAR(255) PRIMARY KEY,
+  family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  account_id VARCHAR(255) NOT NULL REFERENCES external_calendar_accounts(id) ON DELETE CASCADE,
+  provider VARCHAR(50) NOT NULL, -- 'icloud'
+  remote_uid TEXT NOT NULL,      -- UID iCalendar
+  remote_href TEXT NOT NULL,     -- URL ressource CalDAV
+  remote_etag TEXT,
+  local_appointment_id VARCHAR(255) NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(account_id, remote_uid)
+);
+
+CREATE INDEX IF NOT EXISTS idx_external_calendar_event_links_account
+  ON external_calendar_event_links(account_id);
+
+

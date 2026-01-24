@@ -69,12 +69,31 @@ echo -e "${GREEN}Using Container ID: $CTID${NC}"
 
 # Download Debian template if not exists
 echo -e "${YELLOW}Checking Debian template...${NC}"
-if ! pveam list $STORAGE | grep -q "debian-13"; then
+if ! pveam list $STORAGE 2>/dev/null | grep -q "debian-13"; then
     echo -e "${YELLOW}Downloading Debian 13 template...${NC}"
-    pveam download $STORAGE debian-13-standard_13.0-1_amd64.tar.zst
+    pveam download $STORAGE debian-13-standard_13.0-1_amd64.tar.zst 2>/dev/null || {
+        echo -e "${YELLOW}Template download failed, trying alternative method...${NC}"
+        pveam update
+        pveam download $STORAGE debian-13-standard_13.0-1_amd64.tar.zst
+    }
 fi
 
-TEMPLATE=$(pveam list $STORAGE | grep "debian-13" | awk '{print $1}' | head -n1)
+TEMPLATE=$(pveam list $STORAGE 2>/dev/null | grep -E "debian.*13" | awk '{print $1}' | head -n1)
+
+# If no Debian 13 template found, use any available Debian template
+if [ -z "$TEMPLATE" ]; then
+    echo -e "${YELLOW}Debian 13 not found, checking for other Debian versions...${NC}"
+    TEMPLATE=$(pveam list $STORAGE 2>/dev/null | grep "debian" | awk '{print $1}' | head -n1)
+fi
+
+if [ -z "$TEMPLATE" ]; then
+    echo -e "${RED}No Debian template found in $STORAGE!${NC}"
+    echo -e "${YELLOW}Available templates:${NC}"
+    pveam list $STORAGE
+    exit 1
+fi
+
+echo -e "${GREEN}Using template: $TEMPLATE${NC}"
 
 # Create LXC container
 echo -e "${YELLOW}Creating LXC container...${NC}"

@@ -67,29 +67,40 @@ fi
 CTID=$(pvesh get /cluster/nextid)
 echo -e "${GREEN}Using Container ID: $CTID${NC}"
 
+# Verify storage exists
+if ! pvesm status | grep -q "^$STORAGE"; then
+    echo -e "${RED}Error: Storage '$STORAGE' not found!${NC}"
+    echo -e "${YELLOW}Available storage pools:${NC}"
+    pvesm status
+    exit 1
+fi
+
+# Update template list
+echo -e "${YELLOW}Updating template list...${NC}"
+pveam update 2>/dev/null || echo -e "${YELLOW}Warning: Could not update template list${NC}"
+
 # Download Debian template if not exists
 echo -e "${YELLOW}Checking Debian template...${NC}"
-if ! pveam list $STORAGE 2>/dev/null | grep -q "debian-13"; then
-    echo -e "${YELLOW}Downloading Debian 13 template...${NC}"
-    pveam download $STORAGE debian-13-standard_13.0-1_amd64.tar.zst 2>/dev/null || {
-        echo -e "${YELLOW}Template download failed, trying alternative method...${NC}"
-        pveam update
-        pveam download $STORAGE debian-13-standard_13.0-1_amd64.tar.zst
+if ! pveam list $STORAGE 2>/dev/null | grep -q "debian"; then
+    echo -e "${YELLOW}Downloading Debian template...${NC}"
+    # Try Debian 12 first (more stable and widely available)
+    pveam download $STORAGE debian-12-standard_12.7-1_amd64.tar.zst 2>/dev/null || \
+    pveam download $STORAGE debian-12-standard_12.0-1_amd64.tar.zst 2>/dev/null || {
+        echo -e "${RED}Failed to download Debian template!${NC}"
+        echo -e "${YELLOW}Available templates:${NC}"
+        pveam available
+        exit 1
     }
 fi
 
-TEMPLATE=$(pveam list $STORAGE 2>/dev/null | grep -E "debian.*13" | awk '{print $1}' | head -n1)
-
-# If no Debian 13 template found, use any available Debian template
-if [ -z "$TEMPLATE" ]; then
-    echo -e "${YELLOW}Debian 13 not found, checking for other Debian versions...${NC}"
-    TEMPLATE=$(pveam list $STORAGE 2>/dev/null | grep "debian" | awk '{print $1}' | head -n1)
-fi
+TEMPLATE=$(pveam list $STORAGE 2>/dev/null | grep -E "debian.*standard" | awk '{print $1}' | head -n1)
 
 if [ -z "$TEMPLATE" ]; then
     echo -e "${RED}No Debian template found in $STORAGE!${NC}"
-    echo -e "${YELLOW}Available templates:${NC}"
+    echo -e "${YELLOW}Available templates in $STORAGE:${NC}"
     pveam list $STORAGE
+    echo -e "\n${YELLOW}All available templates:${NC}"
+    pveam available | grep debian
     exit 1
 fi
 

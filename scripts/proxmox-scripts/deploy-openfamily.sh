@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 CONTAINER_NAME="openfamily"
 CONTAINER_HOSTNAME="openfamily"
 DEFAULT_STORAGE="local-lvm"
-DEFAULT_TEMPLATE="debian-13"
+DEFAULT_TEMPLATE_STORAGE="local"
 DEFAULT_CORES=2
 DEFAULT_MEMORY=2048
 DEFAULT_DISK=10
@@ -49,8 +49,11 @@ MEMORY="${INPUT_MEMORY:-$DEFAULT_MEMORY}"
 read -p "Enter disk size in GB [10]: " INPUT_DISK
 DISK="${INPUT_DISK:-$DEFAULT_DISK}"
 
-read -p "Enter storage pool [$DEFAULT_STORAGE]: " INPUT_STORAGE
+read -p "Enter storage pool for container [$DEFAULT_STORAGE]: " INPUT_STORAGE
 STORAGE="${INPUT_STORAGE:-$DEFAULT_STORAGE}"
+
+read -p "Enter storage for templates [$DEFAULT_TEMPLATE_STORAGE]: " INPUT_TEMPLATE_STORAGE
+TEMPLATE_STORAGE="${INPUT_TEMPLATE_STORAGE:-$DEFAULT_TEMPLATE_STORAGE}"
 
 read -p "Enter network bridge [$DEFAULT_BRIDGE]: " INPUT_BRIDGE
 BRIDGE="${INPUT_BRIDGE:-$DEFAULT_BRIDGE}"
@@ -75,32 +78,46 @@ if ! pvesm status | grep -q "^$STORAGE"; then
     exit 1
 fi
 
+# Verify template storage exists and supports templates
+if ! pvesm status | grep -q "^$TEMPLATE_STORAGE"; then
+    echo -e "${RED}Error: Template storage '$TEMPLATE_STORAGE' not found!${NC}"
+    echo -e "${YELLOW}Available storage pools:${NC}"
+    pvesm status
+    exit 1
+fi
+
+# Check if template storage supports vztmpl content
+if ! pvesm status | grep "^$TEMPLATE_STORAGE" | grep -q "vztmpl"; then
+    echo -e "${RED}Error: Storage '$TEMPLATE_STORAGE' does not support templates (vztmpl)!${NC}"
+    echo -e "${YELLOW}Available storages that support templates:${NC}"
+    pvesm status | grep "vztmpl" || echo "No storage found that supports templates!"
+    exit 1
+fi
+
 # Update template list
 echo -e "${YELLOW}Updating template list...${NC}"
 pveam update 2>/dev/null || echo -e "${YELLOW}Warning: Could not update template list${NC}"
 
 # Download Debian template if not exists
-echo -e "${YELLOW}Checking Debian template...${NC}"
-if ! pveam list $STORAGE 2>/dev/null | grep -q "debian"; then
-    echo -e "${YELLOW}Downloading Debian template...${NC}"
+echo -e "${YELLOW}Checking Debian template in $TEMPLATE_STORAGE...${NC}"
+if ! pveam list $TEMPLATE_STORAGE 2>/dev/null | grep -q "debian"; then
+    echo -e "${YELLOW}Downloading Debian template to $TEMPLATE_STORAGE...${NC}"
     # Try Debian 12 first (more stable and widely available)
-    pveam download $STORAGE debian-12-standard_12.7-1_amd64.tar.zst 2>/dev/null || \
-    pveam download $STORAGE debian-12-standard_12.0-1_amd64.tar.zst 2>/dev/null || {
+    pveam download $TEMPLATE_STORAGE debian-12-standard_12.7-1_amd64.tar.zst 2>/dev/null || \
+    pveam download $TEMPLATE_STORAGE debian-12-standard_12.0-1_amd64.tar.zst 2>/dev/null || {
         echo -e "${RED}Failed to download Debian template!${NC}"
         echo -e "${YELLOW}Available templates:${NC}"
-        pveam available
+        pveam available | grep debian | head -10
         exit 1
     }
 fi
 
-TEMPLATE=$(pveam list $STORAGE 2>/dev/null | grep -E "debian.*standard" | awk '{print $1}' | head -n1)
+TEMPLATE=$(pveam list $TEMPLATE_STORAGE 2>/dev/null | grep -E "debian.*standard" | awk '{print $1}' | head -n1)
 
 if [ -z "$TEMPLATE" ]; then
-    echo -e "${RED}No Debian template found in $STORAGE!${NC}"
-    echo -e "${YELLOW}Available templates in $STORAGE:${NC}"
-    pveam list $STORAGE
-    echo -e "\n${YELLOW}All available templates:${NC}"
-    pveam available | grep debian
+    echo -e "${RED}No Debian template found in $TEMPLATE_STORAGE!${NC}"
+    echo -e "${YELLOW}Available templates in $TEMPLATE_STORAGE:${NC}"
+    pveam list $TEMPLATE_STORAGE
     exit 1
 fi
 

@@ -206,7 +206,23 @@ Au premier démarrage, un mot de passe PostgreSQL est généré automatiquement 
 docker compose logs init
 ```
 
-### Option 2 : Installation manuelle
+### Option 2 : Déploiement sur Proxmox (LXC Container)
+
+Déploiement automatique en une seule commande sur un serveur Proxmox VE :
+
+```bash
+wget -qO- https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/proxmox-scripts/deploy-openfamily.sh | bash
+```
+
+Le script va :
+- ✅ Créer un conteneur LXC Ubuntu 22.04
+- ✅ Installer Docker et Docker Compose
+- ✅ Cloner et démarrer OpenFamily automatiquement
+- ✅ Afficher l'URL d'accès et le mot de passe de la base
+
+📖 **Documentation complète** : [Guide Proxmox](scripts/proxmox-scripts/PROXMOX_DEPLOYMENT.md)
+
+### Option 3 : Installation manuelle
 
 Pour les développeurs ou si vous ne pouvez pas utiliser Docker :
 

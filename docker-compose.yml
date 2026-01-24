@@ -68,7 +68,10 @@ services:
 
   # OpenFamily Application avec configuration automatique
   app:
-    image: nexaflow/openfamily:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
     container_name: openfamily-app
     restart: unless-stopped
     ports:

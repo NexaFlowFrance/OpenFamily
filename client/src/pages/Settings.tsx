@@ -328,16 +328,16 @@ export default function Settings() {
                           <div>
                             <Label>{t.settings.bloodGroup}</Label>
                             <Input
-                              value={member.bloodType || ''}
-                              onChange={(e) => updateFamilyMember(member.id, { bloodType: e.target.value })}
+                              defaultValue={member.bloodType || ''}
+                              onBlur={(e) => updateFamilyMember(member.id, { bloodType: e.target.value })}
                               placeholder={t.settings.bloodGroupPlaceholder}
                             />
                           </div>
                           <div>
                             <Label>{t.settings.allergies}</Label>
                             <Textarea
-                              value={member.allergies?.join('\n') || ''}
-                              onChange={(e) => updateFamilyMember(member.id, { 
+                              defaultValue={member.allergies?.join('\n') || ''}
+                              onBlur={(e) => updateFamilyMember(member.id, { 
                                 allergies: e.target.value.split('\n').filter(a => a.trim()) 
                               })}
                               placeholder={t.settings.allergiesPlaceholder}
@@ -347,8 +347,8 @@ export default function Settings() {
                           <div>
                             <Label>{t.settings.medicalNotes}</Label>
                             <Textarea
-                              value={member.medicalNotes || ''}
-                              onChange={(e) => updateFamilyMember(member.id, { medicalNotes: e.target.value })}
+                              defaultValue={member.medicalNotes || ''}
+                              onBlur={(e) => updateFamilyMember(member.id, { medicalNotes: e.target.value })}
                               placeholder={t.settings.medicalNotesPlaceholder}
                               rows={4}
                             />
@@ -356,8 +356,8 @@ export default function Settings() {
                           <div>
                             <Label>{t.settings.emergencyContactName}</Label>
                             <Input
-                              value={member.emergencyContact?.name || ''}
-                              onChange={(e) => updateFamilyMember(member.id, { 
+                              defaultValue={member.emergencyContact?.name || ''}
+                              onBlur={(e) => updateFamilyMember(member.id, { 
                                 emergencyContact: { 
                                   ...member.emergencyContact,
                                   name: e.target.value,
@@ -371,8 +371,8 @@ export default function Settings() {
                           <div>
                             <Label>{t.settings.emergencyContactPhone}</Label>
                             <Input
-                              value={member.emergencyContact?.phone || ''}
-                              onChange={(e) => updateFamilyMember(member.id, { 
+                              defaultValue={member.emergencyContact?.phone || ''}
+                              onBlur={(e) => updateFamilyMember(member.id, { 
                                 emergencyContact: { 
                                   name: member.emergencyContact?.name || '',
                                   phone: e.target.value,
@@ -385,8 +385,8 @@ export default function Settings() {
                           <div>
                             <Label>{t.settings.emergencyContactRelation}</Label>
                             <Input
-                              value={member.emergencyContact?.relation || ''}
-                              onChange={(e) => updateFamilyMember(member.id, { 
+                              defaultValue={member.emergencyContact?.relation || ''}
+                              onBlur={(e) => updateFamilyMember(member.id, { 
                                 emergencyContact: { 
                                   name: member.emergencyContact?.name || '',
                                   phone: member.emergencyContact?.phone || '',
@@ -463,7 +463,7 @@ export default function Settings() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t.settings.version}</p>
-              <p className="font-medium text-foreground">1.0.0</p>
+              <p className="font-medium text-foreground">1.0.2</p>
             </div>
           </Card>
         </div>

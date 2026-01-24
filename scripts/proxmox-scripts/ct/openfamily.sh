@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
-# Copyright (c) 2021-2025 community-scripts ORG
+# Copyright (c) 2021-2026 community-scripts ORG
 # Author: NexaFlowFrance
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/NexaFlowFrance/OpenFamily
@@ -116,7 +116,11 @@ cat >"${TMP_INSTALL_SCRIPT}" <<'OPENFAMILY_INSTALL_EOF'
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/NexaFlowFrance/OpenFamily
 
-source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+# Load community-scripts functions
+if [[ -n "${FUNCTIONS_FILE_PATH}" ]]; then
+  source <(echo "${FUNCTIONS_FILE_PATH}")
+fi
+
 color
 verb_ip6
 catch_errors
@@ -149,7 +153,12 @@ $STD sudo -u postgres psql -c "ALTER ROLE ${PG_DB_USER} SET default_transaction_
 $STD sudo -u postgres psql -c "ALTER ROLE ${PG_DB_USER} SET timezone TO 'UTC';"
 msg_ok "Created PostgreSQL Database"
 
-import_local_ip
+# Get local IP address
+if command -v import_local_ip &>/dev/null; then
+  import_local_ip
+else
+  LOCAL_IP=$(hostname -I | awk '{print $1}')
+fi
 
 # SSL mode passed from ct/openfamily.sh (http | https_public | https_local)
 OPENFAMILY_SSL_MODE=${OPENFAMILY_SSL_MODE:-http}
@@ -424,7 +433,14 @@ OPENFAMILY_INSTALL_EOF
 pct push "$CTID" "${TMP_INSTALL_SCRIPT}" /tmp/openfamily-install.sh
 rm -f "${TMP_INSTALL_SCRIPT}" || true
 
-pct exec "$CTID" -- bash -c "export FUNCTIONS_FILE_PATH=\$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/install.func) && export OPENFAMILY_SSL_MODE='${OPENFAMILY_SSL_MODE}' && export OPENFAMILY_DOMAIN='${OPENFAMILY_DOMAIN}' && export ACME_EMAIL='${ACME_EMAIL}' && bash /tmp/openfamily-install.sh"
+# Download functions file inside container and execute installation
+pct exec "$CTID" -- bash -c "
+  export FUNCTIONS_FILE_PATH=\"\$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/install.func)\"
+  export OPENFAMILY_SSL_MODE='${OPENFAMILY_SSL_MODE}'
+  export OPENFAMILY_DOMAIN='${OPENFAMILY_DOMAIN}'
+  export ACME_EMAIL='${ACME_EMAIL}'
+  bash /tmp/openfamily-install.sh
+"
 msg_ok "${APP} Installation Complete"
 
 # Get container IP

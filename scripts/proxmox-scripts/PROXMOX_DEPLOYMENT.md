@@ -9,7 +9,43 @@ Guide complet pour déployer OpenFamily sur Proxmox VE en utilisant des conteneu
 - Connexion Internet active
 - Au moins 2 CPU cores et 2GB RAM disponibles
 
-## 🚀 Méthode 1 : Déploiement Automatique (LXC Container) - Recommandé
+## 🚀 Méthode 1 : Déploiement Automatique (Community-Scripts) - **RECOMMANDÉ**
+
+Utilise le framework officiel ProxmoxVE Community-Scripts pour une installation complète et automatique.
+
+### Installation en une seule commande
+
+Sur votre serveur Proxmox, exécutez :
+
+```bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/proxmox-scripts/ct/openfamily.sh)"
+```
+
+### Ce que fait le script
+
+1. ✅ Crée un conteneur LXC Debian 12 optimisé
+2. ✅ Installe Node.js 20 + pnpm automatiquement
+3. ✅ Configure PostgreSQL 17 avec identifiants auto-générés
+4. ✅ Télécharge et build OpenFamily (dernière release)
+5. ✅ Crée un service systemd avec auto-start
+6. ✅ Configure HTTPS (3 modes au choix)
+7. ✅ Génère les identifiants dans `/root/openfamily.creds`
+
+### Options HTTPS interactives
+
+Le script vous propose 3 modes :
+
+- **HTTP simple** : Accès sur port 3000 (test local)
+- **HTTPS public** : Let's Encrypt automatique (requiert domaine)
+- **HTTPS local** : CA locale téléchargeable (LAN sécurisé)
+
+📖 **Documentation complète** : [Guide Community-Scripts](ct/README.md)
+
+---
+
+## 🔧 Méthode 2 : Déploiement Manuel (Script Bash)
+
+Si vous préférez un contrôle total de la configuration.
 
 Le conteneur LXC est plus léger et démarre plus rapidement qu'une VM.
 

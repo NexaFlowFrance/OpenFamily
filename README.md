@@ -208,17 +208,19 @@ docker compose logs init
 
 ### Option 2 : Déploiement sur Proxmox (LXC Container)
 
-Déploiement automatique en une seule commande sur un serveur Proxmox VE :
+Déploiement automatique complet avec le framework ProxmoxVE Community-Scripts :
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/proxmox-scripts/deploy-openfamily.sh | bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/proxmox-scripts/ct/openfamily.sh)"
 ```
 
 Le script va :
-- ✅ Créer un conteneur LXC Ubuntu 22.04
-- ✅ Installer Docker et Docker Compose
-- ✅ Cloner et démarrer OpenFamily automatiquement
-- ✅ Afficher l'URL d'accès et le mot de passe de la base
+- ✅ Créer un conteneur LXC Debian 12 optimisé
+- ✅ Installer Node.js, PostgreSQL et toutes les dépendances
+- ✅ Configurer HTTPS (3 modes : HTTP simple, Let's Encrypt, CA locale)
+- ✅ Cloner, builder et démarrer OpenFamily automatiquement
+- ✅ Créer un service systemd avec auto-start
+- ✅ Générer et afficher tous les identifiants
 
 📖 **Documentation complète** : [Guide Proxmox](scripts/proxmox-scripts/PROXMOX_DEPLOYMENT.md)
 

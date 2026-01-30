@@ -24,6 +24,8 @@ export default function Meals() {
   const { setAddAction } = useAddButton();
   const [showForm, setShowForm] = useState(false);
   const [showAutoPlanner, setShowAutoPlanner] = useState(false);
+  const [showDayDetails, setShowDayDetails] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [formData, setFormData] = useState({
     date: formatDateOnly(new Date()),
@@ -422,11 +424,18 @@ export default function Meals() {
                     <button
                       key={index}
                       onClick={() => {
-                        setFormData({
-                          ...formData,
-                          date: dateStr,
-                        });
-                        setShowForm(true);
+                        if (hasMeals) {
+                          // Si des repas existent, afficher les détails
+                          setSelectedDate(dateStr);
+                          setShowDayDetails(true);
+                        } else {
+                          // Sinon, ouvrir le formulaire d'ajout
+                          setFormData({
+                            ...formData,
+                            date: dateStr,
+                          });
+                          setShowForm(true);
+                        }
                       }}
                       className={`
                         min-h-[80px] p-2 rounded-lg border transition-all text-left
@@ -481,10 +490,104 @@ export default function Meals() {
         )}
       </div>
 
+      {/* Fenêtre détails du jour */}
+      {showDayDetails && selectedDate && (() => {
+        const selectedDay = new Date(selectedDate + 'T12:00:00');
+        const dayMeals = meals.filter(m => m.date === selectedDate);
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowDayDetails(false)}>
+            <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold">
+                  {selectedDay.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDayDetails(false)}
+                >
+                  ✕
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {getMealTypeLabels(t).map(mealType => {
+                  const typeMeals = dayMeals.filter(m => m.mealType === mealType.value);
+                  
+                  return (
+                    <div key={mealType.value} className="border border-border rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <span>{mealType.emoji}</span>
+                          <span>{mealType.label}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              date: selectedDate,
+                              mealType: mealType.value as any,
+                            });
+                            setShowDayDetails(false);
+                            setShowForm(true);
+                          }}
+                          className="text-primary hover:text-primary/80"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {typeMeals.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic">{t.meals.noMeal}</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {typeMeals.map(meal => (
+                            <div
+                              key={meal.id}
+                              className="flex items-start justify-between bg-muted/50 rounded p-2 text-sm"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  {meal.recipeId && <ChefHat className="w-3 h-3 text-primary" />}
+                                  <span className="font-medium">
+                                    {meal.recipeId ? getRecipeTitle(meal.recipeId) : meal.title}
+                                  </span>
+                                </div>
+                                {meal.notes && (
+                                  <p className="text-xs text-muted-foreground mt-1">{meal.notes}</p>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => deleteMeal(meal.id)}
+                                className="text-muted-foreground hover:text-destructive ml-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => setShowDayDetails(false)}
+                className="w-full"
+              >
+                {t.close || 'Fermer'}
+              </Button>
+            </Card>
+          </div>
+        );
+      })()}
+
       {/* Formulaire ajout repas */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowForm(false)}>
+          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-bold">{t.meals.planMeal}</h2>
 
             <div>

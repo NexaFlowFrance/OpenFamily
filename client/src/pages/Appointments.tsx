@@ -523,7 +523,12 @@ export default function Appointments() {
                 <Input
                   type="time"
                   value={formData.time}
-                  onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                  onChange={(e) => {
+                    // Ensure time format is always HH:mm
+                    const timeValue = e.target.value;
+                    const formattedTime = timeValue.includes(':') ? timeValue : `${timeValue}:00`;
+                    setFormData({ ...formData, time: formattedTime });
+                  }}
                   className="mt-1"
                 />
               </div>

@@ -143,9 +143,29 @@ export class ServerRepository implements IDataRepository {
   }
 
   async updateFamilyMember(id: string, updates: Partial<FamilyMember>): Promise<FamilyMember> {
+    // Transform health-related fields into health_info object for server
+    const { allergies, medicalNotes, bloodType, vaccines, emergencyContact, workSchedule, ...otherUpdates } = updates;
+    
+    const hasHealthInfo = allergies !== undefined || medicalNotes !== undefined || 
+                          bloodType !== undefined || vaccines !== undefined || 
+                          emergencyContact !== undefined;
+    
+    const serverPayload: any = { ...otherUpdates };
+    
+    if (hasHealthInfo || workSchedule !== undefined) {
+      serverPayload.health_info = {};
+      
+      if (allergies !== undefined) serverPayload.health_info.allergies = allergies;
+      if (medicalNotes !== undefined) serverPayload.health_info.medicalNotes = medicalNotes;
+      if (bloodType !== undefined) serverPayload.health_info.bloodType = bloodType;
+      if (vaccines !== undefined) serverPayload.health_info.vaccines = vaccines;
+      if (emergencyContact !== undefined) serverPayload.health_info.emergencyContact = emergencyContact;
+      if (workSchedule !== undefined) serverPayload.health_info.workSchedule = workSchedule;
+    }
+    
     return this.request<FamilyMember>(`/members/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      body: JSON.stringify(serverPayload),
     });
   }
 

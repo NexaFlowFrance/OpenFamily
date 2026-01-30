@@ -109,11 +109,13 @@ export default function WeeklyCalendar({ appointments, onAppointmentClick, onApp
 
   // Détecter les chevauchements d'horaires
   const getAppointmentLayout = (apt: { appointment: Appointment; time: string }, dayAppointments: Array<{ appointment: Appointment; time: string }>) => {
-    const aptStart = parseInt(apt.time.split(':')[0]) * 60 + parseInt(apt.time.split(':')[1]);
+    const timeParts = apt.time.split(':');
+    const aptStart = parseInt(timeParts[0] || '0') * 60 + parseInt(timeParts[1] || '0');
     const aptEnd = aptStart + (apt.appointment.duration || 60);
     
     const overlapping = dayAppointments.filter(other => {
-      const otherStart = parseInt(other.time.split(':')[0]) * 60 + parseInt(other.time.split(':')[1]);
+      const otherTimeParts = other.time.split(':');
+      const otherStart = parseInt(otherTimeParts[0] || '0') * 60 + parseInt(otherTimeParts[1] || '0');
       const otherEnd = otherStart + (other.appointment.duration || 60);
       return aptStart < otherEnd && aptEnd > otherStart;
     });
@@ -253,14 +255,16 @@ export default function WeeklyCalendar({ appointments, onAppointmentClick, onApp
                       {/* Rendez-vous à cette heure */}
                       {dayAppointments
                         .filter(apt => {
-                          const aptHour = parseInt(apt.time.split(':')[0]);
-                          const aptMinutes = parseInt(apt.time.split(':')[1]);
+                          const timeParts = apt.time.split(':');
+                          const aptHour = parseInt(timeParts[0] || '0');
+                          const aptMinutes = parseInt(timeParts[1] || '0');
                           const aptStartHour = aptHour + aptMinutes / 60;
                           const aptEndHour = aptStartHour + (apt.appointment.duration || 60) / 60;
                           return hour >= aptStartHour && hour < aptEndHour;
                         })
                         .map((apt, index) => {
-                          const aptHour = parseInt(apt.time.split(':')[0]);
+                          const timeParts = apt.time.split(':');
+                          const aptHour = parseInt(timeParts[0] || '0');
                           if (aptHour !== hour) return null; // Afficher uniquement dans la première heure
 
                           const { column, totalColumns } = getAppointmentLayout(apt, dayAppointments);
@@ -274,8 +278,8 @@ export default function WeeklyCalendar({ appointments, onAppointmentClick, onApp
                               style={{
                                 backgroundColor: getTypeColor(apt.appointment.type) + '20',
                                 borderLeftColor: getTypeColor(apt.appointment.type),
-                                top: `${(parseInt(apt.time.split(':')[1]) / 60) * 50}px`,
-                                height: `${Math.min(((apt.appointment.duration || 60) / 60) * 50, 50 - (parseInt(apt.time.split(':')[1]) / 60) * 50)}px`,
+                                top: `${(parseInt(timeParts[1] || '0') / 60) * 50}px`,
+                                height: `${Math.min(((apt.appointment.duration || 60) / 60) * 50, 50 - (parseInt(timeParts[1] || '0') / 60) * 50)}px`,
                                 left: `${column * columnWidth}%`,
                                 width: `${columnWidth - 1}%`,
                                 zIndex: 1,

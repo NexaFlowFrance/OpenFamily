@@ -660,7 +660,20 @@ export function createApp(pool: Pool) {
         'SELECT * FROM family_members WHERE family_id = $1 ORDER BY created_at DESC',
         [familyId]
       );
-      res.json(result.rows);
+      
+      // Transform health_info to flat structure for client
+      const members = result.rows.map(member => {
+        const healthInfo = member.health_info || {};
+        return {
+          id: member.id,
+          name: member.name,
+          color: member.color,
+          ...healthInfo,
+          createdAt: member.created_at
+        };
+      });
+      
+      res.json(members);
     } catch (error) {
       console.error('Error fetching members:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -671,15 +684,36 @@ export function createApp(pool: Pool) {
     try {
       const familyId = (req as any).familyId;
       const { id, name, color, health_info } = req.body;
+      
+      // Validate required fields
+      if (!name || typeof name !== 'string' || name.trim() === '') {
+        return res.status(400).json({ error: 'Name is required and cannot be empty' });
+      }
+      
+      if (!color || typeof color !== 'string' || color.trim() === '') {
+        return res.status(400).json({ error: 'Color is required and cannot be empty' });
+      }
+      
       const memberId = id || randomUUID();
       
       const result = await pool.query(
         'INSERT INTO family_members (id, family_id, name, color, health_info) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [memberId, familyId, name, color, JSON.stringify(health_info ?? {})]
+        [memberId, familyId, name.trim(), color.trim(), JSON.stringify(health_info ?? {})]
       );
       
-      notifySync(req, 'members', 'create', result.rows[0]);
-      res.status(201).json(result.rows[0]);
+      // Transform health_info to flat structure for client
+      const member = result.rows[0];
+      const healthInfo = member.health_info || {};
+      const transformedMember = {
+        id: member.id,
+        name: member.name,
+        color: member.color,
+        ...healthInfo,
+        createdAt: member.created_at
+      };
+      
+      notifySync(req, 'members', 'create', transformedMember);
+      res.status(201).json(transformedMember);
     } catch (error) {
       console.error('Error creating member:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -690,19 +724,62 @@ export function createApp(pool: Pool) {
     try {
       const familyId = (req as any).familyId;
       const { id } = req.params;
-      const { name, color, health_info } = req.body;
+      const { name, color, health_info, workSchedule } = req.body;
       
-      const result = await pool.query(
-        'UPDATE family_members SET name = $1, color = $2, health_info = $3 WHERE id = $4 AND family_id = $5 RETURNING *',
-        [name, color, JSON.stringify(health_info), id, familyId]
+      // Get existing member first
+      const existing = await pool.query(
+        'SELECT * FROM family_members WHERE id = $1 AND family_id = $2',
+        [id, familyId]
       );
       
-      if (result.rows.length === 0) {
+      if (existing.rows.length === 0) {
         return res.status(404).json({ error: 'Member not found' });
       }
       
-      notifySync(req, 'members', 'update', result.rows[0]);
-      res.json(result.rows[0]);
+      const currentMember = existing.rows[0];
+      
+      // Validate name if provided
+      if (name !== undefined) {
+        if (!name || typeof name !== 'string' || name.trim() === '') {
+          return res.status(400).json({ error: 'Name cannot be empty' });
+        }
+      }
+      
+      // Validate color if provided
+      if (color !== undefined) {
+        if (!color || typeof color !== 'string' || color.trim() === '') {
+          return res.status(400).json({ error: 'Color cannot be empty' });
+        }
+      }
+      
+      // Merge updates with existing data
+      const updatedName = name !== undefined ? name.trim() : currentMember.name;
+      const updatedColor = color !== undefined ? color.trim() : currentMember.color;
+      
+      // Merge health_info: keep existing data and update only provided fields
+      const existingHealthInfo = currentMember.health_info || {};
+      const updatedHealthInfo = health_info !== undefined 
+        ? { ...existingHealthInfo, ...health_info }
+        : existingHealthInfo;
+      
+      const result = await pool.query(
+        'UPDATE family_members SET name = $1, color = $2, health_info = $3 WHERE id = $4 AND family_id = $5 RETURNING *',
+        [updatedName, updatedColor, JSON.stringify(updatedHealthInfo || {}), id, familyId]
+      );
+      
+      // Transform health_info to flat structure for client
+      const member = result.rows[0];
+      const healthInfo = member.health_info || {};
+      const transformedMember = {
+        id: member.id,
+        name: member.name,
+        color: member.color,
+        ...healthInfo,
+        createdAt: member.created_at
+      };
+      
+      notifySync(req, 'members', 'update', transformedMember);
+      res.json(transformedMember);
     } catch (error) {
       console.error('Error updating member:', error);
       res.status(500).json({ error: 'Internal server error' });

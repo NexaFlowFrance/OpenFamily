@@ -206,7 +206,25 @@ Au premier démarrage, un mot de passe PostgreSQL est généré automatiquement 
 docker compose logs init
 ```
 
-### Option 2 : Installation manuelle
+### Option 2 : Déploiement sur Proxmox (LXC Container)
+
+Déploiement automatique complet avec le framework ProxmoxVE Community-Scripts :
+
+```bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/scripts/proxmox-scripts/ct/openfamily.sh)"
+```
+
+Le script va :
+- ✅ Créer un conteneur LXC Debian 12 optimisé
+- ✅ Installer Node.js, PostgreSQL et toutes les dépendances
+- ✅ Configurer HTTPS (3 modes : HTTP simple, Let's Encrypt, CA locale)
+- ✅ Cloner, builder et démarrer OpenFamily automatiquement
+- ✅ Créer un service systemd avec auto-start
+- ✅ Générer et afficher tous les identifiants
+
+📖 **Documentation complète** : [Guide Proxmox](scripts/proxmox-scripts/PROXMOX_DEPLOYMENT.md)
+
+### Option 3 : Installation manuelle
 
 Pour les développeurs ou si vous ne pouvez pas utiliser Docker :
 

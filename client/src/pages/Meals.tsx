@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAddButton } from '@/contexts/AddButtonContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useWeekSwipe } from '@/hooks/useWeekSwipe';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, ChefHat, Calendar, Sparkles, Download } from 'lucide-react';
+import { Trash2, Plus, ChefHat, Calendar, Sparkles, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { generateWeeklyMealPlan } from '@/lib/mealPlanner';
 import { formatDateOnly } from '@/lib/dateOnly';
@@ -27,6 +28,14 @@ export default function Meals() {
   const [showDayDetails, setShowDayDetails] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  });
   const [formData, setFormData] = useState({
     date: formatDateOnly(new Date()),
     mealType: 'lunch' as const,
@@ -40,20 +49,57 @@ export default function Meals() {
     return () => setAddAction(null);
   }, [setAddAction]);
 
+  // Support du swipe pour la navigation entre semaines (mode semaine uniquement)
+  useWeekSwipe({
+    onSwipeLeft: () => viewMode === 'week' && navigateWeek('next'),
+    onSwipeRight: () => viewMode === 'week' && navigateWeek('prev'),
+    enabled: viewMode === 'week' && !showForm,
+  });
+
   // Obtenir la semaine en cours
   const getWeekDays = () => {
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(currentWeekStart);
+      day.setDate(currentWeekStart.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
+  // Navigation entre les semaines
+  const navigateWeek = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentWeekStart);
+    newDate.setDate(currentWeekStart.getDate() + (direction === 'next' ? 7 : -7));
+    setCurrentWeekStart(newDate);
+  };
+
+  const goToCurrentWeek = () => {
     const today = new Date();
     const currentDay = today.getDay();
     const monday = new Date(today);
     monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+    monday.setHours(0, 0, 0, 0);
+    setCurrentWeekStart(monday);
+  };
+
+  const isCurrentWeek = () => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+    monday.setHours(0, 0, 0, 0);
+    return currentWeekStart.getTime() === monday.getTime();
+  };
+
+  const formatWeekRange = () => {
+    const weekEnd = new Date(currentWeekStart);
+    weekEnd.setDate(currentWeekStart.getDate() + 6);
     
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(monday);
-      day.setDate(monday.getDate() + i);
-      days.push(day);
-    }
-    return days;
+    const startMonth = currentWeekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    const endDate = weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    
+    return `${startMonth} - ${endDate}`;
   };
 
   const handleAddMeal = () => {
@@ -306,6 +352,35 @@ export default function Meals() {
       <div className="p-4">
         {viewMode === 'week' && (
           <div className="space-y-4">
+            {/* Navigation semaine */}
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <Button variant="outline" size="sm" onClick={() => navigateWeek('prev')}>
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  {t.meals.previousWeek || 'Précédent'}
+                </Button>
+                <div className="text-center flex-1 mx-4">
+                  <h2 className="text-sm font-semibold">
+                    {formatWeekRange()}
+                  </h2>
+                  {!isCurrentWeek() && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={goToCurrentWeek}
+                      className="text-xs h-auto p-0 mt-1"
+                    >
+                      {t.meals.goToCurrentWeek || "Aujourd'hui"}
+                    </Button>
+                  )}
+                </div>
+                <Button variant="outline" size="sm" onClick={() => navigateWeek('next')}>
+                  {t.meals.nextWeek || 'Suivant'}
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </Card>
+
             {weekDays.map(day => {
               const dateStr = formatDateOnly(day);
               const isToday = dateStr === today;

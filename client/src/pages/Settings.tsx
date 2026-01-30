@@ -16,6 +16,7 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { requestNotificationPermission, getNotificationStatus } from '@/lib/notifications';
 
+
 const COLORS = [
   '#6b8e7f', // Vert sauge (garde 1 vert)
   '#c8dfe8', // Bleu clair

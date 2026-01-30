@@ -202,6 +202,7 @@ const pool = databaseUrl
       connectionTimeoutMillis: 2000,
     });
 
+
 async function startServer() {
   try {
     // Test database connection
@@ -225,7 +226,7 @@ async function startServer() {
     
     // Create budget_expenses table
     await migrateBudgetExpensesTable(pool);
-    
+
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     console.error('Please ensure PostgreSQL is running and the database is created.');

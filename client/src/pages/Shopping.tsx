@@ -3,6 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAddButton } from '@/contexts/AddButtonContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useStorage } from '@/hooks/useStorage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -48,14 +49,17 @@ export default function Shopping() {
     notes: '',
   });
   const [filter, setFilter] = useState<string | null>(null);
-  const [customCategories, setCustomCategories] = useState<{value: string, label: string, color: string}[]>([]);
+  const [customCategories, setCustomCategories] = useStorage<{value: string, label: string, color: string}[]>('shopping_custom_categories', []);
+  const [hiddenDefaultCategories, setHiddenDefaultCategories] = useStorage<string[]>('shopping_hidden_default_categories', []);
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [showManageCategories, setShowManageCategories] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
   
-  const CATEGORIES = [...DEFAULT_CATEGORIES, ...customCategories];
+  const VISIBLE_DEFAULT_CATEGORIES = DEFAULT_CATEGORIES.filter(cat => !hiddenDefaultCategories.includes(cat.value));
+  const ALL_CATEGORIES = [...DEFAULT_CATEGORIES, ...customCategories];
+  const CATEGORIES = [...VISIBLE_DEFAULT_CATEGORIES, ...customCategories];
 
   useEffect(() => {
     const addAction = () => {
@@ -182,14 +186,30 @@ export default function Shopping() {
   };
 
   const addCustomCategory = () => {
-    if (newCategoryName.trim() && !CATEGORIES.find(c => c.value === newCategoryName.toLowerCase())) {
+    if (!newCategoryName.trim()) return;
+
+    const normalizedValue = newCategoryName.toLowerCase().replace(/\s+/g, '_');
+    const isDefaultCategory = DEFAULT_CATEGORIES.some(c => c.value === normalizedValue);
+    const alreadyExists = ALL_CATEGORIES.some(c => c.value === normalizedValue);
+
+    if (isDefaultCategory) {
+      if (hiddenDefaultCategories.includes(normalizedValue)) {
+        setHiddenDefaultCategories(hiddenDefaultCategories.filter(value => value !== normalizedValue));
+      }
+      setFormData((prev) => ({ ...prev, category: normalizedValue as any }));
+      setNewCategoryName('');
+      setShowAddCategory(false);
+      return;
+    }
+
+    if (!alreadyExists) {
       const newCategory = {
-        value: newCategoryName.toLowerCase().replace(/\s+/g, '_'),
+        value: normalizedValue,
         label: newCategoryName.trim(),
         color: getRandomColor()
       };
       setCustomCategories([...customCategories, newCategory]);
-      setFormData({ ...formData, category: newCategory.value as any });
+      setFormData((prev) => ({ ...prev, category: newCategory.value as any }));
       setNewCategoryName('');
       setShowAddCategory(false);
     }
@@ -215,11 +235,20 @@ export default function Shopping() {
     
     if (confirm(message)) {
       if (isDefault) {
-        // For default categories, we can hide them but not really delete them
-        // On les retire juste de la liste active en les filtrant
-        alert(t.shopping.cannotDeleteDefault);
+        if (!hiddenDefaultCategories.includes(categoryValue)) {
+          setHiddenDefaultCategories([...hiddenDefaultCategories, categoryValue]);
+        }
       } else {
         setCustomCategories(customCategories.filter(cat => cat.value !== categoryValue));
+      }
+
+      if (filter === categoryValue) {
+        setFilter(null);
+      }
+
+      if (formData.category === categoryValue) {
+        const fallbackCategory = VISIBLE_DEFAULT_CATEGORIES[0]?.value || 'other';
+        setFormData((prev) => ({ ...prev, category: fallbackCategory as any }));
       }
     }
   };

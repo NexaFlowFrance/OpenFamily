@@ -192,3 +192,5 @@ CREATE INDEX IF NOT EXISTS idx_scheduled_notifications_family_id ON scheduled_no
 -- INSERT INTO family_members (id, family_id, name, color) VALUES 
 --   ('member-1', 'family-demo', 'Papa', '#3b82f6'),
 --   ('member-2', 'family-demo', 'Maman', '#ec4899');
+
+

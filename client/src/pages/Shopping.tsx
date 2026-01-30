@@ -697,7 +697,16 @@ export default function Shopping() {
                   type="number"
                   min="1"
                   value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    setFormData({ ...formData, quantity: isNaN(value) ? 0 : value });
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value || parseInt(e.target.value) < 1) {
+                      setFormData({ ...formData, quantity: 1 });
+                    }
+                  }}
                   className="mt-1"
                 />
               </div>
@@ -781,7 +790,16 @@ export default function Shopping() {
                   type="number"
                   min="1"
                   value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    setFormData({ ...formData, quantity: isNaN(value) ? 0 : value });
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value || parseInt(e.target.value) < 1) {
+                      setFormData({ ...formData, quantity: 1 });
+                    }
+                  }}
                   className="mt-1"
                 />
               </div>

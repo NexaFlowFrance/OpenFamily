@@ -70,7 +70,6 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
       target: api
     container_name: openfamily-app
     restart: unless-stopped

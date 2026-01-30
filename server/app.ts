@@ -5,8 +5,6 @@ import rateLimit from 'express-rate-limit';
 import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
 import { createPushRoutes } from './pushRoutes.js';
-import { encryptSecret } from './crypto.js';
-import { syncIcloudToOpenFamily, upsertIcloudAccount } from './calendarSync/icloud.js';
 
 
 // Types
@@ -224,82 +222,6 @@ export function createApp(pool: Pool) {
   // Routes protégées - appliqués à toutes les routes sauf /health et /push
   app.use(authMiddleware);
   app.use(familyMiddleware);
-
-  // ===== iCloud Calendar Sync (PROTECTED) =====
-  app.post('/calendar-sync/icloud/connect', async (req: Request, res: Response) => {
-    try {
-      const familyId = (req as any).familyId as string;
-      const { username, appPassword } = req.body as { username?: string; appPassword?: string };
-
-      if (!username || !appPassword) {
-        res.status(400).json({ error: 'username and appPassword are required.' });
-        return;
-      }
-
-      const passwordEncrypted = encryptSecret(appPassword);
-
-      const { accountId } = await upsertIcloudAccount({
-        pool,
-        familyId,
-        username,
-        passwordEncrypted,
-      });
-
-      res.json({ ok: true, accountId });
-    } catch (err) {
-      res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
-    }
-  });
-
-  app.post('/calendar-sync/icloud/sync', async (req: Request, res: Response) => {
-    try {
-      const familyId = (req as any).familyId as string;
-
-      const result = await syncIcloudToOpenFamily({
-        pool,
-        familyId,
-        windowPastDays: 30,
-        windowFutureDays: 365,
-      });
-
-      res.json({ ok: true, result });
-    } catch (err) {
-      res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
-    }
-  });
-
-  app.get('/calendar-sync/icloud/status', async (req: Request, res: Response) => {
-    try {
-      const familyId = (req as any).familyId as string;
-
-      const accountRes = await pool.query(
-        `SELECT id, username, updated_at
-        FROM external_calendar_accounts
-        WHERE family_id = $1 AND provider = 'icloud'
-        ORDER BY updated_at DESC
-        LIMIT 1`,
-        [familyId],
-      );
-
-      if (accountRes.rowCount === 0) {
-        res.json({ connected: false });
-        return;
-      }
-
-      const row = accountRes.rows[0] as any;
-      res.json({
-        connected: true,
-        account: {
-          id: row.id as string,
-          username: row.username as string,
-          updatedAt: row.updated_at as string,
-        },
-      });
-    } catch (err) {
-      res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
-    }
-  });
-
 
   // ===== Shopping Items =====
   app.get('/shopping-items', async (req: Request, res: Response) => {

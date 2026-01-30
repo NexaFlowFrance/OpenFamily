@@ -3,17 +3,6 @@ import { IDataRepository, ServerConfig } from './interface';
 import { ShoppingItem, Task, Appointment, FamilyMember, Recipe, Meal, Budget } from '@/types';
 import { logger } from '../lib/logger';
 
-type IcloudStatusResponse =
-  | { connected: false }
-  | { connected: true; account: { id: string; username: string; updatedAt: string } };
-
-type IcloudConnectResponse = { ok: true; accountId: string };
-
-type IcloudSyncResponse = {
-  ok: true;
-  result: { created: number; updated: number; skipped: number; errors: number };
-};
-
 /**
  * Implémentation du repository utilisant un serveur auto-hébergé
  * Communique avec une API REST
@@ -262,23 +251,5 @@ export class ServerRepository implements IDataRepository {
 
   async clearAllData(): Promise<void> {
     await this.request('/clear', { method: 'POST' });
-  }
-
-   // iCloud Calendar Sync
-  async getIcloudCalendarStatus(): Promise<IcloudStatusResponse> {
-    return this.request<IcloudStatusResponse>('/calendar-sync/icloud/status');
-  }
-
-  async connectIcloudCalendar(params: { username: string; appPassword: string }): Promise<IcloudConnectResponse> {
-    return this.request<IcloudConnectResponse>('/calendar-sync/icloud/connect', {
-      method: 'POST',
-      body: JSON.stringify(params),
-    });
-  }
-
-  async syncIcloudCalendar(): Promise<IcloudSyncResponse> {
-    return this.request<IcloudSyncResponse>('/calendar-sync/icloud/sync', {
-      method: 'POST',
-    });
   }
 }

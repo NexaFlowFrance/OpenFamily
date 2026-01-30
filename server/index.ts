@@ -202,52 +202,6 @@ const pool = databaseUrl
       connectionTimeoutMillis: 2000,
     });
 
-async function migrateExternalCalendarTables(pool: Pool) {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS external_calendar_accounts (
-        id VARCHAR(255) PRIMARY KEY,
-        family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-        provider VARCHAR(50) NOT NULL,
-        username VARCHAR(255) NOT NULL,
-        password_encrypted TEXT NOT NULL,
-        caldav_url TEXT NOT NULL DEFAULT 'https://caldav.icloud.com',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(family_id, provider, username)
-      );
-    `);
-
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_external_calendar_accounts_family_id
-      ON external_calendar_accounts(family_id);
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS external_calendar_event_links (
-        id VARCHAR(255) PRIMARY KEY,
-        family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-        account_id VARCHAR(255) NOT NULL REFERENCES external_calendar_accounts(id) ON DELETE CASCADE,
-        provider VARCHAR(50) NOT NULL,
-        remote_uid TEXT NOT NULL,
-        remote_href TEXT NOT NULL,
-        remote_etag TEXT,
-        local_appointment_id VARCHAR(255) NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(account_id, remote_uid)
-      );
-    `);
-
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_external_calendar_event_links_account
-      ON external_calendar_event_links(account_id);
-    `);
-
-    console.log('✅ External calendar tables migrated');
-  } catch (error) {
-    console.error('⚠️ Error migrating external calendar tables:', error);
-  }
-}
 
 async function startServer() {
   try {
@@ -273,8 +227,6 @@ async function startServer() {
     // Create budget_expenses table
     await migrateBudgetExpensesTable(pool);
 
-    await migrateExternalCalendarTables(pool);
-    
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     console.error('Please ensure PostgreSQL is running and the database is created.');

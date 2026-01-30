@@ -15,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { requestNotificationPermission, getNotificationStatus } from '@/lib/notifications';
-import IcloudCalendarSync from '@/components/IcloudCalendarSync';
 
 
 const COLORS = [
@@ -285,12 +284,6 @@ export default function Settings() {
               </div>
             )}
           </Card>
-        </div>
-
-        {/* iCloud Calendar Sync Section */}
-        <div>
-          <h2 className="text-lg font-bold text-foreground mb-3">Calendrier iCloud</h2>
-          <IcloudCalendarSync />
         </div>
 
         {/* Section de gestion des données supprimée */}

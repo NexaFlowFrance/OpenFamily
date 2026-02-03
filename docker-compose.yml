@@ -152,6 +152,7 @@ services:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
+    entrypoint: []
     command: >
       sh -c "
         set -e

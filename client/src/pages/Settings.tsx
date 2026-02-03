@@ -464,7 +464,7 @@ export default function Settings() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t.settings.version}</p>
-              <p className="font-medium text-foreground">1.0.2</p>
+              <p className="font-medium text-foreground">1.0.3</p>
             </div>
           </Card>
         </div>

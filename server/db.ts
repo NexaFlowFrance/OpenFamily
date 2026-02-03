@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 
 // Configuration de la connexion PostgreSQL
+// Note: Ce pool n'est plus utilisé, voir server/index.ts pour la connexion principale
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/openfamily';
 
 export const pool = new Pool({
@@ -8,14 +9,7 @@ export const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
 });
 
-// Test de la connexion au démarrage
-pool.connect((err, client, release) => {
-  if (err) {
-    console.error('❌ Erreur de connexion à PostgreSQL:', err);
-  } else {
-    console.log('✅ Connecté à PostgreSQL');
-    release();
-  }
-});
+// Auto-connexion désactivée pour éviter les problèmes avec Docker
+// La connexion est maintenant testée dans server/index.ts
 
 export default pool;

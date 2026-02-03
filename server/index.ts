@@ -230,7 +230,8 @@ async function startServer() {
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     console.error('Please ensure PostgreSQL is running and the database is created.');
-    console.error('Run: psql -U postgres -f server/schema.sql');
+    console.error('For Docker: Check that postgres service is healthy');
+    console.error('For local dev: Run psql -U openfamily -d openfamily -f server/schema.sql');
     process.exit(1);
   }
 

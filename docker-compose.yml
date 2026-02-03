@@ -9,9 +9,8 @@ services:
       sh -c "
         if [ ! -f /shared/.db_password ]; then
             echo 'Generation automatique du mot de passe securise...'
-            RANDOM_STRING=$$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)
+            RANDOM_STRING=$$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 29)
             SECURE_PASSWORD=\"OF_$${RANDOM_STRING}\"
-            SECURE_PASSWORD=$$(echo -n \"$$SECURE_PASSWORD\" | head -c 32)
             if [ -z \"$$SECURE_PASSWORD\" ]; then
               echo 'ERROR: password generation failed'
               exit 1

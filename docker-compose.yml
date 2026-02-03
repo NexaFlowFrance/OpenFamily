@@ -167,8 +167,6 @@ services:
         export DATABASE_URL=\"postgresql://openfamily:$${DB_PASSWORD}@postgres:5432/openfamily\"
         echo 'DATABASE_URL configured for postgres service'
         echo 'Database configuration applied'
-        echo \"DEBUG: Password length: $$(echo -n \"$$DB_PASSWORD\" | wc -c)\"
-        echo \"DEBUG: DATABASE_URL (without password): postgresql://openfamily:****@postgres:5432/openfamily\"
         exec node /app/dist/index.js
       "
 

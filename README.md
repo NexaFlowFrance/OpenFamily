@@ -120,16 +120,24 @@ OpenFamily est une application de gestion familiale complète proposée en open 
 La méthode la plus simple ! Utilisez notre image Docker pré-configurée :
 
 ```bash
-# 1. Téléchargez le fichier docker-compose.yml
+# 1. Téléchargez le fichier docker-compose
 mkdir openfamily && cd openfamily
 curl -O https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docker-compose.yml
 
-# 2. Démarrez OpenFamily (Docker Hub)
+# 2. Démarrez OpenFamily
 docker compose up -d
 
 # 3. Accédez à l'application
 # http://localhost:3000
 ```
+
+✅ **Avantages de cette méthode :**
+- Aucun fichier source à télécharger manuellement
+- Le schema SQL est téléchargé et appliqué automatiquement
+- Compatible avec Portainer Web Editor
+- Utilise l'image pré-buildée depuis Docker Hub
+
+> 💡 **Note pour développeurs** : Pour builder l'application localement depuis les sources, clonez le repository complet et utilisez `docker-compose.build.yml`.
 
 ### 🔒 HTTPS (recommandé pour Notifications / Service Worker)
 

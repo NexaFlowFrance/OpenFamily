@@ -41,28 +41,7 @@ services:
         echo 'Initialisation terminee'
       "
 
-  # Service pour télécharger le schema SQL
-  schema-downloader:
-    image: alpine:latest
-    container_name: openfamily-schema-downloader
-    volumes:
-      - shared_data:/shared
-    command: >
-      sh -c "
-        if [ ! -f /shared/schema.sql ]; then
-          echo 'Telechargement du schema SQL...'
-          apk add --no-cache wget
-          wget -O /shared/schema.sql https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/server/schema.sql
-          echo 'Schema SQL telecharge avec succes'
-        else
-          echo 'Schema SQL deja present'
-        fi
-      "
-    depends_on:
-      init:
-        condition: service_completed_successfully
-
-  # PostgreSQL Database avec mot de passe automatique et initialisation du schema
+  # PostgreSQL Database avec mot de passe automatique
   postgres:
     image: postgres:16-alpine
     container_name: openfamily-postgres
@@ -74,10 +53,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - shared_data:/shared:ro
+      - ./server/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     ports:
-      - "5433:5432"
+      - "5433:5432"  # Port différent pour éviter conflits
     depends_on:
-      schema-downloader:
+      init:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U openfamily -d openfamily"]
@@ -86,33 +66,11 @@ services:
       retries: 5
       start_period: 30s
 
-  # Service pour appliquer le schema SQL après le démarrage de Postgres
-  schema-init:
-    image: postgres:16-alpine
-    container_name: openfamily-schema-init
-    volumes:
-      - shared_data:/shared:ro
-    command: >
-      sh -c "
-        echo 'Attente du demarrage de PostgreSQL...'
-        sleep 5
-        echo 'Application du schema SQL...'
-        export PGPASSWORD=$$(cat /shared/.db_password | tr -d '\r\n')
-        psql -h postgres -U openfamily -d openfamily -f /shared/schema.sql 2>&1 | tee /tmp/schema.log
-        if [ $$? -eq 0 ]; then
-          echo 'Schema SQL applique avec succes'
-        else
-          echo 'Erreur lors de l application du schema (verifier si deja applique)'
-          cat /tmp/schema.log
-        fi
-      "
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  # OpenFamily Application depuis Docker Hub
+  # OpenFamily Application avec configuration automatique
   app:
-    image: nexaflow/openfamily:latest
+    build:
+      context: .
+      target: api
     container_name: openfamily-app
     restart: unless-stopped
     ports:
@@ -124,8 +82,6 @@ services:
       - shared_data:/shared:ro
       - app_data:/app/data
     depends_on:
-      schema-init:
-        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     entrypoint: >

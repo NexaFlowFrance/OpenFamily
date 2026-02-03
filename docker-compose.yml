@@ -97,7 +97,7 @@ services:
     command: >
       sh -c "
         echo 'Verification et correction du mot de passe PostgreSQL...'
-        export PGPASSWORD=$$(cat /shared/.db_password | tr -d '\r\n' | tr -d ' ')
+        export PGPASSWORD=$$(cat /shared/.db_password | tr -d '\r\n')
         # Tester la connexion
         if psql -h postgres -U openfamily -d openfamily -c 'SELECT 1;' > /dev/null 2>&1; then
           echo 'Mot de passe PostgreSQL OK'
@@ -128,7 +128,7 @@ services:
         echo 'Attente du demarrage de PostgreSQL...'
         sleep 5
         echo 'Application du schema SQL...'
-        export PGPASSWORD=$$(cat /shared/.db_password | tr -d '\r\n' | tr -d ' ')
+        export PGPASSWORD=$$(cat /shared/.db_password | tr -d '\r\n')
         psql -h postgres -U openfamily -d openfamily -f /shared/schema.sql 2>&1 | tee /tmp/schema.log || true
         echo 'Schema SQL applique avec succes'
       "
@@ -164,7 +164,7 @@ services:
           ls -la /shared || true
           exit 1
         fi
-        DB_PASSWORD=$$(cat /shared/.db_password | tr -d '\r\n' | tr -d ' ')
+        DB_PASSWORD=$$(cat /shared/.db_password | tr -d '\r\n')
         export DATABASE_URL=\"postgresql://openfamily:$${DB_PASSWORD}@postgres:5432/openfamily\"
         echo 'DATABASE_URL configured for postgres service'
         echo 'Database configuration applied'

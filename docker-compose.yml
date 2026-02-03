@@ -77,6 +77,8 @@ services:
     ports:
       - "5433:5432"
     depends_on:
+      init:
+        condition: service_completed_successfully
       schema-downloader:
         condition: service_completed_successfully
     healthcheck:

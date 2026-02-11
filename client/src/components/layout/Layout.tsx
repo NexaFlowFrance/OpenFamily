@@ -7,6 +7,7 @@ import {
     ShoppingCart,
     CheckSquare,
     Calendar as CalendarIcon,
+    CalendarDays,
     ChefHat,
     UtensilsCrossed,
     Wallet,
@@ -30,6 +31,7 @@ const navigation = [
     { name: 'Courses', href: '/shopping', icon: ShoppingCart },
     { name: 'Taches', href: '/tasks', icon: CheckSquare },
     { name: 'Rendez-vous', href: '/calendar', icon: CalendarIcon },
+    { name: 'Planning', href: '/planning', icon: CalendarDays },
     { name: 'Recettes', href: '/recipes', icon: ChefHat },
     { name: 'Repas', href: '/meal-planning', icon: UtensilsCrossed },
     { name: 'Budget', href: '/budget', icon: Wallet },
@@ -38,7 +40,7 @@ const navigation = [
 
 const mobileTabs = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'Planning', href: '/meal-planning', icon: CalendarIcon },
+    { name: 'Planning', href: '/planning', icon: CalendarDays },
     { name: 'Listes', href: '/shopping', icon: ShoppingCart },
     { name: 'Budget', href: '/budget', icon: Wallet },
     { name: 'Famille', href: '/family', icon: Users },
@@ -48,6 +50,7 @@ const quickActions = [
     { name: 'Ajouter une course', href: '/shopping', icon: ShoppingCart },
     { name: 'Ajouter une tache', href: '/tasks', icon: CheckSquare },
     { name: 'Ajouter un rendez-vous', href: '/calendar', icon: CalendarIcon },
+    { name: 'Ajouter un horaire', href: '/planning', icon: CalendarDays },
     { name: 'Ajouter une recette', href: '/recipes', icon: ChefHat },
     { name: 'Ajouter un repas', href: '/meal-planning', icon: UtensilsCrossed },
     { name: 'Ajouter une depense', href: '/budget', icon: Wallet },

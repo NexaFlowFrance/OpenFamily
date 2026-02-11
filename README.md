@@ -7,6 +7,7 @@ OpenFamily est une application de gestion familiale complète proposée en open 
 - 🛒 **Liste de courses** - Catégorisation automatique, prix, quantités, templates
 - ✅ **Tâches** - Tâches récurrentes, assignation familiale, statistiques
 - 📅 **Rendez-vous** - Calendrier mensuel, rappels automatiques, code couleur
+- 🗓️ **Planning hebdomadaire** - Horaires de travail et emploi du temps scolaire par membre
 - 🍳 **Recettes** - Bibliothèque familiale, filtres avancés, temps de préparation
 - 🍽️ **Planning repas** - Vue hebdomadaire, export PDF, liaison recettes
 - 💰 **Budget** - Suivi mensuel, limites par catégorie, statistiques

@@ -20,6 +20,7 @@ interface FamilyMember {
 const ROLES = [
     { value: 'Parent', label: 'Parent' },
     { value: 'Enfant', label: 'Enfant' },
+    { value: 'Etudiant', label: 'Etudiant' },
     { value: 'Autre', label: 'Autre' },
 ];
 

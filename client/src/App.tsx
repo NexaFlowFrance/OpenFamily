@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import ShoppingList from './pages/ShoppingList';
 import Tasks from './pages/Tasks';
 import Calendar from './pages/Calendar';
+import Planning from './pages/Planning';
 import Recipes from './pages/Recipes';
 import MealPlanning from './pages/MealPlanning';
 import Budget from './pages/Budget';
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/shopping" element={<ShoppingList />} />
                 <Route path="/tasks" element={<Tasks />} />
                 <Route path="/calendar" element={<Calendar />} />
+                <Route path="/planning" element={<Planning />} />
                 <Route path="/recipes" element={<Recipes />} />
                 <Route path="/meal-planning" element={<MealPlanning />} />
                 <Route path="/budget" element={<Budget />} />

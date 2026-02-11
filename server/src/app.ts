@@ -9,6 +9,7 @@ import mealPlansRoutes from './routes/mealPlans';
 import budgetRoutes from './routes/budget';
 import familyRoutes from './routes/family';
 import dashboardRoutes from './routes/dashboard';
+import planningRoutes from './routes/planning';
 import { loadEnv } from './config/loadEnv';
 
 loadEnv();
@@ -45,6 +46,7 @@ app.use('/api/meal-plans', mealPlansRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/family', familyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/planning', planningRoutes);
 
 // 404 handler
 app.use((req, res) => {

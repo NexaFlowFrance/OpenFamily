@@ -1,20 +1,22 @@
-import { createRoot } from "react-dom/client";
-import App from "./App";
-import "./index.css";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { AppToastProvider } from './components/ui';
+import App from './App';
+import './index.css';
 
-createRoot(document.getElementById("root")!).render(<App />);
-
-// Service Worker (PWA)
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-	window.addEventListener('load', () => {
-		const host = window.location.hostname;
-		const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
-		if (!window.isSecureContext && !isLocalhost) {
-			return;
-		}
-		const swUrl = `${import.meta.env.BASE_URL}sw.js`;
-		navigator.serviceWorker.register(swUrl, { scope: import.meta.env.BASE_URL }).catch(() => {
-			// Silent fail: app should work without SW
-		});
-	});
-}
+ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+        <BrowserRouter>
+            <ThemeProvider>
+                <AppToastProvider>
+                    <AuthProvider>
+                        <App />
+                    </AuthProvider>
+                </AppToastProvider>
+            </ThemeProvider>
+        </BrowserRouter>
+    </React.StrictMode>
+);

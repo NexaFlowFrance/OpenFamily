@@ -1,129 +1,53 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Capacitor } from '@capacitor/core';
-import { logger } from '../lib/logger';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-type Theme = "light" | "dark" | "auto";
+type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  toggleTheme?: () => void;
-  switchable: boolean;
-  actualTheme: "light" | "dark"; // Le thème réellement appliqué
+    theme: Theme;
+    setTheme: (theme: Theme) => void;
+    actualTheme: 'light' | 'dark';
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-interface ThemeProviderProps {
-  children: React.ReactNode;
-  defaultTheme?: Theme;
-  switchable?: boolean;
-}
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [theme, setTheme] = useState<Theme>(() => {
+        const stored = localStorage.getItem('theme') as Theme;
+        return stored || 'system';
+    });
 
-export function ThemeProvider({
-  children,
-  defaultTheme = "auto",
-  switchable = false,
-}: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (switchable) {
-      const stored = localStorage.getItem("theme");
-      return (stored as Theme) || defaultTheme;
-    }
-    return defaultTheme;
-  });
+    const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
 
-  const [actualTheme, setActualTheme] = useState<"light" | "dark">("light");
+    useEffect(() => {
+        const root = window.document.documentElement;
+        root.classList.remove('light', 'dark');
 
-  // Détecter le thème système
-  useEffect(() => {
-    if (theme !== "auto") {
-      setActualTheme(theme);
-      return;
-    }
+        let effectiveTheme: 'light' | 'dark';
 
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    
-    const updateTheme = () => {
-      setActualTheme(mediaQuery.matches ? "dark" : "light");
-    };
-
-    // Initialiser
-    updateTheme();
-
-    // Écouter les changements
-    mediaQuery.addEventListener("change", updateTheme);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updateTheme);
-    };
-  }, [theme]);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (actualTheme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-
-    // Couleurs de fond
-    const lightBg = '#faf8f5';
-    const darkBg = '#1a1a1a';
-    const bgColor = actualTheme === 'dark' ? darkBg : lightBg;
-
-    // Mettre à jour la couleur du thème pour la barre de statut mobile (PWA)
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', bgColor);
-    }
-
-    // Mettre à jour la couleur de la status bar pour Capacitor (Android/iOS)
-    const updateNativeStatusBar = async () => {
-      if (Capacitor.isNativePlatform()) {
-        try {
-          const { StatusBar, Style } = await import('@capacitor/status-bar');
-          if (actualTheme === 'dark') {
-            await StatusBar.setBackgroundColor({ color: darkBg });
-            await StatusBar.setStyle({ style: Style.Dark }); // Contenu clair sur fond sombre
-          } else {
-            await StatusBar.setBackgroundColor({ color: lightBg });
-            await StatusBar.setStyle({ style: Style.Light }); // Contenu sombre sur fond clair
-          }
-        } catch (error) {
-          logger.log('StatusBar API not available:', error);
+        if (theme === 'system') {
+            effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+        } else {
+            effectiveTheme = theme;
         }
-      }
-    };
-    
-    updateNativeStatusBar();
 
-    if (switchable) {
-      localStorage.setItem("theme", theme);
+        root.classList.add(effectiveTheme);
+        setActualTheme(effectiveTheme);
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    return (
+        <ThemeContext.Provider value={{ theme, setTheme, actualTheme }}>
+            {children}
+        </ThemeContext.Provider>
+    );
+};
+
+export const useTheme = () => {
+    const context = useContext(ThemeContext);
+    if (context === undefined) {
+        throw new Error('useTheme must be used within a ThemeProvider');
     }
-  }, [actualTheme, theme, switchable]);
-
-  const toggleTheme = switchable
-    ? () => {
-        setTheme(prev => {
-          if (prev === "light") return "dark";
-          if (prev === "dark") return "auto";
-          return "light";
-        });
-      }
-    : undefined;
-
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, switchable, actualTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within ThemeProvider");
-  }
-  return context;
-}
+    return context;
+};

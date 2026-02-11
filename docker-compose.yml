@@ -1,179 +1,79 @@
+version: '3.8'
+
 services:
-  # Service d'initialisation pour générer le mot de passe automatiquement
-  init:
-    image: alpine:latest
-    container_name: openfamily-init
-    volumes:
-      - shared_data:/shared
-    command: >
-      sh -c "
-        if [ ! -f /shared/.db_password ]; then
-            echo 'Generation automatique du mot de passe securise...'
-            RANDOM_STRING=$$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 29)
-            SECURE_PASSWORD=\"OF_$${RANDOM_STRING}\"
-            if [ -z \"$$SECURE_PASSWORD\" ]; then
-              echo 'ERROR: password generation failed'
-              exit 1
-            fi
-            printf '%s' \"$$SECURE_PASSWORD\" > /shared/.db_password
-            echo ''
-            echo '=============================================='
-            echo '          MOT DE PASSE GENERE'
-            echo '=============================================='
-            echo ''
-            echo '   IMPORTANT: NOTEZ BIEN CE MOT DE PASSE'
-            echo ''
-            echo \"   $$SECURE_PASSWORD\"
-            echo ''
-            echo '   SAUVEGARDEZ-LE MAINTENANT !'
-            echo '   Necessaire pour administration'
-            echo ''
-            echo '=============================================='
-            echo ''
-            echo 'Demarrage des services dans 15 secondes...'
-            sleep 15
-        else
-            echo 'Configuration existante detectee'
-            SECURE_PASSWORD=$$(cat /shared/.db_password)
-            echo \"Mot de passe: $$SECURE_PASSWORD\"
-        fi
-        echo 'Initialisation terminee'
-      "
-
-  # Service pour télécharger le schema SQL
-  schema-downloader:
-    image: alpine:latest
-    container_name: openfamily-schema-downloader
-    volumes:
-      - shared_data:/shared
-    command: >
-      sh -c "
-        if [ ! -f /shared/schema.sql ]; then
-          echo 'Telechargement du schema SQL...'
-          apk add --no-cache wget
-          wget -O /shared/schema.sql https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/server/schema.sql
-          echo 'Schema SQL telecharge avec succes'
-        else
-          echo 'Schema SQL deja present'
-        fi
-      "
-    depends_on:
-      init:
-        condition: service_completed_successfully
-
-  # PostgreSQL Database avec mot de passe automatique et initialisation du schema
   postgres:
     image: postgres:16-alpine
-    container_name: openfamily-postgres
+    container_name: openfamily-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: openfamily
-      POSTGRES_USER: openfamily
-      POSTGRES_PASSWORD_FILE: /shared/.db_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - shared_data:/shared:ro
+      POSTGRES_DB: ${POSTGRES_DB:-openfamily}
+      POSTGRES_USER: ${POSTGRES_USER:-openfamily}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
     ports:
-      - "5433:5432"
-    depends_on:
-      init:
-        condition: service_completed_successfully
-      schema-downloader:
-        condition: service_completed_successfully
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./server/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U openfamily -d openfamily"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-openfamily}" ]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
 
-  # Service pour corriger le mot de passe si nécessaire  
-  postgres-password-fix:
-    image: postgres:16-alpine
-    container_name: openfamily-postgres-password-fix
-    volumes:
-      - shared_data:/shared:ro
-    command: >
-      sh -c "
-        echo 'Verification et correction du mot de passe PostgreSQL...'
-        export PGPASSWORD=$$(cat /shared/.db_password | tr -d '\r\n')
-        # Tester la connexion
-        if psql -h postgres -U openfamily -d openfamily -c 'SELECT 1;' > /dev/null 2>&1; then
-          echo 'Mot de passe PostgreSQL OK'
-        else
-          echo 'Mot de passe incorrect, tentative de correction...'
-          # Si connexion échoue, essayer avec mot de passe par défaut postgres
-          PGPASSWORD=postgres psql -h postgres -U postgres -d postgres -c \"ALTER USER openfamily WITH PASSWORD '$$PGPASSWORD';\" 2>/dev/null || true
-          # Réessayer avec le nouveau mot de passe
-          if psql -h postgres -U openfamily -d openfamily -c 'SELECT 1;' > /dev/null 2>&1; then
-            echo 'Mot de passe corrige avec succes'
-          else
-            echo 'Impossible de corriger le mot de passe, le volume est peut-etre deja initialise'
-          fi
-        fi
-      "
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    container_name: openfamily-server
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-openfamily}
+      POSTGRES_USER: ${POSTGRES_USER:-openfamily}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      SERVER_PORT: 3001
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "3001:3001"
     depends_on:
       postgres:
         condition: service_healthy
-
-  # Service pour appliquer le schema SQL après le démarrage de Postgres
-  schema-init:
-    image: postgres:16-alpine
-    container_name: openfamily-schema-init
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:3001/health >/dev/null 2>&1 || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     volumes:
-      - shared_data:/shared:ro
-    command: >
-      sh -c "
-        echo 'Attente du demarrage de PostgreSQL...'
-        sleep 5
-        echo 'Application du schema SQL...'
-        export PGPASSWORD=$$(cat /shared/.db_password | tr -d '\r\n')
-        psql -h postgres -U openfamily -d openfamily -f /shared/schema.sql 2>&1 | tee /tmp/schema.log || true
-        echo 'Schema SQL applique avec succes'
-      "
-    depends_on:
-      postgres-password-fix:
-        condition: service_completed_successfully
+      - ./server/uploads:/app/uploads
 
-  # OpenFamily Application depuis Docker Hub
-  app:
-    image: nexaflow/openfamily:latest
-    container_name: openfamily-app
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+        VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:3001}
+    container_name: openfamily-client
     restart: unless-stopped
     ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-    volumes:
-      - shared_data:/shared:ro
-      - app_data:/app/data
+      - "3000:80"
     depends_on:
-      schema-init:
-        condition: service_completed_successfully
-      postgres:
+      server:
         condition: service_healthy
-    entrypoint: []
-    command: >
-      sh -c "
-        set -e
-        echo 'Starting OpenFamily...'
-        if [ ! -s /shared/.db_password ]; then
-          echo 'ERROR: /shared/.db_password is missing or empty'
-          ls -la /shared || true
-          exit 1
-        fi
-        DB_PASSWORD=$$(cat /shared/.db_password | tr -d '\r\n')
-        export DATABASE_URL=\"postgresql://openfamily:$${DB_PASSWORD}@postgres:5432/openfamily\"
-        echo 'DATABASE_URL configured for postgres service'
-        echo 'Database configuration applied'
-        exec node /app/dist/index.js
-      "
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://127.0.0.1 >/dev/null 2>&1 || exit 1" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
-  postgres_data:
-    driver: local
-  app_data:
-    driver: local
-  shared_data:
+  postgres-data:
     driver: local

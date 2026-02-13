@@ -1,579 +1,633 @@
-import { useState, useEffect } from 'react';
-import { useApp } from '@/contexts/AppContext';
-import { useAddButton } from '@/contexts/AddButtonContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, TrendingUp, TrendingDown, BarChart3, PieChart, Edit, Trash, ChevronLeft, ChevronRight } from 'lucide-react';
-import { formatDateOnly, formatYearMonth } from '@/lib/dateOnly';
+import React, { useEffect, useState } from 'react';
+import { api } from '../lib/api';
+import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, Button, Dialog, Input, Select, Textarea, Badge, Tabs } from '../components/ui';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { CHART_COLOR_PRESETS } from '../design/colorPresets';
 
-const getCategoryLabels = (t: any) => ({
-  food: t.budget.food,
-  health: t.budget.health,
-  children: t.budget.children,
-  home: t.budget.home,
-  leisure: t.budget.leisure,
-  other: t.budget.other,
-});
+interface BudgetEntry {
+    id: string;
+    category: string;
+    amount: number;
+    description?: string;
+    date: string;
+    is_expense: boolean;
+}
 
-const categoryColors = {
-  food: 'bg-green-500',
-  health: 'bg-red-500',
-  children: 'bg-blue-500',
-  home: 'bg-yellow-500',
-  leisure: 'bg-purple-500',
-  other: 'bg-gray-500',
+interface BudgetLimit {
+    id: string;
+    category: string;
+    monthly_limit: number;
+    month: number;
+    year: number;
+}
+
+interface BudgetStats {
+    totalExpenses: number;
+    totalIncome: number;
+    balance: number;
+    byCategory: Array<{ category: string; category_total: number }>;
+}
+
+const CATEGORIES = [
+    { value: 'Alimentation', label: 'Alimentation' },
+    { value: 'Santé', label: 'Santé' },
+    { value: 'Enfants', label: 'Enfants' },
+    { value: 'Maison', label: 'Maison' },
+    { value: 'Loisirs', label: 'Loisirs' },
+    { value: 'Autre', label: 'Autre' },
+];
+
+const parsePositiveAmount = (value: string): number => Number(value.replace(',', '.'));
+const toNumber = (value: unknown): number => {
+    if (typeof value === 'number') {
+        return value;
+    }
+    if (typeof value === 'string') {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
 };
 
-export default function Budget() {
-  const { budgets, addBudget, updateBudget, deleteBudget, addExpense, deleteExpense } = useApp();
-  const { setAddAction } = useAddButton();
-  const { formatPrice } = useCurrency();
-  const { t } = useLanguage();
-  
-  const categoryLabels = getCategoryLabels(t);
-  const [selectedMonth, setSelectedMonth] = useState(formatYearMonth(new Date()));
-  const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
-  const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
-  const [isEditBudgetDialogOpen, setIsEditBudgetDialogOpen] = useState(false);
-  const [showStats, setShowStats] = useState(false);
-  
-  const [newExpense, setNewExpense] = useState({
-    category: 'food' as const,
-    amount: 0,
-    description: '',
-    date: formatDateOnly(new Date()),
-  });
+const Budget: React.FC = () => {
+    const [entries, setEntries] = useState<BudgetEntry[]>([]);
+    const [limits, setLimits] = useState<BudgetLimit[]>([]);
+    const [stats, setStats] = useState<BudgetStats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [limitDialogOpen, setLimitDialogOpen] = useState(false);
+    const [editingEntry, setEditingEntry] = useState<BudgetEntry | null>(null);
+    const [formError, setFormError] = useState('');
+    const [limitError, setLimitError] = useState('');
+    const [currentMonth] = useState(new Date().getMonth() + 1);
+    const [currentYear] = useState(new Date().getFullYear());
 
-  const [newBudgetLimits, setNewBudgetLimits] = useState({
-    food: 400,
-    health: 200,
-    children: 300,
-    home: 500,
-    leisure: 200,
-    other: 100,
-  });
+    const [formData, setFormData] = useState({
+        category: 'Alimentation',
+        amount: '',
+        description: '',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        is_expense: true,
+    });
 
-  useEffect(() => {
-    setAddAction(() => setIsExpenseDialogOpen(true));
-    return () => setAddAction(null);
-  }, [setAddAction]);
+    const [limitFormData, setLimitFormData] = useState({
+        category: 'Alimentation',
+        monthly_limit: '',
+    });
 
-  const currentBudget = budgets.find(b => b.month === selectedMonth);
+    useEffect(() => {
+        loadEntries();
+        loadLimits();
+        loadStats();
+    }, []);
 
-  const calculateTotals = () => {
-    const spent = {
-      food: 0,
-      health: 0,
-      children: 0,
-      home: 0,
-      leisure: 0,
-      other: 0,
+    const loadEntries = async () => {
+        try {
+            const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0];
+            const endDate = new Date(currentYear, currentMonth, 0).toISOString().split('T')[0];
+            const response = await api.get<{ success: boolean; data: BudgetEntry[] }>(
+                `/api/budget/entries?start_date=${startDate}&end_date=${endDate}`
+            );
+            if (response.success) {
+                setEntries(response.data.map((entry) => ({
+                    ...entry,
+                    amount: toNumber(entry.amount),
+                })));
+            }
+        } catch (error) {
+            console.error('Failed to load entries:', error);
+        } finally {
+            setLoading(false);
+        }
     };
-    
-    if (!currentBudget) return { spent, total: 0, limit: 0 };
 
-    if (currentBudget.expenses) {
-      currentBudget.expenses.forEach(expense => {
-        const amount = Number(expense.amount) || 0;
-        spent[expense.category] += amount;
-      });
-    }
+    const loadLimits = async () => {
+        try {
+            const response = await api.get<{ success: boolean; data: BudgetLimit[] }>(
+                `/api/budget/limits?month=${currentMonth}&year=${currentYear}`
+            );
+            if (response.success) {
+                setLimits(response.data.map((limit) => ({
+                    ...limit,
+                    monthly_limit: toNumber(limit.monthly_limit),
+                    month: toNumber(limit.month),
+                    year: toNumber(limit.year),
+                })));
+            }
+        } catch (error) {
+            console.error('Failed to load limits:', error);
+        }
+    };
 
-    const total = Object.values(spent).reduce((sum, val) => sum + val, 0);
-    const limit = currentBudget.categories 
-      ? Object.values(currentBudget.categories).reduce((sum, val) => sum + (Number(val) || 0), 0) 
-      : 0;
+    const loadStats = async () => {
+        try {
+            const response = await api.get<{ success: boolean; data: BudgetStats }>(
+                `/api/budget/statistics?month=${currentMonth}&year=${currentYear}`
+            );
+            if (response.success) {
+                setStats({
+                    ...response.data,
+                    totalExpenses: toNumber(response.data.totalExpenses),
+                    totalIncome: toNumber(response.data.totalIncome),
+                    balance: toNumber(response.data.balance),
+                    byCategory: (response.data.byCategory || []).map((item) => ({
+                        category: item.category,
+                        category_total: toNumber(item.category_total),
+                    })),
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load stats:', error);
+        }
+    };
 
-    return { spent, total, limit };
-  };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setFormError('');
+        const parsedAmount = parsePositiveAmount(formData.amount);
+        if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+            setFormError('Le montant doit être un nombre positif.');
+            return;
+        }
 
-  const handleAddExpense = () => {
-    if (!currentBudget) {
-      alert(t.budget.createBudgetFirst);
-      return;
-    }
+        try {
+            const payload = {
+                ...formData,
+                amount: parsedAmount,
+            };
 
-    addExpense(currentBudget.id, newExpense);
-    setNewExpense({
-      category: 'food',
-      amount: 0,
-      description: '',
-      date: formatDateOnly(new Date()),
-    });
-    setIsExpenseDialogOpen(false);
-  };
+            if (editingEntry) {
+                await api.put(`/api/budget/entries/${editingEntry.id}`, payload);
+            } else {
+                await api.post('/api/budget/entries', payload);
+            }
+            setDialogOpen(false);
+            resetForm();
+            loadEntries();
+            loadStats();
+        } catch (error) {
+            console.error('Failed to save entry:', error);
+            setFormError(error instanceof Error ? error.message : 'Impossible d’enregistrer cette entrée.');
+        }
+    };
 
-  const handleCreateBudget = () => {
-    addBudget({
-      month: selectedMonth,
-      categories: newBudgetLimits,
-      expenses: [],
-    });
-    setIsBudgetDialogOpen(false);
-  };
+    const handleLimitSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLimitError('');
+        const parsedLimit = parsePositiveAmount(limitFormData.monthly_limit);
+        if (!Number.isFinite(parsedLimit) || parsedLimit <= 0) {
+            setLimitError('La limite doit être un nombre positif.');
+            return;
+        }
 
-  const handleEditBudget = () => {
-    if (currentBudget) {
-      updateBudget(currentBudget.id, {
-        month: selectedMonth,
-        categories: newBudgetLimits,
-        expenses: currentBudget.expenses,
-      });
-      setIsEditBudgetDialogOpen(false);
-    }
-  };
+        try {
+            await api.post('/api/budget/limits', {
+                ...limitFormData,
+                monthly_limit: parsedLimit,
+                month: currentMonth,
+                year: currentYear,
+            });
+            setLimitDialogOpen(false);
+            resetLimitForm();
+            loadLimits();
+        } catch (error) {
+            console.error('Failed to save limit:', error);
+            setLimitError(error instanceof Error ? error.message : 'Impossible de définir cette limite.');
+        }
+    };
 
-  const handleDeleteBudget = () => {
-    if (currentBudget && confirm(t.budget.deleteConfirm)) {
-      deleteBudget(currentBudget.id);
-      setIsEditBudgetDialogOpen(false);
-    }
-  };
+    const handleDelete = async (id: string) => {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cette entrée ?')) return;
+        try {
+            await api.delete(`/api/budget/entries/${id}`);
+            loadEntries();
+            loadStats();
+        } catch (error) {
+            console.error('Failed to delete entry:', error);
+        }
+    };
 
-  const openEditDialog = () => {
-    if (currentBudget) {
-      setNewBudgetLimits(currentBudget.categories);
-      setIsEditBudgetDialogOpen(true);
-    }
-  };
-
-  const goToPreviousMonth = () => {
-    const date = new Date(selectedMonth + '-01');
-    date.setMonth(date.getMonth() - 1);
-    setSelectedMonth(formatYearMonth(date));
-  };
-
-  const goToNextMonth = () => {
-    const date = new Date(selectedMonth + '-01');
-    date.setMonth(date.getMonth() + 1);
-    setSelectedMonth(formatYearMonth(date));
-  };
-
-  const formatMonthYear = (monthString: string) => {
-    const date = new Date(monthString + '-01');
-    return date.toLocaleDateString('fr-FR', { month: '2-digit', year: '2-digit' });
-  };
-
-  const totals = calculateTotals();
-  const remaining = Number(totals.limit - totals.total) || 0;
-
-  // Calcul des statistiques sur les 6 derniers mois
-  const getMonthlyStats = () => {
-    const stats = [];
-    const currentDate = new Date(selectedMonth);
-    
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(currentDate);
-      date.setMonth(date.getMonth() - i);
-      const monthStr = formatYearMonth(date);
-      const budget = budgets.find(b => b.month === monthStr);
-      
-      if (budget) {
-        const total = budget.expenses ? budget.expenses.reduce((sum, exp) => sum + Number(exp.amount), 0) : 0;
-        const limit = budget.categories ? Object.values(budget.categories).reduce((sum, val) => sum + Number(val), 0) : 0;
-        stats.push({
-          month: monthStr,
-          monthLabel: date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }),
-          total,
-          limit,
+    const handleEdit = (entry: BudgetEntry) => {
+        setEditingEntry(entry);
+        setFormData({
+            category: entry.category,
+            amount: entry.amount.toString(),
+            description: entry.description || '',
+            date: entry.date.split('T')[0],
+            is_expense: entry.is_expense,
         });
-      }
+        setDialogOpen(true);
+    };
+
+    const resetForm = () => {
+        setEditingEntry(null);
+        setFormError('');
+        setFormData({
+            category: 'Alimentation',
+            amount: '',
+            description: '',
+            date: format(new Date(), 'yyyy-MM-dd'),
+            is_expense: true,
+        });
+    };
+
+    const resetLimitForm = () => {
+        setLimitError('');
+        setLimitFormData({
+            category: 'Alimentation',
+            monthly_limit: '',
+        });
+    };
+
+    const getCategorySpending = (category: string) => {
+        return entries
+            .filter((e) => e.category === category && e.is_expense)
+            .reduce((sum, e) => sum + e.amount, 0);
+    };
+
+    const getCategoryLimit = (category: string) => {
+        return limits.find((l) => l.category === category)?.monthly_limit || 0;
+    };
+
+    const chartData = stats?.byCategory.map((cat) => ({
+        name: cat.category,
+        montant: typeof cat.category_total === 'string' ? parseFloat(cat.category_total) : cat.category_total,
+    })) || [];
+
+    if (loading) {
+        return (
+            <div className="flex h-full items-center justify-center min-h-[50vh]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="spinner-brand" />
+                    <p className="text-muted-foreground font-medium animate-pulse">Chargement du budget...</p>
+                </div>
+            </div>
+        );
     }
-    
-    return stats;
-  };
 
-  const monthlyStats = getMonthlyStats();
-
-  return (
-    <div className="container mx-auto p-4 md:p-6 pb-[calc(8rem+env(safe-area-inset-bottom))] max-w-7xl h-screen overflow-y-auto">
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold">{t.budget.title}</h1>
-        <div className="flex gap-2 items-center">
-          <div className="flex items-center border rounded-md bg-background">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={goToPreviousMonth}
-              className="px-2 hover:bg-muted rounded-r-none"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <div className="px-3 py-2 text-sm font-medium border-x min-w-[4rem] text-center">
-              {formatMonthYear(selectedMonth)}
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={goToNextMonth}
-              className="px-2 hover:bg-muted rounded-l-none"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            {currentBudget && (
-              <Button variant="outline" onClick={openEditDialog} className="h-10 px-3">
-                <Edit className="w-4 h-4" />
-                <span className="hidden md:inline ml-2">{t.budget.editBudget}</span>
-              </Button>
-            )}
-            {currentBudget ? (
-              <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="h-10">
-                    <Plus className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">{t.budget.addExpense}</span>
-                    <span className="sm:hidden">{t.budget.expense}</span>
-                  </Button>
-                </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t.budget.newExpense}</DialogTitle>
-                </DialogHeader>
+    const tabs = [
+        {
+            value: 'entries',
+            label: 'Entrées',
+            content: (
                 <div className="space-y-4">
-                  <div>
-                    <Label>{t.budget.category}</Label>
-                    <Select
-                      value={newExpense.category}
-                      onValueChange={(value: any) => setNewExpense({ ...newExpense, category: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(categoryLabels).map(([key, label]) => (
-                          <SelectItem key={key} value={key}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>{t.budget.amount}</Label>
-                    <Input
-                      type="number"
-                      value={newExpense.amount}
-                      onChange={(e) => setNewExpense({ ...newExpense, amount: parseFloat(e.target.value) })}
-                    />
-                  </div>
-                  <div>
-                    <Label>{t.budget.description}</Label>
-                    <Input
-                      value={newExpense.description}
-                      onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>{t.budget.date}</Label>
-                    <Input
-                      type="date"
-                      value={newExpense.date}
-                      onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
-                    />
-                  </div>
-                  <Button onClick={handleAddExpense} className="w-full">
-                    {t.add}
-                  </Button>
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-h2 font-semibold">
+                            {format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: fr })}
+                        </h3>
+                        <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Nouvelle entrée
+                        </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {entries.length === 0 ? (
+                            <Card>
+                                <CardContent className="p-8 text-center">
+                                    <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                                    <p className="text-muted-foreground">Aucune entrée pour ce mois</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            entries.map((entry) => (
+                                <Card key={entry.id} className="hover:shadow-md transition-shadow">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-3 mb-1">
+                                                    <Badge variant={entry.is_expense ? 'danger' : 'success'}>
+                                                        {entry.category}
+                                                    </Badge>
+                                                    <span className="text-label text-muted-foreground">
+                                                        {format(new Date(entry.date), 'dd MMM yyyy', { locale: fr })}
+                                                    </span>
+                                                </div>
+                                                {entry.description && (
+                                                    <p className="text-body-sm text-muted-foreground mb-2">
+                                                        {entry.description}
+                                                    </p>
+                                                )}
+                                                <p
+                                                    className={`text-xl font-bold ${entry.is_expense ? 'text-red-600' : 'text-emerald-600'
+                                                        }`}
+                                                >
+                                                    {entry.is_expense ? '-' : '+'}
+                                                    {entry.amount.toFixed(2)}€
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Button variant="ghost" size="sm" onClick={() => handleEdit(entry)}>
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)}>
+                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
+                    </div>
                 </div>
-              </DialogContent>
-            </Dialog>
-          ) : (
-            <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>{t.budget.createBudget}</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t.budget.newBudgetFor} {selectedMonth}</DialogTitle>
-                </DialogHeader>
+            ),
+        },
+        {
+            value: 'statistics',
+            label: 'Statistiques',
+            content: (
+                <div className="space-y-6">
+                    {stats && (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <Card className="border-red-100">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-label text-muted-foreground mb-1">Dépenses</p>
+                                                <p className="text-2xl font-bold text-red-600">
+                                                    {stats.totalExpenses.toFixed(2)}€
+                                                </p>
+                                            </div>
+                                            <TrendingDown className="h-8 w-8 text-red-600" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="border-emerald-100">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-label text-muted-foreground mb-1">Revenus</p>
+                                                <p className="text-2xl font-bold text-emerald-600">
+                                                    {stats.totalIncome.toFixed(2)}€
+                                                </p>
+                                            </div>
+                                            <TrendingUp className="h-8 w-8 text-emerald-600" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className={stats.balance >= 0 ? 'border-primary/30' : 'border-danger/30'}>
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-label text-muted-foreground mb-1">Solde</p>
+                                                <p
+                                                    className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-nexus-blue' : 'text-red-600'
+                                                        }`}
+                                                >
+                                                    {stats.balance.toFixed(2)}€
+                                                </p>
+                                            </div>
+                                            <DollarSign className="h-8 w-8 text-nexus-blue" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {chartData.length > 0 && (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Dépenses par catégorie</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <ResponsiveContainer width="100%" height={300}>
+                                                <BarChart data={chartData}>
+                                                    <CartesianGrid strokeDasharray="3 3" />
+                                                    <XAxis dataKey="name" />
+                                                    <YAxis />
+                                                    <Tooltip />
+                                                    <Bar dataKey="montant" fill="rgb(var(--primary))" />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </CardContent>
+                                    </Card>
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Répartition</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <ResponsiveContainer width="100%" height={300}>
+                                                <PieChart>
+                                                    <Pie
+                                                        data={chartData}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        labelLine={false}
+                                                        label={(entry: { name: string }) => entry.name}
+                                                        outerRadius={80}
+                                                        fill="rgb(var(--primary-soft))"
+                                                        dataKey="montant"
+                                                    >
+                                                        {chartData.map((_entry, index) => (
+                                                            <Cell key={`cell-${index}`} fill={CHART_COLOR_PRESETS[index % CHART_COLOR_PRESETS.length]} />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip />
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            ),
+        },
+        {
+            value: 'limits',
+            label: 'Limites',
+            content: (
                 <div className="space-y-4">
-                  {Object.entries(categoryLabels).map(([key, label]) => (
-                    <div key={key}>
-                      <Label>{label}</Label>
-                      <Input
-                        type="number"
-                        value={newBudgetLimits[key as keyof typeof newBudgetLimits]}
-                        onChange={(e) => setNewBudgetLimits({
-                          ...newBudgetLimits,
-                          [key]: parseFloat(e.target.value) || 0
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-h2 font-semibold">Limites mensuelles</h3>
+                        <Button onClick={() => { resetLimitForm(); setLimitDialogOpen(true); }}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Définir une limite
+                        </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {CATEGORIES.map((cat) => {
+                            const spending = getCategorySpending(cat.value);
+                            const limit = getCategoryLimit(cat.value);
+                            const percentage = limit > 0 ? (spending / limit) * 100 : 0;
+                            const isOverLimit = percentage > 100;
+
+                            return (
+                                <Card key={cat.value} className={isOverLimit ? 'border-red-200' : ''}>
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-semibold text-body">{cat.label}</h4>
+                                            {isOverLimit && <AlertCircle className="h-5 w-5 text-red-500" />}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-body-sm">
+                                                <span className="text-muted-foreground">Dépensé:</span>
+                                                <span className={`font-medium ${isOverLimit ? 'text-red-600' : ''}`}>
+                                                    {spending.toFixed(2)}€
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-body-sm">
+                                                <span className="text-muted-foreground">Limite:</span>
+                                                <span className="font-medium">
+                                                    {limit > 0 ? `${limit.toFixed(2)}€` : 'Non définie'}
+                                                </span>
+                                            </div>
+                                            {limit > 0 && (
+                                                <div className="mt-2">
+                                                    <div className="w-full bg-surface-2 rounded-full h-2">
+                                                        <div
+                                                            className={`h-2 rounded-full ${isOverLimit ? 'bg-red-500' : 'bg-nexus-blue'
+                                                                }`}
+                                                            style={{ width: `${Math.min(percentage, 100)}%` }}
+                                                        />
+                                                    </div>
+                                                    <p className="text-label text-muted-foreground mt-1">
+                                                        {percentage.toFixed(0)}% utilisé
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            );
                         })}
-                      />
                     </div>
-                  ))}
-                  <Button onClick={handleCreateBudget} className="w-full">
-                    {t.add}
-                  </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
-          )}
-          </div>
-        </div>
-      </div>
+            ),
+        },
+    ];
 
-      {!currentBudget ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground mb-4">{t.budget.noBudget}</p>
-            <Button onClick={() => setIsBudgetDialogOpen(true)}>
-              {t.budget.createBudget}
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {/* Bouton statistiques */}
-          <div className="mb-4">
-            <Button
-              variant={showStats ? 'default' : 'outline'}
-              onClick={() => setShowStats(!showStats)}
-            >
-              {showStats ? <BarChart3 className="w-4 h-4 mr-2" /> : <PieChart className="w-4 h-4 mr-2" />}
-              {showStats ? t.budget.hideStats : t.budget.showStats}
-            </Button>
-          </div>
-
-          {/* Statistiques */}
-          {showStats && monthlyStats.length > 0 && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  {t.budget.last6Months}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Graphique en barres simple */}
-                <div className="space-y-4">
-                  {monthlyStats.map((stat) => {
-                    const percentage = (stat.total / stat.limit) * 100;
-                    const isOver = percentage > 100;
-                    
-                    return (
-                      <div key={stat.month} className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium">{stat.monthLabel}</span>
-                          <span className={isOver ? 'text-red-500 font-semibold' : 'text-muted-foreground'}>
-                            {formatPrice(stat.total)} / {formatPrice(stat.limit)}
-                          </span>
-                        </div>
-                        <div className="relative h-8 bg-muted rounded-lg overflow-hidden">
-                          <div
-                            className={`h-full ${isOver ? 'bg-red-500' : 'bg-primary'} transition-all`}
-                            style={{ width: `${Math.min(percentage, 100)}%` }}
-                          />
-                          {isOver && (
-                            <div
-                              className="absolute top-0 h-full bg-red-600 opacity-50"
-                              style={{ width: `${((percentage - 100) / percentage) * 100}%`, right: 0 }}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+    return (
+        <div className="max-w-7xl mx-auto space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-h1 mb-1">Budget</h1>
+                    <p className="text-muted-foreground text-body">Suivez vos dépenses et revenus</p>
                 </div>
-
-                {/* Répartition par catégorie */}
-                <div className="mt-8 pt-8 border-t">
-                  <h3 className="font-semibold mb-4 flex items-center gap-2">
-                    <PieChart className="w-5 h-5" />
-                    {t.budget.categoryBreakdown}
-                  </h3>
-                  <div className="space-y-3">
-                    {Object.entries(totals.spent)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([category, amount]) => {
-                        const limit = currentBudget.categories[category as keyof typeof currentBudget.categories];
-                        const percentage = limit > 0 ? (amount / limit) * 100 : 0;
-                        const isOver = percentage > 100;
-                        
-                        return (
-                          <div key={category}>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>{categoryLabels[category as keyof typeof categoryLabels]}</span>
-                              <span className={isOver ? 'text-red-500 font-semibold' : ''}>
-                                {formatPrice(amount)} / {formatPrice(limit)}
-                              </span>
-                            </div>
-                            <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-                              <div
-                                className={`h-full ${categoryColors[category as keyof typeof categoryColors]} transition-all`}
-                                style={{ width: `${Math.min(percentage, 100)}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Vue d'ensemble */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{t.budget.totalBudget}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatPrice(totals.limit)}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{t.budget.spent}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">{formatPrice(totals.total)}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {((totals.total / totals.limit) * 100).toFixed(0)}% {t.budget.used}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{t.budget.remaining}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPrice(remaining)}
-                  {remaining >= 0 ? (
-                    <TrendingUp className="inline ml-2 w-5 h-5" />
-                  ) : (
-                    <TrendingDown className="inline ml-2 w-5 h-5" />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Catégories */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>{t.budget.byCategory}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {(Object.keys(categoryLabels) as Array<keyof typeof categoryLabels>).map((key) => {
-                  const label = categoryLabels[key];
-                  const limit = currentBudget.categories[key];
-                  const spent = totals.spent[key];
-                  const percentage = (spent / limit) * 100;
-                  
-                  return (
-                    <div key={key}>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm font-medium">{label}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {formatPrice(spent)} / {formatPrice(limit)}
-                        </span>
-                      </div>
-                      <div className="w-full bg-secondary rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${categoryColors[key]} transition-all`}
-                          style={{ width: `${Math.min(percentage, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Liste des dépenses */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t.budget.monthExpenses}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {currentBudget.expenses.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">{t.budget.noExpenses}</p>
-              ) : (
-                <div className="space-y-2">
-                  {currentBudget.expenses
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((expense) => (
-                      <div
-                        key={expense.id}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${categoryColors[expense.category]}`} />
-                          <div>
-                            <p className="font-medium">{expense.description}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {categoryLabels[expense.category]} • {new Date(expense.date).toLocaleDateString('fr-FR')}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold">{formatPrice(expense.amount)}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteExpense(currentBudget.id, expense.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </>
-      )}
-
-      {/* Dialog de modification du budget */}
-      <Dialog open={isEditBudgetDialogOpen} onOpenChange={setIsEditBudgetDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t.budget.editBudgetFor} {selectedMonth}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {t.budget.modifyAmounts}
-            </p>
-            {Object.entries(categoryLabels).map(([key, label]) => (
-              <div key={key}>
-                <Label>{label}</Label>
-                <Input
-                  type="number"
-                  value={newBudgetLimits[key as keyof typeof newBudgetLimits]}
-                  onChange={(e) => setNewBudgetLimits({
-                    ...newBudgetLimits,
-                    [key]: parseFloat(e.target.value) || 0
-                  })}
-                />
-              </div>
-            ))}
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setIsEditBudgetDialogOpen(false)} className="flex-1">
-                {t.cancel}
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteBudget}>
-                <Trash className="w-4 h-4 mr-2" />
-                {t.budget.deleteBudget}
-              </Button>
-              <Button onClick={handleEditBudget} className="flex-1">
-                {t.save}
-              </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+
+            <Tabs tabs={tabs} />
+
+            {/* Entry Dialog */}
+            <Dialog
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+                title={editingEntry ? 'Modifier l\'entrée' : 'Nouvelle entrée'}
+                description="Remplissez les informations de l'entrée budgétaire"
+            >
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {formError ? (
+                        <div className="rounded-input border border-danger/30 bg-danger/10 px-3 py-2 text-caption text-danger">
+                            {formError}
+                        </div>
+                    ) : null}
+                    <div className="flex gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                checked={formData.is_expense}
+                                onChange={() => setFormData({ ...formData, is_expense: true })}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-body-sm">Dépense</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                checked={!formData.is_expense}
+                                onChange={() => setFormData({ ...formData, is_expense: false })}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-body-sm">Revenu</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label className="block text-label font-medium text-foreground mb-1.5">Catégorie</label>
+                        <Select
+                            value={formData.category}
+                            onValueChange={(value) => setFormData({ ...formData, category: value })}
+                            options={CATEGORIES}
+                        />
+                    </div>
+                    <Input
+                        label="Montant (€)"
+                        type="number"
+                        step="0.01"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                        required
+                        placeholder="0.00"
+                    />
+                    <Input
+                        label="Date"
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        required
+                    />
+                    <Textarea
+                        label="Description (optionnel)"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Détails..."
+                        rows={2}
+                    />
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
+                            Annuler
+                        </Button>
+                        <Button type="submit">{editingEntry ? 'Enregistrer' : 'Créer'}</Button>
+                    </div>
+                </form>
+            </Dialog>
+
+            {/* Limit Dialog */}
+            <Dialog
+                open={limitDialogOpen}
+                onOpenChange={setLimitDialogOpen}
+                title="Définir une limite"
+                description="Définissez une limite mensuelle pour une catégorie"
+            >
+                <form onSubmit={handleLimitSubmit} className="space-y-4">
+                    {limitError ? (
+                        <div className="rounded-input border border-danger/30 bg-danger/10 px-3 py-2 text-caption text-danger">
+                            {limitError}
+                        </div>
+                    ) : null}
+                    <div>
+                        <label className="block text-label font-medium text-foreground mb-1.5">Catégorie</label>
+                        <Select
+                            value={limitFormData.category}
+                            onValueChange={(value) => setLimitFormData({ ...limitFormData, category: value })}
+                            options={CATEGORIES}
+                        />
+                    </div>
+                    <Input
+                        label="Limite mensuelle (€)"
+                        type="number"
+                        step="0.01"
+                        value={limitFormData.monthly_limit}
+                        onChange={(e) => setLimitFormData({ ...limitFormData, monthly_limit: e.target.value })}
+                        required
+                        placeholder="0.00"
+                    />
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="secondary" onClick={() => setLimitDialogOpen(false)}>
+                            Annuler
+                        </Button>
+                        <Button type="submit">Définir</Button>
+                    </div>
+                </form>
+            </Dialog>
+        </div>
+    );
+};
+
+export default Budget;

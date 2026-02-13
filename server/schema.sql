@@ -1,196 +1,234 @@
 -- OpenFamily Database Schema
--- PostgreSQL
 
--- Extensions
+-- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Add missing columns only if the table already exists (avoids first-run errors)
-DO $$
-BEGIN
-    IF EXISTS (
-        SELECT 1 FROM information_schema.tables
-        WHERE table_schema = 'public' AND table_name = 'shopping_items'
-    ) THEN
-        ALTER TABLE shopping_items ADD COLUMN IF NOT EXISTS price DECIMAL(10,2) DEFAULT 0;
-        ALTER TABLE shopping_items ADD COLUMN IF NOT EXISTS notes TEXT;
-    END IF;
-END $$;
-
--- Table: families
-CREATE TABLE IF NOT EXISTS families (
-    id VARCHAR(255) PRIMARY KEY,
+-- Users table
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table: family_members
-CREATE TABLE IF NOT EXISTS family_members (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+-- Family Members table
+CREATE TABLE family_members (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    color VARCHAR(50) NOT NULL,
-    health_info JSONB DEFAULT '{}',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Table: shopping_items
-CREATE TABLE IF NOT EXISTS shopping_items (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
-    quantity INTEGER DEFAULT 1,
-    category VARCHAR(100) DEFAULT 'other',
-    checked BOOLEAN DEFAULT FALSE,
-    assigned_to VARCHAR(255),
-    price DECIMAL(10,2) DEFAULT 0,
+    role VARCHAR(50) NOT NULL DEFAULT 'Autre',
+    birth_date DATE,
+    color VARCHAR(7) NOT NULL DEFAULT '#3B82F6',
+    blood_type VARCHAR(3),
+    allergies TEXT,
+    medications TEXT,
+    vaccines TEXT,
+    emergency_contact_name TEXT,
+    emergency_contact_phone TEXT,
+    emergency_contact TEXT,
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    medical_notes TEXT,
+    avatar_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table: tasks
-CREATE TABLE IF NOT EXISTS tasks (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+-- Shopping Items table
+CREATE TABLE shopping_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    quantity DECIMAL(10, 2),
+    unit VARCHAR(50),
+    price DECIMAL(10, 2),
+    is_checked BOOLEAN DEFAULT FALSE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Shopping List Templates table
+CREATE TABLE shopping_list_templates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    items JSONB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tasks table
+CREATE TABLE tasks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    priority VARCHAR(50) DEFAULT 'medium',
-    status VARCHAR(50) DEFAULT 'todo',
-    assigned_to VARCHAR(255),
+    is_completed BOOLEAN DEFAULT FALSE,
     due_date TIMESTAMP,
-    data JSONB DEFAULT '{}',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    frequency VARCHAR(50),
+    priority VARCHAR(50),
+    assigned_to UUID REFERENCES family_members(id) ON DELETE SET NULL,
+    completed_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table: appointments
-CREATE TABLE IF NOT EXISTS appointments (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+-- Appointments table
+CREATE TABLE appointments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
-    date DATE NOT NULL,
-    time VARCHAR(10) NOT NULL,
+    description TEXT,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP,
     location TEXT,
-    description TEXT,
-    type VARCHAR(50) DEFAULT 'other',
-    reminder VARCHAR(50) DEFAULT 'none',
-    duration INTEGER DEFAULT 60,
-    recurring JSONB,
-    members JSONB DEFAULT '[]',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Table: recipes
-CREATE TABLE IF NOT EXISTS recipes (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    category VARCHAR(100) DEFAULT 'other',
-    prep_time INTEGER DEFAULT 0,
-    cook_time INTEGER DEFAULT 0,
-    servings INTEGER DEFAULT 1,
-    ingredients JSONB DEFAULT '[]',
-    instructions JSONB DEFAULT '[]',
-    image_url TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Table: meals
-CREATE TABLE IF NOT EXISTS meals (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-    date DATE NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    recipe_id VARCHAR(255) REFERENCES recipes(id) ON DELETE SET NULL,
+    family_member_id UUID REFERENCES family_members(id) ON DELETE SET NULL,
+    reminder_30min BOOLEAN DEFAULT FALSE,
+    reminder_1hour BOOLEAN DEFAULT FALSE,
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Table: budgets
-CREATE TABLE IF NOT EXISTS budgets (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-    category VARCHAR(100) NOT NULL,
-    amount DECIMAL(10, 2) DEFAULT 0,
-    spent DECIMAL(10, 2) DEFAULT 0,
-    month VARCHAR(7) NOT NULL, -- Format: YYYY-MM
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(family_id, category, month)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table: budget_expenses
-CREATE TABLE IF NOT EXISTS budget_expenses (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-    category VARCHAR(100) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    description TEXT NOT NULL,
+-- Weekly Planning Entries table (work / school schedules)
+CREATE TABLE schedule_entries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    family_member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    schedule_type VARCHAR(30) NOT NULL DEFAULT 'work',
+    title VARCHAR(255) NOT NULL,
+    day_of_week INTEGER NOT NULL CHECK (day_of_week >= 1 AND day_of_week <= 7),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    location TEXT,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CHECK (end_time > start_time)
+);
+
+-- Recipes table
+CREATE TABLE recipes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    description TEXT,
+    ingredients JSONB NOT NULL,
+    instructions JSONB NOT NULL,
+    prep_time INTEGER,
+    cook_time INTEGER,
+    servings INTEGER,
+    difficulty VARCHAR(50),
+    tags JSONB,
+    image_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Meal Plans table
+CREATE TABLE meal_plans (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Table: family_configuration
-CREATE TABLE IF NOT EXISTS family_configuration (
-    id VARCHAR(255) PRIMARY KEY,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-    onboarding_completed BOOLEAN DEFAULT FALSE,
-    storage_mode VARCHAR(50) DEFAULT 'local',
-    theme VARCHAR(50) DEFAULT 'light',
-    language VARCHAR(10) DEFAULT 'fr',
+    meal_type VARCHAR(50) NOT NULL,
+    recipe_id UUID REFERENCES recipes(id) ON DELETE SET NULL,
+    custom_meal TEXT,
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(family_id)
+    UNIQUE(user_id, date, meal_type)
 );
 
--- Table: push_subscriptions
-CREATE TABLE IF NOT EXISTS push_subscriptions (
-    id SERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    family_id VARCHAR(255) REFERENCES families(id) ON DELETE CASCADE,
+-- Budget Entries table
+CREATE TABLE budget_entries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category VARCHAR(50) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    description TEXT,
+    date DATE NOT NULL,
+    is_expense BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Budget Limits table
+CREATE TABLE budget_limits (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category VARCHAR(50) NOT NULL,
+    monthly_limit DECIMAL(10, 2) NOT NULL,
+    month INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
+    year INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, category, month, year)
+);
+
+-- Notifications table
+CREATE TABLE notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    related_id UUID,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Push Subscriptions table (for web push notifications)
+CREATE TABLE push_subscriptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     endpoint TEXT NOT NULL,
-    p256dh TEXT NOT NULL,
-    auth TEXT NOT NULL,
+    keys JSONB NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, endpoint)
 );
 
--- Table: scheduled_notifications
-CREATE TABLE IF NOT EXISTS scheduled_notifications (
-    id SERIAL PRIMARY KEY,
-    appointment_id VARCHAR(255) NOT NULL,
-    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-    title VARCHAR(255) NOT NULL,
-    body TEXT NOT NULL,
-    scheduled_time TIMESTAMP NOT NULL,
-    sent BOOLEAN DEFAULT FALSE,
-    sent_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- Indexes for better performance
+CREATE INDEX idx_shopping_items_user_id ON shopping_items(user_id);
+CREATE INDEX idx_shopping_items_category ON shopping_items(category);
+CREATE INDEX idx_tasks_user_id ON tasks(user_id);
+CREATE INDEX idx_tasks_due_date ON tasks(due_date);
+CREATE INDEX idx_tasks_assigned_to ON tasks(assigned_to);
+CREATE INDEX idx_appointments_user_id ON appointments(user_id);
+CREATE INDEX idx_appointments_start_time ON appointments(start_time);
+CREATE INDEX idx_schedule_entries_user_day ON schedule_entries(user_id, day_of_week);
+CREATE INDEX idx_schedule_entries_member ON schedule_entries(family_member_id);
+CREATE INDEX idx_recipes_user_id ON recipes(user_id);
+CREATE INDEX idx_recipes_category ON recipes(category);
+CREATE INDEX idx_meal_plans_user_id ON meal_plans(user_id);
+CREATE INDEX idx_meal_plans_date ON meal_plans(date);
+CREATE INDEX idx_budget_entries_user_id ON budget_entries(user_id);
+CREATE INDEX idx_budget_entries_date ON budget_entries(date);
+CREATE INDEX idx_budget_entries_category ON budget_entries(category);
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_is_read ON notifications(is_read);
 
--- Indexes pour améliorer les performances
-CREATE INDEX IF NOT EXISTS idx_family_members_family_id ON family_members(family_id);
-CREATE INDEX IF NOT EXISTS idx_shopping_items_family_id ON shopping_items(family_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_family_id ON tasks(family_id);
-CREATE INDEX IF NOT EXISTS idx_appointments_family_id ON appointments(family_id);
-CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date);
-CREATE INDEX IF NOT EXISTS idx_recipes_family_id ON recipes(family_id);
-CREATE INDEX IF NOT EXISTS idx_meals_family_id ON meals(family_id);
-CREATE INDEX IF NOT EXISTS idx_meals_date ON meals(date);
-CREATE INDEX IF NOT EXISTS idx_budgets_family_id ON budgets(family_id);
-CREATE INDEX IF NOT EXISTS idx_budgets_month ON budgets(month);
-CREATE INDEX IF NOT EXISTS idx_budget_expenses_family_id ON budget_expenses(family_id);
-CREATE INDEX IF NOT EXISTS idx_budget_expenses_date ON budget_expenses(date);
-CREATE INDEX IF NOT EXISTS idx_family_configuration_family_id ON family_configuration(family_id);
-CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user_id ON push_subscriptions(user_id);
-CREATE INDEX IF NOT EXISTS idx_push_subscriptions_family_id ON push_subscriptions(family_id);
-CREATE INDEX IF NOT EXISTS idx_scheduled_notifications_scheduled_time ON scheduled_notifications(scheduled_time);
-CREATE INDEX IF NOT EXISTS idx_scheduled_notifications_sent ON scheduled_notifications(sent);
-CREATE INDEX IF NOT EXISTS idx_scheduled_notifications_family_id ON scheduled_notifications(family_id);
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
 
--- Données d'exemple (optionnel, pour les tests)
--- INSERT INTO families (id, name) VALUES ('family-demo', 'Famille Démo');
--- INSERT INTO family_members (id, family_id, name, color) VALUES 
---   ('member-1', 'family-demo', 'Papa', '#3b82f6'),
---   ('member-2', 'family-demo', 'Maman', '#ec4899');
-
-
+-- Triggers to auto-update updated_at
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_family_members_updated_at BEFORE UPDATE ON family_members FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_shopping_items_updated_at BEFORE UPDATE ON shopping_items FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_appointments_updated_at BEFORE UPDATE ON appointments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_schedule_entries_updated_at BEFORE UPDATE ON schedule_entries FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_recipes_updated_at BEFORE UPDATE ON recipes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_meal_plans_updated_at BEFORE UPDATE ON meal_plans FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_budget_entries_updated_at BEFORE UPDATE ON budget_entries FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_notifications_updated_at BEFORE UPDATE ON notifications FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

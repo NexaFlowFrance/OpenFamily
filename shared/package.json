@@ -1,0 +1,14 @@
+{
+    "name": "@openfamily/shared",
+    "version": "1.0.0",
+    "description": "Shared types and constants for OpenFamily",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc --watch"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3"
+    }
+}

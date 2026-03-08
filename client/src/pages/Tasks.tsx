@@ -61,6 +61,7 @@ const Tasks: React.FC = () => {
     const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [filterPriority, setFilterPriority] = useState<string>('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
+    const [filterMember, setFilterMember] = useState<string>('');
     const [error, setError] = useState('');
 
     // Form state
@@ -190,6 +191,8 @@ const Tasks: React.FC = () => {
         if (filterPriority && task.priority !== filterPriority) return false;
         if (filterStatus === 'completed' && !task.is_completed) return false;
         if (filterStatus === 'pending' && task.is_completed) return false;
+        if (filterMember === '__unassigned__' && task.assigned_to) return false;
+        if (filterMember && filterMember !== '__unassigned__' && task.assigned_to !== filterMember) return false;
         return true;
     });
 
@@ -314,13 +317,24 @@ const Tasks: React.FC = () => {
                             ]}
                             className="w-48"
                         />
-                        {(filterPriority || filterStatus !== 'all') && (
+                        <Select
+                            value={filterMember}
+                            onValueChange={setFilterMember}
+                            options={[
+                                { value: '', label: 'Tous les membres' },
+                                { value: '__unassigned__', label: 'Non assignées' },
+                                ...familyMembers.map((m) => ({ value: m.id, label: m.name })),
+                            ]}
+                            className="w-48"
+                        />
+                        {(filterPriority || filterStatus !== 'all' || filterMember) && (
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
                                     setFilterPriority('');
                                     setFilterStatus('all');
+                                    setFilterMember('');
                                 }}
                             >
                                 Réinitialiser

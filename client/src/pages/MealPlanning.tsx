@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Plus, ChevronLeft, ChevronRight, Edit2, Trash2 } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea } from '../components/ui';
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay } from 'date-fns';
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface MealPlan {
@@ -54,7 +54,7 @@ const MealPlanning: React.FC = () => {
             const start = startOfWeek(currentWeek, { weekStartsOn: 1 });
             const end = endOfWeek(currentWeek, { weekStartsOn: 1 });
             const response = await api.get<{ success: boolean; data: MealPlan[] }>(
-                `/api/meal-plans?start_date=${start.toISOString()}&end_date=${end.toISOString()}`
+                `/api/meal-plans?start_date=${format(start, 'yyyy-MM-dd')}&end_date=${format(end, 'yyyy-MM-dd')}`
             );
             if (response.success) {
                 setMealPlans(response.data);
@@ -120,7 +120,8 @@ const MealPlanning: React.FC = () => {
 
     const handleEdit = (meal: MealPlan) => {
         setEditingMeal(meal);
-        setSelectedDate(new Date(meal.date));
+        // Use noon to avoid timezone shifts when parsing date strings
+        setSelectedDate(new Date(meal.date + 'T12:00:00'));
         setSelectedMealType(meal.meal_type);
         setFormData({
             meal_type: meal.meal_type,
@@ -132,12 +133,16 @@ const MealPlanning: React.FC = () => {
     };
 
     const handleAddMeal = (date: Date, mealType: string) => {
+        setEditingMeal(null);
         setSelectedDate(date);
         setSelectedMealType(mealType);
         setFormData({
-            ...formData,
             meal_type: mealType,
+            recipe_id: '',
+            custom_meal: '',
+            notes: '',
         });
+        setError('');
         setDialogOpen(true);
     };
 
@@ -159,23 +164,24 @@ const MealPlanning: React.FC = () => {
     const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
     const getMealForSlot = (date: Date, mealType: string) => {
+        const dateStr = format(date, 'yyyy-MM-dd');
         return mealPlans.find(
-            (meal) => isSameDay(new Date(meal.date), date) && meal.meal_type === mealType
+            (meal) => meal.date === dateStr && meal.meal_type === mealType
         );
     };
 
     const getMealTypeColor = (mealType: string) => {
         switch (mealType) {
             case 'Petit-déjeuner':
-                return 'from-amber-50 to-orange-50 border-amber-200';
+                return 'from-amber-50 to-orange-50 border-amber-200 dark:from-amber-950/30 dark:to-orange-950/30 dark:border-amber-800';
             case 'Déjeuner':
-                return 'from-blue-50 to-cyan-50 border-blue-200';
+                return 'from-blue-50 to-cyan-50 border-blue-200 dark:from-blue-950/30 dark:to-cyan-950/30 dark:border-blue-800';
             case 'Dîner':
-                return 'from-purple-50 to-pink-50 border-purple-200';
+                return 'from-purple-50 to-pink-50 border-purple-200 dark:from-purple-950/30 dark:to-pink-950/30 dark:border-purple-800';
             case 'Snack':
-                return 'from-emerald-50 to-teal-50 border-emerald-200';
+                return 'from-emerald-50 to-teal-50 border-emerald-200 dark:from-emerald-950/30 dark:to-teal-950/30 dark:border-emerald-800';
             default:
-                return 'from-gray-50 to-gray-100 border-gray-200';
+                return 'from-gray-50 to-gray-100 border-gray-200 dark:from-gray-900/30 dark:to-gray-800/30 dark:border-gray-700';
         }
     };
 

@@ -1,7 +1,11 @@
-import { Pool } from 'pg';
+import { Pool, types } from 'pg';
 import { loadEnv } from './config/loadEnv';
 
 loadEnv();
+
+// Return DATE columns as plain 'YYYY-MM-DD' strings instead of JavaScript Date objects.
+// This prevents timezone-related date shifts (e.g. '2026-03-09' → '2026-03-08T23:00:00.000Z').
+types.setTypeParser(1082, (val: string) => val);
 
 const pool = new Pool({
     host: process.env.POSTGRES_HOST || 'localhost',

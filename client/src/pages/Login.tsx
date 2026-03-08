@@ -7,6 +7,7 @@ import { Users } from 'lucide-react';
 
 const Login: React.FC = () => {
     const { login, register } = useAuth();
+    const registrationEnabled = import.meta.env.VITE_REGISTRATION_ENABLED !== 'false';
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -115,19 +116,21 @@ const Login: React.FC = () => {
                         </Button>
                     </form>
 
-                    <div className="mt-8 text-center pt-2 border-t border-border">
-                        <button
-                            onClick={() => {
-                                setIsLogin(!isLogin);
-                                setError('');
-                            }}
-                            className="text-body-sm text-nexus-blue hover:text-nexus-blue/80 font-medium transition-colors hover:underline underline-offset-4"
-                        >
-                            {isLogin
-                                ? "Je n'ai pas de compte, m'inscrire"
-                                : 'J\'ai déjà un compte, me connecter'}
-                        </button>
-                    </div>
+                    {registrationEnabled && (
+                        <div className="mt-8 text-center pt-2 border-t border-border">
+                            <button
+                                onClick={() => {
+                                    setIsLogin(!isLogin);
+                                    setError('');
+                                }}
+                                className="text-body-sm text-nexus-blue hover:text-nexus-blue/80 font-medium transition-colors hover:underline underline-offset-4"
+                            >
+                                {isLogin
+                                    ? "Je n'ai pas de compte, m'inscrire"
+                                    : 'J\'ai déjà un compte, me connecter'}
+                            </button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

@@ -22,6 +22,10 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
 
 // Register
 router.post('/register', async (req, res) => {
+    if (process.env.REGISTRATION_ENABLED === 'false') {
+        return res.status(403).json({ success: false, error: 'Registration is disabled' });
+    }
+
     try {
         const { email, password, name } = req.body;
         const normalizedEmail = typeof email === 'string' ? normalizeEmail(email) : '';

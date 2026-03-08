@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle, Users } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Dialog, Input, Select, Textarea, Badge, Tabs } from '../components/ui';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CHART_COLOR_PRESETS } from '../design/colorPresets';
@@ -33,21 +33,22 @@ interface BudgetLimit {
     year: number;
 }
 
-interface MemberStats {
-    assigned_to: string | null;
-    member_name: string;
-    member_color: string;
-    total_expenses: number;
-    total_income: number;
-}
-
 interface BudgetStats {
     totalExpenses: number;
     totalIncome: number;
     balance: number;
     byCategory: Array<{ category: string; category_total: number }>;
-    byMember: MemberStats[];
+    byMember: Array<{ assigned_to: string; member_name: string; member_color: string; category: string; amount: number }>;
 }
+
+interface MonthlyStats {
+    month: number;
+    totalExpenses: number;
+    totalIncome: number;
+    balance: number;
+}
+
+const MONTH_SHORT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
 const CATEGORIES = [
     { value: 'Alimentation', label: 'Alimentation' },
@@ -74,6 +75,7 @@ const Budget: React.FC = () => {
     const [entries, setEntries] = useState<BudgetEntry[]>([]);
     const [limits, setLimits] = useState<BudgetLimit[]>([]);
     const [stats, setStats] = useState<BudgetStats | null>(null);
+    const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([]);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -82,8 +84,8 @@ const Budget: React.FC = () => {
     const [formError, setFormError] = useState('');
     const [limitError, setLimitError] = useState('');
     const [filterMember, setFilterMember] = useState<string>('');
-    const [currentMonth] = useState(new Date().getMonth() + 1);
-    const [currentYear] = useState(new Date().getFullYear());
+    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
     const [formData, setFormData] = useState({
         category: 'Alimentation',
@@ -100,11 +102,15 @@ const Budget: React.FC = () => {
     });
 
     useEffect(() => {
+        loadFamilyMembers();
+    }, []);
+
+    useEffect(() => {
         loadEntries();
         loadLimits();
         loadStats();
-        loadFamilyMembers();
-    }, []);
+        loadMonthlyStats(currentYear);
+    }, [currentMonth, currentYear]);
 
     const loadEntries = async () => {
         try {
@@ -160,16 +166,31 @@ const Budget: React.FC = () => {
                         category_total: toNumber(item.category_total),
                     })),
                     byMember: (response.data.byMember || []).map((item) => ({
-                        assigned_to: item.assigned_to,
-                        member_name: item.member_name || 'Non assigné',
-                        member_color: item.member_color || '#94a3b8',
-                        total_expenses: toNumber(item.total_expenses),
-                        total_income: toNumber(item.total_income),
+                        ...item,
+                        amount: toNumber(item.amount),
                     })),
                 });
             }
         } catch (error) {
             console.error('Failed to load stats:', error);
+        }
+    };
+
+    const loadMonthlyStats = async (year = currentYear) => {
+        try {
+            const response = await api.get<{ success: boolean; data: MonthlyStats[] }>(
+                `/api/budget/statistics/monthly?year=${year}`
+            );
+            if (response.success) {
+                setMonthlyStats(response.data.map((item) => ({
+                    ...item,
+                    totalExpenses: toNumber(item.totalExpenses),
+                    totalIncome: toNumber(item.totalIncome),
+                    balance: toNumber(item.balance),
+                })));
+            }
+        } catch (error) {
+            console.error('Failed to load monthly stats:', error);
         }
     };
 
@@ -182,6 +203,15 @@ const Budget: React.FC = () => {
         } catch (error) {
             console.error('Failed to load family members:', error);
         }
+    };
+
+    const navigateMonth = (direction: -1 | 1) => {
+        let newMonth = currentMonth + direction;
+        let newYear = currentYear;
+        if (newMonth < 1) { newMonth = 12; newYear -= 1; }
+        if (newMonth > 12) { newMonth = 1; newYear += 1; }
+        setCurrentMonth(newMonth);
+        setCurrentYear(newYear);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -210,7 +240,7 @@ const Budget: React.FC = () => {
             loadStats();
         } catch (error) {
             console.error('Failed to save entry:', error);
-            setFormError(error instanceof Error ? error.message : 'Impossible d’enregistrer cette entrée.');
+            setFormError(error instanceof Error ? error.message : "Impossible d'enregistrer cette entrée.");
         }
     };
 
@@ -322,11 +352,8 @@ const Budget: React.FC = () => {
             label: 'Entrées',
             content: (
                 <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <h3 className="text-h2 font-semibold">
-                            {format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: fr })}
-                        </h3>
-                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div className="flex items-center gap-2">
                             {familyMembers.length > 0 && (
                                 <Select
                                     value={filterMember}
@@ -338,11 +365,11 @@ const Budget: React.FC = () => {
                                     ]}
                                 />
                             )}
-                            <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
-                                <Plus className="w-4 h-4 mr-2" />
-                                Nouvelle entrée
-                            </Button>
                         </div>
+                        <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Nouvelle entrée
+                        </Button>
                     </div>
 
                     <div className="space-y-3">
@@ -508,56 +535,61 @@ const Budget: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Per-member breakdown */}
-                            {stats.byMember && stats.byMember.length > 0 && (
+                            {stats.byMember && stats.byMember.length > 0 && (() => {
+                                const memberMap = new Map<string, Record<string, string | number>>();
+                                stats.byMember.forEach((row) => {
+                                    if (!memberMap.has(row.assigned_to)) {
+                                        memberMap.set(row.assigned_to, { name: row.member_name });
+                                    }
+                                    const entry = memberMap.get(row.assigned_to)!;
+                                    entry[row.category] = (entry[row.category] as number || 0) + row.amount;
+                                });
+                                const memberChartData = Array.from(memberMap.values());
+                                const memberCategories = [...new Set(stats.byMember.map((r) => r.category))];
+                                return (
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Dépenses par membre et catégorie</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <ResponsiveContainer width="100%" height={300}>
+                                                <BarChart data={memberChartData}>
+                                                    <CartesianGrid strokeDasharray="3 3" />
+                                                    <XAxis dataKey="name" />
+                                                    <YAxis />
+                                                    <Tooltip formatter={(value: number) => `${value.toFixed(2)}€`} />
+                                                    <Legend />
+                                                    {memberCategories.map((cat, i) => (
+                                                        <Bar key={cat} dataKey={cat} stackId="a" fill={CHART_COLOR_PRESETS[i % CHART_COLOR_PRESETS.length]} />
+                                                    ))}
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })()}
+
+                            {monthlyStats.length > 0 && (
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Users className="h-5 w-5" />
-                                            Dépenses par membre
-                                        </CardTitle>
+                                        <CardTitle>Évolution mensuelle {currentYear}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="space-y-4">
-                                            {stats.byMember
-                                                .filter((m) => m.total_expenses > 0)
-                                                .sort((a, b) => b.total_expenses - a.total_expenses)
-                                                .map((member, index) => {
-                                                    const percentage = stats.totalExpenses > 0
-                                                        ? (member.total_expenses / stats.totalExpenses) * 100
-                                                        : 0;
-                                                    return (
-                                                        <div key={member.assigned_to || `unassigned-${index}`} className="space-y-2">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-2">
-                                                                    <div
-                                                                        className="w-3 h-3 rounded-full"
-                                                                        style={{ backgroundColor: member.member_color }}
-                                                                    />
-                                                                    <span className="text-body-sm font-medium">
-                                                                        {member.member_name}
-                                                                    </span>
-                                                                </div>
-                                                                <span className="text-body-sm font-bold text-red-600">
-                                                                    {member.total_expenses.toFixed(2)}€
-                                                                    <span className="text-muted-foreground font-normal ml-1">
-                                                                        ({percentage.toFixed(0)}%)
-                                                                    </span>
-                                                                </span>
-                                                            </div>
-                                                            <div className="w-full bg-surface-2 rounded-full h-2">
-                                                                <div
-                                                                    className="h-2 rounded-full transition-all"
-                                                                    style={{
-                                                                        width: `${percentage}%`,
-                                                                        backgroundColor: member.member_color,
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                        </div>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <BarChart data={monthlyStats.map((m) => ({
+                                                name: MONTH_SHORT[m.month - 1],
+                                                Dépenses: m.totalExpenses,
+                                                Revenus: m.totalIncome,
+                                            }))}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey="name" />
+                                                <YAxis />
+                                                <Tooltip formatter={(value: number) => `${value.toFixed(2)}€`} />
+                                                <Legend />
+                                                <Bar dataKey="Dépenses" fill="#ef4444" />
+                                                <Bar dataKey="Revenus" fill="#10b981" />
+                                            </BarChart>
+                                        </ResponsiveContainer>
                                     </CardContent>
                                 </Card>
                             )}
@@ -637,6 +669,17 @@ const Budget: React.FC = () => {
                 <div>
                     <h1 className="text-h1 mb-1">Budget</h1>
                     <p className="text-muted-foreground text-body">Suivez vos dépenses et revenus</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => navigateMonth(-1)} className="p-1 rounded hover:bg-surface-2 transition-colors">
+                        <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <span className="text-h2 font-semibold min-w-[160px] text-center">
+                        {format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: fr })}
+                    </span>
+                    <button onClick={() => navigateMonth(1)} className="p-1 rounded hover:bg-surface-2 transition-colors">
+                        <ChevronRight className="w-5 h-5" />
+                    </button>
                 </div>
             </div>
 

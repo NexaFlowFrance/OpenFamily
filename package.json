@@ -25,6 +25,10 @@
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
+  "overrides": {
+    "serialize-javascript": ">=7.0.3",
+    "@rollup/plugin-terser": ">=1.0.0"
+  },
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"

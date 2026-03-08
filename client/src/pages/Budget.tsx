@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle, Users, Filter } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Dialog, Input, Select, Textarea, Badge, Tabs } from '../components/ui';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';

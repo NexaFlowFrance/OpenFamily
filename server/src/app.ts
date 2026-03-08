@@ -10,6 +10,7 @@ import budgetRoutes from './routes/budget';
 import familyRoutes from './routes/family';
 import dashboardRoutes from './routes/dashboard';
 import planningRoutes from './routes/planning';
+import dataTransferRoutes from './routes/dataTransfer';
 import { loadEnv } from './config/loadEnv';
 
 loadEnv();
@@ -47,6 +48,7 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/family', familyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/planning', planningRoutes);
+app.use('/api/data', dataTransferRoutes);
 
 // 404 handler
 app.use((req, res) => {

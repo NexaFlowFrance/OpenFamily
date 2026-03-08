@@ -11,6 +11,7 @@ import Recipes from './pages/Recipes';
 import MealPlanning from './pages/MealPlanning';
 import Budget from './pages/Budget';
 import Family from './pages/Family';
+import Settings from './pages/Settings';
 
 function App() {
     const { isAuthenticated, loading } = useAuth();
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/meal-planning" element={<MealPlanning />} />
                 <Route path="/budget" element={<Budget />} />
                 <Route path="/family" element={<Family />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Layout>

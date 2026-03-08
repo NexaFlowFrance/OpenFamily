@@ -12,6 +12,7 @@ import {
     UtensilsCrossed,
     Wallet,
     Users,
+    Settings,
     Moon,
     Sun,
     LogOut,
@@ -36,6 +37,7 @@ const navigation = [
     { name: 'Repas', href: '/meal-planning', icon: UtensilsCrossed },
     { name: 'Budget', href: '/budget', icon: Wallet },
     { name: 'Famille', href: '/family', icon: Users },
+    { name: 'Paramètres', href: '/settings', icon: Settings },
 ];
 
 const mobileTabs = [

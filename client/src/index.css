@@ -202,6 +202,15 @@ html, body {
     min-width: 0;
   }
 
+  /* Mobile-safe bottom sheet modal - uses dvh for iOS Safari compatibility */
+  .mobile-sheet {
+    max-height: 90vh; /* fallback */
+    max-height: 85dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
   /* Allow text selection in input/textarea/contenteditable elements */
   input, textarea, [contenteditable="true"], .selectable {
     -webkit-user-select: text;

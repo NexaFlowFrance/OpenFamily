@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { Pool } from 'pg';
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 import { createPushRoutes } from './pushRoutes.js';
 
 // Types
@@ -145,28 +145,61 @@ function mapMealToClient(dbMeal: any) {
   };
 }
 
-// Middleware d'authentification simple
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+// Hash PIN with SHA-256 (sufficient for 4-6 digit PINs in a family app)
+function hashPin(pin: string): string {
+  return createHash('sha256').update(pin).digest('hex');
+}
+
+// Middleware d'authentification - valide le token de session
+const createAuthMiddleware = (pool: Pool) => async (req: Request, res: Response, next: NextFunction) => {
   const authToken = req.headers.authorization?.replace('Bearer ', '');
   
   if (!authToken) {
     return res.status(401).json({ error: 'Authentication required' });
   }
 
-  // Ici, vous pouvez valider le token (JWT, etc.)
-  // Pour l'instant, on accepte tous les tokens non-vides
-  next();
-};
-
-// Middleware pour extraire le family_id
-const familyMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const familyId = req.headers['x-family-id'] as string;
-  
-  if (!familyId) {
-    return res.status(400).json({ error: 'Family ID required' });
+  // Allow legacy 'default-token' for backward compatibility (onboarding, initial setup)
+  if (authToken === 'default-token') {
+    const familyId = (req.headers['x-family-id'] as string) || 'family-default';
+    (req as any).familyId = familyId;
+    (req as any).memberId = null;
+    (req as any).memberName = null;
+    return next();
   }
 
-  (req as any).familyId = familyId;
+  try {
+    // Validate session token against DB
+    const result = await pool.query(
+      'SELECT s.member_id, s.family_id, fm.name as member_name FROM sessions s JOIN family_members fm ON fm.id = s.member_id WHERE s.token = $1 AND s.expires_at > NOW()',
+      [authToken]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid or expired session' });
+    }
+
+    const session = result.rows[0];
+    (req as any).memberId = session.member_id;
+    (req as any).familyId = session.family_id;
+    (req as any).memberName = session.member_name;
+    next();
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    return res.status(500).json({ error: 'Authentication error' });
+  }
+};
+
+// Middleware pour extraire le family_id (kept for backward compat but now a no-op since familyId comes from session)
+const familyMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  // familyId is already set by auth middleware from the session
+  // But if X-Family-Id header is provided and familyId is not set, use it (for legacy support)
+  if (!(req as any).familyId) {
+    const familyId = req.headers['x-family-id'] as string;
+    if (!familyId) {
+      return res.status(400).json({ error: 'Family ID required' });
+    }
+    (req as any).familyId = familyId;
+  }
   next();
 };
 
@@ -218,7 +251,199 @@ export function createApp(pool: Pool) {
   // ===== Push Notifications (AVANT auth middleware) =====
   app.use('/push', createPushRoutes(pool));
 
-  // Routes protégées - appliqués à toutes les routes sauf /health et /push
+  // ===== Auth Routes (AVANT auth middleware) =====
+  
+  // List family members for login screen (public - only returns name/color/hasPin)
+  app.get('/auth/members', async (req: Request, res: Response) => {
+    try {
+      const familyId = (req.headers['x-family-id'] as string) || 'family-default';
+      const result = await pool.query(
+        'SELECT id, name, color, pin_hash FROM family_members WHERE family_id = $1 ORDER BY created_at ASC',
+        [familyId]
+      );
+      
+      const members = result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        color: row.color,
+        hasPin: !!row.pin_hash,
+      }));
+      
+      res.json(members);
+    } catch (error) {
+      console.error('Error fetching auth members:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Login - authenticate a family member
+  app.post('/auth/login', async (req: Request, res: Response) => {
+    try {
+      const { memberId, pin, familyId: reqFamilyId } = req.body;
+      const familyId = reqFamilyId || 'family-default';
+      
+      if (!memberId) {
+        return res.status(400).json({ error: 'Member ID is required' });
+      }
+      
+      // Find the member
+      const memberResult = await pool.query(
+        'SELECT id, family_id, name, color, pin_hash FROM family_members WHERE id = $1 AND family_id = $2',
+        [memberId, familyId]
+      );
+      
+      if (memberResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Member not found' });
+      }
+      
+      const member = memberResult.rows[0];
+      
+      // Verify PIN if one is set
+      if (member.pin_hash) {
+        if (!pin) {
+          return res.status(401).json({ error: 'PIN required' });
+        }
+        const pinHash = hashPin(pin);
+        if (pinHash !== member.pin_hash) {
+          return res.status(401).json({ error: 'Invalid PIN' });
+        }
+      }
+      
+      // Generate session token
+      const token = randomUUID();
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+      
+      await pool.query(
+        'INSERT INTO sessions (token, member_id, family_id, expires_at) VALUES ($1, $2, $3, $4)',
+        [token, member.id, member.family_id, expiresAt]
+      );
+      
+      // Clean up expired sessions occasionally (1 in 10 chance)
+      if (Math.random() < 0.1) {
+        pool.query('DELETE FROM sessions WHERE expires_at < NOW()').catch(() => {});
+      }
+      
+      res.json({
+        token,
+        member: {
+          id: member.id,
+          name: member.name,
+          color: member.color,
+          familyId: member.family_id,
+        },
+        expiresAt: expiresAt.toISOString(),
+      });
+    } catch (error) {
+      console.error('Error during login:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Validate existing session token
+  app.get('/auth/session', async (req: Request, res: Response) => {
+    try {
+      const authToken = req.headers.authorization?.replace('Bearer ', '');
+      
+      if (!authToken) {
+        return res.status(401).json({ error: 'No token provided' });
+      }
+      
+      const result = await pool.query(
+        `SELECT s.token, s.member_id, s.family_id, s.expires_at,
+                fm.name as member_name, fm.color as member_color
+         FROM sessions s
+         JOIN family_members fm ON fm.id = s.member_id
+         WHERE s.token = $1 AND s.expires_at > NOW()`,
+        [authToken]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(401).json({ error: 'Invalid or expired session' });
+      }
+      
+      const session = result.rows[0];
+      res.json({
+        token: session.token,
+        member: {
+          id: session.member_id,
+          name: session.member_name,
+          color: session.member_color,
+          familyId: session.family_id,
+        },
+        expiresAt: session.expires_at,
+      });
+    } catch (error) {
+      console.error('Error validating session:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Logout - invalidate session
+  app.post('/auth/logout', async (req: Request, res: Response) => {
+    try {
+      const authToken = req.headers.authorization?.replace('Bearer ', '');
+      
+      if (authToken) {
+        await pool.query('DELETE FROM sessions WHERE token = $1', [authToken]);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Set/update PIN for a member (requires auth)
+  app.post('/auth/set-pin', async (req: Request, res: Response) => {
+    try {
+      const authToken = req.headers.authorization?.replace('Bearer ', '');
+      if (!authToken) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      // Validate session
+      const sessionResult = await pool.query(
+        'SELECT member_id, family_id FROM sessions WHERE token = $1 AND expires_at > NOW()',
+        [authToken]
+      );
+      
+      if (sessionResult.rows.length === 0) {
+        return res.status(401).json({ error: 'Invalid session' });
+      }
+      
+      const { member_id: memberId, family_id: familyId } = sessionResult.rows[0];
+      const { pin, currentPin } = req.body;
+      
+      // Check current PIN if one is set
+      const memberResult = await pool.query(
+        'SELECT pin_hash FROM family_members WHERE id = $1 AND family_id = $2',
+        [memberId, familyId]
+      );
+      
+      if (memberResult.rows[0]?.pin_hash && currentPin) {
+        const currentPinHash = hashPin(currentPin);
+        if (currentPinHash !== memberResult.rows[0].pin_hash) {
+          return res.status(401).json({ error: 'Current PIN is incorrect' });
+        }
+      }
+      
+      // Set new PIN (or remove if pin is empty/null)
+      const newPinHash = pin ? hashPin(pin) : null;
+      await pool.query(
+        'UPDATE family_members SET pin_hash = $1 WHERE id = $2 AND family_id = $3',
+        [newPinHash, memberId, familyId]
+      );
+      
+      res.json({ success: true, hasPin: !!newPinHash });
+    } catch (error) {
+      console.error('Error setting PIN:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Routes protégées - appliqués à toutes les routes sauf /health, /push, et /auth
+  const authMiddleware = createAuthMiddleware(pool);
   app.use(authMiddleware);
   app.use(familyMiddleware);
 
@@ -668,6 +893,7 @@ export function createApp(pool: Pool) {
           id: member.id,
           name: member.name,
           color: member.color,
+          hasPin: !!member.pin_hash,
           ...healthInfo,
           createdAt: member.created_at
         };
@@ -1040,6 +1266,7 @@ export function createApp(pool: Pool) {
             amount: Number(expense.amount),
             description: expense.description,
             date: dateOnly,
+            memberId: expense.member_id || null,
             createdAt: expense.created_at,
           });
         }
@@ -1134,8 +1361,8 @@ export function createApp(pool: Pool) {
         const expenseInserts = expenses.map(exp => {
           const expId = exp.id || randomUUID();
           return pool.query(
-            'INSERT INTO budget_expenses (id, family_id, category, amount, description, date) VALUES ($1, $2, $3, $4, $5, $6)',
-            [expId, familyId, exp.category, exp.amount, exp.description || '', exp.date]
+            'INSERT INTO budget_expenses (id, family_id, category, amount, description, date, member_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [expId, familyId, exp.category, exp.amount, exp.description || '', exp.date, exp.memberId || null]
           );
         });
         
@@ -1209,10 +1436,12 @@ export function createApp(pool: Pool) {
         return res.status(400).json({ error: 'Expense date does not match month' });
       }
 
+      const memberId = req.body.memberId || null;
+
       const expId = randomUUID();
       const result = await pool.query(
-        'INSERT INTO budget_expenses (id, family_id, category, amount, description, date) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [expId, familyId, category, amount, description || '', date]
+        'INSERT INTO budget_expenses (id, family_id, category, amount, description, date, member_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [expId, familyId, category, amount, description || '', date, memberId]
       );
 
       const created = result.rows[0];

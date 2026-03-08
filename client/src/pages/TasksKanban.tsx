@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, GripVertical, Calendar, User, AlertCircle, Edit2, X } from 'lucide-react';
+import { Plus, GripVertical, Calendar, User, Users, AlertCircle, Edit2, X } from 'lucide-react';
 import { formatDateOnly, parseDateOnly } from '@/lib/dateOnly';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Task } from '@/types';
 
 const getCategoriesLabels = (t: any) => [
@@ -27,12 +28,14 @@ const getColumnsLabels = (t: any) => [
 export default function TasksKanban() {
   const { t } = useLanguage();
   const { tasks, familyMembers, addTask, updateTask } = useApp();
+  const { currentMember } = useAuth();
   const { setAddAction } = useAddButton();
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
   const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<string | null>(null);
+  const [showMyTasksOnly, setShowMyTasksOnly] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -87,10 +90,14 @@ export default function TasksKanban() {
   };
 
   const getTasksByStatus = (status: string) => {
+    const memberFilter = (t: Task) => {
+      if (!showMyTasksOnly || !currentMember) return true;
+      return !t.assignedTo || t.assignedTo === currentMember.id;
+    };
     if (status === 'done') {
-      return tasks.filter(t => isDoneToday(t));
+      return tasks.filter(t => isDoneToday(t) && memberFilter(t));
     }
-    return tasks.filter(t => !isDoneToday(t) && (t.status === status || (!t.status && status === 'todo')));
+    return tasks.filter(t => !isDoneToday(t) && (t.status === status || (!t.status && status === 'todo')) && memberFilter(t));
   };
 
   const handleDragStart = (taskId: string) => {
@@ -283,6 +290,14 @@ export default function TasksKanban() {
             <Plus className="w-4 h-4 mr-2" />
             {t.tasks.newTask}
           </Button>
+          <Button
+            variant={showMyTasksOnly ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setShowMyTasksOnly(!showMyTasksOnly)}
+          >
+            {showMyTasksOnly ? <User className="w-4 h-4 mr-1" /> : <Users className="w-4 h-4 mr-1" />}
+            {showMyTasksOnly ? t.tasks.myTasks : t.tasks.allMembers}
+          </Button>
         </div>
       </div>
 
@@ -423,7 +438,7 @@ export default function TasksKanban() {
       {/* Formulaire d'ajout/modification */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <Card className="w-full rounded-t-2xl p-6 space-y-4 mobile-sheet">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">
                 {editingTask ? t.tasks.editTask : t.tasks.newTask}

@@ -5,6 +5,8 @@
 
 import { logger } from './logger';
 
+const SESSION_STORAGE_KEY = 'openfamily_session';
+
 export interface FamilyConfiguration {
   family_id?: string;
   onboarding_completed: boolean;
@@ -17,10 +19,26 @@ export interface FamilyConfiguration {
  * Obtient l'URL de l'API
  */
 function getApiUrl(): string {
-  // Always use same-origin API.
-  // - Dev: Vite proxy can forward /api
-  // - Prod/Docker: Node server serves /api on the same host/port
   return '/api';
+}
+
+/**
+ * Get auth credentials from stored session
+ */
+function getAuthCredentials(): { authToken: string; familyId: string } {
+  try {
+    const stored = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (stored) {
+      const session = JSON.parse(stored);
+      return {
+        authToken: session.token || 'default-token',
+        familyId: session.member?.familyId || 'family-default',
+      };
+    }
+  } catch {
+    // fallback
+  }
+  return { authToken: 'default-token', familyId: 'family-default' };
 }
 
 /**
@@ -117,8 +135,7 @@ export async function isOnboardingCompleted(): Promise<boolean> {
   const serverAvailable = await checkServerAvailability();
   
   if (serverAvailable) {
-    const familyId = 'family-default';
-    const authToken = 'default-token';
+    const { authToken, familyId } = getAuthCredentials();
     
     const serverConfig = await fetchServerConfig(apiUrl, authToken, familyId);
     return serverConfig ? serverConfig.onboarding_completed : false;
@@ -137,8 +154,7 @@ export async function markOnboardingCompleted(
   language: string
 ): Promise<void> {
   const apiUrl = getApiUrl();
-  const familyId = 'family-default';
-  const authToken = 'default-token';
+  const { authToken, familyId } = getAuthCredentials();
   
   await saveServerConfig(apiUrl, authToken, familyId, {
     onboarding_completed: true,

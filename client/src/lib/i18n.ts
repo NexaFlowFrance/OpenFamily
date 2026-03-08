@@ -15,6 +15,29 @@ export const translations = {
     close: 'Fermer',
     confirm: 'Confirmer',
     loading: 'Chargement...',
+
+    // Connexion
+    login: {
+      title: 'Qui êtes-vous ?',
+      subtitle: 'Sélectionnez votre profil pour continuer',
+      enterPin: 'Entrez votre code PIN',
+      loginButton: 'Se connecter',
+      wrongPin: 'Code PIN incorrect',
+      error: 'Erreur de connexion',
+      noMembers: 'Aucun membre trouvé. Veuillez compléter la configuration.',
+      back: 'Retour',
+      logout: 'Se déconnecter',
+      changeProfile: 'Changer de profil',
+      setupPin: 'Configurer un code PIN',
+      removePin: 'Supprimer le code PIN',
+      currentPin: 'Code PIN actuel',
+      newPin: 'Nouveau code PIN (4-6 chiffres)',
+      confirmPin: 'Confirmer le code PIN',
+      pinMismatch: 'Les codes PIN ne correspondent pas',
+      pinSet: 'Code PIN configuré avec succès',
+      pinRemoved: 'Code PIN supprimé',
+      pinError: 'Erreur lors de la configuration du PIN',
+    },
     
     // Configuration initiale
     onboarding: {
@@ -278,6 +301,8 @@ export const translations = {
         personal: 'Personnel',
         other: 'Autre',
       },
+      myTasks: 'Mes tâches',
+      allMembers: 'Toutes',
     },
     
     // Budget
@@ -324,6 +349,14 @@ export const translations = {
       deleteConfirm: 'Supprimer définitivement ce budget ?\n\nToutes les dépenses associées seront également supprimées.',
       deleteBudget: 'Supprimer le budget',
       modifyAmounts: 'Modifiez les montants alloués à chaque catégorie selon vos besoins.',
+      
+      // Member tracking
+      paidBy: 'Payé par',
+      allMembers: 'Tous',
+      noMember: 'Non assigné',
+      byMember: 'Par membre',
+      memberBreakdown: 'Répartition par membre',
+      filterByMember: 'Filtrer par membre',
     },
     
     // Appointments
@@ -629,6 +662,29 @@ export const translations = {
     close: 'Close',
     confirm: 'Confirm',
     loading: 'Loading...',
+
+    // Login
+    login: {
+      title: 'Who are you?',
+      subtitle: 'Select your profile to continue',
+      enterPin: 'Enter your PIN code',
+      loginButton: 'Log in',
+      wrongPin: 'Incorrect PIN code',
+      error: 'Login error',
+      noMembers: 'No members found. Please complete the setup.',
+      back: 'Back',
+      logout: 'Log out',
+      changeProfile: 'Switch profile',
+      setupPin: 'Set up a PIN code',
+      removePin: 'Remove PIN code',
+      currentPin: 'Current PIN code',
+      newPin: 'New PIN code (4-6 digits)',
+      confirmPin: 'Confirm PIN code',
+      pinMismatch: 'PIN codes do not match',
+      pinSet: 'PIN code set successfully',
+      pinRemoved: 'PIN code removed',
+      pinError: 'Error setting up PIN',
+    },
     
     // Initial setup
     onboarding: {
@@ -892,6 +948,8 @@ export const translations = {
         personal: 'Personal',
         other: 'Other',
       },
+      myTasks: 'My tasks',
+      allMembers: 'All',
     },
     
     // Budget
@@ -938,6 +996,14 @@ export const translations = {
       deleteConfirm: 'Permanently delete this budget?\n\nAll associated expenses will also be deleted.',
       deleteBudget: 'Delete budget',
       modifyAmounts: 'Modify the amounts allocated to each category according to your needs.',
+      
+      // Member tracking
+      paidBy: 'Paid by',
+      allMembers: 'All',
+      noMember: 'Unassigned',
+      byMember: 'By member',
+      memberBreakdown: 'Breakdown by member',
+      filterByMember: 'Filter by member',
     },
     
     // Appointments
@@ -1243,6 +1309,29 @@ export const translations = {
     close: 'Schließen',
     confirm: 'Bestätigen',
     loading: 'Wird geladen...',
+
+    // Anmeldung
+    login: {
+      title: 'Wer bist du?',
+      subtitle: 'Wähle dein Profil um fortzufahren',
+      enterPin: 'Gib deinen PIN-Code ein',
+      loginButton: 'Anmelden',
+      wrongPin: 'Falscher PIN-Code',
+      error: 'Anmeldefehler',
+      noMembers: 'Keine Mitglieder gefunden. Bitte Einrichtung abschließen.',
+      back: 'Zurück',
+      logout: 'Abmelden',
+      changeProfile: 'Profil wechseln',
+      setupPin: 'PIN-Code einrichten',
+      removePin: 'PIN-Code entfernen',
+      currentPin: 'Aktueller PIN-Code',
+      newPin: 'Neuer PIN-Code (4-6 Ziffern)',
+      confirmPin: 'PIN-Code bestätigen',
+      pinMismatch: 'PIN-Codes stimmen nicht überein',
+      pinSet: 'PIN-Code erfolgreich eingerichtet',
+      pinRemoved: 'PIN-Code entfernt',
+      pinError: 'Fehler beim Einrichten des PINs',
+    },
     
     // Ersteinrichtung
     onboarding: {
@@ -1506,6 +1595,8 @@ export const translations = {
         personal: 'Persönlich',
         other: 'Andere',
       },
+      myTasks: 'Meine Aufgaben',
+      allMembers: 'Alle',
     },
     
     // Budget
@@ -1552,6 +1643,14 @@ export const translations = {
       deleteConfirm: 'Dieses Budget dauerhaft löschen?\n\nAlle zugehörigen Ausgaben werden ebenfalls gelöscht.',
       deleteBudget: 'Budget löschen',
       modifyAmounts: 'Ändern Sie die Beträge, die jeder Kategorie zugewiesen sind, nach Ihren Bedürfnissen.',
+      
+      // Member tracking
+      paidBy: 'Bezahlt von',
+      allMembers: 'Alle',
+      noMember: 'Nicht zugewiesen',
+      byMember: 'Nach Mitglied',
+      memberBreakdown: 'Aufschlüsselung nach Mitglied',
+      filterByMember: 'Nach Mitglied filtern',
     },
     
     // Appointments
@@ -1857,6 +1956,29 @@ export const translations = {
     close: 'Cerrar',
     confirm: 'Confirmar',
     loading: 'Cargando...',
+
+    // Inicio de sesión
+    login: {
+      title: '¿Quién eres?',
+      subtitle: 'Selecciona tu perfil para continuar',
+      enterPin: 'Introduce tu código PIN',
+      loginButton: 'Iniciar sesión',
+      wrongPin: 'Código PIN incorrecto',
+      error: 'Error de inicio de sesión',
+      noMembers: 'No se encontraron miembros. Por favor completa la configuración.',
+      back: 'Volver',
+      logout: 'Cerrar sesión',
+      changeProfile: 'Cambiar perfil',
+      setupPin: 'Configurar código PIN',
+      removePin: 'Eliminar código PIN',
+      currentPin: 'Código PIN actual',
+      newPin: 'Nuevo código PIN (4-6 dígitos)',
+      confirmPin: 'Confirmar código PIN',
+      pinMismatch: 'Los códigos PIN no coinciden',
+      pinSet: 'Código PIN configurado con éxito',
+      pinRemoved: 'Código PIN eliminado',
+      pinError: 'Error al configurar el PIN',
+    },
     
     // Configuración inicial
     onboarding: {
@@ -2120,6 +2242,8 @@ export const translations = {
         personal: 'Personal',
         other: 'Otro',
       },
+      myTasks: 'Mis tareas',
+      allMembers: 'Todas',
     },
     
     // Presupuesto
@@ -2166,6 +2290,14 @@ export const translations = {
       deleteConfirm: '¿Eliminar permanentemente este presupuesto?\n\nTodos los gastos asociados también se eliminarán.',
       deleteBudget: 'Eliminar presupuesto',
       modifyAmounts: 'Modifique los montos asignados a cada categoría según sus necesidades.',
+      
+      // Member tracking
+      paidBy: 'Pagado por',
+      allMembers: 'Todos',
+      noMember: 'No asignado',
+      byMember: 'Por miembro',
+      memberBreakdown: 'Desglose por miembro',
+      filterByMember: 'Filtrar por miembro',
     },
     
     // Appointments

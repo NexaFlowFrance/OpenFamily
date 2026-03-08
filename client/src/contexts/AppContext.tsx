@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import { scheduleTaskNotification } from '@/lib/notifications';
 import { RepositoryFactory } from '@/repositories/factory';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { AuthContext } from './AuthContext';
 import { logger } from '../lib/logger';
 
 interface AppContextType {
@@ -466,7 +467,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Activer la synchronisation en temps réel via WebSocket
-  const familyId = 'family-default'; // TODO: Récupérer depuis la configuration utilisateur
+  // Read auth context directly - may be null if used outside AuthProvider (e.g. during onboarding)
+  const authContext = useContext(AuthContext);
+  const familyId = authContext?.currentMember?.familyId || 'family-default';
   useRealtimeSync(familyId, reloadData, true);
 
   return (

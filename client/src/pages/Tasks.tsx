@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAddButton } from '@/contexts/AddButtonContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, Check, AlertCircle, Edit2, Archive, TrendingUp } from 'lucide-react';
+import { Trash2, Plus, Check, AlertCircle, Edit2, Archive, TrendingUp, User, Users } from 'lucide-react';
 import { getDayOfWeek, getDayOfMonth, generateTaskOccurrences } from '@/lib/recurrence';
 import { logger } from '../lib/logger';
 import { formatDateOnly, parseDateOnly } from '@/lib/dateOnly';
@@ -34,12 +35,14 @@ export default function Tasks() {
   const { tasks, familyMembers, addTask, updateTask, deleteTask } = useApp();
   const { setAddAction } = useAddButton();
   const { t } = useLanguage();
+  const { currentMember } = useAuth();
   
   const CATEGORIES = getCategoryDefaults(t);
   const FREQUENCIES = getFrequencyDefaults(t);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed' | 'history'>('pending');
+  const [showMyTasksOnly, setShowMyTasksOnly] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [formData, setFormData] = useState<{
     title: string;
@@ -185,7 +188,17 @@ export default function Tasks() {
 
   const { dayTasks, taskIdsInDay } = getDayTasks();
 
+  // Filter by logged-in member if "My tasks" is active
+  const memberFilteredDayTasks = showMyTasksOnly && currentMember
+    ? dayTasks.filter(dt => !dt.task.assignedTo || dt.task.assignedTo === currentMember.id)
+    : dayTasks;
+
   const filteredTasks = tasks.filter(task => {
+    // Per-member filter
+    if (showMyTasksOnly && currentMember) {
+      if (task.assignedTo && task.assignedTo !== currentMember.id) return false;
+    }
+    
     // Exclure les tâches qui sont affichées dans la section du jour sélectionné
     if (taskIdsInDay.has(task.id)) return false;
     
@@ -252,8 +265,8 @@ export default function Tasks() {
     return due < today && dueDate !== todayStr;
   };
 
-  const pendingTasksCount = dayTasks.filter(t => !t.isCompleted).length;
-  const completedTasksCount = dayTasks.filter(t => t.isCompleted).length;
+  const pendingTasksCount = memberFilteredDayTasks.filter(t => !t.isCompleted).length;
+  const completedTasksCount = memberFilteredDayTasks.filter(t => t.isCompleted).length;
 
   return (
     <div className="pb-24">
@@ -314,6 +327,14 @@ export default function Tasks() {
           >
             {t.tasks.all}
           </Button>
+          <Button
+            variant={showMyTasksOnly ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setShowMyTasksOnly(!showMyTasksOnly)}
+          >
+            {showMyTasksOnly ? <User className="w-4 h-4 mr-1" /> : <Users className="w-4 h-4 mr-1" />}
+            {showMyTasksOnly ? t.tasks.myTasks : t.tasks.allMembers}
+          </Button>
         </div>
       </div>
 
@@ -362,7 +383,7 @@ export default function Tasks() {
           </h3>
           {(() => {
             // Trier par heure (avec heure en premier, puis sans heure)
-            const sortedDayTasks = [...dayTasks].sort((a, b) => {
+            const sortedDayTasks = [...memberFilteredDayTasks].sort((a, b) => {
               if (a.occurrence.time && !b.occurrence.time) return -1;
               if (!a.occurrence.time && b.occurrence.time) return 1;
               if (a.occurrence.time && b.occurrence.time) return a.occurrence.time.localeCompare(b.occurrence.time);
@@ -456,7 +477,7 @@ export default function Tasks() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <Card className="w-full rounded-t-2xl p-6 space-y-4 mobile-sheet">
             <h2 className="text-xl font-bold">{editingTask ? t.tasks.editTask : t.tasks.addTask}</h2>
 
             <div>

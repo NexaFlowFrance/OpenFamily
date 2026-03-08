@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, TrendingUp, TrendingDown, BarChart3, PieChart, Edit, Trash, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, BarChart3, PieChart, Edit, Trash, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { formatDateOnly, formatYearMonth } from '@/lib/dateOnly';
 
 const getCategoryLabels = (t: any) => ({
@@ -31,7 +31,7 @@ const categoryColors = {
 };
 
 export default function Budget() {
-  const { budgets, addBudget, updateBudget, deleteBudget, addExpense, deleteExpense } = useApp();
+  const { budgets, addBudget, updateBudget, deleteBudget, addExpense, deleteExpense, familyMembers } = useApp();
   const { setAddAction } = useAddButton();
   const { formatPrice } = useCurrency();
   const { t } = useLanguage();
@@ -42,12 +42,14 @@ export default function Budget() {
   const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
   const [isEditBudgetDialogOpen, setIsEditBudgetDialogOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [filterMemberId, setFilterMemberId] = useState<string | null>(null);
   
   const [newExpense, setNewExpense] = useState({
     category: 'food' as const,
     amount: 0,
     description: '',
     date: formatDateOnly(new Date()),
+    memberId: null as string | null,
   });
 
   const [newBudgetLimits, setNewBudgetLimits] = useState({
@@ -99,12 +101,16 @@ export default function Budget() {
       return;
     }
 
-    addExpense(currentBudget.id, newExpense);
+    addExpense(currentBudget.id, {
+      ...newExpense,
+      memberId: newExpense.memberId || null,
+    });
     setNewExpense({
       category: 'food',
       amount: 0,
       description: '',
       date: formatDateOnly(new Date()),
+      memberId: null,
     });
     setIsExpenseDialogOpen(false);
   };
@@ -279,6 +285,30 @@ export default function Budget() {
                       onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
                     />
                   </div>
+                  {familyMembers.length > 0 && (
+                    <div>
+                      <Label>{t.budget.paidBy}</Label>
+                      <Select
+                        value={newExpense.memberId || '_none'}
+                        onValueChange={(value) => setNewExpense({ ...newExpense, memberId: value === '_none' ? null : value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={t.budget.noMember} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="_none">{t.budget.noMember}</SelectItem>
+                          {familyMembers.map((member) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: member.color || '#888' }} />
+                                {member.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <Button onClick={handleAddExpense} className="w-full">
                     {t.add}
                   </Button>
@@ -491,10 +521,111 @@ export default function Budget() {
             </CardContent>
           </Card>
 
+          {/* Répartition par membre */}
+          {familyMembers.length > 0 && currentBudget.expenses.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  {t.budget.memberBreakdown}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {(() => {
+                    const memberTotals: { [key: string]: number } = {};
+                    let unassignedTotal = 0;
+                    currentBudget.expenses.forEach(exp => {
+                      const amount = Number(exp.amount) || 0;
+                      if (exp.memberId) {
+                        memberTotals[exp.memberId] = (memberTotals[exp.memberId] || 0) + amount;
+                      } else {
+                        unassignedTotal += amount;
+                      }
+                    });
+                    const grandTotal = totals.total || 1;
+                    
+                    return (
+                      <>
+                        {familyMembers.map(member => {
+                          const memberTotal = memberTotals[member.id] || 0;
+                          if (memberTotal === 0) return null;
+                          const percentage = (memberTotal / grandTotal) * 100;
+                          return (
+                            <div key={member.id}>
+                              <div className="flex justify-between text-sm mb-1">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: member.color || '#888' }} />
+                                  <span>{member.name}</span>
+                                </div>
+                                <span className="font-medium">
+                                  {formatPrice(memberTotal)} ({percentage.toFixed(0)}%)
+                                </span>
+                              </div>
+                              <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all"
+                                  style={{ width: `${percentage}%`, backgroundColor: member.color || '#888' }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {unassignedTotal > 0 && (
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-gray-400" />
+                                <span>{t.budget.noMember}</span>
+                              </div>
+                              <span className="font-medium">
+                                {formatPrice(unassignedTotal)} ({((unassignedTotal / grandTotal) * 100).toFixed(0)}%)
+                              </span>
+                            </div>
+                            <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gray-400 rounded-full transition-all"
+                                style={{ width: `${(unassignedTotal / grandTotal) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Liste des dépenses */}
           <Card>
             <CardHeader>
-              <CardTitle>{t.budget.monthExpenses}</CardTitle>
+              <div className="flex justify-between items-center flex-wrap gap-2">
+                <CardTitle>{t.budget.monthExpenses}</CardTitle>
+                {familyMembers.length > 0 && currentBudget.expenses.length > 0 && (
+                  <Select
+                    value={filterMemberId || '_all'}
+                    onValueChange={(value) => setFilterMemberId(value === '_all' ? null : value)}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder={t.budget.filterByMember} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_all">{t.budget.allMembers}</SelectItem>
+                      <SelectItem value="_none">{t.budget.noMember}</SelectItem>
+                      {familyMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: member.color || '#888' }} />
+                            {member.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {currentBudget.expenses.length === 0 ? (
@@ -502,33 +633,50 @@ export default function Budget() {
               ) : (
                 <div className="space-y-2">
                   {currentBudget.expenses
+                    .filter(expense => {
+                      if (!filterMemberId) return true;
+                      if (filterMemberId === '_none') return !expense.memberId;
+                      return expense.memberId === filterMemberId;
+                    })
                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((expense) => (
-                      <div
-                        key={expense.id}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${categoryColors[expense.category]}`} />
-                          <div>
-                            <p className="font-medium">{expense.description}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {categoryLabels[expense.category]} • {new Date(expense.date).toLocaleDateString('fr-FR')}
-                            </p>
+                    .map((expense) => {
+                      const member = expense.memberId ? familyMembers.find(m => m.id === expense.memberId) : null;
+                      return (
+                        <div
+                          key={expense.id}
+                          className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${categoryColors[expense.category]}`} />
+                            <div>
+                              <p className="font-medium">{expense.description}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {categoryLabels[expense.category]} • {new Date(expense.date).toLocaleDateString('fr-FR')}
+                                {member && (
+                                  <>
+                                    {' • '}
+                                    <span className="inline-flex items-center gap-1">
+                                      <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: member.color || '#888' }} />
+                                      {member.name}
+                                    </span>
+                                  </>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold">{formatPrice(expense.amount)}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => deleteExpense(currentBudget.id, expense.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold">{formatPrice(expense.amount)}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteExpense(currentBudget.id, expense.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               )}
             </CardContent>

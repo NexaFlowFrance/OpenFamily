@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency, currencies, getCurrencyName } from '@/contexts/CurrencyContext';
@@ -8,7 +9,7 @@ import { Language, languageNames, languageFlags } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Trash2, Plus, Moon, Sun, Heart, Bell, Globe, Check, DollarSign } from 'lucide-react';
+import { Trash2, Plus, Moon, Sun, Heart, Bell, Globe, Check, DollarSign, LogOut, Lock, Shield } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,6 +33,7 @@ export default function Settings() {
     familyMembers, addFamilyMember, updateFamilyMember, deleteFamilyMember,
     shoppingItems, tasks, appointments, recipes, meals
   } = useApp();
+  const { currentMember, logout, setPin } = useAuth();
   const { theme, toggleTheme, actualTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const { currency, setCurrency } = useCurrency();
@@ -45,6 +47,13 @@ export default function Settings() {
   const [showForm, setShowForm] = useState(false);
   const [selectedMemberHealth, setSelectedMemberHealth] = useState<string | null>(null);
   const [notificationStatus, setNotificationStatus] = useState(getNotificationStatus());
+  const [showPinDialog, setShowPinDialog] = useState(false);
+  const [pinForm, setPinForm] = useState({ newPin: '', confirmPin: '', currentPin: '' });
+  const [pinMessage, setPinMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Check if current member has a PIN
+  const currentMemberData = familyMembers.find(m => m.id === currentMember?.id);
+  const hasPin = !!currentMemberData?.hasPin;
 
   const host = window.location.hostname;
   const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
@@ -63,6 +72,29 @@ export default function Settings() {
   }, []);
 
   // Import/export functions removed
+
+  const handleSavePin = async () => {
+    setPinMessage(null);
+    if (pinForm.newPin && pinForm.newPin !== pinForm.confirmPin) {
+      setPinMessage({ type: 'error', text: t.login.pinMismatch });
+      return;
+    }
+    const result = await setPin(pinForm.newPin, pinForm.currentPin || undefined);
+    if (result.success) {
+      setPinMessage({ type: 'success', text: pinForm.newPin ? t.login.pinSet : t.login.pinRemoved });
+      setPinForm({ newPin: '', confirmPin: '', currentPin: '' });
+      setTimeout(() => {
+        setShowPinDialog(false);
+        setPinMessage(null);
+      }, 1500);
+    } else {
+      setPinMessage({ type: 'error', text: result.error || t.login.pinError });
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   const handleAddMember = () => {
     if (formData.name.trim()) {
@@ -86,8 +118,134 @@ export default function Settings() {
         <h1 className="text-3xl font-bold text-foreground">{t.settings.title}</h1>
       </div>
 
-      {/* Language Section */}
+      {/* Account Section */}
       <div className="p-4 space-y-4">
+        <div>
+          <h2 className="text-lg font-bold text-foreground mb-3">
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-primary" />
+              {currentMember?.name || 'Compte'}
+            </div>
+          </h2>
+          
+          <Card className="p-3 space-y-3">
+            {/* Current user info */}
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                style={{ backgroundColor: currentMember?.color || '#6b8e7f' }}
+              >
+                {currentMember?.name?.charAt(0).toUpperCase() || '?'}
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-foreground">{currentMember?.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {hasPin ? '🔒 PIN' : '🔓 ' + t.login.setupPin}
+                </p>
+              </div>
+            </div>
+
+            {/* PIN Setup */}
+            <Dialog open={showPinDialog} onOpenChange={setShowPinDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full gap-2">
+                  <Lock className="w-4 h-4" />
+                  {hasPin ? t.login.setupPin : t.login.setupPin}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t.login.setupPin}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  {hasPin && (
+                    <div>
+                      <Label>{t.login.currentPin}</Label>
+                      <Input
+                        type="password"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={6}
+                        value={pinForm.currentPin}
+                        onChange={(e) => setPinForm({ ...pinForm, currentPin: e.target.value.replace(/\D/g, '') })}
+                        placeholder="••••"
+                        className="text-center tracking-widest"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <Label>{t.login.newPin}</Label>
+                    <Input
+                      type="password"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      value={pinForm.newPin}
+                      onChange={(e) => setPinForm({ ...pinForm, newPin: e.target.value.replace(/\D/g, '') })}
+                      placeholder="••••"
+                      className="text-center tracking-widest"
+                    />
+                  </div>
+                  {pinForm.newPin && (
+                    <div>
+                      <Label>{t.login.confirmPin}</Label>
+                      <Input
+                        type="password"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={6}
+                        value={pinForm.confirmPin}
+                        onChange={(e) => setPinForm({ ...pinForm, confirmPin: e.target.value.replace(/\D/g, '') })}
+                        placeholder="••••"
+                        className="text-center tracking-widest"
+                      />
+                    </div>
+                  )}
+                  {pinMessage && (
+                    <p className={`text-sm ${pinMessage.type === 'error' ? 'text-destructive' : 'text-green-600'}`}>
+                      {pinMessage.text}
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    {hasPin && (
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          setPinForm({ ...pinForm, newPin: '' });
+                          const result = await setPin('', pinForm.currentPin || undefined);
+                          if (result.success) {
+                            setPinMessage({ type: 'success', text: t.login.pinRemoved });
+                            setTimeout(() => { setShowPinDialog(false); setPinMessage(null); }, 1500);
+                          } else {
+                            setPinMessage({ type: 'error', text: result.error || t.login.pinError });
+                          }
+                        }}
+                        className="flex-1"
+                      >
+                        {t.login.removePin}
+                      </Button>
+                    )}
+                    <Button
+                      onClick={handleSavePin}
+                      disabled={!pinForm.newPin || pinForm.newPin.length < 4}
+                      className="flex-1"
+                    >
+                      {t.save}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Logout */}
+            <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleLogout}>
+              <LogOut className="w-4 h-4" />
+              {t.login.logout}
+            </Button>
+          </Card>
+        </div>
+
+        {/* Language Section */}
         <div>
           <h2 className="text-lg font-bold text-foreground mb-3">{t.settings.language}</h2>
           

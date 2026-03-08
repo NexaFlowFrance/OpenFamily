@@ -153,6 +153,42 @@ async function migrateBudgetExpensesTable(pool: Pool) {
 }
 
 /**
+ * Add pin_hash column to family_members and create sessions table
+ */
+async function migrateAuthTables(pool: Pool) {
+  try {
+    // Add pin_hash column to family_members
+    await pool.query(`
+      ALTER TABLE family_members
+      ADD COLUMN IF NOT EXISTS pin_hash VARCHAR(255)
+    `);
+
+    // Create sessions table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        token VARCHAR(255) PRIMARY KEY,
+        member_id VARCHAR(255) NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+        family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NOT NULL
+      )
+    `);
+
+    // Indexes
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_sessions_member_id ON sessions(member_id)
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)
+    `);
+
+    console.log('✅ Auth tables migrated (pin_hash + sessions)');
+  } catch (error) {
+    console.error('⚠️ Error migrating auth tables:', error);
+  }
+}
+
+/**
  * Initialise la famille par défaut dans la base de données
  */
 async function initializeDefaultFamily(pool: Pool) {
@@ -225,6 +261,9 @@ async function startServer() {
     
     // Create budget_expenses table
     await migrateBudgetExpensesTable(pool);
+
+    // Add auth tables (pin_hash + sessions)
+    await migrateAuthTables(pool);
     
   } catch (error) {
     console.error('❌ Database connection failed:', error);

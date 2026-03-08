@@ -269,7 +269,7 @@ export default function Recipes() {
       {/* Modal détails recette */}
       {selectedRecipe && selectedRecipeData && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setSelectedRecipe(null)}>
-          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <Card className="w-full rounded-t-2xl p-6 space-y-4 mobile-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between">
               <h2 className="text-xl font-bold">{selectedRecipeData.title}</h2>
               <button onClick={() => setSelectedRecipe(null)} className="text-muted-foreground">
@@ -319,7 +319,7 @@ export default function Recipes() {
       {/* Formulaire ajout recette */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <Card className="w-full rounded-t-2xl p-6 space-y-4 mobile-sheet">
             <h2 className="text-xl font-bold">{t.recipes.addRecipe}</h2>
 
             <div>

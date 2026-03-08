@@ -496,7 +496,7 @@ export default function Meals() {
         const dayMeals = meals.filter(m => m.date === selectedDate);
         return (
           <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowDayDetails(false)}>
-            <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <Card className="w-full rounded-t-2xl p-6 space-y-4 mobile-sheet" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold">
                   {selectedDay.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -587,7 +587,7 @@ export default function Meals() {
       {/* Formulaire ajout repas */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowForm(false)}>
-          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <Card className="w-full rounded-t-2xl p-6 space-y-4 mobile-sheet" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-bold">{t.meals.planMeal}</h2>
 
             <div>

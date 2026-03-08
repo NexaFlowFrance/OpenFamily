@@ -73,6 +73,7 @@ export interface FamilyMember {
   role: 'parent' | 'child' | 'other';
   color?: string;
   birthdate?: string;
+  hasPin?: boolean;
   allergies?: string[];
   medicalNotes?: string;
   bloodType?: string;
@@ -155,6 +156,7 @@ export interface Budget {
     amount: number;
     description: string;
     date: string;
+    memberId?: string | null; // ID du membre de la famille qui a fait la dépense
   }[];
   createdAt: string;
 }

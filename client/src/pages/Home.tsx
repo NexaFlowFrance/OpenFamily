@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAddButton } from "@/contexts/AddButtonContext";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useState, useEffect } from "react";
@@ -33,6 +34,7 @@ interface HomeProps {
 export default function Home({ onNavigate }: HomeProps) {
   const { shoppingItems, tasks, appointments, recipes, meals, budgets, familyMembers, addShoppingItem, addTask } = useApp();
   const { t } = useLanguage();
+  const { currentMember } = useAuth();
   const { setAddAction } = useAddButton();
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const [showQuickTask, setShowQuickTask] = useState(false);
@@ -55,6 +57,9 @@ export default function Home({ onNavigate }: HomeProps) {
   const getTodayTasks = () => {
     const dayTasks: Array<{ task: any; isCompleted: boolean }> = [];
     tasks.forEach(task => {
+      // Filter by current member (show unassigned + own tasks)
+      if (currentMember && task.assignedTo && task.assignedTo !== currentMember.id) return;
+      
       const occurrences = task.recurring 
         ? generateTaskOccurrences(task, todayStart, todayEnd)
         : [{ date: task.dueDate, time: task.dueTime }];

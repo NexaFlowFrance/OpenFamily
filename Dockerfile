@@ -28,6 +28,12 @@ RUN pnpm ls cross-spawn glob brace-expansion || true
 FROM deps AS builder
 WORKDIR /app
 
+# Declare build args for Vite environment variables
+ARG VITE_API_URL
+ARG VITE_WS_URL
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_WS_URL=$VITE_WS_URL
+
 # Copy all source code
 COPY . .
 

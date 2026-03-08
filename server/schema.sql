@@ -14,6 +14,22 @@ BEGIN
         ALTER TABLE shopping_items ADD COLUMN IF NOT EXISTS price DECIMAL(10,2) DEFAULT 0;
         ALTER TABLE shopping_items ADD COLUMN IF NOT EXISTS notes TEXT;
     END IF;
+
+    -- Add member_id to budget_expenses for per-member expense tracking
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'budget_expenses'
+    ) THEN
+        ALTER TABLE budget_expenses ADD COLUMN IF NOT EXISTS member_id VARCHAR(255) REFERENCES family_members(id) ON DELETE SET NULL;
+    END IF;
+
+    -- Add pin_hash to family_members for login
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'family_members'
+    ) THEN
+        ALTER TABLE family_members ADD COLUMN IF NOT EXISTS pin_hash VARCHAR(255);
+    END IF;
 END $$;
 
 -- Table: families
@@ -30,6 +46,7 @@ CREATE TABLE IF NOT EXISTS family_members (
     name VARCHAR(255) NOT NULL,
     color VARCHAR(50) NOT NULL,
     health_info JSONB DEFAULT '{}',
+    pin_hash VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -125,6 +142,7 @@ CREATE TABLE IF NOT EXISTS budget_expenses (
     amount DECIMAL(10, 2) NOT NULL,
     description TEXT NOT NULL,
     date DATE NOT NULL,
+    member_id VARCHAR(255) REFERENCES family_members(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -154,6 +172,15 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
     UNIQUE(user_id, endpoint)
 );
 
+-- Table: sessions
+CREATE TABLE IF NOT EXISTS sessions (
+    token VARCHAR(255) PRIMARY KEY,
+    member_id VARCHAR(255) NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    family_id VARCHAR(255) NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL
+);
+
 -- Table: scheduled_notifications
 CREATE TABLE IF NOT EXISTS scheduled_notifications (
     id SERIAL PRIMARY KEY,
@@ -180,12 +207,15 @@ CREATE INDEX IF NOT EXISTS idx_budgets_family_id ON budgets(family_id);
 CREATE INDEX IF NOT EXISTS idx_budgets_month ON budgets(month);
 CREATE INDEX IF NOT EXISTS idx_budget_expenses_family_id ON budget_expenses(family_id);
 CREATE INDEX IF NOT EXISTS idx_budget_expenses_date ON budget_expenses(date);
+CREATE INDEX IF NOT EXISTS idx_budget_expenses_member_id ON budget_expenses(member_id);
 CREATE INDEX IF NOT EXISTS idx_family_configuration_family_id ON family_configuration(family_id);
 CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user_id ON push_subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_push_subscriptions_family_id ON push_subscriptions(family_id);
 CREATE INDEX IF NOT EXISTS idx_scheduled_notifications_scheduled_time ON scheduled_notifications(scheduled_time);
 CREATE INDEX IF NOT EXISTS idx_scheduled_notifications_sent ON scheduled_notifications(sent);
 CREATE INDEX IF NOT EXISTS idx_scheduled_notifications_family_id ON scheduled_notifications(family_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_member_id ON sessions(member_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
 
 -- Données d'exemple (optionnel, pour les tests)
 -- INSERT INTO families (id, name) VALUES ('family-demo', 'Famille Démo');

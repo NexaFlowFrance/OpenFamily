@@ -5,6 +5,7 @@ import { Home as HomeIcon } from 'lucide-react';
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { AddButtonProvider } from "@/contexts/AddButtonContext";
 import Navigation from "./components/Navigation";
@@ -20,26 +21,16 @@ import Meals from "./pages/Meals";
 import Budget from "./pages/Budget";
 import Statistics from "./pages/Statistics";
 import Onboarding from "./pages/Onboarding";
+import Login from "./pages/Login";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useSwipeToHome } from "./hooks/useSwipeToHome";
 import { isOnboardingCompleted } from "./lib/configSync";
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<'home' | 'shopping' | 'tasks' | 'tasks-kanban' | 'appointments' | 'settings' | 'recipes' | 'meals' | 'budget' | 'statistics'>('home');
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
-    // Vérifier si l'onboarding a été complété (vérifie serveur si mode serveur)
-    const checkOnboarding = async () => {
-      const completed = await isOnboardingCompleted();
-      if (!completed) {
-        setShowOnboarding(true);
-      }
-    };
-
-    checkOnboarding();
-
     // Raccourci clavier pour la recherche (Ctrl+K ou Cmd+K)
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -52,19 +43,11 @@ function AppContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-  };
-
   // Hook pour le swipe vers la droite pour revenir à l'accueil
   const swipeProgress = useSwipeToHome({
     onSwipeRight: () => setCurrentPage('home'),
     enabled: currentPage !== 'home' && !showSearch,
   });
-
-  if (showOnboarding) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
@@ -117,6 +100,58 @@ function AppContent() {
   );
 }
 
+function AuthGate() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const completed = await isOnboardingCompleted();
+        if (!completed) {
+          setShowOnboarding(true);
+        }
+      } catch {
+        // If check fails, skip onboarding
+      } finally {
+        setCheckingOnboarding(false);
+      }
+    };
+    checkOnboarding();
+  }, []);
+
+  if (checkingOnboarding || isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  // Show onboarding before login (first-time setup creates family members)
+  if (showOnboarding) {
+    return (
+      <AppProvider>
+        <Onboarding onComplete={() => setShowOnboarding(false)} />
+      </AppProvider>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
+  return (
+    <AppProvider>
+      <AddButtonProvider>
+        <Toaster />
+        <AppContent />
+      </AddButtonProvider>
+    </AppProvider>
+  );
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -124,12 +159,9 @@ function App() {
         <CurrencyProvider>
           <ThemeProvider defaultTheme="light" switchable={true}>
             <TooltipProvider>
-              <AppProvider>
-                <AddButtonProvider>
-                  <Toaster />
-                  <AppContent />
-                </AddButtonProvider>
-              </AppProvider>
+              <AuthProvider>
+                <AuthGate />
+              </AuthProvider>
             </TooltipProvider>
           </ThemeProvider>
         </CurrencyProvider>

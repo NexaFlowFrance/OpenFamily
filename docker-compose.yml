@@ -54,8 +54,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - shared_data:/shared:ro
       - ./server/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-    ports:
-      - "5433:5432"  # Port différent pour éviter conflits
+    expose:
+      - "5432"
     depends_on:
       init:
         condition: service_completed_successfully
@@ -72,10 +72,15 @@ services:
       context: .
       dockerfile: Dockerfile
       target: api
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+        VITE_WS_URL: ${VITE_WS_URL:-}
     container_name: openfamily-app
     restart: unless-stopped
+    expose:
+      - "3000"
     ports:
-      - "3000:3000"
+      - "${OPENFAMILY_PORT:-3000}:3000"
     environment:
       NODE_ENV: production
       PORT: 3000

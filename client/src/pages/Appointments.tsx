@@ -484,7 +484,7 @@ export default function Appointments() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <Card className="w-full rounded-t-2xl p-6 space-y-4 mobile-sheet">
             <h2 className="text-xl font-bold">{t.appointments.addAppointment}</h2>
 
             <div>
@@ -703,7 +703,7 @@ export default function Appointments() {
       {/* Formulaire emploi du temps */}
       {showWorkScheduleForm && selectedMember && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <Card className="w-full rounded-t-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <Card className="w-full rounded-t-2xl p-6 space-y-4 mobile-sheet">
             <h2 className="text-xl font-bold">
               {t.appointments.workScheduleFor} {familyMembers.find(m => m.id === selectedMember)?.name}
             </h2>

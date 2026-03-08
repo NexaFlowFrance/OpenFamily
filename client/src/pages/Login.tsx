@@ -135,7 +135,7 @@ const Login: React.FC = () => {
             </Card>
 
             <p className="absolute bottom-6 text-label-sm text-muted-foreground text-center w-full">
-                &copy; {new Date().getFullYear()} OpenFamily Nexus &middot; Confiance & Sécurité
+                &copy; {new Date().getFullYear()} OpenFamily <a href="https://nexaflow.fr" target="_blank" rel="noopener noreferrer" className="text-nexus-blue hover:underline">NexaFlow</a> &middot; Confiance & Sécurité
             </p>
         </div>
     );

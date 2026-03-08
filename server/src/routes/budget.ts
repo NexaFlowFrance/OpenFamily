@@ -33,27 +33,35 @@ const mapBudgetLimit = (row: any) => ({
 // Get budget entries
 router.get('/entries', async (req: AuthRequest, res) => {
     try {
-        const { start_date, end_date, category } = req.query;
+        const { start_date, end_date, category, assigned_to } = req.query;
 
-        let queryText = 'SELECT * FROM budget_entries WHERE user_id = $1';
+        let queryText = `SELECT be.*, fm.name as assigned_to_name, fm.color as assigned_to_color
+            FROM budget_entries be
+            LEFT JOIN family_members fm ON be.assigned_to = fm.id
+            WHERE be.user_id = $1`;
         const params: any[] = [req.userId];
 
         if (start_date) {
             params.push(start_date);
-            queryText += ` AND date >= $${params.length}`;
+            queryText += ` AND be.date >= $${params.length}`;
         }
 
         if (end_date) {
             params.push(end_date);
-            queryText += ` AND date <= $${params.length}`;
+            queryText += ` AND be.date <= $${params.length}`;
         }
 
         if (category) {
             params.push(category);
-            queryText += ` AND category = $${params.length}`;
+            queryText += ` AND be.category = $${params.length}`;
         }
 
-        queryText += ' ORDER BY date DESC';
+        if (assigned_to) {
+            params.push(assigned_to);
+            queryText += ` AND be.assigned_to = $${params.length}`;
+        }
+
+        queryText += ' ORDER BY be.date DESC';
 
         const result = await query(queryText, params);
         res.json({ success: true, data: result.rows.map(mapBudgetEntry) });
@@ -66,7 +74,7 @@ router.get('/entries', async (req: AuthRequest, res) => {
 // Create budget entry
 router.post('/entries', async (req: AuthRequest, res) => {
     try {
-        const { category, amount, description, date, is_expense } = req.body;
+        const { category, amount, description, date, is_expense, assigned_to } = req.body;
         const parsedAmount = toOptionalNumber(amount);
 
         if (!category || parsedAmount === null || !date) {
@@ -74,12 +82,19 @@ router.post('/entries', async (req: AuthRequest, res) => {
         }
 
         const result = await query(
-            `INSERT INTO budget_entries (user_id, category, amount, description, date, is_expense)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [req.userId, category, parsedAmount, toNullIfEmpty(description), date, Boolean(is_expense)]
+            `INSERT INTO budget_entries (user_id, category, amount, description, date, is_expense, assigned_to)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+            [req.userId, category, parsedAmount, toNullIfEmpty(description), date, Boolean(is_expense), toNullIfEmpty(assigned_to)]
         );
 
-        res.json({ success: true, data: mapBudgetEntry(result.rows[0]) });
+        // Re-fetch with JOIN to get member name/color
+        const full = await query(
+            `SELECT be.*, fm.name as assigned_to_name, fm.color as assigned_to_color
+             FROM budget_entries be LEFT JOIN family_members fm ON be.assigned_to = fm.id
+             WHERE be.id = $1`, [result.rows[0].id]
+        );
+
+        res.json({ success: true, data: mapBudgetEntry(full.rows[0]) });
     } catch (error) {
         console.error('Create budget entry error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -90,12 +105,15 @@ router.post('/entries', async (req: AuthRequest, res) => {
 router.put('/entries/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
-        const { category, amount, description, date, is_expense } = req.body;
+        const { category, amount, description, date, is_expense, assigned_to } = req.body;
         const parsedAmount = amount !== undefined ? toOptionalNumber(amount) : undefined;
 
         if (amount !== undefined && parsedAmount === null) {
             return res.status(400).json({ success: false, error: 'Invalid amount format' });
         }
+
+        // Handle assigned_to: allow explicit null to unassign
+        const assignedToValue = assigned_to === '' || assigned_to === null ? null : assigned_to;
 
         const result = await query(
             `UPDATE budget_entries 
@@ -103,14 +121,16 @@ router.put('/entries/:id', async (req: AuthRequest, res) => {
            amount = COALESCE($2, amount),
            description = COALESCE($3, description),
            date = COALESCE($4, date),
-           is_expense = COALESCE($5, is_expense)
-       WHERE id = $6 AND user_id = $7 RETURNING *`,
+           is_expense = COALESCE($5, is_expense),
+           assigned_to = $6
+       WHERE id = $7 AND user_id = $8 RETURNING *`,
             [
                 toNullIfEmpty(category),
                 parsedAmount,
                 toNullIfEmpty(description),
                 toNullIfEmpty(date),
                 is_expense !== undefined ? Boolean(is_expense) : undefined,
+                assignedToValue !== undefined ? assignedToValue : null,
                 id,
                 req.userId,
             ]
@@ -120,7 +140,14 @@ router.put('/entries/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Budget entry not found' });
         }
 
-        res.json({ success: true, data: mapBudgetEntry(result.rows[0]) });
+        // Re-fetch with JOIN
+        const full = await query(
+            `SELECT be.*, fm.name as assigned_to_name, fm.color as assigned_to_color
+             FROM budget_entries be LEFT JOIN family_members fm ON be.assigned_to = fm.id
+             WHERE be.id = $1`, [id]
+        );
+
+        res.json({ success: true, data: mapBudgetEntry(full.rows[0]) });
     } catch (error) {
         console.error('Update budget entry error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -237,6 +264,23 @@ router.get('/statistics', async (req: AuthRequest, res) => {
             [req.userId, parsedMonth, parsedYear]
         );
 
+        // Per-member spending breakdown
+        const byMember = await query(
+            `SELECT 
+         be.assigned_to,
+         fm.name as member_name,
+         fm.color as member_color,
+         SUM(be.amount) FILTER (WHERE be.is_expense = true) as total_expenses,
+         SUM(be.amount) FILTER (WHERE be.is_expense = false) as total_income
+       FROM budget_entries be
+       LEFT JOIN family_members fm ON be.assigned_to = fm.id
+       WHERE be.user_id = $1 
+         AND EXTRACT(MONTH FROM be.date) = $2 
+         AND EXTRACT(YEAR FROM be.date) = $3
+       GROUP BY be.assigned_to, fm.name, fm.color`,
+            [req.userId, parsedMonth, parsedYear]
+        );
+
         const totalExpenses = parseFloat(totals.rows[0]?.total_expenses || '0');
         const totalIncome = parseFloat(totals.rows[0]?.total_income || '0');
 
@@ -249,6 +293,13 @@ router.get('/statistics', async (req: AuthRequest, res) => {
                 byCategory: result.rows.map((row) => ({
                     category: row.category,
                     category_total: toNumber(row.category_total),
+                })),
+                byMember: byMember.rows.map((row) => ({
+                    assigned_to: row.assigned_to,
+                    member_name: row.member_name || 'Non assigné',
+                    member_color: row.member_color || '#94a3b8',
+                    total_expenses: toNumber(row.total_expenses),
+                    total_income: toNumber(row.total_income),
                 })),
             }
         });

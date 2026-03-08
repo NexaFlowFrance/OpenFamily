@@ -152,6 +152,7 @@ CREATE TABLE budget_entries (
     description TEXT,
     date DATE NOT NULL,
     is_expense BOOLEAN DEFAULT TRUE,
+    assigned_to UUID REFERENCES family_members(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -209,6 +210,7 @@ CREATE INDEX idx_meal_plans_date ON meal_plans(date);
 CREATE INDEX idx_budget_entries_user_id ON budget_entries(user_id);
 CREATE INDEX idx_budget_entries_date ON budget_entries(date);
 CREATE INDEX idx_budget_entries_category ON budget_entries(category);
+CREATE INDEX idx_budget_entries_assigned_to ON budget_entries(assigned_to);
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_is_read ON notifications(is_read);
 

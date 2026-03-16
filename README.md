@@ -193,7 +193,7 @@ Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou un
 
 ## 📄 Licence
 
-MIT License - Voir le fichier LICENSE pour plus de détails.
+GNU Affero General Public License v3.0 (AGPL-3.0-only) - Voir le fichier licence.md pour plus de détails.
 
 ## 🙏 Crédits
 

@@ -13,9 +13,8 @@ interface Task {
     due_date?: string;
     frequency?: string;
     priority?: string;
-    assigned_to?: string;
-    assigned_to_name?: string;
-    assigned_to_color?: string;
+    assigned_to?: string[];
+    assigned_to_members?: Array<{ id: string; name: string; color: string }>;
     completed_at?: string;
     created_at: string;
 }
@@ -71,7 +70,7 @@ const Tasks: React.FC = () => {
         due_date: '',
         frequency: 'Une fois',
         priority: 'Moyenne',
-        assigned_to: '',
+        assigned_to: [] as string[],
     });
 
     useEffect(() => {
@@ -170,7 +169,7 @@ const Tasks: React.FC = () => {
             due_date: task.due_date ? task.due_date.split('T')[0] : '',
             frequency: task.frequency || 'Une fois',
             priority: task.priority || 'Moyenne',
-            assigned_to: task.assigned_to || '',
+            assigned_to: task.assigned_to || [],
         });
         setDialogOpen(true);
     };
@@ -183,7 +182,7 @@ const Tasks: React.FC = () => {
             due_date: '',
             frequency: 'Une fois',
             priority: 'Moyenne',
-            assigned_to: '',
+            assigned_to: [],
         });
     };
 
@@ -191,8 +190,8 @@ const Tasks: React.FC = () => {
         if (filterPriority && task.priority !== filterPriority) return false;
         if (filterStatus === 'completed' && !task.is_completed) return false;
         if (filterStatus === 'pending' && task.is_completed) return false;
-        if (filterMember === '__unassigned__' && task.assigned_to) return false;
-        if (filterMember && filterMember !== '__unassigned__' && task.assigned_to !== filterMember) return false;
+        if (filterMember === '__unassigned__' && task.assigned_to && task.assigned_to.length > 0) return false;
+        if (filterMember && filterMember !== '__unassigned__' && !(task.assigned_to || []).includes(filterMember)) return false;
         return true;
     });
 
@@ -403,18 +402,19 @@ const Tasks: React.FC = () => {
                                                             Échéance: {format(new Date(task.due_date), 'dd MMM yyyy', { locale: fr })}
                                                         </Badge>
                                                     )}
-                                                    {task.assigned_to_name && (
+                                                {(task.assigned_to_members || []).map((member) => (
                                                         <Badge
+                                                            key={member.id}
                                                             variant="primary"
                                                             className="flex items-center gap-1"
                                                         >
                                                             <div
                                                                 className="w-2 h-2 rounded-full"
-                                                                style={{ backgroundColor: task.assigned_to_color }}
+                                                                style={{ backgroundColor: member.color }}
                                                             />
-                                                            {task.assigned_to_name}
+                                                            {member.name}
                                                         </Badge>
-                                                    )}
+                                                    ))}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
@@ -495,17 +495,34 @@ const Tasks: React.FC = () => {
                         <label className="block text-label font-medium text-foreground mb-1.5">
                             Assigner à (optionnel)
                         </label>
-                        <Select
-                            value={formData.assigned_to}
-                            onValueChange={(value) => setFormData({ ...formData, assigned_to: value })}
-                            options={[
-                                { value: '', label: 'Personne' },
-                                ...familyMembers.map((member) => ({
-                                    value: member.id,
-                                    label: member.name,
-                                })),
-                            ]}
-                        />
+                        {familyMembers.length === 0 ? (
+                            <p className="text-body-sm text-muted-foreground">Aucun membre disponible</p>
+                        ) : (
+                            <div className="space-y-2 rounded-input border border-border bg-surface-2/40 p-3">
+                                {familyMembers.map((member) => (
+                                    <label key={member.id} className="flex items-center gap-2 cursor-pointer hover:bg-nexus-background rounded px-1 py-0.5">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.assigned_to.includes(member.id)}
+                                            onChange={() => {
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    assigned_to: prev.assigned_to.includes(member.id)
+                                                        ? prev.assigned_to.filter((id) => id !== member.id)
+                                                        : [...prev.assigned_to, member.id],
+                                                }));
+                                            }}
+                                            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                        />
+                                        <div
+                                            className="w-3 h-3 rounded-full flex-shrink-0"
+                                            style={{ backgroundColor: member.color }}
+                                        />
+                                        <span className="text-body-sm">{member.name}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <Button

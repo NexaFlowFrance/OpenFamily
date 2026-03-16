@@ -4,6 +4,7 @@ import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks } from 'lucide-react
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Dialog } from '../components/ui';
 
 interface ShoppingItem {
     id: string;
@@ -55,6 +56,8 @@ const ShoppingList: React.FC = () => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+    const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         void Promise.all([loadItems(), loadTemplates()]).finally(() => setLoading(false));
@@ -162,7 +165,43 @@ const ShoppingList: React.FC = () => {
         }
     };
 
-    const saveTemplate = async () => {
+    const openTemplateDialog = () => {
+        setError('');
+        if (items.length === 0) {
+            setError('Aucun article dans la liste pour créer un template.');
+            return;
+        }
+        // Pre-select all items by default
+        setSelectedItemIds(new Set(items.map((item) => item.id)));
+        setTemplateDialogOpen(true);
+    };
+
+    const toggleItemSelection = (id: string) => {
+        setSelectedItemIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
+    const selectByCategory = (category: string) => {
+        setSelectedItemIds((prev) => {
+            const next = new Set(prev);
+            items.filter((item) => item.category === category).forEach((item) => next.add(item.id));
+            return next;
+        });
+    };
+
+    const deselectByCategory = (category: string) => {
+        setSelectedItemIds((prev) => {
+            const next = new Set(prev);
+            items.filter((item) => item.category === category).forEach((item) => next.delete(item.id));
+            return next;
+        });
+    };
+
+    const saveTemplateFromDialog = async () => {
         setError('');
         const name = templateName.trim();
         if (!name) {
@@ -171,7 +210,7 @@ const ShoppingList: React.FC = () => {
         }
 
         const templateItems = items
-            .filter((item) => !item.is_checked)
+            .filter((item) => selectedItemIds.has(item.id))
             .map((item) => ({
                 name: item.name,
                 category: item.category,
@@ -182,7 +221,7 @@ const ShoppingList: React.FC = () => {
             }));
 
         if (templateItems.length === 0) {
-            setError('Aucun article non coche a enregistrer dans le template.');
+            setError('Sélectionnez au moins un article pour le template.');
             return;
         }
 
@@ -192,10 +231,12 @@ const ShoppingList: React.FC = () => {
                 items: templateItems,
             });
             setTemplateName('');
+            setTemplateDialogOpen(false);
+            setSelectedItemIds(new Set());
             await loadTemplates();
         } catch (err) {
             console.error('Failed to save template:', err);
-            setError(err instanceof Error ? err.message : 'Impossible d enregistrer le template.');
+            setError(err instanceof Error ? err.message : 'Impossible d\'enregistrer le template.');
         }
     };
 
@@ -349,9 +390,9 @@ const ShoppingList: React.FC = () => {
                             placeholder="Ex: Courses semaine"
                         />
                         <div className="md:col-span-2 flex items-end gap-2">
-                            <Button variant="secondary" className="w-full md:w-auto" onClick={saveTemplate}>
+                            <Button variant="secondary" className="w-full md:w-auto" onClick={openTemplateDialog}>
                                 <Save className="mr-1 h-4 w-4" />
-                                Enregistrer la liste courante
+                                Créer un template
                             </Button>
                         </div>
                     </div>
@@ -463,6 +504,99 @@ const ShoppingList: React.FC = () => {
                     <span className="text-body font-semibold text-foreground">{totalPrice.toFixed(2)} EUR</span>
                 </div>
             </div>
+
+            {/* Template creation dialog */}
+            <Dialog
+                open={templateDialogOpen}
+                onOpenChange={setTemplateDialogOpen}
+                title="Nouveau template de courses"
+                description="Sélectionnez les articles à inclure dans ce template"
+            >
+                <div className="space-y-4">
+                    <Input
+                        label="Nom du template"
+                        value={templateName}
+                        onChange={(e) => setTemplateName(e.target.value)}
+                        placeholder="Ex: Courses semaine, Fruits et légumes..."
+                    />
+                    <div>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-label font-medium text-foreground">
+                                Articles ({selectedItemIds.size}/{items.length} sélectionnés)
+                            </span>
+                            <div className="flex gap-2">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setSelectedItemIds(new Set(items.map((i) => i.id)))}
+                                >
+                                    Tout sélectionner
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setSelectedItemIds(new Set())}
+                                >
+                                    Tout désélectionner
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="max-h-72 overflow-y-auto space-y-3 rounded-input border border-border p-3">
+                            {categories.map((category) => {
+                                const categoryItems = items.filter((item) => item.category === category);
+                                if (categoryItems.length === 0) return null;
+                                const allSelected = categoryItems.every((item) => selectedItemIds.has(item.id));
+                                return (
+                                    <div key={category}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-caption font-semibold text-muted-foreground uppercase tracking-wide">
+                                                {category} ({categoryItems.length})
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => allSelected ? deselectByCategory(category) : selectByCategory(category)}
+                                                className="text-micro text-primary underline hover:no-underline"
+                                            >
+                                                {allSelected ? 'Désélectionner' : 'Tout sélectionner'}
+                                            </button>
+                                        </div>
+                                        <div className="space-y-1 pl-1">
+                                            {categoryItems.map((item) => (
+                                                <label
+                                                    key={item.id}
+                                                    className="flex items-center gap-2 cursor-pointer hover:bg-nexus-background rounded px-1 py-0.5"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedItemIds.has(item.id)}
+                                                        onChange={() => toggleItemSelection(item.id)}
+                                                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                                    />
+                                                    <span className={`text-body-sm ${item.is_checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                                                        {item.name}
+                                                        {item.quantity ? ` · ${item.quantity}${item.unit ? ' ' + item.unit : ''}` : ''}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <Button type="button" variant="secondary" onClick={() => setTemplateDialogOpen(false)}>
+                            Annuler
+                        </Button>
+                        <Button type="button" onClick={saveTemplateFromDialog}>
+                            <Save className="mr-1 h-4 w-4" />
+                            Créer le template
+                        </Button>
+                    </div>
+                </div>
+            </Dialog>
         </div>
     );
 };

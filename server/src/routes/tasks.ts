@@ -6,33 +6,44 @@ import { toNullIfEmpty } from '../lib/normalize';
 const router = Router();
 router.use(authMiddleware);
 
-const ensureMemberBelongsToUser = async (memberId: string | null, userId: string) => {
-    if (!memberId) {
-        return;
+const ensureMembersBelongToUser = async (memberIds: string[], userId: string) => {
+    for (const memberId of memberIds) {
+        const member = await query(
+            'SELECT id FROM family_members WHERE id = $1 AND user_id = $2',
+            [memberId, userId]
+        );
+        if (member.rows.length === 0) {
+            throw new Error('INVALID_MEMBER');
+        }
     }
+};
 
-    const member = await query(
-        'SELECT id FROM family_members WHERE id = $1 AND user_id = $2',
-        [memberId, userId]
+const enrichTasksWithMembers = async (tasks: any[], userId: string) => {
+    if (tasks.length === 0) return tasks;
+    const membersResult = await query(
+        'SELECT id, name, color FROM family_members WHERE user_id = $1',
+        [userId]
     );
-
-    if (member.rows.length === 0) {
-        throw new Error('INVALID_MEMBER');
-    }
+    const membersById = new Map(membersResult.rows.map((m: any) => [m.id, m]));
+    return tasks.map((task) => {
+        const assignedTo: string[] = Array.isArray(task.assigned_to) ? task.assigned_to : [];
+        return {
+            ...task,
+            assigned_to: assignedTo,
+            assigned_to_members: assignedTo.map((id) => membersById.get(id)).filter(Boolean),
+        };
+    });
 };
 
 // Get all tasks
 router.get('/', async (req: AuthRequest, res) => {
     try {
         const result = await query(
-            `SELECT t.*, fm.name as assigned_to_name, fm.color as assigned_to_color
-       FROM tasks t
-       LEFT JOIN family_members fm ON t.assigned_to = fm.id
-       WHERE t.user_id = $1
-       ORDER BY t.due_date ASC NULLS LAST, t.created_at DESC`,
+            'SELECT * FROM tasks WHERE user_id = $1 ORDER BY due_date ASC NULLS LAST, created_at DESC',
             [req.userId]
         );
-        res.json({ success: true, data: result.rows });
+        const tasks = await enrichTasksWithMembers(result.rows, req.userId!);
+        res.json({ success: true, data: tasks });
     } catch (error) {
         console.error('Get tasks error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -49,12 +60,14 @@ router.post('/', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'Title is required' });
         }
 
-        const assignedTo = toNullIfEmpty(assigned_to) as string | null;
-        await ensureMemberBelongsToUser(assignedTo, req.userId!);
+        const assignedTo: string[] = Array.isArray(assigned_to)
+            ? assigned_to.filter((id: any) => typeof id === 'string' && id.trim())
+            : [];
+        await ensureMembersBelongToUser(assignedTo, req.userId!);
 
         const result = await query(
             `INSERT INTO tasks (user_id, title, description, due_date, frequency, priority, assigned_to)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb) RETURNING *`,
             [
                 req.userId,
                 cleanedTitle,
@@ -62,11 +75,12 @@ router.post('/', async (req: AuthRequest, res) => {
                 toNullIfEmpty(due_date),
                 toNullIfEmpty(frequency),
                 toNullIfEmpty(priority),
-                assignedTo,
+                JSON.stringify(assignedTo),
             ]
         );
 
-        res.json({ success: true, data: result.rows[0] });
+        const [enriched] = await enrichTasksWithMembers([result.rows[0]], req.userId!);
+        res.json({ success: true, data: enriched });
     } catch (error) {
         if (error instanceof Error && error.message === 'INVALID_MEMBER') {
             return res.status(400).json({ success: false, error: 'Assigned member not found' });
@@ -116,9 +130,12 @@ router.put('/:id', async (req: AuthRequest, res) => {
         }
 
         if (assigned_to !== undefined) {
-            const assignedTo = toNullIfEmpty(assigned_to) as string | null;
-            await ensureMemberBelongsToUser(assignedTo, req.userId!);
-            pushUpdate('assigned_to', assignedTo);
+            const assignedTo: string[] = Array.isArray(assigned_to)
+                ? assigned_to.filter((mid: any) => typeof mid === 'string' && mid.trim())
+                : [];
+            await ensureMembersBelongToUser(assignedTo, req.userId!);
+            values.push(JSON.stringify(assignedTo));
+            updates.push(`assigned_to = $${values.length}::jsonb`);
         }
 
         if (is_completed !== undefined) {
@@ -143,7 +160,8 @@ router.put('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Task not found' });
         }
 
-        res.json({ success: true, data: result.rows[0] });
+        const [enriched] = await enrichTasksWithMembers([result.rows[0]], req.userId!);
+        res.json({ success: true, data: enriched });
     } catch (error) {
         if (error instanceof Error && error.message === 'INVALID_MEMBER') {
             return res.status(400).json({ success: false, error: 'Assigned member not found' });

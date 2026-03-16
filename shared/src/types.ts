@@ -70,7 +70,8 @@ export interface Task extends BaseEntity {
     due_date?: Date;
     frequency?: TaskFrequency;
     priority?: TaskPriority;
-    assigned_to?: string; // family_member_id
+    assigned_to?: string[]; // array of family_member_id
+    assigned_to_members?: Array<{ id: string; name: string; color: string }>;
     completed_at?: Date;
 }
 
@@ -82,7 +83,8 @@ export interface Appointment extends BaseEntity {
     start_time: Date;
     end_time?: Date;
     location?: string;
-    family_member_id?: string;
+    family_member_ids?: string[]; // array of family_member_id
+    family_members_data?: Array<{ id: string; name: string; color: string }>;
     reminder_30min: boolean;
     reminder_1hour: boolean;
     notes?: string;

@@ -70,7 +70,7 @@ CREATE TABLE tasks (
     due_date TIMESTAMP,
     frequency VARCHAR(50),
     priority VARCHAR(50),
-    assigned_to UUID REFERENCES family_members(id) ON DELETE SET NULL,
+    assigned_to JSONB DEFAULT '[]'::jsonb,
     completed_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -85,7 +85,7 @@ CREATE TABLE appointments (
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP,
     location TEXT,
-    family_member_id UUID REFERENCES family_members(id) ON DELETE SET NULL,
+    family_member_ids JSONB DEFAULT '[]'::jsonb,
     reminder_30min BOOLEAN DEFAULT FALSE,
     reminder_1hour BOOLEAN DEFAULT FALSE,
     notes TEXT,
@@ -198,7 +198,7 @@ CREATE INDEX idx_shopping_items_user_id ON shopping_items(user_id);
 CREATE INDEX idx_shopping_items_category ON shopping_items(category);
 CREATE INDEX idx_tasks_user_id ON tasks(user_id);
 CREATE INDEX idx_tasks_due_date ON tasks(due_date);
-CREATE INDEX idx_tasks_assigned_to ON tasks(assigned_to);
+CREATE INDEX idx_tasks_assigned_to ON tasks USING GIN (assigned_to);
 CREATE INDEX idx_appointments_user_id ON appointments(user_id);
 CREATE INDEX idx_appointments_start_time ON appointments(start_time);
 CREATE INDEX idx_schedule_entries_user_day ON schedule_entries(user_id, day_of_week);

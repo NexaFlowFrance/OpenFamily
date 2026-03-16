@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock } from 'lucide-react';
-import { Card, CardContent, Button, Dialog, Input, Select, Textarea, Badge } from '../components/ui';
+import { Card, CardContent, Button, Dialog, Input, Textarea, Badge } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -13,9 +13,8 @@ interface Appointment {
     start_time: string;
     end_time?: string;
     location?: string;
-    family_member_id?: string;
-    family_member_name?: string;
-    family_member_color?: string;
+    family_member_ids?: string[];
+    family_members_data?: Array<{ id: string; name: string; color: string }>;
     reminder_30min: boolean;
     reminder_1hour: boolean;
     notes?: string;
@@ -72,7 +71,7 @@ const Calendar: React.FC = () => {
         start_time: '',
         end_time: '',
         location: '',
-        family_member_id: '',
+        family_member_ids: [] as string[],
         reminder_30min: false,
         reminder_1hour: false,
         notes: '',
@@ -162,7 +161,7 @@ const Calendar: React.FC = () => {
             start_time: appointment.start_time.slice(0, 16),
             end_time: appointment.end_time ? appointment.end_time.slice(0, 16) : '',
             location: appointment.location || '',
-            family_member_id: appointment.family_member_id || '',
+            family_member_ids: appointment.family_member_ids || [],
             reminder_30min: appointment.reminder_30min,
             reminder_1hour: appointment.reminder_1hour,
             notes: appointment.notes || '',
@@ -190,7 +189,7 @@ const Calendar: React.FC = () => {
             start_time: '',
             end_time: '',
             location: '',
-            family_member_id: '',
+            family_member_ids: [],
             reminder_30min: false,
             reminder_1hour: false,
             notes: '',
@@ -393,10 +392,10 @@ const Calendar: React.FC = () => {
                                                 }}
                                                 className="text-[10px] p-1 rounded truncate hover:shadow-sm transition-shadow"
                                                 style={{
-                                                    backgroundColor: apt.family_member_color
-                                                        ? `${apt.family_member_color}20`
+                                                    backgroundColor: apt.family_members_data?.[0]?.color
+                                                        ? `${apt.family_members_data[0].color}20`
                                                         : 'rgb(var(--primary-soft))',
-                                                    borderLeft: `3px solid ${apt.family_member_color || 'var(--primary-base)'}`,
+                                                    borderLeft: `3px solid ${apt.family_members_data?.[0]?.color || 'var(--primary-base)'}`,
                                                 }}
                                             >
                                                 <div className="font-medium truncate">{apt.title}</div>
@@ -434,7 +433,7 @@ const Calendar: React.FC = () => {
                                 >
                                     <div
                                         className="w-1 h-full rounded-full"
-                                        style={{ backgroundColor: apt.family_member_color || 'var(--primary-base)' }}
+                                        style={{ backgroundColor: apt.family_members_data?.[0]?.color || 'var(--primary-base)' }}
                                     />
                                     <div className="flex-1">
                                         <h4 className="font-semibold text-body mb-1">{apt.title}</h4>
@@ -455,10 +454,14 @@ const Calendar: React.FC = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        {apt.family_member_name && (
-                                            <Badge variant="primary" className="mt-2">
-                                                {apt.family_member_name}
-                                            </Badge>
+                                        {(apt.family_members_data || []).length > 0 && (
+                                            <div className="mt-2 flex flex-wrap gap-1">
+                                                {(apt.family_members_data || []).map((m) => (
+                                                    <Badge key={m.id} variant="primary">
+                                                        {m.name}
+                                                    </Badge>
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -552,19 +555,8 @@ const Calendar: React.FC = () => {
                     />
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Membre de la famille (optionnel)
+                            Membres de la famille (optionnel)
                         </label>
-                        <Select
-                            value={formData.family_member_id}
-                            onValueChange={(value) => setFormData({ ...formData, family_member_id: value })}
-                            options={[
-                                { value: '', label: familyMembers.length > 0 ? 'Aucun' : 'Aucun membre disponible' },
-                                ...familyMembers.map((member) => ({
-                                    value: member.id,
-                                    label: member.name,
-                                })),
-                            ]}
-                        />
                         {familyMembers.length === 0 ? (
                             <div className="mt-2 flex items-center justify-between rounded-input border border-border bg-surface-2 px-3 py-2">
                                 <span className="text-micro text-muted-foreground">
@@ -582,7 +574,32 @@ const Calendar: React.FC = () => {
                                     Aller a Famille
                                 </Button>
                             </div>
-                        ) : null}
+                        ) : (
+                            <div className="space-y-2 rounded-input border border-border bg-surface-2/40 p-3">
+                                {familyMembers.map((member) => (
+                                    <label key={member.id} className="flex items-center gap-2 cursor-pointer hover:bg-nexus-background rounded px-1 py-0.5">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.family_member_ids.includes(member.id)}
+                                            onChange={() => {
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    family_member_ids: prev.family_member_ids.includes(member.id)
+                                                        ? prev.family_member_ids.filter((id) => id !== member.id)
+                                                        : [...prev.family_member_ids, member.id],
+                                                }));
+                                            }}
+                                            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                        />
+                                        <div
+                                            className="w-3 h-3 rounded-full flex-shrink-0"
+                                            style={{ backgroundColor: member.color }}
+                                        />
+                                        <span className="text-body-sm">{member.name}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <label className="block text-label font-medium text-foreground">Rappels</label>

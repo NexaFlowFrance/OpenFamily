@@ -45,7 +45,7 @@ router.get('/', async (req: AuthRequest, res) => {
 
         if (start_date) {
             params.push(start_date);
-            queryText += ` AND start_time >= $${params.length}`;
+            queryText += ` AND COALESCE(end_time, start_time) >= $${params.length}`;
         }
 
         if (end_date) {

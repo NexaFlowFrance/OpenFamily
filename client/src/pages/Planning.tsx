@@ -8,7 +8,9 @@ import {
     ChevronRight,
     Edit2,
     GraduationCap,
+    Pin,
     Plus,
+    Repeat,
     Trash2,
     Users,
 } from 'lucide-react';
@@ -35,6 +37,7 @@ interface PlanningEntry {
     day_of_week: number;
     start_time: string;
     end_time: string;
+    specific_date?: string | null;
     location?: string;
     notes?: string;
 }
@@ -93,6 +96,7 @@ const Planning: React.FC = () => {
     const [selectedType, setSelectedType] = useState('all');
     const [selectedDays, setSelectedDays] = useState<number[]>([1]);
     const [replaceConflicts, setReplaceConflicts] = useState(false);
+    const [thisWeekOnly, setThisWeekOnly] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
@@ -115,7 +119,7 @@ const Planning: React.FC = () => {
     useEffect(() => {
         const bootstrap = async () => {
             try {
-                await Promise.all([loadMembers(), loadEntries()]);
+                await Promise.all([loadMembers(), loadEntries(weekStart)]);
             } finally {
                 setLoading(false);
             }
@@ -146,6 +150,10 @@ const Planning: React.FC = () => {
         }));
     }, [familyMembers, editingEntry, formData.family_member_id]);
 
+    useEffect(() => {
+        loadEntries(weekStart);
+    }, [weekStart]);
+
     const loadMembers = async () => {
         try {
             const response = await api.get<{ success: boolean; data: FamilyMember[] }>('/api/family');
@@ -158,9 +166,10 @@ const Planning: React.FC = () => {
         }
     };
 
-    const loadEntries = async () => {
+    const loadEntries = async (ws?: Date) => {
         try {
-            const response = await api.get<{ success: boolean; data: PlanningEntry[] }>('/api/planning');
+            const weekStartParam = ws ? format(ws, 'yyyy-MM-dd') : format(weekStart, 'yyyy-MM-dd');
+            const response = await api.get<{ success: boolean; data: PlanningEntry[] }>(`/api/planning?week_start=${weekStartParam}`);
             if (response.success) {
                 setEntries(response.data);
             }
@@ -174,6 +183,7 @@ const Planning: React.FC = () => {
         setEditingEntry(null);
         setSelectedDays([dayOfWeek]);
         setReplaceConflicts(false);
+        setThisWeekOnly(false);
         const first = familyMembers[0];
         setFormData({
             family_member_id: first?.id || '',
@@ -198,6 +208,7 @@ const Planning: React.FC = () => {
         setError('');
         setNotice('');
         setReplaceConflicts(false);
+        setThisWeekOnly(Boolean(entry.specific_date));
         setEditingEntry(entry);
         setSelectedDays([entry.day_of_week]);
         setFormData({
@@ -221,7 +232,7 @@ const Planning: React.FC = () => {
         setNotice('');
         try {
             await api.delete(`/api/planning/${entryId}`);
-            await loadEntries();
+            await loadEntries(weekStart);
         } catch (err) {
             console.error('Failed to delete planning entry:', err);
             setError(err instanceof Error ? err.message : 'Impossible de supprimer cet horaire.');
@@ -250,8 +261,8 @@ const Planning: React.FC = () => {
             return;
         }
 
-        if (!formData.start_time || !formData.end_time || formData.end_time <= formData.start_time) {
-            setError("L'heure de fin doit etre apres l'heure de debut.");
+        if (!formData.start_time || !formData.end_time || formData.end_time === formData.start_time) {
+            setError("L'heure de debut et de fin ne peuvent pas etre identiques.");
             return;
         }
 
@@ -272,9 +283,13 @@ const Planning: React.FC = () => {
 
         try {
             if (selectedDays.length === 1) {
+                const specificDate = thisWeekOnly
+                    ? format(addDays(weekStart, selectedDays[0] - 1), 'yyyy-MM-dd')
+                    : null;
                 const payload = {
                     ...basePayload,
                     day_of_week: selectedDays[0],
+                    specific_date: specificDate,
                 };
 
                 if (editingEntry) {
@@ -285,7 +300,7 @@ const Planning: React.FC = () => {
 
                 setDialogOpen(false);
                 resetForm(selectedDays[0]);
-                await loadEntries();
+                await loadEntries(weekStart);
                 setNotice('Horaire enregistre.');
                 return;
             }
@@ -297,12 +312,13 @@ const Planning: React.FC = () => {
                     day_of_week_list: sortDays(selectedDays),
                     replace_conflicts: replaceConflicts,
                     source_entry_id: editingEntry?.id || null,
+                    week_start: thisWeekOnly ? format(weekStart, 'yyyy-MM-dd') : null,
                 }
             );
 
             setDialogOpen(false);
             resetForm(selectedDays[0]);
-            await loadEntries();
+            await loadEntries(weekStart);
 
             if (response.success) {
                 const applied = response.data.created + response.data.updated;
@@ -493,6 +509,9 @@ const Planning: React.FC = () => {
                                                 <div className="mb-1 flex items-center justify-between gap-2">
                                                     <p className="text-micro font-semibold text-foreground">
                                                         {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
+                                                        {entry.end_time < entry.start_time && (
+                                                            <span className="ml-1 text-[10px] text-muted-foreground" title="Se termine le lendemain">(+1j)</span>
+                                                        )}
                                                     </p>
                                                     <div className="flex items-center gap-1">
                                                         <button
@@ -528,6 +547,21 @@ const Planning: React.FC = () => {
                                                             {entry.family_member_name}
                                                         </span>
                                                     </Badge>
+                                                    {entry.specific_date ? (
+                                                        <Badge variant="warning">
+                                                            <span className="inline-flex items-center gap-1">
+                                                                <Pin className="h-3 w-3" />
+                                                                Ponctuel
+                                                            </span>
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary">
+                                                            <span className="inline-flex items-center gap-1">
+                                                                <Repeat className="h-3 w-3" />
+                                                                Recurrent
+                                                            </span>
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                                 {entry.location ? (
                                                     <p className="mt-1 truncate text-micro text-muted-foreground">{entry.location}</p>
@@ -653,14 +687,34 @@ const Planning: React.FC = () => {
                             onChange={(e) => setFormData((prev) => ({ ...prev, start_time: e.target.value }))}
                             required
                         />
-                        <Input
-                            label="Fin"
-                            type="time"
-                            value={formData.end_time}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, end_time: e.target.value }))}
-                            required
-                        />
+                        <div>
+                            <Input
+                                label="Fin"
+                                type="time"
+                                value={formData.end_time}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, end_time: e.target.value }))}
+                                required
+                            />
+                            {formData.end_time && formData.start_time && formData.end_time < formData.start_time && (
+                                <p className="mt-1 text-micro text-muted-foreground">
+                                    Se termine le lendemain (+1 jour)
+                                </p>
+                            )}
+                        </div>
                     </div>
+
+                    <label className="flex items-start gap-2 rounded-input border border-border bg-surface-2/50 px-3 py-2 text-caption text-muted-foreground">
+                        <input
+                            type="checkbox"
+                            checked={thisWeekOnly}
+                            onChange={(e) => setThisWeekOnly(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded border-border"
+                        />
+                        <span>
+                            <strong>Cette semaine uniquement</strong> — L'horaire ne s'applique qu'a la semaine du{' '}
+                            {format(weekStart, 'dd MMM yyyy', { locale: fr })}. Sinon, il sera recurrent chaque semaine.
+                        </span>
+                    </label>
 
                     {selectedDays.length > 1 ? (
                         <label className="flex items-start gap-2 rounded-input border border-border bg-surface-2/50 px-3 py-2 text-caption text-muted-foreground">

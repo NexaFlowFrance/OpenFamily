@@ -103,11 +103,11 @@ CREATE TABLE schedule_entries (
     day_of_week INTEGER NOT NULL CHECK (day_of_week >= 1 AND day_of_week <= 7),
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
+    specific_date DATE,
     location TEXT,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CHECK (end_time > start_time)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Recipes table

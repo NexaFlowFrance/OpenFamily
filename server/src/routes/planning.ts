@@ -68,6 +68,7 @@ const ensureNoOverlap = async (
     dayOfWeek: number,
     startTime: string,
     endTime: string,
+    specificDate: string | null,
     excludeId?: string
 ) => {
     const result = await query(
@@ -76,11 +77,26 @@ const ensureNoOverlap = async (
          WHERE user_id = $1
            AND family_member_id = $2
            AND day_of_week = $3
-           AND start_time < $4::time
-           AND end_time > $5::time
+           AND (
+               CASE
+                   WHEN end_time >= start_time AND $4::time >= $5::time THEN
+                       start_time < $4::time AND end_time > $5::time
+                   WHEN end_time < start_time AND $4::time >= $5::time THEN
+                       $5::time < end_time OR $4::time > start_time
+                   WHEN end_time >= start_time AND $4::time < $5::time THEN
+                       start_time < $4::time OR end_time > $5::time
+                   ELSE
+                       TRUE
+               END
+           )
            AND ($6::uuid IS NULL OR id <> $6::uuid)
+           AND (
+               CASE WHEN $7::date IS NULL THEN specific_date IS NULL
+               ELSE specific_date IS NULL OR specific_date = $7::date
+               END
+           )
          LIMIT 1`,
-        [userId, memberId, dayOfWeek, endTime, startTime, excludeId || null]
+        [userId, memberId, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
     );
 
     if (result.rows.length > 0) {
@@ -99,6 +115,7 @@ const mapEntryRow = (row: any) => ({
     day_of_week: Number(row.day_of_week),
     start_time: row.start_time,
     end_time: row.end_time,
+    specific_date: row.specific_date ? (typeof row.specific_date === 'string' ? row.specific_date.slice(0, 10) : row.specific_date.toISOString().slice(0, 10)) : null,
     location: row.location,
     notes: row.notes,
     created_at: row.created_at,
@@ -119,7 +136,7 @@ const getEntryById = async (id: string, userId: string) => {
 
 router.get('/', async (req: AuthRequest, res) => {
     try {
-        const { member_id, day_of_week, schedule_type } = req.query;
+        const { member_id, day_of_week, schedule_type, week_start } = req.query;
         const params: any[] = [req.userId];
         let queryText = `
             SELECT se.*, fm.name as family_member_name, fm.color as family_member_color, fm.role as family_member_role
@@ -149,6 +166,11 @@ router.get('/', async (req: AuthRequest, res) => {
             }
             params.push(cleanedType);
             queryText += ` AND se.schedule_type = $${params.length}`;
+        }
+
+        if (week_start && typeof week_start === 'string') {
+            params.push(week_start);
+            queryText += ` AND (se.specific_date IS NULL OR (se.specific_date >= $${params.length}::date AND se.specific_date < $${params.length}::date + INTERVAL '7 days'))`;
         }
 
         queryText += ' ORDER BY se.day_of_week ASC, se.start_time ASC';
@@ -192,17 +214,19 @@ router.post('/', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'Invalid schedule_type' });
         }
 
-        if (timeToMinutes(endTime) <= timeToMinutes(startTime)) {
-            return res.status(400).json({ success: false, error: 'end_time must be after start_time' });
+        if (timeToMinutes(endTime) === timeToMinutes(startTime)) {
+            return res.status(400).json({ success: false, error: 'start_time and end_time cannot be the same' });
         }
 
+        const specificDate = toNullIfEmpty(req.body.specific_date) as string | null;
+
         await ensureMemberBelongsToUser(memberId, req.userId!);
-        await ensureNoOverlap(req.userId!, memberId, parsedDay, startTime, endTime);
+        await ensureNoOverlap(req.userId!, memberId, parsedDay, startTime, endTime, specificDate);
 
         const inserted = await query(
             `INSERT INTO schedule_entries (
-                user_id, family_member_id, schedule_type, title, day_of_week, start_time, end_time, location, notes
-            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+                user_id, family_member_id, schedule_type, title, day_of_week, start_time, end_time, specific_date, location, notes
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
             RETURNING id`,
             [
                 req.userId,
@@ -212,6 +236,7 @@ router.post('/', async (req: AuthRequest, res) => {
                 parsedDay,
                 startTime,
                 endTime,
+                specificDate,
                 toNullIfEmpty(location),
                 toNullIfEmpty(notes),
             ]
@@ -249,6 +274,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             notes,
             replace_conflicts,
             source_entry_id,
+            week_start,
         } = req.body;
 
         const memberId = toNullIfEmpty(family_member_id) as string | null;
@@ -297,17 +323,32 @@ router.post('/bulk', async (req: AuthRequest, res) => {
         let createdCount = 0;
         let updatedCount = 0;
 
-        const findOverlaps = async (dayOfWeek: number, excludeId?: string) => {
+        const findOverlaps = async (dayOfWeek: number, specificDate: string | null, excludeId?: string) => {
             const conflict = await client.query(
                 `SELECT id
                  FROM schedule_entries
                  WHERE user_id = $1
                    AND family_member_id = $2
                    AND day_of_week = $3
-                   AND start_time < $4::time
-                   AND end_time > $5::time
-                   AND ($6::uuid IS NULL OR id <> $6::uuid)`,
-                [req.userId, memberId, dayOfWeek, endTime, startTime, excludeId || null]
+                   AND (
+                       CASE
+                           WHEN end_time >= start_time AND $4::time >= $5::time THEN
+                               start_time < $4::time AND end_time > $5::time
+                           WHEN end_time < start_time AND $4::time >= $5::time THEN
+                               $5::time < end_time OR $4::time > start_time
+                           WHEN end_time >= start_time AND $4::time < $5::time THEN
+                               start_time < $4::time OR end_time > $5::time
+                           ELSE
+                               TRUE
+                       END
+                   )
+                   AND ($6::uuid IS NULL OR id <> $6::uuid)
+                   AND (
+                       CASE WHEN $7::date IS NULL THEN specific_date IS NULL
+                       ELSE specific_date IS NULL OR specific_date = $7::date
+                       END
+                   )`,
+                [req.userId, memberId, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
             );
             return conflict.rows.map((row) => row.id as string);
         };
@@ -316,7 +357,11 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             const isSourceDay = sourceEntry && dayOfWeek === Number(sourceEntry.day_of_week);
             const excludeId = isSourceDay ? sourceEntry.id : undefined;
 
-            const overlapIds = await findOverlaps(dayOfWeek, excludeId);
+            const specificDate = weekStartDate
+                ? (() => { const d = new Date(weekStartDate); d.setDate(d.getDate() + dayOfWeek - 1); return d.toISOString().slice(0, 10); })()
+                : null;
+
+            const overlapIds = await findOverlaps(dayOfWeek, specificDate, excludeId);
 
             if (overlapIds.length > 0 && !replaceConflicts) {
                 conflicts.push({ day_of_week: dayOfWeek, conflict_ids: overlapIds });
@@ -329,10 +374,25 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                      WHERE user_id = $1
                        AND family_member_id = $2
                        AND day_of_week = $3
-                       AND start_time < $4::time
-                       AND end_time > $5::time
-                       AND ($6::uuid IS NULL OR id <> $6::uuid)`,
-                    [req.userId, memberId, dayOfWeek, endTime, startTime, excludeId || null]
+                       AND (
+                           CASE
+                               WHEN end_time >= start_time AND $4::time >= $5::time THEN
+                                   start_time < $4::time AND end_time > $5::time
+                               WHEN end_time < start_time AND $4::time >= $5::time THEN
+                                   $5::time < end_time OR $4::time > start_time
+                               WHEN end_time >= start_time AND $4::time < $5::time THEN
+                                   start_time < $4::time OR end_time > $5::time
+                               ELSE
+                                   TRUE
+                           END
+                       )
+                       AND ($6::uuid IS NULL OR id <> $6::uuid)
+                       AND (
+                           CASE WHEN $7::date IS NULL THEN specific_date IS NULL
+                           ELSE specific_date IS NULL OR specific_date = $7::date
+                           END
+                       )`,
+                    [req.userId, memberId, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
                 );
             }
 
@@ -345,9 +405,10 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                          day_of_week = $4,
                          start_time = $5,
                          end_time = $6,
-                         location = $7,
-                         notes = $8
-                     WHERE id = $9 AND user_id = $10`,
+                         specific_date = $7,
+                         location = $8,
+                         notes = $9
+                     WHERE id = $10 AND user_id = $11`,
                     [
                         memberId,
                         cleanedType,
@@ -355,6 +416,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                         dayOfWeek,
                         startTime,
                         endTime,
+                        specificDate,
                         toNullIfEmpty(location),
                         toNullIfEmpty(notes),
                         sourceEntry.id,
@@ -368,8 +430,8 @@ router.post('/bulk', async (req: AuthRequest, res) => {
 
             const inserted = await client.query(
                 `INSERT INTO schedule_entries (
-                    user_id, family_member_id, schedule_type, title, day_of_week, start_time, end_time, location, notes
-                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+                    user_id, family_member_id, schedule_type, title, day_of_week, start_time, end_time, specific_date, location, notes
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
                 RETURNING id`,
                 [
                     req.userId,
@@ -379,6 +441,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                     dayOfWeek,
                     startTime,
                     endTime,
+                    specificDate,
                     toNullIfEmpty(location),
                     toNullIfEmpty(notes),
                 ]
@@ -470,12 +533,16 @@ router.put('/:id', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'Invalid schedule_type' });
         }
 
-        if (timeToMinutes(endTime) <= timeToMinutes(startTime)) {
-            return res.status(400).json({ success: false, error: 'end_time must be after start_time' });
+        if (timeToMinutes(endTime) === timeToMinutes(startTime)) {
+            return res.status(400).json({ success: false, error: 'start_time and end_time cannot be the same' });
         }
 
+        const specificDate = req.body.specific_date !== undefined
+            ? toNullIfEmpty(req.body.specific_date) as string | null
+            : (current.specific_date ? (typeof current.specific_date === 'string' ? current.specific_date.slice(0, 10) : current.specific_date.toISOString().slice(0, 10)) : null);
+
         await ensureMemberBelongsToUser(memberId, req.userId!);
-        await ensureNoOverlap(req.userId!, memberId, parsedDay, startTime, endTime, id);
+        await ensureNoOverlap(req.userId!, memberId, parsedDay, startTime, endTime, specificDate, id);
 
         await query(
             `UPDATE schedule_entries
@@ -485,9 +552,10 @@ router.put('/:id', async (req: AuthRequest, res) => {
                  day_of_week = $4,
                  start_time = $5,
                  end_time = $6,
-                 location = $7,
-                 notes = $8
-             WHERE id = $9 AND user_id = $10`,
+                 specific_date = $7,
+                 location = $8,
+                 notes = $9
+             WHERE id = $10 AND user_id = $11`,
             [
                 memberId,
                 cleanedType,
@@ -495,6 +563,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
                 parsedDay,
                 startTime,
                 endTime,
+                specificDate,
                 req.body.location !== undefined ? toNullIfEmpty(req.body.location) : current.location,
                 req.body.notes !== undefined ? toNullIfEmpty(req.body.notes) : current.notes,
                 id,

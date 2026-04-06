@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge } from '../components/ui';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 
@@ -275,7 +275,12 @@ const Calendar: React.FC = () => {
     const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
     const getAppointmentsForDay = (date: Date) => {
-        return appointments.filter((apt) => isSameDay(new Date(apt.start_time), date));
+        return appointments.filter((apt) => {
+            const start = new Date(apt.start_time);
+            if (!apt.end_time) return isSameDay(start, date);
+            const end = new Date(apt.end_time);
+            return start <= endOfDay(date) && end >= startOfDay(date);
+        });
     };
 
     const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -441,6 +446,9 @@ const Calendar: React.FC = () => {
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />
                                                 {format(new Date(apt.start_time), 'dd MMM yyyy', { locale: fr })}
+                                                {apt.end_time && !isSameDay(new Date(apt.start_time), new Date(apt.end_time)) && (
+                                                    <span> → {format(new Date(apt.end_time), 'dd MMM yyyy', { locale: fr })}</span>
+                                                )}
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <Clock className="w-4 h-4" />

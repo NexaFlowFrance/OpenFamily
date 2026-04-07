@@ -357,8 +357,8 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             const isSourceDay = sourceEntry && dayOfWeek === Number(sourceEntry.day_of_week);
             const excludeId = isSourceDay ? sourceEntry.id : undefined;
 
-            const specificDate = weekStartDate
-                ? (() => { const d = new Date(weekStartDate); d.setDate(d.getDate() + dayOfWeek - 1); return d.toISOString().slice(0, 10); })()
+            const specificDate = week_start
+                ? (() => { const d = new Date(week_start); d.setDate(d.getDate() + dayOfWeek - 1); return d.toISOString().slice(0, 10); })()
                 : null;
 
             const overlapIds = await findOverlaps(dayOfWeek, specificDate, excludeId);

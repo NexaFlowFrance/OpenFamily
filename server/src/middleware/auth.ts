@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
+import { getJwtSecret } from '../config/loadEnv';
 
 export interface AuthRequest extends Request {
     userId?: string;
@@ -9,13 +8,14 @@ export interface AuthRequest extends Request {
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const token = req.headers.authorization?.replace('Bearer ', '');
+        const authHeader = req.headers.authorization;
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
 
         if (!token) {
             return res.status(401).json({ success: false, error: 'No token provided' });
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+        const decoded = jwt.verify(token, getJwtSecret()) as { userId: string };
         req.userId = decoded.userId;
         next();
     } catch (error) {
@@ -24,5 +24,5 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 };
 
 export const generateToken = (userId: string): string => {
-    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
+    return jwt.sign({ userId }, getJwtSecret(), { expiresIn: '7d' });
 };

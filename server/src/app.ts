@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
 import shoppingRoutes from './routes/shopping';
 import tasksRoutes from './routes/tasks';
@@ -12,10 +13,25 @@ import dashboardRoutes from './routes/dashboard';
 import planningRoutes from './routes/planning';
 import dataTransferRoutes from './routes/dataTransfer';
 import { loadEnv } from './config/loadEnv';
+import logger from './lib/logger';
 
 loadEnv();
 
 const app = express();
+const authRateLimitWindowMs = Number.parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || '900000', 10);
+const authRateLimitMax = Number.parseInt(process.env.AUTH_RATE_LIMIT_MAX || '10', 10);
+
+const authRateLimiter = rateLimit({
+    windowMs: Number.isNaN(authRateLimitWindowMs) ? 900000 : authRateLimitWindowMs,
+    max: Number.isNaN(authRateLimitMax) ? 10 : authRateLimitMax,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    message: {
+        success: false,
+        error: 'Too many authentication attempts. Please try again later.'
+    }
+});
 
 // Middleware
 app.use(cors({
@@ -28,7 +44,18 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logging
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    const startedAt = Date.now();
+
+    res.on('finish', () => {
+        logger.info('http.request', {
+            method: req.method,
+            path: req.path,
+            statusCode: res.statusCode,
+            durationMs: Date.now() - startedAt,
+            ip: req.ip,
+        });
+    });
+
     next();
 });
 
@@ -38,6 +65,8 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth/login', authRateLimiter);
+app.use('/api/auth/register', authRateLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/shopping', shoppingRoutes);
 app.use('/api/tasks', tasksRoutes);
@@ -56,8 +85,14 @@ app.use((req, res) => {
 });
 
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('Error:', err);
+app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    logger.error('http.unhandled_error', {
+        method: req.method,
+        path: req.path,
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error && process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+    });
+
     res.status(500).json({ success: false, error: 'Internal server error' });
 });
 

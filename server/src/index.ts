@@ -2,6 +2,7 @@ import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import app from './app';
 import pool, { runMigrations } from './db';
+import logger from './lib/logger';
 
 const PORT = process.env.SERVER_PORT || 3001;
 
@@ -15,7 +16,7 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 const clients = new Map<string, Set<WebSocket>>();
 
 wss.on('connection', (ws: WebSocket) => {
-    console.log('New WebSocket connection');
+    logger.info('ws.connection_open');
 
     let userId: string | null = null;
 
@@ -32,11 +33,13 @@ wss.on('connection', (ws: WebSocket) => {
                 }
                 clients.get(userId!)!.add(ws);
 
-                console.log(`User ${userId!} authenticated via WebSocket`);
+                logger.info('ws.authenticated', { userId });
                 ws.send(JSON.stringify({ type: 'auth', success: true }));
             }
         } catch (error) {
-            console.error('WebSocket message error:', error);
+            logger.warn('ws.message_error', {
+                error: error instanceof Error ? error.message : String(error),
+            });
         }
     });
 
@@ -46,12 +49,14 @@ wss.on('connection', (ws: WebSocket) => {
             if (clients.get(userId)!.size === 0) {
                 clients.delete(userId);
             }
-            console.log(`User ${userId} disconnected from WebSocket`);
+            logger.info('ws.connection_closed', { userId });
         }
     });
 
     ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
+        logger.warn('ws.error', {
+            error: error instanceof Error ? error.message : String(error),
+        });
     });
 });
 
@@ -75,33 +80,38 @@ const startServer = async () => {
         await runMigrations();
         // Test database connection
         await pool.query('SELECT NOW()');
-        console.log('Database connected successfully');
+        logger.info('server.database_connected');
 
         server.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-            console.log(`HTTP: http://localhost:${PORT}`);
-            console.log(`WebSocket: ws://localhost:${PORT}/ws`);
+            logger.info('server.started', {
+                port: Number(PORT),
+                httpUrl: `http://localhost:${PORT}`,
+                wsUrl: `ws://localhost:${PORT}/ws`,
+            });
         });
     } catch (error) {
-        console.error('Failed to start server:', error);
+        logger.error('server.start_failed', {
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error && process.env.NODE_ENV !== 'production' ? error.stack : undefined,
+        });
         process.exit(1);
     }
 };
 
 // Handle graceful shutdown
 process.on('SIGTERM', () => {
-    console.log('SIGTERM received, closing server...');
+    logger.info('server.sigterm_received');
     server.close(() => {
-        console.log('Server closed');
+        logger.info('server.closed');
         pool.end();
         process.exit(0);
     });
 });
 
 process.on('SIGINT', () => {
-    console.log('SIGINT received, closing server...');
+    logger.info('server.sigint_received');
     server.close(() => {
-        console.log('Server closed');
+        logger.info('server.closed');
         pool.end();
         process.exit(0);
     });

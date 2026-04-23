@@ -1,5 +1,6 @@
 import { Pool, types } from 'pg';
 import { loadEnv } from './config/loadEnv';
+import logger from './lib/logger';
 
 loadEnv();
 
@@ -19,19 +20,33 @@ const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-    console.error('Unexpected error on idle client', err);
+    logger.error('db.pool_error', {
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error && process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+    });
     process.exit(-1);
 });
 
 export const query = async (text: string, params?: any[]) => {
     const start = Date.now();
+    const operation = text.trim().split(/\s+/)[0]?.toUpperCase() || 'UNKNOWN';
+
     try {
         const res = await pool.query(text, params);
         const duration = Date.now() - start;
-        console.log('Executed query', { text, duration, rows: res.rowCount });
+        logger.debug('db.query', {
+            operation,
+            durationMs: duration,
+            rows: res.rowCount ?? 0,
+            hasParams: Array.isArray(params) && params.length > 0,
+        });
         return res;
     } catch (error) {
-        console.error('Database query error:', error);
+        logger.error('db.query_error', {
+            operation,
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error && process.env.NODE_ENV !== 'production' ? error.stack : undefined,
+        });
         throw error;
     }
 };
@@ -43,7 +58,7 @@ export const getClient = async () => {
 
     // Set a timeout of 5 seconds, after which we will log this client's last query
     const timeout = setTimeout(() => {
-        console.error('A client has been checked out for more than 5 seconds!');
+        logger.warn('db.client_checkout_timeout', { timeoutMs: 5000 });
     }, 5000);
 
     // Monkey patch the query method to keep track of the last query executed
@@ -61,6 +76,8 @@ export const getClient = async () => {
 
 export const runMigrations = async () => {
     // Keep migrations idempotent so startup works on existing installations.
+    logger.info('db.migrations_start');
+
     const migrations = [
         "ALTER TABLE family_members ADD COLUMN IF NOT EXISTS role VARCHAR(50) NOT NULL DEFAULT 'Autre'",
         'ALTER TABLE family_members ADD COLUMN IF NOT EXISTS medications TEXT',
@@ -110,6 +127,8 @@ export const runMigrations = async () => {
     for (const migration of migrations) {
         await pool.query(migration);
     }
+
+    logger.info('db.migrations_complete', { count: migrations.length });
 };
 
 export default pool;

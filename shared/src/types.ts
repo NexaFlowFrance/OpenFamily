@@ -116,6 +116,14 @@ export interface MealPlan extends BaseEntity {
     notes?: string;
 }
 
+// Budget Entry Share
+export interface BudgetEntryShare {
+    family_member_id: string | null;
+    name: string | null;
+    color: string | null;
+    share_amount: number;
+}
+
 // Budget Entry
 export interface BudgetEntry extends BaseEntity {
     user_id: string;
@@ -124,6 +132,12 @@ export interface BudgetEntry extends BaseEntity {
     description?: string;
     date: Date;
     is_expense: boolean; // true for expense, false for income
+    payer_id: string | null;
+    payer_name: string | null;
+    payer_color: string | null;
+    shares: BudgetEntryShare[];
+    is_reimbursement: boolean;
+    image_url: string | null;
 }
 
 // Budget Limit
@@ -133,6 +147,7 @@ export interface BudgetLimit extends BaseEntity {
     monthly_limit: number;
     month: number; // 1-12
     year: number;
+    family_member_id: string | null;
 }
 
 // Notification
@@ -175,12 +190,36 @@ export interface BudgetStatistics {
     totalExpenses: number;
     totalIncome: number;
     balance: number;
-    byCategory: Record<BudgetCategory, number>;
-    monthlyTrend: Array<{
-        month: string;
-        expenses: number;
-        income: number;
+    byCategory: Record<string, number>;
+    byMember: Array<{
+        family_member_id: string | null;
+        name: string | null;
+        total: number;
+        byCategory: Record<string, number>;
     }>;
+    byPayer: Array<{
+        family_member_id: string | null;
+        name: string | null;
+        total: number;
+    }>;
+    unassignedTotal: number;
+}
+
+export interface BudgetMemberStatistics {
+    totalSpent: number;
+    totalPaid: number;
+    balance: number;
+    byCategory: Record<string, number>;
+    monthlyTrend: Array<{ month: number; spent: number; paid: number }>;
+    limit?: { amount: number; percent: number };
+}
+
+export interface BudgetDebt {
+    from_member_id: string;
+    from_name: string;
+    to_member_id: string;
+    to_name: string;
+    amount: number;
 }
 
 export interface DashboardStats {

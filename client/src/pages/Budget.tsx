@@ -1,37 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle, ChevronLeft, ChevronRight, Paperclip, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Dialog, Input, Select, Textarea, Badge, Tabs } from '../components/ui';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CHART_COLOR_PRESETS } from '../design/colorPresets';
+import BudgetShareSplitter from '../components/budget/BudgetShareSplitter';
+import MemberDashboard from '../components/budget/MemberDashboard';
+import type {
+    BudgetEntry as SharedBudgetEntry,
+    BudgetEntryShare,
+    BudgetLimit as SharedBudgetLimit,
+} from '@openfamily/shared';
 
+// Local minimal FamilyMember (the API returns more fields than the shared interface).
 interface FamilyMember {
     id: string;
     name: string;
     color: string;
+    role?: string;
 }
 
-interface BudgetEntry {
-    id: string;
-    category: string;
+// API-shape budget entry: amount comes as string|number, date as string.
+type BudgetEntry = Omit<SharedBudgetEntry, 'amount' | 'date' | 'category'> & {
     amount: number;
-    description?: string;
     date: string;
-    is_expense: boolean;
-    assigned_to?: string;
-    assigned_to_name?: string;
-    assigned_to_color?: string;
-}
+    category: string;
+    // Legacy / denormalized fields from server response
+    assigned_to?: string | null;
+    assigned_to_name?: string | null;
+    assigned_to_color?: string | null;
+};
 
-interface BudgetLimit {
-    id: string;
+type BudgetLimit = Omit<SharedBudgetLimit, 'category' | 'monthly_limit' | 'month' | 'year'> & {
     category: string;
     monthly_limit: number;
     month: number;
     year: number;
-}
+};
 
 interface BudgetStats {
     totalExpenses: number;
@@ -71,6 +78,41 @@ const toNumber = (value: unknown): number => {
     return 0;
 };
 
+interface ShareInputState {
+    family_member_id: string;
+    share_amount: number;
+}
+
+interface EntryFormState {
+    category: string;
+    amount: string;
+    description: string;
+    date: string;
+    is_expense: boolean;
+    payer_id: string;
+    shares: ShareInputState[];
+    is_reimbursement: boolean;
+    image_url: string | null;
+}
+
+interface LimitFormState {
+    category: string;
+    monthly_limit: string;
+    family_member_id: string | null;
+}
+
+const buildEmptyEntryForm = (): EntryFormState => ({
+    category: 'Alimentation',
+    amount: '',
+    description: '',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    is_expense: true,
+    payer_id: '',
+    shares: [],
+    is_reimbursement: false,
+    image_url: null,
+});
+
 const Budget: React.FC = () => {
     const [entries, setEntries] = useState<BudgetEntry[]>([]);
     const [limits, setLimits] = useState<BudgetLimit[]>([]);
@@ -84,46 +126,67 @@ const Budget: React.FC = () => {
     const [formError, setFormError] = useState('');
     const [limitError, setLimitError] = useState('');
     const [filterMember, setFilterMember] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-    const [formData, setFormData] = useState({
-        category: 'Alimentation',
-        amount: '',
-        description: '',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        is_expense: true,
-        assigned_to: '',
-    });
+    const [formData, setFormData] = useState<EntryFormState>(buildEmptyEntryForm());
 
-    const [limitFormData, setLimitFormData] = useState({
+    const [limitFormData, setLimitFormData] = useState<LimitFormState>({
         category: 'Alimentation',
         monthly_limit: '',
+        family_member_id: null,
     });
 
     useEffect(() => {
         loadFamilyMembers();
     }, []);
 
+    // Debounce search input
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+        return () => clearTimeout(t);
+    }, [searchTerm]);
+
     useEffect(() => {
         loadEntries();
         loadLimits();
         loadStats();
         loadMonthlyStats(currentYear);
-    }, [currentMonth, currentYear]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentMonth, currentYear, filterMember, debouncedSearch]);
 
     const loadEntries = async () => {
         try {
             const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0];
             const endDate = new Date(currentYear, currentMonth, 0).toISOString().split('T')[0];
+            const params = new URLSearchParams({ start_date: startDate, end_date: endDate });
+            if (filterMember && filterMember !== '__unassigned__') {
+                params.append('member_id', filterMember);
+            }
+            if (debouncedSearch.trim() !== '') {
+                params.append('search', debouncedSearch.trim());
+            }
             const response = await api.get<{ success: boolean; data: BudgetEntry[] }>(
-                `/api/budget/entries?start_date=${startDate}&end_date=${endDate}`
+                `/api/budget/entries?${params.toString()}`
             );
             if (response.success) {
-                setEntries(response.data.map((entry) => ({
+                let data = response.data.map((entry) => ({
                     ...entry,
                     amount: toNumber(entry.amount),
-                })));
+                    shares: Array.isArray(entry.shares)
+                        ? entry.shares.map((s: BudgetEntryShare) => ({
+                            ...s,
+                            share_amount: toNumber(s.share_amount),
+                        }))
+                        : [],
+                }));
+                if (filterMember === '__unassigned__') {
+                    data = data.filter((e) => !e.payer_id && (!e.shares || e.shares.length === 0));
+                }
+                setEntries(data);
             }
         } catch (error) {
             console.error('Failed to load entries:', error);
@@ -214,6 +277,32 @@ const Budget: React.FC = () => {
         setCurrentYear(newYear);
     };
 
+    const handleImageUpload = async (file: File) => {
+        const fd = new FormData();
+        fd.append('file', file);
+        // api.post forces JSON content-type, so use fetch directly for multipart
+        const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const token = api.getToken();
+        try {
+            const res = await fetch(`${baseURL}/api/upload`, {
+                method: 'POST',
+                body: fd,
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
+            if (!res.ok) {
+                setFormError("L'upload de l'image a échoué. Vérifiez le format et la taille (max 5 Mo).");
+                return;
+            }
+            const data = await res.json();
+            const url = data?.data?.url ?? data?.url ?? null;
+            if (url) {
+                setFormData((prev) => ({ ...prev, image_url: url }));
+            }
+        } catch {
+            setFormError("L'upload de l'image a échoué.");
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormError('');
@@ -224,10 +313,19 @@ const Budget: React.FC = () => {
         }
 
         try {
-            const payload = {
-                ...formData,
+            const payload: Record<string, unknown> = {
+                category: formData.category,
                 amount: parsedAmount,
+                description: formData.description,
+                date: formData.date,
+                is_expense: formData.is_expense,
+                is_reimbursement: formData.is_reimbursement,
+                payer_id: formData.payer_id || null,
+                image_url: formData.image_url || null,
             };
+            if (formData.shares.length > 0) {
+                payload.shares = formData.shares;
+            }
 
             if (editingEntry) {
                 await api.put(`/api/budget/entries/${editingEntry.id}`, payload);
@@ -255,10 +353,11 @@ const Budget: React.FC = () => {
 
         try {
             await api.post('/api/budget/limits', {
-                ...limitFormData,
+                category: limitFormData.category,
                 monthly_limit: parsedLimit,
                 month: currentMonth,
                 year: currentYear,
+                family_member_id: limitFormData.family_member_id || null,
             });
             setLimitDialogOpen(false);
             resetLimitForm();
@@ -280,6 +379,16 @@ const Budget: React.FC = () => {
         }
     };
 
+    const handleDeleteLimit = async (id: string) => {
+        if (!confirm('Supprimer cette limite ?')) return;
+        try {
+            await api.delete(`/api/budget/limits/${id}`);
+            loadLimits();
+        } catch (error) {
+            console.error('Failed to delete limit:', error);
+        }
+    };
+
     const handleEdit = (entry: BudgetEntry) => {
         setEditingEntry(entry);
         setFormData({
@@ -288,7 +397,15 @@ const Budget: React.FC = () => {
             description: entry.description || '',
             date: entry.date.split('T')[0],
             is_expense: entry.is_expense,
-            assigned_to: entry.assigned_to || '',
+            payer_id: entry.payer_id || '',
+            shares: (entry.shares || [])
+                .filter((s) => s.family_member_id !== null && s.family_member_id !== undefined)
+                .map((s) => ({
+                    family_member_id: s.family_member_id as string,
+                    share_amount: toNumber(s.share_amount),
+                })),
+            is_reimbursement: Boolean(entry.is_reimbursement),
+            image_url: entry.image_url || null,
         });
         setDialogOpen(true);
     };
@@ -296,14 +413,7 @@ const Budget: React.FC = () => {
     const resetForm = () => {
         setEditingEntry(null);
         setFormError('');
-        setFormData({
-            category: 'Alimentation',
-            amount: '',
-            description: '',
-            date: format(new Date(), 'yyyy-MM-dd'),
-            is_expense: true,
-            assigned_to: '',
-        });
+        setFormData(buildEmptyEntryForm());
     };
 
     const resetLimitForm = () => {
@@ -311,6 +421,7 @@ const Budget: React.FC = () => {
         setLimitFormData({
             category: 'Alimentation',
             monthly_limit: '',
+            family_member_id: null,
         });
     };
 
@@ -321,14 +432,11 @@ const Budget: React.FC = () => {
     };
 
     const getCategoryLimit = (category: string) => {
-        return limits.find((l) => l.category === category)?.monthly_limit || 0;
+        return limits.find((l) => l.category === category && !l.family_member_id)?.monthly_limit || 0;
     };
 
-    const filteredEntries = entries.filter((entry) => {
-        if (filterMember === '__unassigned__' && entry.assigned_to) return false;
-        if (filterMember && filterMember !== '__unassigned__' && entry.assigned_to !== filterMember) return false;
-        return true;
-    });
+    // Filtering is mostly done server-side via member_id + search.
+    const filteredEntries = entries;
 
     const chartData = stats?.byCategory.map((cat) => ({
         name: cat.category,
@@ -346,6 +454,8 @@ const Budget: React.FC = () => {
         );
     }
 
+    const memberById = new Map(familyMembers.map((m) => [m.id, m]));
+
     const tabs = [
         {
             value: 'entries',
@@ -353,7 +463,7 @@ const Budget: React.FC = () => {
             content: (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                             {familyMembers.length > 0 && (
                                 <Select
                                     value={filterMember}
@@ -365,6 +475,12 @@ const Budget: React.FC = () => {
                                     ]}
                                 />
                             )}
+                            <Input
+                                type="text"
+                                placeholder="Rechercher..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
                         <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
                             <Plus className="w-4 h-4 mr-2" />
@@ -386,26 +502,53 @@ const Budget: React.FC = () => {
                                     <CardContent className="p-4">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                                <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                     <Badge variant={entry.is_expense ? 'danger' : 'success'}>
                                                         {entry.category}
                                                     </Badge>
-                                                    {entry.assigned_to_name && (
+                                                    {entry.payer_id && (
                                                         <span
-                                                            className="inline-flex items-center gap-1.5 text-label font-medium px-2 py-0.5 rounded-full"
-                                                            style={{
-                                                                backgroundColor: `${entry.assigned_to_color}20`,
-                                                                color: entry.assigned_to_color,
-                                                            }}
+                                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label font-medium text-white"
+                                                            style={{ backgroundColor: entry.payer_color ?? '#888' }}
                                                         >
-                                                            <Users className="w-3 h-3" />
-                                                            {entry.assigned_to_name}
+                                                            💳 {entry.payer_name ?? '(supprimé)'}
                                                         </span>
+                                                    )}
+                                                    {entry.is_reimbursement && (
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-label font-medium bg-purple-600 text-white">
+                                                            Remboursement
+                                                        </span>
+                                                    )}
+                                                    {entry.image_url && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setPreviewImage(entry.image_url ?? null)}
+                                                            title="Voir pièce jointe"
+                                                            className="inline-flex items-center justify-center p-1 rounded hover:bg-surface-2"
+                                                        >
+                                                            <Paperclip className="w-4 h-4" />
+                                                        </button>
                                                     )}
                                                     <span className="text-label text-muted-foreground">
                                                         {format(new Date(entry.date), 'dd MMM yyyy', { locale: fr })}
                                                     </span>
                                                 </div>
+                                                {entry.shares && entry.shares.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mb-1">
+                                                        {entry.shares.map((s, idx) => (
+                                                            <span
+                                                                key={`${entry.id}-share-${idx}`}
+                                                                className="inline-flex items-center px-2 py-0.5 rounded-full text-label"
+                                                                style={{
+                                                                    backgroundColor: `${s.color ?? '#888'}20`,
+                                                                    color: s.color ?? '#666',
+                                                                }}
+                                                            >
+                                                                {(s.name ?? '(supprimé)')}: {toNumber(s.share_amount).toFixed(2)}€
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 {entry.description && (
                                                     <p className="text-body-sm text-muted-foreground mb-2">
                                                         {entry.description}
@@ -599,6 +742,32 @@ const Budget: React.FC = () => {
             ),
         },
         {
+            value: 'members',
+            label: 'Par membre',
+            content: (
+                <MemberDashboard
+                    members={familyMembers}
+                    currentMonth={currentMonth}
+                    currentYear={currentYear}
+                    onSettleDebt={(fromId, toId, amount) => {
+                        setEditingEntry(null);
+                        setFormError('');
+                        setFormData({
+                            ...buildEmptyEntryForm(),
+                            is_expense: false,
+                            is_reimbursement: true,
+                            payer_id: fromId,
+                            shares: [{ family_member_id: toId, share_amount: amount }],
+                            amount: String(amount),
+                            date: new Date().toISOString().slice(0, 10),
+                            description: 'Remboursement',
+                        });
+                        setDialogOpen(true);
+                    }}
+                />
+            ),
+        },
+        {
             value: 'limits',
             label: 'Limites',
             content: (
@@ -658,6 +827,35 @@ const Budget: React.FC = () => {
                             );
                         })}
                     </div>
+
+                    {limits.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Toutes les limites définies</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ul className="space-y-2">
+                                    {limits.map((l) => {
+                                        const memberLabel = l.family_member_id
+                                            ? (memberById.get(l.family_member_id)?.name ?? '(supprimé)')
+                                            : 'Global';
+                                        return (
+                                            <li key={l.id} className="flex items-center justify-between gap-2 px-3 py-2 rounded bg-surface-2">
+                                                <span className="text-body-sm">
+                                                    <span className="font-medium">{l.category}</span>
+                                                    <span className="text-muted-foreground"> · {memberLabel} · </span>
+                                                    <span className="font-medium">{l.monthly_limit.toFixed(2)}€</span>
+                                                </span>
+                                                <Button variant="ghost" size="sm" onClick={() => handleDeleteLimit(l.id)}>
+                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                </Button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             ),
         },
@@ -688,7 +886,10 @@ const Budget: React.FC = () => {
             {/* Entry Dialog */}
             <Dialog
                 open={dialogOpen}
-                onOpenChange={setDialogOpen}
+                onOpenChange={(open) => {
+                    setDialogOpen(open);
+                    if (!open) resetForm();
+                }}
                 title={editingEntry ? 'Modifier l\'entrée' : 'Nouvelle entrée'}
                 description="Remplissez les informations de l'entrée budgétaire"
             >
@@ -703,7 +904,7 @@ const Budget: React.FC = () => {
                             <input
                                 type="radio"
                                 checked={formData.is_expense}
-                                onChange={() => setFormData({ ...formData, is_expense: true })}
+                                onChange={() => setFormData({ ...formData, is_expense: true, is_reimbursement: false })}
                                 className="w-4 h-4"
                             />
                             <span className="text-body-sm">Dépense</span>
@@ -749,23 +950,79 @@ const Budget: React.FC = () => {
                         placeholder="Détails..."
                         rows={2}
                     />
+                    <div>
+                        <label className="block text-label font-medium text-foreground mb-1.5">
+                            Pièce justificative (optionnel)
+                        </label>
+                        {formData.image_url && (
+                            <div className="mb-2 flex items-center gap-2">
+                                <img
+                                    src={formData.image_url.startsWith('http') ? formData.image_url : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${formData.image_url}`}
+                                    alt="preview"
+                                    style={{ height: 60, objectFit: 'cover', borderRadius: 4 }}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setFormData({ ...formData, image_url: null })}
+                                >
+                                    Retirer
+                                </Button>
+                            </div>
+                        )}
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                await handleImageUpload(file);
+                            }}
+                            className="text-body-sm"
+                        />
+                    </div>
                     {familyMembers.length > 0 && (
                         <div>
                             <label className="block text-label font-medium text-foreground mb-1.5">
-                                Attribuer à (optionnel)
+                                Payé par
                             </label>
                             <Select
-                                value={formData.assigned_to}
-                                onValueChange={(value) => setFormData({ ...formData, assigned_to: value })}
+                                value={formData.payer_id}
+                                onValueChange={(value) => setFormData({ ...formData, payer_id: value })}
                                 options={[
-                                    { value: '', label: 'Non assigné' },
+                                    { value: '', label: '-- Non assigné --' },
                                     ...familyMembers.map((m) => ({ value: m.id, label: m.name })),
                                 ]}
                             />
                         </div>
                     )}
+                    {familyMembers.length > 0 && (
+                        <div>
+                            <label className="block text-label font-medium text-foreground mb-1.5">
+                                Bénéficiaires
+                            </label>
+                            <BudgetShareSplitter
+                                members={familyMembers.map((m) => ({ id: m.id, name: m.name, color: m.color }))}
+                                totalAmount={parsePositiveAmount(formData.amount) || 0}
+                                value={formData.shares}
+                                onChange={(shares) => setFormData({ ...formData, shares })}
+                            />
+                        </div>
+                    )}
+                    {!formData.is_expense && (
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.is_reimbursement}
+                                onChange={(e) => setFormData({ ...formData, is_reimbursement: e.target.checked })}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-body-sm">Remboursement</span>
+                        </label>
+                    )}
                     <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
+                        <Button type="button" variant="secondary" onClick={() => { setDialogOpen(false); resetForm(); }}>
                             Annuler
                         </Button>
                         <Button type="submit">{editingEntry ? 'Enregistrer' : 'Créer'}</Button>
@@ -794,6 +1051,21 @@ const Budget: React.FC = () => {
                             options={CATEGORIES}
                         />
                     </div>
+                    {familyMembers.length > 0 && (
+                        <div>
+                            <label className="block text-label font-medium text-foreground mb-1.5">
+                                Membre (optionnel)
+                            </label>
+                            <Select
+                                value={limitFormData.family_member_id || ''}
+                                onValueChange={(value) => setLimitFormData({ ...limitFormData, family_member_id: value || null })}
+                                options={[
+                                    { value: '', label: '-- Global (toutes les catégories) --' },
+                                    ...familyMembers.map((m) => ({ value: m.id, label: m.name })),
+                                ]}
+                            />
+                        </div>
+                    )}
                     <Input
                         label="Limite mensuelle (€)"
                         type="number"
@@ -811,6 +1083,30 @@ const Budget: React.FC = () => {
                     </div>
                 </form>
             </Dialog>
+
+            {/* Image preview modal */}
+            {previewImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+                    onClick={() => setPreviewImage(null)}
+                >
+                    <div className="relative max-w-3xl max-h-[90vh] p-4" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            type="button"
+                            onClick={() => setPreviewImage(null)}
+                            className="absolute -top-2 -right-2 z-10 rounded-full bg-white p-1 shadow"
+                            title="Fermer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        <img
+                            src={previewImage.startsWith('http') ? previewImage : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${previewImage}`}
+                            alt="Pièce jointe"
+                            className="max-w-full max-h-[80vh] rounded shadow-lg object-contain"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

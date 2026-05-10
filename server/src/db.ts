@@ -122,6 +122,66 @@ export const runMigrations = async () => {
         'ALTER TABLE schedule_entries DROP CONSTRAINT IF EXISTS schedule_entries_check',
         'ALTER TABLE schedule_entries ADD COLUMN IF NOT EXISTS specific_date DATE',
         'ALTER TABLE schedule_entries ADD COLUMN IF NOT EXISTS location TEXT',
+
+        // Budget multi-member split feature
+        `CREATE TABLE IF NOT EXISTS budget_entry_shares (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          budget_entry_id UUID NOT NULL REFERENCES budget_entries(id) ON DELETE CASCADE,
+          family_member_id UUID REFERENCES family_members(id) ON DELETE SET NULL,
+          share_amount DECIMAL(10, 2) NOT NULL CHECK (share_amount >= 0),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_budget_entry_shares_entry ON budget_entry_shares(budget_entry_id)',
+        'CREATE INDEX IF NOT EXISTS idx_budget_entry_shares_member ON budget_entry_shares(family_member_id)',
+        'ALTER TABLE budget_entries ADD COLUMN IF NOT EXISTS payer_id UUID REFERENCES family_members(id) ON DELETE SET NULL',
+        'CREATE INDEX IF NOT EXISTS idx_budget_entries_payer ON budget_entries(payer_id)',
+        'ALTER TABLE budget_entries ADD COLUMN IF NOT EXISTS is_reimbursement BOOLEAN NOT NULL DEFAULT FALSE',
+        'ALTER TABLE budget_entries ADD COLUMN IF NOT EXISTS image_url TEXT',
+        'ALTER TABLE budget_limits ADD COLUMN IF NOT EXISTS family_member_id UUID REFERENCES family_members(id) ON DELETE CASCADE',
+        // Backfill: existing single-assignee rows become a full-amount share (the full amount is correct
+        // because prior model had no split concept — one person = one expense = full amount)
+        `INSERT INTO budget_entry_shares (budget_entry_id, family_member_id, share_amount)
+        SELECT be.id, be.assigned_to, be.amount
+        FROM budget_entries be
+        WHERE be.assigned_to IS NOT NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM budget_entry_shares s WHERE s.budget_entry_id = be.id
+          )`,
+        'ALTER TABLE budget_limits DROP CONSTRAINT IF EXISTS budget_limits_user_id_category_month_year_key',
+        `CREATE UNIQUE INDEX IF NOT EXISTS uq_budget_limits_global
+          ON budget_limits(user_id, category, month, year)
+          WHERE family_member_id IS NULL`,
+        `CREATE UNIQUE INDEX IF NOT EXISTS uq_budget_limits_per_member
+          ON budget_limits(user_id, category, month, year, family_member_id)
+          WHERE family_member_id IS NOT NULL`,
+        `DO $$ BEGIN
+          CREATE OR REPLACE FUNCTION update_updated_at_column()
+          RETURNS TRIGGER AS $trigger$
+          BEGIN NEW.updated_at = CURRENT_TIMESTAMP; RETURN NEW; END;
+          $trigger$ language 'plpgsql';
+        END $$`,
+        `DO $$ BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_budget_entries_updated_at') THEN
+            CREATE TRIGGER update_budget_entries_updated_at
+              BEFORE UPDATE ON budget_entries
+              FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+          END IF;
+        END $$`,
+        `DO $$ BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_budget_entry_shares_updated_at') THEN
+            CREATE TRIGGER update_budget_entry_shares_updated_at
+              BEFORE UPDATE ON budget_entry_shares
+              FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+          END IF;
+        END $$`,
+        `DO $$ BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_budget_limits_updated_at') THEN
+            CREATE TRIGGER update_budget_limits_updated_at
+              BEFORE UPDATE ON budget_limits
+              FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+          END IF;
+        END $$`,
     ];
 
     for (const migration of migrations) {

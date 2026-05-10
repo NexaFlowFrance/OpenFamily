@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
+import uploadRouter from './routes/upload';
 import shoppingRoutes from './routes/shopping';
 import tasksRoutes from './routes/tasks';
 import appointmentsRoutes from './routes/appointments';
@@ -32,6 +34,9 @@ const authRateLimiter = rateLimit({
         error: 'Too many authentication attempts. Please try again later.'
     }
 });
+
+// Static file serving
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Middleware
 app.use(cors({
@@ -78,6 +83,7 @@ app.use('/api/family', familyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/planning', planningRoutes);
 app.use('/api/data', dataTransferRoutes);
+app.use('/api/upload', uploadRouter);
 
 // 404 handler
 app.use((req, res) => {

@@ -153,6 +153,19 @@ CREATE TABLE budget_entries (
     date DATE NOT NULL,
     is_expense BOOLEAN DEFAULT TRUE,
     assigned_to UUID REFERENCES family_members(id) ON DELETE SET NULL,
+    payer_id UUID REFERENCES family_members(id) ON DELETE SET NULL,
+    is_reimbursement BOOLEAN NOT NULL DEFAULT FALSE,
+    image_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Budget Entry Shares table (multi-member expense splits)
+CREATE TABLE budget_entry_shares (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    budget_entry_id UUID NOT NULL REFERENCES budget_entries(id) ON DELETE CASCADE,
+    family_member_id UUID REFERENCES family_members(id) ON DELETE SET NULL,
+    share_amount DECIMAL(10, 2) NOT NULL CHECK (share_amount >= 0),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -165,9 +178,9 @@ CREATE TABLE budget_limits (
     monthly_limit DECIMAL(10, 2) NOT NULL,
     month INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
     year INTEGER NOT NULL,
+    family_member_id UUID REFERENCES family_members(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, category, month, year)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Notifications table
@@ -211,6 +224,11 @@ CREATE INDEX idx_budget_entries_user_id ON budget_entries(user_id);
 CREATE INDEX idx_budget_entries_date ON budget_entries(date);
 CREATE INDEX idx_budget_entries_category ON budget_entries(category);
 CREATE INDEX idx_budget_entries_assigned_to ON budget_entries(assigned_to);
+CREATE INDEX idx_budget_entries_payer ON budget_entries(payer_id);
+CREATE INDEX idx_budget_entry_shares_entry ON budget_entry_shares(budget_entry_id);
+CREATE INDEX idx_budget_entry_shares_member ON budget_entry_shares(family_member_id);
+CREATE UNIQUE INDEX uq_budget_limits_global ON budget_limits(user_id, category, month, year) WHERE family_member_id IS NULL;
+CREATE UNIQUE INDEX uq_budget_limits_per_member ON budget_limits(user_id, category, month, year, family_member_id) WHERE family_member_id IS NOT NULL;
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_is_read ON notifications(is_read);
 
@@ -233,4 +251,6 @@ CREATE TRIGGER update_schedule_entries_updated_at BEFORE UPDATE ON schedule_entr
 CREATE TRIGGER update_recipes_updated_at BEFORE UPDATE ON recipes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_meal_plans_updated_at BEFORE UPDATE ON meal_plans FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_budget_entries_updated_at BEFORE UPDATE ON budget_entries FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_budget_entry_shares_updated_at BEFORE UPDATE ON budget_entry_shares FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_budget_limits_updated_at BEFORE UPDATE ON budget_limits FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_notifications_updated_at BEFORE UPDATE ON notifications FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

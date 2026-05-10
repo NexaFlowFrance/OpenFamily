@@ -224,9 +224,9 @@ const Budget: React.FC = () => {
                     totalExpenses: toNumber(response.data.totalExpenses),
                     totalIncome: toNumber(response.data.totalIncome),
                     balance: toNumber(response.data.balance),
-                    byCategory: (response.data.byCategory || []).map((item) => ({
-                        category: item.category,
-                        category_total: toNumber(item.category_total),
+                    byCategory: Object.entries(response.data.byCategory || {}).map(([category, total]) => ({
+                        category,
+                        category_total: typeof total === 'number' ? total : parseFloat(String(total)),
                     })),
                     byMember: (response.data.byMember || []).map((item) => ({
                         ...item,

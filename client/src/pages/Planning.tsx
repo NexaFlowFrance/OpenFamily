@@ -18,7 +18,7 @@ import { addDays, addWeeks, format, startOfWeek, subWeeks } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Dialog, Input, Select, Textarea } from '../components/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle, Dialog, Input, Select, Textarea } from '../components/ui';
 
 interface FamilyMember {
     id: string;
@@ -507,67 +507,62 @@ const Planning: React.FC = () => {
                                         const typeMeta = entryTypeBadge(entry.schedule_type);
                                         const TypeIcon = typeMeta.icon;
                                         return (
-                                            <div key={entry.id} className="rounded-input border border-border bg-card p-2 shadow-surface">
-                                                <div className="mb-1 flex items-center justify-between gap-2">
-                                                    <p className="text-micro font-semibold text-foreground">
-                                                        {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
-                                                        {entry.end_time < entry.start_time && (
-                                                            <span className="ml-1 text-[10px] text-muted-foreground" title="Se termine le lendemain">(+1j)</span>
-                                                        )}
-                                                    </p>
-                                                    <div className="flex items-center gap-1">
-                                                        <button
-                                                            type="button"
-                                                            className="rounded p-1 text-muted-foreground hover:bg-surface-2 hover:text-foreground"
-                                                            onClick={() => handleEdit(entry)}
-                                                        >
-                                                            <Edit2 className="h-3.5 w-3.5" />
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                                                            onClick={() => handleDelete(entry.id)}
-                                                        >
-                                                            <Trash2 className="h-3.5 w-3.5" />
-                                                        </button>
+                                            <div
+                                                key={entry.id}
+                                                className="overflow-hidden rounded-input border border-border bg-card shadow-surface"
+                                                style={{ borderLeftColor: entry.family_member_color, borderLeftWidth: 3 }}
+                                            >
+                                                <div className="p-1.5">
+                                                    {/* Time + actions row */}
+                                                    <div className="flex items-center justify-between gap-1">
+                                                        <p className="text-[10px] font-semibold leading-tight text-foreground">
+                                                            {formatTime(entry.start_time)}
+                                                            <span className="text-muted-foreground">–</span>
+                                                            {formatTime(entry.end_time)}
+                                                            {entry.end_time < entry.start_time && (
+                                                                <span className="ml-0.5 text-[9px] text-muted-foreground">+1j</span>
+                                                            )}
+                                                        </p>
+                                                        <div className="flex flex-shrink-0 items-center">
+                                                            {entry.specific_date
+                                                                ? <Pin className="mr-0.5 h-2.5 w-2.5 text-amber-500" title="Ponctuel" />
+                                                                : <Repeat className="mr-0.5 h-2.5 w-2.5 text-muted-foreground/50" title="Récurrent" />
+                                                            }
+                                                            <button
+                                                                type="button"
+                                                                className="rounded p-0.5 text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+                                                                onClick={() => handleEdit(entry)}
+                                                            >
+                                                                <Edit2 className="h-3 w-3" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                                                onClick={() => handleDelete(entry.id)}
+                                                            >
+                                                                <Trash2 className="h-3 w-3" />
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <p className="truncate text-caption font-medium">{entry.title}</p>
-                                                <div className="mt-1 flex flex-wrap items-center gap-1">
-                                                    <Badge variant={typeMeta.variant}>
-                                                        <span className="inline-flex items-center gap-1">
-                                                            <TypeIcon className="h-3 w-3" />
-                                                            {typeMeta.label}
-                                                        </span>
-                                                    </Badge>
-                                                    <Badge variant="default">
-                                                        <span className="inline-flex items-center gap-1">
-                                                            <span
-                                                                className="h-2 w-2 rounded-full"
-                                                                style={{ backgroundColor: entry.family_member_color }}
-                                                            />
+                                                    {/* Title */}
+                                                    <p className="mt-0.5 truncate text-[11px] font-medium leading-tight text-foreground">
+                                                        {entry.title}
+                                                    </p>
+                                                    {/* Type + member row */}
+                                                    <div className="mt-1 flex items-center gap-1">
+                                                        <TypeIcon className="h-2.5 w-2.5 flex-shrink-0 text-muted-foreground" />
+                                                        <span
+                                                            className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                                                            style={{ backgroundColor: entry.family_member_color }}
+                                                        />
+                                                        <span className="truncate text-[10px] text-muted-foreground">
                                                             {entry.family_member_name}
                                                         </span>
-                                                    </Badge>
-                                                    {entry.specific_date ? (
-                                                        <Badge variant="warning">
-                                                            <span className="inline-flex items-center gap-1">
-                                                                <Pin className="h-3 w-3" />
-                                                                Ponctuel
-                                                            </span>
-                                                        </Badge>
-                                                    ) : (
-                                                        <Badge variant="secondary">
-                                                            <span className="inline-flex items-center gap-1">
-                                                                <Repeat className="h-3 w-3" />
-                                                                Recurrent
-                                                            </span>
-                                                        </Badge>
-                                                    )}
+                                                    </div>
+                                                    {entry.location ? (
+                                                        <p className="mt-0.5 truncate text-[10px] text-muted-foreground">{entry.location}</p>
+                                                    ) : null}
                                                 </div>
-                                                {entry.location ? (
-                                                    <p className="mt-1 truncate text-micro text-muted-foreground">{entry.location}</p>
-                                                ) : null}
                                             </div>
                                         );
                                     })

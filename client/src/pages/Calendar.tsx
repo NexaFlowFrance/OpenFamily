@@ -645,11 +645,31 @@ const Calendar: React.FC = () => {
                         placeholder="Notes supplémentaires..."
                         rows={2}
                     />
-                    <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
-                            Annuler
-                        </Button>
-                        <Button type="submit">{editingAppointment ? 'Enregistrer' : 'Créer'}</Button>
+                    <div className="flex items-center justify-between gap-3 pt-4">
+                        <div>
+                            {editingAppointment && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                    onClick={async () => {
+                                        setDialogOpen(false);
+                                        await handleDelete(editingAppointment.id);
+                                        resetForm();
+                                    }}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Supprimer
+                                </Button>
+                            )}
+                        </div>
+                        <div className="flex gap-3">
+                            <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
+                                Annuler
+                            </Button>
+                            <Button type="submit">{editingAppointment ? 'Enregistrer' : 'Créer'}</Button>
+                        </div>
                     </div>
                 </form>
             </Dialog>

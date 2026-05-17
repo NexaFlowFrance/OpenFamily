@@ -161,7 +161,12 @@ export const getAiConfig = (): AiConfig => {
             heavy: process.env.AI_MODEL_HEAVY?.trim() || providerDefaults.heavy,
             vision: process.env.AI_MODEL_VISION?.trim() || providerDefaults.vision,
         },
-        requestTimeoutMs: parseIntEnv(process.env.AI_REQUEST_TIMEOUT_MS, 30_000),
+        // 60s default: heavy structured outputs (vacation plan day-by-day,
+        // weekly meal analysis) routinely need 35-50s on Gemini 2.5-flash-lite
+        // for a single attempt. 30s was too tight and produced spurious
+        // TIMEOUTs; 60s × 3 retries = 3 min worst-case still bounds latency
+        // when the provider is actually down.
+        requestTimeoutMs: parseIntEnv(process.env.AI_REQUEST_TIMEOUT_MS, 60_000),
         streamingEnabled: parseBoolEnv(process.env.AI_STREAMING_ENABLED, true),
         monthlyTokenLimitPerUser: parseIntEnv(
             process.env.AI_MONTHLY_TOKEN_LIMIT_PER_USER,

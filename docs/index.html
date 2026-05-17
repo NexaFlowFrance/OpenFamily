@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenFamily — Gestion familiale open source</title>
+  <meta name="description" content="OpenFamily est une application de gestion familiale complète, open source et auto-hébergeable. Courses, tâches, calendrier, budget, recettes — tout en un." />
+  <meta property="og:title" content="OpenFamily — Gestion familiale open source" />
+  <meta property="og:description" content="Gardez le contrôle total de vos données familiales avec une application auto-hébergée, open source et pensée pour la vie de famille." />
+  <meta property="og:image" content="https://nexaflowfrance.github.io/OpenFamily/openfamily-og.png" />
+  <link rel="icon" href="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #ff5757;
+      --blue-light: #ff7575;
+      --blue-dim: rgba(255,87,87,0.12);
+      --bg: #0b0f1a;
+      --surface: #111827;
+      --surface-2: #1a2236;
+      --border: rgba(255,255,255,0.07);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --radius: 14px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+      background: rgba(11,15,26,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 600; font-size: 1.05rem; }
+    .nav-brand img { width: 30px; height: 30px; }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .btn-nav {
+      background: var(--blue); color: #fff; padding: 0.45rem 1.1rem;
+      border-radius: 8px; font-size: 0.875rem; font-weight: 500;
+      text-decoration: none; transition: background 0.2s;
+    }
+    .btn-nav:hover { background: var(--blue-light); color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 2rem 4rem;
+      position: relative;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(255,87,87,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--blue-dim); border: 1px solid rgba(255,87,87,0.3);
+      color: var(--blue-light); padding: 0.3rem 0.85rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 500; margin-bottom: 2rem;
+      text-decoration: none;
+    }
+    .hero-badge:hover { background: rgba(255,87,87,0.2); }
+    .hero img.logo {
+      width: 90px; height: 90px; margin-bottom: 1.75rem;
+      filter: drop-shadow(0 0 24px rgba(255,87,87,0.45));
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800; line-height: 1.1; letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 span { color: var(--blue-light); }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem); color: var(--muted);
+      max-width: 560px; margin: 0 auto 2.5rem;
+    }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      background: var(--blue); color: #fff;
+      padding: 0.8rem 1.75rem; border-radius: 10px; font-size: 1rem; font-weight: 600;
+      text-decoration: none; transition: background 0.2s, transform 0.15s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover { background: var(--blue-light); transform: translateY(-1px); }
+    .btn-secondary {
+      background: var(--surface); color: var(--text);
+      padding: 0.8rem 1.75rem; border-radius: 10px; font-size: 1rem; font-weight: 500;
+      text-decoration: none; border: 1px solid var(--border);
+      transition: border-color 0.2s, transform 0.15s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+    .hero-stats {
+      display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center;
+      margin-top: 3.5rem; padding-top: 3rem; border-top: 1px solid var(--border); width: 100%; max-width: 600px;
+    }
+    .stat { text-align: center; }
+    .stat strong { display: block; font-size: 1.6rem; font-weight: 700; color: var(--text); }
+    .stat span { font-size: 0.8rem; color: var(--muted); }
+
+    /* ── SECTIONS ── */
+    section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+    .section-label { color: var(--blue-light); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem; }
+    h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+    .section-desc { color: var(--muted); font-size: 1.05rem; max-width: 520px; margin-bottom: 3rem; }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px;
+      background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+    }
+    .feature-card {
+      background: var(--surface); padding: 1.75rem;
+      transition: background 0.2s;
+    }
+    .feature-card:hover { background: var(--surface-2); }
+    .feature-icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+    .feature-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .feature-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.55; }
+    .feature-tag {
+      display: inline-block; margin-top: 0.75rem;
+      background: var(--blue-dim); color: var(--blue-light);
+      font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* ── INSTALL ── */
+    .install-steps { display: grid; gap: 1.25rem; }
+    .step {
+      display: flex; gap: 1.25rem; align-items: flex-start;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+    }
+    .step-num {
+      flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+      background: var(--blue-dim); border: 1px solid rgba(255,87,87,0.3);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--blue-light); font-size: 0.85rem; font-weight: 700;
+    }
+    .step-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .step-content p { font-size: 0.875rem; color: var(--muted); margin-bottom: 0.75rem; }
+    pre {
+      background: #0d1117; border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.85rem 1rem; font-size: 0.82rem; font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #7ee787; overflow-x: auto; line-height: 1.6;
+    }
+
+    /* ── TECH ── */
+    .tech-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .tech-chip {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 0.4rem 0.9rem; border-radius: 999px; font-size: 0.82rem;
+      color: var(--muted); transition: border-color 0.2s, color 0.2s;
+    }
+    .tech-chip:hover { border-color: var(--blue); color: var(--text); }
+
+    /* ── CTA ── */
+    .cta-section {
+      max-width: 100%; margin: 0; padding: 5rem 2rem;
+      background: linear-gradient(135deg, rgba(255,87,87,0.07) 0%, rgba(255,87,87,0.02) 100%);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .cta-section h2 { margin-bottom: 1rem; }
+    .cta-section p { color: var(--muted); max-width: 480px; margin: 0 auto 2rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 2.5rem; font-size: 0.82rem; color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--blue-light); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 1.25rem; }
+      .nav-links { gap: 1rem; }
+      .nav-links a:not(.btn-nav) { display: none; }
+      section { padding: 3.5rem 1.25rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .step { flex-direction: column; gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">
+    <img src="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" alt="OpenFamily" />
+    OpenFamily
+  </a>
+  <div class="nav-links">
+    <a href="#features">Fonctionnalités</a>
+    <a href="#install">Installation</a>
+    <a href="#tech">Technologies</a>
+    <a class="btn-nav" href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">GitHub →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <a class="hero-badge" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest" target="_blank" rel="noopener">
+    🎉 v1.0.7 — Sync temps réel, notifications push &amp; comptes partagés
+  </a>
+  <img class="logo" src="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" alt="OpenFamily" />
+  <h1>La gestion familiale,<br><span>maîtrisée par vous.</span></h1>
+  <p>Application open source et auto-hébergeable pour organiser toute la vie de famille — courses, tâches, calendrier, budget, recettes et plus.</p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest" target="_blank" rel="noopener">
+      ⬇️ Télécharger
+    </a>
+    <a class="btn-secondary" href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">
+      ⭐ GitHub
+    </a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><strong>11</strong><span>modules</span></div>
+    <div class="stat"><strong>PWA</strong><span>installable</span></div>
+    <div class="stat"><strong>AGPL-3</strong><span>open source</span></div>
+    <div class="stat"><strong>Self-hosted</strong><span>vos données</span></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">Fonctionnalités</div>
+  <h2>Tout ce dont votre famille a besoin</h2>
+  <p class="section-desc">11 modules intégrés, synchronisés en temps réel entre tous les appareils.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🛒</div>
+      <h3>Liste de courses</h3>
+      <p>Catégorisation automatique, prix, quantités et templates réutilisables. Cochée en temps réel depuis le supermarché.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✅</div>
+      <h3>Gestion des tâches</h3>
+      <p>Tâches récurrentes (quotidiennes, hebdomadaires…), 3 niveaux de priorité, assignation à un membre de la famille.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <h3>Calendrier</h3>
+      <p>Vue mensuelle avec code couleur par membre, rendez-vous avec rappels automatiques configurables.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🗓️</div>
+      <h3>Planning hebdomadaire</h3>
+      <p>Emplois du temps professionnels et scolaires de chaque membre, créneaux horaires jour par jour.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🍳</div>
+      <h3>Recettes</h3>
+      <p>Bibliothèque familiale de recettes avec ingrédients, instructions, photos, tags et filtres avancés.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🍽️</div>
+      <h3>Planning des repas</h3>
+      <p>Vue hebdomadaire des repas liés à vos recettes, export PDF du planning de la semaine.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💰</div>
+      <h3>Budget</h3>
+      <p>Suivi mensuel des dépenses, limites par catégorie et statistiques visuelles du foyer.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👨‍👩‍👧‍👦</div>
+      <h3>Profils familiaux</h3>
+      <p>Informations santé (groupe sanguin, allergies, vaccins), contacts d'urgence par membre.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <h3>Sync temps réel</h3>
+      <p>Toutes les modifications sont propagées instantanément sur tous les appareils connectés via WebSocket.</p>
+      <span class="feature-tag">Nouveau v1.0.7</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <h3>Notifications push</h3>
+      <p>Rappels de rendez-vous et alertes tâches via Web Push (VAPID), même quand l'app est fermée.</p>
+      <span class="feature-tag">Nouveau v1.0.7</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👥</div>
+      <h3>Comptes partagés</h3>
+      <p>Invitez des membres à rejoindre votre famille via un lien. Gestion des accès depuis l'interface.</p>
+      <span class="feature-tag">Nouveau v1.0.7</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <h3>PWA installable</h3>
+      <p>Installez l'application sur iOS, Android ou desktop comme une app native — avec support offline.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="section-label">Installation</div>
+  <h2>Prêt en 5 minutes</h2>
+  <p class="section-desc">Un seul prérequis : Docker. L'application se lance avec trois commandes.</p>
+  <div class="install-steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Cloner le projet et configurer l'environnement</h4>
+        <p>Copiez le fichier d'environnement et renseignez vos paramètres (secrets JWT, URL, VAPID…).</p>
+        <pre>git clone https://github.com/NexaFlowFrance/OpenFamily.git
+cd OpenFamily
+cp .env.example .env
+# Éditez .env avec vos paramètres</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Démarrer avec Docker Compose</h4>
+        <p>Lance les 3 services : PostgreSQL, le serveur Express et le frontend Nginx.</p>
+        <pre>docker-compose up -d --build</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Accéder à l'application</h4>
+        <p>L'application est accessible sur votre réseau local (ou votre domaine en production).</p>
+        <pre>Frontend : http://localhost:3000
+API      : http://localhost:3001/health</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Vérifier le bon fonctionnement</h4>
+        <p>Lancez le smoke test qui valide tous les modules API.</p>
+        <pre>npm run smoke:api</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section id="tech">
+  <div class="section-label">Technologies</div>
+  <h2>Stack moderne, zéro compromis</h2>
+  <p class="section-desc">Chaque brique choisie pour la performance, la sécurité et la maintenabilité.</p>
+  <div class="tech-grid">
+    <span class="tech-chip">React 19</span>
+    <span class="tech-chip">TypeScript</span>
+    <span class="tech-chip">Vite 7</span>
+    <span class="tech-chip">TailwindCSS</span>
+    <span class="tech-chip">Radix UI</span>
+    <span class="tech-chip">Node.js 20</span>
+    <span class="tech-chip">Express</span>
+    <span class="tech-chip">PostgreSQL 16</span>
+    <span class="tech-chip">WebSocket (ws)</span>
+    <span class="tech-chip">Web Push VAPID</span>
+    <span class="tech-chip">JWT + bcrypt 12</span>
+    <span class="tech-chip">Helmet</span>
+    <span class="tech-chip">Docker</span>
+    <span class="tech-chip">Nginx</span>
+    <span class="tech-chip">GitHub Actions</span>
+    <span class="tech-chip">PWA / Service Worker</span>
+    <span class="tech-chip">Recharts</span>
+    <span class="tech-chip">date-fns</span>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div style="max-width:640px; margin:0 auto;">
+    <h2>Open source, auto-hébergé, pour vous.</h2>
+    <p>Vos données restent chez vous. Contribuez au projet ou déployez votre propre instance dès maintenant.</p>
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;">
+      <a class="btn-primary" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest" target="_blank" rel="noopener">⬇️ Dernière version</a>
+      <a class="btn-secondary" href="https://github.com/NexaFlowFrance/OpenFamily/issues" target="_blank" rel="noopener">💬 Ouvrir une issue</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    Développé par <a href="https://nexaflow.fr" target="_blank" rel="noopener">NexaFlow France</a> —
+    Licence <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/licence.md" target="_blank" rel="noopener">AGPL-3.0</a> —
+    <a href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

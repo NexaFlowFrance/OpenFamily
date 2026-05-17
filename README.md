@@ -1,17 +1,34 @@
-# OpenFamily
+<div align="center">
+  <img src="client/public/OpenFamily.png" alt="OpenFamily" width="90">
+  <h1>OpenFamily</h1>
+  <p><strong>Application de gestion familiale open source, auto-hébergeable</strong><br>
+  Gardez le contrôle total de vos données — hébergez-la sur votre propre serveur.</p>
 
-OpenFamily est une application de gestion familiale complète proposée en open source par NexaFlow, conçue pour être auto-hébergée. Gardez le contrôle total de vos données en hébergeant l'application sur votre propre serveur. Gérez vos courses, tâches, rendez-vous, recettes, planning des repas et budget familial en toute sécurité, accessible depuis tous vos appareils.
+  [![Release](https://img.shields.io/github/v/release/NexaFlowFrance/OpenFamily?color=2563eb&label=version)](https://github.com/NexaFlowFrance/OpenFamily/releases/latest)
+  [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
+  [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily-client)
+  [![License: AGPL v3](https://img.shields.io/badge/License-AGPL--v3-blue.svg)](licence.md)
+  [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
+  [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](https://github.com/NexaFlowFrance/OpenFamily)
+</div>
+
+---
 
 ## 🎯 Fonctionnalités
 
-- 🛒 **Liste de courses** - Catégorisation automatique, prix, quantités, templates
-- ✅ **Tâches** - Tâches récurrentes, assignation familiale, statistiques
-- 📅 **Rendez-vous** - Calendrier mensuel, rappels automatiques, code couleur
-- 🗓️ **Planning hebdomadaire** - Horaires de travail et emploi du temps scolaire par membre
-- 🍳 **Recettes** - Bibliothèque familiale, filtres avancés, temps de préparation
-- 🍽️ **Planning repas** - Vue hebdomadaire, export PDF, liaison recettes
-- 💰 **Budget** - Suivi mensuel, limites par catégorie, statistiques
-- 👨‍👩‍👧‍👦 **Famille** - Profils membres, informations santé, contacts d'urgence
+| | |
+|---|---|
+| 🛒 **Liste de courses** | Catégorisation automatique, prix, quantités, templates |
+| ✅ **Tâches** | Tâches récurrentes, assignation familiale, statistiques |
+| 📅 **Rendez-vous** | Calendrier mensuel, rappels automatiques, code couleur |
+| 🗓️ **Planning hebdomadaire** | Horaires de travail et emploi du temps scolaire par membre |
+| 🍳 **Recettes** | Bibliothèque familiale, filtres avancés, temps de préparation |
+| 🍽️ **Planning repas** | Vue hebdomadaire, export PDF, liaison recettes |
+| 💰 **Budget** | Suivi mensuel, limites par catégorie, statistiques |
+| 👨‍👩‍👧‍👦 **Famille** | Profils membres, informations santé, contacts d'urgence |
+| 🔄 **Sync temps réel** | Mise à jour instantanée entre tous les appareils (WebSocket) |
+| 🔔 **Notifications push** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) |
+| 👥 **Comptes partagés** | Invitez des membres à rejoindre votre famille via lien |
 
 ## 🚀 Démarrage rapide
 
@@ -116,23 +133,22 @@ npm run smoke:api
 ## 🛠️ Technologies
 
 ### Frontend
-- React 19 + TypeScript
-- Vite 7
-- TailwindCSS + Radix UI
-- React Router
-- date-fns, Recharts
+- **React 19** + TypeScript + Vite 7
+- TailwindCSS + Radix UI + React Router
+- WebSocket client — sync temps réel
+- PWA (service worker, web push, offline)
 
 ### Backend
-- Node.js 20 + Express
-- PostgreSQL 16
-- WebSocket (ws)
-- JWT Authentication
-- TypeScript
+- **Node.js 20** + Express + TypeScript
+- **PostgreSQL 16** — auto-migration au démarrage
+- **WebSocket (ws)** — broadcast temps réel
+- **Web Push (VAPID)** — notifications push
+- JWT + bcrypt 12 + helmet + rate limiting
 
 ### DevOps
-- Docker + Docker Compose
+- Docker + Docker Compose — 3 services (postgres, server, client/nginx)
 - Multi-stage builds
-- Nginx (production)
+- GitHub Actions CI + Docker Publish (ghcr.io)
 
 ## 📦 Structure du projet
 
@@ -157,11 +173,13 @@ Nexus/
 
 ## 🔐 Sécurité
 
-- Authentification JWT
-- Mots de passe hashés avec bcrypt
-- CORS configuré
-- Variables d'environnement pour les secrets
-- Validation des entrées
+- Authentification JWT (7j, refresh automatique)
+- Mots de passe hashés avec **bcrypt (cost 12)**
+- En-têtes HTTP sécurisés via **helmet**
+- Rate limiting sur les endpoints d'authentification
+- CORS strict configurable
+- Validation des entrées côté serveur
+- Logs structurés (pas de données sensibles)
 
 ## 📱 PWA
 
@@ -189,13 +207,13 @@ Puis dans le navigateur :
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une [issue](https://github.com/NexaFlowFrance/OpenFamily/issues) ou une [pull request](https://github.com/NexaFlowFrance/OpenFamily/pulls).
 
 ## 📄 Licence
 
-GNU Affero General Public License v3.0 (AGPL-3.0-only) - Voir le fichier licence.md pour plus de détails.
+GNU Affero General Public License v3.0 (AGPL-3.0-only) - voir [licence.md](licence.md) pour plus de détails.
 
 ## 🙏 Crédits
 
-Basé sur le projet [OpenFamily](https://github.com/NexaFlowFrance/OpenFamily) inititié par NexaFlow France.
+Développé et maintenu par [NexaFlow France](https://nexaflow.fr).
 Ce projet respecte la philosophie open source et encourage le partage et la contribution communautaire.

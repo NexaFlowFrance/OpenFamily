@@ -4,9 +4,10 @@
 
 const sw = /** @type {ServiceWorkerGlobalScope} */ (self);
 
-// vite-plugin-pwa injectManifest requires this reference.
-// We use it to pre-cache static assets on install.
-const precacheManifest = sw.__WB_MANIFEST;
+// workbox-build (injectManifest) searches for the LITERAL string self.__WB_MANIFEST.
+// Must reference self directly here — aliased access (sw.__WB_MANIFEST) is not detected.
+// eslint-disable-next-line no-undef
+const precacheManifest = self.__WB_MANIFEST;
 
 const CACHE_NAME = 'openfamily-v1';
 

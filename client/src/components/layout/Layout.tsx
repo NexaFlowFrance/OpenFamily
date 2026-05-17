@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
+import { NotificationBell } from '../ui/NotificationBell';
 
 interface LayoutProps {
     children: ReactNode;
@@ -103,9 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="flex h-full flex-col">
                     <div className="flex h-20 items-center justify-between border-b border-border px-6">
                         <Link to="/" className="flex items-center gap-3" onClick={closeMenus}>
-                            <div className="flex h-9 w-9 items-center justify-center rounded-card bg-primary text-primary-foreground shadow-surface">
-                                <Users className="h-5 w-5" />
-                            </div>
+                            <img src="/OpenFamily.png" alt="OpenFamily" className="h-9 w-9 object-contain" />
                             <span className="text-lg font-semibold tracking-tight">OpenFamily</span>
                         </Link>
                         <button
@@ -207,28 +206,31 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             </div>
                         </div>
 
-                        <div className="hidden items-center gap-2 lg:flex">
-                            <Button
-                                variant="secondary"
-                                size="icon"
-                                onClick={toggleTheme}
-                                aria-label="Changer le theme"
-                            >
-                                {actualTheme === 'dark' ? (
-                                    <Sun className="h-4 w-4" />
-                                ) : (
-                                    <Moon className="h-4 w-4" />
-                                )}
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={logout}
-                                aria-label="Se deconnecter"
-                                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            >
-                                <LogOut className="h-4 w-4" />
-                            </Button>
+                        <div className="flex items-center gap-2">
+                            <NotificationBell />
+                            <div className="hidden items-center gap-2 lg:flex">
+                                <Button
+                                    variant="secondary"
+                                    size="icon"
+                                    onClick={toggleTheme}
+                                    aria-label="Changer le theme"
+                                >
+                                    {actualTheme === 'dark' ? (
+                                        <Sun className="h-4 w-4" />
+                                    ) : (
+                                        <Moon className="h-4 w-4" />
+                                    )}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={logout}
+                                    aria-label="Se deconnecter"
+                                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </header>

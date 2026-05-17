@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
 import shoppingRoutes from './routes/shopping';
@@ -12,6 +13,8 @@ import familyRoutes from './routes/family';
 import dashboardRoutes from './routes/dashboard';
 import planningRoutes from './routes/planning';
 import dataTransferRoutes from './routes/dataTransfer';
+import notificationsRoutes from './routes/notifications';
+import familyInvitesRoutes from './routes/familyInvites';
 import { loadEnv } from './config/loadEnv';
 import logger from './lib/logger';
 
@@ -34,13 +37,14 @@ const authRateLimiter = rateLimit({
 });
 
 // Middleware
+app.use(helmet());
 app.use(cors({
     origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Request logging
 app.use((req, res, next) => {
@@ -78,6 +82,8 @@ app.use('/api/family', familyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/planning', planningRoutes);
 app.use('/api/data', dataTransferRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/invites', familyInvitesRoutes);
 
 // 404 handler
 app.use((req, res) => {

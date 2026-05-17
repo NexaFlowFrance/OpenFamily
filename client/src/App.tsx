@@ -12,6 +12,7 @@ import MealPlanning from './pages/MealPlanning';
 import Budget from './pages/Budget';
 import Family from './pages/Family';
 import Settings from './pages/Settings';
+import Join from './pages/Join';
 
 function App() {
     const { isAuthenticated, loading } = useAuth();
@@ -44,6 +45,7 @@ function App() {
                 <Route path="/budget" element={<Budget />} />
                 <Route path="/family" element={<Family />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/join" element={<Join />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Layout>

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
+import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
 router.use(authMiddleware);
@@ -90,6 +91,7 @@ router.post('/', async (req: AuthRequest, res) => {
             ]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'recipes', action: 'created' });
         res.json({ success: true, data: result.rows[0] });
     } catch (error) {
         console.error('Create recipe error:', error);
@@ -147,6 +149,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Recipe not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'recipes', action: 'updated' });
         res.json({ success: true, data: result.rows[0] });
     } catch (error) {
         console.error('Update recipe error:', error);
@@ -168,6 +171,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Recipe not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'recipes', action: 'deleted' });
         res.json({ success: true, message: 'Recipe deleted' });
     } catch (error) {
         console.error('Delete recipe error:', error);

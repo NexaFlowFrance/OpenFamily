@@ -2,6 +2,9 @@ import { Router } from 'express';
 import { getClient, query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
+// Only allow column names that are safe SQL identifiers (letters, digits, underscore)
+const SAFE_IDENTIFIER = /^[a-z_][a-z0-9_]*$/i;
+
 const router = Router();
 router.use(authMiddleware);
 
@@ -70,7 +73,9 @@ router.post('/import', async (req: AuthRequest, res) => {
         let count = 0;
         for (const row of rows) {
             const entry: Record<string, unknown> = { ...(row as Record<string, unknown>), user_id: userId };
-            const keys = Object.keys(entry);
+            // Strip any key that is not a safe SQL identifier to prevent injection
+            const keys = Object.keys(entry).filter((k) => SAFE_IDENTIFIER.test(k));
+            if (keys.length === 0) continue;
             const values = keys.map((k) => entry[k]);
             const placeholders = keys.map((_, i) => `$${i + 1}`);
             const result = await client.query(

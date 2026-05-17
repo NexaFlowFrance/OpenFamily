@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, Activity, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -21,6 +22,10 @@ const Dashboard: React.FC = () => {
     useEffect(() => {
         loadStats();
     }, []);
+    useWebSocketUpdates('tasks', () => { void loadStats(); });
+    useWebSocketUpdates('shopping', () => { void loadStats(); });
+    useWebSocketUpdates('appointments', () => { void loadStats(); });
+    useWebSocketUpdates('budget', () => { void loadStats(); });
 
     const loadStats = async () => {
         try {

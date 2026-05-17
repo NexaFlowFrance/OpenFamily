@@ -5,13 +5,16 @@ interface User {
     id: string;
     email: string;
     name: string;
+    is_owner?: boolean;
 }
 
 interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string, name: string) => Promise<void>;
+    register: (email: string, password: string, name: string, inviteToken?: string) => Promise<void>;
+    joinFamily: (inviteToken: string) => Promise<void>;
+    leaveFamily: () => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
 }
@@ -88,11 +91,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
-    const register = async (email: string, password: string, name: string) => {
-        const response = await api.register(email, password, name);
+    const register = async (email: string, password: string, name: string, inviteToken?: string) => {
+        const response = await api.register(email, password, name, inviteToken);
         if (response.success && response.user) {
             setUser(response.user);
-            // Also store in localStorage for persistence
+            localStorage.setItem('user', JSON.stringify(response.user));
+        }
+    };
+
+    const joinFamily = async (inviteToken: string) => {
+        const response = await api.joinFamily(inviteToken);
+        if (response.success && response.user) {
+            setUser(response.user);
+            localStorage.setItem('user', JSON.stringify(response.user));
+        }
+    };
+
+    const leaveFamily = async () => {
+        const response = await api.leaveFamily();
+        if (response.success && response.user) {
+            setUser(response.user);
             localStorage.setItem('user', JSON.stringify(response.user));
         }
     };
@@ -110,6 +128,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 loading,
                 login,
                 register,
+                joinFamily,
+                leaveFamily,
                 logout,
                 isAuthenticated: !!user,
             }}

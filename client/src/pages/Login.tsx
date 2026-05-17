@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Users } from 'lucide-react';
+
 
 const Login: React.FC = () => {
     const { login, register } = useAuth();
@@ -14,6 +15,17 @@ const Login: React.FC = () => {
     const [name, setName] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [inviteToken, setInviteToken] = useState<string | null>(null);
+
+    // Detect invite token in URL — auto-switch to registration mode
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const invite = params.get('invite');
+        if (invite) {
+            setInviteToken(invite);
+            setIsLogin(false);
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,10 +36,10 @@ const Login: React.FC = () => {
             if (isLogin) {
                 await login(email, password);
             } else {
-                await register(email, password, name);
+                await register(email, password, name, inviteToken ?? undefined);
             }
-        } catch (err: any) {
-            setError(err.message || 'Une erreur est survenue');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Une erreur est survenue');
         } finally {
             setLoading(false);
         }
@@ -43,8 +55,8 @@ const Login: React.FC = () => {
 
             <Card className="w-full max-w-md relative z-10 animate-accordion-down" hover={false}>
                 <CardHeader className="text-center pb-8 pt-8">
-                    <div className="mx-auto w-16 h-16 bg-nexus-blue rounded-2xl flex items-center justify-center mb-6 shadow-nexus-blue">
-                        <Users className="w-8 h-8 text-white" />
+                    <div className="mx-auto mb-6">
+                        <img src="/OpenFamily.png" alt="OpenFamily" className="w-20 h-20 object-contain mx-auto" />
                     </div>
                     <CardTitle className="text-3xl mb-3 text-nexus-blue">
                         OpenFamily
@@ -55,6 +67,16 @@ const Login: React.FC = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-6 px-8 pb-8">
+                    {/* Invite banner */}
+                    {inviteToken && !isLogin && (
+                        <div className="flex items-center gap-3 p-3 rounded-nexus bg-nexus-blue/10 border border-nexus-blue/20">
+                            <Users className="w-5 h-5 text-nexus-blue shrink-0" />
+                            <p className="text-label-sm text-nexus-blue font-medium">
+                                Vous avez été invité à rejoindre une famille ! Créez votre compte pour accepter l'invitation.
+                            </p>
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {!isLogin && (
                             <div className="space-y-1.5">

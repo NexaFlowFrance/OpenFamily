@@ -8,7 +8,11 @@ const router = Router();
 
 router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     try {
-        const result = await query('SELECT id, email, name FROM users WHERE id = $1', [req.userId]);
+        // Use actualUserId so members see their own profile, not the owner's
+        const result = await query(
+            'SELECT id, email, name, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
+            [req.actualUserId]
+        );
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
@@ -27,7 +31,7 @@ router.post('/register', async (req, res) => {
     }
 
     try {
-        const { email, password, name } = req.body;
+        const { email, password, name, inviteToken } = req.body;
         const normalizedEmail = typeof email === 'string' ? normalizeEmail(email) : '';
         const cleanedName = typeof name === 'string' ? name.trim() : '';
 
@@ -46,7 +50,7 @@ router.post('/register', async (req, res) => {
         }
 
         // Hash password
-        const password_hash = await bcrypt.hash(password, 10);
+        const password_hash = await bcrypt.hash(password, 12);
 
         // Create user
         const result = await query(
@@ -55,9 +59,27 @@ router.post('/register', async (req, res) => {
         );
 
         const user = result.rows[0];
-        const token = generateToken(user.id);
+        let ownerId: string = user.id;
 
-        res.json({ success: true, data: { user, token } });
+        // Process invite token if provided
+        if (typeof inviteToken === 'string' && inviteToken.length > 0) {
+            const inviteResult = await query(
+                `SELECT id, owner_id FROM family_invites
+                 WHERE token = $1 AND status = 'pending' AND expires_at > NOW()`,
+                [inviteToken]
+            );
+            if (inviteResult.rows.length > 0) {
+                const invite = inviteResult.rows[0] as { id: string; owner_id: string };
+                ownerId = invite.owner_id;
+                await query('UPDATE users SET family_owner_id = $1 WHERE id = $2', [invite.owner_id, user.id]);
+                await query("UPDATE family_invites SET status = 'accepted' WHERE id = $1", [invite.id]);
+            }
+        }
+
+        const token = generateToken(user.id, ownerId);
+        const isOwner = ownerId === user.id;
+
+        res.json({ success: true, data: { user: { ...user, is_owner: isOwner }, token } });
     } catch (error) {
         console.error('Register error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -89,12 +111,15 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
 
-        const token = generateToken(user.id);
+        // Include family ownerId in JWT so all data queries use the correct user scope
+        const ownerId: string = user.family_owner_id ?? user.id;
+        const token = generateToken(user.id, ownerId);
+        const isOwner = !user.family_owner_id;
 
         res.json({
             success: true,
             data: {
-                user: { id: user.id, email: user.email, name: user.name },
+                user: { id: user.id, email: user.email, name: user.name, is_owner: isOwner },
                 token
             }
         });

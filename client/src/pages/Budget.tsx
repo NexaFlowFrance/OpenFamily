@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Dialog, Input, Select, Textarea, Badge, Tabs } from '../components/ui';
@@ -111,6 +112,7 @@ const Budget: React.FC = () => {
         loadStats();
         loadMonthlyStats(currentYear);
     }, [currentMonth, currentYear]);
+    useWebSocketUpdates('budget', () => { void loadEntries(); void loadLimits(); void loadStats(); void loadMonthlyStats(currentYear); });
 
     const loadEntries = async () => {
         try {

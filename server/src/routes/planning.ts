@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getClient, query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty } from '../lib/normalize';
+import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
 router.use(authMiddleware);
@@ -243,6 +244,7 @@ router.post('/', async (req: AuthRequest, res) => {
         );
 
         const row = await getEntryById(inserted.rows[0].id, req.userId!);
+        broadcast(req.userId!, { type: 'update', entity: 'planning', action: 'created' });
         return res.json({ success: true, data: mapEntryRow(row) });
     } catch (error) {
         if (error instanceof Error && error.message === 'INVALID_MEMBER') {
@@ -467,6 +469,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             mappedRows = rows.rows.map(mapEntryRow);
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'planning', action: 'updated' });
         return res.json({
             success: true,
             data: {
@@ -572,6 +575,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
         );
 
         const row = await getEntryById(id, req.userId!);
+        broadcast(req.userId!, { type: 'update', entity: 'planning', action: 'updated' });
         return res.json({ success: true, data: mapEntryRow(row) });
     } catch (error) {
         if (error instanceof Error && error.message === 'INVALID_MEMBER') {
@@ -601,6 +605,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Planning entry not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'planning', action: 'deleted' });
         return res.json({ success: true, message: 'Planning entry deleted' });
     } catch (error) {
         console.error('Delete planning entry error:', error);

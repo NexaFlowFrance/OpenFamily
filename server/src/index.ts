@@ -1,8 +1,14 @@
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
+import jwt from 'jsonwebtoken';
 import app from './app';
 import pool, { runMigrations } from './db';
 import logger from './lib/logger';
+import { clients, broadcast } from './lib/broadcaster';
+import { startReminderScheduler } from './lib/reminderScheduler';
+import { getJwtSecret } from './config/loadEnv';
+
+export { broadcast };
 
 const PORT = process.env.SERVER_PORT || 3001;
 
@@ -11,9 +17,6 @@ const server = http.createServer(app);
 
 // Create WebSocket server
 const wss = new WebSocketServer({ server, path: '/ws' });
-
-// Store connected clients with user IDs
-const clients = new Map<string, Set<WebSocket>>();
 
 wss.on('connection', (ws: WebSocket) => {
     logger.info('ws.connection_open');
@@ -24,18 +27,25 @@ wss.on('connection', (ws: WebSocket) => {
         try {
             const data = JSON.parse(message.toString());
 
-            // Handle authentication
-            if (data.type === 'auth' && data.userId) {
-                userId = data.userId;
+            if (data.type === 'auth' && typeof data.token === 'string') {
+                try {
+                    const decoded = jwt.verify(data.token, getJwtSecret()) as { userId: string };
+                    userId = decoded.userId;
 
-                if (!clients.has(userId!)) {
-                    clients.set(userId!, new Set());
+                    if (!clients.has(userId)) {
+                        clients.set(userId, new Set());
+                    }
+                    clients.get(userId)!.add(ws);
+
+                    logger.info('ws.authenticated', { userId });
+                    ws.send(JSON.stringify({ type: 'auth', success: true }));
+                } catch {
+                    logger.warn('ws.auth_failed');
+                    ws.send(JSON.stringify({ type: 'auth', success: false }));
+                    ws.close(4001, 'Unauthorized');
                 }
-                clients.get(userId!)!.add(ws);
-
-                logger.info('ws.authenticated', { userId });
-                ws.send(JSON.stringify({ type: 'auth', success: true }));
             }
+            // ping/pong for keepalive — no response needed, TCP layer handles it
         } catch (error) {
             logger.warn('ws.message_error', {
                 error: error instanceof Error ? error.message : String(error),
@@ -60,20 +70,6 @@ wss.on('connection', (ws: WebSocket) => {
     });
 });
 
-// Broadcast function to send updates to specific users
-export const broadcast = (userId: string, data: any) => {
-    if (clients.has(userId)) {
-        const userClients = clients.get(userId)!;
-        const message = JSON.stringify(data);
-
-        userClients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
-    }
-};
-
 // Start server
 const startServer = async () => {
     try {
@@ -81,6 +77,8 @@ const startServer = async () => {
         // Test database connection
         await pool.query('SELECT NOW()');
         logger.info('server.database_connected');
+
+        startReminderScheduler();
 
         server.listen(PORT, () => {
             logger.info('server.started', {

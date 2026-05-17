@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { Plus, CheckSquare, Square, Trash2, Edit2, Filter, TrendingUp } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, DatePicker, Badge } from '../components/ui';
@@ -78,6 +79,7 @@ const Tasks: React.FC = () => {
         loadFamilyMembers();
         loadStats();
     }, []);
+    useWebSocketUpdates('tasks', () => { void loadTasks(); void loadStats(); });
 
     const loadTasks = async () => {
         try {

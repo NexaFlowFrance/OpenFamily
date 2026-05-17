@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
+import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
 router.use(authMiddleware);
@@ -94,6 +95,7 @@ router.post('/entries', async (req: AuthRequest, res) => {
              WHERE be.id = $1`, [result.rows[0].id]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'created' });
         res.json({ success: true, data: mapBudgetEntry(full.rows[0]) });
     } catch (error) {
         console.error('Create budget entry error:', error);
@@ -147,6 +149,7 @@ router.put('/entries/:id', async (req: AuthRequest, res) => {
              WHERE be.id = $1`, [id]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'updated' });
         res.json({ success: true, data: mapBudgetEntry(full.rows[0]) });
     } catch (error) {
         console.error('Update budget entry error:', error);
@@ -168,6 +171,7 @@ router.delete('/entries/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Budget entry not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'deleted' });
         res.json({ success: true, message: 'Budget entry deleted' });
     } catch (error) {
         console.error('Delete budget entry error:', error);
@@ -222,6 +226,7 @@ router.post('/limits', async (req: AuthRequest, res) => {
             [req.userId, category, parsedLimit, parsedMonth, parsedYear]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'updated' });
         res.json({ success: true, data: mapBudgetLimit(result.rows[0]) });
     } catch (error) {
         console.error('Set budget limit error:', error);

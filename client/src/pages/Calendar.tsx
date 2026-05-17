@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge } from '../components/ui';
@@ -81,6 +82,7 @@ const Calendar: React.FC = () => {
         loadAppointments();
         loadFamilyMembers();
     }, [currentDate]);
+    useWebSocketUpdates('appointments', () => { void loadAppointments(); });
 
     const loadAppointments = async () => {
         try {

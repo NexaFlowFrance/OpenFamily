@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty } from '../lib/normalize';
+import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
 router.use(authMiddleware);
@@ -80,6 +81,7 @@ router.post('/', async (req: AuthRequest, res) => {
         );
 
         const [enriched] = await enrichTasksWithMembers([result.rows[0]], req.userId!);
+        broadcast(req.userId!, { type: 'update', entity: 'tasks', action: 'created' });
         res.json({ success: true, data: enriched });
     } catch (error) {
         if (error instanceof Error && error.message === 'INVALID_MEMBER') {
@@ -161,6 +163,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
         }
 
         const [enriched] = await enrichTasksWithMembers([result.rows[0]], req.userId!);
+        broadcast(req.userId!, { type: 'update', entity: 'tasks', action: 'updated' });
         res.json({ success: true, data: enriched });
     } catch (error) {
         if (error instanceof Error && error.message === 'INVALID_MEMBER') {
@@ -186,6 +189,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Task not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'tasks', action: 'deleted' });
         res.json({ success: true, message: 'Task deleted' });
     } catch (error) {
         console.error('Delete task error:', error);

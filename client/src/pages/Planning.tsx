@@ -17,6 +17,7 @@ import {
 import { addDays, addWeeks, format, startOfWeek, subWeeks } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { api } from '../lib/api';
+import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Dialog, Input, Select, Textarea } from '../components/ui';
 
 interface FamilyMember {
@@ -126,6 +127,7 @@ const Planning: React.FC = () => {
         };
         void bootstrap();
     }, []);
+    useWebSocketUpdates('planning', () => { void loadEntries(weekStart); });
 
     useEffect(() => {
         if (selectedDays.length === 0) {

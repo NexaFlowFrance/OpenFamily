@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { api } from '../lib/api';
-import { Download, Upload, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff } from 'lucide-react';
 import { Card, CardContent, Button } from '../components/ui';
+import { useNotifications } from '../hooks/useNotifications';
 
 interface ImportCounts {
     family_members?: number;
@@ -35,6 +36,22 @@ const Settings: React.FC = () => {
     const [importError, setImportError] = useState('');
     const [importSuccess, setImportSuccess] = useState<ImportCounts | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [notifError, setNotifError] = useState('');
+
+    const { isSupported, permission, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = useNotifications();
+
+    const handleToggleNotifications = async () => {
+        setNotifError('');
+        try {
+            if (isSubscribed) {
+                await unsubscribe();
+            } else {
+                await subscribe();
+            }
+        } catch (err) {
+            setNotifError(err instanceof Error ? err.message : 'Erreur lors de la configuration des notifications.');
+        }
+    };
 
     const handleExport = async () => {
         setExportLoading(true);
@@ -102,6 +119,75 @@ const Settings: React.FC = () => {
                 <h2 className="text-title font-bold text-foreground">Paramètres</h2>
                 <p className="text-caption text-muted-foreground">Gérez vos données et préférences.</p>
             </div>
+
+            {/* Push Notifications */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                            {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-caption font-semibold text-foreground">Notifications push</h3>
+                            <p className="mt-1 text-micro text-muted-foreground">
+                                Recevez des rappels pour vos rendez-vous directement sur cet appareil, même
+                                quand l'application est fermée.
+                            </p>
+
+                            {!isSupported && (
+                                <p className="mt-2 flex items-center gap-1 text-micro text-muted-foreground">
+                                    <AlertCircle className="h-4 w-4" />
+                                    Notifications non supportées sur ce navigateur.
+                                </p>
+                            )}
+
+                            {isSupported && permission === 'denied' && (
+                                <p className="mt-2 flex items-center gap-1 text-micro text-destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    Permission refusée. Autorisez les notifications dans les paramètres de votre
+                                    navigateur.
+                                </p>
+                            )}
+
+                            {notifError && (
+                                <p className="mt-2 flex items-center gap-1 text-micro text-destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    {notifError}
+                                </p>
+                            )}
+
+                            {isSupported && permission !== 'denied' && (
+                                <Button
+                                    className="mt-4"
+                                    variant={isSubscribed ? 'secondary' : 'primary'}
+                                    onClick={() => void handleToggleNotifications()}
+                                    disabled={notifLoading}
+                                >
+                                    {notifLoading ? (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : isSubscribed ? (
+                                        <BellOff className="mr-2 h-4 w-4" />
+                                    ) : (
+                                        <Bell className="mr-2 h-4 w-4" />
+                                    )}
+                                    {notifLoading
+                                        ? 'En cours…'
+                                        : isSubscribed
+                                          ? 'Désactiver les notifications'
+                                          : 'Activer les notifications'}
+                                </Button>
+                            )}
+
+                            {isSubscribed && (
+                                <p className="mt-2 flex items-center gap-1 text-micro text-green-600 dark:text-green-400">
+                                    <CheckCircle className="h-4 w-4" />
+                                    Notifications activées sur cet appareil.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Export */}
             <Card>

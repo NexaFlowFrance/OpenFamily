@@ -8,6 +8,9 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'autoUpdate',
+            strategies: 'injectManifest',
+            srcDir: 'src',
+            filename: 'sw.js',
             includeAssets: ['favicon-32x32.png', 'favicon-16x16.png', 'apple-touch-icon.png', 'OpenFamily.png'],
             manifest: {
                 name: 'OpenFamily',
@@ -29,22 +32,9 @@ export default defineConfig({
                     }
                 ]
             },
-            workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-                runtimeCaching: [
-                    {
-                        urlPattern: /^https:\/\/api\./,
-                        handler: 'NetworkFirst',
-                        options: {
-                            cacheName: 'api-cache',
-                            expiration: {
-                                maxEntries: 50,
-                                maxAgeSeconds: 300
-                            }
-                        }
-                    }
-                ]
-            }
+            devOptions: {
+                enabled: false,
+            },
         })
     ],
     resolve: {

@@ -100,12 +100,33 @@ class ApiClient {
         return response;
     }
 
-    async register(email: string, password: string, name: string) {
+    async register(email: string, password: string, name: string, inviteToken?: string) {
+        const body: Record<string, string> = { email, password, name };
+        if (inviteToken) body.inviteToken = inviteToken;
+
         const response = await this.post<any>(
             '/api/auth/register',
-            { email, password, name }
+            body
         );
 
+        if (response.success && response.data) {
+            this.setToken(response.data.token);
+            return { success: true, ...response.data };
+        }
+        return response;
+    }
+
+    async joinFamily(inviteToken: string) {
+        const response = await this.post<any>('/api/invites/join', { token: inviteToken });
+        if (response.success && response.data) {
+            this.setToken(response.data.token);
+            return { success: true, ...response.data };
+        }
+        return response;
+    }
+
+    async leaveFamily() {
+        const response = await this.delete<any>('/api/invites/leave');
         if (response.success && response.data) {
             this.setToken(response.data.token);
             return { success: true, ...response.data };

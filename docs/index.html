@@ -240,6 +240,34 @@
       .stat { display: flex; align-items: center; gap: 0.5rem; }
       .stat strong { font-size: 1.1rem; }
     }
+
+    /* ── CONTRIBUTORS ── */
+    .contributors-grid {
+      display: flex; flex-wrap: wrap; gap: 1.25rem; justify-content: center;
+      margin-top: 2.5rem;
+    }
+    .contributor-card {
+      display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem 1.75rem;
+      text-decoration: none; color: var(--text);
+      transition: border-color 0.2s, transform 0.15s;
+      min-width: 140px;
+    }
+    .contributor-card:hover { border-color: rgba(255,87,87,0.4); transform: translateY(-2px); }
+    .contributor-card img {
+      width: 72px; height: 72px; border-radius: 50%;
+      border: 2px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .contributor-card:hover img { border-color: rgba(255,87,87,0.5); }
+    .contributor-card .c-name { font-weight: 600; font-size: 0.95rem; }
+    .contributor-card .c-count {
+      font-size: 0.78rem; color: var(--muted);
+      background: var(--surface-2); border: 1px solid var(--border);
+      padding: 0.2rem 0.65rem; border-radius: 999px;
+    }
+    .contributor-card.lead .c-count { color: var(--blue-light); border-color: rgba(255,87,87,0.3); background: var(--blue-dim); }
   </style>
 </head>
 <body>
@@ -254,6 +282,7 @@
     <a href="#features">Fonctionnalités</a>
     <a href="#install">Installation</a>
     <a href="#tech">Technologies</a>
+    <a href="#contributors">Équipe</a>
     <a class="btn-nav" href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">GitHub →</a>
   </div>
 </nav>
@@ -437,6 +466,37 @@ API      : http://localhost:3001/health</pre>
     </div>
   </div>
 </div>
+
+<!-- CONTRIBUTORS -->
+<section id="contributors" style="padding: 5rem 2rem; text-align: center;">
+  <h2>Remerciements</h2>
+  <p class="section-desc" style="margin-top:0.75rem;">Merci à toutes les personnes qui contribuent au projet ❤️</p>
+  <div class="contributors-grid">
+    <a class="contributor-card lead" href="https://github.com/NexaFlowFrance" target="_blank" rel="noopener">
+      <img src="https://avatars.githubusercontent.com/u/251752333?v=4" alt="NexaFlowFrance" />
+      <span class="c-name">NexaFlowFrance</span>
+      <span class="c-count">⭐ 51 commits</span>
+    </a>
+    <a class="contributor-card" href="https://github.com/LoicHarrang1" target="_blank" rel="noopener">
+      <img src="https://avatars.githubusercontent.com/u/128454842?v=4" alt="LoicHarrang1" />
+      <span class="c-name">LoicHarrang1</span>
+      <span class="c-count">4 commits</span>
+    </a>
+    <a class="contributor-card" href="https://github.com/victorprouff" target="_blank" rel="noopener">
+      <img src="https://avatars.githubusercontent.com/u/36435533?v=4" alt="victorprouff" />
+      <span class="c-name">victorprouff</span>
+      <span class="c-count">3 commits</span>
+    </a>
+    <a class="contributor-card" href="https://github.com/caludeayi" target="_blank" rel="noopener">
+      <img src="https://avatars.githubusercontent.com/u/258476110?v=4" alt="caludeayi" />
+      <span class="c-name">caludeayi</span>
+      <span class="c-count">1 commit</span>
+    </a>
+  </div>
+  <p style="margin-top: 2rem; font-size: 0.85rem; color: var(--muted);">
+    Tu veux contribuer ? <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/DOCUMENTATION.md" target="_blank" rel="noopener" style="color: var(--blue-light); text-decoration: none;">Lis la doc →</a>
+  </p>
+</section>
 
 <!-- FOOTER -->
 <footer>

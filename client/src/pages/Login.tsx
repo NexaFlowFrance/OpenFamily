@@ -13,6 +13,7 @@ const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const [role, setRole] = useState<'parent' | 'enfant'>('parent');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [inviteToken, setInviteToken] = useState<string | null>(null);
@@ -36,7 +37,7 @@ const Login: React.FC = () => {
             if (isLogin) {
                 await login(email, password);
             } else {
-                await register(email, password, name, inviteToken ?? undefined);
+                await register(email, password, name, inviteToken ?? undefined, role);
             }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
@@ -88,6 +89,38 @@ const Login: React.FC = () => {
                                     required={!isLogin}
                                     placeholder="Ex: Jean Dupont"
                                 />
+                            </div>
+                        )}
+
+                        {!isLogin && (
+                            <div className="space-y-1.5">
+                                <label className="text-label-sm font-medium text-foreground block">Rôle dans la famille</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRole('parent')}
+                                        className={`flex flex-col items-center gap-1.5 p-3 rounded-nexus border-2 transition-colors ${
+                                            role === 'parent'
+                                                ? 'border-nexus-blue bg-nexus-blue/10 text-nexus-blue'
+                                                : 'border-border text-muted-foreground hover:border-nexus-blue/50'
+                                        }`}
+                                    >
+                                        <span className="text-2xl">👨</span>
+                                        <span className="text-label-sm font-semibold">Parent</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setRole('enfant')}
+                                        className={`flex flex-col items-center gap-1.5 p-3 rounded-nexus border-2 transition-colors ${
+                                            role === 'enfant'
+                                                ? 'border-nexus-blue bg-nexus-blue/10 text-nexus-blue'
+                                                : 'border-border text-muted-foreground hover:border-nexus-blue/50'
+                                        }`}
+                                    >
+                                        <span className="text-2xl">🧒</span>
+                                        <span className="text-label-sm font-semibold">Enfant</span>
+                                    </button>
+                                </div>
                             </div>
                         )}
 

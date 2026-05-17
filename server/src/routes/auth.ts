@@ -10,7 +10,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     try {
         // Use actualUserId so members see their own profile, not the owner's
         const result = await query(
-            'SELECT id, email, name, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
+            'SELECT id, email, name, role, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
             [req.actualUserId]
         );
         if (result.rows.length === 0) {
@@ -31,9 +31,10 @@ router.post('/register', async (req, res) => {
     }
 
     try {
-        const { email, password, name, inviteToken } = req.body;
+        const { email, password, name, inviteToken, role } = req.body;
         const normalizedEmail = typeof email === 'string' ? normalizeEmail(email) : '';
         const cleanedName = typeof name === 'string' ? name.trim() : '';
+        const cleanedRole = ['parent', 'enfant'].includes(role) ? role : 'parent';
 
         if (!normalizedEmail || !password || !cleanedName) {
             return res.status(400).json({ success: false, error: 'Missing required fields' });
@@ -54,8 +55,8 @@ router.post('/register', async (req, res) => {
 
         // Create user
         const result = await query(
-            'INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3) RETURNING id, email, name',
-            [normalizedEmail, password_hash, cleanedName]
+            'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name, role',
+            [normalizedEmail, password_hash, cleanedName, cleanedRole]
         );
 
         const user = result.rows[0];
@@ -74,12 +75,23 @@ router.post('/register', async (req, res) => {
                 await query('UPDATE users SET family_owner_id = $1 WHERE id = $2', [invite.owner_id, user.id]);
                 await query("UPDATE family_invites SET status = 'accepted' WHERE id = $1", [invite.id]);
             }
+        } else {
+            // Auto-join: if a family owner already exists, automatically join that family
+            const ownerResult = await query(
+                'SELECT id FROM users WHERE family_owner_id IS NULL AND id != $1 ORDER BY created_at ASC LIMIT 1',
+                [user.id]
+            );
+            if (ownerResult.rows.length > 0) {
+                const existingOwner = ownerResult.rows[0] as { id: string };
+                ownerId = existingOwner.id;
+                await query('UPDATE users SET family_owner_id = $1 WHERE id = $2', [existingOwner.id, user.id]);
+            }
         }
 
         const token = generateToken(user.id, ownerId);
         const isOwner = ownerId === user.id;
 
-        res.json({ success: true, data: { user: { ...user, is_owner: isOwner }, token } });
+        res.json({ success: true, data: { user: { ...user, is_owner: isOwner, role: user.role }, token } });
     } catch (error) {
         console.error('Register error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -119,7 +131,7 @@ router.post('/login', async (req, res) => {
         res.json({
             success: true,
             data: {
-                user: { id: user.id, email: user.email, name: user.name, is_owner: isOwner },
+                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner },
                 token
             }
         });

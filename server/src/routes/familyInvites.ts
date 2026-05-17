@@ -34,7 +34,7 @@ router.use(authMiddleware);
 // GET /members — list all user accounts in this family
 router.get('/members', async (req: AuthRequest, res) => {
     const { rows } = await query(
-        `SELECT id, name, email, (family_owner_id IS NULL) AS is_owner, created_at
+        `SELECT id, name, email, role, (family_owner_id IS NULL) AS is_owner, created_at
          FROM users
          WHERE id = $1
             OR family_owner_id = $1

@@ -454,7 +454,7 @@ const ShoppingList: React.FC = () => {
                                     <div className="mt-1 flex flex-wrap items-center gap-2 text-micro">
                                         <span className="rounded-pill bg-primary-soft px-2 py-0.5 text-primary">{item.category}</span>
                                         {item.quantity ? <span className="text-muted-foreground">Qt: {item.quantity}</span> : null}
-                                        {item.price ? <span className="text-muted-foreground">{item.price.toFixed(2)} EUR</span> : null}
+                                        {item.price ? <span className="text-muted-foreground">{Number(item.price).toFixed(2)} EUR</span> : null}
                                     </div>
                                 </div>
 

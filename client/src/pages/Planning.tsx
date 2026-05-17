@@ -525,8 +525,8 @@ const Planning: React.FC = () => {
                                                         </p>
                                                         <div className="flex flex-shrink-0 items-center">
                                                             {entry.specific_date
-                                                                ? <Pin className="mr-0.5 h-2.5 w-2.5 text-amber-500" title="Ponctuel" />
-                                                                : <Repeat className="mr-0.5 h-2.5 w-2.5 text-muted-foreground/50" title="Récurrent" />
+                                                                ? <Pin className="mr-0.5 h-2.5 w-2.5 text-amber-500" />
+                                                                : <Repeat className="mr-0.5 h-2.5 w-2.5 text-muted-foreground/50" />
                                                             }
                                                             <button
                                                                 type="button"

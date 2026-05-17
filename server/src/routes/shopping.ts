@@ -6,6 +6,7 @@ import {
     createShoppingItemSchema,
     updateShoppingItemSchema,
     createTemplateSchema,
+    updateTemplateSchema,
 } from '../schemas/shopping';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
 import logger from '../lib/logger';
@@ -174,6 +175,37 @@ router.post(
             res.json({ success: true, data: result.rows[0] });
         } catch (error) {
             logger.error('shopping.create_template_failed', {
+                error: error instanceof Error ? error.message : String(error),
+            });
+            res.status(500).json({ success: false, error: 'Internal server error' });
+        }
+    },
+);
+
+// Update template (full replace of name + items).
+router.put(
+    '/templates/:id',
+    validate({ body: updateTemplateSchema }),
+    async (req: AuthRequest, res) => {
+        try {
+            const { id } = req.params;
+            const { name, items } = req.body;
+
+            const result = await query(
+                `UPDATE shopping_list_templates
+                 SET name = $1, items = $2, updated_at = NOW()
+                 WHERE id = $3 AND user_id = $4
+                 RETURNING *`,
+                [name, JSON.stringify(items), id, req.userId],
+            );
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Template not found' });
+            }
+
+            res.json({ success: true, data: result.rows[0] });
+        } catch (error) {
+            logger.error('shopping.update_template_failed', {
                 error: error instanceof Error ? error.message : String(error),
             });
             res.status(500).json({ success: false, error: 'Internal server error' });

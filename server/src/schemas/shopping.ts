@@ -63,6 +63,11 @@ export const createTemplateSchema = z
     })
     .strict();
 
+// Same shape as create; full replace is intentional (PUT) so the client
+// always sends the canonical template state.
+export const updateTemplateSchema = createTemplateSchema;
+
 export type CreateShoppingItemBody = z.infer<typeof createShoppingItemSchema>;
 export type UpdateShoppingItemBody = z.infer<typeof updateShoppingItemSchema>;
 export type CreateTemplateBody = z.infer<typeof createTemplateSchema>;
+export type UpdateTemplateBody = z.infer<typeof updateTemplateSchema>;

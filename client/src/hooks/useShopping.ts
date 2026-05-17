@@ -187,6 +187,29 @@ export const useCreateTemplate = () => {
     });
 };
 
+export const useUpdateTemplate = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: async ({
+            id,
+            input,
+        }: {
+            id: string;
+            input: { name: string; items: ShoppingTemplate['items'] };
+        }) => {
+            const res = await api.put<ApiResponse<ShoppingTemplate>>(
+                `/api/shopping/templates/${id}`,
+                input,
+            );
+            if (!res.success) throw new Error(res.error || 'Failed to update template');
+            return res.data;
+        },
+        onSuccess: () => {
+            void qc.invalidateQueries({ queryKey: queryKeys.shopping.templates() });
+        },
+    });
+};
+
 export const useApplyTemplate = () => {
     const qc = useQueryClient();
     return useMutation({

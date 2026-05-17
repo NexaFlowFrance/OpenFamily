@@ -1,9 +1,18 @@
 import React, { useMemo, useState } from 'react';
-import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks, Sparkles, X } from 'lucide-react';
+import {
+    Plus,
+    Trash2,
+    Check,
+    ShoppingBag,
+    ListChecks,
+    Sparkles,
+    X,
+    Pencil,
+    PlayCircle,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Dialog } from '../components/ui';
 import { useCurrency } from '../lib/useCurrency';
 import {
     type ShoppingItem,
@@ -12,6 +21,7 @@ import {
     useClearCheckedItems,
     useCreateShoppingItem,
     useCreateTemplate,
+    useUpdateTemplate,
     useDeleteShoppingItem,
     useDeleteTemplate,
     useShoppingItems,
@@ -19,6 +29,9 @@ import {
     useUpdateShoppingItem,
 } from '../hooks/useShopping';
 import { useParseShoppingText, type AiParsedItem } from '../hooks/useAiShopping';
+import ShoppingItemPicker, { type PickerSuggestion } from '../components/app/ShoppingItemPicker';
+import TemplateEditorDialog from '../components/app/TemplateEditorDialog';
+import { SHOPPING_CATALOG } from '../lib/shoppingCatalog';
 
 const categories = ['Alimentation', 'Bebe', 'Menage', 'Sante', 'Autre'];
 
@@ -49,11 +62,10 @@ const ShoppingList: React.FC = () => {
     const deleteItemMutation = useDeleteShoppingItem();
     const clearCheckedMutation = useClearCheckedItems();
     const createTemplateMutation = useCreateTemplate();
+    const updateTemplateMutation = useUpdateTemplate();
     const applyTemplateMutation = useApplyTemplate();
     const deleteTemplateMutation = useDeleteTemplate();
 
-    const [selectedTemplateId, setSelectedTemplateId] = useState('');
-    const [templateName, setTemplateName] = useState('');
     const [newItem, setNewItem] = useState({
         name: '',
         category: 'Alimentation',
@@ -62,8 +74,15 @@ const ShoppingList: React.FC = () => {
         unit: '',
     });
     const [error, setError] = useState('');
-    const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
-    const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
+
+    // Template editor: undefined target = create mode, otherwise edit mode.
+    // `seedFromCurrentList` lets the "Save current list as template" button
+    // pre-fill the editor without polluting an existing template.
+    const [templateEditor, setTemplateEditor] = useState<{
+        open: boolean;
+        target?: ShoppingTemplate;
+        seedFromCurrentList?: boolean;
+    }>({ open: false });
 
     // AI: free-form text → list of items (PR #17).
     // - `aiText` is the textarea content
@@ -79,6 +98,30 @@ const ShoppingList: React.FC = () => {
         (itemsQuery.error instanceof Error ? itemsQuery.error.message : null) ??
         (templatesQuery.error instanceof Error ? templatesQuery.error.message : null);
     const displayedError = error || fetchError || '';
+
+    // Quick-add path: picking a suggestion inserts the item immediately
+    // (qty=1, no price), so the user can chain "Lait, Pain, Œufs…" without
+    // touching the keyboard between rows. The visible form still works for
+    // edge cases that need a specific quantity/price.
+    const quickAddFromSuggestion = async (suggestion: PickerSuggestion) => {
+        setError('');
+        try {
+            await createItem.mutateAsync({
+                name: suggestion.name,
+                category: suggestion.category,
+                unit: suggestion.unit,
+            });
+            setNewItem({
+                name: '',
+                category: 'Alimentation',
+                quantity: '',
+                price: '',
+                unit: '',
+            });
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Impossible d'ajouter cet article.");
+        }
+    };
 
     const addItem = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -156,106 +199,74 @@ const ShoppingList: React.FC = () => {
         }
     };
 
-    const openTemplateDialog = () => {
+    const openCreateTemplate = () => {
+        setError('');
+        setTemplateEditor({ open: true });
+    };
+
+    const openCreateFromCurrentList = () => {
         setError('');
         if (items.length === 0) {
             setError('Aucun article dans la liste pour créer un template.');
             return;
         }
-        // Pre-select all items by default
-        setSelectedItemIds(new Set(items.map((item) => item.id)));
-        setTemplateDialogOpen(true);
+        setTemplateEditor({ open: true, seedFromCurrentList: true });
     };
 
-    const toggleItemSelection = (id: string) => {
-        setSelectedItemIds((prev) => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id);
-            else next.add(id);
-            return next;
-        });
-    };
-
-    const selectByCategory = (category: string) => {
-        setSelectedItemIds((prev) => {
-            const next = new Set(prev);
-            items.filter((item) => item.category === category).forEach((item) => next.add(item.id));
-            return next;
-        });
-    };
-
-    const deselectByCategory = (category: string) => {
-        setSelectedItemIds((prev) => {
-            const next = new Set(prev);
-            items
-                .filter((item) => item.category === category)
-                .forEach((item) => next.delete(item.id));
-            return next;
-        });
-    };
-
-    const saveTemplateFromDialog = async () => {
+    const openEditTemplate = (template: ShoppingTemplate) => {
         setError('');
-        const name = templateName.trim();
-        if (!name) {
-            setError('Donnez un nom au template.');
-            return;
-        }
+        setTemplateEditor({ open: true, target: template });
+    };
 
-        const templateItems = items
-            .filter((item) => selectedItemIds.has(item.id))
-            .map((item) => ({
-                name: item.name,
-                category: item.category,
-                quantity: item.quantity,
-                unit: item.unit,
-                price: item.price,
-                notes: item.notes,
-            }));
-
-        if (templateItems.length === 0) {
-            setError('Sélectionnez au moins un article pour le template.');
-            return;
-        }
-
-        try {
-            await createTemplateMutation.mutateAsync({ name, items: templateItems });
-            setTemplateName('');
-            setTemplateDialogOpen(false);
-            setSelectedItemIds(new Set());
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Impossible d'enregistrer le template.");
+    const handleSaveTemplate = async (payload: {
+        name: string;
+        items: ShoppingTemplate['items'];
+    }) => {
+        if (templateEditor.target) {
+            await updateTemplateMutation.mutateAsync({
+                id: templateEditor.target.id,
+                input: payload,
+            });
+        } else {
+            await createTemplateMutation.mutateAsync(payload);
         }
     };
 
-    const applyTemplate = async () => {
+    const applyTemplateById = async (id: string) => {
         setError('');
-        if (!selectedTemplateId) {
-            setError('Sélectionnez un template à appliquer.');
-            return;
-        }
-
         try {
-            await applyTemplateMutation.mutateAsync(selectedTemplateId);
+            await applyTemplateMutation.mutateAsync(id);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Impossible d'appliquer ce template.");
         }
     };
 
-    const deleteTemplate = async () => {
+    const deleteTemplateById = async (id: string, name: string) => {
         setError('');
-        if (!selectedTemplateId) {
-            setError('Sélectionnez un template à supprimer.');
-            return;
-        }
-
+        const ok = window.confirm(
+            `Supprimer le template « ${name} » ? Cette action est définitive.`,
+        );
+        if (!ok) return;
         try {
-            await deleteTemplateMutation.mutateAsync(selectedTemplateId);
-            setSelectedTemplateId('');
+            await deleteTemplateMutation.mutateAsync(id);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Impossible de supprimer ce template.');
         }
     };
+
+    // For "create from current list", we pass the current rows as
+    // initialDraftItems while leaving `template` undefined so the editor stays
+    // in create mode (no PUT, no existing id).
+    const editorInitialItems = templateEditor.seedFromCurrentList
+        ? items.map((item) => ({
+              name: item.name,
+              category: item.category,
+              quantity: item.quantity,
+              unit: item.unit,
+              price: item.price,
+              notes: item.notes,
+          }))
+        : undefined;
 
     // ------------------------------------------------------------------ //
     // AI handlers                                                         //
@@ -314,6 +325,42 @@ const ShoppingList: React.FC = () => {
 
     const pendingItems = useMemo(() => items.filter((item) => !item.is_checked), [items]);
     const completedItems = useMemo(() => items.filter((item) => item.is_checked), [items]);
+
+    // Top-6 chips for one-tap re-add. Prefer the user's existing rows (sorted by
+    // frequency), then fall back to a small set of catalog staples so brand-new
+    // users still get something to tap on.
+    const quickAddChips: PickerSuggestion[] = useMemo(() => {
+        const counts = new Map<string, { item: ShoppingItem; count: number }>();
+        for (const item of items) {
+            const key = item.name.toLowerCase();
+            const existing = counts.get(key);
+            if (existing) existing.count += 1;
+            else counts.set(key, { item, count: 1 });
+        }
+        const fromHistory = Array.from(counts.values())
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 6)
+            .map<PickerSuggestion>(({ item }) => ({
+                name: item.name,
+                category: item.category,
+                unit: item.unit,
+                source: 'history',
+            }));
+        if (fromHistory.length >= 6) return fromHistory;
+        const staples = ['Lait', 'Pain', 'Œufs', 'Beurre', 'Yaourt nature', 'Pommes'];
+        const filler = staples
+            .map((name) => SHOPPING_CATALOG.find((c) => c.name === name))
+            .filter((c): c is (typeof SHOPPING_CATALOG)[number] => Boolean(c))
+            .filter((c) => !fromHistory.some((h) => h.name.toLowerCase() === c.name.toLowerCase()))
+            .slice(0, 6 - fromHistory.length)
+            .map<PickerSuggestion>((c) => ({
+                name: c.name,
+                category: c.category,
+                unit: c.unit,
+                source: 'catalog',
+            }));
+        return [...fromHistory, ...filler];
+    }, [items]);
 
     const totalPrice = useMemo(() => {
         return pendingItems.reduce((sum, item) => {
@@ -442,16 +489,50 @@ const ShoppingList: React.FC = () => {
                     <CardTitle>Ajouter un article</CardTitle>
                 </CardHeader>
                 <CardContent>
+                    {quickAddChips.length > 0 ? (
+                        <div className="mb-4">
+                            <p className="mb-2 text-micro font-medium uppercase tracking-wide text-muted-foreground">
+                                Ajout rapide
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {quickAddChips.map((chip) => (
+                                    <button
+                                        key={`${chip.source}-${chip.name}`}
+                                        type="button"
+                                        onClick={() => void quickAddFromSuggestion(chip)}
+                                        disabled={createItem.isPending}
+                                        className="inline-flex items-center gap-1 rounded-pill border border-border bg-muted/30 px-3 py-1 text-caption text-foreground transition-colors hover:border-primary hover:bg-primary-soft disabled:opacity-50"
+                                    >
+                                        <Plus className="h-3 w-3" />
+                                        {chip.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ) : null}
                     <form onSubmit={addItem} className="grid grid-cols-1 gap-4 md:grid-cols-8">
                         <div className="md:col-span-3">
-                            <Input
-                                label="Nom"
-                                type="text"
+                            <ShoppingItemPicker
                                 value={newItem.name}
-                                onChange={(e) =>
-                                    setNewItem((prev) => ({ ...prev, name: e.target.value }))
+                                onChange={(value) =>
+                                    setNewItem((prev) => ({ ...prev, name: value }))
                                 }
-                                placeholder="Ex: Lait, Pain"
+                                onPick={(suggestion) => {
+                                    // Auto-fill category + unit so the user only
+                                    // tweaks quantity/price if they care.
+                                    setNewItem((prev) => ({
+                                        ...prev,
+                                        name: suggestion.name,
+                                        category: suggestion.category,
+                                        unit: suggestion.unit ?? prev.unit,
+                                    }));
+                                    // No quantity/price entered yet → assume the
+                                    // user wants the default "just add it" path.
+                                    if (!newItem.quantity && !newItem.price) {
+                                        void quickAddFromSuggestion(suggestion);
+                                    }
+                                }}
+                                historyItems={items}
                             />
                         </div>
                         <div className="md:col-span-2">
@@ -510,62 +591,107 @@ const ShoppingList: React.FC = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <ListChecks className="h-5 w-5 text-primary" />
-                        Templates de courses
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <Input
-                            label="Nouveau template"
-                            value={templateName}
-                            onChange={(e) => setTemplateName(e.target.value)}
-                            placeholder="Ex: Courses semaine"
-                        />
-                        <div className="md:col-span-2 flex items-end gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <CardTitle className="flex items-center gap-2">
+                            <ListChecks className="h-5 w-5 text-primary" />
+                            Templates de courses
+                        </CardTitle>
+                        <div className="flex flex-wrap gap-2">
                             <Button
                                 variant="secondary"
-                                className="w-full md:w-auto"
-                                onClick={openTemplateDialog}
+                                size="sm"
+                                onClick={openCreateFromCurrentList}
+                                disabled={items.length === 0}
+                                title={
+                                    items.length === 0
+                                        ? 'La liste est vide'
+                                        : 'Créer un template depuis la liste actuelle'
+                                }
                             >
-                                <Save className="mr-1 h-4 w-4" />
-                                Créer un template
+                                Depuis la liste
+                            </Button>
+                            <Button size="sm" onClick={openCreateTemplate}>
+                                <Plus className="mr-1 h-4 w-4" />
+                                Nouveau template
                             </Button>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <div className="md:col-span-2">
-                            <label className="mb-1.5 block text-caption font-medium text-foreground">
-                                Template existant
-                            </label>
-                            <select
-                                value={selectedTemplateId}
-                                onChange={(e) => setSelectedTemplateId(e.target.value)}
-                                className="input-nexus py-0 text-caption"
-                            >
-                                <option value="">Selectionner un template</option>
-                                {templates.map((template) => (
-                                    <option key={template.id} value={template.id}>
-                                        {template.name} ({template.items?.length || 0} articles)
-                                    </option>
-                                ))}
-                            </select>
+                </CardHeader>
+                <CardContent>
+                    {templates.length === 0 ? (
+                        <div className="rounded-input border border-dashed border-border bg-muted/20 px-3 py-8 text-center">
+                            <p className="text-caption text-muted-foreground">
+                                Pas encore de template. Créez-en un pour réutiliser une liste type
+                                (courses semaine, apéro, vacances…) en un clic.
+                            </p>
                         </div>
-                        <div className="flex items-end gap-2">
-                            <Button variant="secondary" className="flex-1" onClick={applyTemplate}>
-                                Appliquer
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className="text-destructive hover:bg-destructive/10"
-                                onClick={deleteTemplate}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
+                    ) : (
+                        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                            {templates.map((template) => {
+                                const preview = template.items
+                                    .slice(0, 3)
+                                    .map((i) => i.name)
+                                    .join(' · ');
+                                const extra = Math.max(0, template.items.length - 3);
+                                return (
+                                    <li
+                                        key={template.id}
+                                        className="rounded-card border border-border bg-card p-3 transition-colors hover:border-border-strong"
+                                    >
+                                        <div className="mb-1 flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                                <p className="truncate text-body font-semibold text-foreground">
+                                                    {template.name}
+                                                </p>
+                                                <p className="text-micro text-muted-foreground">
+                                                    {template.items.length} article
+                                                    {template.items.length > 1 ? 's' : ''}
+                                                </p>
+                                            </div>
+                                            <div className="flex shrink-0 gap-1">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => openEditTemplate(template)}
+                                                    title="Modifier"
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="text-destructive hover:bg-destructive/10"
+                                                    onClick={() =>
+                                                        deleteTemplateById(
+                                                            template.id,
+                                                            template.name,
+                                                        )
+                                                    }
+                                                    title="Supprimer"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <p className="mb-3 line-clamp-2 text-caption text-muted-foreground">
+                                            {preview || 'Template vide'}
+                                            {extra > 0 ? ` · +${extra}` : ''}
+                                        </p>
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            className="w-full"
+                                            onClick={() => applyTemplateById(template.id)}
+                                            disabled={applyTemplateMutation.isPending}
+                                        >
+                                            <PlayCircle className="mr-1 h-4 w-4" />
+                                            Appliquer à ma liste
+                                        </Button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
                 </CardContent>
             </Card>
 
@@ -673,120 +799,21 @@ const ShoppingList: React.FC = () => {
                 </div>
             </div>
 
-            {/* Template creation dialog */}
-            <Dialog
-                open={templateDialogOpen}
-                onOpenChange={setTemplateDialogOpen}
-                title="Nouveau template de courses"
-                description="Sélectionnez les articles à inclure dans ce template"
-            >
-                <div className="space-y-4">
-                    <Input
-                        label="Nom du template"
-                        value={templateName}
-                        onChange={(e) => setTemplateName(e.target.value)}
-                        placeholder="Ex: Courses semaine, Fruits et légumes..."
-                    />
-                    <div>
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-label font-medium text-foreground">
-                                Articles ({selectedItemIds.size}/{items.length} sélectionnés)
-                            </span>
-                            <div className="flex gap-2">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() =>
-                                        setSelectedItemIds(new Set(items.map((i) => i.id)))
-                                    }
-                                >
-                                    Tout sélectionner
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setSelectedItemIds(new Set())}
-                                >
-                                    Tout désélectionner
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="max-h-72 overflow-y-auto space-y-3 rounded-input border border-border p-3">
-                            {categories.map((category) => {
-                                const categoryItems = items.filter(
-                                    (item) => item.category === category,
-                                );
-                                if (categoryItems.length === 0) return null;
-                                const allSelected = categoryItems.every((item) =>
-                                    selectedItemIds.has(item.id),
-                                );
-                                return (
-                                    <div key={category}>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="text-caption font-semibold text-muted-foreground uppercase tracking-wide">
-                                                {category} ({categoryItems.length})
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    allSelected
-                                                        ? deselectByCategory(category)
-                                                        : selectByCategory(category)
-                                                }
-                                                className="text-micro text-primary underline hover:no-underline"
-                                            >
-                                                {allSelected
-                                                    ? 'Désélectionner'
-                                                    : 'Tout sélectionner'}
-                                            </button>
-                                        </div>
-                                        <div className="space-y-1 pl-1">
-                                            {categoryItems.map((item) => (
-                                                <label
-                                                    key={item.id}
-                                                    className="flex items-center gap-2 cursor-pointer hover:bg-nexus-background rounded px-1 py-0.5"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedItemIds.has(item.id)}
-                                                        onChange={() =>
-                                                            toggleItemSelection(item.id)
-                                                        }
-                                                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                                                    />
-                                                    <span
-                                                        className={`text-body-sm ${item.is_checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}
-                                                    >
-                                                        {item.name}
-                                                        {item.quantity
-                                                            ? ` · ${item.quantity}${item.unit ? ' ' + item.unit : ''}`
-                                                            : ''}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => setTemplateDialogOpen(false)}
-                        >
-                            Annuler
-                        </Button>
-                        <Button type="button" onClick={saveTemplateFromDialog}>
-                            <Save className="mr-1 h-4 w-4" />
-                            Créer le template
-                        </Button>
-                    </div>
-                </div>
-            </Dialog>
+            <TemplateEditorDialog
+                open={templateEditor.open}
+                onOpenChange={(open) =>
+                    setTemplateEditor((prev) => ({
+                        ...prev,
+                        open,
+                        ...(open ? {} : { target: undefined, seedFromCurrentList: false }),
+                    }))
+                }
+                template={templateEditor.target}
+                initialDraftItems={editorInitialItems}
+                historyItems={items}
+                onSave={handleSaveTemplate}
+                isSaving={createTemplateMutation.isPending || updateTemplateMutation.isPending}
+            />
         </div>
     );
 };

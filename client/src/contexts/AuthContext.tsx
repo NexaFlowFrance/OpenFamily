@@ -6,13 +6,14 @@ interface User {
     email: string;
     name: string;
     is_owner?: boolean;
+    role?: string;
 }
 
 interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string, name: string, inviteToken?: string) => Promise<void>;
+    register: (email: string, password: string, name: string, inviteToken?: string, role?: string) => Promise<void>;
     joinFamily: (inviteToken: string) => Promise<void>;
     leaveFamily: () => Promise<void>;
     logout: () => void;
@@ -91,8 +92,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
-    const register = async (email: string, password: string, name: string, inviteToken?: string) => {
-        const response = await api.register(email, password, name, inviteToken);
+    const register = async (email: string, password: string, name: string, inviteToken?: string, role?: string) => {
+        const response = await api.register(email, password, name, inviteToken, role);
         if (response.success && response.user) {
             setUser(response.user);
             localStorage.setItem('user', JSON.stringify(response.user));

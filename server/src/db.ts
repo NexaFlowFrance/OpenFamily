@@ -141,6 +141,8 @@ export const runMigrations = async () => {
         )`,
         'CREATE INDEX IF NOT EXISTS idx_family_invites_token ON family_invites(token)',
         'CREATE INDEX IF NOT EXISTS idx_family_invites_owner ON family_invites(owner_id)',
+        // Migration 003: user role (parent / enfant)
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'parent'",
     ];
 
     for (const migration of migrations) {

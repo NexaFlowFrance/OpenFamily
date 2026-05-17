@@ -31,6 +31,7 @@ interface SharedAccount {
     name: string;
     email: string;
     is_owner: boolean;
+    role?: string;
 }
 
 const Family: React.FC = () => {
@@ -408,7 +409,7 @@ const Family: React.FC = () => {
                                                 <p className="text-body-sm text-muted-foreground truncate">{account.email}</p>
                                             </div>
                                             <Badge variant={account.is_owner ? 'primary' : 'default'}>
-                                                {account.is_owner ? 'Propriétaire' : 'Membre'}
+                                                {account.is_owner ? 'Propriétaire' : (account.role === 'enfant' ? '🧒 Enfant' : '👨 Parent')}
                                             </Badge>
                                             {/* Owner can kick non-owner members (except themselves) */}
                                             {isOwner && !account.is_owner && (

@@ -100,8 +100,8 @@ class ApiClient {
         return response;
     }
 
-    async register(email: string, password: string, name: string, inviteToken?: string) {
-        const body: Record<string, string> = { email, password, name };
+    async register(email: string, password: string, name: string, inviteToken?: string, role?: string) {
+        const body: Record<string, string> = { email, password, name, role: role ?? 'parent' };
         if (inviteToken) body.inviteToken = inviteToken;
 
         const response = await this.post<any>(

@@ -362,23 +362,120 @@ export const parseShoppingNaturalLanguage = async (
     return out;
 };
 
+// Models occasionally wrap JSON in markdown code fences (```json … ```), even
+// when `response_format: json_object` is requested. Gemini does it more often
+// than NVIDIA. Strip the fence wrapper (and any trailing text) before the
+// brace-extraction fallback runs.
+const stripMarkdownFences = (raw: string): string => {
+    const trimmed = raw.trim();
+    // ```json\n{...}\n```  or  ```\n{...}\n```
+    const fenced = trimmed.match(/^```(?:json|JSON)?\s*\n?([\s\S]*?)\n?\s*```\s*$/);
+    if (fenced) return fenced[1].trim();
+    return trimmed;
+};
+
+// Salvage a JSON document that was truncated mid-stream (typically when the
+// model hits its max_tokens budget mid-array). Strategy:
+//   1. Cut at the last "}," — guaranteed to be on an object boundary that's
+//      followed by a separator, so everything up to and including that `}` is
+//      a complete JSON value.
+//   2. Walk the truncated chunk char by char, ignoring chars inside strings,
+//      and track every unclosed `{` / `[` on a stack.
+//   3. Append matching closers in LIFO order — that produces a syntactically
+//      valid JSON document with one fewer element than the model intended.
+// Returns the recovered string, or null if no recovery point exists.
+const recoverTruncatedJson = (raw: string): string | null => {
+    const cutAt = raw.lastIndexOf('},');
+    if (cutAt === -1) return null;
+    let truncated = raw.slice(0, cutAt + 1);
+
+    const stack: string[] = [];
+    let inString = false;
+    let escape = false;
+    for (const ch of truncated) {
+        if (escape) {
+            escape = false;
+            continue;
+        }
+        if (ch === '\\') {
+            escape = true;
+            continue;
+        }
+        if (ch === '"') {
+            inString = !inString;
+            continue;
+        }
+        if (inString) continue;
+        if (ch === '{' || ch === '[') stack.push(ch);
+        else if (ch === '}' || ch === ']') stack.pop();
+    }
+    for (let i = stack.length - 1; i >= 0; i--) {
+        truncated += stack[i] === '{' ? '}' : ']';
+    }
+    return truncated;
+};
+
 const safeParseJson = (content: string | null): unknown => {
     if (!content) {
         throw new AiError('BAD_JSON', 'Empty model response');
     }
+    const stripped = stripMarkdownFences(content);
+    let firstError: string | null = null;
     try {
-        return JSON.parse(content);
-    } catch {
-        // Last-ditch attempt: some 8B replies leak a leading sentence before
-        // the JSON. Pull the first {…} block out.
-        const m = content.match(/\{[\s\S]*\}/);
+        return JSON.parse(stripped);
+    } catch (err) {
+        firstError = err instanceof Error ? err.message : String(err);
+        // Last-ditch attempt: some replies leak a leading sentence before
+        // the JSON or trailing prose after. Pull the first {…} block out
+        // (greedy match captures everything between the first `{` and last `}`).
+        const m = stripped.match(/\{[\s\S]*\}/);
         if (m) {
             try {
                 return JSON.parse(m[0]);
-            } catch {
+            } catch (err2) {
+                firstError = err2 instanceof Error ? err2.message : String(err2);
                 // fall through
             }
         }
+        // Final fallback: salvage a truncated JSON by chopping the incomplete
+        // tail and balancing the brackets. We lose at most one array element
+        // but the rest of the payload becomes usable — much better than
+        // bubbling BAD_JSON to the caller and discarding everything.
+        const recovered = recoverTruncatedJson(stripped);
+        if (recovered) {
+            try {
+                const parsed = JSON.parse(recovered);
+                logger.info('ai.json_recovered_from_truncation', {
+                    originalLength: content.length,
+                    recoveredLength: recovered.length,
+                });
+                return parsed;
+            } catch {
+                // fall through to error log + throw
+            }
+        }
+        // Extract context around the offending position so we can see whether
+        // the JSON was truncated mid-token (max_tokens hit), poisoned by a bad
+        // escape, or followed by trailing prose. JSON.parse errors include the
+        // 0-based char offset in their message — pull it out with a regex.
+        const positionMatch = firstError?.match(/position (\d+)/);
+        const errorPosition = positionMatch ? parseInt(positionMatch[1], 10) : null;
+        const errorContext =
+            errorPosition !== null
+                ? content.slice(
+                      Math.max(0, errorPosition - 150),
+                      Math.min(content.length, errorPosition + 150),
+                  )
+                : null;
+
+        logger.warn('ai.bad_json_response', {
+            head: content.slice(0, 800),
+            tail: content.slice(-1500),
+            length: content.length,
+            parseError: firstError,
+            errorPosition,
+            errorContext,
+        });
         throw new AiError('BAD_JSON', 'Model response was not valid JSON');
     }
 };
@@ -1513,11 +1610,30 @@ export const generateVacationLuggage = async (
             ],
             temperature: 0.4,
             // ~25 items per person + 12 shared, ~12 tokens each = generous margin.
-            maxTokens: Math.min(3000, 600 + input.participants.length * 350),
+            // Each item is ~30 tokens of JSON; the prompt asks for 8-15 items
+            // per person + 6-12 shared. For a family of 4 that means
+            // ~1500-2000 tokens of actual content, and providers (notably
+            // Gemini) need real headroom to finish closing braces — too tight
+            // a budget produces silent mid-array truncation and BAD_JSON
+            // downstream. 1200 + 600 × people, capped at 6000, gives ~50%
+            // margin even on the high end.
+            maxTokens: Math.min(8000, 1500 + input.participants.length * 800),
             jsonMode: true,
         },
         { userId: ctx.userId, feature: 'vacations.luggage_generate' },
     );
+
+    // Capture finishReason BEFORE the parser runs. If `length`, the JSON is
+    // truncated and any parse error is downstream of a token-budget issue —
+    // no point hunting an escape bug. If `stop`, the model thinks it's done
+    // and the content should be valid; a parse error then points at something
+    // the prompt didn't constrain.
+    logger.info('ai.luggage_response_meta', {
+        finishReason: response.finishReason,
+        contentLength: response.content?.length ?? 0,
+        promptTokens: response.usage.promptTokens,
+        completionTokens: response.usage.completionTokens,
+    });
 
     const parsed = safeParseJson(response.content);
     const luggage = sanitizeLuggage(parsed, validOwnerIds);

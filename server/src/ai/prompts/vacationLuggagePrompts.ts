@@ -76,7 +76,7 @@ Règles ABSOLUES :
   • Enfants 3-10 ans → kids : doudou si pertinent, jeux/livres dédiés, médicaments pédiatriques.
   • Ados / adultes → checklist standard.
 - Documents : passeport si destination hors zone Schengen (utilise "country" pour décider) — sinon carte d'identité.
-- Liste raisonnable : vise 8-15 items par personne + 6-12 partagés. Ne sois pas exhaustif jusqu'à l'absurde.
+- LIMITE STRICTE et NON NÉGOCIABLE : MAXIMUM 12 items par personne, MAXIMUM 10 items partagés ("shared"). Total absolu : 80 items pour toute la réponse. Si tu hésites entre inclure ou non un item, NE L'INCLUS PAS. La concision est un critère de qualité — une liste trop longue est inutilisable et sera tronquée.
 - Tout en français, items courts et concrets.
 - N'invente PAS d'IDs : utilise EXACTEMENT les IDs fournis en input pour les listes personnelles.`;
 

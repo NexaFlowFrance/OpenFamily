@@ -98,6 +98,19 @@ export class GeminiProvider implements BaseProvider {
         if (req.tools && req.tools.length > 0) body.tools = req.tools;
         if (req.toolChoice !== undefined) body.tool_choice = req.toolChoice;
 
+        // Disable Gemini 2.5 "thinking" tokens. Without this, models in the
+        // 2.5 family silently consume the `max_tokens` budget on internal
+        // reasoning before emitting a single visible token, which truncates
+        // long structured outputs (vacation plans, luggage checklists).
+        //
+        // The Gemini OpenAI-compatible REST endpoint reads the standard OpenAI
+        // `reasoning_effort` field and maps "none" onto Google's
+        // `thinking_config.thinking_budget = 0`. The `extra_body` convention
+        // from the OpenAI Python SDK is NOT honored over REST — it gets
+        // silently ignored — so we send the canonical field instead.
+        // Harmless on non-thinking models (1.5, 2.0): the field is ignored.
+        body.reasoning_effort = 'none';
+
         const parsed = await this.postWithRetry<GeminiChatResponse>('/chat/completions', body);
         const choice = parsed.choices?.[0];
         if (!choice) {

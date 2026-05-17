@@ -68,11 +68,23 @@ const DEFAULT_MODELS: Record<AiProviderName, { default: string; heavy: string; v
         vision: 'meta/llama-3.2-90b-vision-instruct',
     },
     gemini: {
-        // Flash for default cheap calls, Pro for heavy reasoning, Flash again
-        // for vision (it's natively multimodal — Pro would also work).
-        default: 'gemini-2.5-flash',
-        heavy: 'gemini-2.5-pro',
-        vision: 'gemini-2.5-flash',
+        // gemini-2.5-flash-lite on every slot. The "lite" variant has NO
+        // built-in thinking, which matters because:
+        //   * Gemini's OpenAI-compatible REST endpoint silently ignores both
+        //     the `extra_body.google.thinking_config` shape (a Python SDK
+        //     convention) and the standard `reasoning_effort: "none"` field.
+        //   * Thinking-enabled 2.5 models therefore consume a large slice of
+        //     the `max_tokens` budget on hidden reasoning, which truncates
+        //     visible JSON on long structured outputs (vacation plans, luggage
+        //     checklists ~4 KB).
+        //   * 2.5-flash-lite is on the free tier, natively multimodal, and
+        //     fast enough that "heavy" tasks still complete in a few seconds.
+        //
+        // Override AI_MODEL_HEAVY=gemini-2.5-pro for deeper reasoning, but be
+        // ready to bump AI_REQUEST_TIMEOUT_MS and accept the thinking caveat.
+        default: 'gemini-2.5-flash-lite',
+        heavy: 'gemini-2.5-flash-lite',
+        vision: 'gemini-2.5-flash-lite',
     },
 };
 

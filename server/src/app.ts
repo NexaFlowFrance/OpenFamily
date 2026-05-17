@@ -21,6 +21,7 @@ import logger from './lib/logger';
 loadEnv();
 
 const app = express();
+app.set('trust proxy', 1);
 const authRateLimitWindowMs = Number.parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || '900000', 10);
 const authRateLimitMax = Number.parseInt(process.env.AUTH_RATE_LIMIT_MAX || '10', 10);
 

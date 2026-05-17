@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { parseStringArray, serializeStringArray, toNullIfEmpty } from '../lib/normalize';
+import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
 router.use(authMiddleware);
@@ -190,6 +191,7 @@ router.post('/', async (req: AuthRequest, res) => {
             ]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'family', action: 'created' });
         res.json({ success: true, data: mapFamilyMember(result.rows[0]) });
     } catch (error) {
         console.error('Create family member error:', error);
@@ -310,6 +312,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Family member not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'family', action: 'updated' });
         res.json({ success: true, data: mapFamilyMember(result.rows[0]) });
     } catch (error) {
         console.error('Update family member error:', error);
@@ -331,6 +334,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Family member not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'family', action: 'deleted' });
         res.json({ success: true, message: 'Family member deleted' });
     } catch (error) {
         console.error('Delete family member error:', error);

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
-import { Plus, Edit2, Trash2, User, Phone, Heart, AlertTriangle } from 'lucide-react';
+import { Plus, Edit2, Trash2, User, Phone, Heart, AlertTriangle, Users, Link2, Copy, LogOut, Crown, UserX, Check } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, Badge } from '../components/ui';
 import { DEFAULT_FAMILY_COLOR, FAMILY_COLOR_PRESETS } from '../design/colorPresets';
 
@@ -24,12 +26,27 @@ const ROLES = [
     { value: 'Autre', label: 'Autre' },
 ];
 
+interface SharedAccount {
+    id: string;
+    name: string;
+    email: string;
+    is_owner: boolean;
+}
+
 const Family: React.FC = () => {
+    const { user, leaveFamily } = useAuth();
     const [members, setMembers] = useState<FamilyMember[]>([]);
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
     const [error, setError] = useState('');
+
+    // Shared accounts state
+    const [sharedAccounts, setSharedAccounts] = useState<SharedAccount[]>([]);
+    const [inviteLink, setInviteLink] = useState<string | null>(null);
+    const [inviteLinkLoading, setInviteLinkLoading] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const [leavingFamily, setLeavingFamily] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -45,7 +62,9 @@ const Family: React.FC = () => {
 
     useEffect(() => {
         loadMembers();
+        loadSharedAccounts();
     }, []);
+    useWebSocketUpdates('family', () => { void loadMembers(); });
 
     const loadMembers = async () => {
         try {
@@ -58,6 +77,63 @@ const Family: React.FC = () => {
             setError(error instanceof Error ? error.message : 'Impossible de charger la famille.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadSharedAccounts = async () => {
+        try {
+            const response = await api.get<{ success: boolean; data: SharedAccount[] }>('/api/invites/members');
+            if (response.success) {
+                setSharedAccounts(response.data);
+            }
+        } catch {
+            // Silently ignore — non-blocking
+        }
+    };
+
+    const handleGenerateInvite = async () => {
+        setInviteLinkLoading(true);
+        try {
+            const response = await api.post<{ success: boolean; data: { token: string } }>('/api/invites', {});
+            if (response.success && response.data) {
+                const baseUrl = window.location.origin;
+                setInviteLink(`${baseUrl}/join?invite=${response.data.token}`);
+            }
+        } catch {
+            setError('Impossible de créer un lien d\'invitation.');
+        } finally {
+            setInviteLinkLoading(false);
+        }
+    };
+
+    const handleCopyInvite = () => {
+        if (!inviteLink) return;
+        navigator.clipboard.writeText(inviteLink).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
+    const handleKickMember = async (userId: string) => {
+        if (!confirm('Retirer ce compte de la famille ?')) return;
+        try {
+            await api.delete(`/api/invites/members/${userId}`);
+            await loadSharedAccounts();
+        } catch {
+            setError('Impossible de retirer ce membre.');
+        }
+    };
+
+    const handleLeaveFamily = async () => {
+        if (!confirm('Quitter la famille partagée ? Vous retrouverez vos propres données.')) return;
+        setLeavingFamily(true);
+        try {
+            await leaveFamily();
+            setSharedAccounts([]);
+        } catch {
+            setError('Impossible de quitter la famille.');
+        } finally {
+            setLeavingFamily(false);
         }
     };
 
@@ -294,6 +370,121 @@ const Family: React.FC = () => {
                     ))}
                 </div>
             )}
+
+            {/* Shared accounts section */}
+            {(() => {
+                const currentAccount = sharedAccounts.find((a) => a.id === user?.id);
+                const isOwner = currentAccount?.is_owner ?? true;
+
+                return (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <Users className="w-5 h-5 text-nexus-blue" />
+                            <h2 className="text-h2">Comptes partagés</h2>
+                        </div>
+                        <p className="text-body-sm text-muted-foreground">
+                            Partagez l'accès à vos données familiales avec d'autres comptes.
+                        </p>
+
+                        {/* Account list */}
+                        {sharedAccounts.length > 1 && (
+                            <div className="grid gap-3">
+                                {sharedAccounts.map((account) => (
+                                    <Card key={account.id} hover={false}>
+                                        <CardContent className="flex items-center gap-3 p-4">
+                                            <div className="w-10 h-10 rounded-full bg-nexus-blue/10 flex items-center justify-center shrink-0">
+                                                {account.is_owner
+                                                    ? <Crown className="w-5 h-5 text-nexus-blue" />
+                                                    : <User className="w-5 h-5 text-muted-foreground" />
+                                                }
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-body font-medium truncate">
+                                                    {account.name}
+                                                    {account.id === user?.id && (
+                                                        <span className="ml-2 text-label-sm text-muted-foreground">(vous)</span>
+                                                    )}
+                                                </p>
+                                                <p className="text-body-sm text-muted-foreground truncate">{account.email}</p>
+                                            </div>
+                                            <Badge variant={account.is_owner ? 'primary' : 'default'}>
+                                                {account.is_owner ? 'Propriétaire' : 'Membre'}
+                                            </Badge>
+                                            {/* Owner can kick non-owner members (except themselves) */}
+                                            {isOwner && !account.is_owner && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleKickMember(account.id)}
+                                                    title="Retirer ce compte"
+                                                >
+                                                    <UserX className="w-4 h-4 text-red-500" />
+                                                </Button>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+
+                        {sharedAccounts.length <= 1 && (
+                            <Card hover={false}>
+                                <CardContent className="p-4 text-center text-muted-foreground text-body-sm">
+                                    Aucun autre compte ne partage encore cette famille.
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Owner: generate invite */}
+                        {isOwner && (
+                            <div className="space-y-3">
+                                <Button
+                                    variant="secondary"
+                                    onClick={handleGenerateInvite}
+                                    disabled={inviteLinkLoading}
+                                    className="flex items-center gap-2"
+                                >
+                                    <Link2 className="w-4 h-4" />
+                                    {inviteLinkLoading ? 'Génération…' : 'Générer un lien d\'invitation'}
+                                </Button>
+
+                                {inviteLink && (
+                                    <div className="flex items-center gap-2 p-3 rounded-nexus bg-nexus-blue/5 border border-nexus-blue/20">
+                                        <input
+                                            readOnly
+                                            value={inviteLink}
+                                            className="flex-1 bg-transparent text-body-sm text-foreground outline-none truncate"
+                                        />
+                                        <button
+                                            onClick={handleCopyInvite}
+                                            className="shrink-0 p-1 rounded hover:bg-nexus-blue/10 transition-colors"
+                                            title="Copier"
+                                        >
+                                            {copied
+                                                ? <Check className="w-4 h-4 text-green-500" />
+                                                : <Copy className="w-4 h-4 text-nexus-blue" />
+                                            }
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Member: leave family */}
+                        {!isOwner && (
+                            <Button
+                                variant="ghost"
+                                onClick={handleLeaveFamily}
+                                disabled={leavingFamily}
+                                className="flex items-center gap-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                {leavingFamily ? 'Départ en cours…' : 'Quitter la famille partagée'}
+                            </Button>
+                        )}
+                    </div>
+                );
+            })()}
 
             {/* Dialog */}
             <Dialog

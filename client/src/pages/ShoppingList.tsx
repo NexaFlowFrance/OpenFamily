@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -62,6 +63,7 @@ const ShoppingList: React.FC = () => {
     useEffect(() => {
         void Promise.all([loadItems(), loadTemplates()]).finally(() => setLoading(false));
     }, []);
+    useWebSocketUpdates('shopping', () => { void loadItems(); });
 
     const loadItems = async () => {
         try {

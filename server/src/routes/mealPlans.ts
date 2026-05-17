@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty } from '../lib/normalize';
+import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
 router.use(authMiddleware);
@@ -95,6 +96,7 @@ router.post('/', async (req: AuthRequest, res) => {
             [result.rows[0].id, req.userId]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'meal-plans', action: 'created' });
         res.json({ success: true, data: mapMealPlanRow(withRecipe.rows[0]) });
     } catch (error) {
         if (error instanceof Error && error.message === 'INVALID_RECIPE') {
@@ -174,6 +176,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
             [id, req.userId]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'meal-plans', action: 'updated' });
         res.json({ success: true, data: mapMealPlanRow(withRecipe.rows[0]) });
     } catch (error) {
         if (error instanceof Error && error.message === 'INVALID_RECIPE') {
@@ -199,6 +202,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Meal plan not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'meal-plans', action: 'deleted' });
         res.json({ success: true, message: 'Meal plan deleted' });
     } catch (error) {
         console.error('Delete meal plan error:', error);

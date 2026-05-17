@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { Plus, Search, Edit2, Trash2, Clock, Users, ChefHat, Eye } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, Badge } from '../components/ui';
@@ -59,6 +60,7 @@ const Recipes: React.FC = () => {
     useEffect(() => {
         loadRecipes();
     }, []);
+    useWebSocketUpdates('recipes', () => { void loadRecipes(); });
 
     const loadRecipes = async () => {
         try {

@@ -8,6 +8,12 @@ loadEnv();
 // This prevents timezone-related date shifts (e.g. '2026-03-09' → '2026-03-08T23:00:00.000Z').
 types.setTypeParser(1082, (val: string) => val);
 
+if (!process.env.POSTGRES_PASSWORD) {
+    logger.warn('db.missing_password', {
+        message: 'POSTGRES_PASSWORD is not set — falling back to default. Set it in your .env file.',
+    });
+}
+
 const pool = new Pool({
     host: process.env.POSTGRES_HOST || 'localhost',
     port: parseInt(process.env.POSTGRES_PORT || '5432'),
@@ -122,6 +128,19 @@ export const runMigrations = async () => {
         'ALTER TABLE schedule_entries DROP CONSTRAINT IF EXISTS schedule_entries_check',
         'ALTER TABLE schedule_entries ADD COLUMN IF NOT EXISTS specific_date DATE',
         'ALTER TABLE schedule_entries ADD COLUMN IF NOT EXISTS location TEXT',
+        // Migration 002: family account sharing
+        'ALTER TABLE users ADD COLUMN IF NOT EXISTS family_owner_id UUID REFERENCES users(id) ON DELETE SET NULL',
+        `CREATE TABLE IF NOT EXISTS family_invites (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            token VARCHAR(64) UNIQUE NOT NULL,
+            invitee_email TEXT,
+            status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'revoked')),
+            expires_at TIMESTAMP NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_family_invites_token ON family_invites(token)',
+        'CREATE INDEX IF NOT EXISTS idx_family_invites_owner ON family_invites(owner_id)',
     ];
 
     for (const migration of migrations) {

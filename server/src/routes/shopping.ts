@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getClient, query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
+import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
 
@@ -57,6 +58,7 @@ router.post('/', async (req: AuthRequest, res) => {
             ]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'shopping', action: 'created' });
         res.json({ success: true, data: result.rows[0] });
     } catch (error) {
         console.error('Create shopping item error:', error);
@@ -110,6 +112,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Item not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'shopping', action: 'updated' });
         res.json({ success: true, data: result.rows[0] });
     } catch (error) {
         console.error('Update shopping item error:', error);
@@ -131,6 +134,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Item not found' });
         }
 
+        broadcast(req.userId!, { type: 'update', entity: 'shopping', action: 'deleted' });
         res.json({ success: true, message: 'Item deleted' });
     } catch (error) {
         console.error('Delete shopping item error:', error);
@@ -146,6 +150,7 @@ router.delete('/checked/clear', async (req: AuthRequest, res) => {
             [req.userId]
         );
 
+        broadcast(req.userId!, { type: 'update', entity: 'shopping', action: 'deleted' });
         res.json({ success: true, message: 'Checked items cleared' });
     } catch (error) {
         console.error('Clear checked items error:', error);
@@ -237,6 +242,7 @@ router.post('/templates/:id/apply', async (req: AuthRequest, res) => {
         }
 
         await client.query('COMMIT');
+        broadcast(req.userId!, { type: 'update', entity: 'shopping', action: 'created' });
         res.json({ success: true, message: 'Template applied' });
     } catch (error) {
         await client.query('ROLLBACK');

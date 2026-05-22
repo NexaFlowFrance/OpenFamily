@@ -5,6 +5,16 @@
     "errors": {
       "update": "Erreur lors de la mise à jour."
     },
+    "password": {
+      "title": "Mot de passe",
+      "description": "Changez le mot de passe de votre compte.",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "confirm": "Confirmer le nouveau mot de passe",
+      "saved": "Mot de passe mis à jour.",
+      "tooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "mismatch": "Les mots de passe ne correspondent pas."
+    },
     "currency": {
       "title": "Devise",
       "description": "Devise utilisée pour afficher les montants (budget, courses, dashboard). Les montants déjà saisis ne sont pas convertis lors d'un changement.",

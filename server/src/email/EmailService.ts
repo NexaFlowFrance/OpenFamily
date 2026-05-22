@@ -15,6 +15,7 @@ import { getEmailConfig } from './config';
 import { EmailError, classifySmtpError } from './errors';
 import { renderNotificationEmail } from './templates/notificationEmail';
 import { renderDigestEmail, type DigestNotification } from './templates/digestEmail';
+import { renderInvitationEmail } from './templates/invitationEmail';
 
 export interface EmailRecipient {
     email: string;
@@ -25,6 +26,11 @@ export interface EmailNotificationPayload {
     type: string;
     title: string;
     message: string;
+}
+
+export interface InvitationEmailPayload {
+    inviterName: string;
+    temporaryPassword: string;
 }
 
 export interface SendResult {
@@ -99,6 +105,36 @@ export const sendNotificationEmail = async (
     });
     logger.info('email.notification_sent', {
         type: notification.type,
+        latencyMs: result.latencyMs,
+        messageId: result.messageId || undefined,
+    });
+    return result;
+};
+
+// Account-invitation email. Transactional: unlike notification/digest emails it
+// is NOT gated by the recipient's email_notifications_enabled preference (the
+// recipient has no preferences yet — the account was just created). It still
+// respects the global EMAIL_ENABLED switch via sendMail().
+export const sendInvitationEmail = async (
+    recipient: EmailRecipient,
+    payload: InvitationEmailPayload,
+): Promise<SendResult> => {
+    const cfg = getEmailConfig();
+    const baseUrl = cfg.appBaseUrl.replace(/\/+$/, '');
+    const rendered = renderInvitationEmail({
+        recipientName: recipient.name,
+        inviterName: payload.inviterName,
+        email: recipient.email,
+        temporaryPassword: payload.temporaryPassword,
+        loginUrl: `${baseUrl}/login`,
+    });
+    const result = await sendMail({
+        to: recipient.email,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: rendered.text,
+    });
+    logger.info('email.invitation_sent', {
         latencyMs: result.latencyMs,
         messageId: result.messageId || undefined,
     });

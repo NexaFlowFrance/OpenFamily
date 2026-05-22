@@ -69,8 +69,21 @@ export const updateEmailPreferencesBodySchema = z
     })
     .strict();
 
+export const changePasswordBodySchema = z
+    .object({
+        currentPassword: z.string().min(1, { message: 'Current password is required' }).max(256),
+        // Same constraints as registration: bcrypt cost makes very long inputs a
+        // DoS vector, so cap the length.
+        newPassword: z
+            .string()
+            .min(8, { message: 'Password must be at least 8 characters' })
+            .max(256, { message: 'Password is too long' }),
+    })
+    .strict();
+
 export type RegisterBody = z.infer<typeof registerBodySchema>;
 export type LoginBody = z.infer<typeof loginBodySchema>;
 export type UpdateCurrencyBody = z.infer<typeof updateCurrencyBodySchema>;
 export type UpdateLocationBody = z.infer<typeof updateLocationBodySchema>;
 export type UpdateEmailPreferencesBody = z.infer<typeof updateEmailPreferencesBodySchema>;
+export type ChangePasswordBody = z.infer<typeof changePasswordBodySchema>;

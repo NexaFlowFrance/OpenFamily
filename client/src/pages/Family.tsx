@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
-import { Plus, Edit2, Trash2, User, Phone, Heart, AlertTriangle, Utensils } from 'lucide-react';
+import {
+    Plus,
+    Edit2,
+    Trash2,
+    User,
+    Phone,
+    Heart,
+    AlertTriangle,
+    Utensils,
+    Mail,
+    KeyRound,
+} from 'lucide-react';
 import {
     Card,
     CardContent,
@@ -12,6 +23,7 @@ import {
     Textarea,
     Badge,
 } from '../components/ui';
+import { useAuth } from '../contexts/AuthContext';
 import { DEFAULT_FAMILY_COLOR, FAMILY_COLOR_PRESETS } from '../design/colorPresets';
 
 interface DietaryPreferencesShape {
@@ -34,6 +46,17 @@ interface FamilyMember {
     emergency_contact_phone?: string;
     notes?: string;
     dietary_preferences?: DietaryPreferencesShape;
+    email?: string | null;
+    has_account?: boolean;
+}
+
+// Shape of the optional `account` block returned by POST /api/family and
+// POST /api/family/:id/invite. The temporary password is only present when the
+// email could not be delivered (so the owner can relay it manually).
+interface AccountResult {
+    email: string;
+    emailDelivered: boolean;
+    temporaryPassword?: string;
 }
 
 // Stored DATA values — labels are resolved at render time via i18n.
@@ -51,6 +74,9 @@ const SPICE_VALUES = ['', 'none', 'mild', 'medium', 'hot'] as const;
 
 const Family: React.FC = () => {
     const { t } = useTranslation();
+    const { user } = useAuth();
+    // Owners (no family_owner_id) manage the family; invited members only view it.
+    const isOwner = !user?.family_owner_id;
     const roleOptions = ROLE_VALUES.map((value) => ({
         value,
         label: t('family.roles.' + value, { defaultValue: value }),
@@ -87,7 +113,18 @@ const Family: React.FC = () => {
         diet_spice: '',
         diet_dislikes: '',
         diet_favorites: '',
+        has_account: false,
+        email: '',
     });
+
+    // Invite dialog (give an existing member a login, or resend their password).
+    const [inviteMember, setInviteMember] = useState<FamilyMember | null>(null);
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteLoading, setInviteLoading] = useState(false);
+    const [inviteError, setInviteError] = useState('');
+    // Shown after a successful invite so the owner can relay a temp password that
+    // could not be emailed.
+    const [accountResult, setAccountResult] = useState<AccountResult | null>(null);
 
     useEffect(() => {
         loadMembers();
@@ -143,7 +180,14 @@ const Family: React.FC = () => {
             if (editingMember) {
                 await api.put(`/api/family/${editingMember.id}`, payload);
             } else {
-                await api.post('/api/family', payload);
+                const res = await api.post<{
+                    success: boolean;
+                    data: FamilyMember;
+                    account?: AccountResult;
+                }>('/api/family', payload);
+                if (res.account) {
+                    setAccountResult(res.account);
+                }
             }
             setDialogOpen(false);
             resetForm();
@@ -182,6 +226,9 @@ const Family: React.FC = () => {
             diet_spice: diet.spice_level || '',
             diet_dislikes: diet.dislikes?.join(', ') || '',
             diet_favorites: diet.favorites?.join(', ') || '',
+            // Account is managed from the card (invite/resend), not the edit form.
+            has_account: member.has_account ?? false,
+            email: member.email ?? '',
         });
         setDialogOpen(true);
     };
@@ -202,7 +249,39 @@ const Family: React.FC = () => {
             diet_spice: '',
             diet_dislikes: '',
             diet_favorites: '',
+            has_account: false,
+            email: '',
         });
+    };
+
+    const openInvite = (member: FamilyMember) => {
+        setInviteMember(member);
+        setInviteEmail(member.email ?? '');
+        setInviteError('');
+    };
+
+    const handleInvite = async () => {
+        if (!inviteMember) return;
+        setInviteError('');
+        setInviteLoading(true);
+        try {
+            // Resend reuses the stored email server-side; first invite needs one.
+            const body = inviteMember.has_account ? {} : { email: inviteEmail.trim() };
+            const res = await api.post<{
+                success: boolean;
+                data: FamilyMember;
+                account?: AccountResult;
+            }>(`/api/family/${inviteMember.id}/invite`, body);
+            setInviteMember(null);
+            if (res.account) {
+                setAccountResult(res.account);
+            }
+            loadMembers();
+        } catch (error) {
+            setInviteError(error instanceof Error ? error.message : t('family.errors.invite'));
+        } finally {
+            setInviteLoading(false);
+        }
     };
 
     const calculateAge = (birthdate: string) => {
@@ -241,15 +320,17 @@ const Family: React.FC = () => {
                     <h1 className="text-h1 mb-1">{t('family.title')}</h1>
                     <p className="text-muted-foreground text-body">{t('family.subtitle')}</p>
                 </div>
-                <Button
-                    onClick={() => {
-                        resetForm();
-                        setDialogOpen(true);
-                    }}
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t('family.add_member')}
-                </Button>
+                {isOwner && (
+                    <Button
+                        onClick={() => {
+                            resetForm();
+                            setDialogOpen(true);
+                        }}
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        {t('family.add_member')}
+                    </Button>
+                )}
             </div>
 
             {members.length === 0 ? (
@@ -372,25 +453,61 @@ const Family: React.FC = () => {
                                     </div>
                                 )}
 
-                                {/* Actions */}
-                                <div className="flex gap-2 pt-2 border-t">
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        onClick={() => handleEdit(member)}
-                                        className="flex-1"
-                                    >
-                                        <Edit2 className="h-4 w-4 mr-1" />
-                                        {t('common.edit')}
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleDelete(member.id)}
-                                    >
-                                        <Trash2 className="h-4 w-4 text-red-500" />
-                                    </Button>
+                                {/* Account status — visible to everyone */}
+                                <div className="flex items-center gap-2 mb-3">
+                                    {member.has_account ? (
+                                        <Badge variant="success">
+                                            <KeyRound className="h-3 w-3 mr-1" />
+                                            {t('family.account.active')}
+                                        </Badge>
+                                    ) : (
+                                        <Badge variant="secondary">
+                                            {t('family.account.none')}
+                                        </Badge>
+                                    )}
                                 </div>
+
+                                {/* Actions — owner only */}
+                                {isOwner && (
+                                    <div className="flex flex-col gap-2 pt-2 border-t">
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={() => openInvite(member)}
+                                            className="w-full"
+                                        >
+                                            {member.has_account ? (
+                                                <>
+                                                    <Mail className="h-4 w-4 mr-1" />
+                                                    {t('family.account.resend')}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <KeyRound className="h-4 w-4 mr-1" />
+                                                    {t('family.account.give_access')}
+                                                </>
+                                            )}
+                                        </Button>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() => handleEdit(member)}
+                                                className="flex-1"
+                                            >
+                                                <Edit2 className="h-4 w-4 mr-1" />
+                                                {t('common.edit')}
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDelete(member.id)}
+                                            >
+                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     ))}
@@ -552,6 +669,50 @@ const Family: React.FC = () => {
                         placeholder={t('family.form.notes_placeholder')}
                         rows={2}
                     />
+
+                    {/* Account — only when creating. Existing members get a login
+                        via the "give access" action on their card. */}
+                    {!editingMember && (
+                        <div className="border-t pt-4">
+                            <h4 className="text-body font-semibold mb-3 flex items-center gap-2">
+                                <KeyRound className="h-4 w-4 text-primary" />
+                                {t('family.form.account_section')}
+                            </h4>
+                            <label className="flex cursor-pointer items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.has_account}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            has_account: e.target.checked,
+                                        })
+                                    }
+                                    className="h-4 w-4 rounded border-border accent-primary"
+                                />
+                                <span className="text-caption text-foreground">
+                                    {t('family.form.has_account')}
+                                </span>
+                            </label>
+                            {formData.has_account && (
+                                <Input
+                                    label={t('family.form.email')}
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, email: e.target.value })
+                                    }
+                                    placeholder={t('family.form.email_placeholder')}
+                                    className="mt-3"
+                                    required
+                                />
+                            )}
+                            <p className="mt-2 text-micro text-muted-foreground">
+                                {t('family.form.account_hint')}
+                            </p>
+                        </div>
+                    )}
+
                     <div className="flex justify-end gap-3 pt-4">
                         <Button
                             type="button"
@@ -565,6 +726,91 @@ const Family: React.FC = () => {
                         </Button>
                     </div>
                 </form>
+            </Dialog>
+
+            {/* Invite / resend dialog */}
+            <Dialog
+                open={!!inviteMember}
+                onOpenChange={(open) => {
+                    if (!open) setInviteMember(null);
+                }}
+                title={
+                    inviteMember?.has_account
+                        ? t('family.invite.resend_title')
+                        : t('family.invite.title')
+                }
+                description={t('family.invite.description', { name: inviteMember?.name ?? '' })}
+            >
+                <div className="space-y-4">
+                    {!inviteMember?.has_account && (
+                        <Input
+                            label={t('family.form.email')}
+                            type="email"
+                            value={inviteEmail}
+                            onChange={(e) => setInviteEmail(e.target.value)}
+                            placeholder={t('family.form.email_placeholder')}
+                            required
+                        />
+                    )}
+                    {inviteError && <p className="text-caption text-danger">{inviteError}</p>}
+                    <div className="flex justify-end gap-3 pt-2">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => setInviteMember(null)}
+                        >
+                            {t('common.cancel')}
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleInvite}
+                            disabled={
+                                inviteLoading || (!inviteMember?.has_account && !inviteEmail.trim())
+                            }
+                        >
+                            {inviteMember?.has_account
+                                ? t('family.account.resend')
+                                : t('family.account.give_access')}
+                        </Button>
+                    </div>
+                </div>
+            </Dialog>
+
+            {/* Account result — surfaces the temp password when it couldn't be emailed */}
+            <Dialog
+                open={!!accountResult}
+                onOpenChange={(open) => {
+                    if (!open) setAccountResult(null);
+                }}
+                title={t('family.account.result_title')}
+                description={
+                    accountResult?.emailDelivered
+                        ? t('family.account.result_sent', { email: accountResult?.email ?? '' })
+                        : t('family.account.result_manual')
+                }
+            >
+                <div className="space-y-4">
+                    {accountResult && !accountResult.emailDelivered && (
+                        <div className="rounded-input border border-warning/30 bg-warning/10 p-3 text-caption">
+                            <p className="mb-2 text-foreground">
+                                {t('family.account.temp_password_label')}
+                            </p>
+                            <code className="block break-all rounded bg-muted px-2 py-1 font-mono text-foreground">
+                                {accountResult.temporaryPassword}
+                            </code>
+                            <p className="mt-2 text-micro text-muted-foreground">
+                                {t('family.account.email_label', {
+                                    email: accountResult.email,
+                                })}
+                            </p>
+                        </div>
+                    )}
+                    <div className="flex justify-end pt-2">
+                        <Button type="button" onClick={() => setAccountResult(null)}>
+                            {t('common.close')}
+                        </Button>
+                    </div>
+                </div>
             </Dialog>
         </div>
     );

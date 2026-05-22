@@ -16,6 +16,7 @@ import House from './pages/House';
 import Vacations from './pages/Vacations';
 import Settings from './pages/Settings';
 import CurrencyOnboardingDialog from './components/CurrencyOnboardingDialog';
+import ForcePasswordChangeDialog from './components/ForcePasswordChangeDialog';
 
 function App() {
     const { isAuthenticated, loading } = useAuth();
@@ -53,6 +54,9 @@ function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            {/* Forced first — an invited member sets their password before anything
+                else (the currency dialog waits until must_change_password clears). */}
+            <ForcePasswordChangeDialog />
             <CurrencyOnboardingDialog />
         </Layout>
     );

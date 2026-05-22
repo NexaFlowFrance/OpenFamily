@@ -11,6 +11,7 @@ import {
 } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import {
+    changePasswordBodySchema,
     loginBodySchema,
     registerBodySchema,
     updateCurrencyBodySchema,
@@ -26,7 +27,7 @@ import logger from '../lib/logger';
 // Centralising the projection avoids drift between endpoints.
 const USER_PUBLIC_COLUMNS =
     'id, email, name, currency, city, country_code, latitude, longitude, ' +
-    'email_notifications_enabled, email_digest_mode';
+    'email_notifications_enabled, email_digest_mode, family_owner_id, must_change_password';
 
 // The list of supported currencies now lives in schemas/auth.ts as a zod
 // enum (single source of truth) and remains synchronized with
@@ -37,7 +38,7 @@ const router = Router();
 router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const result = await query(`SELECT ${USER_PUBLIC_COLUMNS} FROM users WHERE id = $1`, [
-            req.userId,
+            req.accountId,
         ]);
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, error: 'User not found' });
@@ -63,7 +64,7 @@ router.patch(
 
             const result = await query(
                 `UPDATE users SET currency = $1 WHERE id = $2 RETURNING ${USER_PUBLIC_COLUMNS}`,
-                [currency, req.userId],
+                [currency, req.accountId],
             );
 
             if (result.rows.length === 0) {
@@ -101,7 +102,7 @@ router.patch(
                     geocoded.country_code,
                     geocoded.latitude,
                     geocoded.longitude,
-                    req.userId,
+                    req.accountId,
                 ],
             );
             if (result.rows.length === 0) {
@@ -144,7 +145,7 @@ router.patch(
                  SET email_notifications_enabled = $1, email_digest_mode = $2
                  WHERE id = $3
                  RETURNING ${USER_PUBLIC_COLUMNS}`,
-                [enabled, digestMode, req.userId],
+                [enabled, digestMode, req.accountId],
             );
             if (result.rows.length === 0) {
                 return res.status(404).json({ success: false, error: 'User not found' });
@@ -247,6 +248,8 @@ router.post('/login', validate({ body: loginBodySchema }), async (req, res) => {
                     longitude: user.longitude ?? null,
                     email_notifications_enabled: user.email_notifications_enabled ?? true,
                     email_digest_mode: user.email_digest_mode ?? 'immediate',
+                    family_owner_id: user.family_owner_id ?? null,
+                    must_change_password: user.must_change_password ?? false,
                 },
             },
         });
@@ -257,6 +260,51 @@ router.post('/login', validate({ body: loginBodySchema }), async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });
+
+// Change the authenticated account's password. Used both for a normal password
+// change and for the forced change after a member's first login with the
+// temporary password emailed to them (clears must_change_password).
+router.post(
+    '/change-password',
+    authMiddleware,
+    validate({ body: changePasswordBodySchema }),
+    async (req: AuthRequest, res) => {
+        try {
+            const { currentPassword, newPassword } = req.body as {
+                currentPassword: string;
+                newPassword: string;
+            };
+
+            // Operate on the logged-in account (accountId), never the family scope.
+            const result = await query('SELECT password_hash FROM users WHERE id = $1', [
+                req.accountId,
+            ]);
+            if (result.rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'User not found' });
+            }
+
+            const isValid = await bcrypt.compare(currentPassword, result.rows[0].password_hash);
+            if (!isValid) {
+                return res
+                    .status(400)
+                    .json({ success: false, error: 'Current password is incorrect' });
+            }
+
+            const password_hash = await bcrypt.hash(newPassword, 10);
+            await query(
+                'UPDATE users SET password_hash = $1, must_change_password = false WHERE id = $2',
+                [password_hash, req.accountId],
+            );
+
+            return res.json({ success: true });
+        } catch (error) {
+            logger.error('auth.change_password_failed', {
+                error: error instanceof Error ? error.message : String(error),
+            });
+            return res.status(500).json({ success: false, error: 'Internal server error' });
+        }
+    },
+);
 
 // Issue a fresh access (and refresh) token from a valid refresh cookie.
 // Returns 401 if the refresh cookie is missing, invalid, expired, or has the

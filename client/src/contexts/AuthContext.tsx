@@ -12,6 +12,11 @@ interface User {
     longitude?: number | null;
     email_notifications_enabled?: boolean;
     email_digest_mode?: 'immediate' | 'daily';
+    // NULL = this account owns its family (can manage members). Set = invited
+    // member of another account's family.
+    family_owner_id?: string | null;
+    // True until the member changes the temporary password emailed to them.
+    must_change_password?: boolean;
 }
 
 interface AuthContextType {

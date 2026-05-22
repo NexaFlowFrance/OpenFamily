@@ -89,5 +89,17 @@
     "description": "Tous vos montants (budget, courses…) seront affichés dans cette devise. Vos données existantes ne sont pas converties — sélectionnez la devise dans laquelle elles sont déjà saisies.",
     "currencyLabel": "Devise",
     "confirm": "Confirmer"
+  },
+  "forcePasswordChange": {
+    "title": "Choisissez votre mot de passe",
+    "description": "Votre compte a été créé avec un mot de passe temporaire. Pour des raisons de sécurité, choisissez votre propre mot de passe pour continuer.",
+    "currentLabel": "Mot de passe temporaire",
+    "currentPlaceholder": "Celui reçu par email",
+    "newLabel": "Nouveau mot de passe",
+    "confirmLabel": "Confirmer le mot de passe",
+    "confirm": "Valider",
+    "tooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+    "mismatch": "Les mots de passe ne correspondent pas.",
+    "error": "Impossible de changer le mot de passe."
   }
 }

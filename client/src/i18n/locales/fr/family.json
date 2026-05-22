@@ -30,7 +30,24 @@
     "errors": {
       "load": "Impossible de charger la famille.",
       "save": "Impossible d'enregistrer ce membre.",
-      "delete": "Impossible de supprimer ce membre."
+      "delete": "Impossible de supprimer ce membre.",
+      "invite": "Impossible d'envoyer l'invitation."
+    },
+    "account": {
+      "active": "Compte actif",
+      "none": "Pas de compte",
+      "give_access": "Donner un accès",
+      "resend": "Renvoyer le mot de passe",
+      "result_title": "Accès créé",
+      "result_sent": "Un email a été envoyé à {{email}} avec ses identifiants de connexion.",
+      "result_manual": "Le compte a été créé mais l'email n'a pas pu être envoyé. Transmettez ces identifiants manuellement.",
+      "temp_password_label": "Mot de passe temporaire :",
+      "email_label": "Email : {{email}}"
+    },
+    "invite": {
+      "title": "Donner un accès",
+      "resend_title": "Renvoyer le mot de passe",
+      "description": "Un compte sera créé pour {{name}} et un email contenant un mot de passe temporaire lui sera envoyé."
     },
     "confirm_delete": "Êtes-vous sûr de vouloir supprimer ce membre de la famille ?",
     "card": {
@@ -69,6 +86,11 @@
       "favorites_placeholder": "Ex: Yassa poulet, Mafé, Pâtes",
       "notes": "Notes (optionnel)",
       "notes_placeholder": "Notes supplémentaires...",
+      "account_section": "Compte",
+      "has_account": "Cette personne aura un compte",
+      "email": "Adresse email",
+      "email_placeholder": "Ex: marie@exemple.com",
+      "account_hint": "Un email avec un mot de passe temporaire lui sera envoyé pour se connecter à la famille.",
       "add": "Ajouter"
     }
   }

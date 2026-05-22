@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JsonWebTokenError } from 'jsonwebtoken';
 import { getJwtSecret } from '../config/loadEnv';
+import { query } from '../db';
 
 // =============================================================================
 // Auth tokens — two-token model
@@ -27,7 +28,14 @@ import { getJwtSecret } from '../config/loadEnv';
 // =============================================================================
 
 export interface AuthRequest extends Request {
+    // Family scope id: the owner of the family this request operates on. Equals
+    // the logged-in account for owners; equals the owner for invited members.
+    // All data tables are scoped by this, so existing `WHERE user_id = req.userId`
+    // queries keep working unchanged.
     userId?: string;
+    // The actual logged-in account id. Use this for identity-specific actions
+    // (own profile, password change, "am I the owner?" checks).
+    accountId?: string;
 }
 
 type TokenKind = 'access' | 'refresh';
@@ -155,7 +163,7 @@ export const extractRefreshToken = (req: Request): string | null => {
     return null;
 };
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const token = extractAccessToken(req);
         if (!token) {
@@ -163,9 +171,37 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
         }
 
         const decoded = verifyToken(token, 'access');
-        req.userId = decoded.userId;
+
+        // Resolve the family scope. A single indexed PK lookup per request: cheap,
+        // and it means a member who is removed loses access immediately rather
+        // than after the access token expires (we don't bake the scope into the JWT).
+        const result = await query('SELECT family_owner_id FROM users WHERE id = $1', [
+            decoded.userId,
+        ]);
+        if (result.rows.length === 0) {
+            // Account was deleted while a token was still valid.
+            return res.status(401).json({ success: false, error: 'Invalid token' });
+        }
+
+        req.accountId = decoded.userId;
+        req.userId = result.rows[0].family_owner_id ?? decoded.userId;
         next();
     } catch {
         return res.status(401).json({ success: false, error: 'Invalid token' });
     }
+};
+
+/**
+ * Guard for actions only the family owner may perform (managing members,
+ * inviting accounts). An owner has no `family_owner_id`, so the auth middleware
+ * resolves `req.userId === req.accountId`. Invited members fail this check.
+ * Must run after `authMiddleware`.
+ */
+export const requireFamilyOwner = (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.accountId || req.accountId !== req.userId) {
+        return res
+            .status(403)
+            .json({ success: false, error: 'Only the family owner can perform this action' });
+    }
+    next();
 };

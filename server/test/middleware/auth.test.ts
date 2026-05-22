@@ -6,13 +6,25 @@ import {
     generateRefreshToken,
     verifyToken,
     authMiddleware,
+    requireFamilyOwner,
     ACCESS_COOKIE_NAME,
     setAuthCookies,
     clearAuthCookies,
     extractRefreshToken,
     REFRESH_COOKIE_NAME,
+    type AuthRequest,
 } from '../../src/middleware/auth';
 import { getJwtSecret } from '../../src/config/loadEnv';
+import { query } from '../../src/db';
+
+// authMiddleware now resolves the family scope with a single users lookup. Mock
+// the DB so the middleware sees an owner account (family_owner_id = null) and
+// keeps req.userId === the token's userId.
+vi.mock('../../src/db', () => ({
+    default: {},
+    query: vi.fn(async () => ({ rows: [{ family_owner_id: null }] })),
+    getClient: vi.fn(),
+}));
 
 const USER_ID = 'd1f7a3c8-9b1e-41d4-a716-446655440000';
 
@@ -65,7 +77,7 @@ describe('authMiddleware token extraction', () => {
         };
     };
 
-    it('accepts a valid access token via cookie', () => {
+    it('accepts a valid access token via cookie', async () => {
         const token = generateAccessToken(USER_ID);
         const req = {
             headers: {},
@@ -74,13 +86,13 @@ describe('authMiddleware token extraction', () => {
         const res = makeRes();
         const next: NextFunction = vi.fn();
 
-        authMiddleware(req, res, next);
+        await authMiddleware(req, res, next);
 
         expect(next).toHaveBeenCalledOnce();
         expect(req.userId).toBe(USER_ID);
     });
 
-    it('accepts a valid access token via Authorization header (fallback)', () => {
+    it('accepts a valid access token via Authorization header (fallback)', async () => {
         const token = generateAccessToken(USER_ID);
         const req = {
             headers: { authorization: `Bearer ${token}` },
@@ -89,7 +101,7 @@ describe('authMiddleware token extraction', () => {
         const res = makeRes();
         const next: NextFunction = vi.fn();
 
-        authMiddleware(req, res, next);
+        await authMiddleware(req, res, next);
 
         expect(next).toHaveBeenCalledOnce();
         expect(req.userId).toBe(USER_ID);
@@ -137,6 +149,94 @@ describe('authMiddleware token extraction', () => {
 
         expect(next).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(401);
+    });
+});
+
+describe('authMiddleware family scope resolution', () => {
+    const OWNER_ID = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
+    const MEMBER_ID = 'bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb';
+
+    const makeRes = () => {
+        const json = vi.fn();
+        const status = vi.fn(() => ({ json }));
+        return { status, json } as unknown as Response & {
+            status: ReturnType<typeof vi.fn>;
+            json: ReturnType<typeof vi.fn>;
+        };
+    };
+
+    const reqWithToken = (userId: string) =>
+        ({
+            headers: {},
+            cookies: { [ACCESS_COOKIE_NAME]: generateAccessToken(userId) },
+        }) as unknown as AuthRequest;
+
+    it('owner account: userId and accountId both equal the token user', async () => {
+        vi.mocked(query).mockResolvedValueOnce({ rows: [{ family_owner_id: null }] } as never);
+        const req = reqWithToken(OWNER_ID);
+        const res = makeRes();
+        const next = vi.fn();
+
+        await authMiddleware(req, res, next);
+
+        expect(next).toHaveBeenCalledOnce();
+        expect(req.accountId).toBe(OWNER_ID);
+        expect(req.userId).toBe(OWNER_ID);
+    });
+
+    it('member account: userId resolves to the owner, accountId stays the member', async () => {
+        vi.mocked(query).mockResolvedValueOnce({
+            rows: [{ family_owner_id: OWNER_ID }],
+        } as never);
+        const req = reqWithToken(MEMBER_ID);
+        const res = makeRes();
+        const next = vi.fn();
+
+        await authMiddleware(req, res, next);
+
+        expect(next).toHaveBeenCalledOnce();
+        expect(req.accountId).toBe(MEMBER_ID);
+        expect(req.userId).toBe(OWNER_ID);
+    });
+
+    it('deleted account (no user row): rejects with 401', async () => {
+        vi.mocked(query).mockResolvedValueOnce({ rows: [] } as never);
+        const req = reqWithToken(MEMBER_ID);
+        const res = makeRes();
+        const next = vi.fn();
+
+        await authMiddleware(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+    });
+});
+
+describe('requireFamilyOwner', () => {
+    const makeRes = () => {
+        const json = vi.fn();
+        const status = vi.fn(() => ({ json }));
+        return { status, json } as unknown as Response & {
+            status: ReturnType<typeof vi.fn>;
+            json: ReturnType<typeof vi.fn>;
+        };
+    };
+
+    it('passes when the account is the family owner (accountId === userId)', () => {
+        const req = { accountId: 'x', userId: 'x' } as AuthRequest;
+        const res = makeRes();
+        const next = vi.fn();
+        requireFamilyOwner(req, res, next);
+        expect(next).toHaveBeenCalledOnce();
+    });
+
+    it('blocks an invited member (accountId !== userId) with 403', () => {
+        const req = { accountId: 'member', userId: 'owner' } as AuthRequest;
+        const res = makeRes();
+        const next = vi.fn();
+        requireFamilyOwner(req, res, next);
+        expect(next).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(403);
     });
 });
 

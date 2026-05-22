@@ -22,6 +22,11 @@ export interface User extends BaseEntity {
     password_hash: string;
     name: string;
     currency?: string | null;
+    // NULL/undefined = this account owns its own family. Set = member of the
+    // referenced owner's family (data scoped to the owner).
+    family_owner_id?: string | null;
+    // Forces a password change on first login (member temp passwords).
+    must_change_password?: boolean;
 }
 
 // Family Member
@@ -37,6 +42,10 @@ export interface FamilyMember extends BaseEntity {
     medical_notes?: string;
     avatar_url?: string;
     dietary_preferences?: DietaryPreferences;
+    // Login account backing this member card (set once an account is created).
+    account_user_id?: string | null;
+    // Email the owner entered to give this member an account.
+    email?: string | null;
 }
 
 // Dietary preferences — consumed by the AI recipe generator and (future)

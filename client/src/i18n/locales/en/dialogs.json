@@ -89,5 +89,17 @@
     "description": "All your amounts (budget, shopping…) will be displayed in this currency. Your existing data is not converted — select the currency they are already entered in.",
     "currencyLabel": "Currency",
     "confirm": "Confirm"
+  },
+  "forcePasswordChange": {
+    "title": "Choose your password",
+    "description": "Your account was created with a temporary password. For security, choose your own password to continue.",
+    "currentLabel": "Temporary password",
+    "currentPlaceholder": "The one received by email",
+    "newLabel": "New password",
+    "confirmLabel": "Confirm password",
+    "confirm": "Confirm",
+    "tooShort": "Password must be at least 8 characters.",
+    "mismatch": "Passwords do not match.",
+    "error": "Unable to change the password."
   }
 }

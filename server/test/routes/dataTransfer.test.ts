@@ -31,7 +31,9 @@ const fakeClient = {
 
 vi.mock('../../src/db', () => ({
     default: { query: vi.fn() },
-    query: vi.fn(),
+    // authMiddleware resolves the family scope via a users lookup; return an
+    // owner row (family_owner_id = null) so req.userId stays the token's userId.
+    query: vi.fn(async () => ({ rows: [{ family_owner_id: null }] })),
     getClient: vi.fn(async () => fakeClient),
 }));
 

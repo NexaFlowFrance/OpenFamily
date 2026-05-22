@@ -36,13 +36,28 @@ export const notificationPath = (type: string): string => {
     return '/';
 };
 
-/** Wrap content in a minimal, email-safe HTML document. */
+/**
+ * Wrap content in a minimal, email-safe HTML document.
+ *
+ * The footer defaults to the email-notifications wording (used by the
+ * notification/digest emails). Transactional emails that aren't tied to
+ * notification preferences (e.g. the account invitation) pass a custom
+ * `footerHtml` to override it.
+ */
 export const wrapEmail = (params: {
     title: string;
     bodyHtml: string;
-    settingsUrl: string;
+    settingsUrl?: string;
+    footerHtml?: string;
 }): string => {
-    const { title, bodyHtml, settingsUrl } = params;
+    const { title, bodyHtml, settingsUrl, footerHtml } = params;
+    const footer =
+        footerHtml ??
+        `<p style="margin:0;font-size:12px;line-height:1.5;color:#a1a1aa;">
+            Vous recevez cet email parce que les notifications par email sont activées sur votre compte KeurTonux.
+            <br>
+            <a href="${escapeHtml(settingsUrl ?? '')}" style="color:#71717a;text-decoration:underline;">Gérer mes préférences</a>
+          </p>`;
     return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -61,11 +76,7 @@ export const wrapEmail = (params: {
           ${bodyHtml}
         </td></tr>
         <tr><td style="padding:16px 28px 24px 28px;border-top:1px solid #f4f4f5;">
-          <p style="margin:0;font-size:12px;line-height:1.5;color:#a1a1aa;">
-            Vous recevez cet email parce que les notifications par email sont activées sur votre compte KeurTonux.
-            <br>
-            <a href="${escapeHtml(settingsUrl)}" style="color:#71717a;text-decoration:underline;">Gérer mes préférences</a>
-          </p>
+          ${footer}
         </td></tr>
       </table>
     </td></tr>

@@ -12,6 +12,7 @@ import {
     Mail,
     Send,
     Languages,
+    KeyRound,
 } from 'lucide-react';
 import { Card, CardContent, Button, Input, Select } from '../components/ui';
 import { useAuth } from '../contexts/AuthContext';
@@ -130,6 +131,43 @@ const Settings: React.FC = () => {
             });
         } finally {
             setEmailTesting(false);
+        }
+    };
+
+    // ---- Password change ----
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordSaving, setPasswordSaving] = useState(false);
+    const [passwordMessage, setPasswordMessage] = useState<{
+        kind: 'success' | 'error';
+        text: string;
+    } | null>(null);
+
+    const handleChangePassword = async () => {
+        setPasswordMessage(null);
+        if (newPassword.length < 8) {
+            setPasswordMessage({ kind: 'error', text: t('settings.password.tooShort') });
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setPasswordMessage({ kind: 'error', text: t('settings.password.mismatch') });
+            return;
+        }
+        setPasswordSaving(true);
+        try {
+            await api.post('/api/auth/change-password', { currentPassword, newPassword });
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+            setPasswordMessage({ kind: 'success', text: t('settings.password.saved') });
+        } catch (err) {
+            setPasswordMessage({
+                kind: 'error',
+                text: err instanceof Error ? err.message : t('settings.errors.update'),
+            });
+        } finally {
+            setPasswordSaving(false);
         }
     };
 
@@ -467,6 +505,79 @@ const Settings: React.FC = () => {
                                         : t('settings.email.sendTest')}
                                 </Button>
                             </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Password */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                            <KeyRound className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-caption font-semibold text-foreground">
+                                {t('settings.password.title')}
+                            </h3>
+                            <p className="mt-1 text-micro text-muted-foreground">
+                                {t('settings.password.description')}
+                            </p>
+                            <div className="mt-4 max-w-sm space-y-3">
+                                <Input
+                                    type="password"
+                                    autoComplete="current-password"
+                                    label={t('settings.password.current')}
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                />
+                                <Input
+                                    type="password"
+                                    autoComplete="new-password"
+                                    label={t('settings.password.new')}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                />
+                                <Input
+                                    type="password"
+                                    autoComplete="new-password"
+                                    label={t('settings.password.confirm')}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                            </div>
+                            {passwordMessage && (
+                                <p
+                                    className={`mt-2 flex items-center gap-1 text-micro ${
+                                        passwordMessage.kind === 'error'
+                                            ? 'text-destructive'
+                                            : 'text-emerald-600'
+                                    }`}
+                                >
+                                    {passwordMessage.kind === 'error' ? (
+                                        <AlertCircle className="h-4 w-4" />
+                                    ) : (
+                                        <CheckCircle className="h-4 w-4" />
+                                    )}
+                                    {passwordMessage.text}
+                                </p>
+                            )}
+                            <Button
+                                className="mt-4"
+                                onClick={handleChangePassword}
+                                disabled={
+                                    passwordSaving ||
+                                    !currentPassword ||
+                                    !newPassword ||
+                                    !confirmPassword
+                                }
+                            >
+                                {passwordSaving && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+                                {t('common.save')}
+                            </Button>
                         </div>
                     </div>
                 </CardContent>

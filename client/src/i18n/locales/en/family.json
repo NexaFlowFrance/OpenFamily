@@ -30,7 +30,24 @@
     "errors": {
       "load": "Unable to load the family.",
       "save": "Unable to save this member.",
-      "delete": "Unable to delete this member."
+      "delete": "Unable to delete this member.",
+      "invite": "Unable to send the invitation."
+    },
+    "account": {
+      "active": "Account active",
+      "none": "No account",
+      "give_access": "Give access",
+      "resend": "Resend password",
+      "result_title": "Access created",
+      "result_sent": "An email was sent to {{email}} with their sign-in credentials.",
+      "result_manual": "The account was created but the email could not be sent. Share these credentials manually.",
+      "temp_password_label": "Temporary password:",
+      "email_label": "Email: {{email}}"
+    },
+    "invite": {
+      "title": "Give access",
+      "resend_title": "Resend password",
+      "description": "An account will be created for {{name}} and an email with a temporary password will be sent to them."
     },
     "confirm_delete": "Are you sure you want to delete this family member?",
     "card": {
@@ -69,6 +86,11 @@
       "favorites_placeholder": "E.g. Chicken yassa, Mafé, Pasta",
       "notes": "Notes (optional)",
       "notes_placeholder": "Additional notes...",
+      "account_section": "Account",
+      "has_account": "This person will have an account",
+      "email": "Email address",
+      "email_placeholder": "E.g. marie@example.com",
+      "account_hint": "An email with a temporary password will be sent so they can sign in to the family.",
       "add": "Add"
     }
   }

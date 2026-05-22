@@ -5,6 +5,16 @@
     "errors": {
       "update": "Update failed."
     },
+    "password": {
+      "title": "Password",
+      "description": "Change your account password.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "saved": "Password updated.",
+      "tooShort": "Password must be at least 8 characters.",
+      "mismatch": "Passwords do not match."
+    },
     "currency": {
       "title": "Currency",
       "description": "Currency used to display amounts (budget, shopping, dashboard). Amounts already entered are not converted when you change it.",

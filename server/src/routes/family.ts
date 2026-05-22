@@ -1,7 +1,17 @@
 import { Router } from 'express';
-import { query } from '../db';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { parseStringArray, serializeStringArray, toNullIfEmpty } from '../lib/normalize';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import type { PoolClient } from 'pg';
+import { getClient, query } from '../db';
+import { authMiddleware, AuthRequest, requireFamilyOwner } from '../middleware/auth';
+import {
+    parseStringArray,
+    serializeStringArray,
+    toNullIfEmpty,
+    normalizeEmail,
+} from '../lib/normalize';
+import { sendInvitationEmail } from '../email/EmailService';
+import { EmailError } from '../email/errors';
 import logger from '../lib/logger';
 
 const router = Router();
@@ -11,6 +21,90 @@ const DEFAULT_ROLE = 'Autre';
 const DEFAULT_COLOR = '#FF4466';
 
 const isValidHexColor = (value: string) => /^#[0-9a-fA-F]{6}$/.test(value);
+const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+// 12 random bytes → 16 url-safe chars. Comfortably above the 8-char minimum and
+// not user-typed for long (forced reset on first login via must_change_password).
+const generateTempPassword = (): string => crypto.randomBytes(12).toString('base64url');
+
+interface AccountProvisionResult {
+    accountUserId: string;
+    temporaryPassword: string;
+}
+
+// Create a login account for a member card (or reset the password of an existing
+// one) inside an open transaction. The caller owns BEGIN/COMMIT and the email
+// send (done after COMMIT so an SMTP hiccup never rolls back the account).
+const provisionMemberAccount = async (
+    client: PoolClient,
+    params: {
+        ownerUserId: string;
+        memberId: string;
+        memberName: string;
+        normalizedEmail: string;
+        existingAccountUserId: string | null;
+    },
+): Promise<AccountProvisionResult> => {
+    const { ownerUserId, memberId, memberName, normalizedEmail, existingAccountUserId } = params;
+    const temporaryPassword = generateTempPassword();
+    const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+
+    if (existingAccountUserId) {
+        // Resend flow: rotate the password and force a fresh change.
+        await client.query(
+            'UPDATE users SET password_hash = $1, must_change_password = true WHERE id = $2',
+            [passwordHash, existingAccountUserId],
+        );
+        return { accountUserId: existingAccountUserId, temporaryPassword };
+    }
+
+    const inserted = await client.query(
+        `INSERT INTO users (email, password_hash, name, family_owner_id, must_change_password)
+         VALUES ($1, $2, $3, $4, true)
+         RETURNING id`,
+        [normalizedEmail, passwordHash, memberName, ownerUserId],
+    );
+    const accountUserId = inserted.rows[0].id as string;
+
+    await client.query(
+        'UPDATE family_members SET account_user_id = $1, email = $2 WHERE id = $3 AND user_id = $4',
+        [accountUserId, normalizedEmail, memberId, ownerUserId],
+    );
+
+    return { accountUserId, temporaryPassword };
+};
+
+// Resolve the family owner's display name for the invitation email's "X added
+// you" copy. The owner is always req.userId for owner-only routes.
+const getOwnerName = async (ownerUserId: string): Promise<string> => {
+    const result = await query('SELECT name FROM users WHERE id = $1', [ownerUserId]);
+    return result.rows[0]?.name ?? 'Votre famille';
+};
+
+// Send the invitation email after the account transaction has committed.
+// Returns whether delivery succeeded — the route surfaces the temp password to
+// the owner when it didn't (EMAIL_ENABLED=false or an SMTP error) so they can
+// relay it manually.
+const deliverInvitation = async (params: {
+    ownerName: string;
+    memberName: string;
+    email: string;
+    temporaryPassword: string;
+}): Promise<boolean> => {
+    try {
+        await sendInvitationEmail(
+            { email: params.email, name: params.memberName },
+            { inviterName: params.ownerName, temporaryPassword: params.temporaryPassword },
+        );
+        return true;
+    } catch (error) {
+        logger.warn('family.invitation_email_failed', {
+            code: error instanceof EmailError ? error.code : undefined,
+            error: error instanceof Error ? error.message : String(error),
+        });
+        return false;
+    }
+};
 
 const ALLOWED_REGIMES = new Set(['omnivore', 'vegetarian', 'vegan', 'halal', 'kosher', 'no_pork']);
 const ALLOWED_SPICE = new Set(['none', 'mild', 'medium', 'hot']);
@@ -118,6 +212,8 @@ const mapFamilyMember = (row: any) => {
         emergency_contact_phone: emergency.phone,
         notes: row.notes ?? row.medical_notes ?? null,
         dietary_preferences: parseDietaryPreferences(row.dietary_preferences),
+        email: row.email ?? null,
+        has_account: !!row.account_user_id,
         created_at: row.created_at,
         updated_at: row.updated_at,
     };
@@ -162,8 +258,9 @@ router.get('/:id', async (req: AuthRequest, res) => {
     }
 });
 
-// Create family member
-router.post('/', async (req: AuthRequest, res) => {
+// Create family member. Owner-only: members can use the family but not change
+// its composition.
+router.post('/', requireFamilyOwner, async (req: AuthRequest, res) => {
     try {
         const {
             name,
@@ -176,6 +273,8 @@ router.post('/', async (req: AuthRequest, res) => {
             emergency_contact_phone,
             notes,
             dietary_preferences,
+            has_account,
+            email,
         } = req.body;
 
         const cleanedName = typeof name === 'string' ? name.trim() : '';
@@ -189,6 +288,25 @@ router.post('/', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'Invalid color format' });
         }
 
+        // When the owner opts to give this member an account, validate the email
+        // and confirm it isn't already taken BEFORE we touch the database.
+        const wantsAccount = has_account === true;
+        let normalizedEmail = '';
+        if (wantsAccount) {
+            normalizedEmail = normalizeEmail(typeof email === 'string' ? email : '');
+            if (!isValidEmail(normalizedEmail)) {
+                return res.status(400).json({ success: false, error: 'A valid email is required' });
+            }
+            const existing = await query('SELECT id FROM users WHERE LOWER(email) = $1', [
+                normalizedEmail,
+            ]);
+            if (existing.rows.length > 0) {
+                return res
+                    .status(409)
+                    .json({ success: false, error: 'An account with this email already exists' });
+            }
+        }
+
         const roleValue = typeof role === 'string' && role.trim() ? role.trim() : DEFAULT_ROLE;
         const birthDateValue = toNullIfEmpty(birthdate);
         const allergiesValue = serializeStringArray(allergies);
@@ -198,57 +316,78 @@ router.post('/', async (req: AuthRequest, res) => {
         const notesValue = toNullIfEmpty(notes);
         const dietaryValue = sanitizeDietaryPreferences(dietary_preferences);
 
-        const result = await query(
-            `INSERT INTO family_members (
-          user_id,
-          name,
-          role,
-          birth_date,
-          color,
-          allergies,
-          medications,
-          vaccines,
-          emergency_contact_name,
-          emergency_contact_phone,
-          emergency_contact,
-          notes,
-          medical_notes,
-          dietary_preferences
-        ) VALUES (
-          $1,
-          $2,
-          $3,
-          $4,
-          $5,
-          $6,
-          $7,
-          $8,
-          $9,
-          $10,
-          $11,
-          $12,
-          $13,
-          $14
-        ) RETURNING *`,
-            [
-                req.userId,
-                cleanedName,
-                roleValue,
-                birthDateValue,
-                cleanedColor,
-                allergiesValue,
-                medicationsValue,
-                medicationsValue,
-                emergencyName,
-                emergencyPhone,
-                serializeEmergencyContact(emergencyName, emergencyPhone),
-                notesValue,
-                notesValue,
-                JSON.stringify(dietaryValue),
-            ],
-        );
+        const insertSql = `INSERT INTO family_members (
+          user_id, name, role, birth_date, color, allergies, medications, vaccines,
+          emergency_contact_name, emergency_contact_phone, emergency_contact,
+          notes, medical_notes, dietary_preferences
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`;
+        const insertParams = [
+            req.userId,
+            cleanedName,
+            roleValue,
+            birthDateValue,
+            cleanedColor,
+            allergiesValue,
+            medicationsValue,
+            medicationsValue,
+            emergencyName,
+            emergencyPhone,
+            serializeEmergencyContact(emergencyName, emergencyPhone),
+            notesValue,
+            notesValue,
+            JSON.stringify(dietaryValue),
+        ];
 
-        res.json({ success: true, data: mapFamilyMember(result.rows[0]) });
+        // Simple path: no account requested.
+        if (!wantsAccount) {
+            const result = await query(insertSql, insertParams);
+            return res.json({ success: true, data: mapFamilyMember(result.rows[0]) });
+        }
+
+        // Account path: member insert + account creation must be atomic.
+        const client = await getClient();
+        let member;
+        let provision: AccountProvisionResult;
+        try {
+            await client.query('BEGIN');
+            const inserted = await client.query(insertSql, insertParams);
+            member = inserted.rows[0];
+            provision = await provisionMemberAccount(client, {
+                ownerUserId: req.userId!,
+                memberId: member.id,
+                memberName: cleanedName,
+                normalizedEmail,
+                existingAccountUserId: null,
+            });
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK').catch(() => undefined);
+            throw error;
+        } finally {
+            client.release();
+        }
+
+        // Re-read so the response reflects account_user_id/email set in the tx.
+        const refreshed = await query('SELECT * FROM family_members WHERE id = $1', [member.id]);
+        const ownerName = await getOwnerName(req.userId!);
+        const emailDelivered = await deliverInvitation({
+            ownerName,
+            memberName: cleanedName,
+            email: normalizedEmail,
+            temporaryPassword: provision.temporaryPassword,
+        });
+
+        return res.json({
+            success: true,
+            data: mapFamilyMember(refreshed.rows[0]),
+            account: {
+                email: normalizedEmail,
+                emailDelivered,
+                // Only expose the temp password when we couldn't email it, so the
+                // owner can pass it on manually (self-host without SMTP, etc.).
+                ...(emailDelivered ? {} : { temporaryPassword: provision.temporaryPassword }),
+            },
+        });
     } catch (error) {
         logger.error('family.create_family_member_failed', {
             error: error instanceof Error ? error.message : String(error),
@@ -257,8 +396,90 @@ router.post('/', async (req: AuthRequest, res) => {
     }
 });
 
-// Update family member
-router.put('/:id', async (req: AuthRequest, res) => {
+// Give an existing member card a login (or resend/reset its temporary password).
+// Owner-only. Body may include `email` for a first-time invite; for a resend the
+// member's existing account email is reused.
+router.post('/:id/invite', requireFamilyOwner, async (req: AuthRequest, res) => {
+    try {
+        const { id } = req.params;
+        const { email } = req.body;
+
+        const memberResult = await query(
+            'SELECT * FROM family_members WHERE id = $1 AND user_id = $2',
+            [id, req.userId],
+        );
+        if (memberResult.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Family member not found' });
+        }
+        const member = memberResult.rows[0];
+        const existingAccountUserId: string | null = member.account_user_id ?? null;
+
+        // First-time invite needs a fresh email; resend reuses the account's one.
+        let normalizedEmail: string;
+        if (existingAccountUserId) {
+            normalizedEmail = normalizeEmail(member.email ?? '');
+        } else {
+            normalizedEmail = normalizeEmail(typeof email === 'string' ? email : '');
+            if (!isValidEmail(normalizedEmail)) {
+                return res.status(400).json({ success: false, error: 'A valid email is required' });
+            }
+            const existing = await query('SELECT id FROM users WHERE LOWER(email) = $1', [
+                normalizedEmail,
+            ]);
+            if (existing.rows.length > 0) {
+                return res
+                    .status(409)
+                    .json({ success: false, error: 'An account with this email already exists' });
+            }
+        }
+
+        const client = await getClient();
+        let provision: AccountProvisionResult;
+        try {
+            await client.query('BEGIN');
+            provision = await provisionMemberAccount(client, {
+                ownerUserId: req.userId!,
+                memberId: id,
+                memberName: member.name,
+                normalizedEmail,
+                existingAccountUserId,
+            });
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK').catch(() => undefined);
+            throw error;
+        } finally {
+            client.release();
+        }
+
+        const refreshed = await query('SELECT * FROM family_members WHERE id = $1', [id]);
+        const ownerName = await getOwnerName(req.userId!);
+        const emailDelivered = await deliverInvitation({
+            ownerName,
+            memberName: member.name,
+            email: normalizedEmail,
+            temporaryPassword: provision.temporaryPassword,
+        });
+
+        return res.json({
+            success: true,
+            data: mapFamilyMember(refreshed.rows[0]),
+            account: {
+                email: normalizedEmail,
+                emailDelivered,
+                ...(emailDelivered ? {} : { temporaryPassword: provision.temporaryPassword }),
+            },
+        });
+    } catch (error) {
+        logger.error('family.invite_family_member_failed', {
+            error: error instanceof Error ? error.message : String(error),
+        });
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Update family member. Owner-only.
+router.put('/:id', requireFamilyOwner, async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
         const {
@@ -393,26 +614,44 @@ router.put('/:id', async (req: AuthRequest, res) => {
     }
 });
 
-// Delete family member
-router.delete('/:id', async (req: AuthRequest, res) => {
+// Delete family member. Owner-only. If the member has a linked login account we
+// delete that account too, so removing someone from the family also revokes
+// their access (otherwise the orphaned account could still read family data).
+router.delete('/:id', requireFamilyOwner, async (req: AuthRequest, res) => {
+    const client = await getClient();
     try {
         const { id } = req.params;
 
-        const result = await query(
-            'DELETE FROM family_members WHERE id = $1 AND user_id = $2 RETURNING id',
+        await client.query('BEGIN');
+        const result = await client.query(
+            'DELETE FROM family_members WHERE id = $1 AND user_id = $2 RETURNING account_user_id',
             [id, req.userId],
         );
 
         if (result.rows.length === 0) {
+            await client.query('ROLLBACK');
             return res.status(404).json({ success: false, error: 'Family member not found' });
         }
 
+        const accountUserId: string | null = result.rows[0].account_user_id ?? null;
+        if (accountUserId) {
+            // Only ever delete a member account of THIS family — never an owner.
+            await client.query('DELETE FROM users WHERE id = $1 AND family_owner_id = $2', [
+                accountUserId,
+                req.userId,
+            ]);
+        }
+
+        await client.query('COMMIT');
         res.json({ success: true, message: 'Family member deleted' });
     } catch (error) {
+        await client.query('ROLLBACK').catch(() => undefined);
         logger.error('family.delete_family_member_failed', {
             error: error instanceof Error ? error.message : String(error),
         });
         res.status(500).json({ success: false, error: 'Internal server error' });
+    } finally {
+        client.release();
     }
 });
 

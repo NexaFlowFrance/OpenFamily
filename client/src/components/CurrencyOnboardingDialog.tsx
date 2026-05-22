@@ -22,7 +22,8 @@ const CurrencyOnboardingDialog: React.FC = () => {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
 
-    const open = !!user && !user.currency;
+    // Wait until any forced password change is done so two modals don't stack.
+    const open = !!user && !user.currency && !user.must_change_password;
 
     const handleConfirm = async () => {
         setSubmitting(true);

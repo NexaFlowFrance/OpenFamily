@@ -1,0 +1,147 @@
+{
+  "budget": {
+    "title": "Budget",
+    "subtitle": "Track your expenses and income",
+    "loading": "Loading budget...",
+    "categories": {
+      "Alimentation": "Food",
+      "Santé": "Health",
+      "Enfants": "Children",
+      "Maison": "Home",
+      "Loisirs": "Leisure",
+      "Autre": "Other"
+    },
+    "tabs": {
+      "entries": "Entries",
+      "statistics": "Statistics",
+      "limits": "Limits"
+    },
+    "filter": {
+      "all_members": "All members",
+      "unassigned": "Unassigned"
+    },
+    "scan_receipt": "Scan receipt",
+    "new_entry": "New entry",
+    "empty_month": "No entries for this month",
+    "stats": {
+      "ai_card_title": "AI analysis of the month",
+      "ai_card_desc": "Diagnosis + savings opportunities + actionable recommendations.",
+      "analyze": "Analyze",
+      "expenses": "Expenses",
+      "income": "Income",
+      "balance": "Balance",
+      "by_category": "Expenses by category",
+      "distribution": "Distribution",
+      "by_member_category": "Expenses by member and category",
+      "monthly_evolution": "Monthly trend {{year}}"
+    },
+    "chart": {
+      "expenses": "Expenses",
+      "income": "Income"
+    },
+    "limitsTab": {
+      "title": "Monthly limits",
+      "define": "Set a limit",
+      "spent": "Spent:",
+      "limit": "Limit:",
+      "not_defined": "Not set",
+      "used": "{{percentage}}% used"
+    },
+    "errors": {
+      "amount_positive": "The amount must be a positive number.",
+      "limit_positive": "The limit must be a positive number.",
+      "save_entry": "Unable to save this entry.",
+      "save_limit": "Unable to set this limit."
+    },
+    "confirm_delete": "Are you sure you want to delete this entry?",
+    "form": {
+      "edit_title": "Edit entry",
+      "new_title": "New entry",
+      "description": "Fill in the budget entry details",
+      "expense": "Expense",
+      "income": "Income",
+      "category": "Category",
+      "category_placeholder": "Food, Fuel…",
+      "category_hint": "Pick from the list or type your own category.",
+      "amount": "Amount ({{symbol}})",
+      "date": "Date",
+      "description_label": "Description (optional)",
+      "description_placeholder": "Details...",
+      "assign_to": "Assign to (optional)",
+      "unassigned": "Unassigned",
+      "create": "Create"
+    },
+    "limitForm": {
+      "title": "Set a limit",
+      "description": "Set a monthly limit for a category",
+      "category": "Category",
+      "monthly_limit": "Monthly limit ({{symbol}})",
+      "define": "Set"
+    },
+    "receiptScan": {
+      "title": "Scan a receipt",
+      "description": "Take a photo (or import) a receipt — AI pre-fills the expense.",
+      "confidence": {
+        "high": "High confidence",
+        "medium": "Medium confidence",
+        "low": "Low confidence"
+      },
+      "errors": {
+        "unsupported_format": "Unsupported format: {{type}}. Use JPG, PNG, WEBP or HEIC.",
+        "unknown_type": "unknown",
+        "too_large": "Image too large (max {{size}} MB).",
+        "extract_http": "Extraction failed (HTTP {{status}})",
+        "disabled": "AI is disabled on this installation.",
+        "quota_exceeded": "Monthly AI quota reached. Try again next month.",
+        "bad_json": "AI couldn't read this image. Try a sharper photo.",
+        "network": "Network error during upload.",
+        "aborted": "Upload cancelled.",
+        "extract_failed": "Extraction failed."
+      },
+      "pick_photo": "Take / import a photo",
+      "formats_hint": "JPG, PNG, WEBP, HEIC — 5 MB max",
+      "preview_alt": "Receipt preview",
+      "remove_photo": "Remove photo",
+      "file_size": "{{name}} — {{size}} KB",
+      "extracting": "Extracting…",
+      "extract": "Extract the information",
+      "extracted_title": "Extracted data",
+      "amount": "Amount",
+      "date": "Date",
+      "merchant": "Merchant",
+      "category": "Category",
+      "description": "Description",
+      "adjust_hint": "You'll be able to adjust these values in the next step before saving the expense.",
+      "re_extracting": "Re-extracting…",
+      "re_extract": "Re-extract",
+      "use_info": "Use this info",
+      "close": "Close"
+    },
+    "analysisDialog": {
+      "title": "Budget analysis",
+      "description": "AI reviews {{period}} and suggests concrete ideas.",
+      "analyzing": "Analyzing… (10–20 seconds)",
+      "analysis_failed": "Analysis failed.",
+      "analysis_impossible": "Analysis unavailable.",
+      "empty_month": "No expenses or income recorded for {{period}}. Add a few entries then run the analysis again.",
+      "quota_exceeded": "Monthly AI quota reached. Try again next month.",
+      "disabled": "AI is disabled on this installation.",
+      "unusable": "AI couldn't produce a usable analysis. Try again.",
+      "diagnostic": "Diagnosis",
+      "alerts": "Immediate alerts",
+      "strengths": "Strengths",
+      "weaknesses": "Points of attention",
+      "savings": "Estimated savings opportunities",
+      "recommendations": "Recommendations",
+      "verdict": {
+        "Excellent": "Excellent",
+        "Sain": "Healthy",
+        "À surveiller": "Watch out",
+        "Critique": "Critical"
+      },
+      "re_analyzing": "Re-analyzing…",
+      "re_analyze": "Re-analyze",
+      "close": "Close"
+    }
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "domain": {
+    "equipmentCategory": {
+      "Chaudière": "Chaudière",
+      "Climatisation": "Climatisation",
+      "Électroménager": "Électroménager",
+      "Véhicule": "Véhicule",
+      "Outillage": "Outillage",
+      "Sécurité": "Sécurité",
+      "Jardin": "Jardin",
+      "Autre": "Autre"
+    },
+    "maintenanceKind": {
+      "Entretien": "Entretien",
+      "Révision": "Révision",
+      "Réparation": "Réparation",
+      "Inspection": "Inspection"
+    },
+    "contractCategory": {
+      "Énergie": "Énergie",
+      "Eau": "Eau",
+      "Internet": "Internet",
+      "Téléphone": "Téléphone",
+      "Streaming": "Streaming",
+      "Assurance": "Assurance",
+      "Prêt": "Prêt",
+      "Abonnement": "Abonnement",
+      "Autre": "Autre"
+    },
+    "contractFrequency": {
+      "Mensuel": "Mensuel",
+      "Bimestriel": "Bimestriel",
+      "Trimestriel": "Trimestriel",
+      "Semestriel": "Semestriel",
+      "Annuel": "Annuel"
+    },
+    "paymentMethod": {
+      "Prélèvement auto": "Prélèvement auto",
+      "Carte": "Carte",
+      "Virement": "Virement",
+      "Chèque": "Chèque",
+      "Espèces": "Espèces",
+      "Manuel": "Manuel"
+    },
+    "contactCategory": {
+      "Plombier": "Plombier",
+      "Électricien": "Électricien",
+      "Chauffagiste": "Chauffagiste",
+      "Bricoleur": "Bricoleur",
+      "Jardinier": "Jardinier",
+      "Ménage": "Ménage",
+      "Médecin": "Médecin",
+      "Pédiatre": "Pédiatre",
+      "Vétérinaire": "Vétérinaire",
+      "Gardien": "Gardien",
+      "Voisin": "Voisin",
+      "Famille": "Famille",
+      "Urgences": "Urgences",
+      "Assurance": "Assurance",
+      "Banque": "Banque",
+      "École": "École",
+      "Autre": "Autre"
+    },
+    "roomCategory": {
+      "Salon": "Salon",
+      "Cuisine": "Cuisine",
+      "Salle à manger": "Salle à manger",
+      "Chambre": "Chambre",
+      "Chambre enfant": "Chambre enfant",
+      "Chambre sous sol": "Chambre sous sol",
+      "Salle de bain": "Salle de bain",
+      "WC": "WC",
+      "Bureau": "Bureau",
+      "Buanderie": "Buanderie",
+      "Garage": "Garage",
+      "Cave": "Cave",
+      "Grenier": "Grenier",
+      "Atelier": "Atelier",
+      "Jardin": "Jardin",
+      "Terrasse": "Terrasse",
+      "Couloir": "Couloir",
+      "Entrée": "Entrée",
+      "Autre": "Autre"
+    },
+    "itemCategory": {
+      "Outils": "Outils",
+      "Documents": "Documents",
+      "Médicaments": "Médicaments",
+      "Meubles": "Meubles",
+      "Électronique": "Électronique",
+      "Papeterie": "Papeterie",
+      "Vêtements": "Vêtements",
+      "Cuisine": "Cuisine",
+      "Décoration": "Décoration",
+      "Jouets": "Jouets",
+      "Sport": "Sport",
+      "Saisonnier": "Saisonnier",
+      "Autre": "Autre"
+    },
+    "documentCategory": {
+      "Facture": "Facture",
+      "Contrat": "Contrat",
+      "Manuel": "Manuel",
+      "Notice": "Notice",
+      "Photo": "Photo",
+      "Garantie": "Garantie",
+      "Attestation": "Attestation",
+      "Autre": "Autre"
+    },
+    "projectCategory": {
+      "Rénovation": "Rénovation",
+      "Décoration": "Décoration",
+      "Jardin": "Jardin",
+      "Sécurité": "Sécurité",
+      "Confort": "Confort",
+      "Réparation": "Réparation",
+      "Énergie": "Énergie",
+      "Mobilier": "Mobilier",
+      "Autre": "Autre"
+    },
+    "projectStatus": {
+      "Idée": "Idée",
+      "En cours": "En cours",
+      "Terminé": "Terminé",
+      "Suspendu": "Suspendu"
+    },
+    "shoppingCategory": {
+      "Alimentation": "Alimentation",
+      "Bebe": "Bébé",
+      "Menage": "Ménage",
+      "Sante": "Santé",
+      "Autre": "Autre"
+    }
+  }
+}

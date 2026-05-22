@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { Plus, CheckSquare, Square, Trash2, Edit2, Filter, TrendingUp, Repeat } from 'lucide-react';
 import {
@@ -14,7 +15,7 @@ import {
     useToast,
 } from '../components/ui';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useDateLocale } from '../lib/dateLocale';
 
 interface Task {
     id: string;
@@ -48,22 +49,24 @@ interface TaskStats {
     };
 }
 
-const PRIORITIES = [
-    { value: 'Haute', label: 'Haute' },
-    { value: 'Moyenne', label: 'Moyenne' },
-    { value: 'Basse', label: 'Basse' },
-];
-
-const FREQUENCIES = [
-    { value: 'Une fois', label: 'Une fois' },
-    { value: 'Quotidien', label: 'Quotidien' },
-    { value: 'Hebdomadaire', label: 'Hebdomadaire' },
-    { value: 'Mensuel', label: 'Mensuel' },
-    { value: 'Annuel', label: 'Annuel' },
-];
+// Persisted data values (kept verbatim — server + TS literals). Display labels
+// are resolved at render time via t('tasks.priority.' + value).
+const PRIORITY_VALUES = ['Haute', 'Moyenne', 'Basse'];
+const FREQUENCY_VALUES = ['Une fois', 'Quotidien', 'Hebdomadaire', 'Mensuel', 'Annuel'];
 
 const Tasks: React.FC = () => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const { showToast } = useToast();
+
+    const PRIORITIES = PRIORITY_VALUES.map((value) => ({
+        value,
+        label: t('tasks.priority.' + value, { defaultValue: value }),
+    }));
+    const FREQUENCIES = FREQUENCY_VALUES.map((value) => ({
+        value,
+        label: t('tasks.frequency.' + value, { defaultValue: value }),
+    }));
     const [tasks, setTasks] = useState<Task[]>([]);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [stats, setStats] = useState<TaskStats | null>(null);
@@ -99,7 +102,7 @@ const Tasks: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to load tasks:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de charger les tâches.');
+            setError(error instanceof Error ? error.message : t('tasks.errors.load'));
         } finally {
             setLoading(false);
         }
@@ -115,7 +118,7 @@ const Tasks: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to load family members:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de charger les membres.');
+            setError(error instanceof Error ? error.message : t('tasks.errors.load_members'));
         }
     };
 
@@ -129,9 +132,7 @@ const Tasks: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to load stats:', error);
-            setError(
-                error instanceof Error ? error.message : 'Impossible de charger les statistiques.',
-            );
+            setError(error instanceof Error ? error.message : t('tasks.errors.load_stats'));
         }
     };
 
@@ -150,9 +151,7 @@ const Tasks: React.FC = () => {
             loadStats();
         } catch (error) {
             console.error('Failed to save task:', error);
-            setError(
-                error instanceof Error ? error.message : 'Impossible d’enregistrer cette tâche.',
-            );
+            setError(error instanceof Error ? error.message : t('tasks.errors.save'));
         }
     };
 
@@ -169,33 +168,32 @@ const Tasks: React.FC = () => {
             if (response.success && response.data?.next_occurrence) {
                 const next = response.data.next_occurrence;
                 showToast({
-                    title: 'Tâche terminée ✓',
+                    title: t('tasks.toast.completed_title'),
                     description: next.due_date
-                        ? `Prochaine "${next.title}" planifiée le ${format(new Date(next.due_date), 'dd MMM', { locale: fr })}`
-                        : `Prochaine "${next.title}" créée`,
+                        ? t('tasks.toast.next_scheduled', {
+                              title: next.title,
+                              date: format(new Date(next.due_date), 'dd MMM', { locale }),
+                          })
+                        : t('tasks.toast.next_created', { title: next.title }),
                 });
             }
             loadTasks();
             loadStats();
         } catch (error) {
             console.error('Failed to toggle task:', error);
-            setError(
-                error instanceof Error ? error.message : 'Impossible de mettre à jour cette tâche.',
-            );
+            setError(error instanceof Error ? error.message : t('tasks.errors.update'));
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) return;
+        if (!confirm(t('tasks.confirm_delete'))) return;
         try {
             await api.delete(`/api/tasks/${id}`);
             loadTasks();
             loadStats();
         } catch (error) {
             console.error('Failed to delete task:', error);
-            setError(
-                error instanceof Error ? error.message : 'Impossible de supprimer cette tâche.',
-            );
+            setError(error instanceof Error ? error.message : t('tasks.errors.delete'));
         }
     };
 
@@ -258,7 +256,7 @@ const Tasks: React.FC = () => {
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
                     <p className="text-muted-foreground font-medium animate-pulse">
-                        Chargement des tâches...
+                        {t('tasks.loading')}
                     </p>
                 </div>
             </div>
@@ -274,10 +272,8 @@ const Tasks: React.FC = () => {
             ) : null}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-h1 mb-1">Tâches</h1>
-                    <p className="text-muted-foreground text-body">
-                        Gérez vos tâches familiales et suivez leur progression
-                    </p>
+                    <h1 className="text-h1 mb-1">{t('tasks.title')}</h1>
+                    <p className="text-muted-foreground text-body">{t('tasks.subtitle')}</p>
                 </div>
                 <Button
                     onClick={() => {
@@ -286,7 +282,7 @@ const Tasks: React.FC = () => {
                     }}
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    Nouvelle tâche
+                    {t('tasks.new_task')}
                 </Button>
             </div>
 
@@ -297,7 +293,9 @@ const Tasks: React.FC = () => {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-label text-muted-foreground mb-1">Total</p>
+                                    <p className="text-label text-muted-foreground mb-1">
+                                        {t('tasks.stats.total')}
+                                    </p>
                                     <p className="text-2xl font-bold">{stats.total}</p>
                                 </div>
                                 <CheckSquare className="h-8 w-8 text-info" />
@@ -309,7 +307,7 @@ const Tasks: React.FC = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-label text-muted-foreground mb-1">
-                                        Complétées
+                                        {t('tasks.stats.completed')}
                                     </p>
                                     <p className="text-2xl font-bold text-success">
                                         {stats.completed}
@@ -324,7 +322,7 @@ const Tasks: React.FC = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-label text-muted-foreground mb-1">
-                                        En attente
+                                        {t('tasks.stats.pending')}
                                     </p>
                                     <p className="text-2xl font-bold text-warning">
                                         {stats.pending}
@@ -339,7 +337,7 @@ const Tasks: React.FC = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-label text-muted-foreground mb-1">
-                                        Taux de réussite
+                                        {t('tasks.stats.completion_rate')}
                                     </p>
                                     <p className="text-2xl font-bold text-primary">
                                         {stats.completionRate}%
@@ -360,30 +358,35 @@ const Tasks: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-2">
                             <Filter className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-body-sm font-medium">Filtres:</span>
+                            <span className="text-body-sm font-medium">
+                                {t('tasks.filters.label')}
+                            </span>
                         </div>
                         <Select
                             value={filterStatus}
                             onValueChange={setFilterStatus}
                             options={[
-                                { value: 'all', label: 'Toutes' },
-                                { value: 'pending', label: 'En attente' },
-                                { value: 'completed', label: 'Complétées' },
+                                { value: 'all', label: t('tasks.filters.all') },
+                                { value: 'pending', label: t('tasks.filters.pending') },
+                                { value: 'completed', label: t('tasks.filters.completed') },
                             ]}
                             className="w-40"
                         />
                         <Select
                             value={filterPriority}
                             onValueChange={setFilterPriority}
-                            options={[{ value: '', label: 'Toutes priorités' }, ...PRIORITIES]}
+                            options={[
+                                { value: '', label: t('tasks.filters.all_priorities') },
+                                ...PRIORITIES,
+                            ]}
                             className="w-48"
                         />
                         <Select
                             value={filterMember}
                             onValueChange={setFilterMember}
                             options={[
-                                { value: '', label: 'Tous les membres' },
-                                { value: '__unassigned__', label: 'Non assignées' },
+                                { value: '', label: t('tasks.filters.all_members') },
+                                { value: '__unassigned__', label: t('tasks.filters.unassigned') },
                                 ...familyMembers.map((m) => ({ value: m.id, label: m.name })),
                             ]}
                             className="w-48"
@@ -398,7 +401,7 @@ const Tasks: React.FC = () => {
                                     setFilterMember('');
                                 }}
                             >
-                                Réinitialiser
+                                {t('tasks.filters.reset')}
                             </Button>
                         )}
                     </div>
@@ -413,8 +416,8 @@ const Tasks: React.FC = () => {
                             <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
                             <p className="text-muted-foreground">
                                 {tasks.length === 0
-                                    ? 'Aucune tâche pour le moment. Créez votre première tâche !'
-                                    : 'Aucune tâche ne correspond aux filtres sélectionnés.'}
+                                    ? t('tasks.empty.none')
+                                    : t('tasks.empty.no_match')}
                             </p>
                         </CardContent>
                     </Card>
@@ -460,24 +463,34 @@ const Tasks: React.FC = () => {
                                                                 task.priority,
                                                             )}
                                                         >
-                                                            {task.priority}
+                                                            {t('tasks.priority.' + task.priority, {
+                                                                defaultValue: task.priority,
+                                                            })}
                                                         </Badge>
                                                     )}
                                                     {task.frequency &&
                                                         task.frequency !== 'Une fois' && (
                                                             <Badge variant="secondary">
                                                                 <Repeat className="h-3 w-3 mr-1" />
-                                                                {task.frequency}
+                                                                {t(
+                                                                    'tasks.frequency.' +
+                                                                        task.frequency,
+                                                                    {
+                                                                        defaultValue:
+                                                                            task.frequency,
+                                                                    },
+                                                                )}
                                                             </Badge>
                                                         )}
                                                     {task.due_date && (
                                                         <Badge variant="default">
-                                                            Échéance:{' '}
-                                                            {format(
-                                                                new Date(task.due_date),
-                                                                'dd MMM yyyy',
-                                                                { locale: fr },
-                                                            )}
+                                                            {t('tasks.due_date_badge', {
+                                                                date: format(
+                                                                    new Date(task.due_date),
+                                                                    'dd MMM yyyy',
+                                                                    { locale },
+                                                                ),
+                                                            })}
                                                         </Badge>
                                                     )}
                                                     {(task.assigned_to_members || []).map(
@@ -529,28 +542,28 @@ const Tasks: React.FC = () => {
             <Dialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
-                title={editingTask ? 'Modifier la tâche' : 'Nouvelle tâche'}
-                description="Remplissez les informations de la tâche"
+                title={editingTask ? t('tasks.dialog.edit_title') : t('tasks.dialog.new_title')}
+                description={t('tasks.dialog.description')}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input
-                        label="Titre"
+                        label={t('tasks.dialog.title_label')}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         required
-                        placeholder="Ex: Faire les courses"
+                        placeholder={t('tasks.dialog.title_placeholder')}
                     />
                     <Textarea
-                        label="Description (optionnel)"
+                        label={t('tasks.dialog.description_label')}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Détails supplémentaires..."
+                        placeholder={t('tasks.dialog.description_placeholder')}
                         rows={3}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-label font-medium text-foreground mb-1.5">
-                                Priorité
+                                {t('tasks.dialog.priority_label')}
                             </label>
                             <Select
                                 value={formData.priority}
@@ -562,7 +575,7 @@ const Tasks: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-label font-medium text-foreground mb-1.5">
-                                Fréquence
+                                {t('tasks.dialog.frequency_label')}
                             </label>
                             <Select
                                 value={formData.frequency}
@@ -574,17 +587,17 @@ const Tasks: React.FC = () => {
                         </div>
                     </div>
                     <DatePicker
-                        label="Date d'échéance (optionnel)"
+                        label={t('tasks.dialog.due_date_label')}
                         value={formData.due_date}
                         onChange={(value) => setFormData({ ...formData, due_date: value })}
                     />
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Assigner à (optionnel)
+                            {t('tasks.dialog.assign_label')}
                         </label>
                         {familyMembers.length === 0 ? (
                             <p className="text-body-sm text-muted-foreground">
-                                Aucun membre disponible
+                                {t('tasks.dialog.no_members')}
                             </p>
                         ) : (
                             <div className="space-y-2 rounded-input border border-border bg-surface-2/40 p-3">
@@ -626,9 +639,11 @@ const Tasks: React.FC = () => {
                             variant="secondary"
                             onClick={() => setDialogOpen(false)}
                         >
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
-                        <Button type="submit">{editingTask ? 'Enregistrer' : 'Créer'}</Button>
+                        <Button type="submit">
+                            {editingTask ? t('common.save') : t('tasks.dialog.create')}
+                        </Button>
                     </div>
                 </form>
             </Dialog>

@@ -1,0 +1,73 @@
+{
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your data and preferences.",
+    "errors": {
+      "update": "Update failed."
+    },
+    "currency": {
+      "title": "Currency",
+      "description": "Currency used to display amounts (budget, shopping, dashboard). Amounts already entered are not converted when you change it.",
+      "saved": "Currency updated."
+    },
+    "location": {
+      "title": "City",
+      "description": "Used for tomorrow's weather and outfit suggestions on the dashboard. Enter a city name (e.g. Lyon, Montreal, Dakar) — the location is found automatically.",
+      "placeholder": "e.g. Paris",
+      "current": "Current: {{city}}",
+      "save": "Save city",
+      "saved": "City saved: {{city}}.",
+      "notFound": "City not found — check the spelling or try a larger town."
+    },
+    "email": {
+      "title": "Email notifications",
+      "description": "Get reminders (appointments, tasks, contracts, warranties) in your inbox. Emails are sent to",
+      "enable": "Enable email notifications",
+      "mode": "Delivery mode",
+      "immediate": "Immediate — one email per notification",
+      "daily": "Daily — summary at 8am",
+      "saved": "Preferences updated.",
+      "sending": "Sending…",
+      "sendTest": "Send a test email",
+      "testSent": "Test email sent to {{email}}. Remember to check your spam folder.",
+      "testFailed": "Sending failed: {{message}}",
+      "testFailedGeneric": "Failed to send the test."
+    },
+    "export": {
+      "title": "Export data",
+      "description": "Download all your data (budget, tasks, recipes, members, shopping, appointments, schedules, meals) as a JSON file.",
+      "button": "Export",
+      "exporting": "Exporting…",
+      "error": "Export failed."
+    },
+    "import": {
+      "title": "Import data",
+      "description": "Restore data from a KeurTonux export file. Existing data is not overwritten (duplicates are ignored).",
+      "success": "Import successful",
+      "chooseFile": "Choose a file…",
+      "button": "Import",
+      "importing": "Importing…",
+      "invalidJson": "Invalid JSON file.",
+      "error": "Import failed.",
+      "itemsImported_one": "item imported",
+      "itemsImported_other": "items imported",
+      "entities": {
+        "family_members": "Family members",
+        "tasks": "Tasks",
+        "recipes": "Recipes",
+        "meal_plans": "Planned meals",
+        "budget_entries": "Budget entries",
+        "budget_limits": "Budget limits",
+        "shopping_items": "Shopping items",
+        "appointments": "Appointments",
+        "schedule_entries": "Schedules"
+      }
+    }
+  },
+  "language": {
+    "title": "Language",
+    "description": "Choose the interface language. The change is immediate and kept on this device.",
+    "fr": "Français",
+    "en": "English"
+  }
+}

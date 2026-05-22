@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { api } from '../lib/api';
 import {
     ShoppingCart,
@@ -60,23 +62,26 @@ interface QuickOverviewKpisProps {
     navigate: (path: string) => void;
 }
 
-const formatRelativeDate = (iso: string): string => {
+const formatRelativeDate = (iso: string, t: TFunction, locale: string): string => {
     const d = new Date(iso);
     const now = new Date();
     const diffMs = d.getTime() - now.getTime();
     const diffDays = Math.round(diffMs / (24 * 3600 * 1000));
-    if (diffDays === 0) return "aujourd'hui";
-    if (diffDays === 1) return 'demain';
-    if (diffDays > 1 && diffDays < 7) return `dans ${diffDays} jours`;
-    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    if (diffDays === 0) return t('dashboard.relative_date.today');
+    if (diffDays === 1) return t('dashboard.relative_date.tomorrow');
+    if (diffDays > 1 && diffDays < 7)
+        return t('dashboard.relative_date.in_days', { count: diffDays });
+    return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 };
 
 const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMoney, navigate }) => {
+    const { t, i18n } = useTranslation();
+    const dateLocale = i18n.language === 'fr' ? 'fr-FR' : 'en-US';
     const kpis = stats?.kpis;
     if (!kpis) {
         return (
             <p className="text-caption text-muted-foreground">
-                Vos indicateurs apparaîtront ici dès que vous aurez ajouté des données.
+                {t('dashboard.quick_overview.empty')}
             </p>
         );
     }
@@ -94,19 +99,20 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
         label: string;
         tone: 'good' | 'bad' | 'neutral';
     } = (() => {
-        if (delta === null) return { Icon: Minus, label: 'Pas de comparaison', tone: 'neutral' };
+        if (delta === null)
+            return { Icon: Minus, label: t('dashboard.kpi.no_comparison'), tone: 'neutral' };
         const pct = Math.round(delta * 100);
         if (Math.abs(pct) < 5)
-            return { Icon: Minus, label: 'Stable vs mois dernier', tone: 'neutral' };
+            return { Icon: Minus, label: t('dashboard.kpi.stable'), tone: 'neutral' };
         if (pct > 0)
             return {
                 Icon: TrendingUp,
-                label: `+${pct}% vs mois dernier`,
+                label: t('dashboard.kpi.up', { pct }),
                 tone: 'bad', // more spending = bad signal
             };
         return {
             Icon: TrendingDown,
-            label: `${pct}% vs mois dernier`,
+            label: t('dashboard.kpi.down', { pct }),
             tone: 'good',
         };
     })();
@@ -121,7 +127,7 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
             >
                 <div className="flex items-center gap-2 text-label text-muted-foreground mb-2">
                     <Wallet className="h-4 w-4" />
-                    Dépenses ce mois
+                    {t('dashboard.kpi.month_expenses')}
                 </div>
                 <div className="text-h2 text-foreground">
                     {formatMoney(kpis.budget.thisMonth, { maximumFractionDigits: 0 })}
@@ -140,7 +146,7 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
                 </div>
                 {kpis.budget.topCategory ? (
                     <p className="text-micro text-muted-foreground mt-1">
-                        Top poste :{' '}
+                        {t('dashboard.kpi.top_category')}{' '}
                         <span className="font-medium">{kpis.budget.topCategory.category}</span> (
                         {formatMoney(kpis.budget.topCategory.amount, { maximumFractionDigits: 0 })})
                     </p>
@@ -155,21 +161,27 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
             >
                 <div className="flex items-center gap-2 text-label text-muted-foreground mb-2">
                     <ShoppingCart className="h-4 w-4" />
-                    Liste de courses
+                    {t('dashboard.kpi.shopping_list')}
                 </div>
                 <div className="text-h2 text-foreground">
                     {kpis.shopping.pending}{' '}
-                    <span className="text-body text-muted-foreground">à acheter</span>
+                    <span className="text-body text-muted-foreground">
+                        {t('dashboard.kpi.to_buy')}
+                    </span>
                 </div>
                 <div className="mt-2 h-2 rounded-full bg-muted overflow-hidden">
                     <div
                         className="h-full bg-success transition-all"
                         style={{ width: `${shoppingProgress}%` }}
-                        aria-label={`${shoppingProgress}% cochés`}
+                        aria-label={t('dashboard.kpi.checked_aria', { pct: shoppingProgress })}
                     />
                 </div>
                 <p className="text-micro text-muted-foreground mt-1">
-                    {kpis.shopping.checked}/{kpis.shopping.total} cochés · {shoppingProgress}%
+                    {t('dashboard.kpi.checked_progress', {
+                        checked: kpis.shopping.checked,
+                        total: kpis.shopping.total,
+                        pct: shoppingProgress,
+                    })}
                 </p>
             </button>
 
@@ -181,12 +193,12 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
             >
                 <div className="flex items-center gap-2 text-label text-muted-foreground mb-2">
                     <UtensilsCrossed className="h-4 w-4" />
-                    Repas planifiés
+                    {t('dashboard.kpi.planned_meals')}
                 </div>
                 <div className="text-h2 text-foreground">
                     {kpis.mealPlanning.plannedDays}
                     <span className="text-body text-muted-foreground">
-                        /{kpis.mealPlanning.totalDays} jours
+                        {t('dashboard.kpi.days_suffix', { total: kpis.mealPlanning.totalDays })}
                     </span>
                 </div>
                 <div className="flex gap-1 mt-2">
@@ -201,8 +213,10 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
                 </div>
                 <p className="text-micro text-muted-foreground mt-1">
                     {kpis.mealPlanning.plannedDays === kpis.mealPlanning.totalDays
-                        ? 'Semaine complète ✓'
-                        : `${kpis.mealPlanning.totalDays - kpis.mealPlanning.plannedDays} jour(s) à planifier`}
+                        ? t('dashboard.kpi.week_complete')
+                        : t('dashboard.kpi.days_to_plan', {
+                              count: kpis.mealPlanning.totalDays - kpis.mealPlanning.plannedDays,
+                          })}
                 </p>
             </button>
 
@@ -214,7 +228,7 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
             >
                 <div className="flex items-center gap-2 text-label text-muted-foreground mb-2">
                     <CalendarClock className="h-4 w-4" />
-                    Prochain rendez-vous
+                    {t('dashboard.kpi.next_appointment')}
                 </div>
                 {kpis.nextAppointment ? (
                     <>
@@ -222,19 +236,23 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
                             {kpis.nextAppointment.title}
                         </div>
                         <p className="text-caption text-primary mt-1">
-                            {formatRelativeDate(kpis.nextAppointment.startTime)}
+                            {formatRelativeDate(kpis.nextAppointment.startTime, t, dateLocale)}
                         </p>
                     </>
                 ) : (
-                    <p className="text-body text-muted-foreground">Aucun à venir</p>
+                    <p className="text-body text-muted-foreground">
+                        {t('dashboard.kpi.none_upcoming')}
+                    </p>
                 )}
                 {kpis.overdueTasks > 0 ? (
                     <p className="text-caption text-destructive mt-2 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3" />
-                        {kpis.overdueTasks} tâche{kpis.overdueTasks > 1 ? 's' : ''} en retard
+                        {t('dashboard.kpi.overdue_tasks', { count: kpis.overdueTasks })}
                     </p>
                 ) : (
-                    <p className="text-micro text-muted-foreground mt-2">Aucune tâche en retard</p>
+                    <p className="text-micro text-muted-foreground mt-2">
+                        {t('dashboard.kpi.no_overdue')}
+                    </p>
                 )}
             </button>
         </div>
@@ -242,6 +260,7 @@ const QuickOverviewKpis: React.FC<QuickOverviewKpisProps> = ({ stats, formatMone
 };
 
 const Dashboard: React.FC = () => {
+    const { t } = useTranslation();
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -272,7 +291,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
                     <p className="text-muted-foreground font-medium animate-pulse">
-                        Chargement de votre espace...
+                        {t('dashboard.loading')}
                     </p>
                 </div>
             </div>
@@ -281,7 +300,8 @@ const Dashboard: React.FC = () => {
 
     const statCards = [
         {
-            title: 'Rendez-vous à venir',
+            key: 'upcoming_appointments',
+            title: t('dashboard.stat_cards.upcoming_appointments'),
             value: stats?.upcomingAppointments || 0,
             icon: Calendar,
             color: 'text-info',
@@ -290,7 +310,8 @@ const Dashboard: React.FC = () => {
             href: '/calendar',
         },
         {
-            title: 'Tâches en attente',
+            key: 'pending_tasks',
+            title: t('dashboard.stat_cards.pending_tasks'),
             value: stats?.pendingTasks || 0,
             icon: CheckSquare,
             color: 'text-success',
@@ -299,7 +320,8 @@ const Dashboard: React.FC = () => {
             href: '/tasks',
         },
         {
-            title: 'Articles à acheter',
+            key: 'shopping_items',
+            title: t('dashboard.stat_cards.shopping_items'),
             value: stats?.shoppingItems || 0,
             icon: ShoppingCart,
             color: 'text-primary',
@@ -308,7 +330,8 @@ const Dashboard: React.FC = () => {
             href: '/shopping',
         },
         {
-            title: 'Dépenses du mois',
+            key: 'month_expenses',
+            title: t('dashboard.stat_cards.month_expenses'),
             value: formatMoney(Number(stats?.thisMonthExpenses || 0), { maximumFractionDigits: 0 }),
             icon: Wallet,
             color: 'text-warning',
@@ -322,15 +345,13 @@ const Dashboard: React.FC = () => {
         <div className="space-y-8 animate-accordion-down">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-h1 text-foreground mb-1">Bonjour ! 👋</h1>
-                    <p className="text-muted-foreground text-body">
-                        Voici ce qu'il se passe dans votre famille aujourd'hui.
-                    </p>
+                    <h1 className="text-h1 text-foreground mb-1">{t('dashboard.greeting')}</h1>
+                    <p className="text-muted-foreground text-body">{t('dashboard.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
                     <Button variant="secondary" size="sm" onClick={() => navigate('/calendar')}>
                         <Activity className="w-4 h-4 mr-2" />
-                        Voir l'activité
+                        {t('dashboard.see_activity')}
                     </Button>
                 </div>
             </div>
@@ -342,11 +363,12 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div className="flex-1">
                         <h3 className="font-semibold text-foreground text-body-sm">
-                            Attention au budget
+                            {t('dashboard.budget_alert.title')}
                         </h3>
                         <p className="text-sm text-muted-foreground mt-1">
-                            {stats.budgetAlerts} catégorie{stats.budgetAlerts > 1 ? 's ont' : ' a'}{' '}
-                            dépassé le budget mensuel défini.
+                            {t('dashboard.budget_alert.description', {
+                                count: stats.budgetAlerts,
+                            })}
                         </p>
                     </div>
                     <Button
@@ -354,7 +376,7 @@ const Dashboard: React.FC = () => {
                         onClick={() => navigate('/budget')}
                         className="bg-warning hover:bg-warning/90 text-foreground shrink-0 shadow-none border-0"
                     >
-                        Voir détail
+                        {t('dashboard.budget_alert.see_detail')}
                     </Button>
                 </div>
             )}
@@ -364,7 +386,7 @@ const Dashboard: React.FC = () => {
                     const Icon = card.icon;
                     return (
                         <Card
-                            key={card.title}
+                            key={card.key}
                             className={`border ${card.borderColor} bg-card group cursor-pointer`}
                             onClick={() => navigate(card.href)}
                         >
@@ -397,14 +419,17 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <Card className="lg:col-span-2 shadow-nexus border-none">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xl">Aperçu rapide</CardTitle>
+                        <CardTitle className="text-xl">
+                            {t('dashboard.quick_overview.title')}
+                        </CardTitle>
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => navigate('/calendar')}
                             className="text-primary hover:text-primary/80 hover:bg-primary-soft"
                         >
-                            Voir tout <ChevronRight className="w-4 h-4 ml-1" />
+                            {t('dashboard.quick_overview.see_all')}{' '}
+                            <ChevronRight className="w-4 h-4 ml-1" />
                         </Button>
                     </CardHeader>
                     <CardContent>
@@ -418,7 +443,9 @@ const Dashboard: React.FC = () => {
 
                 <Card className="shadow-nexus border-none h-full">
                     <CardHeader>
-                        <CardTitle className="text-xl">Démarrage rapide</CardTitle>
+                        <CardTitle className="text-xl">
+                            {t('dashboard.quick_start.title')}
+                        </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <button
@@ -430,10 +457,10 @@ const Dashboard: React.FC = () => {
                                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px]">
                                     1
                                 </span>
-                                Ajoutez votre famille
+                                {t('dashboard.quick_start.add_family_title')}
                             </h3>
                             <p className="text-label text-muted-foreground pl-7">
-                                Créez des profils pour chaque membre
+                                {t('dashboard.quick_start.add_family_desc')}
                             </p>
                         </button>
                         <button
@@ -445,10 +472,10 @@ const Dashboard: React.FC = () => {
                                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px]">
                                     2
                                 </span>
-                                Planifiez vos repas
+                                {t('dashboard.quick_start.plan_meals_title')}
                             </h3>
                             <p className="text-label text-muted-foreground pl-7">
-                                Créez votre planning de la semaine
+                                {t('dashboard.quick_start.plan_meals_desc')}
                             </p>
                         </button>
                         <button
@@ -460,10 +487,10 @@ const Dashboard: React.FC = () => {
                                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px]">
                                     3
                                 </span>
-                                Suivez le budget
+                                {t('dashboard.quick_start.track_budget_title')}
                             </h3>
                             <p className="text-label text-muted-foreground pl-7">
-                                Définissez vos limites mensuelles
+                                {t('dashboard.quick_start.track_budget_desc')}
                             </p>
                         </button>
                     </CardContent>

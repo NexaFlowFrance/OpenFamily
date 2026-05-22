@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ScanLine,
     Camera,
@@ -33,17 +34,20 @@ interface Props {
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 const MAX_SIZE_MB = 5;
 
-const CONFIDENCE_LABEL: Record<ExtractedReceipt['confidence'], string> = {
-    high: 'Confiance élevée',
-    medium: 'Confiance moyenne',
-    low: 'Confiance faible',
-};
-
 const CONFIDENCE_STYLE: Record<ExtractedReceipt['confidence'], string> = {
     high: 'bg-success/15 text-success border border-success/30',
     medium: 'bg-warning/15 text-warning border border-warning/30',
     low: 'bg-danger/15 text-danger border border-danger/30',
 };
+
+// Distinguishes failures so the component can map them to localized messages.
+type UploadErrorKind = 'http' | 'network' | 'abort';
+interface UploadError extends Error {
+    kind: UploadErrorKind;
+    status?: number;
+    code?: string;
+    serverMessage?: string;
+}
 
 const uploadReceipt = (file: File): Promise<ExtractedReceipt> =>
     new Promise((resolve, reject) => {
@@ -52,6 +56,9 @@ const uploadReceipt = (file: File): Promise<ExtractedReceipt> =>
         xhr.withCredentials = true;
         xhr.responseType = 'json';
 
+        const fail = (kind: UploadErrorKind, extra: Partial<UploadError> = {}) =>
+            reject(Object.assign(new Error(kind), { kind, ...extra }) as UploadError);
+
         xhr.addEventListener('load', () => {
             if (xhr.status >= 200 && xhr.status < 300 && xhr.response?.success) {
                 resolve(xhr.response.data.extraction as ExtractedReceipt);
@@ -59,20 +66,12 @@ const uploadReceipt = (file: File): Promise<ExtractedReceipt> =>
             }
             const errorBody = xhr.response?.error;
             const code = typeof errorBody === 'object' ? errorBody?.code : undefined;
-            let message =
-                (typeof errorBody === 'object' ? errorBody?.message : errorBody) ||
-                `Extraction impossible (HTTP ${xhr.status})`;
-            if (code === 'DISABLED') {
-                message = "L'IA est désactivée sur cette installation.";
-            } else if (code === 'QUOTA_EXCEEDED') {
-                message = "Quota mensuel d'IA atteint. Réessayez le mois prochain.";
-            } else if (code === 'BAD_JSON') {
-                message = "L'IA n'a pas pu lire cette image. Essaie avec une photo plus nette.";
-            }
-            reject(Object.assign(new Error(message), { status: xhr.status, code }));
+            const serverMessage =
+                typeof errorBody === 'object' ? errorBody?.message : (errorBody as string);
+            fail('http', { status: xhr.status, code, serverMessage });
         });
-        xhr.addEventListener('error', () => reject(new Error("Erreur réseau pendant l'envoi.")));
-        xhr.addEventListener('abort', () => reject(new Error('Envoi annulé.')));
+        xhr.addEventListener('error', () => fail('network'));
+        xhr.addEventListener('abort', () => fail('abort'));
 
         const fd = new FormData();
         fd.append('file', file, file.name);
@@ -80,6 +79,30 @@ const uploadReceipt = (file: File): Promise<ExtractedReceipt> =>
     });
 
 export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtracted }) => {
+    const { t } = useTranslation();
+    const confidenceLabel: Record<ExtractedReceipt['confidence'], string> = {
+        high: t('budget.receiptScan.confidence.high'),
+        medium: t('budget.receiptScan.confidence.medium'),
+        low: t('budget.receiptScan.confidence.low'),
+    };
+
+    // Maps the upload failure (raised by uploadReceipt) to a localized string.
+    const localizeUploadError = (err: unknown): string => {
+        const e = err as UploadError | undefined;
+        if (e?.kind === 'network') return t('budget.receiptScan.errors.network');
+        if (e?.kind === 'abort') return t('budget.receiptScan.errors.aborted');
+        if (e?.kind === 'http') {
+            if (e.code === 'DISABLED') return t('budget.receiptScan.errors.disabled');
+            if (e.code === 'QUOTA_EXCEEDED') return t('budget.receiptScan.errors.quota_exceeded');
+            if (e.code === 'BAD_JSON') return t('budget.receiptScan.errors.bad_json');
+            return (
+                e.serverMessage ||
+                t('budget.receiptScan.errors.extract_http', { status: e.status ?? '' })
+            );
+        }
+        return t('budget.receiptScan.errors.extract_failed');
+    };
+
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [extracting, setExtracting] = useState(false);
@@ -118,12 +141,14 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
         }
         if (!ALLOWED_MIME.includes(f.type)) {
             setError(
-                `Format non supporté : ${f.type || 'inconnu'}. Utilise JPG, PNG, WEBP ou HEIC.`,
+                t('budget.receiptScan.errors.unsupported_format', {
+                    type: f.type || t('budget.receiptScan.errors.unknown_type'),
+                }),
             );
             return;
         }
         if (f.size > MAX_SIZE_MB * 1024 * 1024) {
-            setError(`Image trop volumineuse (max ${MAX_SIZE_MB} MB).`);
+            setError(t('budget.receiptScan.errors.too_large', { size: MAX_SIZE_MB }));
             return;
         }
         setFile(f);
@@ -139,7 +164,7 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
             setExtraction(result);
         } catch (err) {
             console.error('Receipt extraction failed:', err);
-            setError(err instanceof Error ? err.message : 'Extraction impossible.');
+            setError(localizeUploadError(err));
         } finally {
             setExtracting(false);
         }
@@ -154,8 +179,8 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Scanner une facture"
-            description="Prends en photo (ou importe) un ticket — l'IA pré-remplit la dépense."
+            title={t('budget.receiptScan.title')}
+            description={t('budget.receiptScan.description')}
             className="sm:max-w-2xl"
         >
             <div className="space-y-5">
@@ -177,16 +202,18 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
                         >
                             <Camera className="h-8 w-8 text-primary" />
                             <span className="text-body font-medium text-foreground">
-                                Prendre / importer une photo
+                                {t('budget.receiptScan.pick_photo')}
                             </span>
-                            <span className="text-label-sm">JPG, PNG, WEBP, HEIC — 5 MB max</span>
+                            <span className="text-label-sm">
+                                {t('budget.receiptScan.formats_hint')}
+                            </span>
                         </button>
                     )}
                     {previewUrl && (
                         <div className="relative rounded-card border border-border bg-surface-2/50 p-2">
                             <img
                                 src={previewUrl}
-                                alt="Aperçu facture"
+                                alt={t('budget.receiptScan.preview_alt')}
                                 className="mx-auto max-h-64 rounded-input object-contain"
                             />
                             <button
@@ -198,12 +225,15 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
                                     if (inputRef.current) inputRef.current.value = '';
                                 }}
                                 className="absolute right-3 top-3 rounded-full bg-card p-1.5 text-muted-foreground shadow-surface hover:text-foreground"
-                                aria-label="Retirer la photo"
+                                aria-label={t('budget.receiptScan.remove_photo')}
                             >
                                 <CloseIcon className="h-4 w-4" />
                             </button>
                             <p className="mt-2 truncate text-center text-label-sm text-muted-foreground">
-                                {file?.name} — {file ? Math.round(file.size / 1024) : 0} Ko
+                                {t('budget.receiptScan.file_size', {
+                                    name: file?.name ?? '',
+                                    size: file ? Math.round(file.size / 1024) : 0,
+                                })}
                             </p>
                         </div>
                     )}
@@ -223,12 +253,12 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
                             {extracting ? (
                                 <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Extraction en cours…
+                                    {t('budget.receiptScan.extracting')}
                                 </>
                             ) : (
                                 <>
                                     <ScanLine className="w-4 h-4 mr-2" />
-                                    Extraire les informations
+                                    {t('budget.receiptScan.extract')}
                                 </>
                             )}
                         </Button>
@@ -241,18 +271,20 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
                         <div className="flex items-center justify-between gap-3">
                             <h3 className="text-h2 font-semibold flex items-center gap-2">
                                 <Check className="h-5 w-5 text-success" />
-                                Données extraites
+                                {t('budget.receiptScan.extracted_title')}
                             </h3>
                             <span
                                 className={`rounded-pill px-2.5 py-0.5 text-label-sm font-medium ${CONFIDENCE_STYLE[extraction.confidence]}`}
                             >
-                                {CONFIDENCE_LABEL[extraction.confidence]}
+                                {confidenceLabel[extraction.confidence]}
                             </span>
                         </div>
 
                         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-caption">
                             <div>
-                                <dt className="text-label-sm text-muted-foreground">Montant</dt>
+                                <dt className="text-label-sm text-muted-foreground">
+                                    {t('budget.receiptScan.amount')}
+                                </dt>
                                 <dd className="font-semibold text-foreground">
                                     {extraction.amount !== null
                                         ? `${extraction.amount.toFixed(2)} ${extraction.currency ?? ''}`.trim()
@@ -260,27 +292,35 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
                                 </dd>
                             </div>
                             <div>
-                                <dt className="text-label-sm text-muted-foreground">Date</dt>
+                                <dt className="text-label-sm text-muted-foreground">
+                                    {t('budget.receiptScan.date')}
+                                </dt>
                                 <dd className="font-semibold text-foreground">
                                     {extraction.date ?? '—'}
                                 </dd>
                             </div>
                             <div>
-                                <dt className="text-label-sm text-muted-foreground">Commerçant</dt>
+                                <dt className="text-label-sm text-muted-foreground">
+                                    {t('budget.receiptScan.merchant')}
+                                </dt>
                                 <dd className="font-semibold text-foreground">
                                     {extraction.merchant ?? '—'}
                                 </dd>
                             </div>
                             <div>
-                                <dt className="text-label-sm text-muted-foreground">Catégorie</dt>
+                                <dt className="text-label-sm text-muted-foreground">
+                                    {t('budget.receiptScan.category')}
+                                </dt>
                                 <dd className="font-semibold text-foreground">
-                                    {extraction.category}
+                                    {t('budget.categories.' + extraction.category, {
+                                        defaultValue: extraction.category,
+                                    })}
                                 </dd>
                             </div>
                             {extraction.description && (
                                 <div className="sm:col-span-2">
                                     <dt className="text-label-sm text-muted-foreground">
-                                        Description
+                                        {t('budget.receiptScan.description')}
                                     </dt>
                                     <dd className="text-foreground">{extraction.description}</dd>
                                 </div>
@@ -303,8 +343,7 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
 
                         <p className="flex items-start gap-2 text-label-sm text-muted-foreground">
                             <Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
-                            Tu pourras ajuster ces valeurs dans l'étape suivante avant d'enregistrer
-                            la dépense.
+                            {t('budget.receiptScan.adjust_hint')}
                         </p>
 
                         <div className="flex justify-end gap-2 pt-1">
@@ -317,15 +356,15 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
                                 {extracting ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Re-extraction…
+                                        {t('budget.receiptScan.re_extracting')}
                                     </>
                                 ) : (
-                                    'Re-extraire'
+                                    t('budget.receiptScan.re_extract')
                                 )}
                             </Button>
                             <Button type="button" onClick={apply}>
                                 <Check className="w-4 h-4 mr-1.5" />
-                                Utiliser ces infos
+                                {t('budget.receiptScan.use_info')}
                             </Button>
                         </div>
                     </section>
@@ -333,7 +372,7 @@ export const ReceiptScanDialog: React.FC<Props> = ({ open, onOpenChange, onExtra
 
                 <div className="flex justify-end pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Fermer
+                        {t('budget.receiptScan.close')}
                     </Button>
                 </div>
             </div>

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import {
     Sparkles,
@@ -43,18 +44,9 @@ interface Props {
     onRecipeSaved?: () => void;
 }
 
-const CUISINE_OPTIONS = [
-    { value: 'senegalese', label: 'Sénégalaise' },
-    { value: 'world', label: 'Du monde' },
-    { value: 'any', label: 'Peu importe' },
-];
-
-const TIME_OPTIONS = [
-    { value: '30', label: '≤ 30 minutes' },
-    { value: '45', label: '≤ 45 minutes' },
-    { value: '60', label: '≤ 1 heure' },
-    { value: '', label: 'Pas de limite' },
-];
+// Stored DATA values — labels resolved at render time via i18n.
+const CUISINE_VALUES = ['senegalese', 'world', 'any'] as const;
+const TIME_VALUES = ['30', '45', '60', ''] as const;
 
 // Stable defaults remembered across opens so the dialog feels personal.
 const PREFS_STORAGE_KEY = 'openfamily.recipeGen.prefs.v1';
@@ -86,6 +78,17 @@ const loadRememberedPrefs = (): RememberedPrefs => {
 };
 
 export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRecipeSaved }) => {
+    const { t } = useTranslation();
+    const cuisineOptions = CUISINE_VALUES.map((value) => ({
+        value,
+        label: t('recipes.generateDialog.cuisine_options.' + value, { defaultValue: value }),
+    }));
+    const timeOptions = TIME_VALUES.map((value) => ({
+        value,
+        label: value
+            ? t('recipes.generateDialog.time_options.' + value, { defaultValue: value })
+            : t('recipes.generateDialog.time_options.none'),
+    }));
     const [members, setMembers] = useState<FamilyMemberLite[]>([]);
     const [ingredientInput, setIngredientInput] = useState('');
     const [ingredients, setIngredients] = useState<string[]>([]);
@@ -162,7 +165,7 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
     const generate = async () => {
         setError('');
         if (ingredients.length === 0) {
-            setError('Ajoutez au moins un ingrédient.');
+            setError(t('recipes.generateDialog.errors.no_ingredient'));
             return;
         }
         setGenerating(true);
@@ -189,15 +192,16 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
             if (!response.success) {
                 const code = response.error?.code;
                 if (code === 'DISABLED') {
-                    setError(
-                        "L'IA est désactivée sur cette installation. Contactez l'administrateur.",
-                    );
+                    setError(t('recipes.generateDialog.errors.disabled'));
                 } else if (code === 'QUOTA_EXCEEDED') {
-                    setError("Quota mensuel d'IA atteint. Réessayez le mois prochain.");
+                    setError(t('recipes.generateDialog.errors.quota_exceeded'));
                 } else if (code === 'BAD_JSON') {
-                    setError("L'IA a renvoyé une réponse incompréhensible. Réessayez.");
+                    setError(t('recipes.generateDialog.errors.bad_json'));
                 } else {
-                    setError(response.error?.message || 'Génération impossible.');
+                    setError(
+                        response.error?.message ||
+                            t('recipes.generateDialog.errors.generate_failed'),
+                    );
                 }
                 return;
             }
@@ -205,7 +209,11 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
             setRecipes(response.data?.recipes ?? []);
         } catch (err) {
             console.error('Recipe generation failed:', err);
-            setError(err instanceof Error ? err.message : 'Génération impossible.');
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : t('recipes.generateDialog.errors.generate_failed'),
+            );
         } finally {
             setGenerating(false);
         }
@@ -222,7 +230,9 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
             onRecipeSaved?.();
         } catch (err) {
             console.error('Failed to save recipe:', err);
-            setError(err instanceof Error ? err.message : 'Sauvegarde impossible.');
+            setError(
+                err instanceof Error ? err.message : t('recipes.generateDialog.errors.save_failed'),
+            );
         } finally {
             setSavingIndex(null);
         }
@@ -236,26 +246,26 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
 
     const aiHint = useMemo(() => {
         const parts: string[] = [];
-        if (simple) parts.push('plats simples');
-        if (cuisine === 'senegalese') parts.push('cuisine sénégalaise');
-        if (cuisine === 'world') parts.push('cuisine du monde');
-        if (maxTime) parts.push(`≤ ${maxTime} min`);
+        if (simple) parts.push(t('recipes.generateDialog.hint.simple'));
+        if (cuisine === 'senegalese') parts.push(t('recipes.generateDialog.hint.senegalese'));
+        if (cuisine === 'world') parts.push(t('recipes.generateDialog.hint.world'));
+        if (maxTime) parts.push(t('recipes.generateDialog.hint.max_time', { minutes: maxTime }));
         return parts.join(' • ');
-    }, [simple, cuisine, maxTime]);
+    }, [simple, cuisine, maxTime, t]);
 
     return (
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Générer une recette avec l'IA"
-            description="Décrivez ce que vous avez sous la main, l'IA propose 3 recettes adaptées à votre famille."
+            title={t('recipes.generateDialog.title')}
+            description={t('recipes.generateDialog.description')}
             className="sm:max-w-3xl"
         >
             <div className="space-y-6">
                 {/* Ingredients input */}
                 <section>
                     <label className="block text-label font-medium text-foreground mb-1.5">
-                        Ingrédients disponibles
+                        {t('recipes.generateDialog.available_ingredients')}
                     </label>
                     <div className="flex gap-2">
                         <Input
@@ -267,10 +277,10 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                                     addIngredient();
                                 }
                             }}
-                            placeholder="Ex: poulet, oignons, riz, citron…"
+                            placeholder={t('recipes.generateDialog.ingredient_placeholder')}
                         />
                         <Button type="button" variant="secondary" onClick={addIngredient}>
-                            Ajouter
+                            {t('common.add')}
                         </Button>
                     </div>
                     {ingredients.length > 0 && (
@@ -285,7 +295,9 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                                         type="button"
                                         onClick={() => removeIngredient(idx)}
                                         className="hover:text-primary-pressed"
-                                        aria-label={`Retirer ${ing}`}
+                                        aria-label={t('recipes.generateDialog.remove_ingredient', {
+                                            name: ing,
+                                        })}
                                     >
                                         <CloseIcon className="h-3 w-3" />
                                     </button>
@@ -294,7 +306,7 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                         </div>
                     )}
                     <p className="text-label-sm text-muted-foreground mt-2">
-                        Astuce : sel, huile, eau et oignon sont considérés comme acquis.
+                        {t('recipes.generateDialog.ingredients_tip')}
                     </p>
                 </section>
 
@@ -302,7 +314,7 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                 {members.length > 0 && (
                     <section>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Pour qui ? (allergies + régimes pris en compte)
+                            {t('recipes.generateDialog.for_whom')}
                         </label>
                         <div className="flex flex-wrap gap-2">
                             {members.map((m) => {
@@ -335,27 +347,27 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                 <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Cuisine
+                            {t('recipes.generateDialog.cuisine')}
                         </label>
                         <Select
                             value={cuisine}
                             onValueChange={(v) => setCuisine(v as Cuisine)}
-                            options={CUISINE_OPTIONS}
+                            options={cuisineOptions}
                         />
                     </div>
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Temps total
+                            {t('recipes.generateDialog.total_time')}
                         </label>
                         <Select
                             value={maxTime}
                             onValueChange={(v) => setMaxTime(v)}
-                            options={TIME_OPTIONS}
+                            options={timeOptions}
                         />
                     </div>
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Style
+                            {t('recipes.generateDialog.style')}
                         </label>
                         <label className="flex items-center gap-2 h-10 px-3 rounded-input border border-border bg-surface cursor-pointer">
                             <input
@@ -364,7 +376,9 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                                 onChange={(e) => setSimple(e.target.checked)}
                                 className="h-4 w-4 accent-primary"
                             />
-                            <span className="text-label-sm">Plats simples</span>
+                            <span className="text-label-sm">
+                                {t('recipes.generateDialog.simple_dishes')}
+                            </span>
                         </label>
                     </div>
                 </section>
@@ -385,12 +399,12 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                             {generating ? (
                                 <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Génération…
+                                    {t('recipes.generateDialog.generating')}
                                 </>
                             ) : (
                                 <>
                                     <Sparkles className="w-4 h-4 mr-2" />
-                                    Générer 3 recettes
+                                    {t('recipes.generateDialog.generate')}
                                 </>
                             )}
                         </Button>
@@ -402,7 +416,7 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                         <div className="flex items-center justify-between">
                             <h3 className="text-h2 font-semibold flex items-center gap-2">
                                 <Sparkles className="h-5 w-5 text-accent" />
-                                {recipes.length} proposition{recipes.length > 1 ? 's' : ''}
+                                {t('recipes.generateDialog.proposals', { count: recipes.length })}
                             </h3>
                             <Button
                                 type="button"
@@ -414,10 +428,10 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                                 {generating ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Re-génération…
+                                        {t('recipes.generateDialog.re_generating')}
                                     </>
                                 ) : (
-                                    'Re-générer'
+                                    t('recipes.generateDialog.re_generate')
                                 )}
                             </Button>
                         </div>
@@ -449,12 +463,12 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                                             {savedIndices.has(idx) ? (
                                                 <>
                                                     <Check className="w-4 h-4 mr-1" />
-                                                    Sauvegardée
+                                                    {t('recipes.generateDialog.saved')}
                                                 </>
                                             ) : savingIndex === idx ? (
                                                 <Loader2 className="w-4 h-4 animate-spin" />
                                             ) : (
-                                                'Sauvegarder'
+                                                t('recipes.generateDialog.save')
                                             )}
                                         </Button>
                                     </div>
@@ -462,21 +476,31 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                                     <div className="flex flex-wrap gap-3 text-label-sm text-muted-foreground">
                                         <span className="inline-flex items-center gap-1">
                                             <Clock className="h-3.5 w-3.5" />
-                                            {r.prep_time + r.cook_time} min
+                                            {t('recipes.generateDialog.minutes', {
+                                                count: r.prep_time + r.cook_time,
+                                            })}
                                         </span>
                                         <span className="inline-flex items-center gap-1">
                                             <Users className="h-3.5 w-3.5" />
-                                            {r.servings} pers.
+                                            {t('recipes.generateDialog.servings_short', {
+                                                count: r.servings,
+                                            })}
                                         </span>
                                         <span className="inline-flex items-center gap-1">
-                                            {r.category} • {r.difficulty}
+                                            {t('recipes.categories.' + r.category, {
+                                                defaultValue: r.category,
+                                            })}{' '}
+                                            •{' '}
+                                            {t('recipes.difficulties.' + r.difficulty, {
+                                                defaultValue: r.difficulty,
+                                            })}
                                         </span>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-caption">
                                         <div>
                                             <p className="font-semibold text-foreground mb-1">
-                                                Ingrédients
+                                                {t('recipes.generateDialog.ingredients')}
                                             </p>
                                             <ul className="list-disc pl-4 space-y-0.5 text-muted-foreground">
                                                 {r.ingredients.map((ing, i) => (
@@ -486,7 +510,7 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                                         </div>
                                         <div>
                                             <p className="font-semibold text-foreground mb-1">
-                                                Étapes
+                                                {t('recipes.generateDialog.steps')}
                                             </p>
                                             <ol className="list-decimal pl-4 space-y-0.5 text-muted-foreground">
                                                 {r.instructions.map((step, i) => (
@@ -517,7 +541,7 @@ export const GenerateRecipeDialog: React.FC<Props> = ({ open, onOpenChange, onRe
                 {recipes && (
                     <div className="flex justify-end pt-2">
                         <Button type="button" variant="secondary" onClick={closeAndReset}>
-                            Fermer
+                            {t('recipes.generateDialog.close')}
                         </Button>
                     </div>
                 )}

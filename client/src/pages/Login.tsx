@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -6,6 +7,7 @@ import { Input } from '../components/ui/Input';
 import { Users } from 'lucide-react';
 
 const Login: React.FC = () => {
+    const { t } = useTranslation();
     const { login, register } = useAuth();
     const registrationEnabled = import.meta.env.VITE_REGISTRATION_ENABLED !== 'false';
     const [isLogin, setIsLogin] = useState(true);
@@ -27,7 +29,7 @@ const Login: React.FC = () => {
                 await register(email, password, name);
             }
         } catch (err: any) {
-            setError(err.message || 'Une erreur est survenue');
+            setError(err.message || t('common.error'));
         } finally {
             setLoading(false);
         }
@@ -45,16 +47,13 @@ const Login: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-primary/30 to-accent/40" />
                 <div className="relative z-10 max-w-lg text-white">
                     <h2 className="text-4xl font-bold leading-tight mb-4 drop-shadow-md">
-                        Une famille,
+                        {t('login.hero.line1')}
                         <br />
-                        une histoire,
+                        {t('login.hero.line2')}
                         <br />
-                        un espace partagé.
+                        {t('login.hero.line3')}
                     </h2>
-                    <p className="text-lg text-white/90 drop-shadow">
-                        KeurTonux aide les familles sénégalaises à organiser le quotidien,
-                        transmettre et garder le lien.
-                    </p>
+                    <p className="text-lg text-white/90 drop-shadow">{t('login.hero.subtitle')}</p>
                 </div>
             </aside>
 
@@ -80,9 +79,7 @@ const Login: React.FC = () => {
                             <Users className="w-8 h-8 text-primary-foreground" />
                         </div>
                         <CardTitle className="text-3xl mb-3 text-primary">KeurTonux</CardTitle>
-                        <p className="text-muted-foreground text-body-sm">
-                            Le numérique au service du lien familial
-                        </p>
+                        <p className="text-muted-foreground text-body-sm">{t('login.tagline')}</p>
                     </CardHeader>
 
                     <CardContent className="space-y-6 px-8 pb-8">
@@ -90,30 +87,30 @@ const Login: React.FC = () => {
                             {!isLogin && (
                                 <div className="space-y-1.5">
                                     <Input
-                                        label="Nom complet"
+                                        label={t('login.name')}
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         required={!isLogin}
-                                        placeholder="Ex: Jean Dupont"
+                                        placeholder={t('login.name_placeholder')}
                                     />
                                 </div>
                             )}
 
                             <div className="space-y-1.5">
                                 <Input
-                                    label="Email"
+                                    label={t('login.email')}
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    placeholder="votre@email.com"
+                                    placeholder={t('login.email_placeholder')}
                                 />
                             </div>
 
                             <div className="space-y-1.5">
                                 <Input
-                                    label="Mot de passe"
+                                    label={t('login.password')}
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -139,12 +136,12 @@ const Login: React.FC = () => {
                                 {loading ? (
                                     <span className="flex items-center gap-2">
                                         <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Chargement...
+                                        {t('login.loading')}
                                     </span>
                                 ) : isLogin ? (
-                                    'Se connecter'
+                                    t('login.sign_in')
                                 ) : (
-                                    "S'inscrire"
+                                    t('login.sign_up')
                                 )}
                             </Button>
                         </form>
@@ -159,8 +156,8 @@ const Login: React.FC = () => {
                                     className="text-body-sm text-primary hover:text-primary/80 font-medium transition-colors hover:underline underline-offset-4"
                                 >
                                     {isLogin
-                                        ? "Je n'ai pas de compte, m'inscrire"
-                                        : "J'ai déjà un compte, me connecter"}
+                                        ? t('login.switch_to_register')
+                                        : t('login.switch_to_login')}
                                 </button>
                             </div>
                         )}
@@ -177,7 +174,7 @@ const Login: React.FC = () => {
                     >
                         tonuxcorp
                     </a>{' '}
-                    &middot; Confiance & Sécurité
+                    &middot; {t('login.footer_trust')}
                 </p>
             </div>
         </div>

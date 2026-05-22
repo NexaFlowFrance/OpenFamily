@@ -1,0 +1,76 @@
+{
+  "shopping": {
+    "loading": "Chargement de votre liste...",
+    "title": "Liste de courses",
+    "items_remaining": "{{count}} articles restants",
+    "categories": {
+      "Alimentation": "Alimentation",
+      "Bebe": "Bébé",
+      "Menage": "Ménage",
+      "Sante": "Santé",
+      "Autre": "Autre"
+    },
+    "ai": {
+      "title": "Ajouter via l’IA",
+      "hint": "Décris tes courses en une phrase. Exemple : « ajoute du lait, 6 yaourts à la fraise et 2 baguettes ».",
+      "placeholder": "Ajoute du lait, 6 yaourts…",
+      "analyzing": "Analyse…",
+      "analyze": "Analyser",
+      "none_detected": "Aucun article détecté.",
+      "to_add": "{{kept}}/{{total}} articles à ajouter",
+      "keep_aria": "Conserver {{name}}",
+      "add_to_list": "Ajouter à la liste"
+    },
+    "picker": {
+      "name": "Nom",
+      "placeholder": "Ex: Lait, Pain…",
+      "your_items": "Vos articles",
+      "catalog": "Catalogue"
+    },
+    "add": {
+      "title": "Ajouter un article",
+      "quick_add": "Ajout rapide",
+      "category_label": "Categorie",
+      "quantity_label": "Qt",
+      "quantity_placeholder": "1",
+      "price_label": "Prix",
+      "price_placeholder": "2.50"
+    },
+    "templates": {
+      "title": "Templates de courses",
+      "from_list": "Depuis la liste",
+      "from_list_title": "Créer un template depuis la liste actuelle",
+      "list_empty": "La liste est vide",
+      "new_template": "Nouveau template",
+      "empty": "Pas encore de template. Créez-en un pour réutiliser une liste type (courses semaine, apéro, vacances…) en un clic.",
+      "items_one": "{{count}} article",
+      "items_other": "{{count}} articles",
+      "empty_template": "Template vide",
+      "apply": "Appliquer à ma liste",
+      "confirm_delete": "Supprimer le template « {{name}} » ? Cette action est définitive."
+    },
+    "list": {
+      "empty_title": "Votre liste est vide",
+      "empty_hint": "Ajoutez des articles ou appliquez un template.",
+      "quantity": "Qt: {{quantity}}",
+      "checked_items": "Articles coches ({{count}})",
+      "clean": "Nettoyer",
+      "total_estimate": "Total estime"
+    },
+    "errors": {
+      "add_item": "Impossible d'ajouter cet article.",
+      "name_required": "Le nom de l'article est obligatoire.",
+      "quantity_positive": "La quantité doit être un nombre positif.",
+      "price_valid": "Le prix doit être un nombre valide.",
+      "update_item": "Impossible de mettre à jour cet article.",
+      "delete_item": "Impossible de supprimer cet article.",
+      "clear_checked": "Impossible de vider les articles cochés.",
+      "list_empty_template": "Aucun article dans la liste pour créer un template.",
+      "apply_template": "Impossible d'appliquer ce template.",
+      "delete_template": "Impossible de supprimer ce template.",
+      "ai_describe": "Décris tes courses en français pour utiliser l’IA.",
+      "ai_failed": "L'IA n'a pas pu analyser ce texte.",
+      "add_items": "Impossible d'ajouter ces articles."
+    }
+  }
+}

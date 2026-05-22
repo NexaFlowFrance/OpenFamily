@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { Plus, Edit2, Trash2, User, Phone, Heart, AlertTriangle, Utensils } from 'lucide-react';
 import {
@@ -35,32 +36,37 @@ interface FamilyMember {
     dietary_preferences?: DietaryPreferencesShape;
 }
 
-const ROLES = [
-    { value: 'Parent', label: 'Parent' },
-    { value: 'Enfant', label: 'Enfant' },
-    { value: 'Etudiant', label: 'Etudiant' },
-    { value: 'Autre', label: 'Autre' },
-];
-
-const DIETARY_REGIMES = [
-    { value: '', label: '— Non précisé —' },
-    { value: 'omnivore', label: 'Omnivore' },
-    { value: 'vegetarian', label: 'Végétarien' },
-    { value: 'vegan', label: 'Végan' },
-    { value: 'halal', label: 'Halal' },
-    { value: 'kosher', label: 'Kosher' },
-    { value: 'no_pork', label: 'Sans porc' },
-];
-
-const SPICE_LEVELS = [
-    { value: '', label: '— Non précisé —' },
-    { value: 'none', label: 'Aucune épice' },
-    { value: 'mild', label: 'Doux' },
-    { value: 'medium', label: 'Moyen' },
-    { value: 'hot', label: 'Fort' },
-];
+// Stored DATA values — labels are resolved at render time via i18n.
+const ROLE_VALUES = ['Parent', 'Enfant', 'Etudiant', 'Autre'] as const;
+const REGIME_VALUES = [
+    '',
+    'omnivore',
+    'vegetarian',
+    'vegan',
+    'halal',
+    'kosher',
+    'no_pork',
+] as const;
+const SPICE_VALUES = ['', 'none', 'mild', 'medium', 'hot'] as const;
 
 const Family: React.FC = () => {
+    const { t } = useTranslation();
+    const roleOptions = ROLE_VALUES.map((value) => ({
+        value,
+        label: t('family.roles.' + value, { defaultValue: value }),
+    }));
+    const regimeOptions = REGIME_VALUES.map((value) => ({
+        value,
+        label: value
+            ? t('family.regimes.' + value, { defaultValue: value })
+            : t('family.regimes.unspecified'),
+    }));
+    const spiceOptions = SPICE_VALUES.map((value) => ({
+        value,
+        label: value
+            ? t('family.spice.' + value, { defaultValue: value })
+            : t('family.spice.unspecified'),
+    }));
     const [members, setMembers] = useState<FamilyMember[]>([]);
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -97,7 +103,7 @@ const Family: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to load family members:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de charger la famille.');
+            setError(error instanceof Error ? error.message : t('family.errors.load'));
         } finally {
             setLoading(false);
         }
@@ -144,20 +150,18 @@ const Family: React.FC = () => {
             loadMembers();
         } catch (error) {
             console.error('Failed to save family member:', error);
-            setError(
-                error instanceof Error ? error.message : 'Impossible d’enregistrer ce membre.',
-            );
+            setError(error instanceof Error ? error.message : t('family.errors.save'));
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce membre de la famille ?')) return;
+        if (!confirm(t('family.confirm_delete'))) return;
         try {
             await api.delete(`/api/family/${id}`);
             loadMembers();
         } catch (error) {
             console.error('Failed to delete family member:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de supprimer ce membre.');
+            setError(error instanceof Error ? error.message : t('family.errors.delete'));
         }
     };
 
@@ -218,7 +222,7 @@ const Family: React.FC = () => {
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
                     <p className="text-muted-foreground font-medium animate-pulse">
-                        Chargement de la famille...
+                        {t('family.loading')}
                     </p>
                 </div>
             </div>
@@ -234,10 +238,8 @@ const Family: React.FC = () => {
             ) : null}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-h1 mb-1">Famille</h1>
-                    <p className="text-muted-foreground text-body">
-                        Gérez les membres de votre famille
-                    </p>
+                    <h1 className="text-h1 mb-1">{t('family.title')}</h1>
+                    <p className="text-muted-foreground text-body">{t('family.subtitle')}</p>
                 </div>
                 <Button
                     onClick={() => {
@@ -246,7 +248,7 @@ const Family: React.FC = () => {
                     }}
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    Ajouter un membre
+                    {t('family.add_member')}
                 </Button>
             </div>
 
@@ -254,9 +256,7 @@ const Family: React.FC = () => {
                 <Card>
                     <CardContent className="p-8 text-center">
                         <User className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                        <p className="text-muted-foreground">
-                            Aucun membre de la famille. Ajoutez votre premier membre !
-                        </p>
+                        <p className="text-muted-foreground">{t('family.empty')}</p>
                     </CardContent>
                 </Card>
             ) : (
@@ -276,11 +276,15 @@ const Family: React.FC = () => {
                                             {member.name}
                                         </h3>
                                         <Badge variant="primary" className="mt-1">
-                                            {member.role}
+                                            {t('family.roles.' + member.role, {
+                                                defaultValue: member.role,
+                                            })}
                                         </Badge>
                                         {member.birthdate && (
                                             <p className="text-body-sm text-muted-foreground mt-1">
-                                                {calculateAge(member.birthdate)} ans
+                                                {t('family.card.age', {
+                                                    count: calculateAge(member.birthdate),
+                                                })}
                                             </p>
                                         )}
                                     </div>
@@ -293,13 +297,13 @@ const Family: React.FC = () => {
                                         <div className="flex items-center gap-2 mb-2">
                                             <Heart className="h-4 w-4 text-amber-600" />
                                             <span className="text-label font-semibold text-amber-900">
-                                                Santé
+                                                {t('family.card.health')}
                                             </span>
                                         </div>
                                         {member.allergies && member.allergies.length > 0 && (
                                             <div className="mb-2">
                                                 <p className="text-[11px] font-medium text-amber-900 mb-1">
-                                                    Allergies:
+                                                    {t('family.card.allergies')}
                                                 </p>
                                                 <div className="flex flex-wrap gap-1">
                                                     {member.allergies.map((allergy, idx) => (
@@ -316,7 +320,7 @@ const Family: React.FC = () => {
                                         {member.medications && member.medications.length > 0 && (
                                             <div>
                                                 <p className="text-[11px] font-medium text-amber-900 mb-1">
-                                                    Médicaments:
+                                                    {t('family.card.medications')}
                                                 </p>
                                                 <div className="flex flex-wrap gap-1">
                                                     {member.medications.map((med, idx) => (
@@ -339,7 +343,7 @@ const Family: React.FC = () => {
                                         <div className="flex items-center gap-2 mb-2">
                                             <AlertTriangle className="h-4 w-4 text-red-600" />
                                             <span className="text-label font-semibold text-red-900">
-                                                Contact d'urgence
+                                                {t('family.card.emergency_contact')}
                                             </span>
                                         </div>
                                         <p className="text-body-sm text-red-900 font-medium">
@@ -377,7 +381,7 @@ const Family: React.FC = () => {
                                         className="flex-1"
                                     >
                                         <Edit2 className="h-4 w-4 mr-1" />
-                                        Modifier
+                                        {t('common.edit')}
                                     </Button>
                                     <Button
                                         variant="ghost"
@@ -397,31 +401,31 @@ const Family: React.FC = () => {
             <Dialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
-                title={editingMember ? 'Modifier le membre' : 'Ajouter un membre'}
-                description="Remplissez les informations du membre de la famille"
+                title={editingMember ? t('family.form.edit_title') : t('family.form.new_title')}
+                description={t('family.form.description')}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input
-                        label="Nom"
+                        label={t('family.form.name')}
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
-                        placeholder="Ex: Marie Dupont"
+                        placeholder={t('family.form.name_placeholder')}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-label font-medium text-foreground mb-1.5">
-                                Rôle
+                                {t('family.form.role')}
                             </label>
                             <Select
                                 value={formData.role}
                                 onValueChange={(value) => setFormData({ ...formData, role: value })}
-                                options={ROLES}
+                                options={roleOptions}
                             />
                         </div>
                         <div>
                             <label className="block text-label font-medium text-foreground mb-1.5">
-                                Couleur
+                                {t('family.form.color')}
                             </label>
                             <Select
                                 value={formData.color}
@@ -433,7 +437,7 @@ const Family: React.FC = () => {
                         </div>
                     </div>
                     <Input
-                        label="Date de naissance (optionnel)"
+                        label={t('family.form.birthdate')}
                         type="date"
                         value={formData.birthdate}
                         onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
@@ -441,41 +445,41 @@ const Family: React.FC = () => {
                     <div className="border-t pt-4">
                         <h4 className="text-body font-semibold mb-3 flex items-center gap-2">
                             <Heart className="h-4 w-4 text-amber-600" />
-                            Informations de santé
+                            {t('family.form.health_section')}
                         </h4>
                         <Input
-                            label="Allergies (séparées par des virgules)"
+                            label={t('family.form.allergies')}
                             value={formData.allergies}
                             onChange={(e) =>
                                 setFormData({ ...formData, allergies: e.target.value })
                             }
-                            placeholder="Ex: Arachides, Lactose"
+                            placeholder={t('family.form.allergies_placeholder')}
                         />
                         <Input
-                            label="Médicaments (séparés par des virgules)"
+                            label={t('family.form.medications')}
                             value={formData.medications}
                             onChange={(e) =>
                                 setFormData({ ...formData, medications: e.target.value })
                             }
-                            placeholder="Ex: Aspirine, Insuline"
+                            placeholder={t('family.form.medications_placeholder')}
                             className="mt-3"
                         />
                     </div>
                     <div className="border-t pt-4">
                         <h4 className="text-body font-semibold mb-3 flex items-center gap-2">
                             <AlertTriangle className="h-4 w-4 text-red-600" />
-                            Contact d'urgence
+                            {t('family.form.emergency_section')}
                         </h4>
                         <Input
-                            label="Nom du contact"
+                            label={t('family.form.contact_name')}
                             value={formData.emergency_contact_name}
                             onChange={(e) =>
                                 setFormData({ ...formData, emergency_contact_name: e.target.value })
                             }
-                            placeholder="Ex: Jean Dupont"
+                            placeholder={t('family.form.contact_name_placeholder')}
                         />
                         <Input
-                            label="Téléphone du contact"
+                            label={t('family.form.contact_phone')}
                             type="tel"
                             value={formData.emergency_contact_phone}
                             onChange={(e) =>
@@ -484,68 +488,68 @@ const Family: React.FC = () => {
                                     emergency_contact_phone: e.target.value,
                                 })
                             }
-                            placeholder="Ex: +33 6 12 34 56 78"
+                            placeholder={t('family.form.contact_phone_placeholder')}
                             className="mt-3"
                         />
                     </div>
                     <div className="border-t pt-4">
                         <h4 className="text-body font-semibold mb-3 flex items-center gap-2">
                             <Utensils className="h-4 w-4 text-primary" />
-                            Préférences alimentaires
+                            {t('family.form.dietary_section')}
                             <span className="text-label-sm font-normal text-muted-foreground">
-                                (utilisées par l'IA recettes)
+                                {t('family.form.dietary_hint')}
                             </span>
                         </h4>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-label font-medium text-foreground mb-1.5">
-                                    Régime
+                                    {t('family.form.regime')}
                                 </label>
                                 <Select
                                     value={formData.diet_regime}
                                     onValueChange={(value) =>
                                         setFormData({ ...formData, diet_regime: value })
                                     }
-                                    options={DIETARY_REGIMES}
+                                    options={regimeOptions}
                                 />
                             </div>
                             <div>
                                 <label className="block text-label font-medium text-foreground mb-1.5">
-                                    Niveau d'épice
+                                    {t('family.form.spice_level')}
                                 </label>
                                 <Select
                                     value={formData.diet_spice}
                                     onValueChange={(value) =>
                                         setFormData({ ...formData, diet_spice: value })
                                     }
-                                    options={SPICE_LEVELS}
+                                    options={spiceOptions}
                                 />
                             </div>
                         </div>
                         <Input
-                            label="N'aime pas (séparés par des virgules)"
+                            label={t('family.form.dislikes')}
                             value={formData.diet_dislikes}
                             onChange={(e) =>
                                 setFormData({ ...formData, diet_dislikes: e.target.value })
                             }
-                            placeholder="Ex: Aubergine, Coriandre"
+                            placeholder={t('family.form.dislikes_placeholder')}
                             className="mt-3"
                         />
                         <Input
-                            label="Plats / aliments favoris"
+                            label={t('family.form.favorites')}
                             value={formData.diet_favorites}
                             onChange={(e) =>
                                 setFormData({ ...formData, diet_favorites: e.target.value })
                             }
-                            placeholder="Ex: Yassa poulet, Mafé, Pâtes"
+                            placeholder={t('family.form.favorites_placeholder')}
                             className="mt-3"
                         />
                     </div>
                     <Textarea
-                        label="Notes (optionnel)"
+                        label={t('family.form.notes')}
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder="Notes supplémentaires..."
+                        placeholder={t('family.form.notes_placeholder')}
                         rows={2}
                     />
                     <div className="flex justify-end gap-3 pt-4">
@@ -554,9 +558,11 @@ const Family: React.FC = () => {
                             variant="secondary"
                             onClick={() => setDialogOpen(false)}
                         >
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
-                        <Button type="submit">{editingMember ? 'Enregistrer' : 'Ajouter'}</Button>
+                        <Button type="submit">
+                            {editingMember ? t('common.save') : t('family.form.add')}
+                        </Button>
                     </div>
                 </form>
             </Dialog>

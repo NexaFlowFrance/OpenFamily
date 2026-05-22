@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Star, BookOpen } from 'lucide-react';
 import { type CatalogItem, type FrequentItem, matchCatalog } from '../../lib/shoppingCatalog';
 
@@ -61,9 +62,11 @@ const ShoppingItemPicker: React.FC<ShoppingItemPickerProps> = ({
     onChange,
     onPick,
     historyItems,
-    placeholder = 'Ex: Lait, Pain…',
+    placeholder,
     autoFocus,
 }) => {
+    const { t } = useTranslation();
+    const resolvedPlaceholder = placeholder ?? t('shopping.picker.placeholder');
     const [open, setOpen] = useState(false);
     const [highlight, setHighlight] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -165,7 +168,9 @@ const ShoppingItemPicker: React.FC<ShoppingItemPickerProps> = ({
 
     return (
         <div ref={containerRef} className="relative w-full">
-            <label className="mb-1.5 block text-caption font-medium text-foreground">Nom</label>
+            <label className="mb-1.5 block text-caption font-medium text-foreground">
+                {t('shopping.picker.name')}
+            </label>
             <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -178,7 +183,7 @@ const ShoppingItemPicker: React.FC<ShoppingItemPickerProps> = ({
                     }}
                     onFocus={() => setOpen(true)}
                     onKeyDown={onKeyDown}
-                    placeholder={placeholder}
+                    placeholder={resolvedPlaceholder}
                     autoFocus={autoFocus}
                     className="input-nexus pl-9"
                     aria-autocomplete="list"
@@ -218,15 +223,18 @@ const ShoppingItemPicker: React.FC<ShoppingItemPickerProps> = ({
                                         </span>
                                     ) : null}
                                     <span className="rounded-pill bg-muted/60 px-2 py-0.5 text-micro text-muted-foreground">
-                                        {s.category}
+                                        {t('shopping.categories.' + s.category, {
+                                            defaultValue: s.category,
+                                        })}
                                     </span>
                                 </button>
                             </li>
                         ))}
                     </ul>
                     <div className="border-t border-border bg-muted/20 px-3 py-1.5 text-micro text-muted-foreground">
-                        <Star className="mr-1 inline h-3 w-3 text-warning" /> Vos articles ·{' '}
-                        <BookOpen className="mr-1 inline h-3 w-3" /> Catalogue
+                        <Star className="mr-1 inline h-3 w-3 text-warning" />{' '}
+                        {t('shopping.picker.your_items')} ·{' '}
+                        <BookOpen className="mr-1 inline h-3 w-3" /> {t('shopping.picker.catalog')}
                     </div>
                 </div>
             ) : null}

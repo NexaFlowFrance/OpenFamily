@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     FileText,
     Image as ImageIcon,
@@ -47,6 +48,7 @@ const DocumentsList: React.FC<Props> = ({
     mode = 'full',
     hideAdd = false,
 }) => {
+    const { t } = useTranslation();
     const filters =
         entityType && entityId ? { entity_type: entityType, entity_id: entityId } : undefined;
     const docsQuery = useDocuments(filters);
@@ -54,11 +56,11 @@ const DocumentsList: React.FC<Props> = ({
     const [uploadOpen, setUploadOpen] = useState(false);
 
     const handleDelete = async (doc: HouseDocument) => {
-        if (!confirm(`Supprimer "${doc.name}" ?\nLe fichier sera définitivement effacé.`)) return;
+        if (!confirm(t('house.documents.deleteConfirm', { name: doc.name }))) return;
         try {
             await deleteMut.mutateAsync(doc.id);
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Suppression impossible.');
+            alert(err instanceof Error ? err.message : t('house.common.deleteFailed'));
         }
     };
 
@@ -69,7 +71,7 @@ const DocumentsList: React.FC<Props> = ({
             <div className="flex items-center justify-between gap-2">
                 <p className="text-caption font-semibold flex items-center gap-2">
                     <Paperclip className="h-4 w-4" />
-                    Documents
+                    {t('house.documents.title')}
                     {docs.length > 0 && (
                         <span className="text-micro text-muted-foreground font-normal">
                             ({docs.length})
@@ -79,18 +81,18 @@ const DocumentsList: React.FC<Props> = ({
                 {!hideAdd && (
                     <Button size="sm" variant="secondary" onClick={() => setUploadOpen(true)}>
                         <Plus className="h-4 w-4 mr-1.5" />
-                        Document
+                        {t('house.documents.documentShort')}
                     </Button>
                 )}
             </div>
 
             {docsQuery.isPending ? (
-                <p className="text-micro text-muted-foreground italic">Chargement…</p>
+                <p className="text-micro text-muted-foreground italic">{t('common.loading')}</p>
             ) : docs.length === 0 ? (
                 <p className="text-micro text-muted-foreground italic">
                     {entityType
-                        ? 'Aucun document attaché.'
-                        : 'Aucun document. Commence par uploader une facture ou un manuel.'}
+                        ? t('house.documents.noneAttached')
+                        : t('house.documents.noneGeneric')}
                 </p>
             ) : mode === 'compact' ? (
                 <div className="flex flex-wrap gap-2">
@@ -129,6 +131,7 @@ const DocumentCard: React.FC<{ doc: HouseDocument; onDelete: () => void }> = ({
     doc,
     onDelete,
 }) => {
+    const { t } = useTranslation();
     const Icon = iconForMime(doc.mime_type);
     const isImage = isPreviewableImage(doc.mime_type);
     return (
@@ -162,7 +165,8 @@ const DocumentCard: React.FC<{ doc: HouseDocument; onDelete: () => void }> = ({
             <div className="p-3 space-y-1">
                 <p className="text-caption font-semibold truncate">{doc.name}</p>
                 <p className="text-micro text-muted-foreground truncate">
-                    {doc.category} · {formatFileSize(doc.file_size)}
+                    {t('domain.documentCategory.' + doc.category, { defaultValue: doc.category })} ·{' '}
+                    {formatFileSize(doc.file_size)}
                 </p>
                 <div className="flex gap-1 pt-1">
                     <a
@@ -170,23 +174,23 @@ const DocumentCard: React.FC<{ doc: HouseDocument; onDelete: () => void }> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-1 rounded hover:bg-surface-2 text-muted-foreground"
-                        aria-label="Aperçu"
-                        title="Aperçu"
+                        aria-label={t('house.documents.preview')}
+                        title={t('house.documents.preview')}
                     >
                         <Eye className="h-4 w-4" />
                     </a>
                     <a
                         href={documentFileUrl(doc.id, { download: true })}
                         className="p-1 rounded hover:bg-surface-2 text-muted-foreground"
-                        aria-label="Télécharger"
-                        title="Télécharger"
+                        aria-label={t('house.documents.download')}
+                        title={t('house.documents.download')}
                     >
                         <Download className="h-4 w-4" />
                     </a>
                     <button
                         onClick={onDelete}
                         className="ml-auto p-1 rounded hover:bg-destructive/10 text-destructive"
-                        aria-label="Supprimer"
+                        aria-label={t('common.delete')}
                     >
                         <Trash2 className="h-4 w-4" />
                     </button>
@@ -200,6 +204,7 @@ const DocumentChip: React.FC<{ doc: HouseDocument; onDelete: () => void }> = ({
     doc,
     onDelete,
 }) => {
+    const { t } = useTranslation();
     const Icon = iconForMime(doc.mime_type);
     return (
         <div className="group inline-flex items-center gap-2 rounded-pill border border-border bg-card px-2.5 py-1 text-micro">
@@ -215,7 +220,7 @@ const DocumentChip: React.FC<{ doc: HouseDocument; onDelete: () => void }> = ({
             <button
                 onClick={onDelete}
                 className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive"
-                aria-label="Supprimer"
+                aria-label={t('common.delete')}
             >
                 <Trash2 className="h-3 w-3" />
             </button>

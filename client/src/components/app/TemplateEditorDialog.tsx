@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
@@ -44,6 +45,7 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
     onSave,
     isSaving,
 }) => {
+    const { t } = useTranslation();
     const [draft, setDraft] = useState(() => emptyDraft(template, initialDraftItems));
     const [pickerValue, setPickerValue] = useState('');
     const [error, setError] = useState('');
@@ -101,11 +103,11 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
         setError('');
         const name = draft.name.trim();
         if (!name) {
-            setError('Donnez un nom au template.');
+            setError(t('house.template.nameRequired'));
             return;
         }
         if (draft.items.length === 0) {
-            setError('Ajoutez au moins un article au template.');
+            setError(t('house.template.itemsRequired'));
             return;
         }
         try {
@@ -122,7 +124,7 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
             });
             onOpenChange(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Impossible d'enregistrer le template.");
+            setError(err instanceof Error ? err.message : t('house.template.saveError'));
         }
     };
 
@@ -130,11 +132,11 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title={template ? 'Modifier le template' : 'Nouveau template'}
+            title={template ? t('house.template.editTitle') : t('house.template.createTitle')}
             description={
                 template
-                    ? 'Ajustez le nom et les articles, puis enregistrez.'
-                    : 'Construisez un template réutilisable en quelques clics.'
+                    ? t('house.template.editDescription')
+                    : t('house.template.createDescription')
             }
         >
             <div className="space-y-5">
@@ -145,15 +147,15 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                 ) : null}
 
                 <Input
-                    label="Nom du template"
+                    label={t('house.template.name')}
                     value={draft.name}
                     onChange={(e) => setDraft((prev) => ({ ...prev, name: e.target.value }))}
-                    placeholder="Ex: Courses semaine, Apéro entre amis…"
+                    placeholder={t('house.template.namePlaceholder')}
                 />
 
                 <div>
                     <p className="mb-2 text-caption font-medium text-foreground">
-                        Ajouter un article
+                        {t('house.template.addItem')}
                     </p>
                     <ShoppingItemPicker
                         value={pickerValue}
@@ -167,7 +169,7 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                             })
                         }
                         historyItems={historyItems}
-                        placeholder="Tape un article puis Entrée…"
+                        placeholder={t('house.template.pickerPlaceholder')}
                     />
                     {pickerValue.trim() ? (
                         <Button
@@ -184,7 +186,7 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                             }
                         >
                             <Plus className="mr-1 h-4 w-4" />
-                            Ajouter « {pickerValue.trim()} »
+                            {t('house.template.addNamed', { name: pickerValue.trim() })}
                         </Button>
                     ) : null}
                 </div>
@@ -192,12 +194,12 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                 <div>
                     <div className="mb-2 flex items-center justify-between">
                         <p className="text-caption font-medium text-foreground">
-                            Articles ({draft.items.length})
+                            {t('house.template.itemsCount', { count: draft.items.length })}
                         </p>
                     </div>
                     {draft.items.length === 0 ? (
                         <div className="rounded-input border border-dashed border-border bg-muted/20 px-3 py-6 text-center text-caption text-muted-foreground">
-                            Aucun article. Utilisez le picker ci-dessus pour en ajouter.
+                            {t('house.template.noItems')}
                         </div>
                     ) : (
                         <ul className="max-h-72 space-y-2 overflow-y-auto rounded-input border border-border p-2">
@@ -211,7 +213,7 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                                         value={item.name}
                                         onChange={(e) => updateItem(idx, { name: e.target.value })}
                                         className="input-nexus col-span-5 h-9 py-0 text-caption"
-                                        aria-label="Nom"
+                                        aria-label={t('house.template.itemName')}
                                     />
                                     <input
                                         type="number"
@@ -226,8 +228,8 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                                             })
                                         }
                                         className="input-nexus col-span-2 h-9 py-0 text-caption"
-                                        placeholder="Qt"
-                                        aria-label="Quantité"
+                                        placeholder={t('house.template.quantityShort')}
+                                        aria-label={t('house.template.quantity')}
                                     />
                                     <select
                                         value={item.category}
@@ -235,11 +237,13 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                                             updateItem(idx, { category: e.target.value })
                                         }
                                         className="input-nexus col-span-4 h-9 py-0 text-caption"
-                                        aria-label="Catégorie"
+                                        aria-label={t('house.template.category')}
                                     >
                                         {CATEGORIES.map((c) => (
                                             <option key={c} value={c}>
-                                                {c}
+                                                {t('domain.shoppingCategory.' + c, {
+                                                    defaultValue: c,
+                                                })}
                                             </option>
                                         ))}
                                     </select>
@@ -247,7 +251,9 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                                         type="button"
                                         onClick={() => removeItem(idx)}
                                         className="col-span-1 inline-flex items-center justify-center rounded-input p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                                        aria-label={`Retirer ${item.name}`}
+                                        aria-label={t('house.template.removeItem', {
+                                            name: item.name,
+                                        })}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </button>
@@ -259,11 +265,11 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
 
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Annuler
+                        {t('common.cancel')}
                     </Button>
                     <Button type="button" onClick={handleSave} disabled={isSaving}>
                         <Save className="mr-1 h-4 w-4" />
-                        {template ? 'Enregistrer' : 'Créer le template'}
+                        {template ? t('house.template.save') : t('house.template.create')}
                     </Button>
                 </div>
             </div>

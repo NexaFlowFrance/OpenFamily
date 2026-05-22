@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -84,6 +85,7 @@ const fromContract = (c: Contract): FormState => ({
 });
 
 const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
+    const { t } = useTranslation();
     const isEdit = !!contract;
     const createMut = useCreateContract();
     const updateMut = useUpdateContract();
@@ -118,16 +120,16 @@ const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
         e.preventDefault();
         setError('');
         if (!form.name.trim()) {
-            setError('Le nom du contrat est requis.');
+            setError(t('house.contract.dialog.nameRequired'));
             return;
         }
         const amount = Number(form.amount.replace(',', '.'));
         if (!Number.isFinite(amount) || amount < 0) {
-            setError('Le montant doit être un nombre positif.');
+            setError(t('house.contract.dialog.amountInvalid'));
             return;
         }
         if (!form.next_due_date) {
-            setError('La prochaine échéance est requise.');
+            setError(t('house.contract.dialog.dueRequired'));
             return;
         }
         const body = {
@@ -152,7 +154,7 @@ const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
             }
             onOpenChange(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setError(err instanceof Error ? err.message : t('house.common.saveError'));
         }
     };
 
@@ -162,10 +164,12 @@ const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? 'Modifier le contrat' : 'Nouveau contrat / facture'}
-            description={
-                isEdit ? contract?.name : 'EDF, eau, internet, abonnement, assurance, prêt…'
+            title={
+                isEdit
+                    ? t('house.contract.dialog.editTitle')
+                    : t('house.contract.dialog.createTitle')
             }
+            description={isEdit ? contract?.name : t('house.contract.dialog.createDescription')}
             className="sm:max-w-xl"
         >
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -176,33 +180,36 @@ const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
                     </p>
                 )}
                 <Input
-                    label="Nom *"
+                    label={t('house.contract.dialog.name')}
                     value={form.name}
                     onChange={(e) => handleChange('name', e.target.value)}
-                    placeholder="Ex: Box internet"
+                    placeholder={t('house.contract.dialog.namePlaceholder')}
                     required
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Fournisseur"
+                        label={t('house.contract.dialog.provider')}
                         value={form.provider}
                         onChange={(e) => handleChange('provider', e.target.value)}
-                        placeholder="Free, EDF, Veolia…"
+                        placeholder={t('house.contract.dialog.providerPlaceholder')}
                     />
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Catégorie *
+                            {t('house.contract.dialog.category')}
                         </label>
                         <Select
                             value={form.category}
                             onValueChange={(v) => handleCategoryChange(v as ContractCategory)}
-                            options={CONTRACT_CATEGORIES.map((c) => ({ value: c, label: c }))}
+                            options={CONTRACT_CATEGORIES.map((c) => ({
+                                value: c,
+                                label: t('domain.contractCategory.' + c, { defaultValue: c }),
+                            }))}
                         />
                     </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Montant *"
+                        label={t('house.contract.dialog.amount')}
                         type="number"
                         step="0.01"
                         value={form.amount}
@@ -212,18 +219,21 @@ const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
                     />
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Fréquence *
+                            {t('house.contract.dialog.frequency')}
                         </label>
                         <Select
                             value={form.frequency}
                             onValueChange={(v) => handleChange('frequency', v as ContractFrequency)}
-                            options={CONTRACT_FREQUENCIES.map((f) => ({ value: f, label: f }))}
+                            options={CONTRACT_FREQUENCIES.map((f) => ({
+                                value: f,
+                                label: t('domain.contractFrequency.' + f, { defaultValue: f }),
+                            }))}
                         />
                     </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Prochaine échéance *"
+                        label={t('house.contract.dialog.nextDue')}
                         type="date"
                         value={form.next_due_date}
                         onChange={(e) => handleChange('next_due_date', e.target.value)}
@@ -231,28 +241,31 @@ const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
                     />
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Paiement
+                            {t('house.contract.dialog.payment')}
                         </label>
                         <Select
                             value={form.payment_method || 'Prélèvement auto'}
                             onValueChange={(v) =>
                                 handleChange('payment_method', v as PaymentMethod)
                             }
-                            options={PAYMENT_METHODS.map((p) => ({ value: p, label: p }))}
+                            options={PAYMENT_METHODS.map((p) => ({
+                                value: p,
+                                label: t('domain.paymentMethod.' + p, { defaultValue: p }),
+                            }))}
                         />
                     </div>
                 </div>
                 <Input
-                    label="N° client / référence"
+                    label={t('house.contract.dialog.clientNumber')}
                     value={form.client_number}
                     onChange={(e) => handleChange('client_number', e.target.value)}
-                    placeholder="Optionnel"
+                    placeholder={t('house.contract.dialog.clientNumberPlaceholder')}
                 />
                 <Textarea
-                    label="Notes"
+                    label={t('house.contract.dialog.notes')}
                     value={form.notes}
                     onChange={(e) => handleChange('notes', e.target.value)}
-                    placeholder="Conditions, n° de contrat, contact SAV…"
+                    placeholder={t('house.contract.dialog.notesPlaceholder')}
                     rows={2}
                 />
 
@@ -268,16 +281,16 @@ const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
                             className="h-4 w-4"
                         />
                         <span className="text-caption font-medium">
-                            Créer une dépense Budget à chaque paiement
+                            {t('house.contract.dialog.autoBudget')}
                         </span>
                     </label>
                     {form.auto_create_budget_entry && (
                         <div className="pl-6">
                             <Input
-                                label="Catégorie Budget"
+                                label={t('house.contract.dialog.budgetCategory')}
                                 value={form.budget_category}
                                 onChange={(e) => handleChange('budget_category', e.target.value)}
-                                placeholder="Maison, Loisirs, Autre…"
+                                placeholder={t('house.contract.dialog.budgetCategoryPlaceholder')}
                             />
                         </div>
                     )}
@@ -291,17 +304,17 @@ const ContractDialog: React.FC<Props> = ({ open, onOpenChange, contract }) => {
                             onChange={(e) => handleChange('is_active', e.target.checked)}
                             className="h-4 w-4"
                         />
-                        <span className="text-caption">Contrat actif</span>
+                        <span className="text-caption">{t('house.contract.dialog.isActive')}</span>
                     </label>
                 )}
 
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Annuler
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={submitting}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? 'Enregistrer' : 'Créer'}
+                        {isEdit ? t('common.save') : t('house.common.create')}
                     </Button>
                 </div>
             </form>

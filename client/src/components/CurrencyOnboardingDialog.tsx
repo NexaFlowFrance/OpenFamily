@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, Button, Select } from './ui';
 import { useAuth } from '../contexts/AuthContext';
 import { SUPPORTED_CURRENCIES, DEFAULT_CURRENCY } from '../lib/currencies';
@@ -15,6 +16,7 @@ const currencyOptions = SUPPORTED_CURRENCIES.map((c) => ({
  * the currency their existing amounts are stored in.
  */
 const CurrencyOnboardingDialog: React.FC = () => {
+    const { t } = useTranslation();
     const { user, setUserCurrency } = useAuth();
     const [selected, setSelected] = useState<string>(DEFAULT_CURRENCY);
     const [submitting, setSubmitting] = useState(false);
@@ -28,7 +30,7 @@ const CurrencyOnboardingDialog: React.FC = () => {
         try {
             await setUserCurrency(selected);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Impossible d'enregistrer la devise.");
+            setError(err instanceof Error ? err.message : t('currencyOnboarding.saveError'));
         } finally {
             setSubmitting(false);
         }
@@ -39,13 +41,13 @@ const CurrencyOnboardingDialog: React.FC = () => {
             open={open}
             // Modal is intentionally not dismissible: the user must pick a currency.
             onOpenChange={() => undefined}
-            title="Choisissez votre devise"
-            description="Tous vos montants (budget, courses…) seront affichés dans cette devise. Vos données existantes ne sont pas converties — sélectionnez la devise dans laquelle elles sont déjà saisies."
+            title={t('currencyOnboarding.title')}
+            description={t('currencyOnboarding.description')}
         >
             <div className="space-y-4">
                 <div>
                     <label className="block text-label font-medium text-foreground mb-1.5">
-                        Devise
+                        {t('currencyOnboarding.currencyLabel')}
                     </label>
                     <Select
                         value={selected}
@@ -62,7 +64,7 @@ const CurrencyOnboardingDialog: React.FC = () => {
                 <div className="flex justify-end pt-2">
                     <Button onClick={handleConfirm} disabled={submitting}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Confirmer
+                        {t('currencyOnboarding.confirm')}
                     </Button>
                 </div>
             </div>

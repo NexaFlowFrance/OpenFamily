@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Sparkles,
     X as CloseIcon,
@@ -41,13 +42,14 @@ interface Props {
     onIdeaApplied: (idea: LunchboxIdea) => void;
 }
 
-const LOCATION_OPTIONS: Array<{ value: LunchboxLocation; label: string }> = [
-    { value: 'school', label: 'École' },
-    { value: 'daycare', label: 'Crèche / garderie' },
-    { value: 'outing', label: 'Sortie / pique-nique' },
-    { value: 'work', label: 'Travail' },
-    { value: 'travel', label: 'Voyage / trajet' },
-    { value: 'other', label: 'Autre' },
+// Stored DATA values (server enum) — labels resolved at render time via i18n.
+const LOCATION_VALUES: LunchboxLocation[] = [
+    'school',
+    'daycare',
+    'outing',
+    'work',
+    'travel',
+    'other',
 ];
 
 // Remembered between opens so a family doesn't re-enter their pantry every day.
@@ -98,6 +100,7 @@ const ChipListInput: React.FC<{
     values: string[];
     onChange: (next: string[]) => void;
 }> = ({ label, icon, placeholder, values, onChange }) => {
+    const { t } = useTranslation();
     const [draft, setDraft] = useState('');
 
     const add = () => {
@@ -135,7 +138,7 @@ const ChipListInput: React.FC<{
                     placeholder={placeholder}
                 />
                 <Button type="button" variant="secondary" onClick={add}>
-                    Ajouter
+                    {t('meals.lunchboxAi.add')}
                 </Button>
             </div>
             {values.length > 0 && (
@@ -150,7 +153,7 @@ const ChipListInput: React.FC<{
                                 type="button"
                                 onClick={() => remove(idx)}
                                 className="hover:text-primary-pressed"
-                                aria-label={`Retirer ${v}`}
+                                aria-label={t('meals.lunchboxAi.remove', { name: v })}
                             >
                                 <CloseIcon className="h-3 w-3" />
                             </button>
@@ -168,6 +171,11 @@ export const LunchboxAiDialog: React.FC<Props> = ({
     familyMember,
     onIdeaApplied,
 }) => {
+    const { t } = useTranslation();
+    const locationOptions = LOCATION_VALUES.map((value) => ({
+        value,
+        label: t('meals.lunchboxAi.locations.' + value, { defaultValue: value }),
+    }));
     const [mains, setMains] = useState<string[]>([]);
     const [fruits, setFruits] = useState<string[]>([]);
     const [snacks, setSnacks] = useState<string[]>([]);
@@ -207,7 +215,7 @@ export const LunchboxAiDialog: React.FC<Props> = ({
     const generate = async () => {
         setError('');
         if (totalItems === 0) {
-            setError('Liste au moins un aliment disponible (fruit, snack, plat ou boisson).');
+            setError(t('meals.lunchboxAi.errors.min_item'));
             return;
         }
         setGenerating(true);
@@ -233,15 +241,15 @@ export const LunchboxAiDialog: React.FC<Props> = ({
             if (!response.success) {
                 const code = response.error?.code;
                 if (code === 'DISABLED') {
-                    setError(
-                        "L'IA est désactivée sur cette installation. Contactez l'administrateur.",
-                    );
+                    setError(t('meals.lunchboxAi.errors.disabled'));
                 } else if (code === 'QUOTA_EXCEEDED') {
-                    setError("Quota mensuel d'IA atteint. Réessayez le mois prochain.");
+                    setError(t('meals.lunchboxAi.errors.quota_exceeded'));
                 } else if (code === 'BAD_JSON') {
-                    setError("L'IA a renvoyé une réponse incompréhensible. Réessayez.");
+                    setError(t('meals.lunchboxAi.errors.bad_json'));
                 } else {
-                    setError(response.error?.message || 'Génération impossible.');
+                    setError(
+                        response.error?.message || t('meals.lunchboxAi.errors.generate_failed'),
+                    );
                 }
                 return;
             }
@@ -249,7 +257,9 @@ export const LunchboxAiDialog: React.FC<Props> = ({
             setIdeas(response.data?.ideas ?? []);
         } catch (err) {
             console.error('Lunchbox AI generation failed:', err);
-            setError(err instanceof Error ? err.message : 'Génération impossible.');
+            setError(
+                err instanceof Error ? err.message : t('meals.lunchboxAi.errors.generate_failed'),
+            );
         } finally {
             setGenerating(false);
         }
@@ -264,47 +274,47 @@ export const LunchboxAiDialog: React.FC<Props> = ({
 
     const aiHint = useMemo(() => {
         const parts: string[] = [];
-        if (familyMember) parts.push(`pour ${familyMember.name}`);
-        const loc = LOCATION_OPTIONS.find((o) => o.value === location)?.label;
+        if (familyMember) parts.push(t('meals.lunchboxAi.hint_for', { name: familyMember.name }));
+        const loc = t('meals.lunchboxAi.locations.' + location, { defaultValue: '' });
         if (loc) parts.push(loc.toLowerCase());
-        parts.push(`${totalItems} aliment${totalItems > 1 ? 's' : ''} dispo`);
+        parts.push(t('meals.lunchboxAi.hint_items', { count: totalItems }));
         return parts.join(' • ');
-    }, [familyMember, location, totalItems]);
+    }, [familyMember, location, totalItems, t]);
 
     return (
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Suggérer une boîte à lunch avec l'IA"
-            description="Indique ce que tu as à la maison, l'IA propose 3 boîtes prêtes à préparer."
+            title={t('meals.lunchboxAi.title')}
+            description={t('meals.lunchboxAi.description')}
             className="sm:max-w-3xl"
         >
             <div className="space-y-5">
                 <ChipListInput
-                    label="Plats / restes"
+                    label={t('meals.lunchboxAi.mains')}
                     icon={<UtensilsCrossed className="h-4 w-4" />}
-                    placeholder="Ex: reste de poulet, riz, wrap thon…"
+                    placeholder={t('meals.lunchboxAi.mains_placeholder')}
                     values={mains}
                     onChange={setMains}
                 />
                 <ChipListInput
-                    label="Fruits / légumes"
+                    label={t('meals.lunchboxAi.fruits')}
                     icon={<Apple className="h-4 w-4" />}
-                    placeholder="Ex: pomme, clémentine, carotte…"
+                    placeholder={t('meals.lunchboxAi.fruits_placeholder')}
                     values={fruits}
                     onChange={setFruits}
                 />
                 <ChipListInput
-                    label="Snacks / collations"
+                    label={t('meals.lunchboxAi.snacks')}
                     icon={<Cookie className="h-4 w-4" />}
-                    placeholder="Ex: compote, biscuit, fromage…"
+                    placeholder={t('meals.lunchboxAi.snacks_placeholder')}
                     values={snacks}
                     onChange={setSnacks}
                 />
                 <ChipListInput
-                    label="Boissons"
+                    label={t('meals.lunchboxAi.drinks')}
                     icon={<GlassWater className="h-4 w-4" />}
-                    placeholder="Ex: eau, jus de pomme, lait…"
+                    placeholder={t('meals.lunchboxAi.drinks_placeholder')}
                     values={drinks}
                     onChange={setDrinks}
                 />
@@ -312,22 +322,22 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                 <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Lieu de consommation
+                            {t('meals.lunchboxAi.location')}
                         </label>
                         <Select
                             value={location}
                             onValueChange={(v) => setLocation(v as LunchboxLocation)}
-                            options={LOCATION_OPTIONS}
+                            options={locationOptions}
                         />
                     </div>
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Contexte du jour (optionnel)
+                            {t('meals.lunchboxAi.context')}
                         </label>
                         <Input
                             value={context}
                             onChange={(e) => setContext(e.target.value)}
-                            placeholder="Ex: sortie sportive, journée chaude…"
+                            placeholder={t('meals.lunchboxAi.context_placeholder')}
                         />
                     </div>
                 </section>
@@ -346,12 +356,12 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                             {generating ? (
                                 <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Génération…
+                                    {t('meals.lunchboxAi.generating')}
                                 </>
                             ) : (
                                 <>
                                     <Sparkles className="w-4 h-4 mr-2" />
-                                    Générer 3 idées
+                                    {t('meals.lunchboxAi.generate')}
                                 </>
                             )}
                         </Button>
@@ -363,7 +373,7 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                         <div className="flex items-center justify-between">
                             <h3 className="text-h2 font-semibold flex items-center gap-2">
                                 <Sparkles className="h-5 w-5 text-accent" />
-                                {ideas.length} idée{ideas.length > 1 ? 's' : ''}
+                                {t('meals.lunchboxAi.ideas', { count: ideas.length })}
                             </h3>
                             <Button
                                 type="button"
@@ -375,10 +385,10 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                                 {generating ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Re-génération…
+                                        {t('meals.lunchboxAi.re_generating')}
                                     </>
                                 ) : (
-                                    'Re-générer'
+                                    t('meals.lunchboxAi.re_generate')
                                 )}
                             </Button>
                         </div>
@@ -393,7 +403,9 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                                         <div className="flex items-start gap-2">
                                             <UtensilsCrossed className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                                             <span>
-                                                <span className="font-medium">Plat :</span>{' '}
+                                                <span className="font-medium">
+                                                    {t('meals.lunchboxAi.main_label')}
+                                                </span>{' '}
                                                 {idea.main}
                                             </span>
                                         </div>
@@ -402,7 +414,9 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                                         <div className="flex items-start gap-2">
                                             <Apple className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                                             <span>
-                                                <span className="font-medium">Fruit :</span>{' '}
+                                                <span className="font-medium">
+                                                    {t('meals.lunchboxAi.fruit_label')}
+                                                </span>{' '}
                                                 {idea.fruit}
                                             </span>
                                         </div>
@@ -411,7 +425,9 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                                         <div className="flex items-start gap-2">
                                             <Cookie className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                                             <span>
-                                                <span className="font-medium">Snack :</span>{' '}
+                                                <span className="font-medium">
+                                                    {t('meals.lunchboxAi.snack_label')}
+                                                </span>{' '}
                                                 {idea.snack}
                                             </span>
                                         </div>
@@ -420,7 +436,9 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                                         <div className="flex items-start gap-2">
                                             <GlassWater className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                                             <span>
-                                                <span className="font-medium">Boisson :</span>{' '}
+                                                <span className="font-medium">
+                                                    {t('meals.lunchboxAi.drink_label')}
+                                                </span>{' '}
                                                 {idea.drink}
                                             </span>
                                         </div>
@@ -458,10 +476,10 @@ export const LunchboxAiDialog: React.FC<Props> = ({
                                         {appliedIdx === idx ? (
                                             <>
                                                 <Check className="w-4 h-4 mr-1" />
-                                                Appliqué
+                                                {t('meals.lunchboxAi.applied')}
                                             </>
                                         ) : (
-                                            'Utiliser cette idée'
+                                            t('meals.lunchboxAi.use_idea')
                                         )}
                                     </Button>
                                 </div>
@@ -472,7 +490,7 @@ export const LunchboxAiDialog: React.FC<Props> = ({
 
                 <div className="flex justify-end pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Fermer
+                        {t('meals.lunchboxAi.close')}
                     </Button>
                 </div>
             </div>

@@ -1,0 +1,58 @@
+{
+  "calendar": {
+    "loading": "Chargement du calendrier...",
+    "title": "Calendrier",
+    "subtitle": "Gérez vos rendez-vous familiaux",
+    "new_appointment": "Nouveau rendez-vous",
+    "today": "Aujourd'hui",
+    "more_others": "+{{count}} autres",
+    "upcoming": "Rendez-vous à venir",
+    "none_upcoming": "Aucun rendez-vous à venir",
+    "week_days": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam",
+      "sun": "Dim"
+    },
+    "dialog": {
+      "edit_title": "Modifier le rendez-vous",
+      "new_title": "Nouveau rendez-vous",
+      "description": "Remplissez les informations du rendez-vous",
+      "title_label": "Titre",
+      "title_placeholder": "Ex: Rendez-vous médecin",
+      "description_label": "Description (optionnel)",
+      "description_placeholder": "Détails supplémentaires...",
+      "schedule": "Planification",
+      "start_date": "Debut date",
+      "start_time": "Debut heure",
+      "end_date": "Fin date",
+      "end_time": "Fin heure",
+      "preset_30min": "+30 min",
+      "preset_1h": "+1 h",
+      "preset_2h": "+2 h",
+      "location_label": "Lieu (optionnel)",
+      "location_placeholder": "Ex: Cabinet médical",
+      "members_label": "Membres de la famille (optionnel)",
+      "no_members": "Ajoutez un membre pour l assigner rapidement.",
+      "go_to_family": "Aller a Famille",
+      "reminders": "Rappels",
+      "reminder_30min": "30 minutes avant",
+      "reminder_1hour": "1 heure avant",
+      "notes_label": "Notes (optionnel)",
+      "notes_placeholder": "Notes supplémentaires...",
+      "create": "Créer"
+    },
+    "errors": {
+      "load": "Impossible de charger les rendez-vous.",
+      "load_members": "Impossible de charger les membres.",
+      "start_required": "Veuillez renseigner une date et une heure de debut.",
+      "end_after_start": "L heure de fin doit etre apres l heure de debut.",
+      "save": "Impossible d’enregistrer ce rendez-vous.",
+      "delete": "Impossible de supprimer ce rendez-vous."
+    },
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer ce rendez-vous ?"
+  }
+}

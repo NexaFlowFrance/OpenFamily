@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -61,6 +62,7 @@ const fromItem = (i: HouseItem): FormState => ({
 });
 
 const ItemDialog: React.FC<Props> = ({ open, onOpenChange, item, defaultRoomId }) => {
+    const { t } = useTranslation();
     const isEdit = !!item;
     const createMut = useCreateItem();
     const updateMut = useUpdateItem();
@@ -79,14 +81,14 @@ const ItemDialog: React.FC<Props> = ({ open, onOpenChange, item, defaultRoomId }
         e.preventDefault();
         setError('');
         if (!form.name.trim()) {
-            setError("Le nom de l'objet est requis.");
+            setError(t('house.item.dialog.nameRequired'));
             return;
         }
         let quantity: number | null = null;
         if (form.quantity.trim()) {
             const n = Number(form.quantity);
             if (!Number.isInteger(n) || n < 1) {
-                setError('La quantité doit être un entier ≥ 1.');
+                setError(t('house.item.dialog.quantityInvalid'));
                 return;
             }
             quantity = n;
@@ -108,13 +110,13 @@ const ItemDialog: React.FC<Props> = ({ open, onOpenChange, item, defaultRoomId }
             }
             onOpenChange(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setError(err instanceof Error ? err.message : t('house.common.saveError'));
         }
     };
 
     const submitting = createMut.isPending || updateMut.isPending;
     const roomOptions = [
-        { value: '', label: 'Aucune (À ranger)' },
+        { value: '', label: t('house.item.dialog.roomNone') },
         ...(roomsQuery.data ?? []).map((r) => ({ value: r.id, label: r.name })),
     ];
 
@@ -122,12 +124,8 @@ const ItemDialog: React.FC<Props> = ({ open, onOpenChange, item, defaultRoomId }
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? "Modifier l'objet" : 'Nouvel objet'}
-            description={
-                isEdit
-                    ? item?.name
-                    : 'Ajoute ce que tu ranges quelque part : tournevis, passeports, médicaments, déco saisonnière…'
-            }
+            title={isEdit ? t('house.item.dialog.editTitle') : t('house.item.dialog.createTitle')}
+            description={isEdit ? item?.name : t('house.item.dialog.createDescription')}
             className="sm:max-w-xl"
         >
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -138,35 +136,38 @@ const ItemDialog: React.FC<Props> = ({ open, onOpenChange, item, defaultRoomId }
                     </p>
                 )}
                 <Input
-                    label="Nom *"
+                    label={t('house.item.dialog.name')}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Ex: Perceuse Bosch"
+                    placeholder={t('house.item.dialog.namePlaceholder')}
                     required
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Catégorie *
+                            {t('house.item.dialog.category')}
                         </label>
                         <Select
                             value={form.category}
                             onValueChange={(v) => setForm({ ...form, category: v as ItemCategory })}
-                            options={ITEM_CATEGORIES.map((c) => ({ value: c, label: c }))}
+                            options={ITEM_CATEGORIES.map((c) => ({
+                                value: c,
+                                label: t('domain.itemCategory.' + c, { defaultValue: c }),
+                            }))}
                         />
                     </div>
                     <Input
-                        label="Quantité"
+                        label={t('house.item.dialog.quantity')}
                         type="number"
                         min={1}
                         value={form.quantity}
                         onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                        placeholder="Optionnel"
+                        placeholder={t('house.item.dialog.quantityPlaceholder')}
                     />
                 </div>
                 <div>
                     <label className="block text-label font-medium text-foreground mb-1.5">
-                        Pièce
+                        {t('house.item.dialog.room')}
                     </label>
                     <Select
                         value={form.room_id}
@@ -175,31 +176,31 @@ const ItemDialog: React.FC<Props> = ({ open, onOpenChange, item, defaultRoomId }
                     />
                 </div>
                 <Input
-                    label="Emplacement précis"
+                    label={t('house.item.dialog.locationDetail')}
                     value={form.location_detail}
                     onChange={(e) => setForm({ ...form, location_detail: e.target.value })}
-                    placeholder="Tiroir du haut, étagère verte, boîte à outils…"
+                    placeholder={t('house.item.dialog.locationDetailPlaceholder')}
                 />
                 <Input
-                    label="Photo (URL)"
+                    label={t('house.item.dialog.photoUrl')}
                     value={form.photo_url}
                     onChange={(e) => setForm({ ...form, photo_url: e.target.value })}
-                    placeholder="https://…  (l'upload arrivera plus tard)"
+                    placeholder={t('house.item.dialog.photoUrlPlaceholder')}
                 />
                 <Textarea
-                    label="Notes"
+                    label={t('house.item.dialog.notes')}
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    placeholder="Garantie, prêté à…"
+                    placeholder={t('house.item.dialog.notesPlaceholder')}
                     rows={2}
                 />
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Annuler
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={submitting}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? 'Enregistrer' : 'Créer'}
+                        {isEdit ? t('common.save') : t('house.common.create')}
                     </Button>
                 </div>
             </form>

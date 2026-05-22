@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useDateLocale } from '../../lib/dateLocale';
 import {
     Wrench,
     ShieldCheck,
@@ -30,12 +31,14 @@ const daysFromNow = (iso: string): number => {
     return Math.round((target - today.getTime()) / (24 * 60 * 60 * 1000));
 };
 
-const formatShortDate = (iso: string): string => format(parseISO(iso), 'dd MMM', { locale: fr });
-
 const HouseAlertsCard: React.FC = () => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const query = useHouseDashboard();
     const payMut = usePayContract();
     const navigate = useNavigate();
+
+    const formatShortDate = (iso: string): string => format(parseISO(iso), 'dd MMM', { locale });
 
     if (query.isPending) {
         return (
@@ -68,50 +71,55 @@ const HouseAlertsCard: React.FC = () => {
                     <div>
                         <h2 className="text-h2 font-semibold flex items-center gap-2">
                             <HomeIcon className="h-5 w-5 text-primary" />
-                            Maison
+                            {t('house.alerts.title')}
                         </h2>
                         <p className="text-micro text-muted-foreground">
-                            {data.counts.equipments} équipement
-                            {data.counts.equipments > 1 ? 's' : ''}
+                            {t('house.alerts.summaryEquipments', {
+                                count: data.counts.equipments,
+                            })}
                             {' · '}
-                            {data.counts.upcoming_30d} entretien
-                            {data.counts.upcoming_30d !== 1 ? 's' : ''} 30j
+                            {t('house.alerts.summaryUpcoming', {
+                                count: data.counts.upcoming_30d,
+                            })}
                             {' · '}
-                            {data.counts.warranties_60d} garantie
-                            {data.counts.warranties_60d !== 1 ? 's' : ''} 60j
+                            {t('house.alerts.summaryWarranties', {
+                                count: data.counts.warranties_60d,
+                            })}
                             {data.counts.active_contracts > 0 && (
                                 <>
                                     {' · '}
-                                    {data.counts.active_contracts} contrat
-                                    {data.counts.active_contracts > 1 ? 's' : ''} actif
-                                    {data.counts.active_contracts > 1 ? 's' : ''}
-                                    {' · '}~ {data.monthly_estimated_total.toFixed(0)} €/mois
+                                    {t('house.alerts.summaryContracts', {
+                                        count: data.counts.active_contracts,
+                                    })}
+                                    {' · '}
+                                    {t('house.alerts.summaryMonthly', {
+                                        amount: data.monthly_estimated_total.toFixed(0),
+                                    })}
                                 </>
                             )}
                         </p>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => navigate('/house')}>
-                        Voir tout
+                        {t('house.alerts.viewAll')}
                         <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                 </div>
 
                 {noData ? (
                     <div className="rounded-card border border-dashed border-border bg-muted/20 p-4 text-center">
-                        <p className="text-caption font-medium">Pas encore de données maison</p>
+                        <p className="text-caption font-medium">{t('house.alerts.noDataTitle')}</p>
                         <p className="text-micro text-muted-foreground mt-1">
-                            Ajoute tes équipements ou tes contrats récurrents pour voir les alertes
-                            ici.
+                            {t('house.alerts.noDataDescription')}
                         </p>
                         <Button size="sm" className="mt-3" onClick={() => navigate('/house')}>
                             <Plus className="h-4 w-4 mr-1.5" />
-                            Ouvrir Maison
+                            {t('house.alerts.openHouse')}
                         </Button>
                     </div>
                 ) : nothing ? (
                     <div className="flex items-center gap-2 rounded-card border border-success/30 bg-success-soft px-3 py-2 text-caption text-success">
                         <CheckCircle2 className="h-4 w-4" />
-                        Tous tes équipements sont à jour ✓
+                        {t('house.alerts.allUpToDate')}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -119,11 +127,11 @@ const HouseAlertsCard: React.FC = () => {
                         <div className="space-y-2">
                             <p className="text-caption font-semibold flex items-center gap-1.5">
                                 <Receipt className="h-4 w-4 text-primary" />
-                                Échéances 7j
+                                {t('house.alerts.due7d')}
                             </p>
                             {data.upcoming_contracts.length === 0 ? (
                                 <p className="text-micro text-muted-foreground italic">
-                                    Aucune échéance dans les 7 jours.
+                                    {t('house.alerts.noDue7d')}
                                 </p>
                             ) : (
                                 <ul className="space-y-1.5">
@@ -147,9 +155,9 @@ const HouseAlertsCard: React.FC = () => {
                                                         type="button"
                                                         onClick={() => payMut.mutate({ id: c.id })}
                                                         className="text-micro text-primary hover:underline shrink-0"
-                                                        title="Marquer payé"
+                                                        title={t('house.alerts.markPaid')}
                                                     >
-                                                        Payé
+                                                        {t('house.alerts.paid')}
                                                     </button>
                                                 </div>
                                                 <p
@@ -162,10 +170,12 @@ const HouseAlertsCard: React.FC = () => {
                                                     {c.amount.toFixed(2)} € ·{' '}
                                                     {formatShortDate(c.next_due_date)} (
                                                     {overdue
-                                                        ? `retard ${-days}j`
+                                                        ? t('house.alerts.overdueShort', {
+                                                              days: -days,
+                                                          })
                                                         : days === 0
-                                                          ? "aujourd'hui"
-                                                          : `dans ${days}j`}
+                                                          ? t('house.alerts.today')
+                                                          : t('house.alerts.inDays', { days })}
                                                     )
                                                 </p>
                                             </li>
@@ -179,11 +189,11 @@ const HouseAlertsCard: React.FC = () => {
                         <div className="space-y-2">
                             <p className="text-caption font-semibold flex items-center gap-1.5">
                                 <Wrench className="h-4 w-4 text-primary" />
-                                Entretiens 30j
+                                {t('house.alerts.maintenance30d')}
                             </p>
                             {data.upcoming_maintenance.length === 0 ? (
                                 <p className="text-micro text-muted-foreground italic">
-                                    Aucun entretien d'ici 30 jours.
+                                    {t('house.alerts.noMaintenance30d')}
                                 </p>
                             ) : (
                                 <ul className="space-y-1.5">
@@ -215,8 +225,11 @@ const HouseAlertsCard: React.FC = () => {
                                                             : ''}{' '}
                                                         (
                                                         {days >= 0
-                                                            ? `dans ${days}j`
-                                                            : `en retard ${-days}j`}
+                                                            ? t('house.alerts.inDays', { days })
+                                                            : t(
+                                                                  'house.alerts.maintenanceOverdueShort',
+                                                                  { days: -days },
+                                                              )}
                                                         )
                                                     </span>
                                                 </p>
@@ -231,11 +244,11 @@ const HouseAlertsCard: React.FC = () => {
                         <div className="space-y-2">
                             <p className="text-caption font-semibold flex items-center gap-1.5">
                                 <ShieldCheck className="h-4 w-4 text-warning" />
-                                Garanties 60j
+                                {t('house.alerts.warranties60d')}
                             </p>
                             {data.expiring_warranties.length === 0 ? (
                                 <p className="text-micro text-muted-foreground italic">
-                                    Aucune garantie à expirer d'ici 60 jours.
+                                    {t('house.alerts.noWarranties60d')}
                                 </p>
                             ) : (
                                 <ul className="space-y-1.5">
@@ -251,8 +264,10 @@ const HouseAlertsCard: React.FC = () => {
                                                     {w.name}
                                                 </p>
                                                 <p className="text-warning">
-                                                    Expire le {formatShortDate(w.warranty_until)}{' '}
-                                                    (dans {days}j)
+                                                    {t('house.alerts.warrantyExpires', {
+                                                        date: formatShortDate(w.warranty_until),
+                                                        days,
+                                                    })}
                                                 </p>
                                             </li>
                                         );

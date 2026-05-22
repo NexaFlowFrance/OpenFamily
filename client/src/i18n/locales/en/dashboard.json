@@ -1,0 +1,60 @@
+{
+  "dashboard": {
+    "loading": "Loading your space...",
+    "greeting": "Hello! 👋",
+    "subtitle": "Here's what's happening in your family today.",
+    "see_activity": "View activity",
+    "budget_alert": {
+      "title": "Budget warning",
+      "description_one": "{{count}} category has exceeded the monthly budget you set.",
+      "description_other": "{{count}} categories have exceeded the monthly budget you set.",
+      "see_detail": "View details"
+    },
+    "stat_cards": {
+      "upcoming_appointments": "Upcoming appointments",
+      "pending_tasks": "Pending tasks",
+      "shopping_items": "Items to buy",
+      "month_expenses": "This month's expenses"
+    },
+    "quick_overview": {
+      "title": "Quick overview",
+      "see_all": "View all",
+      "empty": "Your metrics will appear here as soon as you've added some data."
+    },
+    "kpi": {
+      "month_expenses": "Spending this month",
+      "no_comparison": "No comparison",
+      "stable": "Stable vs last month",
+      "up": "+{{pct}}% vs last month",
+      "down": "{{pct}}% vs last month",
+      "top_category": "Top category:",
+      "shopping_list": "Shopping list",
+      "to_buy": "to buy",
+      "checked_aria": "{{pct}}% checked",
+      "checked_progress": "{{checked}}/{{total}} checked · {{pct}}%",
+      "planned_meals": "Planned meals",
+      "days_suffix": "/{{total}} days",
+      "week_complete": "Full week ✓",
+      "days_to_plan": "{{count}} day(s) to plan",
+      "next_appointment": "Next appointment",
+      "none_upcoming": "None upcoming",
+      "overdue_tasks_one": "{{count}} overdue task",
+      "overdue_tasks_other": "{{count}} overdue tasks",
+      "no_overdue": "No overdue tasks"
+    },
+    "relative_date": {
+      "today": "today",
+      "tomorrow": "tomorrow",
+      "in_days": "in {{count}} days"
+    },
+    "quick_start": {
+      "title": "Quick start",
+      "add_family_title": "Add your family",
+      "add_family_desc": "Create a profile for each member",
+      "plan_meals_title": "Plan your meals",
+      "plan_meals_desc": "Build your weekly meal plan",
+      "track_budget_title": "Track the budget",
+      "track_budget_desc": "Set your monthly limits"
+    }
+  }
+}

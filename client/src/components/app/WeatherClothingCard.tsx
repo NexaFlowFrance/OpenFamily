@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
     Cloud,
     CloudDrizzle,
@@ -52,26 +54,27 @@ const weatherIconFor = (code: number) => {
 
 const isClientLocationError = (msg: string): boolean => /NO_LOCATION|HTTP 4\d\d/i.test(msg);
 
-const errorMessageFor = (msg: string): { code?: 'NO_LOCATION'; text: string } => {
+const errorMessageFor = (msg: string, t: TFunction): { code?: 'NO_LOCATION'; text: string } => {
     if (/NO_LOCATION/i.test(msg)) {
-        return { code: 'NO_LOCATION', text: 'Aucune ville renseignée.' };
+        return { code: 'NO_LOCATION', text: t('weatherClothing.errorNoLocation') };
     }
     if (/CITY_NOT_FOUND/i.test(msg)) {
-        return { text: 'Ville introuvable.' };
+        return { text: t('weatherClothing.errorCityNotFound') };
     }
     if (/TIMEOUT/i.test(msg)) {
-        return { text: 'La météo a mis trop de temps à répondre.' };
+        return { text: t('weatherClothing.errorTimeout') };
     }
-    return { text: 'Météo indisponible — réessaie dans un instant.' };
+    return { text: t('weatherClothing.errorGeneric') };
 };
 
-const degradedLabel: Record<ClothingDegradedCode, string> = {
-    DISABLED: "Suggestions IA désactivées par l'administrateur",
-    QUOTA_EXCEEDED: 'Quota IA mensuel atteint — suggestions indisponibles',
-    BAD_JSON: "L'IA a renvoyé une réponse inutilisable, réessaie plus tard",
+const degradedLabelKey: Record<ClothingDegradedCode, string> = {
+    DISABLED: 'weatherClothing.degradedDisabled',
+    QUOTA_EXCEEDED: 'weatherClothing.degradedQuotaExceeded',
+    BAD_JSON: 'weatherClothing.degradedBadJson',
 };
 
 const WeatherClothingCard: React.FC = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const navigate = useNavigate();
     const { showToast } = useToast();
@@ -88,7 +91,7 @@ const WeatherClothingCard: React.FC = () => {
 
     const requestGeolocation = () => {
         if (!('geolocation' in navigator)) {
-            showToast({ title: 'Géolocalisation non disponible sur ce navigateur.' });
+            showToast({ title: t('weatherClothing.geoUnavailable') });
             return;
         }
         setLocating(true);
@@ -103,11 +106,11 @@ const WeatherClothingCard: React.FC = () => {
             (err) => {
                 setLocating(false);
                 showToast({
-                    title: 'Localisation refusée',
+                    title: t('weatherClothing.geoDeniedTitle'),
                     description:
                         err.code === err.PERMISSION_DENIED
-                            ? 'Active la permission dans ton navigateur ou utilise la ville enregistrée.'
-                            : 'Impossible de récupérer votre position.',
+                            ? t('weatherClothing.geoDeniedPermission')
+                            : t('weatherClothing.geoDeniedOther'),
                 });
             },
             { timeout: 10_000, maximumAge: 5 * 60_000 },
@@ -123,9 +126,9 @@ const WeatherClothingCard: React.FC = () => {
         return (
             <EmptyShell
                 icon={<MapPin className="h-5 w-5 text-primary" />}
-                title="Météo & tenues à l'école"
-                description="Renseigne ta ville pour voir la météo de demain et des suggestions de vêtements pour chaque enfant."
-                actionLabel="Configurer la ville"
+                title={t('weatherClothing.emptyTitle')}
+                description={t('weatherClothing.emptyDescription')}
+                actionLabel={t('weatherClothing.configureCity')}
                 onAction={() => navigate('/settings')}
             />
         );
@@ -155,14 +158,14 @@ const WeatherClothingCard: React.FC = () => {
     // ------------------------------------------------------------------------
     if (query.isError) {
         const msg = query.error instanceof Error ? query.error.message : '';
-        const detail = errorMessageFor(msg);
+        const detail = errorMessageFor(msg, t);
         if (detail.code === 'NO_LOCATION') {
             return (
                 <EmptyShell
                     icon={<MapPin className="h-5 w-5 text-primary" />}
-                    title="Météo & tenues à l'école"
-                    description="Renseigne ta ville pour voir la météo de demain et des suggestions par enfant."
-                    actionLabel="Configurer la ville"
+                    title={t('weatherClothing.emptyTitle')}
+                    description={t('weatherClothing.emptyDescriptionShort')}
+                    actionLabel={t('weatherClothing.configureCity')}
                     onAction={() => navigate('/settings')}
                 />
             );
@@ -173,7 +176,9 @@ const WeatherClothingCard: React.FC = () => {
                     <div className="flex items-start gap-3">
                         <AlertCircle className="mt-0.5 h-5 w-5 text-destructive shrink-0" />
                         <div className="flex-1">
-                            <p className="text-caption font-semibold">Météo indisponible</p>
+                            <p className="text-caption font-semibold">
+                                {t('weatherClothing.weatherUnavailableTitle')}
+                            </p>
                             <p className="text-micro text-muted-foreground">{detail.text}</p>
                         </div>
                         <Button
@@ -183,7 +188,7 @@ const WeatherClothingCard: React.FC = () => {
                             disabled={isClientLocationError(msg)}
                         >
                             <RefreshCw className="h-4 w-4 mr-1.5" />
-                            Réessayer
+                            {t('weatherClothing.retry')}
                         </Button>
                     </div>
                 </CardContent>
@@ -203,20 +208,24 @@ const WeatherClothingCard: React.FC = () => {
                     <div>
                         <h2 className="text-h2 font-semibold flex items-center gap-2">
                             <Sparkles className="h-5 w-5 text-primary" />
-                            Demain — école
+                            {t('weatherClothing.tomorrowSchool')}
                         </h2>
                         <p className="text-micro text-muted-foreground flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5" />
-                            {override ? 'Ma position actuelle' : (data.city ?? 'Ville sauvegardée')}
+                            {override
+                                ? t('weatherClothing.currentPosition')
+                                : (data.city ?? t('weatherClothing.savedCity'))}
                             {data.aiUnavailable && data.code && (
-                                <span className="ml-2 italic">· {degradedLabel[data.code]}</span>
+                                <span className="ml-2 italic">
+                                    · {t(degradedLabelKey[data.code])}
+                                </span>
                             )}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         {override && (
                             <Button variant="ghost" size="sm" onClick={resetOverride}>
-                                Réinitialiser
+                                {t('weatherClothing.reset')}
                             </Button>
                         )}
                         <Button
@@ -226,7 +235,9 @@ const WeatherClothingCard: React.FC = () => {
                             disabled={locating}
                         >
                             <LocateFixed className="h-4 w-4 mr-1.5" />
-                            {locating ? 'Localisation…' : 'Ma position'}
+                            {locating
+                                ? t('weatherClothing.locating')
+                                : t('weatherClothing.myPosition')}
                         </Button>
                     </div>
                 </div>
@@ -252,7 +263,7 @@ const WeatherClothingCard: React.FC = () => {
                 open={detailsOpen}
                 onOpenChange={setDetailsOpen}
                 tomorrow={data.weather}
-                cityLabel={override ? 'Position actuelle' : data.city}
+                cityLabel={override ? t('weatherClothing.positionLabel') : data.city}
                 override={override}
             />
         </Card>
@@ -288,6 +299,7 @@ const WeatherTile: React.FC<{ forecast: ForecastDTO; onClick?: () => void }> = (
     forecast,
     onClick,
 }) => {
+    const { t } = useTranslation();
     const Icon = weatherIconFor(forecast.weatherCode);
     return (
         <button
@@ -295,15 +307,15 @@ const WeatherTile: React.FC<{ forecast: ForecastDTO; onClick?: () => void }> = (
             onClick={onClick}
             disabled={!onClick}
             className="text-left rounded-card border border-border bg-info-soft p-4 transition-all hover:shadow-surface hover:border-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-default"
-            aria-label="Voir le détail météo de la semaine"
+            aria-label={t('weatherClothing.viewWeekDetail')}
         >
             <div className="flex items-start justify-between">
                 <div>
                     <p className="text-label text-muted-foreground flex items-center gap-1">
-                        Demain
+                        {t('weatherClothing.tomorrow')}
                         {onClick && (
                             <span className="text-[10px] italic text-primary/70">
-                                · cliquer pour la semaine
+                                · {t('weatherClothing.clickForWeek')}
                             </span>
                         )}
                     </p>
@@ -316,7 +328,7 @@ const WeatherTile: React.FC<{ forecast: ForecastDTO; onClick?: () => void }> = (
                     <p className="text-foreground font-semibold">
                         {Math.round(forecast.tempMin)}° / {Math.round(forecast.tempMax)}°C
                     </p>
-                    <p>Min / max</p>
+                    <p>{t('weatherClothing.minMax')}</p>
                 </div>
                 <div className="flex items-start gap-1">
                     <Droplets className="h-3.5 w-3.5 mt-0.5" />
@@ -324,7 +336,7 @@ const WeatherTile: React.FC<{ forecast: ForecastDTO; onClick?: () => void }> = (
                         <p className="text-foreground font-semibold">
                             {Math.round(forecast.precipitationProbability)}%
                         </p>
-                        <p>Pluie</p>
+                        <p>{t('weatherClothing.rain')}</p>
                     </div>
                 </div>
                 <div className="flex items-start gap-1">
@@ -333,7 +345,7 @@ const WeatherTile: React.FC<{ forecast: ForecastDTO; onClick?: () => void }> = (
                         <p className="text-foreground font-semibold">
                             {Math.round(forecast.windSpeedMax)} km/h
                         </p>
-                        <p>Vent</p>
+                        <p>{t('weatherClothing.wind')}</p>
                     </div>
                 </div>
             </div>
@@ -341,27 +353,31 @@ const WeatherTile: React.FC<{ forecast: ForecastDTO; onClick?: () => void }> = (
     );
 };
 
-const EmptyKidsHint: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-    <div className="flex h-full items-center justify-center rounded-card border border-dashed border-border bg-muted/20 p-4 text-center">
-        <div>
-            <p className="text-caption font-medium text-foreground">
-                Ajoute un enfant à la famille
-            </p>
-            <p className="mt-1 text-micro text-muted-foreground">
-                Les suggestions de vêtements apparaîtront ici une fois qu'un enfant est enregistré.
-            </p>
-            <Button variant="secondary" size="sm" className="mt-3" onClick={onClick}>
-                Aller à Famille
-            </Button>
+const EmptyKidsHint: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="flex h-full items-center justify-center rounded-card border border-dashed border-border bg-muted/20 p-4 text-center">
+            <div>
+                <p className="text-caption font-medium text-foreground">
+                    {t('weatherClothing.addKidTitle')}
+                </p>
+                <p className="mt-1 text-micro text-muted-foreground">
+                    {t('weatherClothing.addKidDescription')}
+                </p>
+                <Button variant="secondary" size="sm" className="mt-3" onClick={onClick}>
+                    {t('weatherClothing.goToFamily')}
+                </Button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const KidsSuggestions: React.FC<{
     kids: ClothingKidDTO[];
     suggestions: ClothingSuggestionDTO[];
     aiUnavailable: boolean;
 }> = ({ kids, suggestions, aiUnavailable }) => {
+    const { t } = useTranslation();
     const byKidId = useMemo(() => {
         const m = new Map<string, ClothingSuggestionDTO>();
         for (const s of suggestions) m.set(s.kidId, s);
@@ -384,13 +400,13 @@ const KidsSuggestions: React.FC<{
                             />
                             <p className="text-caption font-semibold truncate">{kid.name}</p>
                             <span className="text-micro text-muted-foreground">
-                                {kid.ageYears} ans
+                                {t('weatherClothing.ageYears', { count: kid.ageYears })}
                             </span>
                         </div>
 
                         {aiUnavailable || !suggestion ? (
                             <p className="text-micro italic text-muted-foreground">
-                                Pas de suggestion IA disponible. Habille selon la météo affichée.
+                                {t('weatherClothing.noSuggestion')}
                             </p>
                         ) : (
                             <SuggestionPills suggestion={suggestion} />
@@ -403,18 +419,23 @@ const KidsSuggestions: React.FC<{
 };
 
 const SuggestionPills: React.FC<{ suggestion: ClothingSuggestionDTO }> = ({ suggestion }) => {
-    const sections: Array<{ label: string; items: string[] }> = [
-        { label: 'Haut', items: suggestion.top },
-        { label: 'Bas', items: suggestion.bottom },
-        { label: 'Pieds', items: suggestion.footwear },
-        { label: 'Accessoires', items: suggestion.accessories },
+    const { t } = useTranslation();
+    const sections: Array<{ id: string; label: string; items: string[] }> = [
+        { id: 'top', label: t('weatherClothing.sectionTop'), items: suggestion.top },
+        { id: 'bottom', label: t('weatherClothing.sectionBottom'), items: suggestion.bottom },
+        { id: 'footwear', label: t('weatherClothing.sectionFootwear'), items: suggestion.footwear },
+        {
+            id: 'accessories',
+            label: t('weatherClothing.sectionAccessories'),
+            items: suggestion.accessories,
+        },
     ];
 
     return (
         <div className="space-y-1.5">
-            {sections.map(({ label, items }) =>
+            {sections.map(({ id, label, items }) =>
                 items.length === 0 ? null : (
-                    <div key={label} className="flex flex-wrap items-center gap-1">
+                    <div key={id} className="flex flex-wrap items-center gap-1">
                         <span className="text-micro font-medium text-muted-foreground w-20 shrink-0">
                             {label}
                         </span>

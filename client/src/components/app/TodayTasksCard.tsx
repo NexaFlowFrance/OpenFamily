@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { format, type Locale } from 'date-fns';
 import { CheckSquare, Square, AlertCircle, ChevronRight, Repeat, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, Button, useToast } from '../ui';
+import { useDateLocale } from '../../lib/dateLocale';
 import { useTodayTasks, useUpdateTask, type Task } from '../../hooks/useTasks';
 
 // =============================================================================
@@ -20,6 +23,8 @@ const recurrenceLabel = (frequency: string | null): string | null => {
 };
 
 const TodayTasksCard: React.FC = () => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const navigate = useNavigate();
     const { showToast } = useToast();
     const query = useTodayTasks();
@@ -36,16 +41,19 @@ const TodayTasksCard: React.FC = () => {
             if (result.next_occurrence) {
                 const nextDate = result.next_occurrence.due_date;
                 showToast({
-                    title: 'Tâche terminée ✓',
+                    title: t('todayTasks.completedTitle'),
                     description: nextDate
-                        ? `Prochaine occurrence créée pour le ${formatShortDate(nextDate)}`
-                        : 'Prochaine occurrence créée',
+                        ? t('todayTasks.nextOccurrenceFor', {
+                              date: formatShortDate(nextDate, locale),
+                          })
+                        : t('todayTasks.nextOccurrenceCreated'),
                 });
             }
         } catch (err) {
             showToast({
-                title: 'Impossible de marquer la tâche',
-                description: err instanceof Error ? err.message : 'Erreur',
+                title: t('todayTasks.completeErrorTitle'),
+                description:
+                    err instanceof Error ? err.message : t('todayTasks.completeErrorFallback'),
             });
         } finally {
             setCompletingId(null);
@@ -74,23 +82,26 @@ const TodayTasksCard: React.FC = () => {
                     <div>
                         <h2 className="text-h2 font-semibold flex items-center gap-2">
                             <CheckSquare className="h-5 w-5 text-primary" />
-                            Tâches du jour
+                            {t('todayTasks.title')}
                         </h2>
                         <p className="text-micro text-muted-foreground">
-                            {data.today.length} aujourd'hui
+                            {t('todayTasks.todayCount', { count: data.today.length })}
                             {data.overdue.length > 0 && (
                                 <span className="text-destructive">
                                     {' '}
-                                    · {data.overdue.length} en retard
+                                    {t('todayTasks.overdueInline', { count: data.overdue.length })}
                                 </span>
                             )}
                             {data.upcoming_count > 0 && (
-                                <span> · {data.upcoming_count} dans les 7j</span>
+                                <span>
+                                    {' '}
+                                    {t('todayTasks.upcomingInline', { count: data.upcoming_count })}
+                                </span>
                             )}
                         </p>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => navigate('/tasks')}>
-                        Voir tout
+                        {t('todayTasks.viewAll')}
                         <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                 </div>
@@ -98,13 +109,15 @@ const TodayTasksCard: React.FC = () => {
                 {!hasAny ? (
                     <div className="flex items-center gap-2 rounded-card border border-success/30 bg-success-soft px-3 py-2 text-caption text-success">
                         <CheckCircle2 className="h-4 w-4" />
-                        Rien à faire pour aujourd'hui — bien joué !
+                        {t('todayTasks.allDone')}
                     </div>
                 ) : (
                     <div className="space-y-3">
                         {data.overdue.length > 0 && (
                             <Section
-                                label={`En retard (${data.overdue.length})`}
+                                label={t('todayTasks.overdueSection', {
+                                    count: data.overdue.length,
+                                })}
                                 tone="destructive"
                                 tasks={data.overdue}
                                 completingId={completingId}
@@ -113,7 +126,7 @@ const TodayTasksCard: React.FC = () => {
                         )}
                         {data.today.length > 0 && (
                             <Section
-                                label="Aujourd'hui"
+                                label={t('todayTasks.todaySection')}
                                 tone="primary"
                                 tasks={data.today}
                                 completingId={completingId}
@@ -162,6 +175,8 @@ const TaskRow: React.FC<{
     overdue: boolean;
     onComplete: () => void;
 }> = ({ task, isCompleting, overdue, onComplete }) => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const recur = recurrenceLabel(task.frequency);
     return (
         <li className="flex items-center gap-3 rounded-input border border-border bg-card px-3 py-2">
@@ -174,7 +189,7 @@ const TaskRow: React.FC<{
                         ? 'border-primary bg-primary/20'
                         : 'border-input hover:border-primary'
                 }`}
-                aria-label="Marquer comme fait"
+                aria-label={t('todayTasks.markDone')}
             >
                 {isCompleting ? (
                     <CheckSquare className="h-3.5 w-3.5 text-primary animate-pulse" />
@@ -188,7 +203,7 @@ const TaskRow: React.FC<{
                     {overdue && task.due_date && (
                         <span className="text-destructive flex items-center gap-1">
                             <AlertCircle className="h-3 w-3" />
-                            {formatShortDate(task.due_date)}
+                            {formatShortDate(task.due_date, locale)}
                         </span>
                     )}
                     {recur && (
@@ -220,10 +235,10 @@ const TaskRow: React.FC<{
     );
 };
 
-const formatShortDate = (iso: string): string => {
+const formatShortDate = (iso: string, locale: Locale): string => {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    return format(d, 'dd MMM', { locale });
 };
 
 export default TodayTasksCard;

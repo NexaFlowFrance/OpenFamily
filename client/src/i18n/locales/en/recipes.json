@@ -1,0 +1,139 @@
+{
+  "recipes": {
+    "title": "Recipes",
+    "subtitle": "Your family recipe library",
+    "loading": "Loading recipes...",
+    "categories": {
+      "Entrée": "Starter",
+      "Plat": "Main course",
+      "Dessert": "Dessert",
+      "Snack": "Snack"
+    },
+    "difficulties": {
+      "Facile": "Easy",
+      "Moyen": "Medium",
+      "Difficile": "Hard"
+    },
+    "generate_ai": "Generate with AI",
+    "new_recipe": "New recipe",
+    "search_placeholder": "Search a recipe...",
+    "all_categories": "All categories",
+    "all_difficulties": "All difficulties",
+    "empty_none": "No recipes yet. Create your first recipe!",
+    "empty_search": "No recipe matches your search.",
+    "minutes_short": "{{count}}min",
+    "servings_short": "{{count}} ppl",
+    "view": "View",
+    "errors": {
+      "load": "Unable to load recipes.",
+      "save": "Unable to save this recipe.",
+      "delete": "Unable to delete this recipe."
+    },
+    "confirm_delete": "Are you sure you want to delete this recipe?",
+    "form": {
+      "edit_title": "Edit recipe",
+      "new_title": "New recipe",
+      "description": "Fill in the recipe details",
+      "name": "Recipe name",
+      "name_placeholder": "E.g. Apple pie",
+      "category": "Category",
+      "difficulty": "Difficulty",
+      "description_label": "Description (optional)",
+      "description_placeholder": "Short description of the recipe...",
+      "prep_time": "Prep time (min)",
+      "cook_time": "Cook time (min)",
+      "servings": "Servings",
+      "ingredients": "Ingredients (one per line)",
+      "ingredients_placeholder": "200g flour\n3 eggs\n100g sugar",
+      "instructions": "Instructions (one step per line)",
+      "instructions_placeholder": "Preheat the oven to 180°C\nMix flour and sugar\nAdd the eggs",
+      "tags": "Tags (comma-separated)",
+      "tags_placeholder": "vegetarian, quick, budget-friendly",
+      "create": "Create"
+    },
+    "detail": {
+      "prep": "Prep:",
+      "cook": "Cook:",
+      "servings": "Servings:",
+      "minutes": "{{count}} min",
+      "ingredients": "Ingredients",
+      "instructions": "Instructions",
+      "close": "Close"
+    },
+    "generateDialog": {
+      "title": "Generate a recipe with AI",
+      "description": "Describe what you have on hand, AI suggests 3 recipes tailored to your family.",
+      "available_ingredients": "Available ingredients",
+      "ingredient_placeholder": "E.g. chicken, onions, rice, lemon…",
+      "remove_ingredient": "Remove {{name}}",
+      "ingredients_tip": "Tip: salt, oil, water and onion are assumed to be on hand.",
+      "for_whom": "For whom? (allergies + diets taken into account)",
+      "cuisine": "Cuisine",
+      "total_time": "Total time",
+      "style": "Style",
+      "simple_dishes": "Simple dishes",
+      "cuisine_options": {
+        "senegalese": "Senegalese",
+        "world": "World",
+        "any": "Any"
+      },
+      "time_options": {
+        "30": "≤ 30 minutes",
+        "45": "≤ 45 minutes",
+        "60": "≤ 1 hour",
+        "none": "No limit"
+      },
+      "errors": {
+        "no_ingredient": "Add at least one ingredient.",
+        "disabled": "AI is disabled on this installation. Contact the administrator.",
+        "quota_exceeded": "Monthly AI quota reached. Try again next month.",
+        "bad_json": "AI returned an unintelligible response. Try again.",
+        "generate_failed": "Generation unavailable.",
+        "save_failed": "Save failed."
+      },
+      "hint": {
+        "simple": "simple dishes",
+        "senegalese": "Senegalese cuisine",
+        "world": "world cuisine",
+        "max_time": "≤ {{minutes}} min"
+      },
+      "generating": "Generating…",
+      "generate": "Generate 3 recipes",
+      "re_generating": "Regenerating…",
+      "re_generate": "Regenerate",
+      "proposals_one": "{{count}} proposal",
+      "proposals_other": "{{count}} proposals",
+      "minutes": "{{count}} min",
+      "servings_short": "{{count}} ppl",
+      "ingredients": "Ingredients",
+      "steps": "Steps",
+      "saved": "Saved",
+      "save": "Save",
+      "close": "Close"
+    },
+    "nutritionDialog": {
+      "title": "Weekly nutrition analysis",
+      "description": "AI assesses the balance of planned meals and suggests concrete ideas.",
+      "analyzing": "Analyzing… (10–20 seconds)",
+      "analysis_failed": "Analysis failed.",
+      "analysis_impossible": "Analysis unavailable.",
+      "quota_exceeded": "Monthly AI quota reached — try again later.",
+      "disabled": "AI is disabled on this installation.",
+      "unavailable": "AI couldn't analyze these meals right now.",
+      "meals_analyzed": "{{count}} meals analyzed this week.",
+      "strengths": "Strengths",
+      "weaknesses": "To improve",
+      "missing_groups": "Underrepresented food groups",
+      "recommendations": "Priority recommendations",
+      "empty_week": "No analysis available for this week.",
+      "verdict": {
+        "Excellent": "Excellent",
+        "Bon": "Good",
+        "À améliorer": "Needs improvement",
+        "Déséquilibré": "Unbalanced"
+      },
+      "re_analyze": "Re-analyze",
+      "close": "Close"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import {
     Sparkles,
@@ -65,6 +66,7 @@ const VERDICT_STYLE: Record<Verdict, { text: string; bg: string; ring: string; e
 };
 
 const ScoreGauge: React.FC<{ score: number; verdict: Verdict }> = ({ score, verdict }) => {
+    const { t } = useTranslation();
     const style = VERDICT_STYLE[verdict];
     // Conic gradient angle (0–360) mapped from score 0–100.
     const angle = Math.round((score / 100) * 360);
@@ -93,7 +95,7 @@ const ScoreGauge: React.FC<{ score: number; verdict: Verdict }> = ({ score, verd
                 className={`mt-3 inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-label-sm font-medium ${style.bg} ${style.text}`}
             >
                 <span>{style.emoji}</span>
-                {verdict}
+                {t('recipes.nutritionDialog.verdict.' + verdict, { defaultValue: verdict })}
             </div>
         </div>
     );
@@ -105,6 +107,7 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
     weekStart,
     weekEnd,
 }) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [data, setData] = useState<AnalyzeResponseData | null>(null);
@@ -125,14 +128,18 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                 endDate: weekEnd,
             });
             if (!response.success) {
-                setError(response.error?.message || "L'analyse a échoué.");
+                setError(response.error?.message || t('recipes.nutritionDialog.analysis_failed'));
                 return;
             }
             setData(response.data ?? null);
             setAnalyzedFor(`${weekStart}|${weekEnd}`);
         } catch (err) {
             console.error('Nutrition analysis failed:', err);
-            setError(err instanceof Error ? err.message : 'Analyse impossible.');
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : t('recipes.nutritionDialog.analysis_impossible'),
+            );
         } finally {
             setLoading(false);
         }
@@ -151,8 +158,8 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Analyse nutritionnelle de la semaine"
-            description="L'IA évalue l'équilibre des repas planifiés et propose des pistes concrètes."
+            title={t('recipes.nutritionDialog.title')}
+            description={t('recipes.nutritionDialog.description')}
             className="sm:max-w-3xl"
         >
             <div className="space-y-5">
@@ -160,7 +167,7 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                     <div className="flex flex-col items-center justify-center py-12">
                         <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
                         <p className="text-body text-muted-foreground">
-                            Analyse en cours… (10–20 secondes)
+                            {t('recipes.nutritionDialog.analyzing')}
                         </p>
                     </div>
                 )}
@@ -177,10 +184,10 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                         <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
                         <span>
                             {data.code === 'QUOTA_EXCEEDED'
-                                ? 'Quota IA mensuel atteint — réessayez plus tard.'
+                                ? t('recipes.nutritionDialog.quota_exceeded')
                                 : data.code === 'DISABLED'
-                                  ? "L'IA est désactivée sur cette installation."
-                                  : "L'IA n'a pas pu analyser ces repas pour le moment."}
+                                  ? t('recipes.nutritionDialog.disabled')
+                                  : t('recipes.nutritionDialog.unavailable')}
                         </span>
                     </div>
                 )}
@@ -199,7 +206,9 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                                         {data.analysis.summary}
                                     </p>
                                     <p className="text-label-sm text-muted-foreground mt-3">
-                                        {data.mealsAnalyzed} repas analysés sur la semaine.
+                                        {t('recipes.nutritionDialog.meals_analyzed', {
+                                            count: data.mealsAnalyzed,
+                                        })}
                                     </p>
                                 </div>
                             </CardContent>
@@ -214,7 +223,7 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                                         <CardContent className="p-4">
                                             <h4 className="text-body font-semibold flex items-center gap-2 mb-2">
                                                 <CheckCircle2 className="h-4 w-4 text-success" />
-                                                Points forts
+                                                {t('recipes.nutritionDialog.strengths')}
                                             </h4>
                                             <ul className="space-y-1.5 text-caption text-muted-foreground">
                                                 {data.analysis.strengths.map((s, i) => (
@@ -233,8 +242,8 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                                     <Card>
                                         <CardContent className="p-4">
                                             <h4 className="text-body font-semibold flex items-center gap-2 mb-2">
-                                                <XCircle className="h-4 w-4 text-danger" />À
-                                                améliorer
+                                                <XCircle className="h-4 w-4 text-danger" />
+                                                {t('recipes.nutritionDialog.weaknesses')}
                                             </h4>
                                             <ul className="space-y-1.5 text-caption text-muted-foreground">
                                                 {data.analysis.weaknesses.map((w, i) => (
@@ -258,7 +267,7 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                                 <CardContent className="p-4">
                                     <h4 className="text-body font-semibold flex items-center gap-2 mb-2">
                                         <Info className="h-4 w-4 text-info" />
-                                        Groupes alimentaires sous-représentés
+                                        {t('recipes.nutritionDialog.missing_groups')}
                                     </h4>
                                     <div className="flex flex-wrap gap-2">
                                         {data.analysis.missingFoodGroups.map((g, i) => (
@@ -280,7 +289,7 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                                 <CardContent className="p-4">
                                     <h4 className="text-body font-semibold flex items-center gap-2 mb-3">
                                         <Lightbulb className="h-4 w-4 text-accent" />
-                                        Recommandations prioritaires
+                                        {t('recipes.nutritionDialog.recommendations')}
                                     </h4>
                                     <ol className="space-y-3">
                                         {data.analysis.recommendations.map((r, i) => (
@@ -314,19 +323,19 @@ export const NutritionAnalysisDialog: React.FC<Props> = ({
                 {data && !data.analysis && !data.aiUnavailable && !loading && (
                     <div className="text-center py-8">
                         <p className="text-body text-muted-foreground">
-                            Aucune analyse disponible pour cette semaine.
+                            {t('recipes.nutritionDialog.empty_week')}
                         </p>
                     </div>
                 )}
 
                 <div className="flex justify-end gap-2 pt-2 border-t border-border">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Fermer
+                        {t('recipes.nutritionDialog.close')}
                     </Button>
                     {data && !loading && (
                         <Button type="button" onClick={runAnalysis}>
                             <Sparkles className="w-4 h-4 mr-2" />
-                            Re-analyser
+                            {t('recipes.nutritionDialog.re_analyze')}
                         </Button>
                     )}
                 </div>

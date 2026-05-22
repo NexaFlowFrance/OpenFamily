@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -55,6 +56,7 @@ const fromRoom = (r: Room): FormState => ({
 });
 
 const RoomDialog: React.FC<Props> = ({ open, onOpenChange, room }) => {
+    const { t } = useTranslation();
     const isEdit = !!room;
     const createMut = useCreateRoom();
     const updateMut = useUpdateRoom();
@@ -72,16 +74,16 @@ const RoomDialog: React.FC<Props> = ({ open, onOpenChange, room }) => {
         e.preventDefault();
         setError('');
         if (!form.name.trim()) {
-            setError('Le nom de la pièce est requis.');
+            setError(t('house.room.dialog.nameRequired'));
             return;
         }
         const category = form.category.trim();
         if (!category) {
-            setError('La catégorie est requise.');
+            setError(t('house.room.dialog.categoryRequired'));
             return;
         }
         if (category.length > 32) {
-            setError('La catégorie est trop longue (32 caractères max).');
+            setError(t('house.room.dialog.categoryTooLong'));
             return;
         }
         const body = {
@@ -98,7 +100,7 @@ const RoomDialog: React.FC<Props> = ({ open, onOpenChange, room }) => {
             }
             onOpenChange(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setError(err instanceof Error ? err.message : t('house.common.saveError'));
         }
     };
 
@@ -108,12 +110,8 @@ const RoomDialog: React.FC<Props> = ({ open, onOpenChange, room }) => {
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? 'Modifier la pièce' : 'Nouvelle pièce'}
-            description={
-                isEdit
-                    ? room?.name
-                    : 'Salon, cuisine, chambre, garage… toutes les zones de la maison où tu ranges des choses.'
-            }
+            title={isEdit ? t('house.room.dialog.editTitle') : t('house.room.dialog.createTitle')}
+            description={isEdit ? room?.name : t('house.room.dialog.createDescription')}
             className="sm:max-w-md"
         >
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -124,18 +122,18 @@ const RoomDialog: React.FC<Props> = ({ open, onOpenChange, room }) => {
                     </p>
                 )}
                 <Input
-                    label="Nom *"
+                    label={t('house.room.dialog.name')}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Ex: Garage"
+                    placeholder={t('house.room.dialog.namePlaceholder')}
                     required
                 />
                 <div>
                     <Input
-                        label="Catégorie *"
+                        label={t('house.room.dialog.category')}
                         value={form.category}
                         onChange={(e) => setForm({ ...form, category: e.target.value })}
-                        placeholder="Salon, Grenier, Cabane jardin…"
+                        placeholder={t('house.room.dialog.categoryPlaceholder')}
                         list="room-category-suggestions"
                         maxLength={32}
                         required
@@ -146,12 +144,12 @@ const RoomDialog: React.FC<Props> = ({ open, onOpenChange, room }) => {
                         ))}
                     </datalist>
                     <p className="mt-1.5 text-micro text-muted-foreground">
-                        Choisis dans la liste ou tape ta propre catégorie.
+                        {t('house.room.dialog.categoryHint')}
                     </p>
                 </div>
                 <div>
                     <label className="block text-label font-medium text-foreground mb-1.5">
-                        Couleur
+                        {t('house.room.dialog.color')}
                     </label>
                     <div className="flex flex-wrap gap-2">
                         {ROOM_COLORS.map((c) => (
@@ -163,25 +161,25 @@ const RoomDialog: React.FC<Props> = ({ open, onOpenChange, room }) => {
                                     form.color === c ? 'border-foreground' : 'border-border'
                                 }`}
                                 style={{ background: c }}
-                                aria-label={`Couleur ${c}`}
+                                aria-label={t('house.room.dialog.colorAria', { color: c })}
                             />
                         ))}
                     </div>
                 </div>
                 <Textarea
-                    label="Notes"
+                    label={t('house.room.dialog.notes')}
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    placeholder="Particularités, code accès…"
+                    placeholder={t('house.room.dialog.notesPlaceholder')}
                     rows={2}
                 />
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Annuler
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={submitting}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? 'Enregistrer' : 'Créer'}
+                        {isEdit ? t('common.save') : t('house.common.create')}
                     </Button>
                 </div>
             </form>

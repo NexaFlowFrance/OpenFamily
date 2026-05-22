@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import {
     Plus,
@@ -23,7 +24,7 @@ import {
     getDay,
     subDays,
 } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useDateLocale } from '../lib/dateLocale';
 import { mealTypeGradient } from '../design/colorPresets';
 
 interface FamilyMember {
@@ -78,6 +79,8 @@ const DEFAULT_LUNCHBOX_FORM = {
 };
 
 const MealPlanning: React.FC = () => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const [currentWeek, setCurrentWeek] = useState(new Date());
     const [nutritionDialogOpen, setNutritionDialogOpen] = useState(false);
     const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
@@ -116,7 +119,7 @@ const MealPlanning: React.FC = () => {
             );
             if (response.success) setMealPlans(response.data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Impossible de charger le planning.');
+            setError(err instanceof Error ? err.message : t('meals.errors.load_planning'));
         } finally {
             setLoading(false);
         }
@@ -186,7 +189,7 @@ const MealPlanning: React.FC = () => {
             setHouseholdOpen(false);
             await loadMealPlans();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Impossible d'enregistrer ce repas.");
+            setError(err instanceof Error ? err.message : t('meals.errors.save_meal'));
         }
     };
 
@@ -225,7 +228,7 @@ const MealPlanning: React.FC = () => {
     const applyLunchboxIdea = (idea: LunchboxIdea) => {
         const noteParts: string[] = [];
         if (lunchboxForm.notes.trim()) noteParts.push(lunchboxForm.notes.trim());
-        if (idea.reasoning) noteParts.push(`IA — ${idea.reasoning}`);
+        if (idea.reasoning) noteParts.push(t('meals.ai_note', { reasoning: idea.reasoning }));
         for (const w of idea.warnings) noteParts.push(`⚠️ ${w}`);
         setLunchboxForm((prev) => ({
             ...prev,
@@ -242,7 +245,7 @@ const MealPlanning: React.FC = () => {
         e.preventDefault();
         if (!selectedDate) return;
         if (!lunchboxForm.family_member_id) {
-            setError('Sélectionne un enfant.');
+            setError(t('meals.errors.select_child'));
             return;
         }
         const lunchbox_items = {
@@ -252,7 +255,7 @@ const MealPlanning: React.FC = () => {
             drink: lunchboxForm.drink,
         };
         if (!Object.values(lunchbox_items).some((v) => v.trim())) {
-            setError('Renseigne au moins un élément (plat, fruit, snack ou boisson).');
+            setError(t('meals.errors.lunchbox_min'));
             return;
         }
 
@@ -273,23 +276,19 @@ const MealPlanning: React.FC = () => {
             setLunchboxOpen(false);
             await loadMealPlans();
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Impossible d'enregistrer cette boîte à lunch.",
-            );
+            setError(err instanceof Error ? err.message : t('meals.errors.save_lunchbox'));
         }
     };
 
     // -------- Common --------
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce repas ?')) return;
+        if (!confirm(t('meals.confirm_delete'))) return;
         try {
             await api.delete(`/api/meal-plans/${id}`);
             await loadMealPlans();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Impossible de supprimer ce repas.');
+            setError(err instanceof Error ? err.message : t('meals.errors.delete_meal'));
         }
     };
 
@@ -308,17 +307,18 @@ const MealPlanning: React.FC = () => {
             });
             if (response.success) {
                 if (response.data.inserted === 0) {
-                    setInfo('Aucune boîte à lunch renseignée cette semaine.');
+                    setInfo(t('meals.shopping_empty'));
                 } else {
                     setInfo(
-                        `${response.data.inserted} article(s) ajouté(s) à la liste de courses (${response.data.total_lunchboxes} boîtes traitées).`,
+                        t('meals.shopping_added', {
+                            count: response.data.inserted,
+                            total: response.data.total_lunchboxes,
+                        }),
                     );
                 }
             }
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : 'Impossible de générer la liste de courses.',
-            );
+            setError(err instanceof Error ? err.message : t('meals.errors.shopping_list'));
         }
     };
 
@@ -360,7 +360,7 @@ const MealPlanning: React.FC = () => {
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
                     <p className="text-muted-foreground font-medium animate-pulse">
-                        Chargement du planning...
+                        {t('meals.loading')}
                     </p>
                 </div>
             </div>
@@ -371,8 +371,10 @@ const MealPlanning: React.FC = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h2 className="text-h2 font-semibold">
-                    Semaine du {format(weekStart, 'dd MMM', { locale: fr })} au{' '}
-                    {format(weekEnd, 'dd MMM yyyy', { locale: fr })}
+                    {t('meals.week_range', {
+                        start: format(weekStart, 'dd MMM', { locale }),
+                        end: format(weekEnd, 'dd MMM yyyy', { locale }),
+                    })}
                 </h2>
                 <div className="flex items-center gap-2">
                     <Button
@@ -387,7 +389,7 @@ const MealPlanning: React.FC = () => {
                         size="sm"
                         onClick={() => setCurrentWeek(new Date())}
                     >
-                        Cette semaine
+                        {t('meals.this_week')}
                     </Button>
                     <Button
                         variant="secondary"
@@ -398,7 +400,7 @@ const MealPlanning: React.FC = () => {
                     </Button>
                     <Button size="sm" onClick={() => setNutritionDialogOpen(true)}>
                         <Sparkles className="w-4 h-4 mr-1.5" />
-                        Analyser
+                        {t('meals.analyze')}
                     </Button>
                 </div>
             </div>
@@ -421,10 +423,10 @@ const MealPlanning: React.FC = () => {
                                 {weekDays.map((day) => (
                                     <div key={day.toISOString()} className="text-center">
                                         <div className="font-semibold text-body-sm">
-                                            {format(day, 'EEE', { locale: fr })}
+                                            {format(day, 'EEE', { locale })}
                                         </div>
                                         <div className="text-label text-muted-foreground">
-                                            {format(day, 'dd MMM', { locale: fr })}
+                                            {format(day, 'dd MMM', { locale })}
                                         </div>
                                     </div>
                                 ))}
@@ -434,7 +436,9 @@ const MealPlanning: React.FC = () => {
                             {HOUSEHOLD_MEAL_TYPES.map((mealType) => (
                                 <div key={mealType} className="grid grid-cols-8 gap-2 mb-2">
                                     <div className="flex items-center font-medium text-body-sm text-muted-foreground">
-                                        {mealType}
+                                        {t('meals.mealTypes.' + mealType, {
+                                            defaultValue: mealType,
+                                        })}
                                     </div>
                                     {weekDays.map((day) => {
                                         const meal = getHouseholdMeal(day, mealType);
@@ -495,7 +499,7 @@ const MealPlanning: React.FC = () => {
                             <div className="grid grid-cols-8 gap-2 mb-2 mt-4 pt-4 border-t border-border">
                                 <div className="flex items-center gap-1.5 font-medium text-body-sm text-muted-foreground">
                                     <Sandwich className="h-4 w-4" />
-                                    Boîte à lunch
+                                    {t('meals.lunchbox')}
                                 </div>
                                 {weekDays.map((day) => {
                                     if (!isWeekday(day)) {
@@ -541,7 +545,7 @@ const MealPlanning: React.FC = () => {
                                                                 handleDelete(lb.id);
                                                             }}
                                                             className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
-                                                            aria-label="Supprimer"
+                                                            aria-label={t('meals.remove')}
                                                         >
                                                             <Trash2 className="h-3 w-3 text-red-500" />
                                                         </button>
@@ -573,8 +577,7 @@ const MealPlanning: React.FC = () => {
 
                             {familyMembers.length === 0 && (
                                 <p className="mt-2 text-micro text-muted-foreground">
-                                    Ajoute d'abord des membres de la famille pour pouvoir préparer
-                                    des boîtes à lunch.
+                                    {t('meals.lunchbox_help')}
                                 </p>
                             )}
                         </div>
@@ -587,7 +590,7 @@ const MealPlanning: React.FC = () => {
                             onClick={generateLunchboxShoppingList}
                         >
                             <ShoppingBasket className="h-4 w-4 mr-2" />
-                            Générer la liste de courses (boîtes de la semaine)
+                            {t('meals.generate_shopping_list')}
                         </Button>
                     </div>
                 </CardContent>
@@ -596,10 +599,10 @@ const MealPlanning: React.FC = () => {
     );
 
     const tabs = [
-        { value: 'planning', label: 'Planning', content: planningTab },
+        { value: 'planning', label: t('meals.tabs.planning'), content: planningTab },
         {
             value: 'tracking',
-            label: 'Suivi boîtes à lunch',
+            label: t('meals.tabs.tracking'),
             content: <LunchboxTracking familyMembers={familyMembers} />,
         },
     ];
@@ -607,10 +610,8 @@ const MealPlanning: React.FC = () => {
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             <div>
-                <h1 className="text-h1 mb-1">Planning des repas</h1>
-                <p className="text-muted-foreground text-body">
-                    Organisez vos repas et les boîtes à lunch des enfants
-                </p>
+                <h1 className="text-h1 mb-1">{t('meals.title')}</h1>
+                <p className="text-muted-foreground text-body">{t('meals.subtitle')}</p>
             </div>
 
             {error && (
@@ -630,17 +631,26 @@ const MealPlanning: React.FC = () => {
             <Dialog
                 open={householdOpen}
                 onOpenChange={setHouseholdOpen}
-                title={editingMeal ? 'Modifier le repas' : 'Ajouter un repas'}
+                title={
+                    editingMeal
+                        ? t('meals.householdForm.edit_title')
+                        : t('meals.householdForm.new_title')
+                }
                 description={
                     selectedDate
-                        ? `${householdForm.meal_type} du ${format(selectedDate, 'dd MMMM yyyy', { locale: fr })}`
+                        ? t('meals.householdForm.description', {
+                              mealType: t('meals.mealTypes.' + householdForm.meal_type, {
+                                  defaultValue: householdForm.meal_type,
+                              }),
+                              date: format(selectedDate, 'dd MMMM yyyy', { locale }),
+                          })
                         : ''
                 }
             >
                 <form onSubmit={handleHouseholdSubmit} className="space-y-4">
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Type de repas
+                            {t('meals.householdForm.meal_type')}
                         </label>
                         <Select
                             value={householdForm.meal_type}
@@ -649,13 +659,13 @@ const MealPlanning: React.FC = () => {
                             }
                             options={HOUSEHOLD_MEAL_TYPES.map((type) => ({
                                 value: type,
-                                label: type,
+                                label: t('meals.mealTypes.' + type, { defaultValue: type }),
                             }))}
                         />
                     </div>
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Recette (optionnel)
+                            {t('meals.householdForm.recipe')}
                         </label>
                         <Select
                             value={householdForm.recipe_id}
@@ -667,31 +677,33 @@ const MealPlanning: React.FC = () => {
                                 })
                             }
                             options={[
-                                { value: '', label: 'Aucune recette' },
+                                { value: '', label: t('meals.householdForm.no_recipe') },
                                 ...recipes.map((r) => ({
                                     value: r.id,
-                                    label: `${r.name} (${r.category})`,
+                                    label: `${r.name} (${t('recipes.categories.' + r.category, {
+                                        defaultValue: r.category,
+                                    })})`,
                                 })),
                             ]}
                         />
                     </div>
                     {!householdForm.recipe_id && (
                         <Input
-                            label="Ou repas personnalisé"
+                            label={t('meals.householdForm.custom_meal')}
                             value={householdForm.custom_meal}
                             onChange={(e) =>
                                 setHouseholdForm({ ...householdForm, custom_meal: e.target.value })
                             }
-                            placeholder="Ex: Pizza maison"
+                            placeholder={t('meals.householdForm.custom_meal_placeholder')}
                         />
                     )}
                     <Textarea
-                        label="Notes (optionnel)"
+                        label={t('meals.householdForm.notes')}
                         value={householdForm.notes}
                         onChange={(e) =>
                             setHouseholdForm({ ...householdForm, notes: e.target.value })
                         }
-                        placeholder="Notes supplémentaires..."
+                        placeholder={t('meals.householdForm.notes_placeholder')}
                         rows={2}
                     />
                     <div className="flex justify-end gap-3 pt-4">
@@ -700,9 +712,11 @@ const MealPlanning: React.FC = () => {
                             variant="secondary"
                             onClick={() => setHouseholdOpen(false)}
                         >
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
-                        <Button type="submit">{editingMeal ? 'Enregistrer' : 'Ajouter'}</Button>
+                        <Button type="submit">
+                            {editingMeal ? t('common.save') : t('meals.householdForm.add')}
+                        </Button>
                     </div>
                 </form>
             </Dialog>
@@ -711,17 +725,23 @@ const MealPlanning: React.FC = () => {
             <Dialog
                 open={lunchboxOpen}
                 onOpenChange={setLunchboxOpen}
-                title={editingMeal ? 'Modifier la boîte à lunch' : 'Préparer une boîte à lunch'}
+                title={
+                    editingMeal
+                        ? t('meals.lunchboxForm.edit_title')
+                        : t('meals.lunchboxForm.new_title')
+                }
                 description={
                     selectedDate
-                        ? `Pour le ${format(selectedDate, 'EEEE dd MMMM yyyy', { locale: fr })}`
+                        ? t('meals.lunchboxForm.description', {
+                              date: format(selectedDate, 'EEEE dd MMMM yyyy', { locale }),
+                          })
                         : ''
                 }
             >
                 <form onSubmit={handleLunchboxSubmit} className="space-y-4">
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Enfant
+                            {t('meals.lunchboxForm.child')}
                         </label>
                         <Select
                             value={lunchboxForm.family_member_id}
@@ -733,8 +753,7 @@ const MealPlanning: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between gap-3 rounded-input border border-dashed border-primary/40 bg-primary/5 px-3 py-2">
                         <p className="text-label-sm text-muted-foreground">
-                            Plus d'idée ? Génère une suggestion à partir de ce que tu as à la
-                            maison.
+                            {t('meals.lunchboxForm.ai_prompt')}
                         </p>
                         <Button
                             type="button"
@@ -743,46 +762,46 @@ const MealPlanning: React.FC = () => {
                             onClick={() => setLunchboxAiOpen(true)}
                         >
                             <Sparkles className="w-4 h-4 mr-1.5" />
-                            Suggérer
+                            {t('meals.lunchboxForm.suggest')}
                         </Button>
                     </div>
                     <Input
-                        label="Plat principal"
+                        label={t('meals.lunchboxForm.main')}
                         value={lunchboxForm.main}
                         onChange={(e) => setLunchboxForm({ ...lunchboxForm, main: e.target.value })}
-                        placeholder="Ex: sandwich jambon-fromage"
+                        placeholder={t('meals.lunchboxForm.main_placeholder')}
                     />
                     <Input
-                        label="Fruit / légume"
+                        label={t('meals.lunchboxForm.fruit')}
                         value={lunchboxForm.fruit}
                         onChange={(e) =>
                             setLunchboxForm({ ...lunchboxForm, fruit: e.target.value })
                         }
-                        placeholder="Ex: clémentine"
+                        placeholder={t('meals.lunchboxForm.fruit_placeholder')}
                     />
                     <Input
-                        label="Snack / collation"
+                        label={t('meals.lunchboxForm.snack')}
                         value={lunchboxForm.snack}
                         onChange={(e) =>
                             setLunchboxForm({ ...lunchboxForm, snack: e.target.value })
                         }
-                        placeholder="Ex: barre de céréales"
+                        placeholder={t('meals.lunchboxForm.snack_placeholder')}
                     />
                     <Input
-                        label="Boisson"
+                        label={t('meals.lunchboxForm.drink')}
                         value={lunchboxForm.drink}
                         onChange={(e) =>
                             setLunchboxForm({ ...lunchboxForm, drink: e.target.value })
                         }
-                        placeholder="Ex: jus de pomme"
+                        placeholder={t('meals.lunchboxForm.drink_placeholder')}
                     />
                     <Textarea
-                        label="Notes (optionnel)"
+                        label={t('meals.lunchboxForm.notes')}
                         value={lunchboxForm.notes}
                         onChange={(e) =>
                             setLunchboxForm({ ...lunchboxForm, notes: e.target.value })
                         }
-                        placeholder="Allergie, préférence du jour..."
+                        placeholder={t('meals.lunchboxForm.notes_placeholder')}
                         rows={2}
                     />
                     <div className="flex justify-end gap-3 pt-4">
@@ -791,9 +810,11 @@ const MealPlanning: React.FC = () => {
                             variant="secondary"
                             onClick={() => setLunchboxOpen(false)}
                         >
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
-                        <Button type="submit">{editingMeal ? 'Enregistrer' : 'Préparer'}</Button>
+                        <Button type="submit">
+                            {editingMeal ? t('common.save') : t('meals.lunchboxForm.prepare')}
+                        </Button>
                     </div>
                 </form>
             </Dialog>
@@ -821,14 +842,9 @@ interface LunchboxStats {
     byField: Record<'main' | 'fruit' | 'snack' | 'drink', Array<{ label: string; count: number }>>;
 }
 
-const FIELD_LABELS: Record<string, string> = {
-    main: 'Plat principal',
-    fruit: 'Fruit / légume',
-    snack: 'Snack',
-    drink: 'Boisson',
-};
-
 const LunchboxTracking: React.FC<TrackingProps> = ({ familyMembers }) => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const [selectedMemberId, setSelectedMemberId] = useState<string>('');
     const [history, setHistory] = useState<MealPlan[]>([]);
     const [stats, setStats] = useState<LunchboxStats | null>(null);
@@ -868,7 +884,7 @@ const LunchboxTracking: React.FC<TrackingProps> = ({ familyMembers }) => {
             if (historyResp.success) setHistory(historyResp.data);
             if (statsResp.success) setStats(statsResp.data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Impossible de charger le suivi.');
+            setError(err instanceof Error ? err.message : t('meals.tracking.load_error'));
         } finally {
             setLoading(false);
         }
@@ -883,7 +899,7 @@ const LunchboxTracking: React.FC<TrackingProps> = ({ familyMembers }) => {
         return (
             <Card>
                 <CardContent className="p-6 text-center text-muted-foreground text-caption">
-                    Ajoute d'abord des membres de la famille pour suivre les boîtes à lunch.
+                    {t('meals.tracking.empty_members')}
                 </CardContent>
             </Card>
         );
@@ -921,7 +937,7 @@ const LunchboxTracking: React.FC<TrackingProps> = ({ familyMembers }) => {
 
             {loading && (
                 <div className="text-center text-caption text-muted-foreground py-6">
-                    Chargement...
+                    {t('meals.tracking.loading')}
                 </div>
             )}
 
@@ -931,18 +947,18 @@ const LunchboxTracking: React.FC<TrackingProps> = ({ familyMembers }) => {
                     <Card>
                         <CardContent className="p-6">
                             <h3 className="text-h2 font-semibold mb-4">
-                                Items les plus fréquents — 60 derniers jours
+                                {t('meals.tracking.frequent_title')}
                             </h3>
                             {stats && stats.totalLunchboxes > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {(['main', 'fruit', 'snack', 'drink'] as const).map((field) => (
                                         <div key={field} className="space-y-2">
                                             <p className="text-caption font-semibold">
-                                                {FIELD_LABELS[field]}
+                                                {t('meals.tracking.field_labels.' + field)}
                                             </p>
                                             {stats.byField[field].length === 0 ? (
                                                 <p className="text-micro text-muted-foreground">
-                                                    Rien encore.
+                                                    {t('meals.tracking.nothing_yet')}
                                                 </p>
                                             ) : (
                                                 <ul className="space-y-1">
@@ -966,12 +982,14 @@ const LunchboxTracking: React.FC<TrackingProps> = ({ familyMembers }) => {
                                 </div>
                             ) : (
                                 <p className="text-caption text-muted-foreground">
-                                    Aucune boîte à lunch préparée sur les 60 derniers jours.
+                                    {t('meals.tracking.no_lunchbox')}
                                 </p>
                             )}
                             {stats && (
                                 <p className="mt-4 text-micro text-muted-foreground">
-                                    Total : {stats.totalLunchboxes} boîte(s) sur la période.
+                                    {t('meals.tracking.total', {
+                                        count: stats.totalLunchboxes,
+                                    })}
                                 </p>
                             )}
                         </CardContent>
@@ -980,10 +998,14 @@ const LunchboxTracking: React.FC<TrackingProps> = ({ familyMembers }) => {
                     {/* History */}
                     <Card>
                         <CardContent className="p-6">
-                            <h3 className="text-h2 font-semibold mb-4">Historique récent</h3>
+                            <h3 className="text-h2 font-semibold mb-4">
+                                {t('meals.tracking.history_title')}
+                            </h3>
                             {history.length === 0 ? (
                                 <p className="text-caption text-muted-foreground">
-                                    Pas encore d'historique pour {selectedMember.name}.
+                                    {t('meals.tracking.history_empty', {
+                                        name: selectedMember.name,
+                                    })}
                                 </p>
                             ) : (
                                 <ul className="space-y-2">
@@ -998,7 +1020,7 @@ const LunchboxTracking: React.FC<TrackingProps> = ({ familyMembers }) => {
                                                         new Date(lb.date + 'T12:00:00'),
                                                         'EEEE dd MMM yyyy',
                                                         {
-                                                            locale: fr,
+                                                            locale,
                                                         },
                                                     )}
                                                 </span>

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Plus,
     Trash2,
@@ -46,6 +47,7 @@ const parseOptionalPositiveNumber = (value: string): number | undefined => {
 };
 
 const ShoppingList: React.FC = () => {
+    const { t } = useTranslation();
     const { format: formatMoney } = useCurrency();
 
     // React Query owns the data lifecycle now — cache, dedup, refetch on focus,
@@ -119,7 +121,7 @@ const ShoppingList: React.FC = () => {
                 unit: '',
             });
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Impossible d'ajouter cet article.");
+            setError(err instanceof Error ? err.message : t('shopping.errors.add_item'));
         }
     };
 
@@ -128,7 +130,7 @@ const ShoppingList: React.FC = () => {
         setError('');
 
         if (!newItem.name.trim()) {
-            setError("Le nom de l'article est obligatoire.");
+            setError(t('shopping.errors.name_required'));
             return;
         }
 
@@ -136,12 +138,12 @@ const ShoppingList: React.FC = () => {
         const price = parseOptionalPositiveNumber(newItem.price);
 
         if (quantity !== undefined && (!Number.isFinite(quantity) || quantity <= 0)) {
-            setError('La quantité doit être un nombre positif.');
+            setError(t('shopping.errors.quantity_positive'));
             return;
         }
 
         if (price !== undefined && (!Number.isFinite(price) || price < 0)) {
-            setError('Le prix doit être un nombre valide.');
+            setError(t('shopping.errors.price_valid'));
             return;
         }
 
@@ -161,7 +163,7 @@ const ShoppingList: React.FC = () => {
                 unit: '',
             });
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Impossible d'ajouter cet article.");
+            setError(err instanceof Error ? err.message : t('shopping.errors.add_item'));
         }
     };
 
@@ -173,9 +175,7 @@ const ShoppingList: React.FC = () => {
                 patch: { is_checked: !item.is_checked },
             });
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : 'Impossible de mettre à jour cet article.',
-            );
+            setError(err instanceof Error ? err.message : t('shopping.errors.update_item'));
         }
     };
 
@@ -184,7 +184,7 @@ const ShoppingList: React.FC = () => {
         try {
             await deleteItemMutation.mutateAsync(id);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Impossible de supprimer cet article.');
+            setError(err instanceof Error ? err.message : t('shopping.errors.delete_item'));
         }
     };
 
@@ -193,9 +193,7 @@ const ShoppingList: React.FC = () => {
         try {
             await clearCheckedMutation.mutateAsync();
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : 'Impossible de vider les articles cochés.',
-            );
+            setError(err instanceof Error ? err.message : t('shopping.errors.clear_checked'));
         }
     };
 
@@ -207,7 +205,7 @@ const ShoppingList: React.FC = () => {
     const openCreateFromCurrentList = () => {
         setError('');
         if (items.length === 0) {
-            setError('Aucun article dans la liste pour créer un template.');
+            setError(t('shopping.errors.list_empty_template'));
             return;
         }
         setTemplateEditor({ open: true, seedFromCurrentList: true });
@@ -237,20 +235,18 @@ const ShoppingList: React.FC = () => {
         try {
             await applyTemplateMutation.mutateAsync(id);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Impossible d'appliquer ce template.");
+            setError(err instanceof Error ? err.message : t('shopping.errors.apply_template'));
         }
     };
 
     const deleteTemplateById = async (id: string, name: string) => {
         setError('');
-        const ok = window.confirm(
-            `Supprimer le template « ${name} » ? Cette action est définitive.`,
-        );
+        const ok = window.confirm(t('shopping.templates.confirm_delete', { name }));
         if (!ok) return;
         try {
             await deleteTemplateMutation.mutateAsync(id);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Impossible de supprimer ce template.');
+            setError(err instanceof Error ? err.message : t('shopping.errors.delete_template'));
         }
     };
 
@@ -276,7 +272,7 @@ const ShoppingList: React.FC = () => {
         setError('');
         const text = aiText.trim();
         if (!text) {
-            setError('Décris tes courses en français pour utiliser l’IA.');
+            setError(t('shopping.errors.ai_describe'));
             return;
         }
         try {
@@ -284,7 +280,7 @@ const ShoppingList: React.FC = () => {
             setAiPreview(items);
             setAiKeep(items.map(() => true));
         } catch (err) {
-            setError(err instanceof Error ? err.message : "L'IA n'a pas pu analyser ce texte.");
+            setError(err instanceof Error ? err.message : t('shopping.errors.ai_failed'));
         }
     };
 
@@ -315,7 +311,7 @@ const ShoppingList: React.FC = () => {
             }
             dismissAiPreview();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Impossible d'ajouter ces articles.");
+            setError(err instanceof Error ? err.message : t('shopping.errors.add_items'));
         }
     };
 
@@ -376,7 +372,7 @@ const ShoppingList: React.FC = () => {
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
                     <p className="animate-pulse font-medium text-muted-foreground">
-                        Chargement de votre liste...
+                        {t('shopping.loading')}
                     </p>
                 </div>
             </div>
@@ -396,9 +392,9 @@ const ShoppingList: React.FC = () => {
                     <ShoppingBag className="h-7 w-7" />
                 </div>
                 <div>
-                    <h1 className="text-h1 text-foreground">Liste de courses</h1>
+                    <h1 className="text-h1 text-foreground">{t('shopping.title')}</h1>
                     <p className="text-body text-muted-foreground">
-                        {pendingItems.length} articles restants
+                        {t('shopping.items_remaining', { count: pendingItems.length })}
                     </p>
                 </div>
             </div>
@@ -407,17 +403,14 @@ const ShoppingList: React.FC = () => {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-primary" />
-                        Ajouter via l’IA
+                        {t('shopping.ai.title')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <p className="text-caption text-muted-foreground">
-                        Décris tes courses en une phrase. Exemple : « ajoute du lait, 6 yaourts à la
-                        fraise et 2 baguettes ».
-                    </p>
+                    <p className="text-caption text-muted-foreground">{t('shopping.ai.hint')}</p>
                     <textarea
                         className="input-nexus min-h-[80px] py-2 text-caption"
-                        placeholder="Ajoute du lait, 6 yaourts…"
+                        placeholder={t('shopping.ai.placeholder')}
                         value={aiText}
                         onChange={(e) => setAiText(e.target.value)}
                     />
@@ -428,12 +421,14 @@ const ShoppingList: React.FC = () => {
                             disabled={parseAi.isPending || !aiText.trim()}
                         >
                             <Sparkles className="mr-1 h-4 w-4" />
-                            {parseAi.isPending ? 'Analyse…' : 'Analyser'}
+                            {parseAi.isPending
+                                ? t('shopping.ai.analyzing')
+                                : t('shopping.ai.analyze')}
                         </Button>
                         {aiPreview ? (
                             <Button type="button" variant="secondary" onClick={dismissAiPreview}>
                                 <X className="mr-1 h-4 w-4" />
-                                Annuler
+                                {t('common.cancel')}
                             </Button>
                         ) : null}
                     </div>
@@ -442,8 +437,11 @@ const ShoppingList: React.FC = () => {
                         <div className="mt-2 space-y-2">
                             <p className="text-caption font-medium text-foreground">
                                 {aiPreview.length === 0
-                                    ? 'Aucun article détecté.'
-                                    : `${aiKeep.filter(Boolean).length}/${aiPreview.length} articles à ajouter`}
+                                    ? t('shopping.ai.none_detected')
+                                    : t('shopping.ai.to_add', {
+                                          kept: aiKeep.filter(Boolean).length,
+                                          total: aiPreview.length,
+                                      })}
                             </p>
                             <ul className="space-y-1">
                                 {aiPreview.map((item, idx) => (
@@ -456,7 +454,9 @@ const ShoppingList: React.FC = () => {
                                             checked={aiKeep[idx] ?? true}
                                             onChange={() => toggleAiKeep(idx)}
                                             className="h-4 w-4"
-                                            aria-label={`Conserver ${item.name}`}
+                                            aria-label={t('shopping.ai.keep_aria', {
+                                                name: item.name,
+                                            })}
                                         />
                                         <span className="flex-1 truncate">
                                             {item.quantity != null ? `${item.quantity} ` : ''}
@@ -464,7 +464,9 @@ const ShoppingList: React.FC = () => {
                                             {item.name}
                                         </span>
                                         <span className="text-micro text-muted-foreground">
-                                            {item.category}
+                                            {t('shopping.categories.' + item.category, {
+                                                defaultValue: item.category,
+                                            })}
                                         </span>
                                     </li>
                                 ))}
@@ -476,7 +478,7 @@ const ShoppingList: React.FC = () => {
                                     disabled={createItem.isPending}
                                 >
                                     <Check className="mr-1 h-4 w-4" />
-                                    Ajouter à la liste
+                                    {t('shopping.ai.add_to_list')}
                                 </Button>
                             ) : null}
                         </div>
@@ -486,13 +488,13 @@ const ShoppingList: React.FC = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Ajouter un article</CardTitle>
+                    <CardTitle>{t('shopping.add.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {quickAddChips.length > 0 ? (
                         <div className="mb-4">
                             <p className="mb-2 text-micro font-medium uppercase tracking-wide text-muted-foreground">
-                                Ajout rapide
+                                {t('shopping.add.quick_add')}
                             </p>
                             <div className="flex flex-wrap gap-2">
                                 {quickAddChips.map((chip) => (
@@ -537,7 +539,7 @@ const ShoppingList: React.FC = () => {
                         </div>
                         <div className="md:col-span-2">
                             <label className="mb-1.5 block text-caption font-medium text-foreground">
-                                Categorie
+                                {t('shopping.add.category_label')}
                             </label>
                             <select
                                 value={newItem.category}
@@ -548,14 +550,16 @@ const ShoppingList: React.FC = () => {
                             >
                                 {categories.map((category) => (
                                     <option key={category} value={category}>
-                                        {category}
+                                        {t('shopping.categories.' + category, {
+                                            defaultValue: category,
+                                        })}
                                     </option>
                                 ))}
                             </select>
                         </div>
                         <div>
                             <Input
-                                label="Qt"
+                                label={t('shopping.add.quantity_label')}
                                 type="number"
                                 min="0"
                                 step="0.1"
@@ -563,12 +567,12 @@ const ShoppingList: React.FC = () => {
                                 onChange={(e) =>
                                     setNewItem((prev) => ({ ...prev, quantity: e.target.value }))
                                 }
-                                placeholder="1"
+                                placeholder={t('shopping.add.quantity_placeholder')}
                             />
                         </div>
                         <div>
                             <Input
-                                label="Prix"
+                                label={t('shopping.add.price_label')}
                                 type="number"
                                 min="0"
                                 step="0.01"
@@ -576,13 +580,13 @@ const ShoppingList: React.FC = () => {
                                 onChange={(e) =>
                                     setNewItem((prev) => ({ ...prev, price: e.target.value }))
                                 }
-                                placeholder="2.50"
+                                placeholder={t('shopping.add.price_placeholder')}
                             />
                         </div>
                         <div className="md:col-span-8 flex justify-end">
                             <Button type="submit">
                                 <Plus className="mr-1 h-4 w-4" />
-                                Ajouter
+                                {t('common.add')}
                             </Button>
                         </div>
                     </form>
@@ -594,7 +598,7 @@ const ShoppingList: React.FC = () => {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <CardTitle className="flex items-center gap-2">
                             <ListChecks className="h-5 w-5 text-primary" />
-                            Templates de courses
+                            {t('shopping.templates.title')}
                         </CardTitle>
                         <div className="flex flex-wrap gap-2">
                             <Button
@@ -604,15 +608,15 @@ const ShoppingList: React.FC = () => {
                                 disabled={items.length === 0}
                                 title={
                                     items.length === 0
-                                        ? 'La liste est vide'
-                                        : 'Créer un template depuis la liste actuelle'
+                                        ? t('shopping.templates.list_empty')
+                                        : t('shopping.templates.from_list_title')
                                 }
                             >
-                                Depuis la liste
+                                {t('shopping.templates.from_list')}
                             </Button>
                             <Button size="sm" onClick={openCreateTemplate}>
                                 <Plus className="mr-1 h-4 w-4" />
-                                Nouveau template
+                                {t('shopping.templates.new_template')}
                             </Button>
                         </div>
                     </div>
@@ -621,8 +625,7 @@ const ShoppingList: React.FC = () => {
                     {templates.length === 0 ? (
                         <div className="rounded-input border border-dashed border-border bg-muted/20 px-3 py-8 text-center">
                             <p className="text-caption text-muted-foreground">
-                                Pas encore de template. Créez-en un pour réutiliser une liste type
-                                (courses semaine, apéro, vacances…) en un clic.
+                                {t('shopping.templates.empty')}
                             </p>
                         </div>
                     ) : (
@@ -644,8 +647,9 @@ const ShoppingList: React.FC = () => {
                                                     {template.name}
                                                 </p>
                                                 <p className="text-micro text-muted-foreground">
-                                                    {template.items.length} article
-                                                    {template.items.length > 1 ? 's' : ''}
+                                                    {t('shopping.templates.items', {
+                                                        count: template.items.length,
+                                                    })}
                                                 </p>
                                             </div>
                                             <div className="flex shrink-0 gap-1">
@@ -653,7 +657,7 @@ const ShoppingList: React.FC = () => {
                                                     size="sm"
                                                     variant="ghost"
                                                     onClick={() => openEditTemplate(template)}
-                                                    title="Modifier"
+                                                    title={t('common.edit')}
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
@@ -667,14 +671,14 @@ const ShoppingList: React.FC = () => {
                                                             template.name,
                                                         )
                                                     }
-                                                    title="Supprimer"
+                                                    title={t('common.delete')}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </div>
                                         <p className="mb-3 line-clamp-2 text-caption text-muted-foreground">
-                                            {preview || 'Template vide'}
+                                            {preview || t('shopping.templates.empty_template')}
                                             {extra > 0 ? ` · +${extra}` : ''}
                                         </p>
                                         <Button
@@ -685,7 +689,7 @@ const ShoppingList: React.FC = () => {
                                             disabled={applyTemplateMutation.isPending}
                                         >
                                             <PlayCircle className="mr-1 h-4 w-4" />
-                                            Appliquer à ma liste
+                                            {t('shopping.templates.apply')}
                                         </Button>
                                     </li>
                                 );
@@ -700,10 +704,10 @@ const ShoppingList: React.FC = () => {
                     <div className="rounded-card border border-dashed border-border bg-card py-16 text-center">
                         <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
                         <h3 className="text-body font-semibold text-foreground">
-                            Votre liste est vide
+                            {t('shopping.list.empty_title')}
                         </h3>
                         <p className="text-caption text-muted-foreground">
-                            Ajoutez des articles ou appliquez un template.
+                            {t('shopping.list.empty_hint')}
                         </p>
                     </div>
                 ) : (
@@ -729,11 +733,15 @@ const ShoppingList: React.FC = () => {
                                     </p>
                                     <div className="mt-1 flex flex-wrap items-center gap-2 text-micro">
                                         <span className="rounded-pill bg-primary-soft px-2 py-0.5 text-primary">
-                                            {item.category}
+                                            {t('shopping.categories.' + item.category, {
+                                                defaultValue: item.category,
+                                            })}
                                         </span>
                                         {item.quantity ? (
                                             <span className="text-muted-foreground">
-                                                Qt: {item.quantity}
+                                                {t('shopping.list.quantity', {
+                                                    quantity: item.quantity,
+                                                })}
                                             </span>
                                         ) : null}
                                         {item.price ? (
@@ -759,10 +767,12 @@ const ShoppingList: React.FC = () => {
                             <div className="rounded-card border border-dashed border-border bg-muted/20 p-4">
                                 <div className="mb-3 flex items-center justify-between">
                                     <p className="text-caption font-medium text-muted-foreground">
-                                        Articles coches ({completedItems.length})
+                                        {t('shopping.list.checked_items', {
+                                            count: completedItems.length,
+                                        })}
                                     </p>
                                     <Button variant="ghost" size="sm" onClick={clearCheckedItems}>
-                                        Nettoyer
+                                        {t('shopping.list.clean')}
                                     </Button>
                                 </div>
                                 <div className="space-y-2">
@@ -792,7 +802,9 @@ const ShoppingList: React.FC = () => {
 
             <div className="sticky bottom-20 z-20 rounded-card border border-border bg-card px-4 py-3 shadow-surface lg:bottom-4">
                 <div className="flex items-center justify-between text-caption">
-                    <span className="text-muted-foreground">Total estime</span>
+                    <span className="text-muted-foreground">
+                        {t('shopping.list.total_estimate')}
+                    </span>
                     <span className="text-body font-semibold text-foreground">
                         {formatMoney(totalPrice)}
                     </span>

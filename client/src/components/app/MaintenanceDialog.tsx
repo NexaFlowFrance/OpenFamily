@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -61,6 +62,7 @@ const fromMaintenance = (m: Maintenance): FormState => ({
 });
 
 const MaintenanceDialog: React.FC<Props> = ({ open, onOpenChange, equipment, maintenance }) => {
+    const { t } = useTranslation();
     const isEdit = !!maintenance;
     const createMut = useCreateMaintenance();
     const updateMut = useUpdateMaintenance();
@@ -83,16 +85,16 @@ const MaintenanceDialog: React.FC<Props> = ({ open, onOpenChange, equipment, mai
         e.preventDefault();
         setError('');
         if (!form.title.trim()) {
-            setError("Le titre de l'entretien est requis.");
+            setError(t('house.maintenance.dialog.titleRequired'));
             return;
         }
         if (!form.planned_date && !form.performed_date) {
-            setError('Renseigne au moins une date (planifiée ou réalisée).');
+            setError(t('house.maintenance.dialog.dateRequired'));
             return;
         }
         const cost = form.cost.trim() ? Number(form.cost.replace(',', '.')) : null;
         if (cost !== null && (!Number.isFinite(cost) || cost < 0)) {
-            setError('Le coût doit être un nombre positif.');
+            setError(t('house.maintenance.dialog.costInvalid'));
             return;
         }
         const recurrence = form.recurrence_months.trim() ? Number(form.recurrence_months) : null;
@@ -100,7 +102,7 @@ const MaintenanceDialog: React.FC<Props> = ({ open, onOpenChange, equipment, mai
             recurrence !== null &&
             (!Number.isInteger(recurrence) || recurrence < 1 || recurrence > 120)
         ) {
-            setError('La récurrence doit être un entier entre 1 et 120 mois.');
+            setError(t('house.maintenance.dialog.recurrenceInvalid'));
             return;
         }
         const body = {
@@ -131,7 +133,7 @@ const MaintenanceDialog: React.FC<Props> = ({ open, onOpenChange, equipment, mai
             }
             onOpenChange(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setError(err instanceof Error ? err.message : t('house.common.saveError'));
         }
     };
 
@@ -141,8 +143,12 @@ const MaintenanceDialog: React.FC<Props> = ({ open, onOpenChange, equipment, mai
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? "Modifier l'entretien" : 'Nouvel entretien'}
-            description={`Pour : ${equipment.name}`}
+            title={
+                isEdit
+                    ? t('house.maintenance.dialog.editTitle')
+                    : t('house.maintenance.dialog.createTitle')
+            }
+            description={t('house.maintenance.dialog.forEquipment', { name: equipment.name })}
             className="sm:max-w-xl"
         >
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -154,35 +160,40 @@ const MaintenanceDialog: React.FC<Props> = ({ open, onOpenChange, equipment, mai
                 )}
                 {recurrenceFired && (
                     <div className="rounded-input border border-success/40 bg-success-soft px-3 py-2 text-micro text-success">
-                        Prochaine occurrence créée automatiquement pour le {recurrenceFired}.
+                        {t('house.maintenance.dialog.nextOccurrenceCreated', {
+                            date: recurrenceFired,
+                        })}
                     </div>
                 )}
                 <Input
-                    label="Titre *"
+                    label={t('house.maintenance.dialog.title')}
                     value={form.title}
                     onChange={(e) => handleChange('title', e.target.value)}
-                    placeholder="Ex: Contrôle annuel"
+                    placeholder={t('house.maintenance.dialog.titlePlaceholder')}
                     required
                 />
                 <div>
                     <label className="block text-label font-medium text-foreground mb-1.5">
-                        Type *
+                        {t('house.maintenance.dialog.type')}
                     </label>
                     <Select
                         value={form.kind}
                         onValueChange={(v) => handleChange('kind', v as MaintenanceKind)}
-                        options={MAINTENANCE_KINDS.map((k) => ({ value: k, label: k }))}
+                        options={MAINTENANCE_KINDS.map((k) => ({
+                            value: k,
+                            label: t('domain.maintenanceKind.' + k, { defaultValue: k }),
+                        }))}
                     />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Date planifiée"
+                        label={t('house.maintenance.dialog.plannedDate')}
                         type="date"
                         value={form.planned_date}
                         onChange={(e) => handleChange('planned_date', e.target.value)}
                     />
                     <Input
-                        label="Date réalisée"
+                        label={t('house.maintenance.dialog.performedDate')}
                         type="date"
                         value={form.performed_date}
                         onChange={(e) => handleChange('performed_date', e.target.value)}
@@ -190,7 +201,7 @@ const MaintenanceDialog: React.FC<Props> = ({ open, onOpenChange, equipment, mai
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Coût"
+                        label={t('house.maintenance.dialog.cost')}
                         type="number"
                         step="0.01"
                         value={form.cost}
@@ -198,29 +209,29 @@ const MaintenanceDialog: React.FC<Props> = ({ open, onOpenChange, equipment, mai
                         placeholder="0.00"
                     />
                     <Input
-                        label="Récurrence (mois)"
+                        label={t('house.maintenance.dialog.recurrence')}
                         type="number"
                         min={1}
                         max={120}
                         value={form.recurrence_months}
                         onChange={(e) => handleChange('recurrence_months', e.target.value)}
-                        placeholder="ex: 12 = annuel"
+                        placeholder={t('house.maintenance.dialog.recurrencePlaceholder')}
                     />
                 </div>
                 <Textarea
-                    label="Notes"
+                    label={t('house.maintenance.dialog.notes')}
                     value={form.notes}
                     onChange={(e) => handleChange('notes', e.target.value)}
-                    placeholder="Détails, intervenant, pièces remplacées…"
+                    placeholder={t('house.maintenance.dialog.notesPlaceholder')}
                     rows={3}
                 />
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        {recurrenceFired ? 'Fermer' : 'Annuler'}
+                        {recurrenceFired ? t('house.maintenance.dialog.close') : t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={submitting}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? 'Enregistrer' : 'Créer'}
+                        {isEdit ? t('common.save') : t('house.common.create')}
                     </Button>
                 </div>
             </form>

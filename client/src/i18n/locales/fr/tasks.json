@@ -1,0 +1,70 @@
+{
+  "tasks": {
+    "loading": "Chargement des tâches...",
+    "title": "Tâches",
+    "subtitle": "Gérez vos tâches familiales et suivez leur progression",
+    "new_task": "Nouvelle tâche",
+    "stats": {
+      "total": "Total",
+      "completed": "Complétées",
+      "pending": "En attente",
+      "completion_rate": "Taux de réussite"
+    },
+    "filters": {
+      "label": "Filtres:",
+      "all": "Toutes",
+      "pending": "En attente",
+      "completed": "Complétées",
+      "all_priorities": "Toutes priorités",
+      "all_members": "Tous les membres",
+      "unassigned": "Non assignées",
+      "reset": "Réinitialiser"
+    },
+    "empty": {
+      "none": "Aucune tâche pour le moment. Créez votre première tâche !",
+      "no_match": "Aucune tâche ne correspond aux filtres sélectionnés."
+    },
+    "due_date_badge": "Échéance: {{date}}",
+    "dialog": {
+      "edit_title": "Modifier la tâche",
+      "new_title": "Nouvelle tâche",
+      "description": "Remplissez les informations de la tâche",
+      "title_label": "Titre",
+      "title_placeholder": "Ex: Faire les courses",
+      "description_label": "Description (optionnel)",
+      "description_placeholder": "Détails supplémentaires...",
+      "priority_label": "Priorité",
+      "frequency_label": "Fréquence",
+      "due_date_label": "Date d'échéance (optionnel)",
+      "assign_label": "Assigner à (optionnel)",
+      "no_members": "Aucun membre disponible",
+      "create": "Créer"
+    },
+    "priority": {
+      "Haute": "Haute",
+      "Moyenne": "Moyenne",
+      "Basse": "Basse"
+    },
+    "frequency": {
+      "Une fois": "Une fois",
+      "Quotidien": "Quotidien",
+      "Hebdomadaire": "Hebdomadaire",
+      "Mensuel": "Mensuel",
+      "Annuel": "Annuel"
+    },
+    "toast": {
+      "completed_title": "Tâche terminée ✓",
+      "next_scheduled": "Prochaine \"{{title}}\" planifiée le {{date}}",
+      "next_created": "Prochaine \"{{title}}\" créée"
+    },
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer cette tâche ?",
+    "errors": {
+      "load": "Impossible de charger les tâches.",
+      "load_members": "Impossible de charger les membres.",
+      "load_stats": "Impossible de charger les statistiques.",
+      "save": "Impossible d’enregistrer cette tâche.",
+      "update": "Impossible de mettre à jour cette tâche.",
+      "delete": "Impossible de supprimer cette tâche."
+    }
+  }
+}

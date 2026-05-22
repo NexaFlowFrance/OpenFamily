@@ -1,0 +1,75 @@
+{
+  "family": {
+    "title": "Famille",
+    "subtitle": "Gérez les membres de votre famille",
+    "loading": "Chargement de la famille...",
+    "add_member": "Ajouter un membre",
+    "empty": "Aucun membre de la famille. Ajoutez votre premier membre !",
+    "roles": {
+      "Parent": "Parent",
+      "Enfant": "Enfant",
+      "Etudiant": "Etudiant",
+      "Autre": "Autre"
+    },
+    "regimes": {
+      "unspecified": "— Non précisé —",
+      "omnivore": "Omnivore",
+      "vegetarian": "Végétarien",
+      "vegan": "Végan",
+      "halal": "Halal",
+      "kosher": "Kosher",
+      "no_pork": "Sans porc"
+    },
+    "spice": {
+      "unspecified": "— Non précisé —",
+      "none": "Aucune épice",
+      "mild": "Doux",
+      "medium": "Moyen",
+      "hot": "Fort"
+    },
+    "errors": {
+      "load": "Impossible de charger la famille.",
+      "save": "Impossible d'enregistrer ce membre.",
+      "delete": "Impossible de supprimer ce membre."
+    },
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer ce membre de la famille ?",
+    "card": {
+      "age": "{{count}} ans",
+      "health": "Santé",
+      "allergies": "Allergies:",
+      "medications": "Médicaments:",
+      "emergency_contact": "Contact d'urgence"
+    },
+    "form": {
+      "edit_title": "Modifier le membre",
+      "new_title": "Ajouter un membre",
+      "description": "Remplissez les informations du membre de la famille",
+      "name": "Nom",
+      "name_placeholder": "Ex: Marie Dupont",
+      "role": "Rôle",
+      "color": "Couleur",
+      "birthdate": "Date de naissance (optionnel)",
+      "health_section": "Informations de santé",
+      "allergies": "Allergies (séparées par des virgules)",
+      "allergies_placeholder": "Ex: Arachides, Lactose",
+      "medications": "Médicaments (séparés par des virgules)",
+      "medications_placeholder": "Ex: Aspirine, Insuline",
+      "emergency_section": "Contact d'urgence",
+      "contact_name": "Nom du contact",
+      "contact_name_placeholder": "Ex: Jean Dupont",
+      "contact_phone": "Téléphone du contact",
+      "contact_phone_placeholder": "Ex: +33 6 12 34 56 78",
+      "dietary_section": "Préférences alimentaires",
+      "dietary_hint": "(utilisées par l'IA recettes)",
+      "regime": "Régime",
+      "spice_level": "Niveau d'épice",
+      "dislikes": "N'aime pas (séparés par des virgules)",
+      "dislikes_placeholder": "Ex: Aubergine, Coriandre",
+      "favorites": "Plats / aliments favoris",
+      "favorites_placeholder": "Ex: Yassa poulet, Mafé, Pâtes",
+      "notes": "Notes (optionnel)",
+      "notes_placeholder": "Notes supplémentaires...",
+      "add": "Ajouter"
+    }
+  }
+}

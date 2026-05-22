@@ -1,0 +1,60 @@
+{
+  "dashboard": {
+    "loading": "Chargement de votre espace...",
+    "greeting": "Bonjour ! 👋",
+    "subtitle": "Voici ce qu'il se passe dans votre famille aujourd'hui.",
+    "see_activity": "Voir l'activité",
+    "budget_alert": {
+      "title": "Attention au budget",
+      "description_one": "{{count}} catégorie a dépassé le budget mensuel défini.",
+      "description_other": "{{count}} catégories ont dépassé le budget mensuel défini.",
+      "see_detail": "Voir détail"
+    },
+    "stat_cards": {
+      "upcoming_appointments": "Rendez-vous à venir",
+      "pending_tasks": "Tâches en attente",
+      "shopping_items": "Articles à acheter",
+      "month_expenses": "Dépenses du mois"
+    },
+    "quick_overview": {
+      "title": "Aperçu rapide",
+      "see_all": "Voir tout",
+      "empty": "Vos indicateurs apparaîtront ici dès que vous aurez ajouté des données."
+    },
+    "kpi": {
+      "month_expenses": "Dépenses ce mois",
+      "no_comparison": "Pas de comparaison",
+      "stable": "Stable vs mois dernier",
+      "up": "+{{pct}}% vs mois dernier",
+      "down": "{{pct}}% vs mois dernier",
+      "top_category": "Top poste :",
+      "shopping_list": "Liste de courses",
+      "to_buy": "à acheter",
+      "checked_aria": "{{pct}}% cochés",
+      "checked_progress": "{{checked}}/{{total}} cochés · {{pct}}%",
+      "planned_meals": "Repas planifiés",
+      "days_suffix": "/{{total}} jours",
+      "week_complete": "Semaine complète ✓",
+      "days_to_plan": "{{count}} jour(s) à planifier",
+      "next_appointment": "Prochain rendez-vous",
+      "none_upcoming": "Aucun à venir",
+      "overdue_tasks_one": "{{count}} tâche en retard",
+      "overdue_tasks_other": "{{count}} tâches en retard",
+      "no_overdue": "Aucune tâche en retard"
+    },
+    "relative_date": {
+      "today": "aujourd'hui",
+      "tomorrow": "demain",
+      "in_days": "dans {{count}} jours"
+    },
+    "quick_start": {
+      "title": "Démarrage rapide",
+      "add_family_title": "Ajoutez votre famille",
+      "add_family_desc": "Créez des profils pour chaque membre",
+      "plan_meals_title": "Planifiez vos repas",
+      "plan_meals_desc": "Créez votre planning de la semaine",
+      "track_budget_title": "Suivez le budget",
+      "track_budget_desc": "Définissez vos limites mensuelles"
+    }
+  }
+}

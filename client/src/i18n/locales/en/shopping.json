@@ -1,0 +1,76 @@
+{
+  "shopping": {
+    "loading": "Loading your list...",
+    "title": "Shopping list",
+    "items_remaining": "{{count}} items left",
+    "categories": {
+      "Alimentation": "Food",
+      "Bebe": "Baby",
+      "Menage": "Household",
+      "Sante": "Health",
+      "Autre": "Other"
+    },
+    "ai": {
+      "title": "Add with AI",
+      "hint": "Describe your shopping in one sentence. Example: \"add milk, 6 strawberry yogurts and 2 baguettes\".",
+      "placeholder": "Add milk, 6 yogurts…",
+      "analyzing": "Analyzing…",
+      "analyze": "Analyze",
+      "none_detected": "No items detected.",
+      "to_add": "{{kept}}/{{total}} items to add",
+      "keep_aria": "Keep {{name}}",
+      "add_to_list": "Add to list"
+    },
+    "picker": {
+      "name": "Name",
+      "placeholder": "e.g. Milk, Bread…",
+      "your_items": "Your items",
+      "catalog": "Catalog"
+    },
+    "add": {
+      "title": "Add an item",
+      "quick_add": "Quick add",
+      "category_label": "Category",
+      "quantity_label": "Qty",
+      "quantity_placeholder": "1",
+      "price_label": "Price",
+      "price_placeholder": "2.50"
+    },
+    "templates": {
+      "title": "Shopping templates",
+      "from_list": "From list",
+      "from_list_title": "Create a template from the current list",
+      "list_empty": "The list is empty",
+      "new_template": "New template",
+      "empty": "No template yet. Create one to reuse a standard list (weekly groceries, drinks, holidays…) in one click.",
+      "items_one": "{{count}} item",
+      "items_other": "{{count}} items",
+      "empty_template": "Empty template",
+      "apply": "Apply to my list",
+      "confirm_delete": "Delete the template \"{{name}}\"? This action is permanent."
+    },
+    "list": {
+      "empty_title": "Your list is empty",
+      "empty_hint": "Add items or apply a template.",
+      "quantity": "Qty: {{quantity}}",
+      "checked_items": "Checked items ({{count}})",
+      "clean": "Clean up",
+      "total_estimate": "Estimated total"
+    },
+    "errors": {
+      "add_item": "Could not add this item.",
+      "name_required": "The item name is required.",
+      "quantity_positive": "The quantity must be a positive number.",
+      "price_valid": "The price must be a valid number.",
+      "update_item": "Could not update this item.",
+      "delete_item": "Could not delete this item.",
+      "clear_checked": "Could not clear the checked items.",
+      "list_empty_template": "No items in the list to create a template.",
+      "apply_template": "Could not apply this template.",
+      "delete_template": "Could not delete this template.",
+      "ai_describe": "Describe your shopping in French to use the AI.",
+      "ai_failed": "The AI could not analyze this text.",
+      "add_items": "Could not add these items."
+    }
+  }
+}

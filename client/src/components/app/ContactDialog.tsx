@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -68,6 +69,7 @@ const fromContact = (c: Contact): FormState => ({
 });
 
 const ContactDialog: React.FC<Props> = ({ open, onOpenChange, contact }) => {
+    const { t } = useTranslation();
     const isEdit = !!contact;
     const createMut = useCreateContact();
     const updateMut = useUpdateContact();
@@ -89,7 +91,7 @@ const ContactDialog: React.FC<Props> = ({ open, onOpenChange, contact }) => {
         e.preventDefault();
         setError('');
         if (!form.name.trim()) {
-            setError('Le nom du contact est requis.');
+            setError(t('house.contact.dialog.nameRequired'));
             return;
         }
         const body = {
@@ -112,17 +114,17 @@ const ContactDialog: React.FC<Props> = ({ open, onOpenChange, contact }) => {
             }
             onOpenChange(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setError(err instanceof Error ? err.message : t('house.common.saveError'));
         }
     };
 
     const submitting = createMut.isPending || updateMut.isPending;
 
     const equipmentOptions = [
-        { value: '', label: 'Aucun équipement lié' },
+        { value: '', label: t('house.common.noneLinkedEquipment') },
         ...(equipmentsQuery.data ?? []).map((e) => ({
             value: e.id,
-            label: `${e.name} (${e.category})`,
+            label: `${e.name} (${t('domain.equipmentCategory.' + e.category, { defaultValue: e.category })})`,
         })),
     ];
 
@@ -130,12 +132,10 @@ const ContactDialog: React.FC<Props> = ({ open, onOpenChange, contact }) => {
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? 'Modifier le contact' : 'Nouveau contact'}
-            description={
-                isEdit
-                    ? contact?.name
-                    : 'Plombier, électricien, médecin, voisin… ces gens à qui tu veux vite mettre la main dessus.'
+            title={
+                isEdit ? t('house.contact.dialog.editTitle') : t('house.contact.dialog.createTitle')
             }
+            description={isEdit ? contact?.name : t('house.contact.dialog.createDescription')}
             className="sm:max-w-xl"
         >
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -147,62 +147,65 @@ const ContactDialog: React.FC<Props> = ({ open, onOpenChange, contact }) => {
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Nom *"
+                        label={t('house.contact.dialog.name')}
                         value={form.name}
                         onChange={(e) => handleChange('name', e.target.value)}
-                        placeholder="M. Dupont"
+                        placeholder={t('house.contact.dialog.namePlaceholder')}
                         required
                     />
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Catégorie *
+                            {t('house.contact.dialog.category')}
                         </label>
                         <Select
                             value={form.category}
                             onValueChange={(v) => handleChange('category', v as ContactCategory)}
-                            options={CONTACT_CATEGORIES.map((c) => ({ value: c, label: c }))}
+                            options={CONTACT_CATEGORIES.map((c) => ({
+                                value: c,
+                                label: t('domain.contactCategory.' + c, { defaultValue: c }),
+                            }))}
                         />
                     </div>
                 </div>
                 <Input
-                    label="Société (optionnel)"
+                    label={t('house.contact.dialog.company')}
                     value={form.company}
                     onChange={(e) => handleChange('company', e.target.value)}
-                    placeholder="Plomberie Dupont SARL"
+                    placeholder={t('house.contact.dialog.companyPlaceholder')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Téléphone"
+                        label={t('house.contact.dialog.phone')}
                         type="tel"
                         value={form.phone}
                         onChange={(e) => handleChange('phone', e.target.value)}
-                        placeholder="+33 6 12 34 56 78"
+                        placeholder={t('house.contact.dialog.phonePlaceholder')}
                     />
                     <Input
-                        label="Email"
+                        label={t('house.contact.dialog.email')}
                         type="email"
                         value={form.email}
                         onChange={(e) => handleChange('email', e.target.value)}
-                        placeholder="contact@exemple.fr"
+                        placeholder={t('house.contact.dialog.emailPlaceholder')}
                     />
                 </div>
                 <Textarea
-                    label="Adresse"
+                    label={t('house.contact.dialog.address')}
                     value={form.address}
                     onChange={(e) => handleChange('address', e.target.value)}
-                    placeholder="Optionnel"
+                    placeholder={t('house.contact.dialog.addressPlaceholder')}
                     rows={2}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Dernière intervention"
+                        label={t('house.contact.dialog.lastIntervention')}
                         type="date"
                         value={form.last_intervention_date}
                         onChange={(e) => handleChange('last_intervention_date', e.target.value)}
                     />
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Équipement lié (optionnel)
+                            {t('house.contact.dialog.linkedEquipment')}
                         </label>
                         <Select
                             value={form.equipment_id}
@@ -212,10 +215,10 @@ const ContactDialog: React.FC<Props> = ({ open, onOpenChange, contact }) => {
                     </div>
                 </div>
                 <Textarea
-                    label="Notes"
+                    label={t('house.contact.dialog.notes')}
                     value={form.notes}
                     onChange={(e) => handleChange('notes', e.target.value)}
-                    placeholder="Tarif, horaires, qualité de service…"
+                    placeholder={t('house.contact.dialog.notesPlaceholder')}
                     rows={2}
                 />
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -225,17 +228,15 @@ const ContactDialog: React.FC<Props> = ({ open, onOpenChange, contact }) => {
                         onChange={(e) => handleChange('is_favorite', e.target.checked)}
                         className="h-4 w-4"
                     />
-                    <span className="text-caption">
-                        ⭐ Favori (affiché en tête de la catégorie)
-                    </span>
+                    <span className="text-caption">{t('house.contact.dialog.favorite')}</span>
                 </label>
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Annuler
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={submitting}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? 'Enregistrer' : 'Créer'}
+                        {isEdit ? t('common.save') : t('house.common.create')}
                     </Button>
                 </div>
             </form>

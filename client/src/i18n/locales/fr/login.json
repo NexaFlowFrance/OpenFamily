@@ -1,0 +1,22 @@
+{
+  "login": {
+    "hero": {
+      "line1": "Une famille,",
+      "line2": "une histoire,",
+      "line3": "un espace partagé.",
+      "subtitle": "KeurTonux aide les familles sénégalaises à organiser le quotidien, transmettre et garder le lien."
+    },
+    "tagline": "Le numérique au service du lien familial",
+    "name": "Nom complet",
+    "name_placeholder": "Ex: Jean Dupont",
+    "email": "Email",
+    "email_placeholder": "votre@email.com",
+    "password": "Mot de passe",
+    "loading": "Chargement...",
+    "sign_in": "Se connecter",
+    "sign_up": "S'inscrire",
+    "switch_to_register": "Je n'ai pas de compte, m'inscrire",
+    "switch_to_login": "J'ai déjà un compte, me connecter",
+    "footer_trust": "Confiance & Sécurité"
+  }
+}

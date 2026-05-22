@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
     Briefcase,
     BookOpen,
@@ -28,40 +30,36 @@ export interface PlanningEventEntry {
 }
 
 // When recurring collapse is on, the anchor card carries the full set of days
-// the same event repeats across, so it can render a "Lun→Ven" hint.
+// AND the full set of underlying entry IDs the same event repeats across, so
+// it can render a "Lun→Ven" hint and bulk-delete the whole group from one click.
 export interface GroupedPlanningEntry extends PlanningEventEntry {
     repeatDays: number[];
+    groupIds: string[];
 }
 
 interface PlanningEventCardProps {
     entry: GroupedPlanningEntry;
     density: 'compact' | 'detailed';
     onEdit: (entry: PlanningEventEntry) => void;
-    onDelete: (id: string) => void;
+    // Receives all ids in the recurring group (just one id when not grouped),
+    // so the parent can confirm + bulk-delete in a single mutation flow.
+    onDelete: (ids: string[]) => void;
     // List/Member views display events outside a per-day column, so the day
     // label needs to be rendered inside the card itself.
     showDayLabel?: boolean;
 }
 
-const DAY_SHORT: Record<number, string> = {
-    1: 'Lun',
-    2: 'Mar',
-    3: 'Mer',
-    4: 'Jeu',
-    5: 'Ven',
-    6: 'Sam',
-    7: 'Dim',
-};
-
+// Icon + tint are presentation metadata keyed by the persisted schedule_type
+// value. The display label is resolved at render time via t('planning.types.*').
 const TYPE_META: Record<
     PlanningEventEntry['schedule_type'],
-    { label: string; icon: React.ComponentType<{ className?: string }>; tint: string }
+    { icon: React.ComponentType<{ className?: string }>; tint: string }
 > = {
-    work: { label: 'Travail', icon: Briefcase, tint: 'text-primary' },
-    school: { label: 'Ecole', icon: GraduationCap, tint: 'text-success' },
-    study: { label: 'Etudes', icon: BookOpen, tint: 'text-warning' },
-    activity: { label: 'Activite', icon: CalendarDays, tint: 'text-secondary-foreground' },
-    other: { label: 'Autre', icon: CalendarDays, tint: 'text-muted-foreground' },
+    work: { icon: Briefcase, tint: 'text-primary' },
+    school: { icon: GraduationCap, tint: 'text-success' },
+    study: { icon: BookOpen, tint: 'text-warning' },
+    activity: { icon: CalendarDays, tint: 'text-secondary-foreground' },
+    other: { icon: CalendarDays, tint: 'text-muted-foreground' },
 };
 
 const formatTime = (raw: string) => raw.slice(0, 5);
@@ -77,15 +75,17 @@ const initials = (name: string): string => {
 
 // "Lun→Ven" for consecutive runs, "Lun, Mer, Ven" otherwise, "Tous les jours"
 // for the full week. Empty string when the event is a single day.
-export const formatRepeatDays = (days: number[]): string => {
+// `t` resolves the localized short day names (planning.days_short.*).
+export const formatRepeatDays = (days: number[], t: TFunction): string => {
     if (days.length <= 1) return '';
-    if (days.length === 7) return 'Tous les jours';
+    if (days.length === 7) return t('planning.all_days');
     const sorted = [...days].sort((a, b) => a - b);
+    const short = (d: number) => t('planning.days_short.' + d);
     const consecutive = sorted.every((d, i) => i === 0 || d === sorted[i - 1] + 1);
     if (consecutive && sorted.length >= 2) {
-        return `${DAY_SHORT[sorted[0]]}→${DAY_SHORT[sorted[sorted.length - 1]]}`;
+        return `${short(sorted[0])}→${short(sorted[sorted.length - 1])}`;
     }
-    return sorted.map((d) => DAY_SHORT[d]).join(', ');
+    return sorted.map((d) => short(d)).join(', ');
 };
 
 const PlanningEventCard: React.FC<PlanningEventCardProps> = ({
@@ -95,11 +95,15 @@ const PlanningEventCard: React.FC<PlanningEventCardProps> = ({
     onDelete,
     showDayLabel,
 }) => {
+    const { t } = useTranslation();
     const type = TYPE_META[entry.schedule_type];
+    const typeLabel = t('planning.types.' + entry.schedule_type, {
+        defaultValue: entry.schedule_type,
+    });
     const TypeIcon = type.icon;
     const overnight = entry.end_time < entry.start_time;
     const isRecurring = !entry.specific_date;
-    const repeatHint = formatRepeatDays(entry.repeatDays);
+    const repeatHint = formatRepeatDays(entry.repeatDays, t);
     // Hide the location row when it's identical to the title — common case in
     // current data where users put the same string in both fields.
     const showLocation =
@@ -118,9 +122,9 @@ const PlanningEventCard: React.FC<PlanningEventCardProps> = ({
                         {overnight ? (
                             <span
                                 className="ml-0.5 text-[10px] text-muted-foreground"
-                                title="Se termine le lendemain"
+                                title={t('planning.card.overnight_title')}
                             >
-                                +1j
+                                {t('planning.card.overnight_label')}
                             </span>
                         ) : null}
                     </span>
@@ -131,14 +135,17 @@ const PlanningEventCard: React.FC<PlanningEventCardProps> = ({
                     >
                         {initials(entry.family_member_name)}
                     </span>
-                    <TypeIcon className={`h-3 w-3 shrink-0 ${type.tint}`} aria-label={type.label} />
+                    <TypeIcon className={`h-3 w-3 shrink-0 ${type.tint}`} aria-label={typeLabel} />
                     {isRecurring ? (
                         <Repeat
                             className="h-3 w-3 shrink-0 text-muted-foreground"
-                            aria-label="Récurrent"
+                            aria-label={t('planning.card.recurring')}
                         />
                     ) : (
-                        <Pin className="h-3 w-3 shrink-0 text-warning" aria-label="Ponctuel" />
+                        <Pin
+                            className="h-3 w-3 shrink-0 text-warning"
+                            aria-label={t('planning.card.one_off')}
+                        />
                     )}
                     {repeatHint ? (
                         <span className="rounded-pill bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -147,25 +154,27 @@ const PlanningEventCard: React.FC<PlanningEventCardProps> = ({
                     ) : null}
                     {showDayLabel ? (
                         <span className="rounded-pill bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                            {DAY_SHORT[entry.day_of_week]}
+                            {t('planning.days_short.' + entry.day_of_week)}
                         </span>
                     ) : null}
-                    <span className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="ml-auto flex items-center gap-0.5">
                         <button
                             type="button"
-                            className="rounded p-0.5 text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+                            className="rounded p-1 text-muted-foreground/70 transition-colors hover:bg-surface-2 hover:text-foreground"
                             onClick={() => onEdit(entry)}
-                            aria-label="Modifier"
+                            aria-label={t('planning.card.edit')}
+                            title={t('planning.card.edit')}
                         >
-                            <Edit2 className="h-3 w-3" />
+                            <Edit2 className="h-3.5 w-3.5" />
                         </button>
                         <button
                             type="button"
-                            className="rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => onDelete(entry.id)}
-                            aria-label="Supprimer"
+                            className="rounded p-1 text-muted-foreground/70 transition-colors hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => onDelete(entry.groupIds)}
+                            aria-label={t('planning.card.delete')}
+                            title={t('planning.card.delete')}
                         >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-3.5 w-3.5" />
                         </button>
                     </span>
                 </div>

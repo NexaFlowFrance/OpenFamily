@@ -1,0 +1,73 @@
+{
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez vos données et préférences.",
+    "errors": {
+      "update": "Erreur lors de la mise à jour."
+    },
+    "currency": {
+      "title": "Devise",
+      "description": "Devise utilisée pour afficher les montants (budget, courses, dashboard). Les montants déjà saisis ne sont pas convertis lors d'un changement.",
+      "saved": "Devise mise à jour."
+    },
+    "location": {
+      "title": "Ville",
+      "description": "Utilisée pour la météo de demain et les suggestions de tenues sur le dashboard. Renseigne le nom d'une ville (ex : Lyon, Montréal, Dakar) — la localisation sera trouvée automatiquement.",
+      "placeholder": "Ex: Paris",
+      "current": "Actuel : {{city}}",
+      "save": "Enregistrer la ville",
+      "saved": "Ville enregistrée : {{city}}.",
+      "notFound": "Ville introuvable — vérifie l'orthographe ou essaie une commune plus grande."
+    },
+    "email": {
+      "title": "Notifications par email",
+      "description": "Recevez les rappels (rendez-vous, tâches, contrats, garanties) sur votre boîte mail. Les emails partent à l'adresse",
+      "enable": "Activer les notifications par email",
+      "mode": "Mode d'envoi",
+      "immediate": "Immédiat — un email par notification",
+      "daily": "Quotidien — récapitulatif à 8h",
+      "saved": "Préférences mises à jour.",
+      "sending": "Envoi…",
+      "sendTest": "Envoyer un email de test",
+      "testSent": "Email de test envoyé à {{email}}. Pensez à vérifier vos spams.",
+      "testFailed": "Échec de l'envoi : {{message}}",
+      "testFailedGeneric": "Échec de l'envoi du test."
+    },
+    "export": {
+      "title": "Exporter les données",
+      "description": "Télécharge toutes vos données (budget, tâches, recettes, membres, courses, rendez-vous, plannings, repas) dans un fichier JSON.",
+      "button": "Exporter",
+      "exporting": "Export en cours…",
+      "error": "Erreur lors de l'export."
+    },
+    "import": {
+      "title": "Importer des données",
+      "description": "Restaure des données depuis un fichier d'export KeurTonux. Les données existantes ne sont pas écrasées (doublons ignorés).",
+      "success": "Import réussi",
+      "chooseFile": "Choisir un fichier…",
+      "button": "Importer",
+      "importing": "Import en cours…",
+      "invalidJson": "Fichier JSON invalide.",
+      "error": "Erreur lors de l'import.",
+      "itemsImported_one": "élément importé",
+      "itemsImported_other": "éléments importés",
+      "entities": {
+        "family_members": "Membres de la famille",
+        "tasks": "Tâches",
+        "recipes": "Recettes",
+        "meal_plans": "Repas planifiés",
+        "budget_entries": "Entrées budget",
+        "budget_limits": "Limites budget",
+        "shopping_items": "Articles de courses",
+        "appointments": "Rendez-vous",
+        "schedule_entries": "Plannings"
+      }
+    }
+  },
+  "language": {
+    "title": "Langue",
+    "description": "Choisissez la langue de l'interface. Le changement est immédiat et conservé sur cet appareil.",
+    "fr": "Français",
+    "en": "English"
+  }
+}

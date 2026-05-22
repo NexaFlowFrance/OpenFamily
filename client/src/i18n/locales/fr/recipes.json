@@ -1,0 +1,139 @@
+{
+  "recipes": {
+    "title": "Recettes",
+    "subtitle": "Votre bibliothèque de recettes familiales",
+    "loading": "Chargement des recettes...",
+    "categories": {
+      "Entrée": "Entrée",
+      "Plat": "Plat",
+      "Dessert": "Dessert",
+      "Snack": "Snack"
+    },
+    "difficulties": {
+      "Facile": "Facile",
+      "Moyen": "Moyen",
+      "Difficile": "Difficile"
+    },
+    "generate_ai": "Générer avec l'IA",
+    "new_recipe": "Nouvelle recette",
+    "search_placeholder": "Rechercher une recette...",
+    "all_categories": "Toutes catégories",
+    "all_difficulties": "Toutes difficultés",
+    "empty_none": "Aucune recette pour le moment. Créez votre première recette !",
+    "empty_search": "Aucune recette ne correspond à votre recherche.",
+    "minutes_short": "{{count}}min",
+    "servings_short": "{{count}} pers.",
+    "view": "Voir",
+    "errors": {
+      "load": "Impossible de charger les recettes.",
+      "save": "Impossible d'enregistrer cette recette.",
+      "delete": "Impossible de supprimer cette recette."
+    },
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer cette recette ?",
+    "form": {
+      "edit_title": "Modifier la recette",
+      "new_title": "Nouvelle recette",
+      "description": "Remplissez les informations de la recette",
+      "name": "Nom de la recette",
+      "name_placeholder": "Ex: Tarte aux pommes",
+      "category": "Catégorie",
+      "difficulty": "Difficulté",
+      "description_label": "Description (optionnel)",
+      "description_placeholder": "Brève description de la recette...",
+      "prep_time": "Préparation (min)",
+      "cook_time": "Cuisson (min)",
+      "servings": "Portions",
+      "ingredients": "Ingrédients (un par ligne)",
+      "ingredients_placeholder": "200g de farine\n3 œufs\n100g de sucre",
+      "instructions": "Instructions (une étape par ligne)",
+      "instructions_placeholder": "Préchauffer le four à 180°C\nMélanger la farine et le sucre\nAjouter les œufs",
+      "tags": "Tags (séparés par des virgules)",
+      "tags_placeholder": "végétarien, rapide, économique",
+      "create": "Créer"
+    },
+    "detail": {
+      "prep": "Préparation:",
+      "cook": "Cuisson:",
+      "servings": "Portions:",
+      "minutes": "{{count}} min",
+      "ingredients": "Ingrédients",
+      "instructions": "Instructions",
+      "close": "Fermer"
+    },
+    "generateDialog": {
+      "title": "Générer une recette avec l'IA",
+      "description": "Décrivez ce que vous avez sous la main, l'IA propose 3 recettes adaptées à votre famille.",
+      "available_ingredients": "Ingrédients disponibles",
+      "ingredient_placeholder": "Ex: poulet, oignons, riz, citron…",
+      "remove_ingredient": "Retirer {{name}}",
+      "ingredients_tip": "Astuce : sel, huile, eau et oignon sont considérés comme acquis.",
+      "for_whom": "Pour qui ? (allergies + régimes pris en compte)",
+      "cuisine": "Cuisine",
+      "total_time": "Temps total",
+      "style": "Style",
+      "simple_dishes": "Plats simples",
+      "cuisine_options": {
+        "senegalese": "Sénégalaise",
+        "world": "Du monde",
+        "any": "Peu importe"
+      },
+      "time_options": {
+        "30": "≤ 30 minutes",
+        "45": "≤ 45 minutes",
+        "60": "≤ 1 heure",
+        "none": "Pas de limite"
+      },
+      "errors": {
+        "no_ingredient": "Ajoutez au moins un ingrédient.",
+        "disabled": "L'IA est désactivée sur cette installation. Contactez l'administrateur.",
+        "quota_exceeded": "Quota mensuel d'IA atteint. Réessayez le mois prochain.",
+        "bad_json": "L'IA a renvoyé une réponse incompréhensible. Réessayez.",
+        "generate_failed": "Génération impossible.",
+        "save_failed": "Sauvegarde impossible."
+      },
+      "hint": {
+        "simple": "plats simples",
+        "senegalese": "cuisine sénégalaise",
+        "world": "cuisine du monde",
+        "max_time": "≤ {{minutes}} min"
+      },
+      "generating": "Génération…",
+      "generate": "Générer 3 recettes",
+      "re_generating": "Re-génération…",
+      "re_generate": "Re-générer",
+      "proposals_one": "{{count}} proposition",
+      "proposals_other": "{{count}} propositions",
+      "minutes": "{{count}} min",
+      "servings_short": "{{count}} pers.",
+      "ingredients": "Ingrédients",
+      "steps": "Étapes",
+      "saved": "Sauvegardée",
+      "save": "Sauvegarder",
+      "close": "Fermer"
+    },
+    "nutritionDialog": {
+      "title": "Analyse nutritionnelle de la semaine",
+      "description": "L'IA évalue l'équilibre des repas planifiés et propose des pistes concrètes.",
+      "analyzing": "Analyse en cours… (10–20 secondes)",
+      "analysis_failed": "L'analyse a échoué.",
+      "analysis_impossible": "Analyse impossible.",
+      "quota_exceeded": "Quota IA mensuel atteint — réessayez plus tard.",
+      "disabled": "L'IA est désactivée sur cette installation.",
+      "unavailable": "L'IA n'a pas pu analyser ces repas pour le moment.",
+      "meals_analyzed": "{{count}} repas analysés sur la semaine.",
+      "strengths": "Points forts",
+      "weaknesses": "À améliorer",
+      "missing_groups": "Groupes alimentaires sous-représentés",
+      "recommendations": "Recommandations prioritaires",
+      "empty_week": "Aucune analyse disponible pour cette semaine.",
+      "verdict": {
+        "Excellent": "Excellent",
+        "Bon": "Bon",
+        "À améliorer": "À améliorer",
+        "Déséquilibré": "Déséquilibré"
+      },
+      "re_analyze": "Re-analyser",
+      "close": "Fermer"
+    }
+  }
+}

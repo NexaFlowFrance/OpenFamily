@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -34,6 +35,7 @@ interface Props {
 const MAX_MB = Number(import.meta.env.VITE_MAX_UPLOAD_SIZE_MB) || 50;
 
 const DocumentUploadDialog: React.FC<Props> = ({ open, onOpenChange, boundEntity }) => {
+    const { t } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [file, setFile] = useState<File | null>(null);
     const [name, setName] = useState('');
@@ -70,15 +72,15 @@ const DocumentUploadDialog: React.FC<Props> = ({ open, onOpenChange, boundEntity
         e.preventDefault();
         setError('');
         if (!file) {
-            setError('Choisis un fichier à uploader.');
+            setError(t('house.documents.upload.fileRequired'));
             return;
         }
         if (file.size > MAX_MB * 1024 * 1024) {
-            setError(`Fichier trop volumineux (max ${MAX_MB} MB).`);
+            setError(t('house.documents.upload.fileTooLarge', { max: MAX_MB }));
             return;
         }
         if (!name.trim()) {
-            setError('Donne un nom au document.');
+            setError(t('house.documents.upload.nameRequired'));
             return;
         }
         try {
@@ -96,13 +98,11 @@ const DocumentUploadDialog: React.FC<Props> = ({ open, onOpenChange, boundEntity
         } catch (err) {
             const e2 = err as { code?: string; message?: string };
             if (e2.code === 'FILE_TOO_LARGE') {
-                setError(`Fichier trop volumineux (max ${MAX_MB} MB).`);
+                setError(t('house.documents.upload.fileTooLarge', { max: MAX_MB }));
             } else if (e2.code === 'UNSUPPORTED_MIME') {
-                setError(
-                    'Type de fichier non supporté (PDF, JPG, PNG, WEBP, DOCX, XLSX uniquement).',
-                );
+                setError(t('house.documents.upload.unsupportedMime'));
             } else {
-                setError(e2.message || 'Échec de l’upload.');
+                setError(e2.message || t('house.documents.upload.uploadFailed'));
             }
             setProgress(null);
         }
@@ -112,11 +112,11 @@ const DocumentUploadDialog: React.FC<Props> = ({ open, onOpenChange, boundEntity
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Ajouter un document"
+            title={t('house.documents.upload.title')}
             description={
                 boundEntity?.label
-                    ? `Sera attaché à : ${boundEntity.label}`
-                    : "PDF, image (JPG/PNG/WEBP), DOCX, XLSX — jusqu'à " + MAX_MB + ' MB.'
+                    ? t('house.documents.upload.boundDescription', { label: boundEntity.label })
+                    : t('house.documents.upload.freeDescription', { max: MAX_MB })
             }
             className="sm:max-w-md"
         >
@@ -130,12 +130,12 @@ const DocumentUploadDialog: React.FC<Props> = ({ open, onOpenChange, boundEntity
 
                 <div>
                     <label className="block text-label font-medium text-foreground mb-1.5">
-                        Fichier *
+                        {t('house.documents.upload.file')}
                     </label>
                     <label className="flex items-center justify-center gap-2 rounded-input border-2 border-dashed border-border bg-muted/20 px-4 py-6 cursor-pointer hover:bg-muted/30">
                         <Upload className="h-5 w-5 text-muted-foreground" />
                         <span className="text-caption text-muted-foreground">
-                            {file ? file.name : 'Choisir un fichier…'}
+                            {file ? file.name : t('house.documents.upload.chooseFile')}
                         </span>
                         <input
                             ref={fileInputRef}
@@ -148,35 +148,38 @@ const DocumentUploadDialog: React.FC<Props> = ({ open, onOpenChange, boundEntity
                     {file && (
                         <p className="mt-1 text-micro text-muted-foreground">
                             {(file.size / (1024 * 1024)).toFixed(2)} MB ·{' '}
-                            {file.type || 'type inconnu'}
+                            {file.type || t('house.documents.upload.unknownType')}
                         </p>
                     )}
                 </div>
 
                 <Input
-                    label="Nom *"
+                    label={t('house.documents.upload.name')}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Facture EDF janvier 2026"
+                    placeholder={t('house.documents.upload.namePlaceholder')}
                     required
                 />
 
                 <div>
                     <label className="block text-label font-medium text-foreground mb-1.5">
-                        Catégorie *
+                        {t('house.documents.upload.category')}
                     </label>
                     <Select
                         value={category}
                         onValueChange={(v) => setCategory(v as DocumentCategory)}
-                        options={DOCUMENT_CATEGORIES.map((c) => ({ value: c, label: c }))}
+                        options={DOCUMENT_CATEGORIES.map((c) => ({
+                            value: c,
+                            label: t('domain.documentCategory.' + c, { defaultValue: c }),
+                        }))}
                     />
                 </div>
 
                 <Textarea
-                    label="Notes"
+                    label={t('house.documents.upload.notes')}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Optionnel — n° de référence, contexte…"
+                    placeholder={t('house.documents.upload.notesPlaceholder')}
                     rows={2}
                 />
 
@@ -189,18 +192,18 @@ const DocumentUploadDialog: React.FC<Props> = ({ open, onOpenChange, boundEntity
                             />
                         </div>
                         <p className="mt-1 text-micro text-muted-foreground text-center">
-                            Upload {progress}%
+                            {t('house.documents.upload.progress', { progress })}
                         </p>
                     </div>
                 )}
 
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Annuler
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={uploadMut.isPending || !file}>
                         {uploadMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Uploader
+                        {t('house.documents.upload.submit')}
                     </Button>
                 </div>
             </form>

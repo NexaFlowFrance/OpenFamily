@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 import {
     CalendarDays,
@@ -10,7 +12,7 @@ import {
     Users,
 } from 'lucide-react';
 import { addDays, addWeeks, format, startOfWeek, subWeeks } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useDateLocale } from '../lib/dateLocale';
 import { api } from '../lib/api';
 import {
     Button,
@@ -55,23 +57,10 @@ interface PlanningBulkResult {
     conflicts: Array<{ day_of_week: number; conflict_ids: string[] }>;
 }
 
-const DAYS = [
-    { value: 1, label: 'Lundi', short: 'Lun' },
-    { value: 2, label: 'Mardi', short: 'Mar' },
-    { value: 3, label: 'Mercredi', short: 'Mer' },
-    { value: 4, label: 'Jeudi', short: 'Jeu' },
-    { value: 5, label: 'Vendredi', short: 'Ven' },
-    { value: 6, label: 'Samedi', short: 'Sam' },
-    { value: 7, label: 'Dimanche', short: 'Dim' },
-];
-
-const TYPE_OPTIONS = [
-    { value: 'work', label: 'Travail' },
-    { value: 'school', label: 'Ecole' },
-    { value: 'study', label: 'Etudes' },
-    { value: 'activity', label: 'Activite' },
-    { value: 'other', label: 'Autre' },
-];
+// Day numbers (1=Mon … 7=Sun) and schedule_type values are persisted data.
+// Display labels are resolved at render via t('planning.days.*') etc.
+const DAY_VALUES = [1, 2, 3, 4, 5, 6, 7];
+const TYPE_VALUES = ['work', 'school', 'study', 'activity', 'other'] as const;
 
 const WEEKDAYS = [1, 2, 3, 4, 5];
 const FULL_WEEK = [1, 2, 3, 4, 5, 6, 7];
@@ -80,8 +69,8 @@ const sortDays = (values: number[]) => [...values].sort((a, b) => a - b);
 
 const formatTime = (raw: string) => raw.slice(0, 5);
 
-const getDayLabel = (day: number) =>
-    DAYS.find((item) => item.value === day)?.label || `Jour ${day}`;
+const getDayLabel = (day: number, t: TFunction) =>
+    t('planning.days.' + day, { defaultValue: t('planning.day_fallback', { day }) });
 
 const defaultTypeFromRole = (role?: string) => {
     const normalized = (role || '').toLowerCase();
@@ -95,7 +84,21 @@ const defaultTypeFromRole = (role?: string) => {
 };
 
 const Planning: React.FC = () => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const navigate = useNavigate();
+
+    // Localized option lists derived from the persisted value sets.
+    const DAYS = DAY_VALUES.map((value) => ({
+        value,
+        label: t('planning.days.' + value),
+        short: t('planning.days_short.' + value),
+    }));
+    const TYPE_OPTIONS = TYPE_VALUES.map((value) => ({
+        value,
+        label: t('planning.types.' + value),
+    }));
+
     const [entries, setEntries] = useState<PlanningEntry[]>([]);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [weekAnchor, setWeekAnchor] = useState(new Date());
@@ -177,7 +180,7 @@ const Planning: React.FC = () => {
             }
         } catch (err) {
             console.error('Failed to load members:', err);
-            setError(err instanceof Error ? err.message : 'Impossible de charger les membres.');
+            setError(err instanceof Error ? err.message : t('planning.errors.load_members'));
         }
     };
 
@@ -192,7 +195,7 @@ const Planning: React.FC = () => {
             }
         } catch (err) {
             console.error('Failed to load planning entries:', err);
-            setError(err instanceof Error ? err.message : 'Impossible de charger le planning.');
+            setError(err instanceof Error ? err.message : t('planning.errors.load'));
         }
     };
 
@@ -241,18 +244,26 @@ const Planning: React.FC = () => {
         setDialogOpen(true);
     };
 
-    const handleDelete = async (entryId: string) => {
-        if (!confirm('Supprimer cet horaire ?')) {
+    const handleDelete = async (entryIds: string[]) => {
+        const ids = Array.isArray(entryIds) ? entryIds : [entryIds];
+        if (ids.length === 0) return;
+        const message =
+            ids.length === 1
+                ? t('planning.confirm_delete_one')
+                : t('planning.confirm_delete_recurring', { count: ids.length });
+        if (!confirm(message)) {
             return;
         }
         setError('');
         setNotice('');
         try {
-            await api.delete(`/api/planning/${entryId}`);
+            // Fire deletes in parallel — server is per-id, no bulk endpoint
+            // currently, but Promise.all keeps the UX snappy.
+            await Promise.all(ids.map((id) => api.delete(`/api/planning/${id}`)));
             await loadEntries(weekStart);
         } catch (err) {
             console.error('Failed to delete planning entry:', err);
-            setError(err instanceof Error ? err.message : 'Impossible de supprimer cet horaire.');
+            setError(err instanceof Error ? err.message : t('planning.errors.delete'));
         }
     };
 
@@ -274,7 +285,7 @@ const Planning: React.FC = () => {
         setNotice('');
 
         if (!formData.family_member_id || !formData.title.trim()) {
-            setError('Le membre et le titre sont obligatoires.');
+            setError(t('planning.errors.member_title_required'));
             return;
         }
 
@@ -283,12 +294,12 @@ const Planning: React.FC = () => {
             !formData.end_time ||
             formData.end_time === formData.start_time
         ) {
-            setError("L'heure de debut et de fin ne peuvent pas etre identiques.");
+            setError(t('planning.errors.times_identical'));
             return;
         }
 
         if (selectedDays.length === 0) {
-            setError('Selectionnez au moins un jour.');
+            setError(t('planning.errors.select_day'));
             return;
         }
 
@@ -322,7 +333,7 @@ const Planning: React.FC = () => {
                 setDialogOpen(false);
                 resetForm(selectedDays[0]);
                 await loadEntries(weekStart);
-                setNotice('Horaire enregistre.');
+                setNotice(t('planning.notice.saved'));
                 return;
             }
 
@@ -345,18 +356,21 @@ const Planning: React.FC = () => {
                 const applied = response.data.created + response.data.updated;
                 if (response.data.conflicts.length > 0) {
                     const conflictDays = response.data.conflicts
-                        .map((item) => getDayLabel(item.day_of_week))
+                        .map((item) => getDayLabel(item.day_of_week, t))
                         .join(', ');
                     setNotice(
-                        `Enregistre sur ${applied} jour(s). Conflits detectes sur: ${conflictDays}.`,
+                        t('planning.notice.saved_days_conflicts', {
+                            count: applied,
+                            days: conflictDays,
+                        }),
                     );
                 } else {
-                    setNotice(`Enregistre sur ${applied} jour(s).`);
+                    setNotice(t('planning.notice.saved_days', { count: applied }));
                 }
             }
         } catch (err) {
             console.error('Failed to save planning entry:', err);
-            setError(err instanceof Error ? err.message : "Impossible d'enregistrer cet horaire.");
+            setError(err instanceof Error ? err.message : t('planning.errors.save'));
         }
     };
 
@@ -383,7 +397,11 @@ const Planning: React.FC = () => {
     // event with a specific_date never merges with anything.
     const groupedEntries = useMemo<GroupedPlanningEntry[]>(() => {
         if (!collapseRecurring) {
-            return visibleEntries.map((entry) => ({ ...entry, repeatDays: [entry.day_of_week] }));
+            return visibleEntries.map((entry) => ({
+                ...entry,
+                repeatDays: [entry.day_of_week],
+                groupIds: [entry.id],
+            }));
         }
         const keyFor = (e: PlanningEntry) =>
             [
@@ -406,7 +424,11 @@ const Planning: React.FC = () => {
         for (const bucket of groups.values()) {
             const sorted = [...bucket].sort((a, b) => a.day_of_week - b.day_of_week);
             const anchor = sorted[0];
-            result.push({ ...anchor, repeatDays: sorted.map((s) => s.day_of_week) });
+            result.push({
+                ...anchor,
+                repeatDays: sorted.map((s) => s.day_of_week),
+                groupIds: sorted.map((s) => s.id),
+            });
         }
         return result.sort((a, b) => {
             if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
@@ -420,7 +442,7 @@ const Planning: React.FC = () => {
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
                     <p className="animate-pulse font-medium text-muted-foreground">
-                        Chargement du planning...
+                        {t('planning.loading')}
                     </p>
                 </div>
             </div>
@@ -432,12 +454,12 @@ const Planning: React.FC = () => {
             <Card>
                 <CardContent className="p-10 text-center">
                     <Users className="mx-auto mb-3 h-12 w-12 text-muted-foreground/60" />
-                    <h2 className="text-h2">Ajoutez d'abord vos membres</h2>
+                    <h2 className="text-h2">{t('planning.no_members.title')}</h2>
                     <p className="mt-1 text-caption text-muted-foreground">
-                        Le planning hebdomadaire s'appuie sur les profils famille.
+                        {t('planning.no_members.subtitle')}
                     </p>
                     <Button className="mt-5" onClick={() => navigate('/family')}>
-                        Aller a Famille
+                        {t('planning.no_members.go_to_family')}
                     </Button>
                 </CardContent>
             </Card>
@@ -459,11 +481,8 @@ const Planning: React.FC = () => {
 
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <h1 className="text-h1">Planning Hebdomadaire</h1>
-                    <p className="text-caption text-muted-foreground">
-                        Horaires recurents de travail et emploi du temps scolaire, semaine par
-                        semaine.
-                    </p>
+                    <h1 className="text-h1">{t('planning.title')}</h1>
+                    <p className="text-caption text-muted-foreground">{t('planning.subtitle')}</p>
                 </div>
                 <Button
                     onClick={() => {
@@ -474,7 +493,7 @@ const Planning: React.FC = () => {
                     }}
                 >
                     <Plus className="mr-2 h-4 w-4" />
-                    Nouvel horaire
+                    {t('planning.new_schedule')}
                 </Button>
             </div>
 
@@ -494,7 +513,7 @@ const Planning: React.FC = () => {
                                 size="sm"
                                 onClick={() => setWeekAnchor(new Date())}
                             >
-                                Cette semaine
+                                {t('planning.toolbar.this_week')}
                             </Button>
                             <Button
                                 variant="secondary"
@@ -504,17 +523,29 @@ const Planning: React.FC = () => {
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
                             <span className="ml-2 text-caption text-muted-foreground">
-                                {format(weekStart, 'dd MMM', { locale: fr })} -{' '}
-                                {format(addDays(weekStart, 6), 'dd MMM yyyy', { locale: fr })}
+                                {format(weekStart, 'dd MMM', { locale })} -{' '}
+                                {format(addDays(weekStart, 6), 'dd MMM yyyy', { locale })}
                             </span>
                         </div>
 
                         {/* Segmented view switcher */}
                         <div className="inline-flex rounded-pill border border-border bg-surface-2 p-0.5">
                             {[
-                                { v: 'week' as const, label: 'Semaine', icon: LayoutGrid },
-                                { v: 'list' as const, label: 'Liste', icon: List },
-                                { v: 'member' as const, label: 'Par membre', icon: Users },
+                                {
+                                    v: 'week' as const,
+                                    label: t('planning.toolbar.view_week'),
+                                    icon: LayoutGrid,
+                                },
+                                {
+                                    v: 'list' as const,
+                                    label: t('planning.toolbar.view_list'),
+                                    icon: List,
+                                },
+                                {
+                                    v: 'member' as const,
+                                    label: t('planning.toolbar.view_member'),
+                                    icon: Users,
+                                },
                             ].map(({ v, label, icon: Icon }) => (
                                 <button
                                     key={v}
@@ -539,7 +570,7 @@ const Planning: React.FC = () => {
                                 value={selectedMemberId}
                                 onValueChange={setSelectedMemberId}
                                 options={[
-                                    { value: '', label: 'Tous les membres' },
+                                    { value: '', label: t('planning.toolbar.all_members') },
                                     ...familyMembers.map((member) => ({
                                         value: member.id,
                                         label: member.name,
@@ -550,7 +581,7 @@ const Planning: React.FC = () => {
                                 value={selectedType}
                                 onValueChange={setSelectedType}
                                 options={[
-                                    { value: 'all', label: 'Tous les types' },
+                                    { value: 'all', label: t('planning.toolbar.all_types') },
                                     ...TYPE_OPTIONS,
                                 ]}
                             />
@@ -563,7 +594,7 @@ const Planning: React.FC = () => {
                                     onChange={(e) => setCollapseRecurring(e.target.checked)}
                                     className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                                 />
-                                Replier les récurrents
+                                {t('planning.toolbar.collapse_recurring')}
                             </label>
                             <div className="inline-flex rounded-pill border border-border bg-surface-2 p-0.5">
                                 {(['compact', 'detailed'] as const).map((d) => (
@@ -577,7 +608,9 @@ const Planning: React.FC = () => {
                                                 : 'text-muted-foreground hover:text-foreground'
                                         }`}
                                     >
-                                        {d === 'compact' ? 'Compact' : 'Détaillé'}
+                                        {d === 'compact'
+                                            ? t('planning.toolbar.compact')
+                                            : t('planning.toolbar.detailed')}
                                     </button>
                                 ))}
                             </div>
@@ -604,7 +637,7 @@ const Planning: React.FC = () => {
                                                 {day.label}
                                             </CardTitle>
                                             <p className="text-micro text-muted-foreground">
-                                                {format(dateForHeader, 'dd/MM', { locale: fr })}
+                                                {format(dateForHeader, 'dd/MM', { locale })}
                                             </p>
                                         </div>
                                         <Button
@@ -612,7 +645,9 @@ const Planning: React.FC = () => {
                                             size="sm"
                                             onClick={() => handleAddForDay(day.value)}
                                             className="h-7 px-1.5"
-                                            aria-label={`Ajouter le ${day.label}`}
+                                            aria-label={t('planning.add_for_day_aria', {
+                                                day: day.label,
+                                            })}
                                         >
                                             <Plus className="h-3.5 w-3.5" />
                                         </Button>
@@ -625,7 +660,7 @@ const Planning: React.FC = () => {
                                             onClick={() => handleAddForDay(day.value)}
                                             className="w-full rounded-input border border-dashed border-border px-3 py-4 text-center text-micro text-muted-foreground hover:bg-surface-2"
                                         >
-                                            + Ajouter
+                                            + {t('planning.add')}
                                         </button>
                                     ) : (
                                         dayEntries.map((entry) => (
@@ -661,7 +696,7 @@ const Planning: React.FC = () => {
                                             {day.label}
                                         </h2>
                                         <span className="text-caption text-muted-foreground">
-                                            {format(dateForHeader, 'dd MMMM', { locale: fr })}
+                                            {format(dateForHeader, 'dd MMMM', { locale })}
                                         </span>
                                     </div>
                                     <Button
@@ -670,7 +705,7 @@ const Planning: React.FC = () => {
                                         onClick={() => handleAddForDay(day.value)}
                                     >
                                         <Plus className="mr-1 h-3.5 w-3.5" />
-                                        Ajouter
+                                        {t('planning.add')}
                                     </Button>
                                 </div>
                                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -691,7 +726,7 @@ const Planning: React.FC = () => {
                         <div className="rounded-card border border-dashed border-border bg-card py-12 text-center">
                             <CalendarDays className="mx-auto mb-2 h-10 w-10 text-muted-foreground/40" />
                             <p className="text-caption text-muted-foreground">
-                                Aucun horaire cette semaine.
+                                {t('planning.empty_week')}
                             </p>
                         </div>
                     ) : null}
@@ -720,15 +755,16 @@ const Planning: React.FC = () => {
                                                 {member.name}
                                             </CardTitle>
                                             <span className="ml-auto text-micro text-muted-foreground">
-                                                {memberEntries.length} horaire
-                                                {memberEntries.length > 1 ? 's' : ''}
+                                                {t('planning.member.schedules', {
+                                                    count: memberEntries.length,
+                                                })}
                                             </span>
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0">
                                         {memberEntries.length === 0 ? (
                                             <p className="text-caption text-muted-foreground">
-                                                Aucun horaire pour ce membre.
+                                                {t('planning.member.none')}
                                             </p>
                                         ) : (
                                             <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
@@ -759,14 +795,16 @@ const Planning: React.FC = () => {
                         resetForm(selectedDays[0] || 1);
                     }
                 }}
-                title={editingEntry ? 'Modifier un horaire' : 'Nouvel horaire'}
-                description="Definissez un horaire et appliquez-le a un ou plusieurs jours."
+                title={
+                    editingEntry ? t('planning.dialog.edit_title') : t('planning.dialog.new_title')
+                }
+                description={t('planning.dialog.description')}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label className="mb-1.5 block text-label font-medium text-foreground">
-                                Membre
+                                {t('planning.dialog.member_label')}
                             </label>
                             <Select
                                 value={formData.family_member_id}
@@ -788,7 +826,7 @@ const Planning: React.FC = () => {
                         </div>
                         <div>
                             <label className="mb-1.5 block text-label font-medium text-foreground">
-                                Type
+                                {t('planning.dialog.type_label')}
                             </label>
                             <Select
                                 value={formData.schedule_type}
@@ -801,18 +839,18 @@ const Planning: React.FC = () => {
                     </div>
 
                     <Input
-                        label="Intitule"
+                        label={t('planning.dialog.title_label')}
                         value={formData.title}
                         onChange={(e) =>
                             setFormData((prev) => ({ ...prev, title: e.target.value }))
                         }
-                        placeholder="Ex: Bureau - Equipe Produit / Mathematiques"
+                        placeholder={t('planning.dialog.title_placeholder')}
                         required
                     />
 
                     <div>
                         <label className="mb-1.5 block text-label font-medium text-foreground">
-                            Jours concernes
+                            {t('planning.dialog.days_label')}
                         </label>
                         <div className="flex flex-wrap gap-2">
                             {DAYS.map((day) => {
@@ -840,7 +878,7 @@ const Planning: React.FC = () => {
                                 size="sm"
                                 onClick={() => setSelectedDays(WEEKDAYS)}
                             >
-                                Lun-Ven
+                                {t('planning.dialog.weekdays')}
                             </Button>
                             <Button
                                 type="button"
@@ -848,7 +886,7 @@ const Planning: React.FC = () => {
                                 size="sm"
                                 onClick={() => setSelectedDays(FULL_WEEK)}
                             >
-                                Semaine complete
+                                {t('planning.dialog.full_week')}
                             </Button>
                             <Button
                                 type="button"
@@ -856,19 +894,23 @@ const Planning: React.FC = () => {
                                 size="sm"
                                 onClick={() => setSelectedDays([1])}
                             >
-                                Reinitialiser
+                                {t('planning.dialog.reset')}
                             </Button>
                         </div>
                         <p className="mt-2 text-micro text-muted-foreground">
                             {selectedDays.length === 1
-                                ? `Jour selectionne: ${getDayLabel(selectedDays[0])}`
-                                : `${selectedDays.length} jours selectionnes`}
+                                ? t('planning.dialog.day_selected', {
+                                      day: getDayLabel(selectedDays[0], t),
+                                  })
+                                : t('planning.dialog.days_selected', {
+                                      count: selectedDays.length,
+                                  })}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <Input
-                            label="Debut"
+                            label={t('planning.dialog.start_label')}
                             type="time"
                             value={formData.start_time}
                             onChange={(e) =>
@@ -878,7 +920,7 @@ const Planning: React.FC = () => {
                         />
                         <div>
                             <Input
-                                label="Fin"
+                                label={t('planning.dialog.end_label')}
                                 type="time"
                                 value={formData.end_time}
                                 onChange={(e) =>
@@ -890,7 +932,7 @@ const Planning: React.FC = () => {
                                 formData.start_time &&
                                 formData.end_time < formData.start_time && (
                                     <p className="mt-1 text-micro text-muted-foreground">
-                                        Se termine le lendemain (+1 jour)
+                                        {t('planning.dialog.ends_next_day')}
                                     </p>
                                 )}
                         </div>
@@ -904,9 +946,10 @@ const Planning: React.FC = () => {
                             className="mt-0.5 h-4 w-4 rounded border-border"
                         />
                         <span>
-                            <strong>Cette semaine uniquement</strong> — L'horaire ne s'applique qu'a
-                            la semaine du {format(weekStart, 'dd MMM yyyy', { locale: fr })}. Sinon,
-                            il sera recurrent chaque semaine.
+                            <strong>{t('planning.dialog.this_week_only')}</strong>
+                            {t('planning.dialog.this_week_only_desc', {
+                                date: format(weekStart, 'dd MMM yyyy', { locale }),
+                            })}
                         </span>
                     </label>
 
@@ -918,30 +961,26 @@ const Planning: React.FC = () => {
                                 onChange={(e) => setReplaceConflicts(e.target.checked)}
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                             />
-                            <span>
-                                Remplacer les horaires en conflit sur les jours selectionnes. Si des
-                                conflits existent et que cette option est desactivee, ces jours
-                                seront ignores.
-                            </span>
+                            <span>{t('planning.dialog.replace_conflicts')}</span>
                         </label>
                     ) : null}
 
                     <Input
-                        label="Lieu (optionnel)"
+                        label={t('planning.dialog.location_label')}
                         value={formData.location}
                         onChange={(e) =>
                             setFormData((prev) => ({ ...prev, location: e.target.value }))
                         }
-                        placeholder="Ex: Bureau Lyon / College Jean Moulin"
+                        placeholder={t('planning.dialog.location_placeholder')}
                     />
 
                     <Textarea
-                        label="Notes (optionnel)"
+                        label={t('planning.dialog.notes_label')}
                         value={formData.notes}
                         onChange={(e) =>
                             setFormData((prev) => ({ ...prev, notes: e.target.value }))
                         }
-                        placeholder="Informations utiles, salle, matiere, transport..."
+                        placeholder={t('planning.dialog.notes_placeholder')}
                         rows={2}
                     />
 
@@ -951,14 +990,14 @@ const Planning: React.FC = () => {
                             variant="secondary"
                             onClick={() => setDialogOpen(false)}
                         >
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
                         <Button type="submit">
                             {selectedDays.length > 1
-                                ? 'Appliquer aux jours selectionnes'
+                                ? t('planning.dialog.apply_to_days')
                                 : editingEntry
-                                  ? 'Enregistrer'
-                                  : 'Ajouter'}
+                                  ? t('common.save')
+                                  : t('planning.dialog.add')}
                         </Button>
                     </div>
                 </form>

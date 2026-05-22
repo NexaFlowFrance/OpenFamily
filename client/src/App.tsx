@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
@@ -18,13 +19,14 @@ import CurrencyOnboardingDialog from './components/CurrencyOnboardingDialog';
 
 function App() {
     const { isAuthenticated, loading } = useAuth();
+    const { t } = useTranslation();
 
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-3">
                     <div className="spinner-brand" />
-                    <p className="text-caption text-muted-foreground">Chargement...</p>
+                    <p className="text-caption text-muted-foreground">{t('common.loading')}</p>
                 </div>
             </div>
         );

@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { getDateFnsLocale } from '../../lib/dateLocale';
 import {
     Bell,
     BellOff,
@@ -70,13 +71,14 @@ const colorForType = (type: string): string => {
 
 const formatRelative = (iso: string): string => {
     try {
-        return formatDistanceToNow(parseISO(iso), { addSuffix: true, locale: fr });
+        return formatDistanceToNow(parseISO(iso), { addSuffix: true, locale: getDateFnsLocale() });
     } catch {
         return '';
     }
 };
 
 const NotificationsBell: React.FC = () => {
+    const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
@@ -127,7 +129,11 @@ const NotificationsBell: React.FC = () => {
                 variant="secondary"
                 size="icon"
                 onClick={() => setOpen((v) => !v)}
-                aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
+                aria-label={
+                    unreadCount > 0
+                        ? t('notifications.ariaLabelWithCount', { count: unreadCount })
+                        : t('notifications.ariaLabel')
+                }
             >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
@@ -144,10 +150,10 @@ const NotificationsBell: React.FC = () => {
                 <div className="absolute right-0 mt-2 w-[360px] max-w-[calc(100vw-2rem)] rounded-card border border-border bg-card shadow-surface-hover z-50 overflow-hidden">
                     <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
                         <p className="text-caption font-semibold">
-                            Notifications
+                            {t('notifications.title')}
                             {unreadCount > 0 && (
                                 <span className="ml-2 text-micro text-muted-foreground font-normal">
-                                    {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
+                                    {t('notifications.unread', { count: unreadCount })}
                                 </span>
                             )}
                         </p>
@@ -158,7 +164,7 @@ const NotificationsBell: React.FC = () => {
                                 className="flex items-center gap-1 text-micro text-primary hover:underline"
                             >
                                 <CheckCheck className="h-3.5 w-3.5" />
-                                Tout marquer lu
+                                {t('notifications.markAllRead')}
                             </button>
                         )}
                     </div>
@@ -166,16 +172,13 @@ const NotificationsBell: React.FC = () => {
                     <div className="max-h-[420px] overflow-y-auto">
                         {listQuery.isPending ? (
                             <div className="p-6 text-center text-micro text-muted-foreground">
-                                Chargement…
+                                {t('common.loading')}
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="p-8 flex flex-col items-center gap-2 text-center text-micro text-muted-foreground">
                                 <BellOff className="h-6 w-6" />
-                                <p>Aucune notification pour l'instant.</p>
-                                <p className="italic">
-                                    Le système t'enverra des rappels pour les tâches du jour, RDV
-                                    proches, échéances de factures et entretiens à prévoir.
-                                </p>
+                                <p>{t('notifications.empty')}</p>
+                                <p className="italic">{t('notifications.emptyHint')}</p>
                             </div>
                         ) : (
                             <ul>
@@ -201,6 +204,7 @@ const NotificationRow: React.FC<{
     onClick: () => void;
     onDelete: () => void;
 }> = ({ notification, onClick, onDelete }) => {
+    const { t } = useTranslation();
     const Icon = iconForType(notification.type);
     const colorClass = colorForType(notification.type);
     return (
@@ -221,7 +225,7 @@ const NotificationRow: React.FC<{
                     {!notification.is_read && (
                         <span
                             className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-primary"
-                            aria-label="Non lue"
+                            aria-label={t('notifications.unreadDot')}
                         />
                     )}
                 </p>
@@ -237,7 +241,7 @@ const NotificationRow: React.FC<{
                     onDelete();
                 }}
                 className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-destructive/10 shrink-0"
-                aria-label="Supprimer"
+                aria-label={t('common.delete')}
             >
                 <Trash2 className="h-3.5 w-3.5 text-destructive" />
             </button>

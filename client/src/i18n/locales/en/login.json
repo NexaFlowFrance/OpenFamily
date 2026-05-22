@@ -1,0 +1,22 @@
+{
+  "login": {
+    "hero": {
+      "line1": "One family,",
+      "line2": "one story,",
+      "line3": "one shared space.",
+      "subtitle": "KeurTonux helps families organise daily life, pass things on and stay connected."
+    },
+    "tagline": "Technology in the service of family bonds",
+    "name": "Full name",
+    "name_placeholder": "e.g. Jean Dupont",
+    "email": "Email",
+    "email_placeholder": "your@email.com",
+    "password": "Password",
+    "loading": "Loading...",
+    "sign_in": "Sign in",
+    "sign_up": "Sign up",
+    "switch_to_register": "I don't have an account, sign up",
+    "switch_to_login": "I already have an account, sign in",
+    "footer_trust": "Trust & Security"
+  }
+}

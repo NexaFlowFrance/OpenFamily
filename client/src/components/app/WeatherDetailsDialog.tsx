@@ -1,6 +1,8 @@
 import React from 'react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { format, type Locale } from 'date-fns';
+import { useDateLocale } from '../../lib/dateLocale';
 import {
     Cloud,
     CloudDrizzle,
@@ -52,16 +54,21 @@ const weatherIconFor = (code: number) => {
     return Cloud;
 };
 
-const formatHourFromIso = (iso: string | null): string => {
+const formatHourFromIso = (iso: string | null, locale: Locale): string => {
     if (!iso) return '—';
     // Open-Meteo returns local-tz timestamps without a TZ suffix: parsing as
     // Date works for display purposes even though the offset is implicit.
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return '—';
-    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return format(d, 'HH:mm', { locale });
 };
 
-const formatDayLabel = (yyyymmdd: string, isFirst: boolean): string => {
+const formatDayLabel = (
+    yyyymmdd: string,
+    isFirst: boolean,
+    t: TFunction,
+    locale: Locale,
+): string => {
     const d = new Date(`${yyyymmdd}T12:00:00`);
     if (Number.isNaN(d.getTime())) return yyyymmdd;
     const today = new Date();
@@ -69,9 +76,9 @@ const formatDayLabel = (yyyymmdd: string, isFirst: boolean): string => {
     const dayMidnight = new Date(d);
     dayMidnight.setHours(0, 0, 0, 0);
     const diffDays = Math.round((dayMidnight.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
-    if (diffDays === 0) return "Aujourd'hui";
-    if (diffDays === 1) return 'Demain';
-    return format(d, isFirst ? 'EEEE dd MMMM' : 'EEEE dd MMM', { locale: fr });
+    if (diffDays === 0) return t('weatherDetails.today');
+    if (diffDays === 1) return t('weatherDetails.tomorrow');
+    return format(d, isFirst ? 'EEEE dd MMMM' : 'EEEE dd MMM', { locale });
 };
 
 const WeatherDetailsDialog: React.FC<Props> = ({
@@ -81,6 +88,7 @@ const WeatherDetailsDialog: React.FC<Props> = ({
     cityLabel,
     override,
 }) => {
+    const { t } = useTranslation();
     // Only fetch when the dialog is open — saves an Open-Meteo call per page
     // load when the user never opens the modal.
     const weekly = useWeeklyForecast(override, { enabled: open, days: 7 });
@@ -89,26 +97,32 @@ const WeatherDetailsDialog: React.FC<Props> = ({
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Détails météo"
-            description={cityLabel ? `Pour ${cityLabel}` : 'Ville sauvegardée'}
+            title={t('weatherDetails.title')}
+            description={
+                cityLabel
+                    ? t('weatherDetails.descriptionForCity', { city: cityLabel })
+                    : t('weatherDetails.descriptionSaved')
+            }
             className="sm:max-w-2xl"
         >
             <div className="space-y-6">
                 {tomorrow && <TomorrowDetail forecast={tomorrow} />}
 
                 <section>
-                    <h3 className="text-caption font-semibold mb-3">Cette semaine</h3>
+                    <h3 className="text-caption font-semibold mb-3">
+                        {t('weatherDetails.thisWeek')}
+                    </h3>
                     {weekly.isPending ? (
                         <div className="flex items-center gap-2 py-6 text-caption text-muted-foreground">
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Chargement de la semaine...
+                            {t('weatherDetails.loadingWeek')}
                         </div>
                     ) : weekly.isError ? (
                         <p className="flex items-center gap-1 text-micro text-destructive">
                             <AlertCircle className="h-4 w-4" />
                             {weekly.error instanceof Error
                                 ? weekly.error.message
-                                : 'Prévisions indisponibles.'}
+                                : t('weatherDetails.forecastUnavailable')}
                         </p>
                     ) : (
                         <ul className="space-y-2">
@@ -124,13 +138,15 @@ const WeatherDetailsDialog: React.FC<Props> = ({
 };
 
 const TomorrowDetail: React.FC<{ forecast: ForecastDTO }> = ({ forecast }) => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const Icon = weatherIconFor(forecast.weatherCode);
     return (
         <section className="rounded-card border border-border bg-info-soft p-4">
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <p className="text-label text-muted-foreground">
-                        {formatDayLabel(forecast.date, true)}
+                        {formatDayLabel(forecast.date, true, t, locale)}
                     </p>
                     <p className="text-h2 font-semibold text-foreground">{forecast.label}</p>
                 </div>
@@ -139,12 +155,12 @@ const TomorrowDetail: React.FC<{ forecast: ForecastDTO }> = ({ forecast }) => {
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-micro text-muted-foreground">
                 <DetailMetric
                     icon={<Thermometer className="h-3.5 w-3.5" />}
-                    label="Min / Max"
+                    label={t('weatherDetails.minMax')}
                     value={`${Math.round(forecast.tempMin)}° / ${Math.round(forecast.tempMax)}°C`}
                 />
                 <DetailMetric
                     icon={<Droplets className="h-3.5 w-3.5" />}
-                    label="Pluie"
+                    label={t('weatherDetails.rain')}
                     value={`${Math.round(forecast.precipitationProbability)}%`}
                     secondary={
                         forecast.precipitationMm > 0
@@ -154,12 +170,12 @@ const TomorrowDetail: React.FC<{ forecast: ForecastDTO }> = ({ forecast }) => {
                 />
                 <DetailMetric
                     icon={<Wind className="h-3.5 w-3.5" />}
-                    label="Vent"
+                    label={t('weatherDetails.wind')}
                     value={`${Math.round(forecast.windSpeedMax)} km/h`}
                 />
                 <DetailMetric
                     icon={<Cloud className="h-3.5 w-3.5" />}
-                    label="Code"
+                    label={t('weatherDetails.code')}
                     value={forecast.weatherCode.toString()}
                 />
             </div>
@@ -184,6 +200,8 @@ const DetailMetric: React.FC<{
 );
 
 const WeeklyRow: React.FC<{ day: DailyForecastDTO; isFirst: boolean }> = ({ day, isFirst }) => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
     const Icon = weatherIconFor(day.weatherCode);
     return (
         <li className="rounded-card border border-border bg-card p-3">
@@ -191,7 +209,7 @@ const WeeklyRow: React.FC<{ day: DailyForecastDTO; isFirst: boolean }> = ({ day,
                 <Icon className="h-7 w-7 text-info shrink-0" />
                 <div className="flex-1 min-w-0">
                     <p className="text-caption font-semibold capitalize truncate">
-                        {formatDayLabel(day.date, isFirst)}
+                        {formatDayLabel(day.date, isFirst, t, locale)}
                     </p>
                     <p className="text-micro text-muted-foreground truncate">{day.label}</p>
                 </div>
@@ -216,22 +234,24 @@ const WeeklyRow: React.FC<{ day: DailyForecastDTO; isFirst: boolean }> = ({ day,
                     {day.sunrise && (
                         <span className="flex items-center gap-1">
                             <Sunrise className="h-3 w-3" />
-                            {formatHourFromIso(day.sunrise)}
+                            {formatHourFromIso(day.sunrise, locale)}
                         </span>
                     )}
                     {day.sunset && (
                         <span className="flex items-center gap-1">
                             <Sunset className="h-3 w-3" />
-                            {formatHourFromIso(day.sunset)}
+                            {formatHourFromIso(day.sunset, locale)}
                         </span>
                     )}
                     {day.uvIndexMax !== null && (
-                        <span>UV max&nbsp;: {day.uvIndexMax.toFixed(1)}</span>
+                        <span>
+                            {t('weatherDetails.uvMax')}&nbsp;: {day.uvIndexMax.toFixed(1)}
+                        </span>
                     )}
                     {day.apparentTempMax !== day.tempMax && (
                         <span>
-                            Ressenti&nbsp;: {Math.round(day.apparentTempMin)}° /{' '}
-                            {Math.round(day.apparentTempMax)}°
+                            {t('weatherDetails.feelsLike')}&nbsp;: {Math.round(day.apparentTempMin)}
+                            ° / {Math.round(day.apparentTempMax)}°
                         </span>
                     )}
                 </div>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import {
     Plus,
@@ -43,7 +44,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useDateLocale } from '../lib/dateLocale';
 import { CHART_COLOR_PRESETS } from '../design/colorPresets';
 import { useCurrency } from '../lib/useCurrency';
 
@@ -94,29 +95,8 @@ interface MonthlyStats {
     balance: number;
 }
 
-const MONTH_SHORT = [
-    'Jan',
-    'Fév',
-    'Mar',
-    'Avr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Aoû',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Déc',
-];
-
-const CATEGORIES = [
-    { value: 'Alimentation', label: 'Alimentation' },
-    { value: 'Santé', label: 'Santé' },
-    { value: 'Enfants', label: 'Enfants' },
-    { value: 'Maison', label: 'Maison' },
-    { value: 'Loisirs', label: 'Loisirs' },
-    { value: 'Autre', label: 'Autre' },
-];
+// Stored DATA values — labels resolved at render time via i18n.
+const CATEGORY_VALUES = ['Alimentation', 'Santé', 'Enfants', 'Maison', 'Loisirs', 'Autre'] as const;
 
 const parsePositiveAmount = (value: string): number => Number(value.replace(',', '.'));
 const toNumber = (value: unknown): number => {
@@ -131,6 +111,12 @@ const toNumber = (value: unknown): number => {
 };
 
 const Budget: React.FC = () => {
+    const { t } = useTranslation();
+    const locale = useDateLocale();
+    const categoryOptions = CATEGORY_VALUES.map((value) => ({
+        value,
+        label: t('budget.categories.' + value, { defaultValue: value }),
+    }));
     const { format: formatMoney, symbol: currencySymbol } = useCurrency();
     const [entries, setEntries] = useState<BudgetEntry[]>([]);
     const [limits, setLimits] = useState<BudgetLimit[]>([]);
@@ -297,7 +283,7 @@ const Budget: React.FC = () => {
         setFormError('');
         const parsedAmount = parsePositiveAmount(formData.amount);
         if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
-            setFormError('Le montant doit être un nombre positif.');
+            setFormError(t('budget.errors.amount_positive'));
             return;
         }
 
@@ -318,9 +304,7 @@ const Budget: React.FC = () => {
             loadStats();
         } catch (error) {
             console.error('Failed to save entry:', error);
-            setFormError(
-                error instanceof Error ? error.message : "Impossible d'enregistrer cette entrée.",
-            );
+            setFormError(error instanceof Error ? error.message : t('budget.errors.save_entry'));
         }
     };
 
@@ -329,7 +313,7 @@ const Budget: React.FC = () => {
         setLimitError('');
         const parsedLimit = parsePositiveAmount(limitFormData.monthly_limit);
         if (!Number.isFinite(parsedLimit) || parsedLimit <= 0) {
-            setLimitError('La limite doit être un nombre positif.');
+            setLimitError(t('budget.errors.limit_positive'));
             return;
         }
 
@@ -345,14 +329,12 @@ const Budget: React.FC = () => {
             loadLimits();
         } catch (error) {
             console.error('Failed to save limit:', error);
-            setLimitError(
-                error instanceof Error ? error.message : 'Impossible de définir cette limite.',
-            );
+            setLimitError(error instanceof Error ? error.message : t('budget.errors.save_limit'));
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer cette entrée ?')) return;
+        if (!confirm(t('budget.confirm_delete'))) return;
         try {
             await api.delete(`/api/budget/entries/${id}`);
             loadEntries();
@@ -436,7 +418,7 @@ const Budget: React.FC = () => {
 
     const chartData =
         stats?.byCategory.map((cat) => ({
-            name: cat.category,
+            name: t('budget.categories.' + cat.category, { defaultValue: cat.category }),
             montant:
                 typeof cat.category_total === 'string'
                     ? parseFloat(cat.category_total)
@@ -449,7 +431,7 @@ const Budget: React.FC = () => {
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
                     <p className="text-muted-foreground font-medium animate-pulse">
-                        Chargement du budget...
+                        {t('budget.loading')}
                     </p>
                 </div>
             </div>
@@ -459,7 +441,7 @@ const Budget: React.FC = () => {
     const tabs = [
         {
             value: 'entries',
-            label: 'Entrées',
+            label: t('budget.tabs.entries'),
             content: (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -469,8 +451,11 @@ const Budget: React.FC = () => {
                                     value={filterMember}
                                     onValueChange={(value) => setFilterMember(value)}
                                     options={[
-                                        { value: '', label: 'Tous les membres' },
-                                        { value: '__unassigned__', label: 'Non assignées' },
+                                        { value: '', label: t('budget.filter.all_members') },
+                                        {
+                                            value: '__unassigned__',
+                                            label: t('budget.filter.unassigned'),
+                                        },
                                         ...familyMembers.map((m) => ({
                                             value: m.id,
                                             label: m.name,
@@ -482,7 +467,7 @@ const Budget: React.FC = () => {
                         <div className="flex gap-2">
                             <Button variant="secondary" onClick={() => setScanDialogOpen(true)}>
                                 <ScanLine className="w-4 h-4 mr-2" />
-                                Scanner facture
+                                {t('budget.scan_receipt')}
                             </Button>
                             <Button
                                 onClick={() => {
@@ -491,7 +476,7 @@ const Budget: React.FC = () => {
                                 }}
                             >
                                 <Plus className="w-4 h-4 mr-2" />
-                                Nouvelle entrée
+                                {t('budget.new_entry')}
                             </Button>
                         </div>
                     </div>
@@ -502,7 +487,7 @@ const Budget: React.FC = () => {
                                 <CardContent className="p-8 text-center">
                                     <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
                                     <p className="text-muted-foreground">
-                                        Aucune entrée pour ce mois
+                                        {t('budget.empty_month')}
                                     </p>
                                 </CardContent>
                             </Card>
@@ -518,7 +503,9 @@ const Budget: React.FC = () => {
                                                             entry.is_expense ? 'danger' : 'success'
                                                         }
                                                     >
-                                                        {entry.category}
+                                                        {t('budget.categories.' + entry.category, {
+                                                            defaultValue: entry.category,
+                                                        })}
                                                     </Badge>
                                                     {entry.assigned_to_name && (
                                                         <span
@@ -536,7 +523,7 @@ const Budget: React.FC = () => {
                                                         {format(
                                                             new Date(entry.date),
                                                             'dd MMM yyyy',
-                                                            { locale: fr },
+                                                            { locale },
                                                         )}
                                                     </span>
                                                 </div>
@@ -583,16 +570,16 @@ const Budget: React.FC = () => {
         },
         {
             value: 'statistics',
-            label: 'Statistiques',
+            label: t('budget.tabs.statistics'),
             content: (
                 <div className="space-y-6">
                     <div className="flex items-center justify-between gap-3 rounded-card border border-dashed border-primary/40 bg-primary/5 px-4 py-3">
                         <div className="min-w-0">
                             <p className="text-caption font-semibold text-foreground">
-                                Analyse IA du mois
+                                {t('budget.stats.ai_card_title')}
                             </p>
                             <p className="text-label-sm text-muted-foreground">
-                                Diagnostic + pistes d'économies + recommandations actionnables.
+                                {t('budget.stats.ai_card_desc')}
                             </p>
                         </div>
                         <Button
@@ -603,7 +590,7 @@ const Budget: React.FC = () => {
                             }
                         >
                             <Sparkles className="w-4 h-4 mr-2" />
-                            Analyser
+                            {t('budget.stats.analyze')}
                         </Button>
                     </div>
                     {stats && (
@@ -614,7 +601,7 @@ const Budget: React.FC = () => {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-label text-muted-foreground mb-1">
-                                                    Dépenses
+                                                    {t('budget.stats.expenses')}
                                                 </p>
                                                 <p className="text-2xl font-bold text-destructive">
                                                     {formatMoney(stats.totalExpenses)}
@@ -629,7 +616,7 @@ const Budget: React.FC = () => {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-label text-muted-foreground mb-1">
-                                                    Revenus
+                                                    {t('budget.stats.income')}
                                                 </p>
                                                 <p className="text-2xl font-bold text-success">
                                                     {formatMoney(stats.totalIncome)}
@@ -650,7 +637,7 @@ const Budget: React.FC = () => {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-label text-muted-foreground mb-1">
-                                                    Solde
+                                                    {t('budget.stats.balance')}
                                                 </p>
                                                 <p
                                                     className={`text-2xl font-bold ${
@@ -672,7 +659,7 @@ const Budget: React.FC = () => {
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <Card>
                                         <CardHeader>
-                                            <CardTitle>Dépenses par catégorie</CardTitle>
+                                            <CardTitle>{t('budget.stats.by_category')}</CardTitle>
                                         </CardHeader>
                                         <CardContent>
                                             <ResponsiveContainer width="100%" height={300}>
@@ -701,7 +688,7 @@ const Budget: React.FC = () => {
                                     </Card>
                                     <Card>
                                         <CardHeader>
-                                            <CardTitle>Répartition</CardTitle>
+                                            <CardTitle>{t('budget.stats.distribution')}</CardTitle>
                                         </CardHeader>
                                         <CardContent>
                                             <ResponsiveContainer width="100%" height={300}>
@@ -763,7 +750,7 @@ const Budget: React.FC = () => {
                                         <Card>
                                             <CardHeader>
                                                 <CardTitle>
-                                                    Dépenses par membre et catégorie
+                                                    {t('budget.stats.by_member_category')}
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent>
@@ -783,7 +770,13 @@ const Budget: React.FC = () => {
                                                                 formatMoney(value)
                                                             }
                                                         />
-                                                        <Legend />
+                                                        <Legend
+                                                            formatter={(value: string) =>
+                                                                t('budget.categories.' + value, {
+                                                                    defaultValue: value,
+                                                                })
+                                                            }
+                                                        />
                                                         {memberCategories.map((cat, i) => (
                                                             <Bar
                                                                 key={cat}
@@ -807,15 +800,23 @@ const Budget: React.FC = () => {
                             {monthlyStats.length > 0 && (
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Évolution mensuelle {currentYear}</CardTitle>
+                                        <CardTitle>
+                                            {t('budget.stats.monthly_evolution', {
+                                                year: currentYear,
+                                            })}
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <ResponsiveContainer width="100%" height={300}>
                                             <BarChart
                                                 data={monthlyStats.map((m) => ({
-                                                    name: MONTH_SHORT[m.month - 1],
-                                                    Dépenses: m.totalExpenses,
-                                                    Revenus: m.totalIncome,
+                                                    name: format(
+                                                        new Date(currentYear, m.month - 1, 1),
+                                                        'MMM',
+                                                        { locale },
+                                                    ),
+                                                    [t('budget.chart.expenses')]: m.totalExpenses,
+                                                    [t('budget.chart.income')]: m.totalIncome,
                                                 }))}
                                             >
                                                 <CartesianGrid strokeDasharray="3 3" />
@@ -833,8 +834,14 @@ const Budget: React.FC = () => {
                                                     }
                                                 />
                                                 <Legend />
-                                                <Bar dataKey="Dépenses" fill="#ef4444" />
-                                                <Bar dataKey="Revenus" fill="#10b981" />
+                                                <Bar
+                                                    dataKey={t('budget.chart.expenses')}
+                                                    fill="#ef4444"
+                                                />
+                                                <Bar
+                                                    dataKey={t('budget.chart.income')}
+                                                    fill="#10b981"
+                                                />
                                             </BarChart>
                                         </ResponsiveContainer>
                                     </CardContent>
@@ -847,11 +854,11 @@ const Budget: React.FC = () => {
         },
         {
             value: 'limits',
-            label: 'Limites',
+            label: t('budget.tabs.limits'),
             content: (
                 <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                        <h3 className="text-h2 font-semibold">Limites mensuelles</h3>
+                        <h3 className="text-h2 font-semibold">{t('budget.limitsTab.title')}</h3>
                         <Button
                             onClick={() => {
                                 resetLimitForm();
@@ -859,12 +866,12 @@ const Budget: React.FC = () => {
                             }}
                         >
                             <Plus className="w-4 h-4 mr-2" />
-                            Définir une limite
+                            {t('budget.limitsTab.define')}
                         </Button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {CATEGORIES.map((cat) => {
+                        {categoryOptions.map((cat) => {
                             const spending = getCategorySpending(cat.value);
                             const limit = getCategoryLimit(cat.value);
                             const percentage = limit > 0 ? (spending / limit) * 100 : 0;
@@ -885,7 +892,7 @@ const Budget: React.FC = () => {
                                         <div className="space-y-2">
                                             <div className="flex justify-between text-body-sm">
                                                 <span className="text-muted-foreground">
-                                                    Dépensé:
+                                                    {t('budget.limitsTab.spent')}
                                                 </span>
                                                 <span
                                                     className={`font-medium ${isOverLimit ? 'text-destructive' : ''}`}
@@ -895,10 +902,12 @@ const Budget: React.FC = () => {
                                             </div>
                                             <div className="flex justify-between text-body-sm">
                                                 <span className="text-muted-foreground">
-                                                    Limite:
+                                                    {t('budget.limitsTab.limit')}
                                                 </span>
                                                 <span className="font-medium">
-                                                    {limit > 0 ? formatMoney(limit) : 'Non définie'}
+                                                    {limit > 0
+                                                        ? formatMoney(limit)
+                                                        : t('budget.limitsTab.not_defined')}
                                                 </span>
                                             </div>
                                             {limit > 0 && (
@@ -916,7 +925,9 @@ const Budget: React.FC = () => {
                                                         />
                                                     </div>
                                                     <p className="text-label text-muted-foreground mt-1">
-                                                        {percentage.toFixed(0)}% utilisé
+                                                        {t('budget.limitsTab.used', {
+                                                            percentage: percentage.toFixed(0),
+                                                        })}
                                                     </p>
                                                 </div>
                                             )}
@@ -935,10 +946,8 @@ const Budget: React.FC = () => {
         <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-h1 mb-1">Budget</h1>
-                    <p className="text-muted-foreground text-body">
-                        Suivez vos dépenses et revenus
-                    </p>
+                    <h1 className="text-h1 mb-1">{t('budget.title')}</h1>
+                    <p className="text-muted-foreground text-body">{t('budget.subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
@@ -949,7 +958,7 @@ const Budget: React.FC = () => {
                     </button>
                     <span className="text-h2 font-semibold min-w-[160px] text-center">
                         {format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', {
-                            locale: fr,
+                            locale,
                         })}
                     </span>
                     <button
@@ -967,8 +976,8 @@ const Budget: React.FC = () => {
             <Dialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
-                title={editingEntry ? "Modifier l'entrée" : 'Nouvelle entrée'}
-                description="Remplissez les informations de l'entrée budgétaire"
+                title={editingEntry ? t('budget.form.edit_title') : t('budget.form.new_title')}
+                description={t('budget.form.description')}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {formError ? (
@@ -984,7 +993,7 @@ const Budget: React.FC = () => {
                                 onChange={() => setFormData({ ...formData, is_expense: true })}
                                 className="w-4 h-4"
                             />
-                            <span className="text-body-sm">Dépense</span>
+                            <span className="text-body-sm">{t('budget.form.expense')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
@@ -993,30 +1002,30 @@ const Budget: React.FC = () => {
                                 onChange={() => setFormData({ ...formData, is_expense: false })}
                                 className="w-4 h-4"
                             />
-                            <span className="text-body-sm">Revenu</span>
+                            <span className="text-body-sm">{t('budget.form.income')}</span>
                         </label>
                     </div>
                     <div>
                         <Input
-                            label="Catégorie"
+                            label={t('budget.form.category')}
                             value={formData.category}
                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                            placeholder="Alimentation, Carburant…"
+                            placeholder={t('budget.form.category_placeholder')}
                             list="budget-category-suggestions"
                             maxLength={50}
                             required
                         />
                         <datalist id="budget-category-suggestions">
-                            {CATEGORIES.map((c) => (
+                            {categoryOptions.map((c) => (
                                 <option key={c.value} value={c.value} />
                             ))}
                         </datalist>
                         <p className="mt-1.5 text-micro text-muted-foreground">
-                            Choisis dans la liste ou tape ta propre catégorie.
+                            {t('budget.form.category_hint')}
                         </p>
                     </div>
                     <Input
-                        label={`Montant (${currencySymbol})`}
+                        label={t('budget.form.amount', { symbol: currencySymbol })}
                         type="number"
                         step="0.01"
                         value={formData.amount}
@@ -1025,23 +1034,23 @@ const Budget: React.FC = () => {
                         placeholder="0.00"
                     />
                     <Input
-                        label="Date"
+                        label={t('budget.form.date')}
                         type="date"
                         value={formData.date}
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                         required
                     />
                     <Textarea
-                        label="Description (optionnel)"
+                        label={t('budget.form.description_label')}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Détails..."
+                        placeholder={t('budget.form.description_placeholder')}
                         rows={2}
                     />
                     {familyMembers.length > 0 && (
                         <div>
                             <label className="block text-label font-medium text-foreground mb-1.5">
-                                Attribuer à (optionnel)
+                                {t('budget.form.assign_to')}
                             </label>
                             <Select
                                 value={formData.assigned_to}
@@ -1049,7 +1058,7 @@ const Budget: React.FC = () => {
                                     setFormData({ ...formData, assigned_to: value })
                                 }
                                 options={[
-                                    { value: '', label: 'Non assigné' },
+                                    { value: '', label: t('budget.form.unassigned') },
                                     ...familyMembers.map((m) => ({ value: m.id, label: m.name })),
                                 ]}
                             />
@@ -1061,9 +1070,11 @@ const Budget: React.FC = () => {
                             variant="secondary"
                             onClick={() => setDialogOpen(false)}
                         >
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
-                        <Button type="submit">{editingEntry ? 'Enregistrer' : 'Créer'}</Button>
+                        <Button type="submit">
+                            {editingEntry ? t('common.save') : t('budget.form.create')}
+                        </Button>
                     </div>
                 </form>
             </Dialog>
@@ -1072,8 +1083,8 @@ const Budget: React.FC = () => {
             <Dialog
                 open={limitDialogOpen}
                 onOpenChange={setLimitDialogOpen}
-                title="Définir une limite"
-                description="Définissez une limite mensuelle pour une catégorie"
+                title={t('budget.limitForm.title')}
+                description={t('budget.limitForm.description')}
             >
                 <form onSubmit={handleLimitSubmit} className="space-y-4">
                     {limitError ? (
@@ -1083,18 +1094,18 @@ const Budget: React.FC = () => {
                     ) : null}
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Catégorie
+                            {t('budget.limitForm.category')}
                         </label>
                         <Select
                             value={limitFormData.category}
                             onValueChange={(value) =>
                                 setLimitFormData({ ...limitFormData, category: value })
                             }
-                            options={CATEGORIES}
+                            options={categoryOptions}
                         />
                     </div>
                     <Input
-                        label={`Limite mensuelle (${currencySymbol})`}
+                        label={t('budget.limitForm.monthly_limit', { symbol: currencySymbol })}
                         type="number"
                         step="0.01"
                         value={limitFormData.monthly_limit}
@@ -1110,9 +1121,9 @@ const Budget: React.FC = () => {
                             variant="secondary"
                             onClick={() => setLimitDialogOpen(false)}
                         >
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
-                        <Button type="submit">Définir</Button>
+                        <Button type="submit">{t('budget.limitForm.define')}</Button>
                     </div>
                 </form>
             </Dialog>
@@ -1129,7 +1140,7 @@ const Budget: React.FC = () => {
                 month={currentMonth}
                 year={currentYear}
                 periodLabel={format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', {
-                    locale: fr,
+                    locale,
                 })}
             />
         </div>

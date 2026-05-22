@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -70,6 +71,7 @@ const fromEquipment = (e: Equipment): FormState => ({
 });
 
 const EquipmentDialog: React.FC<Props> = ({ open, onOpenChange, equipment }) => {
+    const { t } = useTranslation();
     const isEdit = !!equipment;
     const createMut = useCreateEquipment();
     const updateMut = useUpdateEquipment();
@@ -90,14 +92,14 @@ const EquipmentDialog: React.FC<Props> = ({ open, onOpenChange, equipment }) => 
         e.preventDefault();
         setError('');
         if (!form.name.trim()) {
-            setError("Le nom de l'équipement est requis.");
+            setError(t('house.equipment.dialog.nameRequired'));
             return;
         }
         const priceParsed = form.purchase_price.trim()
             ? Number(form.purchase_price.replace(',', '.'))
             : undefined;
         if (priceParsed !== undefined && (!Number.isFinite(priceParsed) || priceParsed < 0)) {
-            setError("Le prix d'achat doit être un nombre positif.");
+            setError(t('house.equipment.dialog.priceInvalid'));
             return;
         }
         const body = {
@@ -121,7 +123,7 @@ const EquipmentDialog: React.FC<Props> = ({ open, onOpenChange, equipment }) => 
             }
             onOpenChange(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setError(err instanceof Error ? err.message : t('house.common.saveError'));
         }
     };
 
@@ -131,12 +133,12 @@ const EquipmentDialog: React.FC<Props> = ({ open, onOpenChange, equipment }) => 
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? "Modifier l'équipement" : 'Ajouter un équipement'}
-            description={
+            title={
                 isEdit
-                    ? equipment?.name
-                    : 'Renseigne les informations principales — tu pourras les compléter plus tard.'
+                    ? t('house.equipment.dialog.editTitle')
+                    : t('house.equipment.dialog.createTitle')
             }
+            description={isEdit ? equipment?.name : t('house.equipment.dialog.createDescription')}
             className="sm:max-w-xl"
         >
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -147,51 +149,54 @@ const EquipmentDialog: React.FC<Props> = ({ open, onOpenChange, equipment }) => 
                     </p>
                 )}
                 <Input
-                    label="Nom *"
+                    label={t('house.equipment.dialog.name')}
                     value={form.name}
                     onChange={(e) => handleChange('name', e.target.value)}
-                    placeholder="Ex: Chaudière gaz"
+                    placeholder={t('house.equipment.dialog.namePlaceholder')}
                     required
                 />
                 <div>
                     <label className="block text-label font-medium text-foreground mb-1.5">
-                        Catégorie *
+                        {t('house.equipment.dialog.category')}
                     </label>
                     <Select
                         value={form.category}
                         onValueChange={(v) => handleChange('category', v as EquipmentCategory)}
-                        options={EQUIPMENT_CATEGORIES.map((c) => ({ value: c, label: c }))}
+                        options={EQUIPMENT_CATEGORIES.map((c) => ({
+                            value: c,
+                            label: t('domain.equipmentCategory.' + c, { defaultValue: c }),
+                        }))}
                     />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Marque"
+                        label={t('house.equipment.dialog.brand')}
                         value={form.brand}
                         onChange={(e) => handleChange('brand', e.target.value)}
-                        placeholder="Viessmann"
+                        placeholder={t('house.equipment.dialog.brandPlaceholder')}
                     />
                     <Input
-                        label="Modèle"
+                        label={t('house.equipment.dialog.model')}
                         value={form.model}
                         onChange={(e) => handleChange('model', e.target.value)}
-                        placeholder="Vitodens 100"
+                        placeholder={t('house.equipment.dialog.modelPlaceholder')}
                     />
                 </div>
                 <Input
-                    label="N° de série"
+                    label={t('house.equipment.dialog.serialNumber')}
                     value={form.serial_number}
                     onChange={(e) => handleChange('serial_number', e.target.value)}
-                    placeholder="Optionnel — utile pour la garantie"
+                    placeholder={t('house.equipment.dialog.serialNumberPlaceholder')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Date d'achat"
+                        label={t('house.equipment.dialog.purchaseDate')}
                         type="date"
                         value={form.purchase_date}
                         onChange={(e) => handleChange('purchase_date', e.target.value)}
                     />
                     <Input
-                        label="Prix d'achat"
+                        label={t('house.equipment.dialog.purchasePrice')}
                         type="number"
                         step="0.01"
                         value={form.purchase_price}
@@ -201,38 +206,38 @@ const EquipmentDialog: React.FC<Props> = ({ open, onOpenChange, equipment }) => 
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                        label="Garantie jusqu'au"
+                        label={t('house.equipment.dialog.warrantyUntil')}
                         type="date"
                         value={form.warranty_until}
                         onChange={(e) => handleChange('warranty_until', e.target.value)}
                     />
                     <Input
-                        label="Pièce / lieu"
+                        label={t('house.equipment.dialog.locationRoom')}
                         value={form.location_room}
                         onChange={(e) => handleChange('location_room', e.target.value)}
-                        placeholder="Sous-sol, garage…"
+                        placeholder={t('house.equipment.dialog.locationRoomPlaceholder')}
                     />
                 </div>
                 <Input
-                    label="Image (URL)"
+                    label={t('house.equipment.dialog.imageUrl')}
                     value={form.image_url}
                     onChange={(e) => handleChange('image_url', e.target.value)}
-                    placeholder="https://…  (l'upload arrivera plus tard)"
+                    placeholder={t('house.equipment.dialog.imageUrlPlaceholder')}
                 />
                 <Textarea
-                    label="Notes"
+                    label={t('house.equipment.dialog.notes')}
                     value={form.notes}
                     onChange={(e) => handleChange('notes', e.target.value)}
-                    placeholder="Numéro client SAV, particularités…"
+                    placeholder={t('house.equipment.dialog.notesPlaceholder')}
                     rows={3}
                 />
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Annuler
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={submitting}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? 'Enregistrer' : 'Créer'}
+                        {isEdit ? t('common.save') : t('house.common.create')}
                     </Button>
                 </div>
             </form>

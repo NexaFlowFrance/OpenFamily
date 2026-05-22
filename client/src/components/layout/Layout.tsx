@@ -183,7 +183,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 variant="secondary"
                                 size="icon"
                                 onClick={toggleTheme}
-                                aria-label="Changer le theme"
+                                aria-label={
+                                    actualTheme === 'dark'
+                                        ? t('header.toggle_light')
+                                        : t('header.toggle_dark')
+                                }
                                 className="flex-1"
                             >
                                 {actualTheme === 'dark' ? (
@@ -197,11 +201,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 size="icon"
                                 onClick={toggleHideAmounts}
                                 aria-label={
-                                    hideAmounts ? 'Afficher les montants' : 'Masquer les montants'
+                                    hideAmounts
+                                        ? t('header.show_amounts')
+                                        : t('header.hide_amounts')
                                 }
                                 aria-pressed={hideAmounts}
                                 title={
-                                    hideAmounts ? 'Afficher les montants' : 'Masquer les montants'
+                                    hideAmounts
+                                        ? t('header.show_amounts')
+                                        : t('header.hide_amounts')
                                 }
                                 className="flex-1"
                             >
@@ -215,7 +223,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 variant="ghost"
                                 size="icon"
                                 onClick={logout}
-                                aria-label="Se deconnecter"
+                                aria-label={t('header.logout')}
                                 className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
                                 <LogOut className="h-4 w-4" />
@@ -236,7 +244,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     setSidebarOpen(true);
                                 }}
                                 className="rounded-input p-2 text-muted-foreground hover:bg-surface-2 lg:hidden"
-                                aria-label="Ouvrir le menu"
+                                aria-label={t('header.open_menu')}
                             >
                                 <Menu className="h-5 w-5" />
                             </button>
@@ -256,11 +264,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 size="icon"
                                 onClick={toggleHideAmounts}
                                 aria-label={
-                                    hideAmounts ? 'Afficher les montants' : 'Masquer les montants'
+                                    hideAmounts
+                                        ? t('header.show_amounts')
+                                        : t('header.hide_amounts')
                                 }
                                 aria-pressed={hideAmounts}
                                 title={
-                                    hideAmounts ? 'Afficher les montants' : 'Masquer les montants'
+                                    hideAmounts
+                                        ? t('header.show_amounts')
+                                        : t('header.hide_amounts')
                                 }
                             >
                                 {hideAmounts ? (
@@ -275,7 +287,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     variant="secondary"
                                     size="icon"
                                     onClick={toggleTheme}
-                                    aria-label="Changer le theme"
+                                    aria-label={
+                                        actualTheme === 'dark'
+                                            ? t('header.toggle_light')
+                                            : t('header.toggle_dark')
+                                    }
                                 >
                                     {actualTheme === 'dark' ? (
                                         <Sun className="h-4 w-4" />
@@ -287,7 +303,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     variant="ghost"
                                     size="icon"
                                     onClick={logout}
-                                    aria-label="Se deconnecter"
+                                    aria-label={t('header.logout')}
                                     className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                                 >
                                     <LogOut className="h-4 w-4" />
@@ -309,7 +325,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     setQuickActionsOpen((open) => !open);
                 }}
                 className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98] lg:hidden"
-                aria-label="Actions rapides"
+                aria-label={t('quick_actions.open')}
             >
                 <Plus className="h-6 w-6" />
             </button>

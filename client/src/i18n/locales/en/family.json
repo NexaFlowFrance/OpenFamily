@@ -1,0 +1,75 @@
+{
+  "family": {
+    "title": "Family",
+    "subtitle": "Manage your family members",
+    "loading": "Loading family...",
+    "add_member": "Add a member",
+    "empty": "No family members. Add your first member!",
+    "roles": {
+      "Parent": "Parent",
+      "Enfant": "Child",
+      "Etudiant": "Student",
+      "Autre": "Other"
+    },
+    "regimes": {
+      "unspecified": "— Unspecified —",
+      "omnivore": "Omnivore",
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "halal": "Halal",
+      "kosher": "Kosher",
+      "no_pork": "No pork"
+    },
+    "spice": {
+      "unspecified": "— Unspecified —",
+      "none": "No spice",
+      "mild": "Mild",
+      "medium": "Medium",
+      "hot": "Hot"
+    },
+    "errors": {
+      "load": "Unable to load the family.",
+      "save": "Unable to save this member.",
+      "delete": "Unable to delete this member."
+    },
+    "confirm_delete": "Are you sure you want to delete this family member?",
+    "card": {
+      "age": "{{count}} years old",
+      "health": "Health",
+      "allergies": "Allergies:",
+      "medications": "Medications:",
+      "emergency_contact": "Emergency contact"
+    },
+    "form": {
+      "edit_title": "Edit member",
+      "new_title": "Add a member",
+      "description": "Fill in the family member's details",
+      "name": "Name",
+      "name_placeholder": "E.g. Marie Dupont",
+      "role": "Role",
+      "color": "Color",
+      "birthdate": "Date of birth (optional)",
+      "health_section": "Health information",
+      "allergies": "Allergies (comma-separated)",
+      "allergies_placeholder": "E.g. Peanuts, Lactose",
+      "medications": "Medications (comma-separated)",
+      "medications_placeholder": "E.g. Aspirin, Insulin",
+      "emergency_section": "Emergency contact",
+      "contact_name": "Contact name",
+      "contact_name_placeholder": "E.g. Jean Dupont",
+      "contact_phone": "Contact phone",
+      "contact_phone_placeholder": "E.g. +33 6 12 34 56 78",
+      "dietary_section": "Dietary preferences",
+      "dietary_hint": "(used by the recipe AI)",
+      "regime": "Diet",
+      "spice_level": "Spice level",
+      "dislikes": "Dislikes (comma-separated)",
+      "dislikes_placeholder": "E.g. Eggplant, Cilantro",
+      "favorites": "Favorite dishes / foods",
+      "favorites_placeholder": "E.g. Chicken yassa, Mafé, Pasta",
+      "notes": "Notes (optional)",
+      "notes_placeholder": "Additional notes...",
+      "add": "Add"
+    }
+  }
+}

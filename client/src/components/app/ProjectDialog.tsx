@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -67,6 +68,7 @@ const fromProject = (p: Project): FormState => ({
 });
 
 const ProjectDialog: React.FC<Props> = ({ open, onOpenChange, project }) => {
+    const { t } = useTranslation();
     const isEdit = !!project;
     const createMut = useCreateProject();
     const updateMut = useUpdateProject();
@@ -84,14 +86,14 @@ const ProjectDialog: React.FC<Props> = ({ open, onOpenChange, project }) => {
         e.preventDefault();
         setError('');
         if (!form.name.trim()) {
-            setError('Le nom du projet est requis.');
+            setError(t('house.project.dialog.nameRequired'));
             return;
         }
         let plannedBudget: number | null = null;
         if (form.planned_budget.trim()) {
             const n = Number(form.planned_budget.replace(',', '.'));
             if (!Number.isFinite(n) || n < 0) {
-                setError('Le budget prévu doit être un nombre positif.');
+                setError(t('house.project.dialog.budgetInvalid'));
                 return;
             }
             plannedBudget = n;
@@ -115,7 +117,7 @@ const ProjectDialog: React.FC<Props> = ({ open, onOpenChange, project }) => {
             }
             onOpenChange(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setError(err instanceof Error ? err.message : t('house.common.saveError'));
         }
     };
 
@@ -125,12 +127,10 @@ const ProjectDialog: React.FC<Props> = ({ open, onOpenChange, project }) => {
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? 'Modifier le projet' : 'Nouveau projet'}
-            description={
-                isEdit
-                    ? project?.name
-                    : 'Rénovation cuisine, peinture, jardin, sécurité… tout ce qui demande planning + budget + suivi.'
+            title={
+                isEdit ? t('house.project.dialog.editTitle') : t('house.project.dialog.createTitle')
             }
+            description={isEdit ? project?.name : t('house.project.dialog.createDescription')}
             className="sm:max-w-xl"
         >
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,85 +141,91 @@ const ProjectDialog: React.FC<Props> = ({ open, onOpenChange, project }) => {
                     </p>
                 )}
                 <Input
-                    label="Nom *"
+                    label={t('house.project.dialog.name')}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Ex: Refaire la cuisine"
+                    placeholder={t('house.project.dialog.namePlaceholder')}
                     required
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Catégorie *
+                            {t('house.project.dialog.category')}
                         </label>
                         <Select
                             value={form.category}
                             onValueChange={(v) =>
                                 setForm({ ...form, category: v as ProjectCategory })
                             }
-                            options={PROJECT_CATEGORIES.map((c) => ({ value: c, label: c }))}
+                            options={PROJECT_CATEGORIES.map((c) => ({
+                                value: c,
+                                label: t('domain.projectCategory.' + c, { defaultValue: c }),
+                            }))}
                         />
                     </div>
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Statut
+                            {t('house.project.dialog.status')}
                         </label>
                         <Select
                             value={form.status}
                             onValueChange={(v) => setForm({ ...form, status: v as ProjectStatus })}
-                            options={PROJECT_STATUSES.map((s) => ({ value: s, label: s }))}
+                            options={PROJECT_STATUSES.map((s) => ({
+                                value: s,
+                                label: t('domain.projectStatus.' + s, { defaultValue: s }),
+                            }))}
                         />
                     </div>
                 </div>
                 <Textarea
-                    label="Description"
+                    label={t('house.project.dialog.description')}
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    placeholder="Le pourquoi du projet, le périmètre…"
+                    placeholder={t('house.project.dialog.descriptionPlaceholder')}
                     rows={3}
                 />
                 <Input
-                    label="Budget prévu"
+                    label={t('house.project.dialog.plannedBudget')}
                     type="number"
                     step="0.01"
                     value={form.planned_budget}
                     onChange={(e) => setForm({ ...form, planned_budget: e.target.value })}
-                    placeholder="Optionnel — ex: 12000"
+                    placeholder={t('house.project.dialog.plannedBudgetPlaceholder')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Input
-                        label="Début"
+                        label={t('house.project.dialog.start')}
                         type="date"
                         value={form.started_at}
                         onChange={(e) => setForm({ ...form, started_at: e.target.value })}
                     />
                     <Input
-                        label="Cible"
+                        label={t('house.project.dialog.target')}
                         type="date"
                         value={form.target_end}
                         onChange={(e) => setForm({ ...form, target_end: e.target.value })}
                     />
                     <Input
-                        label="Terminé le"
+                        label={t('house.project.dialog.completedOn')}
                         type="date"
                         value={form.completed_at}
                         onChange={(e) => setForm({ ...form, completed_at: e.target.value })}
                     />
                 </div>
                 <Textarea
-                    label="Notes"
+                    label={t('house.project.dialog.notes')}
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    placeholder="Décisions, contacts, idées…"
+                    placeholder={t('house.project.dialog.notesPlaceholder')}
                     rows={2}
                 />
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                        Annuler
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={submitting}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? 'Enregistrer' : 'Créer'}
+                        {isEdit ? t('common.save') : t('house.common.create')}
                     </Button>
                 </div>
             </form>

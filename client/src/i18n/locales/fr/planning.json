@@ -1,0 +1,110 @@
+{
+  "planning": {
+    "loading": "Chargement du planning...",
+    "title": "Planning Hebdomadaire",
+    "subtitle": "Horaires recurents de travail et emploi du temps scolaire, semaine par semaine.",
+    "new_schedule": "Nouvel horaire",
+    "no_members": {
+      "title": "Ajoutez d'abord vos membres",
+      "subtitle": "Le planning hebdomadaire s'appuie sur les profils famille.",
+      "go_to_family": "Aller a Famille"
+    },
+    "days": {
+      "1": "Lundi",
+      "2": "Mardi",
+      "3": "Mercredi",
+      "4": "Jeudi",
+      "5": "Vendredi",
+      "6": "Samedi",
+      "7": "Dimanche"
+    },
+    "days_short": {
+      "1": "Lun",
+      "2": "Mar",
+      "3": "Mer",
+      "4": "Jeu",
+      "5": "Ven",
+      "6": "Sam",
+      "7": "Dim"
+    },
+    "day_fallback": "Jour {{day}}",
+    "all_days": "Tous les jours",
+    "types": {
+      "work": "Travail",
+      "school": "Ecole",
+      "study": "Etudes",
+      "activity": "Activite",
+      "other": "Autre"
+    },
+    "toolbar": {
+      "this_week": "Cette semaine",
+      "view_week": "Semaine",
+      "view_list": "Liste",
+      "view_member": "Par membre",
+      "all_members": "Tous les membres",
+      "all_types": "Tous les types",
+      "collapse_recurring": "Replier les récurrents",
+      "compact": "Compact",
+      "detailed": "Détaillé"
+    },
+    "add_for_day_aria": "Ajouter le {{day}}",
+    "add": "Ajouter",
+    "empty_week": "Aucun horaire cette semaine.",
+    "member": {
+      "schedules_one": "{{count}} horaire",
+      "schedules_other": "{{count}} horaires",
+      "none": "Aucun horaire pour ce membre."
+    },
+    "dialog": {
+      "edit_title": "Modifier un horaire",
+      "new_title": "Nouvel horaire",
+      "description": "Definissez un horaire et appliquez-le a un ou plusieurs jours.",
+      "member_label": "Membre",
+      "type_label": "Type",
+      "title_label": "Intitule",
+      "title_placeholder": "Ex: Bureau - Equipe Produit / Mathematiques",
+      "days_label": "Jours concernes",
+      "weekdays": "Lun-Ven",
+      "full_week": "Semaine complete",
+      "reset": "Reinitialiser",
+      "day_selected": "Jour selectionne: {{day}}",
+      "days_selected": "{{count}} jours selectionnes",
+      "start_label": "Debut",
+      "end_label": "Fin",
+      "ends_next_day": "Se termine le lendemain (+1 jour)",
+      "this_week_only": "Cette semaine uniquement",
+      "this_week_only_desc": " — L'horaire ne s'applique qu'a la semaine du {{date}}. Sinon, il sera recurrent chaque semaine.",
+      "replace_conflicts": "Remplacer les horaires en conflit sur les jours selectionnes. Si des conflits existent et que cette option est desactivee, ces jours seront ignores.",
+      "location_label": "Lieu (optionnel)",
+      "location_placeholder": "Ex: Bureau Lyon / College Jean Moulin",
+      "notes_label": "Notes (optionnel)",
+      "notes_placeholder": "Informations utiles, salle, matiere, transport...",
+      "apply_to_days": "Appliquer aux jours selectionnes",
+      "add": "Ajouter"
+    },
+    "confirm_delete_one": "Supprimer cet horaire ?",
+    "confirm_delete_recurring": "Supprimer cet horaire récurrent sur {{count}} jours ?",
+    "notice": {
+      "saved": "Horaire enregistre.",
+      "saved_days": "Enregistre sur {{count}} jour(s).",
+      "saved_days_conflicts": "Enregistre sur {{count}} jour(s). Conflits detectes sur: {{days}}."
+    },
+    "errors": {
+      "load_members": "Impossible de charger les membres.",
+      "load": "Impossible de charger le planning.",
+      "delete": "Impossible de supprimer cet horaire.",
+      "member_title_required": "Le membre et le titre sont obligatoires.",
+      "times_identical": "L'heure de debut et de fin ne peuvent pas etre identiques.",
+      "select_day": "Selectionnez au moins un jour.",
+      "save": "Impossible d'enregistrer cet horaire."
+    },
+    "card": {
+      "overnight_label": "+1j",
+      "overnight_title": "Se termine le lendemain",
+      "recurring": "Récurrent",
+      "one_off": "Ponctuel",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "planning": {
+    "loading": "Loading the schedule...",
+    "title": "Weekly Schedule",
+    "subtitle": "Recurring work hours and school timetable, week by week.",
+    "new_schedule": "New schedule",
+    "no_members": {
+      "title": "Add your members first",
+      "subtitle": "The weekly schedule relies on family profiles.",
+      "go_to_family": "Go to Family"
+    },
+    "days": {
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday",
+      "7": "Sunday"
+    },
+    "days_short": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "day_fallback": "Day {{day}}",
+    "all_days": "Every day",
+    "types": {
+      "work": "Work",
+      "school": "School",
+      "study": "Studies",
+      "activity": "Activity",
+      "other": "Other"
+    },
+    "toolbar": {
+      "this_week": "This week",
+      "view_week": "Week",
+      "view_list": "List",
+      "view_member": "By member",
+      "all_members": "All members",
+      "all_types": "All types",
+      "collapse_recurring": "Collapse recurring",
+      "compact": "Compact",
+      "detailed": "Detailed"
+    },
+    "add_for_day_aria": "Add on {{day}}",
+    "add": "Add",
+    "empty_week": "No schedule this week.",
+    "member": {
+      "schedules_one": "{{count}} schedule",
+      "schedules_other": "{{count}} schedules",
+      "none": "No schedule for this member."
+    },
+    "dialog": {
+      "edit_title": "Edit a schedule",
+      "new_title": "New schedule",
+      "description": "Define a schedule and apply it to one or more days.",
+      "member_label": "Member",
+      "type_label": "Type",
+      "title_label": "Title",
+      "title_placeholder": "e.g. Office - Product Team / Mathematics",
+      "days_label": "Days concerned",
+      "weekdays": "Mon-Fri",
+      "full_week": "Full week",
+      "reset": "Reset",
+      "day_selected": "Selected day: {{day}}",
+      "days_selected": "{{count}} days selected",
+      "start_label": "Start",
+      "end_label": "End",
+      "ends_next_day": "Ends the next day (+1 day)",
+      "this_week_only": "This week only",
+      "this_week_only_desc": " — The schedule only applies to the week of {{date}}. Otherwise it will recur every week.",
+      "replace_conflicts": "Replace conflicting schedules on the selected days. If conflicts exist and this option is disabled, those days will be skipped.",
+      "location_label": "Location (optional)",
+      "location_placeholder": "e.g. Lyon Office / Jean Moulin School",
+      "notes_label": "Notes (optional)",
+      "notes_placeholder": "Useful information, room, subject, transport...",
+      "apply_to_days": "Apply to selected days",
+      "add": "Add"
+    },
+    "confirm_delete_one": "Delete this schedule?",
+    "confirm_delete_recurring": "Delete this recurring schedule across {{count}} days?",
+    "notice": {
+      "saved": "Schedule saved.",
+      "saved_days": "Saved on {{count}} day(s).",
+      "saved_days_conflicts": "Saved on {{count}} day(s). Conflicts detected on: {{days}}."
+    },
+    "errors": {
+      "load_members": "Could not load members.",
+      "load": "Could not load the schedule.",
+      "delete": "Could not delete this schedule.",
+      "member_title_required": "The member and title are required.",
+      "times_identical": "The start and end times cannot be identical.",
+      "select_day": "Select at least one day.",
+      "save": "Could not save this schedule."
+    },
+    "card": {
+      "overnight_label": "+1d",
+      "overnight_title": "Ends the next day",
+      "recurring": "Recurring",
+      "one_off": "One-off",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  }
+}

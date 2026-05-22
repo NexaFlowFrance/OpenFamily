@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { format, parseISO } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { getDateFnsLocale } from '../lib/dateLocale';
 import {
     Plus,
     Wrench,
@@ -93,7 +95,7 @@ import {
 // =============================================================================
 
 const formatDate = (d: string | null): string =>
-    d ? format(parseISO(d), 'dd MMM yyyy', { locale: fr }) : '—';
+    d ? format(parseISO(d), 'dd MMM yyyy', { locale: getDateFnsLocale() }) : '—';
 
 const daysUntil = (d: string): number => {
     const target = new Date(`${d}T12:00:00`).getTime();
@@ -103,23 +105,26 @@ const daysUntil = (d: string): number => {
 };
 
 const House: React.FC = () => {
+    const { t } = useTranslation();
     const tabs = [
-        { value: 'equipments', label: 'Équipements', content: <EquipmentsTab /> },
-        { value: 'maintenance', label: 'Entretiens', content: <MaintenanceTab /> },
-        { value: 'bills', label: 'Factures', content: <ContractsTab /> },
-        { value: 'contacts', label: 'Contacts pro', content: <ContactsTab /> },
-        { value: 'storage', label: 'Rangement', content: <StorageTab /> },
-        { value: 'documents', label: 'Documents', content: <DocumentsTab /> },
-        { value: 'projects', label: 'Projets', content: <ProjectsTab /> },
+        { value: 'equipments', label: t('house.page.tabs.equipments'), content: <EquipmentsTab /> },
+        {
+            value: 'maintenance',
+            label: t('house.page.tabs.maintenance'),
+            content: <MaintenanceTab />,
+        },
+        { value: 'bills', label: t('house.page.tabs.bills'), content: <ContractsTab /> },
+        { value: 'contacts', label: t('house.page.tabs.contacts'), content: <ContactsTab /> },
+        { value: 'storage', label: t('house.page.tabs.storage'), content: <StorageTab /> },
+        { value: 'documents', label: t('house.page.tabs.documents'), content: <DocumentsTab /> },
+        { value: 'projects', label: t('house.page.tabs.projects'), content: <ProjectsTab /> },
     ];
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             <div>
-                <h1 className="text-h1 mb-1">Maison</h1>
-                <p className="text-muted-foreground text-body">
-                    Suis tes équipements, entretiens et — bientôt — contrats, contacts et travaux.
-                </p>
+                <h1 className="text-h1 mb-1">{t('house.page.title')}</h1>
+                <p className="text-muted-foreground text-body">{t('house.page.subtitle')}</p>
             </div>
             <Tabs tabs={tabs} />
         </div>
@@ -129,6 +134,7 @@ const House: React.FC = () => {
 // ---------- Équipements tab ----------
 
 const EquipmentsTab: React.FC = () => {
+    const { t } = useTranslation();
     const [category, setCategory] = useState<EquipmentCategory | 'all'>('all');
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
@@ -147,12 +153,12 @@ const EquipmentsTab: React.FC = () => {
     };
 
     const handleDelete = async (eq: Equipment) => {
-        if (!confirm(`Supprimer "${eq.name}" et tous ses entretiens ?`)) return;
+        if (!confirm(t('house.equipment.deleteConfirm', { name: eq.name }))) return;
         try {
             await deleteMut.mutateAsync(eq.id);
             if (detailFor?.id === eq.id) setDetailFor(null);
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Suppression impossible.');
+            alert(err instanceof Error ? err.message : t('house.common.deleteFailed'));
         }
     };
 
@@ -168,7 +174,7 @@ const EquipmentsTab: React.FC = () => {
                         <Input
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
-                            placeholder="Rechercher (nom, marque, modèle)…"
+                            placeholder={t('house.equipment.searchPlaceholder')}
                             className="pl-9"
                         />
                     </div>
@@ -180,20 +186,20 @@ const EquipmentsTab: React.FC = () => {
                     }}
                 >
                     <Plus className="h-4 w-4 mr-2" />
-                    Ajouter un équipement
+                    {t('house.equipment.add')}
                 </Button>
             </div>
 
             <div className="flex flex-wrap gap-2">
                 <CategoryChip
-                    label="Tous"
+                    label={t('house.common.all')}
                     active={category === 'all'}
                     onClick={() => setCategory('all')}
                 />
                 {EQUIPMENT_CATEGORIES.map((c) => (
                     <CategoryChip
                         key={c}
-                        label={c}
+                        label={t('domain.equipmentCategory.' + c, { defaultValue: c })}
                         active={category === c}
                         onClick={() => setCategory(c)}
                     />
@@ -207,7 +213,7 @@ const EquipmentsTab: React.FC = () => {
                     message={
                         equipmentsQuery.error instanceof Error
                             ? equipmentsQuery.error.message
-                            : 'Erreur'
+                            : t('house.common.error')
                     }
                 />
             ) : equipmentsQuery.data && equipmentsQuery.data.length > 0 ? (
@@ -227,9 +233,9 @@ const EquipmentsTab: React.FC = () => {
                 </div>
             ) : (
                 <EmptyState
-                    title="Aucun équipement enregistré"
-                    description="Commence par ajouter ta chaudière, ton lave-linge ou ta voiture pour suivre les entretiens et les garanties."
-                    actionLabel="Ajouter un équipement"
+                    title={t('house.equipment.emptyTitle')}
+                    description={t('house.equipment.emptyDescription')}
+                    actionLabel={t('house.equipment.add')}
                     onAction={() => {
                         setEditing(null);
                         setDialogOpen(true);
@@ -278,19 +284,23 @@ const EquipmentCard: React.FC<{
     onEdit: () => void;
     onDelete: () => void;
 }> = ({ equipment, onOpen, onEdit, onDelete }) => {
+    const { t } = useTranslation();
     const warranty = equipment.warranty_until ? daysUntil(equipment.warranty_until) : null;
     const warrantyStatus =
         warranty === null
             ? null
             : warranty < 0
-              ? { label: 'Garantie expirée', className: 'text-destructive bg-destructive/10' }
+              ? {
+                    label: t('house.equipment.warrantyExpired'),
+                    className: 'text-destructive bg-destructive/10',
+                }
               : warranty < 60
                 ? {
-                      label: `Garantie : ${warranty}j`,
+                      label: t('house.equipment.warrantyDays', { days: warranty }),
                       className: 'text-warning bg-warning-soft',
                   }
                 : {
-                      label: `Garantie OK`,
+                      label: t('house.equipment.warrantyOk'),
                       className: 'text-success bg-success-soft',
                   };
 
@@ -304,7 +314,9 @@ const EquipmentCard: React.FC<{
                     <div className="min-w-0">
                         <p className="text-caption font-semibold truncate">{equipment.name}</p>
                         <p className="text-micro text-muted-foreground truncate">
-                            {equipment.category}
+                            {t('domain.equipmentCategory.' + equipment.category, {
+                                defaultValue: equipment.category,
+                            })}
                             {equipment.brand && ` · ${equipment.brand}`}
                             {equipment.model && ` ${equipment.model}`}
                         </p>
@@ -313,14 +325,14 @@ const EquipmentCard: React.FC<{
                         <button
                             onClick={onEdit}
                             className="p-1 rounded hover:bg-surface-2"
-                            aria-label="Modifier"
+                            aria-label={t('common.edit')}
                         >
                             <Edit2 className="h-4 w-4 text-muted-foreground" />
                         </button>
                         <button
                             onClick={onDelete}
                             className="p-1 rounded hover:bg-destructive/10"
-                            aria-label="Supprimer"
+                            aria-label={t('common.delete')}
                         >
                             <Trash2 className="h-4 w-4 text-destructive" />
                         </button>
@@ -350,6 +362,7 @@ const EquipmentDetailDialog: React.FC<{
     onOpenChange: (open: boolean) => void;
     onEdit: () => void;
 }> = ({ equipment, open, onOpenChange, onEdit }) => {
+    const { t } = useTranslation();
     const maintenanceQuery = useMaintenance({ equipment_id: equipment.id, status: 'all' });
     const updateMut = useUpdateMaintenance();
     const deleteMaintMut = useDeleteMaintenance();
@@ -370,14 +383,18 @@ const EquipmentDetailDialog: React.FC<{
         try {
             await updateMut.mutateAsync({ id: m.id, patch: { performed_date: today } });
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Erreur.');
+            alert(err instanceof Error ? err.message : t('house.common.genericError'));
         }
     };
 
     const handleDeleteMaintenance = async (m: Maintenance) => {
-        if (!confirm(`Supprimer "${m.title}" ?`)) return;
+        if (!confirm(t('house.maintenance.deleteConfirm', { title: m.title }))) return;
         await deleteMaintMut.mutateAsync(m.id);
     };
+
+    const categoryLabel = t('domain.equipmentCategory.' + equipment.category, {
+        defaultValue: equipment.category,
+    });
 
     return (
         <>
@@ -385,7 +402,7 @@ const EquipmentDetailDialog: React.FC<{
                 open={open}
                 onOpenChange={onOpenChange}
                 title={equipment.name}
-                description={`${equipment.category}${equipment.brand ? ` · ${equipment.brand}` : ''}${
+                description={`${categoryLabel}${equipment.brand ? ` · ${equipment.brand}` : ''}${
                     equipment.model ? ` ${equipment.model}` : ''
                 }`}
                 className="sm:max-w-2xl"
@@ -396,25 +413,33 @@ const EquipmentDetailDialog: React.FC<{
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-micro text-muted-foreground">
                             {equipment.serial_number && (
                                 <div>
-                                    <p className="font-medium text-foreground">N° série</p>
+                                    <p className="font-medium text-foreground">
+                                        {t('house.equipment.serialNumber')}
+                                    </p>
                                     <p className="truncate">{equipment.serial_number}</p>
                                 </div>
                             )}
                             {equipment.purchase_date && (
                                 <div>
-                                    <p className="font-medium text-foreground">Acheté le</p>
+                                    <p className="font-medium text-foreground">
+                                        {t('house.equipment.purchasedOn')}
+                                    </p>
                                     <p>{formatDate(equipment.purchase_date)}</p>
                                 </div>
                             )}
                             {equipment.warranty_until && (
                                 <div>
-                                    <p className="font-medium text-foreground">Garantie</p>
+                                    <p className="font-medium text-foreground">
+                                        {t('house.equipment.warranty')}
+                                    </p>
                                     <p>{formatDate(equipment.warranty_until)}</p>
                                 </div>
                             )}
                             {equipment.location_room && (
                                 <div>
-                                    <p className="font-medium text-foreground">Lieu</p>
+                                    <p className="font-medium text-foreground">
+                                        {t('house.equipment.location')}
+                                    </p>
                                     <p>{equipment.location_room}</p>
                                 </div>
                             )}
@@ -427,7 +452,7 @@ const EquipmentDetailDialog: React.FC<{
                         <div className="flex justify-end">
                             <Button variant="ghost" size="sm" onClick={onEdit}>
                                 <Edit2 className="h-4 w-4 mr-1.5" />
-                                Modifier l'équipement
+                                {t('house.equipment.editEquipment')}
                             </Button>
                         </div>
                     </section>
@@ -437,7 +462,7 @@ const EquipmentDetailDialog: React.FC<{
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-caption font-semibold flex items-center gap-2">
                                 <Wrench className="h-4 w-4" />
-                                Historique d'entretien
+                                {t('house.equipment.maintenanceHistory')}
                             </h3>
                             <Button
                                 size="sm"
@@ -447,16 +472,16 @@ const EquipmentDetailDialog: React.FC<{
                                 }}
                             >
                                 <Plus className="h-4 w-4 mr-1.5" />
-                                Entretien
+                                {t('house.equipment.maintenanceShort')}
                             </Button>
                         </div>
                         {maintenanceQuery.isPending ? (
                             <div className="text-caption text-muted-foreground py-4">
-                                Chargement…
+                                {t('common.loading')}
                             </div>
                         ) : sorted.length === 0 ? (
                             <p className="text-micro text-muted-foreground italic">
-                                Aucun entretien renseigné.
+                                {t('house.equipment.noMaintenance')}
                             </p>
                         ) : (
                             <ul className="space-y-2">
@@ -504,6 +529,7 @@ const EquipmentDetailDialog: React.FC<{
 // ---------- Entretiens (global tab) ----------
 
 const MaintenanceTab: React.FC = () => {
+    const { t } = useTranslation();
     const [status, setStatus] = useState<'upcoming' | 'done' | 'all'>('upcoming');
     const maintenanceQuery = useMaintenance({ status });
     const updateMut = useUpdateMaintenance();
@@ -514,12 +540,12 @@ const MaintenanceTab: React.FC = () => {
         try {
             await updateMut.mutateAsync({ id: m.id, patch: { performed_date: today } });
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Erreur.');
+            alert(err instanceof Error ? err.message : t('house.common.genericError'));
         }
     };
 
     const handleDelete = async (m: Maintenance) => {
-        if (!confirm(`Supprimer "${m.title}" ?`)) return;
+        if (!confirm(t('house.maintenance.deleteConfirm', { title: m.title }))) return;
         await deleteMut.mutateAsync(m.id);
     };
 
@@ -529,7 +555,13 @@ const MaintenanceTab: React.FC = () => {
                 {(['upcoming', 'done', 'all'] as const).map((s) => (
                     <CategoryChip
                         key={s}
-                        label={s === 'upcoming' ? 'À venir' : s === 'done' ? 'Réalisés' : 'Tous'}
+                        label={
+                            s === 'upcoming'
+                                ? t('house.maintenance.filterUpcoming')
+                                : s === 'done'
+                                  ? t('house.maintenance.filterDone')
+                                  : t('house.maintenance.filterAll')
+                        }
                         active={status === s}
                         onClick={() => setStatus(s)}
                     />
@@ -538,14 +570,14 @@ const MaintenanceTab: React.FC = () => {
 
             {maintenanceQuery.isPending ? (
                 <div className="text-caption text-muted-foreground py-6 text-center">
-                    Chargement…
+                    {t('common.loading')}
                 </div>
             ) : maintenanceQuery.isError ? (
                 <ErrorBanner
                     message={
                         maintenanceQuery.error instanceof Error
                             ? maintenanceQuery.error.message
-                            : 'Erreur'
+                            : t('house.common.error')
                     }
                 />
             ) : maintenanceQuery.data && maintenanceQuery.data.length > 0 ? (
@@ -564,12 +596,12 @@ const MaintenanceTab: React.FC = () => {
                 <EmptyState
                     title={
                         status === 'upcoming'
-                            ? 'Aucun entretien à venir'
+                            ? t('house.maintenance.emptyUpcoming')
                             : status === 'done'
-                              ? 'Aucun entretien réalisé'
-                              : 'Aucun entretien'
+                              ? t('house.maintenance.emptyDone')
+                              : t('house.maintenance.emptyAll')
                     }
-                    description="Ajoute des entretiens depuis le détail d'un équipement."
+                    description={t('house.maintenance.emptyDescription')}
                 />
             )}
         </div>
@@ -583,6 +615,7 @@ const MaintenanceRow: React.FC<{
     onEdit?: () => void;
     onDelete?: () => void;
 }> = ({ item, showEquipment, onMarkDone, onEdit, onDelete }) => {
+    const { t } = useTranslation();
     const isDone = !!item.performed_date;
     const isPlanned = !!item.planned_date && !isDone;
     const planDays = isPlanned ? daysUntil(item.planned_date!) : null;
@@ -612,7 +645,8 @@ const MaintenanceRow: React.FC<{
                     <p className="text-caption font-semibold truncate">
                         {item.title}{' '}
                         <span className="text-micro text-muted-foreground font-normal">
-                            · {item.kind}
+                            ·{' '}
+                            {t('domain.maintenanceKind.' + item.kind, { defaultValue: item.kind })}
                         </span>
                     </p>
                     <p className="text-micro text-muted-foreground">
@@ -623,24 +657,38 @@ const MaintenanceRow: React.FC<{
                         )}
                         {showEquipment && item.equipment_name && ' — '}
                         {isDone ? (
-                            <>Réalisé le {formatDate(item.performed_date)}</>
+                            <>
+                                {t('house.maintenance.performedOn', {
+                                    date: formatDate(item.performed_date),
+                                })}
+                            </>
                         ) : isPlanned ? (
                             <>
-                                Prévu le {formatDate(item.planned_date)}
+                                {t('house.maintenance.plannedOn', {
+                                    date: formatDate(item.planned_date),
+                                })}
                                 {planDays !== null && (
                                     <span className={overdue ? 'text-destructive' : ''}>
                                         {' '}
                                         (
                                         {overdue
-                                            ? `en retard de ${-planDays}j`
-                                            : `dans ${planDays}j`}
+                                            ? t('house.maintenance.overdueBy', { days: -planDays })
+                                            : t('house.maintenance.inDays', { days: planDays })}
                                         )
                                     </span>
                                 )}
                             </>
                         ) : null}
                         {item.cost !== null && <> · {item.cost.toFixed(2)} €</>}
-                        {item.recurrence_months && <> · récurrence {item.recurrence_months} mois</>}
+                        {item.recurrence_months && (
+                            <>
+                                {' '}
+                                ·{' '}
+                                {t('house.maintenance.recurrenceMonths', {
+                                    count: item.recurrence_months,
+                                })}
+                            </>
+                        )}
                     </p>
                     {item.notes && (
                         <p className="text-micro italic text-muted-foreground mt-1">{item.notes}</p>
@@ -650,14 +698,14 @@ const MaintenanceRow: React.FC<{
                     {!isDone && (
                         <Button size="sm" variant="secondary" onClick={onMarkDone}>
                             <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                            Fait
+                            {t('house.maintenance.done')}
                         </Button>
                     )}
                     {onEdit && (
                         <button
                             onClick={onEdit}
                             className="p-1 rounded hover:bg-surface-2"
-                            aria-label="Modifier"
+                            aria-label={t('common.edit')}
                         >
                             <Edit2 className="h-4 w-4 text-muted-foreground" />
                         </button>
@@ -666,7 +714,7 @@ const MaintenanceRow: React.FC<{
                         <button
                             onClick={onDelete}
                             className="p-1 rounded hover:bg-destructive/10"
-                            aria-label="Supprimer"
+                            aria-label={t('common.delete')}
                         >
                             <Trash2 className="h-4 w-4 text-destructive" />
                         </button>
@@ -680,6 +728,7 @@ const MaintenanceRow: React.FC<{
 // ---------- Factures / Contrats récurrents (Phase 2) ----------
 
 const ContractsTab: React.FC = () => {
+    const { t } = useTranslation();
     const { showToast } = useToast();
     const [status, setStatus] = useState<'active' | 'inactive' | 'all'>('active');
     const contractsQuery = useContracts({ status });
@@ -689,32 +738,39 @@ const ContractsTab: React.FC = () => {
     const [editing, setEditing] = useState<Contract | null>(null);
 
     const handleDelete = async (c: Contract) => {
-        if (!confirm(`Supprimer "${c.name}" ?`)) return;
+        if (!confirm(t('house.contract.deleteConfirm', { name: c.name }))) return;
         try {
             await deleteMut.mutateAsync(c.id);
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Erreur.');
+            alert(err instanceof Error ? err.message : t('house.common.genericError'));
         }
     };
 
     const handlePay = async (c: Contract) => {
         const ok = confirm(
-            `Marquer "${c.name}" payé ?\n\nProchaine échéance : +${frequencyLabel(c.frequency)}` +
+            t('house.contract.payConfirm', {
+                name: c.name,
+                frequency: frequencyLabel(c.frequency, t),
+            }) +
                 (c.auto_create_budget_entry
-                    ? `\nUne dépense de ${c.amount.toFixed(2)} € sera ajoutée au Budget (catégorie : ${c.budget_category ?? 'Maison'}).`
+                    ? t('house.contract.payConfirmBudget', {
+                          amount: c.amount.toFixed(2),
+                          category: c.budget_category ?? t('house.contract.defaultBudgetCategory'),
+                      })
                     : ''),
         );
         if (!ok) return;
         try {
             const result = await payMut.mutateAsync({ id: c.id });
             showToast({
-                title: 'Paiement enregistré ✓',
-                description: `Prochaine échéance : ${formatDate(result.contract.next_due_date)}${
-                    result.budget_entry_id ? ' · dépense créée dans le Budget' : ''
-                }`,
+                title: t('house.contract.paymentRecorded'),
+                description:
+                    t('house.contract.paymentNextDue', {
+                        date: formatDate(result.contract.next_due_date),
+                    }) + (result.budget_entry_id ? t('house.contract.paymentBudgetCreated') : ''),
             });
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Erreur.');
+            alert(err instanceof Error ? err.message : t('house.common.genericError'));
         }
     };
 
@@ -732,7 +788,11 @@ const ContractsTab: React.FC = () => {
                         <CategoryChip
                             key={s}
                             label={
-                                s === 'active' ? 'Actifs' : s === 'inactive' ? 'Inactifs' : 'Tous'
+                                s === 'active'
+                                    ? t('house.contract.filterActive')
+                                    : s === 'inactive'
+                                      ? t('house.contract.filterInactive')
+                                      : t('house.contract.filterAll')
                             }
                             active={status === s}
                             onClick={() => setStatus(s)}
@@ -746,13 +806,13 @@ const ContractsTab: React.FC = () => {
                     }}
                 >
                     <Plus className="h-4 w-4 mr-2" />
-                    Ajouter un contrat
+                    {t('house.contract.add')}
                 </Button>
             </div>
 
             {status === 'active' && contractsQuery.data && contractsQuery.data.length > 0 && (
                 <div className="rounded-card border border-border bg-primary-soft/40 px-4 py-2 text-caption">
-                    Coût mensuel estimé total :{' '}
+                    {t('house.contract.monthlyTotal')}{' '}
                     <span className="font-semibold text-foreground">
                         {monthlyTotal.toFixed(2)} €
                     </span>
@@ -766,7 +826,7 @@ const ContractsTab: React.FC = () => {
                     message={
                         contractsQuery.error instanceof Error
                             ? contractsQuery.error.message
-                            : 'Erreur'
+                            : t('house.common.error')
                     }
                 />
             ) : contractsQuery.data && contractsQuery.data.length > 0 ? (
@@ -786,9 +846,9 @@ const ContractsTab: React.FC = () => {
                 </ul>
             ) : (
                 <EmptyState
-                    title="Aucun contrat enregistré"
-                    description="Ajoute tes abonnements et factures récurrents (EDF, internet, assurance, prêt…) pour suivre les échéances et générer automatiquement les dépenses dans le Budget."
-                    actionLabel="Ajouter un contrat"
+                    title={t('house.contract.emptyTitle')}
+                    description={t('house.contract.emptyDescription')}
+                    actionLabel={t('house.contract.add')}
                     onAction={() => {
                         setEditing(null);
                         setDialogOpen(true);
@@ -811,12 +871,12 @@ const FREQUENCY_MONTHS: Record<string, number> = {
     Annuel: 12,
 };
 
-const frequencyLabel = (freq: string): string => {
+const frequencyLabel = (freq: string, t: TFunction): string => {
     const m = FREQUENCY_MONTHS[freq];
     if (!m) return freq;
-    if (m === 1) return '1 mois';
-    if (m < 12) return `${m} mois`;
-    return '1 an';
+    if (m === 1) return t('house.contract.freqOneMonth');
+    if (m < 12) return t('house.contract.freqMonths', { count: m });
+    return t('house.contract.freqOneYear');
 };
 
 const ContractRow: React.FC<{
@@ -825,6 +885,7 @@ const ContractRow: React.FC<{
     onEdit: () => void;
     onDelete: () => void;
 }> = ({ contract, onPay, onEdit, onDelete }) => {
+    const { t } = useTranslation();
     const due = daysUntil(contract.next_due_date);
     const overdue = due < 0;
     const dueSoon = due >= 0 && due <= 7;
@@ -856,16 +917,20 @@ const ContractRow: React.FC<{
                             </span>
                         )}
                         <span className="rounded-pill bg-surface-2 px-2 py-0.5 text-micro text-muted-foreground">
-                            {contract.category}
+                            {t('domain.contractCategory.' + contract.category, {
+                                defaultValue: contract.category,
+                            })}
                         </span>
                         <span className="text-micro inline-flex items-center gap-0.5 text-muted-foreground">
                             <Repeat className="h-3 w-3" />
-                            {contract.frequency}
+                            {t('domain.contractFrequency.' + contract.frequency, {
+                                defaultValue: contract.frequency,
+                            })}
                         </span>
                         {!contract.is_active && (
                             <span className="rounded-pill bg-muted px-2 py-0.5 text-micro text-muted-foreground inline-flex items-center gap-1">
                                 <Pause className="h-3 w-3" />
-                                Inactif
+                                {t('house.contract.inactive')}
                             </span>
                         )}
                     </div>
@@ -874,7 +939,7 @@ const ContractRow: React.FC<{
                             {contract.amount.toFixed(2)} €
                         </span>
                         {' · '}
-                        Échéance {formatDate(contract.next_due_date)}
+                        {t('house.contract.due', { date: formatDate(contract.next_due_date) })}
                         {contract.is_active && (
                             <span
                                 className={
@@ -886,10 +951,22 @@ const ContractRow: React.FC<{
                                 }
                             >
                                 {' '}
-                                ({overdue ? `en retard de ${-due}j` : `dans ${due}j`})
+                                (
+                                {overdue
+                                    ? t('house.contract.overdueBy', { days: -due })
+                                    : t('house.contract.inDays', { days: due })}
+                                )
                             </span>
                         )}
-                        {contract.payment_method && <> · {contract.payment_method}</>}
+                        {contract.payment_method && (
+                            <>
+                                {' '}
+                                ·{' '}
+                                {t('domain.paymentMethod.' + contract.payment_method, {
+                                    defaultValue: contract.payment_method,
+                                })}
+                            </>
+                        )}
                     </p>
                     {contract.notes && (
                         <p className="text-micro italic text-muted-foreground mt-1">
@@ -901,20 +978,20 @@ const ContractRow: React.FC<{
                     {contract.is_active && (
                         <Button size="sm" variant="secondary" onClick={onPay}>
                             <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                            Payé
+                            {t('house.contract.paid')}
                         </Button>
                     )}
                     <button
                         onClick={onEdit}
                         className="p-1 rounded hover:bg-surface-2"
-                        aria-label="Modifier"
+                        aria-label={t('common.edit')}
                     >
                         <Edit2 className="h-4 w-4 text-muted-foreground" />
                     </button>
                     <button
                         onClick={onDelete}
                         className="p-1 rounded hover:bg-destructive/10"
-                        aria-label="Supprimer"
+                        aria-label={t('common.delete')}
                     >
                         <Trash2 className="h-4 w-4 text-destructive" />
                     </button>
@@ -927,6 +1004,7 @@ const ContractRow: React.FC<{
 // ---------- Contacts pro (Phase 3) ----------
 
 const ContactsTab: React.FC = () => {
+    const { t } = useTranslation();
     const [category, setCategory] = useState<ContactCategory | 'all'>('all');
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
@@ -944,11 +1022,11 @@ const ContactsTab: React.FC = () => {
     };
 
     const handleDelete = async (c: Contact) => {
-        if (!confirm(`Supprimer "${c.name}" ?`)) return;
+        if (!confirm(t('house.contact.deleteConfirm', { name: c.name }))) return;
         try {
             await deleteMut.mutateAsync(c.id);
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Erreur.');
+            alert(err instanceof Error ? err.message : t('house.common.genericError'));
         }
     };
 
@@ -973,7 +1051,7 @@ const ContactsTab: React.FC = () => {
                         <Input
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
-                            placeholder="Rechercher (nom, société, notes)…"
+                            placeholder={t('house.contact.searchPlaceholder')}
                             className="pl-9"
                         />
                     </div>
@@ -985,20 +1063,20 @@ const ContactsTab: React.FC = () => {
                     }}
                 >
                     <Plus className="h-4 w-4 mr-2" />
-                    Ajouter un contact
+                    {t('house.contact.add')}
                 </Button>
             </div>
 
             <div className="flex flex-wrap gap-2">
                 <CategoryChip
-                    label="Toutes"
+                    label={t('house.common.allFem')}
                     active={category === 'all'}
                     onClick={() => setCategory('all')}
                 />
                 {CONTACT_CATEGORIES.map((c) => (
                     <CategoryChip
                         key={c}
-                        label={c}
+                        label={t('domain.contactCategory.' + c, { defaultValue: c })}
                         active={category === c}
                         onClick={() => setCategory(c)}
                     />
@@ -1012,7 +1090,7 @@ const ContactsTab: React.FC = () => {
                     message={
                         contactsQuery.error instanceof Error
                             ? contactsQuery.error.message
-                            : 'Erreur'
+                            : t('house.common.error')
                     }
                 />
             ) : contactsQuery.data && contactsQuery.data.length > 0 ? (
@@ -1020,7 +1098,7 @@ const ContactsTab: React.FC = () => {
                     {orderedCategories.map((cat) => (
                         <div key={cat} className="space-y-2">
                             <h3 className="text-caption font-semibold text-muted-foreground">
-                                {cat}
+                                {t('domain.contactCategory.' + cat, { defaultValue: cat })}
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {grouped[cat].map((contact) => (
@@ -1040,9 +1118,9 @@ const ContactsTab: React.FC = () => {
                 </div>
             ) : (
                 <EmptyState
-                    title="Aucun contact enregistré"
-                    description="Ajoute ton plombier, ton électricien, ton médecin, le gardien… tout ce que tu veux pouvoir appeler vite."
-                    actionLabel="Ajouter un contact"
+                    title={t('house.contact.emptyTitle')}
+                    description={t('house.contact.emptyDescription')}
+                    actionLabel={t('house.contact.add')}
                     onAction={() => {
                         setEditing(null);
                         setDialogOpen(true);
@@ -1059,87 +1137,95 @@ const ContactCard: React.FC<{
     contact: Contact;
     onEdit: () => void;
     onDelete: () => void;
-}> = ({ contact, onEdit, onDelete }) => (
-    <div className="rounded-card border border-border bg-card p-3 space-y-2">
-        <div className="flex items-start gap-2">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-                <UserRound className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                    <p className="text-caption font-semibold truncate">{contact.name}</p>
-                    {contact.is_favorite && (
-                        <Star className="h-3.5 w-3.5 text-warning fill-warning shrink-0" />
+}> = ({ contact, onEdit, onDelete }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="rounded-card border border-border bg-card p-3 space-y-2">
+            <div className="flex items-start gap-2">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                    <UserRound className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                        <p className="text-caption font-semibold truncate">{contact.name}</p>
+                        {contact.is_favorite && (
+                            <Star className="h-3.5 w-3.5 text-warning fill-warning shrink-0" />
+                        )}
+                    </div>
+                    {contact.company && (
+                        <p className="text-micro text-muted-foreground truncate">
+                            {contact.company}
+                        </p>
+                    )}
+                    {contact.equipment_name && (
+                        <p className="text-micro text-muted-foreground truncate">
+                            🔧 {contact.equipment_name}
+                        </p>
                     )}
                 </div>
-                {contact.company && (
-                    <p className="text-micro text-muted-foreground truncate">{contact.company}</p>
+                <div className="flex gap-1 shrink-0">
+                    <button
+                        onClick={onEdit}
+                        className="p-1 rounded hover:bg-surface-2"
+                        aria-label={t('common.edit')}
+                    >
+                        <Edit2 className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="p-1 rounded hover:bg-destructive/10"
+                        aria-label={t('common.delete')}
+                    >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                    </button>
+                </div>
+            </div>
+            <div className="space-y-1">
+                {contact.phone && (
+                    <a
+                        href={`tel:${contact.phone}`}
+                        className="flex items-center gap-2 text-micro text-primary hover:underline"
+                    >
+                        <Phone className="h-3.5 w-3.5" />
+                        {contact.phone}
+                    </a>
                 )}
-                {contact.equipment_name && (
-                    <p className="text-micro text-muted-foreground truncate">
-                        🔧 {contact.equipment_name}
+                {contact.email && (
+                    <a
+                        href={`mailto:${contact.email}`}
+                        className="flex items-center gap-2 text-micro text-primary hover:underline truncate"
+                    >
+                        <Mail className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{contact.email}</span>
+                    </a>
+                )}
+                {contact.address && (
+                    <p className="flex items-start gap-2 text-micro text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                        <span className="line-clamp-2">{contact.address}</span>
+                    </p>
+                )}
+                {contact.last_intervention_date && (
+                    <p className="text-micro text-muted-foreground italic">
+                        {t('house.contact.lastIntervention', {
+                            date: formatDate(contact.last_intervention_date),
+                        })}
+                    </p>
+                )}
+                {contact.notes && (
+                    <p className="text-micro italic text-muted-foreground line-clamp-2 border-l-2 border-border pl-2">
+                        {contact.notes}
                     </p>
                 )}
             </div>
-            <div className="flex gap-1 shrink-0">
-                <button
-                    onClick={onEdit}
-                    className="p-1 rounded hover:bg-surface-2"
-                    aria-label="Modifier"
-                >
-                    <Edit2 className="h-4 w-4 text-muted-foreground" />
-                </button>
-                <button
-                    onClick={onDelete}
-                    className="p-1 rounded hover:bg-destructive/10"
-                    aria-label="Supprimer"
-                >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                </button>
-            </div>
         </div>
-        <div className="space-y-1">
-            {contact.phone && (
-                <a
-                    href={`tel:${contact.phone}`}
-                    className="flex items-center gap-2 text-micro text-primary hover:underline"
-                >
-                    <Phone className="h-3.5 w-3.5" />
-                    {contact.phone}
-                </a>
-            )}
-            {contact.email && (
-                <a
-                    href={`mailto:${contact.email}`}
-                    className="flex items-center gap-2 text-micro text-primary hover:underline truncate"
-                >
-                    <Mail className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{contact.email}</span>
-                </a>
-            )}
-            {contact.address && (
-                <p className="flex items-start gap-2 text-micro text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                    <span className="line-clamp-2">{contact.address}</span>
-                </p>
-            )}
-            {contact.last_intervention_date && (
-                <p className="text-micro text-muted-foreground italic">
-                    Dernière intervention : {formatDate(contact.last_intervention_date)}
-                </p>
-            )}
-            {contact.notes && (
-                <p className="text-micro italic text-muted-foreground line-clamp-2 border-l-2 border-border pl-2">
-                    {contact.notes}
-                </p>
-            )}
-        </div>
-    </div>
-);
+    );
+};
 
 // ---------- Rangement (Phase 4) ----------
 
 const StorageTab: React.FC = () => {
+    const { t } = useTranslation();
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
     const [selectedRoomId, setSelectedRoomId] = useState<string | 'orphan' | null>(null);
@@ -1176,19 +1262,22 @@ const StorageTab: React.FC = () => {
         const itemsCount = room.items_count ?? 0;
         const msg =
             itemsCount > 0
-                ? `Supprimer "${room.name}" ?\n\n${itemsCount} objet(s) ne seront plus rattachés à une pièce (visible sous "À ranger").`
-                : `Supprimer "${room.name}" ?`;
+                ? t('house.storage.roomDeleteConfirmWithItems', {
+                      name: room.name,
+                      count: itemsCount,
+                  })
+                : t('house.storage.roomDeleteConfirm', { name: room.name });
         if (!confirm(msg)) return;
         try {
             await deleteRoomMut.mutateAsync(room.id);
             if (selectedRoomId === room.id) setSelectedRoomId(null);
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Erreur.');
+            alert(err instanceof Error ? err.message : t('house.common.genericError'));
         }
     };
 
     const handleDeleteItem = async (item: HouseItem) => {
-        if (!confirm(`Supprimer "${item.name}" ?`)) return;
+        if (!confirm(t('house.storage.itemDeleteConfirm', { name: item.name }))) return;
         await deleteItemMut.mutateAsync(item.id);
     };
 
@@ -1204,7 +1293,7 @@ const StorageTab: React.FC = () => {
                     <Input
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
-                        placeholder="Où est… ? (ex: tournevis, passeport, chargeur)"
+                        placeholder={t('house.storage.searchPlaceholder')}
                         className="pl-9 text-base"
                     />
                 </div>
@@ -1219,7 +1308,7 @@ const StorageTab: React.FC = () => {
                             setSelectedRoomId(null);
                         }}
                     >
-                        Réinitialiser
+                        {t('house.storage.reset')}
                     </Button>
                 )}
             </form>
@@ -1229,7 +1318,7 @@ const StorageTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <h3 className="text-caption font-semibold flex items-center gap-2">
                         <DoorOpen className="h-4 w-4" />
-                        Pièces ({rooms.length})
+                        {t('house.storage.roomsTitle', { count: rooms.length })}
                     </h3>
                     <div className="flex gap-2">
                         <Button
@@ -1241,7 +1330,7 @@ const StorageTab: React.FC = () => {
                             }}
                         >
                             <Plus className="h-4 w-4 mr-1.5" />
-                            Pièce
+                            {t('house.storage.room')}
                         </Button>
                         <Button
                             size="sm"
@@ -1251,7 +1340,7 @@ const StorageTab: React.FC = () => {
                             }}
                         >
                             <Plus className="h-4 w-4 mr-1.5" />
-                            Objet
+                            {t('house.storage.item')}
                         </Button>
                     </div>
                 </div>
@@ -1260,9 +1349,9 @@ const StorageTab: React.FC = () => {
                     <SkeletonGrid />
                 ) : rooms.length === 0 ? (
                     <EmptyState
-                        title="Aucune pièce enregistrée"
-                        description='Commence par créer "Salon", "Cuisine", "Garage"… puis ajoute-y tes objets.'
-                        actionLabel="Ajouter une pièce"
+                        title={t('house.storage.roomsEmptyTitle')}
+                        description={t('house.storage.roomsEmptyDescription')}
+                        actionLabel={t('house.storage.addRoom')}
                         onAction={() => {
                             setEditingRoom(null);
                             setRoomDialogOpen(true);
@@ -1304,10 +1393,12 @@ const StorageTab: React.FC = () => {
                         >
                             <div className="flex items-center gap-2">
                                 <PackageOpen className="h-4 w-4 text-warning" />
-                                <p className="text-caption font-semibold">À ranger</p>
+                                <p className="text-caption font-semibold">
+                                    {t('house.storage.toSort')}
+                                </p>
                             </div>
                             <p className="text-micro text-muted-foreground mt-1">
-                                Objets sans pièce
+                                {t('house.storage.itemsWithoutRoom')}
                             </p>
                         </button>
                     </div>
@@ -1321,12 +1412,14 @@ const StorageTab: React.FC = () => {
                     <h3 className="text-caption font-semibold flex items-center gap-2">
                         <Package className="h-4 w-4" />
                         {search
-                            ? `Résultats pour "${search}"`
+                            ? t('house.storage.resultsFor', { query: search })
                             : selectedRoomId === 'orphan'
-                              ? 'Objets sans pièce'
+                              ? t('house.storage.itemsWithoutRoom')
                               : selectedRoomId
-                                ? `Objets dans "${rooms.find((r) => r.id === selectedRoomId)?.name ?? ''}"`
-                                : 'Tous les objets'}
+                                ? t('house.storage.itemsInRoom', {
+                                      room: rooms.find((r) => r.id === selectedRoomId)?.name ?? '',
+                                  })
+                                : t('house.storage.allItems')}
                         {items.length > 0 && (
                             <span className="text-micro text-muted-foreground font-normal">
                                 ({items.length})
@@ -1336,16 +1429,20 @@ const StorageTab: React.FC = () => {
                 </div>
 
                 {itemsQuery.isPending ? (
-                    <div className="text-caption text-muted-foreground py-4">Chargement…</div>
+                    <div className="text-caption text-muted-foreground py-4">
+                        {t('common.loading')}
+                    </div>
                 ) : items.length === 0 ? (
                     <div className="rounded-card border border-dashed border-border bg-muted/20 p-6 text-center">
                         <p className="text-caption font-medium">
-                            {search ? 'Aucun résultat.' : 'Aucun objet pour ce filtre.'}
+                            {search
+                                ? t('house.storage.noResults')
+                                : t('house.storage.noItemsFilter')}
                         </p>
                         <p className="text-micro text-muted-foreground mt-1">
                             {search
-                                ? "Essaie un mot plus court ou vérifie l'orthographe."
-                                : 'Ajoute des objets pour les retrouver plus tard.'}
+                                ? t('house.storage.noResultsHint')
+                                : t('house.storage.noItemsHint')}
                         </p>
                     </div>
                 ) : (
@@ -1388,117 +1485,127 @@ const RoomCard: React.FC<{
     onClick: () => void;
     onEdit: () => void;
     onDelete: () => void;
-}> = ({ room, active, onClick, onEdit, onDelete }) => (
-    <div
-        className={`group rounded-card border-2 p-3 cursor-pointer transition-all ${
-            active ? 'shadow-surface' : 'border-border hover:shadow-surface'
-        }`}
-        style={active ? { borderColor: room.color, background: `${room.color}10` } : undefined}
-        onClick={onClick}
-    >
-        <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1 flex items-center gap-2">
-                <span
-                    className="inline-block h-3 w-3 rounded-full shrink-0"
-                    style={{ background: room.color }}
-                />
-                <p className="text-caption font-semibold truncate">{room.name}</p>
-            </div>
-            <div
-                className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <button
-                    onClick={onEdit}
-                    className="p-0.5 rounded hover:bg-surface-2"
-                    aria-label="Modifier"
+}> = ({ room, active, onClick, onEdit, onDelete }) => {
+    const { t } = useTranslation();
+    return (
+        <div
+            className={`group rounded-card border-2 p-3 cursor-pointer transition-all ${
+                active ? 'shadow-surface' : 'border-border hover:shadow-surface'
+            }`}
+            style={active ? { borderColor: room.color, background: `${room.color}10` } : undefined}
+            onClick={onClick}
+        >
+            <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1 flex items-center gap-2">
+                    <span
+                        className="inline-block h-3 w-3 rounded-full shrink-0"
+                        style={{ background: room.color }}
+                    />
+                    <p className="text-caption font-semibold truncate">{room.name}</p>
+                </div>
+                <div
+                    className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                    onClick={(e) => e.stopPropagation()}
                 >
-                    <Edit2 className="h-3.5 w-3.5 text-muted-foreground" />
-                </button>
-                <button
-                    onClick={onDelete}
-                    className="p-0.5 rounded hover:bg-destructive/10"
-                    aria-label="Supprimer"
-                >
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                </button>
+                    <button
+                        onClick={onEdit}
+                        className="p-0.5 rounded hover:bg-surface-2"
+                        aria-label={t('common.edit')}
+                    >
+                        <Edit2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="p-0.5 rounded hover:bg-destructive/10"
+                        aria-label={t('common.delete')}
+                    >
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </button>
+                </div>
             </div>
+            <p className="text-micro text-muted-foreground mt-1">
+                {t('domain.roomCategory.' + room.category, { defaultValue: room.category })}
+                {' · '}
+                {t('house.storage.itemsCount', { count: room.items_count ?? 0 })}
+            </p>
         </div>
-        <p className="text-micro text-muted-foreground mt-1">
-            {room.category}
-            {' · '}
-            {room.items_count ?? 0} objet{(room.items_count ?? 0) > 1 ? 's' : ''}
-        </p>
-    </div>
-);
+    );
+};
 
 const ItemCard: React.FC<{
     item: HouseItem;
     onEdit: () => void;
     onDelete: () => void;
-}> = ({ item, onEdit, onDelete }) => (
-    <div className="rounded-card border border-border bg-card p-3 space-y-1.5">
-        <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-                <p className="text-caption font-semibold truncate">
-                    {item.name}
-                    {item.quantity && item.quantity > 1 && (
-                        <span className="ml-1.5 text-micro text-muted-foreground font-normal">
-                            × {item.quantity}
-                        </span>
-                    )}
-                </p>
-                <span className="rounded-pill bg-surface-2 px-2 py-0.5 text-micro text-muted-foreground inline-block mt-0.5">
-                    {item.category}
-                </span>
+}> = ({ item, onEdit, onDelete }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="rounded-card border border-border bg-card p-3 space-y-1.5">
+            <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                    <p className="text-caption font-semibold truncate">
+                        {item.name}
+                        {item.quantity && item.quantity > 1 && (
+                            <span className="ml-1.5 text-micro text-muted-foreground font-normal">
+                                × {item.quantity}
+                            </span>
+                        )}
+                    </p>
+                    <span className="rounded-pill bg-surface-2 px-2 py-0.5 text-micro text-muted-foreground inline-block mt-0.5">
+                        {t('domain.itemCategory.' + item.category, { defaultValue: item.category })}
+                    </span>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                    <button
+                        onClick={onEdit}
+                        className="p-1 rounded hover:bg-surface-2"
+                        aria-label={t('common.edit')}
+                    >
+                        <Edit2 className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="p-1 rounded hover:bg-destructive/10"
+                        aria-label={t('common.delete')}
+                    >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                    </button>
+                </div>
             </div>
-            <div className="flex gap-1 shrink-0">
-                <button
-                    onClick={onEdit}
-                    className="p-1 rounded hover:bg-surface-2"
-                    aria-label="Modifier"
-                >
-                    <Edit2 className="h-4 w-4 text-muted-foreground" />
-                </button>
-                <button
-                    onClick={onDelete}
-                    className="p-1 rounded hover:bg-destructive/10"
-                    aria-label="Supprimer"
-                >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                </button>
+            <div className="space-y-1 text-micro text-muted-foreground">
+                {item.room_name ? (
+                    <p className="flex items-center gap-1">
+                        <span
+                            className="inline-block h-2 w-2 rounded-full shrink-0"
+                            style={{ background: item.room_color || '#999' }}
+                        />
+                        <span className="font-medium text-foreground">{item.room_name}</span>
+                        {item.location_detail && (
+                            <>
+                                <ArrowRight className="h-3 w-3" />
+                                <span className="truncate">{item.location_detail}</span>
+                            </>
+                        )}
+                    </p>
+                ) : (
+                    <p className="flex items-center gap-1 text-warning">
+                        <PackageOpen className="h-3 w-3" />
+                        {t('house.storage.toSort')}
+                    </p>
+                )}
+                {item.notes && (
+                    <p className="italic line-clamp-2 border-l-2 border-border pl-2">
+                        {item.notes}
+                    </p>
+                )}
             </div>
         </div>
-        <div className="space-y-1 text-micro text-muted-foreground">
-            {item.room_name ? (
-                <p className="flex items-center gap-1">
-                    <span
-                        className="inline-block h-2 w-2 rounded-full shrink-0"
-                        style={{ background: item.room_color || '#999' }}
-                    />
-                    <span className="font-medium text-foreground">{item.room_name}</span>
-                    {item.location_detail && (
-                        <>
-                            <ArrowRight className="h-3 w-3" />
-                            <span className="truncate">{item.location_detail}</span>
-                        </>
-                    )}
-                </p>
-            ) : (
-                <p className="flex items-center gap-1 text-warning">
-                    <PackageOpen className="h-3 w-3" />À ranger
-                </p>
-            )}
-            {item.notes && (
-                <p className="italic line-clamp-2 border-l-2 border-border pl-2">{item.notes}</p>
-            )}
-        </div>
-    </div>
-);
+    );
+};
 
 // ---------- Documents (Phase 5) ----------
 
 const DocumentsTab: React.FC = () => {
+    const { t } = useTranslation();
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState<DocumentCategory | 'all'>('all');
@@ -1518,7 +1625,7 @@ const DocumentsTab: React.FC = () => {
     };
 
     const handleDelete = async (doc: HouseDocument) => {
-        if (!confirm(`Supprimer "${doc.name}" ?\nLe fichier sera définitivement effacé.`)) return;
+        if (!confirm(t('house.documents.deleteConfirm', { name: doc.name }))) return;
         await deleteMut.mutateAsync(doc.id);
     };
 
@@ -1536,20 +1643,20 @@ const DocumentsTab: React.FC = () => {
                         <Input
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
-                            placeholder="Rechercher (nom, fichier, notes)…"
+                            placeholder={t('house.documents.searchPlaceholder')}
                             className="pl-9"
                         />
                     </div>
                 </form>
                 <Button onClick={() => setUploadOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Ajouter un document
+                    {t('house.documents.add')}
                 </Button>
             </div>
 
             <div className="flex flex-wrap gap-2">
                 <CategoryChip
-                    label="Toutes"
+                    label={t('house.common.allFem')}
                     active={category === 'all' && scope === 'all'}
                     onClick={() => {
                         setCategory('all');
@@ -1559,7 +1666,7 @@ const DocumentsTab: React.FC = () => {
                 {DOCUMENT_CATEGORIES.map((c) => (
                     <CategoryChip
                         key={c}
-                        label={c}
+                        label={t('domain.documentCategory.' + c, { defaultValue: c })}
                         active={category === c}
                         onClick={() => {
                             setCategory(c);
@@ -1568,7 +1675,7 @@ const DocumentsTab: React.FC = () => {
                     />
                 ))}
                 <CategoryChip
-                    label="Sans lien"
+                    label={t('house.documents.filterUnlinked')}
                     active={scope === 'unlinked'}
                     onClick={() => {
                         setScope('unlinked');
@@ -1581,7 +1688,11 @@ const DocumentsTab: React.FC = () => {
                 <SkeletonGrid />
             ) : docsQuery.isError ? (
                 <ErrorBanner
-                    message={docsQuery.error instanceof Error ? docsQuery.error.message : 'Erreur'}
+                    message={
+                        docsQuery.error instanceof Error
+                            ? docsQuery.error.message
+                            : t('house.common.error')
+                    }
                 />
             ) : docs.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1595,9 +1706,9 @@ const DocumentsTab: React.FC = () => {
                 </div>
             ) : (
                 <EmptyState
-                    title="Aucun document"
-                    description="Upload tes premières factures, contrats, manuels ou photos."
-                    actionLabel="Ajouter un document"
+                    title={t('house.documents.emptyTitle')}
+                    description={t('house.documents.emptyDescription')}
+                    actionLabel={t('house.documents.add')}
                     onAction={() => setUploadOpen(true)}
                 />
             )}
@@ -1613,6 +1724,7 @@ const DocumentLibraryCard: React.FC<{ doc: HouseDocument; onDelete: () => void }
     doc,
     onDelete,
 }) => {
+    const { t } = useTranslation();
     const Icon = isPdf(doc.mime_type)
         ? FileText
         : isPreviewableImage(doc.mime_type)
@@ -1620,16 +1732,16 @@ const DocumentLibraryCard: React.FC<{ doc: HouseDocument; onDelete: () => void }
           : FileText;
     const isImage = isPreviewableImage(doc.mime_type);
     const linkLabel = doc.equipment_id
-        ? '🔧 Équipement'
+        ? t('house.documents.linkEquipment')
         : doc.contract_id
-          ? '📄 Contrat'
+          ? t('house.documents.linkContract')
           : doc.contact_id
-            ? '👤 Contact'
+            ? t('house.documents.linkContact')
             : doc.item_id
-              ? '📦 Objet'
+              ? t('house.documents.linkItem')
               : doc.project_id
-                ? '🏗️ Projet'
-                : 'Sans lien';
+                ? t('house.documents.linkProject')
+                : t('house.documents.linkNone');
     return (
         <div className="rounded-card border border-border bg-card overflow-hidden">
             {isImage ? (
@@ -1661,21 +1773,22 @@ const DocumentLibraryCard: React.FC<{ doc: HouseDocument; onDelete: () => void }
             <div className="p-3 space-y-1">
                 <p className="text-caption font-semibold truncate">{doc.name}</p>
                 <p className="text-micro text-muted-foreground truncate">
-                    {doc.category} · {formatFileSize(doc.file_size)}
+                    {t('domain.documentCategory.' + doc.category, { defaultValue: doc.category })} ·{' '}
+                    {formatFileSize(doc.file_size)}
                 </p>
                 <p className="text-micro text-muted-foreground truncate">{linkLabel}</p>
                 <div className="flex gap-1 pt-1">
                     <a
                         href={documentFileUrl(doc.id, { download: true })}
                         className="p-1 rounded hover:bg-surface-2 text-muted-foreground"
-                        aria-label="Télécharger"
+                        aria-label={t('house.documents.download')}
                     >
                         <FolderOpen className="h-4 w-4" />
                     </a>
                     <button
                         onClick={onDelete}
                         className="ml-auto p-1 rounded hover:bg-destructive/10 text-destructive"
-                        aria-label="Supprimer"
+                        aria-label={t('common.delete')}
                     >
                         <Trash2 className="h-4 w-4" />
                     </button>
@@ -1688,6 +1801,7 @@ const DocumentLibraryCard: React.FC<{ doc: HouseDocument; onDelete: () => void }
 // ---------- Projets travaux (Phase 5) ----------
 
 const ProjectsTab: React.FC = () => {
+    const { t } = useTranslation();
     const [status, setStatus] = useState<ProjectStatus | 'all'>('all');
     const projectsQuery = useProjects(status === 'all' ? undefined : { status });
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -1701,14 +1815,14 @@ const ProjectsTab: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="flex flex-wrap gap-2">
                     <CategoryChip
-                        label="Tous"
+                        label={t('house.common.all')}
                         active={status === 'all'}
                         onClick={() => setStatus('all')}
                     />
                     {PROJECT_STATUSES.map((s) => (
                         <CategoryChip
                             key={s}
-                            label={s}
+                            label={t('domain.projectStatus.' + s, { defaultValue: s })}
                             active={status === s}
                             onClick={() => setStatus(s)}
                         />
@@ -1721,7 +1835,7 @@ const ProjectsTab: React.FC = () => {
                     }}
                 >
                     <Plus className="h-4 w-4 mr-2" />
-                    Nouveau projet
+                    {t('house.project.add')}
                 </Button>
             </div>
 
@@ -1743,9 +1857,9 @@ const ProjectsTab: React.FC = () => {
                 </div>
             ) : (
                 <EmptyState
-                    title="Aucun projet"
-                    description="Refaire la cuisine, repeindre le couloir, planter le jardin… ajoute ton premier projet pour le suivre du début à la fin."
-                    actionLabel="Nouveau projet"
+                    title={t('house.project.emptyTitle')}
+                    description={t('house.project.emptyDescription')}
+                    actionLabel={t('house.project.add')}
                     onAction={() => {
                         setEditing(null);
                         setDialogOpen(true);
@@ -1775,6 +1889,7 @@ const ProjectCard: React.FC<{
     onClick: () => void;
     onEdit: () => void;
 }> = ({ project, onClick, onEdit }) => {
+    const { t } = useTranslation();
     // Status badge palette centralised in colorPresets.ts so a future
     // status (e.g., "Annulé") can be added in one place.
     const statusBadge = PROJECT_STATUS_COLORS[project.status] ?? {
@@ -1794,7 +1909,9 @@ const ProjectCard: React.FC<{
                     <div className="min-w-0 flex-1">
                         <p className="text-caption font-semibold truncate">{project.name}</p>
                         <p className="text-micro text-muted-foreground truncate">
-                            {project.category}
+                            {t('domain.projectCategory.' + project.category, {
+                                defaultValue: project.category,
+                            })}
                         </p>
                     </div>
                     <button
@@ -1803,18 +1920,22 @@ const ProjectCard: React.FC<{
                             onEdit();
                         }}
                         className="p-1 rounded hover:bg-surface-2 shrink-0"
-                        aria-label="Modifier"
+                        aria-label={t('common.edit')}
                     >
                         <Edit2 className="h-4 w-4 text-muted-foreground" />
                     </button>
                 </div>
                 <div className="flex items-center gap-2 text-micro">
                     <span className={`rounded-pill px-2 py-0.5 font-medium ${statusColor}`}>
-                        {project.status}
+                        {t('domain.projectStatus.' + project.status, {
+                            defaultValue: project.status,
+                        })}
                     </span>
                     {project.planned_budget !== null && (
                         <span className="text-muted-foreground">
-                            Budget : {project.planned_budget.toFixed(0)} €
+                            {t('house.project.budget', {
+                                amount: project.planned_budget.toFixed(0),
+                            })}
                         </span>
                     )}
                 </div>
@@ -1829,15 +1950,19 @@ const ProjectCard: React.FC<{
                             />
                         </div>
                         <p className="text-micro text-muted-foreground">
-                            {checklistDone}/{checklistTotal} tâches
+                            {t('house.project.tasksCount', {
+                                done: checklistDone,
+                                total: checklistTotal,
+                            })}
                         </p>
                     </div>
                 )}
                 {(project.documents_count ?? 0) > 0 && (
                     <p className="text-micro text-muted-foreground inline-flex items-center gap-1">
                         <FileText className="h-3 w-3" />
-                        {project.documents_count} document
-                        {(project.documents_count ?? 0) > 1 ? 's' : ''}
+                        {t('house.project.documentsCount', {
+                            count: project.documents_count ?? 0,
+                        })}
                     </p>
                 )}
             </CardContent>
@@ -1851,6 +1976,7 @@ const ProjectDetailDialog: React.FC<{
     onOpenChange: (open: boolean) => void;
     onEdit: () => void;
 }> = ({ project, open, onOpenChange, onEdit }) => {
+    const { t } = useTranslation();
     const updateProject = useUpdateProject();
     const deleteProject = useDeleteProject();
     const checklistMut = useUpdateProjectChecklist();
@@ -1884,12 +2010,7 @@ const ProjectDetailDialog: React.FC<{
         checklistMut.mutate({ projectId: project.id, op: { op: 'remove', id } });
 
     const handleDelete = async () => {
-        if (
-            !confirm(
-                `Supprimer "${project.name}" ?\nLes documents associés ne seront pas supprimés (ils deviennent "Sans lien").`,
-            )
-        )
-            return;
+        if (!confirm(t('house.project.deleteConfirm', { name: project.name }))) return;
         await deleteProject.mutateAsync(project.id);
         onOpenChange(false);
     };
@@ -1899,7 +2020,14 @@ const ProjectDetailDialog: React.FC<{
             open={open}
             onOpenChange={onOpenChange}
             title={project.name}
-            description={`${project.category} · ${project.status}`}
+            description={t('house.project.detailDescription', {
+                category: t('domain.projectCategory.' + project.category, {
+                    defaultValue: project.category,
+                }),
+                status: t('domain.projectStatus.' + project.status, {
+                    defaultValue: project.status,
+                }),
+            })}
             className="sm:max-w-2xl"
         >
             <div className="space-y-5">
@@ -1916,7 +2044,7 @@ const ProjectDetailDialog: React.FC<{
                                     : 'bg-card text-foreground border-border hover:bg-surface-2'
                             }`}
                         >
-                            {s}
+                            {t('domain.projectStatus.' + s, { defaultValue: s })}
                         </button>
                     ))}
                 </div>
@@ -1934,26 +2062,32 @@ const ProjectDetailDialog: React.FC<{
                             {project.planned_budget !== null && (
                                 <span>
                                     <span className="font-medium text-foreground">
-                                        Budget prévu :
+                                        {t('house.project.budgetPlanned')}
                                     </span>{' '}
                                     {project.planned_budget.toFixed(2)} €
                                 </span>
                             )}
                             {project.started_at && (
                                 <span>
-                                    <span className="font-medium text-foreground">Début :</span>{' '}
+                                    <span className="font-medium text-foreground">
+                                        {t('house.project.start')}
+                                    </span>{' '}
                                     {formatDate(project.started_at)}
                                 </span>
                             )}
                             {project.target_end && (
                                 <span>
-                                    <span className="font-medium text-foreground">Cible :</span>{' '}
+                                    <span className="font-medium text-foreground">
+                                        {t('house.project.target')}
+                                    </span>{' '}
                                     {formatDate(project.target_end)}
                                 </span>
                             )}
                             {project.completed_at && (
                                 <span>
-                                    <span className="font-medium text-foreground">Terminé :</span>{' '}
+                                    <span className="font-medium text-foreground">
+                                        {t('house.project.completed')}
+                                    </span>{' '}
                                     {formatDate(project.completed_at)}
                                 </span>
                             )}
@@ -1968,7 +2102,7 @@ const ProjectDetailDialog: React.FC<{
                 <section>
                     <h3 className="text-caption font-semibold mb-2 flex items-center gap-2">
                         <CheckSquare className="h-4 w-4" />
-                        Checklist
+                        {t('house.project.checklist')}
                         {project.checklist.length > 0 && (
                             <span className="text-micro text-muted-foreground font-normal">
                                 ({project.checklist.filter((i) => i.done).length}/
@@ -1978,7 +2112,7 @@ const ProjectDetailDialog: React.FC<{
                     </h3>
                     {project.checklist.length === 0 ? (
                         <p className="text-micro text-muted-foreground italic mb-2">
-                            Aucune tâche. Décompose ton projet en petits pas.
+                            {t('house.project.checklistEmpty')}
                         </p>
                     ) : (
                         <ul className="space-y-1.5 mb-2">
@@ -1992,7 +2126,11 @@ const ProjectDetailDialog: React.FC<{
                                         type="button"
                                         onClick={() => handleToggle(item.id)}
                                         className="shrink-0"
-                                        aria-label={item.done ? 'Décocher' : 'Cocher'}
+                                        aria-label={
+                                            item.done
+                                                ? t('house.project.uncheck')
+                                                : t('house.project.check')
+                                        }
                                     >
                                         {item.done ? (
                                             <CheckSquare className="h-4 w-4 text-primary" />
@@ -2011,7 +2149,7 @@ const ProjectDetailDialog: React.FC<{
                                         type="button"
                                         onClick={() => handleRemoveItem(item.id)}
                                         className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-destructive/10"
-                                        aria-label="Supprimer"
+                                        aria-label={t('common.delete')}
                                     >
                                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                     </button>
@@ -2023,7 +2161,7 @@ const ProjectDetailDialog: React.FC<{
                         <Input
                             value={newItemLabel}
                             onChange={(e) => setNewItemLabel(e.target.value)}
-                            placeholder="Ajouter une tâche…"
+                            placeholder={t('house.project.addTask')}
                             disabled={project.checklist.length >= 30}
                         />
                         <Button
@@ -2036,7 +2174,7 @@ const ProjectDetailDialog: React.FC<{
                     </form>
                     {project.checklist.length >= 30 && (
                         <p className="text-micro text-muted-foreground italic mt-1">
-                            Maximum 30 tâches — découpe en sous-projets.
+                            {t('house.project.maxTasks')}
                         </p>
                     )}
                 </section>
@@ -2060,11 +2198,11 @@ const ProjectDetailDialog: React.FC<{
                         className="text-destructive"
                     >
                         <Trash2 className="h-4 w-4 mr-1.5" />
-                        Supprimer
+                        {t('common.delete')}
                     </Button>
                     <Button variant="secondary" size="sm" onClick={onEdit}>
                         <Edit2 className="h-4 w-4 mr-1.5" />
-                        Modifier
+                        {t('common.edit')}
                     </Button>
                 </div>
             </div>

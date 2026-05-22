@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import {
     Download,
@@ -10,10 +11,12 @@ import {
     MapPin,
     Mail,
     Send,
+    Languages,
 } from 'lucide-react';
 import { Card, CardContent, Button, Input, Select } from '../components/ui';
 import { useAuth } from '../contexts/AuthContext';
 import { SUPPORTED_CURRENCIES, DEFAULT_CURRENCY } from '../lib/currencies';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 import { useUpdateUserLocation } from '../hooks/useDashboardWeather';
 
 const currencyOptions = SUPPORTED_CURRENCIES.map((c) => ({
@@ -33,20 +36,13 @@ interface ImportCounts {
     schedule_entries?: number;
 }
 
-const ENTITY_LABELS: Record<string, string> = {
-    family_members: 'Membres de la famille',
-    tasks: 'Tâches',
-    recipes: 'Recettes',
-    meal_plans: 'Repas planifiés',
-    budget_entries: 'Entrées budget',
-    budget_limits: 'Limites budget',
-    shopping_items: 'Articles de courses',
-    appointments: 'Rendez-vous',
-    schedule_entries: 'Plannings',
-};
-
 const Settings: React.FC = () => {
+    const { t, i18n } = useTranslation();
     const { user, setUserCurrency, setUserFromServer } = useAuth();
+    const languageOptions = SUPPORTED_LANGUAGES.map((lng) => ({
+        value: lng,
+        label: t(`language.${lng}`),
+    }));
     const updateLocation = useUpdateUserLocation();
     const [cityDraft, setCityDraft] = useState<string>(user?.city ?? '');
     const [cityMessage, setCityMessage] = useState<{
@@ -64,13 +60,13 @@ const Settings: React.FC = () => {
             setCityDraft(updated.city ?? '');
             setCityMessage({
                 kind: 'success',
-                text: `Ville enregistrée : ${updated.city ?? cityDraft.trim()}.`,
+                text: t('settings.location.saved', {
+                    city: updated.city ?? cityDraft.trim(),
+                }),
             });
         } catch (err) {
-            const msg = err instanceof Error ? err.message : 'Erreur lors de la mise à jour.';
-            const friendly = /CITY_NOT_FOUND/i.test(msg)
-                ? 'Ville introuvable — vérifie l’orthographe ou essaie une commune plus grande.'
-                : msg;
+            const msg = err instanceof Error ? err.message : t('settings.errors.update');
+            const friendly = /CITY_NOT_FOUND/i.test(msg) ? t('settings.location.notFound') : msg;
             setCityMessage({ kind: 'error', text: friendly });
         }
     };
@@ -104,11 +100,11 @@ const Settings: React.FC = () => {
             if (response.success && response.data?.user) {
                 setUserFromServer(response.data.user);
             }
-            setEmailMessage({ kind: 'success', text: 'Préférences mises à jour.' });
+            setEmailMessage({ kind: 'success', text: t('settings.email.saved') });
         } catch (err) {
             setEmailMessage({
                 kind: 'error',
-                text: err instanceof Error ? err.message : 'Erreur lors de la mise à jour.',
+                text: err instanceof Error ? err.message : t('settings.errors.update'),
             });
         } finally {
             setEmailSaving(false);
@@ -122,15 +118,15 @@ const Settings: React.FC = () => {
             await api.post<{ success: boolean }>('/api/notifications/_test-email', {});
             setEmailMessage({
                 kind: 'success',
-                text: `Email de test envoyé à ${user?.email}. Pensez à vérifier vos spams.`,
+                text: t('settings.email.testSent', { email: user?.email }),
             });
         } catch (err) {
             setEmailMessage({
                 kind: 'error',
                 text:
                     err instanceof Error
-                        ? `Échec de l'envoi : ${err.message}`
-                        : "Échec de l'envoi du test.",
+                        ? t('settings.email.testFailed', { message: err.message })
+                        : t('settings.email.testFailedGeneric'),
             });
         } finally {
             setEmailTesting(false);
@@ -159,11 +155,11 @@ const Settings: React.FC = () => {
         setCurrencyMessage(null);
         try {
             await setUserCurrency(currencyDraft);
-            setCurrencyMessage({ kind: 'success', text: 'Devise mise à jour.' });
+            setCurrencyMessage({ kind: 'success', text: t('settings.currency.saved') });
         } catch (err) {
             setCurrencyMessage({
                 kind: 'error',
-                text: err instanceof Error ? err.message : 'Erreur lors de la mise à jour.',
+                text: err instanceof Error ? err.message : t('settings.errors.update'),
             });
         } finally {
             setCurrencySaving(false);
@@ -185,7 +181,7 @@ const Settings: React.FC = () => {
             a.click();
             URL.revokeObjectURL(url);
         } catch (error) {
-            setExportError(error instanceof Error ? error.message : "Erreur lors de l'export.");
+            setExportError(error instanceof Error ? error.message : t('settings.export.error'));
         } finally {
             setExportLoading(false);
         }
@@ -221,9 +217,9 @@ const Settings: React.FC = () => {
             }
         } catch (error) {
             if (error instanceof SyntaxError) {
-                setImportError('Fichier JSON invalide.');
+                setImportError(t('settings.import.invalidJson'));
             } else {
-                setImportError(error instanceof Error ? error.message : "Erreur lors de l'import.");
+                setImportError(error instanceof Error ? error.message : t('settings.import.error'));
             }
         } finally {
             setImportLoading(false);
@@ -233,11 +229,37 @@ const Settings: React.FC = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-title font-bold text-foreground">Paramètres</h2>
-                <p className="text-caption text-muted-foreground">
-                    Gérez vos données et préférences.
-                </p>
+                <h2 className="text-title font-bold text-foreground">{t('settings.title')}</h2>
+                <p className="text-caption text-muted-foreground">{t('settings.subtitle')}</p>
             </div>
+
+            {/* Language */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                            <Languages className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-caption font-semibold text-foreground">
+                                {t('language.title')}
+                            </h3>
+                            <p className="mt-1 text-micro text-muted-foreground">
+                                {t('language.description')}
+                            </p>
+                            <div className="mt-4 max-w-sm">
+                                <Select
+                                    value={i18n.language.split('-')[0]}
+                                    onValueChange={(lng) => {
+                                        void i18n.changeLanguage(lng);
+                                    }}
+                                    options={languageOptions}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Currency */}
             <Card>
@@ -247,11 +269,11 @@ const Settings: React.FC = () => {
                             <Coins className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-caption font-semibold text-foreground">Devise</h3>
+                            <h3 className="text-caption font-semibold text-foreground">
+                                {t('settings.currency.title')}
+                            </h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Devise utilisée pour afficher les montants (budget, courses,
-                                dashboard). Les montants déjà saisis ne sont pas convertis lors d'un
-                                changement.
+                                {t('settings.currency.description')}
                             </p>
                             <div className="mt-4 max-w-sm">
                                 <Select
@@ -284,7 +306,7 @@ const Settings: React.FC = () => {
                                 {currencySaving && (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                Enregistrer
+                                {t('common.save')}
                             </Button>
                         </div>
                     </div>
@@ -299,22 +321,22 @@ const Settings: React.FC = () => {
                             <MapPin className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-caption font-semibold text-foreground">Ville</h3>
+                            <h3 className="text-caption font-semibold text-foreground">
+                                {t('settings.location.title')}
+                            </h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Utilisée pour la météo de demain et les suggestions de tenues sur le
-                                dashboard. Renseigne le nom d'une ville (ex : Lyon, Montréal, Dakar)
-                                — la localisation sera trouvée automatiquement.
+                                {t('settings.location.description')}
                             </p>
                             <div className="mt-4 max-w-sm">
                                 <Input
                                     value={cityDraft}
                                     onChange={(e) => setCityDraft(e.target.value)}
-                                    placeholder="Ex: Paris"
+                                    placeholder={t('settings.location.placeholder')}
                                 />
                             </div>
                             {user?.city && (
                                 <p className="mt-2 text-micro text-muted-foreground">
-                                    Actuel : {user.city}
+                                    {t('settings.location.current', { city: user.city })}
                                     {user.country_code ? ` (${user.country_code})` : ''}
                                 </p>
                             )}
@@ -342,7 +364,7 @@ const Settings: React.FC = () => {
                                 {updateLocation.isPending && (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                Enregistrer la ville
+                                {t('settings.location.save')}
                             </Button>
                         </div>
                     </div>
@@ -358,11 +380,10 @@ const Settings: React.FC = () => {
                         </div>
                         <div className="flex-1">
                             <h3 className="text-caption font-semibold text-foreground">
-                                Notifications par email
+                                {t('settings.email.title')}
                             </h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Recevez les rappels (rendez-vous, tâches, contrats, garanties) sur
-                                votre boîte mail. Les emails partent à l'adresse{' '}
+                                {t('settings.email.description')}{' '}
                                 <span className="font-medium text-foreground">{user?.email}</span>.
                             </p>
 
@@ -374,13 +395,13 @@ const Settings: React.FC = () => {
                                     className="h-4 w-4 rounded border-border accent-primary"
                                 />
                                 <span className="text-caption text-foreground">
-                                    Activer les notifications par email
+                                    {t('settings.email.enable')}
                                 </span>
                             </label>
 
                             <div className="mt-4 max-w-sm">
                                 <label className="text-micro font-medium text-muted-foreground">
-                                    Mode d'envoi
+                                    {t('settings.email.mode')}
                                 </label>
                                 <div
                                     className={`mt-1 ${emailEnabled ? '' : 'pointer-events-none opacity-50'}`}
@@ -393,11 +414,11 @@ const Settings: React.FC = () => {
                                         options={[
                                             {
                                                 value: 'immediate',
-                                                label: 'Immédiat — un email par notification',
+                                                label: t('settings.email.immediate'),
                                             },
                                             {
                                                 value: 'daily',
-                                                label: 'Quotidien — récapitulatif à 8h',
+                                                label: t('settings.email.daily'),
                                             },
                                         ]}
                                     />
@@ -429,7 +450,7 @@ const Settings: React.FC = () => {
                                     {emailSaving && (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     )}
-                                    Enregistrer
+                                    {t('common.save')}
                                 </Button>
                                 <Button
                                     variant="secondary"
@@ -441,7 +462,9 @@ const Settings: React.FC = () => {
                                     ) : (
                                         <Send className="mr-2 h-4 w-4" />
                                     )}
-                                    {emailTesting ? 'Envoi…' : 'Envoyer un email de test'}
+                                    {emailTesting
+                                        ? t('settings.email.sending')
+                                        : t('settings.email.sendTest')}
                                 </Button>
                             </div>
                         </div>
@@ -458,11 +481,10 @@ const Settings: React.FC = () => {
                         </div>
                         <div className="flex-1">
                             <h3 className="text-caption font-semibold text-foreground">
-                                Exporter les données
+                                {t('settings.export.title')}
                             </h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Télécharge toutes vos données (budget, tâches, recettes, membres,
-                                courses, rendez-vous, plannings, repas) dans un fichier JSON.
+                                {t('settings.export.description')}
                             </p>
                             {exportError && (
                                 <p className="mt-2 flex items-center gap-1 text-micro text-destructive">
@@ -480,7 +502,9 @@ const Settings: React.FC = () => {
                                 ) : (
                                     <Download className="mr-2 h-4 w-4" />
                                 )}
-                                {exportLoading ? 'Export en cours…' : 'Exporter'}
+                                {exportLoading
+                                    ? t('settings.export.exporting')
+                                    : t('settings.export.button')}
                             </Button>
                         </div>
                     </div>
@@ -496,27 +520,31 @@ const Settings: React.FC = () => {
                         </div>
                         <div className="flex-1">
                             <h3 className="text-caption font-semibold text-foreground">
-                                Importer des données
+                                {t('settings.import.title')}
                             </h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Restaure des données depuis un fichier d'export KeurTonux. Les
-                                données existantes ne sont pas écrasées (doublons ignorés).
+                                {t('settings.import.description')}
                             </p>
 
                             {importSuccess && (
                                 <div className="mt-3 rounded-input border border-border bg-surface-2 p-3">
                                     <p className="mb-2 flex items-center gap-1 text-micro font-semibold text-foreground">
                                         <CheckCircle className="h-4 w-4 text-green-500" />
-                                        Import réussi
+                                        {t('settings.import.success')}
                                     </p>
                                     <ul className="space-y-0.5 text-micro text-muted-foreground">
                                         {Object.entries(importSuccess).map(([key, count]) => (
                                             <li key={key}>
-                                                {ENTITY_LABELS[key] ?? key} :{' '}
+                                                {t(`settings.import.entities.${key}`, {
+                                                    defaultValue: key,
+                                                })}{' '}
+                                                :{' '}
                                                 <span className="font-medium text-foreground">
                                                     {count}
                                                 </span>{' '}
-                                                élément(s) importé(s)
+                                                {t('settings.import.itemsImported', {
+                                                    count: count ?? 0,
+                                                })}
                                             </li>
                                         ))}
                                     </ul>
@@ -541,7 +569,9 @@ const Settings: React.FC = () => {
                                     />
                                     <span className="inline-flex h-9 items-center gap-2 rounded-input border border-border bg-card px-3 text-caption font-medium text-foreground hover:bg-surface-2 transition-colors duration-fast">
                                         <Upload className="h-4 w-4" />
-                                        {selectedFile ? selectedFile.name : 'Choisir un fichier…'}
+                                        {selectedFile
+                                            ? selectedFile.name
+                                            : t('settings.import.chooseFile')}
                                     </span>
                                 </label>
                                 {selectedFile && (
@@ -551,7 +581,9 @@ const Settings: React.FC = () => {
                                         ) : (
                                             <Upload className="mr-2 h-4 w-4" />
                                         )}
-                                        {importLoading ? 'Import en cours…' : 'Importer'}
+                                        {importLoading
+                                            ? t('settings.import.importing')
+                                            : t('settings.import.button')}
                                     </Button>
                                 )}
                             </div>

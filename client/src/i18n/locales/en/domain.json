@@ -1,0 +1,135 @@
+{
+  "domain": {
+    "equipmentCategory": {
+      "Chaudière": "Boiler",
+      "Climatisation": "Air conditioning",
+      "Électroménager": "Appliances",
+      "Véhicule": "Vehicle",
+      "Outillage": "Tools",
+      "Sécurité": "Security",
+      "Jardin": "Garden",
+      "Autre": "Other"
+    },
+    "maintenanceKind": {
+      "Entretien": "Servicing",
+      "Révision": "Overhaul",
+      "Réparation": "Repair",
+      "Inspection": "Inspection"
+    },
+    "contractCategory": {
+      "Énergie": "Energy",
+      "Eau": "Water",
+      "Internet": "Internet",
+      "Téléphone": "Phone",
+      "Streaming": "Streaming",
+      "Assurance": "Insurance",
+      "Prêt": "Loan",
+      "Abonnement": "Subscription",
+      "Autre": "Other"
+    },
+    "contractFrequency": {
+      "Mensuel": "Monthly",
+      "Bimestriel": "Bimonthly",
+      "Trimestriel": "Quarterly",
+      "Semestriel": "Half-yearly",
+      "Annuel": "Yearly"
+    },
+    "paymentMethod": {
+      "Prélèvement auto": "Direct debit",
+      "Carte": "Card",
+      "Virement": "Bank transfer",
+      "Chèque": "Cheque",
+      "Espèces": "Cash",
+      "Manuel": "Manual"
+    },
+    "contactCategory": {
+      "Plombier": "Plumber",
+      "Électricien": "Electrician",
+      "Chauffagiste": "Heating engineer",
+      "Bricoleur": "Handyman",
+      "Jardinier": "Gardener",
+      "Ménage": "Cleaning",
+      "Médecin": "Doctor",
+      "Pédiatre": "Pediatrician",
+      "Vétérinaire": "Veterinarian",
+      "Gardien": "Caretaker",
+      "Voisin": "Neighbor",
+      "Famille": "Family",
+      "Urgences": "Emergencies",
+      "Assurance": "Insurance",
+      "Banque": "Bank",
+      "École": "School",
+      "Autre": "Other"
+    },
+    "roomCategory": {
+      "Salon": "Living room",
+      "Cuisine": "Kitchen",
+      "Salle à manger": "Dining room",
+      "Chambre": "Bedroom",
+      "Chambre enfant": "Child's bedroom",
+      "Chambre sous sol": "Basement bedroom",
+      "Salle de bain": "Bathroom",
+      "WC": "Toilet",
+      "Bureau": "Office",
+      "Buanderie": "Laundry room",
+      "Garage": "Garage",
+      "Cave": "Cellar",
+      "Grenier": "Attic",
+      "Atelier": "Workshop",
+      "Jardin": "Garden",
+      "Terrasse": "Terrace",
+      "Couloir": "Hallway",
+      "Entrée": "Entrance",
+      "Autre": "Other"
+    },
+    "itemCategory": {
+      "Outils": "Tools",
+      "Documents": "Documents",
+      "Médicaments": "Medication",
+      "Meubles": "Furniture",
+      "Électronique": "Electronics",
+      "Papeterie": "Stationery",
+      "Vêtements": "Clothing",
+      "Cuisine": "Kitchen",
+      "Décoration": "Decoration",
+      "Jouets": "Toys",
+      "Sport": "Sports",
+      "Saisonnier": "Seasonal",
+      "Autre": "Other"
+    },
+    "documentCategory": {
+      "Facture": "Invoice",
+      "Contrat": "Contract",
+      "Manuel": "Manual",
+      "Notice": "Instructions",
+      "Photo": "Photo",
+      "Garantie": "Warranty",
+      "Attestation": "Certificate",
+      "Autre": "Other"
+    },
+    "projectCategory": {
+      "Rénovation": "Renovation",
+      "Décoration": "Decoration",
+      "Jardin": "Garden",
+      "Sécurité": "Security",
+      "Confort": "Comfort",
+      "Réparation": "Repair",
+      "Énergie": "Energy",
+      "Mobilier": "Furniture",
+      "Autre": "Other"
+    },
+    "projectStatus": {
+      "Idée": "Idea",
+      "En cours": "In progress",
+      "Terminé": "Completed",
+      "Suspendu": "On hold"
+    },
+    "shoppingCategory": {
+      "Alimentation": "Groceries",
+      "Bebe": "Baby",
+      "Menage": "Household",
+      "Sante": "Health",
+      "Autre": "Other"
+    }
+  }
+}

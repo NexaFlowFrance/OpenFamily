@@ -18,11 +18,18 @@
     },
     "filter": {
       "all_members": "Tous les membres",
-      "unassigned": "Non assignées"
+      "unassigned": "Non assignées",
+      "all_categories": "Toutes les catégories"
+    },
+    "search_placeholder": "Rechercher une entrée...",
+    "pagination": {
+      "page": "Page {{current}} / {{total}}",
+      "showing": "{{from}}–{{to}} sur {{total}}"
     },
     "scan_receipt": "Scanner facture",
     "new_entry": "Nouvelle entrée",
     "empty_month": "Aucune entrée pour ce mois",
+    "empty_search": "Aucune entrée ne correspond à votre recherche",
     "stats": {
       "ai_card_title": "Analyse IA du mois",
       "ai_card_desc": "Diagnostic + pistes d'économies + recommandations actionnables.",

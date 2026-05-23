@@ -14,6 +14,7 @@ import {
     ChevronRight,
     ScanLine,
     Sparkles,
+    Search,
 } from 'lucide-react';
 import { ReceiptScanDialog, type ExtractedReceipt } from '../components/app/ReceiptScanDialog';
 import { BudgetAnalysisDialog } from '../components/app/BudgetAnalysisDialog';
@@ -98,6 +99,8 @@ interface MonthlyStats {
 // Stored DATA values — labels resolved at render time via i18n.
 const CATEGORY_VALUES = ['Alimentation', 'Santé', 'Enfants', 'Maison', 'Loisirs', 'Autre'] as const;
 
+const ENTRIES_PER_PAGE = 10;
+
 const parsePositiveAmount = (value: string): number => Number(value.replace(',', '.'));
 const toNumber = (value: unknown): number => {
     if (typeof value === 'number') {
@@ -132,6 +135,9 @@ const Budget: React.FC = () => {
     const [formError, setFormError] = useState('');
     const [limitError, setLimitError] = useState('');
     const [filterMember, setFilterMember] = useState<string>('');
+    const [filterCategory, setFilterCategory] = useState<string>('');
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [currentPage, setCurrentPage] = useState(1);
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
@@ -413,8 +419,37 @@ const Budget: React.FC = () => {
         if (filterMember === '__unassigned__' && entry.assigned_to) return false;
         if (filterMember && filterMember !== '__unassigned__' && entry.assigned_to !== filterMember)
             return false;
+        if (filterCategory && entry.category !== filterCategory) return false;
+        if (searchQuery.trim()) {
+            const query = searchQuery.trim().toLowerCase();
+            const categoryLabel = t('budget.categories.' + entry.category, {
+                defaultValue: entry.category,
+            }).toLowerCase();
+            const matches =
+                entry.description?.toLowerCase().includes(query) ||
+                entry.category.toLowerCase().includes(query) ||
+                categoryLabel.includes(query) ||
+                entry.assigned_to_name?.toLowerCase().includes(query);
+            if (!matches) return false;
+        }
         return true;
     });
+
+    const totalPages = Math.max(1, Math.ceil(filteredEntries.length / ENTRIES_PER_PAGE));
+    const pageStart = (currentPage - 1) * ENTRIES_PER_PAGE;
+    const paginatedEntries = filteredEntries.slice(pageStart, pageStart + ENTRIES_PER_PAGE);
+
+    // Reset to first page whenever the active filters or period change.
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, filterCategory, filterMember, currentMonth, currentYear]);
+
+    // Keep the current page in range after deletions or filtering.
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     const chartData =
         stats?.byCategory.map((cat) => ({
@@ -445,7 +480,24 @@ const Budget: React.FC = () => {
             content: (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder={t('budget.search_placeholder')}
+                                    className="pl-10 w-full sm:w-56"
+                                />
+                            </div>
+                            <Select
+                                value={filterCategory}
+                                onValueChange={(value) => setFilterCategory(value)}
+                                options={[
+                                    { value: '', label: t('budget.filter.all_categories') },
+                                    ...categoryOptions,
+                                ]}
+                            />
                             {familyMembers.length > 0 && (
                                 <Select
                                     value={filterMember}
@@ -487,12 +539,14 @@ const Budget: React.FC = () => {
                                 <CardContent className="p-8 text-center">
                                     <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
                                     <p className="text-muted-foreground">
-                                        {t('budget.empty_month')}
+                                        {entries.length === 0
+                                            ? t('budget.empty_month')
+                                            : t('budget.empty_search')}
                                     </p>
                                 </CardContent>
                             </Card>
                         ) : (
-                            filteredEntries.map((entry) => (
+                            paginatedEntries.map((entry) => (
                                 <Card key={entry.id} className="hover:shadow-md transition-shadow">
                                     <CardContent className="p-4">
                                         <div className="flex items-start justify-between">
@@ -565,6 +619,47 @@ const Budget: React.FC = () => {
                             ))
                         )}
                     </div>
+
+                    {filteredEntries.length > ENTRIES_PER_PAGE && (
+                        <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
+                            <p className="text-label text-muted-foreground">
+                                {t('budget.pagination.showing', {
+                                    from: pageStart + 1,
+                                    to: Math.min(
+                                        pageStart + ENTRIES_PER_PAGE,
+                                        filteredEntries.length,
+                                    ),
+                                    total: filteredEntries.length,
+                                })}
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={currentPage <= 1}
+                                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                <span className="text-label text-muted-foreground min-w-[90px] text-center">
+                                    {t('budget.pagination.page', {
+                                        current: currentPage,
+                                        total: totalPages,
+                                    })}
+                                </span>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={currentPage >= totalPages}
+                                    onClick={() =>
+                                        setCurrentPage((page) => Math.min(totalPages, page + 1))
+                                    }
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ),
         },

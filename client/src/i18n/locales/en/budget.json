@@ -18,11 +18,18 @@
     },
     "filter": {
       "all_members": "All members",
-      "unassigned": "Unassigned"
+      "unassigned": "Unassigned",
+      "all_categories": "All categories"
+    },
+    "search_placeholder": "Search an entry...",
+    "pagination": {
+      "page": "Page {{current}} / {{total}}",
+      "showing": "{{from}}–{{to}} of {{total}}"
     },
     "scan_receipt": "Scan receipt",
     "new_entry": "New entry",
     "empty_month": "No entries for this month",
+    "empty_search": "No entry matches your search",
     "stats": {
       "ai_card_title": "AI analysis of the month",
       "ai_card_desc": "Diagnosis + savings opportunities + actionable recommendations.",

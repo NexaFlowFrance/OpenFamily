@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
+import { formatCurrency } from '../lib/utils';
 import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -44,6 +46,8 @@ const parseOptionalPositiveNumber = (value: string): number | undefined => {
 };
 
 const ShoppingList: React.FC = () => {
+    const { user } = useAuth();
+    const currency = user?.currency || 'EUR';
     const [items, setItems] = useState<ShoppingItem[]>([]);
     const [templates, setTemplates] = useState<ShoppingTemplate[]>([]);
     const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -454,7 +458,7 @@ const ShoppingList: React.FC = () => {
                                     <div className="mt-1 flex flex-wrap items-center gap-2 text-micro">
                                         <span className="rounded-pill bg-primary-soft px-2 py-0.5 text-primary">{item.category}</span>
                                         {item.quantity ? <span className="text-muted-foreground">Qt: {item.quantity}</span> : null}
-                                        {item.price ? <span className="text-muted-foreground">{Number(item.price).toFixed(2)} EUR</span> : null}
+                                        {item.price ? <span className="text-muted-foreground">{formatCurrency(Number(item.price), currency)}</span> : null}
                                     </div>
                                 </div>
 
@@ -503,7 +507,7 @@ const ShoppingList: React.FC = () => {
             <div className="sticky bottom-20 z-20 rounded-card border border-border bg-card px-4 py-3 shadow-surface lg:bottom-4">
                 <div className="flex items-center justify-between text-caption">
                     <span className="text-muted-foreground">Total estime</span>
-                    <span className="text-body font-semibold text-foreground">{totalPrice.toFixed(2)} EUR</span>
+                    <span className="text-body font-semibold text-foreground">{formatCurrency(totalPrice, currency)}</span>
                 </div>
             </div>
 

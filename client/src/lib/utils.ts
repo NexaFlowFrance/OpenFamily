@@ -22,9 +22,9 @@ export function formatTime(date: Date | string): string {
     });
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number, currency: string = 'EUR'): string {
     return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency: 'EUR'
+        currency: currency.toUpperCase()
     }).format(amount);
 }

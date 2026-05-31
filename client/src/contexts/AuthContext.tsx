@@ -7,6 +7,7 @@ interface User {
     name: string;
     is_owner?: boolean;
     role?: string;
+    currency?: string;
 }
 
 interface AuthContextType {
@@ -18,6 +19,7 @@ interface AuthContextType {
     leaveFamily: () => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
+    updateCurrency: (currency: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -122,6 +124,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.removeItem('user');
     };
 
+    const updateCurrency = async (currency: string) => {
+        const response = await api.put<{ success: boolean; data: { user: User } }>('/api/auth/currency', { currency });
+        if (response.success && response.data?.user) {
+            setUser(response.data.user);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -133,6 +143,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 leaveFamily,
                 logout,
                 isAuthenticated: !!user,
+                updateCurrency,
             }}
         >
             {children}

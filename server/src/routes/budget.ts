@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { query } from '../db';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
 
@@ -73,7 +73,7 @@ router.get('/entries', async (req: AuthRequest, res) => {
 });
 
 // Create budget entry
-router.post('/entries', async (req: AuthRequest, res) => {
+router.post('/entries', requireParent, async (req: AuthRequest, res) => {
     try {
         const { category, amount, description, date, is_expense, assigned_to } = req.body;
         const parsedAmount = toOptionalNumber(amount);
@@ -104,7 +104,7 @@ router.post('/entries', async (req: AuthRequest, res) => {
 });
 
 // Update budget entry
-router.put('/entries/:id', async (req: AuthRequest, res) => {
+router.put('/entries/:id', requireParent, async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
         const { category, amount, description, date, is_expense, assigned_to } = req.body;
@@ -158,7 +158,7 @@ router.put('/entries/:id', async (req: AuthRequest, res) => {
 });
 
 // Delete budget entry
-router.delete('/entries/:id', async (req: AuthRequest, res) => {
+router.delete('/entries/:id', requireParent, async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
 
@@ -206,7 +206,7 @@ router.get('/limits', async (req: AuthRequest, res) => {
 });
 
 // Set budget limit
-router.post('/limits', async (req: AuthRequest, res) => {
+router.post('/limits', requireParent, async (req: AuthRequest, res) => {
     try {
         const { category, monthly_limit, month, year } = req.body;
         const parsedLimit = toOptionalNumber(monthly_limit);
@@ -353,6 +353,248 @@ router.get('/statistics/monthly', async (req: AuthRequest, res) => {
         res.json({ success: true, data: monthlyData });
     } catch (error) {
         console.error('Get monthly budget statistics error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// ─── Recurring Expenses ───────────────────────────────────────────────────────
+
+const mapRecurringExpense = (row: any) => ({
+    ...row,
+    amount: toNumber(row.amount),
+    debit_day: toNumber(row.debit_day),
+    is_active: Boolean(row.is_active),
+    is_pointed: Boolean(row.is_pointed),
+});
+
+// List recurring expenses with their pointing status for a given month/year
+router.get('/recurring', async (req: AuthRequest, res) => {
+    try {
+        const { month, year } = req.query;
+        const parsedMonth = toOptionalNumber(month);
+        const parsedYear = toOptionalNumber(year);
+
+        const result = await query(
+            `SELECT re.*,
+                COALESCE(rel.is_pointed, false) as is_pointed,
+                rel.pointed_at
+             FROM recurring_expenses re
+             LEFT JOIN recurring_expense_logs rel
+               ON rel.recurring_expense_id = re.id
+               AND rel.month = $2
+               AND rel.year = $3
+             WHERE re.user_id = $1 AND re.is_active = true
+             ORDER BY re.debit_day ASC, re.label ASC`,
+            [req.userId, parsedMonth ?? new Date().getMonth() + 1, parsedYear ?? new Date().getFullYear()]
+        );
+
+        res.json({ success: true, data: result.rows.map(mapRecurringExpense) });
+    } catch (error) {
+        console.error('Get recurring expenses error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Create recurring expense
+router.post('/recurring', requireParent, async (req: AuthRequest, res) => {
+    try {
+        const { label, amount, category, debit_day } = req.body;
+        const parsedAmount = toOptionalNumber(amount);
+        const parsedDay = toOptionalNumber(debit_day);
+
+        if (!label || parsedAmount === null || parsedAmount <= 0) {
+            return res.status(400).json({ success: false, error: 'label and amount are required' });
+        }
+
+        const day = parsedDay !== null && parsedDay >= 1 && parsedDay <= 31 ? parsedDay : 1;
+
+        const result = await query(
+            `INSERT INTO recurring_expenses (user_id, label, amount, category, debit_day)
+             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [req.userId, label, parsedAmount, category || 'Maison', day]
+        );
+
+        broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'created' });
+        res.json({ success: true, data: mapRecurringExpense({ ...result.rows[0], is_pointed: false }) });
+    } catch (error) {
+        console.error('Create recurring expense error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Update recurring expense
+router.put('/recurring/:id', requireParent, async (req: AuthRequest, res) => {
+    try {
+        const { id } = req.params;
+        const { label, amount, category, debit_day, is_active } = req.body;
+        const parsedAmount = amount !== undefined ? toOptionalNumber(amount) : undefined;
+        const parsedDay = debit_day !== undefined ? toOptionalNumber(debit_day) : undefined;
+
+        const result = await query(
+            `UPDATE recurring_expenses
+             SET label = COALESCE($1, label),
+                 amount = COALESCE($2, amount),
+                 category = COALESCE($3, category),
+                 debit_day = COALESCE($4, debit_day),
+                 is_active = COALESCE($5, is_active),
+                 updated_at = NOW()
+             WHERE id = $6 AND user_id = $7 RETURNING *`,
+            [
+                label ?? null,
+                parsedAmount ?? null,
+                category ?? null,
+                parsedDay ?? null,
+                is_active !== undefined ? Boolean(is_active) : null,
+                id,
+                req.userId,
+            ]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Recurring expense not found' });
+        }
+
+        broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'updated' });
+        res.json({ success: true, data: mapRecurringExpense({ ...result.rows[0], is_pointed: false }) });
+    } catch (error) {
+        console.error('Update recurring expense error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Delete recurring expense
+router.delete('/recurring/:id', requireParent, async (req: AuthRequest, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await query(
+            'DELETE FROM recurring_expenses WHERE id = $1 AND user_id = $2 RETURNING id',
+            [id, req.userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Recurring expense not found' });
+        }
+
+        broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'deleted' });
+        res.json({ success: true, message: 'Recurring expense deleted' });
+    } catch (error) {
+        console.error('Delete recurring expense error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Toggle pointing status for a recurring expense for a given month/year
+router.post('/recurring/:id/point', requireParent, async (req: AuthRequest, res) => {
+    try {
+        const { id } = req.params;
+        const { month, year, is_pointed } = req.body;
+        const parsedMonth = toOptionalNumber(month);
+        const parsedYear = toOptionalNumber(year);
+
+        if (parsedMonth === null || parsedYear === null) {
+            return res.status(400).json({ success: false, error: 'month and year are required' });
+        }
+
+        // Verify the recurring expense belongs to the user
+        const check = await query(
+            'SELECT id FROM recurring_expenses WHERE id = $1 AND user_id = $2',
+            [id, req.userId]
+        );
+        if (check.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Recurring expense not found' });
+        }
+
+        const pointed = Boolean(is_pointed);
+        const result = await query(
+            `INSERT INTO recurring_expense_logs (recurring_expense_id, user_id, month, year, is_pointed, pointed_at)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             ON CONFLICT (recurring_expense_id, month, year)
+             DO UPDATE SET is_pointed = $5, pointed_at = $6
+             RETURNING *`,
+            [id, req.userId, parsedMonth, parsedYear, pointed, pointed ? new Date() : null]
+        );
+
+        broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'updated' });
+        res.json({ success: true, data: { ...result.rows[0], is_pointed: Boolean(result.rows[0].is_pointed) } });
+    } catch (error) {
+        console.error('Point recurring expense error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Get forecast for a month (current balance + upcoming recurring expenses)
+router.get('/forecast', async (req: AuthRequest, res) => {
+    try {
+        const { month, year } = req.query;
+        const parsedMonth = toOptionalNumber(month);
+        const parsedYear = toOptionalNumber(year);
+
+        if (parsedMonth === null || parsedYear === null) {
+            return res.status(400).json({ success: false, error: 'month and year are required' });
+        }
+
+        // All budget entries for the month (one-time expenses & income)
+        const totals = await query(
+            `SELECT
+               SUM(amount) FILTER (WHERE is_expense = false) as total_income,
+               SUM(amount) FILTER (WHERE is_expense = true) as total_expenses
+             FROM budget_entries
+             WHERE user_id = $1
+               AND EXTRACT(MONTH FROM date) = $2
+               AND EXTRACT(YEAR FROM date) = $3`,
+            [req.userId, parsedMonth, parsedYear]
+        );
+
+        // Pointed recurring expenses total
+        const pointedRecurring = await query(
+            `SELECT COALESCE(SUM(re.amount), 0) as total
+             FROM recurring_expenses re
+             INNER JOIN recurring_expense_logs rel
+               ON rel.recurring_expense_id = re.id
+               AND rel.month = $2
+               AND rel.year = $3
+               AND rel.is_pointed = true
+             WHERE re.user_id = $1 AND re.is_active = true`,
+            [req.userId, parsedMonth, parsedYear]
+        );
+
+        // Unpointed recurring expenses total
+        const unpointedRecurring = await query(
+            `SELECT COALESCE(SUM(re.amount), 0) as total
+             FROM recurring_expenses re
+             LEFT JOIN recurring_expense_logs rel
+               ON rel.recurring_expense_id = re.id
+               AND rel.month = $2
+               AND rel.year = $3
+             WHERE re.user_id = $1 AND re.is_active = true
+               AND (rel.is_pointed IS NULL OR rel.is_pointed = false)`,
+            [req.userId, parsedMonth, parsedYear]
+        );
+
+        const income = toNumber(totals.rows[0]?.total_income);
+        const oneTimeExpenses = toNumber(totals.rows[0]?.total_expenses);
+        const pointed = toNumber(pointedRecurring.rows[0]?.total);
+        const unpointed = toNumber(unpointedRecurring.rows[0]?.total);
+
+        // Solde actuel = revenus - dépenses ponctuelles - prélèvements déjà pointés
+        const currentBalance = income - oneTimeExpenses - pointed;
+        // Prévisionnel = solde actuel - prélèvements restants à pointer
+        const forecastBalance = currentBalance - unpointed;
+
+        res.json({
+            success: true,
+            data: {
+                income,
+                oneTimeExpenses,
+                pointedRecurring: pointed,
+                unpointedRecurring: unpointed,
+                currentBalance,
+                forecastBalance,
+            },
+        });
+    } catch (error) {
+        console.error('Get forecast error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });

@@ -9,7 +9,13 @@ const sw = /** @type {ServiceWorkerGlobalScope} */ (self);
 // eslint-disable-next-line no-undef
 const precacheManifest = self.__WB_MANIFEST;
 
-const CACHE_NAME = 'openfamily-v1';
+// Versionne les caches : un changement de version purge automatiquement les
+// anciens caches a l'activation (voir handler 'activate'). Indispensable pour
+// eviter qu'un ancien bundle (ex. pointant vers une mauvaise URL d'API) reste
+// servi indefiniment apres une mise a jour de l'application.
+const CACHE_NAME = 'openfamily-v2';
+const API_CACHE_NAME = 'openfamily-api-v2';
+const OFFLINE_URL = '/index.html';
 
 sw.addEventListener('install', (event) => {
     event.waitUntil(
@@ -17,6 +23,8 @@ sw.addEventListener('install', (event) => {
             const urls = precacheManifest
                 .filter((entry) => entry.url && !entry.url.startsWith('http'))
                 .map((entry) => entry.url);
+            // Always keep the app shell available for offline navigation.
+            if (!urls.includes(OFFLINE_URL)) urls.push(OFFLINE_URL);
             return cache.addAll(urls).catch(() => {
                 // Ignore individual failures (missing assets, etc.)
             });
@@ -27,17 +35,58 @@ sw.addEventListener('install', (event) => {
 sw.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) =>
-            Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+            Promise.all(
+                keys
+                    .filter((k) => k !== CACHE_NAME && k !== API_CACHE_NAME)
+                    .map((k) => caches.delete(k))
+            )
         ).then(() => sw.clients.claim())
     );
 });
 
 sw.addEventListener('fetch', (event) => {
-    if (event.request.method !== 'GET') return;
-    if (event.request.url.includes('/api/')) return; // Never cache API calls
+    const { request } = event;
+    if (request.method !== 'GET') return;
 
+    const url = new URL(request.url);
+
+    // App navigations: try the network first, fall back to the cached shell when offline.
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request).catch(() =>
+                caches.match(request).then((cached) => cached ?? caches.match(OFFLINE_URL))
+            )
+        );
+        return;
+    }
+
+    // API reads: network-first with a cache fallback so data stays viewable offline.
+    if (url.pathname.includes('/api/')) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response && response.ok) {
+                        const clone = response.clone();
+                        caches.open(API_CACHE_NAME).then((cache) => cache.put(request, clone));
+                    }
+                    return response;
+                })
+                .catch(() =>
+                    caches.match(request).then((cached) => {
+                        if (cached) return cached;
+                        return new Response(
+                            JSON.stringify({ success: false, error: 'offline', offline: true }),
+                            { status: 503, headers: { 'Content-Type': 'application/json' } }
+                        );
+                    })
+                )
+        );
+        return;
+    }
+
+    // Static assets: cache-first.
     event.respondWith(
-        caches.match(event.request).then((cached) => cached ?? fetch(event.request))
+        caches.match(request).then((cached) => cached ?? fetch(request))
     );
 });
 

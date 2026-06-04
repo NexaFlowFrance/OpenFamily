@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { api } from '../lib/api';
-import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe } from 'lucide-react';
+import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Camera, Trash2 } from 'lucide-react';
 import { Card, CardContent, Button } from '../components/ui';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,8 +53,11 @@ const Settings: React.FC = () => {
     const [notifError, setNotifError] = useState('');
     const [currencyLoading, setCurrencyLoading] = useState(false);
     const [currencyError, setCurrencyError] = useState('');
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+    const [avatarLoading, setAvatarLoading] = useState(false);
+    const [avatarError, setAvatarError] = useState('');
 
-    const { user, updateCurrency } = useAuth();
+    const { user, updateCurrency, updateProfile } = useAuth();
     const { isSupported, permission, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = useNotifications();
 
     const handleToggleNotifications = async () => {
@@ -79,6 +82,62 @@ const Settings: React.FC = () => {
             setCurrencyError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour de la devise.');
         } finally {
             setCurrencyLoading(false);
+        }
+    };
+
+    // Resize/compress the selected image client-side to keep the stored data URL small.
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (avatarInputRef.current) avatarInputRef.current.value = '';
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            setAvatarError('Veuillez choisir une image.');
+            return;
+        }
+        setAvatarError('');
+        setAvatarLoading(true);
+        try {
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = () => reject(new Error('Lecture du fichier impossible.'));
+                reader.readAsDataURL(file);
+            });
+            const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => resolve(image);
+                image.onerror = () => reject(new Error('Image invalide.'));
+                image.src = dataUrl;
+            });
+            const size = 256;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Canvas indisponible.');
+            // Cover-crop to a square.
+            const min = Math.min(img.width, img.height);
+            const sx = (img.width - min) / 2;
+            const sy = (img.height - min) / 2;
+            ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+            const compressed = canvas.toDataURL('image/jpeg', 0.85);
+            await updateProfile({ avatar_url: compressed });
+        } catch (err) {
+            setAvatarError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour de la photo.');
+        } finally {
+            setAvatarLoading(false);
+        }
+    };
+
+    const handleRemoveAvatar = async () => {
+        setAvatarError('');
+        setAvatarLoading(true);
+        try {
+            await updateProfile({ avatar_url: null });
+        } catch (err) {
+            setAvatarError(err instanceof Error ? err.message : 'Erreur lors de la suppression de la photo.');
+        } finally {
+            setAvatarLoading(false);
         }
     };
 
@@ -148,6 +207,74 @@ const Settings: React.FC = () => {
                 <h2 className="text-title font-bold text-foreground">Paramètres</h2>
                 <p className="text-caption text-muted-foreground">Gérez vos données et préférences.</p>
             </div>
+
+            {/* Profile photo */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="relative shrink-0">
+                            {user?.avatar_url ? (
+                                <img
+                                    src={user.avatar_url}
+                                    alt={user?.name || 'Profil'}
+                                    className="h-16 w-16 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-soft text-title font-semibold text-primary">
+                                    {user?.name?.charAt(0) || 'U'}
+                                </div>
+                            )}
+                            {avatarLoading && (
+                                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
+                                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-caption font-semibold text-foreground">Photo de profil</h3>
+                            <p className="mt-1 text-micro text-muted-foreground">
+                                Choisissez une photo qui apparaîtra dans le menu de l'application.
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                <input
+                                    ref={avatarInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleAvatarChange}
+                                />
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => avatarInputRef.current?.click()}
+                                    disabled={avatarLoading}
+                                >
+                                    <Camera className="mr-2 h-4 w-4" />
+                                    {user?.avatar_url ? 'Changer la photo' : 'Choisir une photo'}
+                                </Button>
+                                {user?.avatar_url && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleRemoveAvatar}
+                                        disabled={avatarLoading}
+                                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Retirer
+                                    </Button>
+                                )}
+                            </div>
+                            {avatarError && (
+                                <p className="mt-2 flex items-center gap-1 text-micro text-destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    {avatarError}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Push Notifications */}
             <Card>

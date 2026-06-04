@@ -51,3 +51,10 @@ ios/
 # PWA
 client/public/sw.js
 client/public/workbox-*.js
+
+# Windows installer (scripts de compilation — distribué via Release .exe)
+installer/
+.github/workflows/windows-installer.yml
+
+# Assets internes non distribués
+logo nexaflow.png

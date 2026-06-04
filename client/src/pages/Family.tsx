@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
-import { Plus, Edit2, Trash2, User, Phone, Heart, AlertTriangle, Users, Link2, Copy, LogOut, Crown, UserX, Check } from 'lucide-react';
+import { Plus, Edit2, Trash2, User, Phone, Heart, AlertTriangle, Users, Link2, Copy, LogOut, Crown, UserX, Check, UserPlus, Send, Clock, X } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, Badge } from '../components/ui';
 import { DEFAULT_FAMILY_COLOR, FAMILY_COLOR_PRESETS } from '../design/colorPresets';
 
@@ -34,8 +34,23 @@ interface SharedAccount {
     role?: string;
 }
 
+interface JoinRequest {
+    id: string;
+    requester_id: string;
+    requester_name: string;
+    requester_email: string;
+    created_at: string;
+}
+
+interface MyJoinRequest {
+    id: string;
+    status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+    owner_name: string;
+    owner_email: string;
+}
+
 const Family: React.FC = () => {
-    const { user, leaveFamily } = useAuth();
+    const { user, leaveFamily, refreshToken } = useAuth();
     const [members, setMembers] = useState<FamilyMember[]>([]);
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -48,6 +63,13 @@ const Family: React.FC = () => {
     const [inviteLinkLoading, setInviteLinkLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [leavingFamily, setLeavingFamily] = useState(false);
+
+    // Join requests state
+    const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([]);
+    const [myRequest, setMyRequest] = useState<MyJoinRequest | null>(null);
+    const [joinEmail, setJoinEmail] = useState('');
+    const [joinError, setJoinError] = useState('');
+    const [joinSubmitting, setJoinSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -64,8 +86,13 @@ const Family: React.FC = () => {
     useEffect(() => {
         loadMembers();
         loadSharedAccounts();
+        loadJoinData();
     }, []);
-    useWebSocketUpdates('family', () => { void loadMembers(); });
+    useWebSocketUpdates('family', () => {
+        void loadMembers();
+        void loadSharedAccounts();
+        void loadJoinData();
+    });
 
     const loadMembers = async () => {
         try {
@@ -89,6 +116,80 @@ const Family: React.FC = () => {
             }
         } catch {
             // Silently ignore — non-blocking
+        }
+    };
+
+    const loadJoinData = async () => {
+        // Owner: pending requests addressed to me (403 for non-owners — ignore)
+        try {
+            const reqRes = await api.get<{ success: boolean; data: JoinRequest[] }>('/api/invites/requests');
+            if (reqRes.success) setJoinRequests(reqRes.data);
+        } catch {
+            setJoinRequests([]);
+        }
+        // Requester: status of my own outgoing request
+        try {
+            const mineRes = await api.get<{ success: boolean; data: MyJoinRequest | null }>('/api/invites/requests/mine');
+            if (mineRes.success) {
+                if (mineRes.data?.status === 'approved') {
+                    // Access granted — refresh the token so data queries use the new family scope
+                    await refreshToken();
+                    await loadSharedAccounts();
+                    await loadMembers();
+                    setMyRequest(null);
+                } else {
+                    setMyRequest(mineRes.data);
+                }
+            }
+        } catch {
+            setMyRequest(null);
+        }
+    };
+
+    const handleSendJoinRequest = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setJoinError('');
+        if (!joinEmail.trim()) {
+            setJoinError('Adresse e-mail requise');
+            return;
+        }
+        setJoinSubmitting(true);
+        try {
+            await api.post('/api/invites/requests', { ownerEmail: joinEmail.trim() });
+            setJoinEmail('');
+            await loadJoinData();
+        } catch (err) {
+            setJoinError(err instanceof Error ? err.message : 'Impossible d\'envoyer la demande.');
+        } finally {
+            setJoinSubmitting(false);
+        }
+    };
+
+    const handleCancelJoinRequest = async () => {
+        try {
+            await api.delete('/api/invites/requests/mine');
+            setMyRequest(null);
+        } catch {
+            setError('Impossible d\'annuler la demande.');
+        }
+    };
+
+    const handleApproveRequest = async (id: string) => {
+        try {
+            await api.post(`/api/invites/requests/${id}/approve`, {});
+            await loadJoinData();
+            await loadSharedAccounts();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Impossible d\'approuver la demande.');
+        }
+    };
+
+    const handleRejectRequest = async (id: string) => {
+        try {
+            await api.post(`/api/invites/requests/${id}/reject`, {});
+            await loadJoinData();
+        } catch {
+            setError('Impossible de refuser la demande.');
         }
     };
 
@@ -122,6 +223,28 @@ const Family: React.FC = () => {
             await loadSharedAccounts();
         } catch {
             setError('Impossible de retirer ce membre.');
+        }
+    };
+
+    const handleTransferOwnership = async (account: SharedAccount) => {
+        if (!confirm(
+            `Transférer la propriété de la famille à ${account.name} ?\n\n` +
+            'Vous deviendrez un membre ordinaire. Toutes les données familiales seront conservées ' +
+            'et gérées par le nouveau propriétaire. Cette action est irréversible.'
+        )) return;
+        try {
+            const res = await api.post<{ success: boolean; data?: { token: string; user: any } }>(
+                '/api/invites/transfer-ownership',
+                { newOwnerId: account.id }
+            );
+            if (res.success) {
+                // Our token now reflects member status — sync it.
+                await refreshToken();
+                await loadSharedAccounts();
+                await loadMembers();
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Impossible de transférer la propriété.');
         }
     };
 
@@ -416,6 +539,16 @@ const Family: React.FC = () => {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
+                                                    onClick={() => handleTransferOwnership(account)}
+                                                    title="Transférer la propriété à ce compte"
+                                                >
+                                                    <Crown className="w-4 h-4 text-amber-500" />
+                                                </Button>
+                                            )}
+                                            {isOwner && !account.is_owner && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
                                                     onClick={() => handleKickMember(account.id)}
                                                     title="Retirer ce compte"
                                                 >
@@ -434,6 +567,107 @@ const Family: React.FC = () => {
                                     Aucun autre compte ne partage encore cette famille.
                                 </CardContent>
                             </Card>
+                        )}
+
+                        {/* Owner: pending join requests to approve / reject */}
+                        {isOwner && joinRequests.length > 0 && (
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <UserPlus className="w-4 h-4 text-nexus-blue" />
+                                    <h3 className="text-body font-semibold">Demandes d'accès</h3>
+                                    <Badge variant="primary">{joinRequests.length}</Badge>
+                                </div>
+                                {joinRequests.map((reqItem) => (
+                                    <Card key={reqItem.id} hover={false}>
+                                        <CardContent className="flex items-center gap-3 p-4">
+                                            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                                                <User className="w-5 h-5 text-amber-600" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-body font-medium truncate">{reqItem.requester_name}</p>
+                                                <p className="text-body-sm text-muted-foreground truncate">{reqItem.requester_email}</p>
+                                            </div>
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() => handleApproveRequest(reqItem.id)}
+                                                className="flex items-center gap-1 text-green-600"
+                                                title="Accepter"
+                                            >
+                                                <Check className="w-4 h-4" />
+                                                Accepter
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleRejectRequest(reqItem.id)}
+                                                title="Refuser"
+                                            >
+                                                <X className="w-4 h-4 text-red-500" />
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Lone account: request to join another family */}
+                        {isOwner && sharedAccounts.length <= 1 && (
+                            myRequest && myRequest.status === 'pending' ? (
+                                <Card hover={false}>
+                                    <CardContent className="flex items-center gap-3 p-4">
+                                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                                            <Clock className="w-5 h-5 text-amber-600" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-body font-medium">Demande en attente</p>
+                                            <p className="text-body-sm text-muted-foreground truncate">
+                                                Envoyée à {myRequest.owner_name} ({myRequest.owner_email})
+                                            </p>
+                                        </div>
+                                        <Button variant="ghost" size="sm" onClick={handleCancelJoinRequest}>
+                                            Annuler
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ) : (
+                                <div className="space-y-3 border-t pt-4">
+                                    <div className="flex items-center gap-2">
+                                        <UserPlus className="w-4 h-4 text-nexus-blue" />
+                                        <h3 className="text-body font-semibold">Rejoindre une famille</h3>
+                                    </div>
+                                    <p className="text-body-sm text-muted-foreground">
+                                        Saisissez l'adresse e-mail du propriétaire de la famille à rejoindre. Il recevra une demande
+                                        à accepter ou refuser.
+                                    </p>
+                                    {myRequest && myRequest.status === 'rejected' && (
+                                        <p className="text-body-sm text-red-500">
+                                            Votre dernière demande a été refusée.
+                                        </p>
+                                    )}
+                                    {joinError && (
+                                        <p className="text-body-sm text-red-500">{joinError}</p>
+                                    )}
+                                    <form onSubmit={handleSendJoinRequest} className="flex flex-col gap-2 sm:flex-row">
+                                        <Input
+                                            type="email"
+                                            value={joinEmail}
+                                            onChange={(e) => setJoinEmail(e.target.value)}
+                                            placeholder="email@exemple.com"
+                                            className="flex-1"
+                                        />
+                                        <Button
+                                            type="submit"
+                                            variant="secondary"
+                                            disabled={joinSubmitting}
+                                            className="flex items-center justify-center gap-2"
+                                        >
+                                            <Send className="w-4 h-4" />
+                                            {joinSubmitting ? 'Envoi…' : 'Envoyer la demande'}
+                                        </Button>
+                                    </form>
+                                </div>
+                            )
                         )}
 
                         {/* Owner: generate invite */}

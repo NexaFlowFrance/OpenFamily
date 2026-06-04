@@ -267,7 +267,7 @@ const Recipes: React.FC = () => {
                             </div>
                             <CardContent className="p-4">
                                 <div className="flex items-start justify-between mb-2">
-                                    <h3 className="text-body font-semibold flex-1">{recipe.name}</h3>
+                                    <h3 className="text-body font-semibold flex-1 min-w-0 break-words">{recipe.name}</h3>
                                 </div>
                                 {recipe.description && (
                                     <p className="text-body-sm text-muted-foreground mb-3 line-clamp-2">

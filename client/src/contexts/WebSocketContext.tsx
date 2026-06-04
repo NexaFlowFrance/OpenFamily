@@ -19,7 +19,8 @@ export type WsEntity =
     | 'budget'
     | 'recipes'
     | 'meal-plans'
-    | 'planning';
+    | 'planning'
+    | 'notifications';
 
 export type WsAction = 'created' | 'updated' | 'deleted';
 
@@ -40,7 +41,20 @@ interface WebSocketContextType {
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
-const WS_URL = (import.meta.env.VITE_WS_URL as string | undefined) || 'ws://localhost:3001';
+// VITE_WS_URL non défini en dev -> ws://localhost:3001.
+// En build de production, on dérive l'URL WebSocket de window.location (même
+// origine), pour fonctionner depuis un mobile via http://<ip-du-pc>:3000.
+const rawWsUrl = import.meta.env.VITE_WS_URL as string | undefined;
+const WS_URL = rawWsUrl !== undefined
+    ? rawWsUrl
+    : (import.meta.env.PROD ? '' : 'ws://localhost:3001');
+
+const resolveWsBase = (): string => {
+    if (WS_URL) return WS_URL;
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${proto}//${window.location.host}`;
+};
+
 const RECONNECT_DELAY_MS = 2_000;
 const RECONNECT_MAX_DELAY_MS = 30_000;
 const PING_INTERVAL_MS = 25_000;
@@ -83,7 +97,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
             wsRef.current.close();
         }
 
-        const ws = new WebSocket(`${WS_URL}/ws`);
+        const ws = new WebSocket(`${resolveWsBase()}/ws`);
         wsRef.current = ws;
 
         ws.onopen = () => {

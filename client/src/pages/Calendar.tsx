@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
-import { api } from '../lib/api';
-import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock } from 'lucide-react';
+import { api, API_BASE_URL } from '../lib/api';
+import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -66,6 +66,10 @@ const Calendar: React.FC = () => {
     const [endManuallySet, setEndManuallySet] = useState(false);
     const navigate = useNavigate();
 
+    const [feedDialogOpen, setFeedDialogOpen] = useState(false);
+    const [feedToken, setFeedToken] = useState<string | null>(null);
+    const [feedCopied, setFeedCopied] = useState(false);
+
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -111,6 +115,45 @@ const Calendar: React.FC = () => {
         } catch (error) {
             console.error('Failed to load family members:', error);
             setError(error instanceof Error ? error.message : 'Impossible de charger les membres.');
+        }
+    };
+
+    const feedUrl = feedToken ? `${API_BASE_URL}/api/calendar/${feedToken}/openfamily.ics` : '';
+    const feedWebcalUrl = feedUrl.replace(/^https?:\/\//, 'webcal://');
+
+    const openFeedDialog = async () => {
+        setFeedDialogOpen(true);
+        setFeedCopied(false);
+        if (!feedToken) {
+            try {
+                const res = await api.get<{ success: boolean; data: { token: string } }>('/api/calendar/token');
+                if (res.success) setFeedToken(res.data.token);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Impossible de récupérer le lien iCal.');
+            }
+        }
+    };
+
+    const resetFeedToken = async () => {
+        if (!confirm('Régénérer le lien ? Les anciens abonnements cesseront de fonctionner.')) return;
+        try {
+            const res = await api.post<{ success: boolean; data: { token: string } }>('/api/calendar/token/reset', {});
+            if (res.success) {
+                setFeedToken(res.data.token);
+                setFeedCopied(false);
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Impossible de régénérer le lien.');
+        }
+    };
+
+    const copyFeedUrl = async () => {
+        try {
+            await navigator.clipboard.writeText(feedUrl);
+            setFeedCopied(true);
+            setTimeout(() => setFeedCopied(false), 2000);
+        } catch {
+            /* clipboard unavailable */
         }
     };
 
@@ -310,10 +353,16 @@ const Calendar: React.FC = () => {
                     <h1 className="text-h1 mb-1">Calendrier</h1>
                     <p className="text-muted-foreground text-body">Gérez vos rendez-vous familiaux</p>
                 </div>
-                <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nouveau rendez-vous
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="secondary" onClick={openFeedDialog}>
+                        <CalendarPlus className="w-4 h-4 mr-2" />
+                        Exporter (iCal)
+                    </Button>
+                    <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nouveau rendez-vous
+                    </Button>
+                </div>
             </div>
 
             {/* Calendar Header */}
@@ -442,8 +491,8 @@ const Calendar: React.FC = () => {
                                         className="w-1 h-full rounded-full"
                                         style={{ backgroundColor: apt.family_members_data?.[0]?.color || 'var(--primary-base)' }}
                                     />
-                                    <div className="flex-1">
-                                        <h4 className="font-semibold text-body mb-1">{apt.title}</h4>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-semibold text-body mb-1 break-words">{apt.title}</h4>
                                         <div className="flex flex-wrap items-center gap-3 text-body-sm text-muted-foreground">
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />
@@ -672,6 +721,62 @@ const Calendar: React.FC = () => {
                         </div>
                     </div>
                 </form>
+            </Dialog>
+
+            {/* Dialog export iCal */}
+            <Dialog
+                open={feedDialogOpen}
+                onOpenChange={setFeedDialogOpen}
+                title="Exporter le calendrier (iCal)"
+                description="Abonnez-vous depuis Apple Calendar, Google Agenda ou Outlook pour synchroniser automatiquement vos rendez-vous."
+            >
+                <div className="space-y-4">
+                    {!feedToken ? (
+                        <p className="text-body-sm text-muted-foreground py-4 text-center">Génération du lien…</p>
+                    ) : (
+                        <>
+                            <div>
+                                <label className="block text-label font-medium text-foreground mb-1">Lien d'abonnement</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        readOnly
+                                        value={feedUrl}
+                                        onFocus={(e) => e.target.select()}
+                                        className="flex-1 min-w-0 px-3 py-2 rounded-input border border-border bg-surface-1 text-caption text-foreground"
+                                    />
+                                    <Button variant="secondary" size="sm" onClick={copyFeedUrl}>
+                                        {feedCopied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                                <a href={feedWebcalUrl}>
+                                    <Button variant="secondary" size="sm">
+                                        <CalendarPlus className="h-4 w-4 mr-2" />
+                                        S'abonner (Apple / Outlook)
+                                    </Button>
+                                </a>
+                                <a href={feedUrl} download="openfamily.ics">
+                                    <Button variant="secondary" size="sm">
+                                        Télécharger le fichier .ics
+                                    </Button>
+                                </a>
+                            </div>
+
+                            <p className="text-caption text-muted-foreground">
+                                Ce lien est privé : toute personne le possédant peut consulter vos rendez-vous.
+                            </p>
+
+                            <div className="flex justify-end pt-2 border-t border-border">
+                                <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={resetFeedToken}>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Régénérer le lien
+                                </Button>
+                            </div>
+                        </>
+                    )}
+                </div>
             </Dialog>
         </div>
     );

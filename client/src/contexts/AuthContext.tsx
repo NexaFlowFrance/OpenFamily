@@ -8,6 +8,7 @@ interface User {
     is_owner?: boolean;
     role?: string;
     currency?: string;
+    avatar_url?: string | null;
 }
 
 interface AuthContextType {
@@ -17,9 +18,11 @@ interface AuthContextType {
     register: (email: string, password: string, name: string, inviteToken?: string, role?: string) => Promise<void>;
     joinFamily: (inviteToken: string) => Promise<void>;
     leaveFamily: () => Promise<void>;
+    refreshToken: () => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
     updateCurrency: (currency: string) => Promise<void>;
+    updateProfile: (data: { name?: string; avatar_url?: string | null }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -118,6 +121,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
+    const refreshToken = async () => {
+        const response = await api.refreshToken();
+        if (response.success && response.user) {
+            setUser(response.user);
+            localStorage.setItem('user', JSON.stringify(response.user));
+        }
+    };
+
     const logout = () => {
         api.logout();
         setUser(null);
@@ -126,6 +137,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const updateCurrency = async (currency: string) => {
         const response = await api.put<{ success: boolean; data: { user: User } }>('/api/auth/currency', { currency });
+        if (response.success && response.data?.user) {
+            setUser(response.data.user);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+    };
+
+    const updateProfile = async (data: { name?: string; avatar_url?: string | null }) => {
+        const response = await api.put<{ success: boolean; data: { user: User } }>('/api/auth/profile', data);
         if (response.success && response.data?.user) {
             setUser(response.data.user);
             localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -141,9 +160,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 register,
                 joinFamily,
                 leaveFamily,
+                refreshToken,
                 logout,
                 isAuthenticated: !!user,
                 updateCurrency,
+                updateProfile,
             }}
         >
             {children}

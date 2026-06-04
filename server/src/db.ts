@@ -145,6 +145,23 @@ export const runMigrations = async () => {
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'parent'",
         // Migration 004: configurable currency
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'EUR'",
+        // Migration 004 (join requests): a standalone user can ask to join an existing family
+        `CREATE TABLE IF NOT EXISTS family_join_requests (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            requester_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            responded_at TIMESTAMP
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_family_join_requests_owner ON family_join_requests(owner_id)',
+        'CREATE INDEX IF NOT EXISTS idx_family_join_requests_requester ON family_join_requests(requester_id)',
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_family_join_requests_pending ON family_join_requests(requester_id) WHERE status = 'pending'",
+        // Migration 005: per-user iCal calendar feed token
+        'ALTER TABLE users ADD COLUMN IF NOT EXISTS calendar_token VARCHAR(64)',
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_users_calendar_token ON users(calendar_token)',
+        // Migration 006: user profile photo (stored as a compact data URL)
+        'ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT',
     ];
 
     for (const migration of migrations) {

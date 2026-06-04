@@ -19,6 +19,7 @@ import {
     Menu,
     X,
     Plus,
+    WifiOff,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
@@ -73,6 +74,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { setTheme, actualTheme } = useTheme();
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
     const [quickActionsOpen, setQuickActionsOpen] = React.useState(false);
+    const [isOffline, setIsOffline] = React.useState(!navigator.onLine);
+
+    React.useEffect(() => {
+        const goOnline = () => setIsOffline(false);
+        const goOffline = () => setIsOffline(true);
+        window.addEventListener('online', goOnline);
+        window.addEventListener('offline', goOffline);
+        return () => {
+            window.removeEventListener('online', goOnline);
+            window.removeEventListener('offline', goOffline);
+        };
+    }, []);
 
     const currentPage = navigation.find((item) => isRouteActive(location.pathname, item.href));
 
@@ -147,9 +160,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                     <div className="border-t border-border bg-surface-2/60 p-4">
                         <div className="mb-4 flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft text-primary text-body font-semibold">
-                                {user?.name?.charAt(0) || 'U'}
-                            </div>
+                            {user?.avatar_url ? (
+                                <img
+                                    src={user.avatar_url}
+                                    alt={user?.name || 'Profil'}
+                                    className="h-10 w-10 shrink-0 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft text-primary text-body font-semibold">
+                                    {user?.name?.charAt(0) || 'U'}
+                                </div>
+                            )}
                             <div className="min-w-0 flex-1">
                                 <p className="truncate text-caption font-semibold text-foreground">{user?.name}</p>
                                 <p className="truncate text-micro text-muted-foreground">{user?.email}</p>
@@ -236,6 +257,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </header>
 
                 <main className="container max-w-[1200px] px-4 pb-28 pt-6 lg:px-6 lg:pb-10 lg:pt-8">
+                    {isOffline && (
+                        <div className="mb-4 flex items-center gap-2 rounded-card border border-amber-300 bg-amber-50 px-4 py-2.5 text-caption text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400">
+                            <WifiOff className="h-4 w-4 flex-shrink-0" />
+                            Mode hors ligne — les données affichées proviennent du cache. Les modifications seront possibles au retour de la connexion.
+                        </div>
+                    )}
                     {children}
                 </main>
             </div>
@@ -290,14 +317,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 key={item.name}
                                 to={item.href}
                                 className={cn(
-                                    'flex flex-col items-center justify-center gap-1 rounded-input px-2 py-2 text-micro font-medium',
+                                    'flex flex-col items-center justify-center gap-1 rounded-input px-1 py-2',
                                     active
                                         ? 'bg-primary-soft text-primary'
                                         : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground'
                                 )}
                             >
-                                <Icon className="h-4 w-4" />
-                                <span>{item.name}</span>
+                                <Icon className="h-4 w-4 shrink-0" />
+                                <span className="text-[10px] font-medium leading-none whitespace-nowrap">{item.name}</span>
                             </Link>
                         );
                     })}

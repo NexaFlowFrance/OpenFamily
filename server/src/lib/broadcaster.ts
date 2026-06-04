@@ -8,7 +8,8 @@ export type WsEntity =
     | 'budget'
     | 'recipes'
     | 'meal-plans'
-    | 'planning';
+    | 'planning'
+    | 'notifications';
 
 export type WsAction = 'created' | 'updated' | 'deleted';
 

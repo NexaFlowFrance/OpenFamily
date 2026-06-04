@@ -18,17 +18,19 @@
 
 | | |
 |---|---|
-| 🛒 **Liste de courses** | Catégorisation automatique, prix, quantités, templates |
+| 🛒 **Liste de courses** | Catégorisation automatique, prix, quantités, templates, **mode magasin par rayon** |
 | ✅ **Tâches** | Tâches récurrentes, assignation familiale, statistiques |
-| 📅 **Rendez-vous** | Calendrier mensuel, rappels automatiques, code couleur |
+| 📅 **Rendez-vous** | Calendrier mensuel, rappels automatiques, code couleur, **export iCal (.ics / webcal)** |
 | 🗓️ **Planning hebdomadaire** | Horaires de travail et emploi du temps scolaire par membre |
 | 🍳 **Recettes** | Bibliothèque familiale, filtres avancés, temps de préparation |
 | 🍽️ **Planning repas** | Vue hebdomadaire, export PDF, liaison recettes |
-| 💰 **Budget** | Suivi mensuel, limites par catégorie, statistiques |
+| 💰 **Budget** | Suivi mensuel, **graphiques (camembert + évolution annuelle)**, **plafonds par catégorie avec alertes** |
 | 👨‍👩‍👧‍👦 **Famille** | Profils membres, informations santé, contacts d'urgence |
 | 🔄 **Sync temps réel** | Mise à jour instantanée entre tous les appareils (WebSocket) |
-| 🔔 **Notifications push** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) |
-| 👥 **Comptes partagés** | Invitez des membres à rejoindre votre famille via lien |
+| 🔔 **Notifications** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) + **notifications in-app** |
+| 👥 **Comptes partagés** | Invitez des membres via lien, **demandes d'accès**, **transfert de propriété** |
+| 🛡️ **Rôles & permissions** | Comptes **parent / enfant** — accès en lecture seule au budget pour les enfants |
+| 📴 **Mode hors ligne** | Consultation des données en cache sans connexion (PWA, network-first) |
 
 ## 🚀 Démarrage rapide
 
@@ -37,6 +39,27 @@
 - Node.js 20+
 - PostgreSQL 16+ (ou Docker)
 - npm 10+
+
+### 🪟 Installation sur Windows (.exe) — la plus simple
+
+Pour les utilisateurs Windows, **NexaFlow** fournit un installeur graphique **tout-en-un** : Node.js et PostgreSQL sont embarqués, **aucun Docker ni aucune configuration** n'est nécessaire.
+
+1. Téléchargez l'installeur :
+
+<p>
+  <a href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe">
+    <img src="https://img.shields.io/badge/⬇️%20Télécharger%20la%20dernière%20version-OpenFamily%20pour%20Windows-2496ED?style=for-the-badge&logo=windows&logoColor=white" alt="Télécharger OpenFamily pour Windows" />
+  </a>
+</p>
+
+2. Lancez `OpenFamily-Setup.exe`. L'installeur crée les raccourcis **Bureau** et **Menu Démarrer** (avec le logo OpenFamily) et génère une configuration sécurisée (secrets aléatoires).
+3. Ouvrez **OpenFamily** : une fenêtre s'affiche avec trois boutons — **Démarrer**, **Arrêter**, **Ouvrir**. Cliquez sur **Démarrer**, l'app s'ouvre sur http://localhost:3000.
+4. **Depuis un mobile à la maison** : la fenêtre affiche l'adresse réseau local (ex. `http://192.168.x.x:3000`). Ouvrez-la dans le navigateur du téléphone connecté au même Wi-Fi/box.
+5. **Depuis n'importe où** : l'onglet **Paramètres** explique comment installer **Tailscale** en quelques clics pour accéder à OpenFamily à distance, en toute sécurité.
+
+> Édité par [NexaFlow](https://nexaflow.fr) · Page du projet : [nexaflowfrance.github.io/OpenFamily](https://nexaflowfrance.github.io/OpenFamily/)
+>
+> Le code source de l'installeur se trouve dans [`installer/windows/`](installer/windows/).
 
 ### Installation avec Docker (Recommandé)
 

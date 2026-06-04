@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
 import shoppingRoutes from './routes/shopping';
@@ -15,6 +16,7 @@ import planningRoutes from './routes/planning';
 import dataTransferRoutes from './routes/dataTransfer';
 import notificationsRoutes from './routes/notifications';
 import familyInvitesRoutes from './routes/familyInvites';
+import calendarRoutes from './routes/calendar';
 import { loadEnv } from './config/loadEnv';
 import logger from './lib/logger';
 
@@ -38,7 +40,12 @@ const authRateLimiter = rateLimit({
 });
 
 // Middleware
-app.use(helmet());
+// When the Express server also serves the built client (native Windows install),
+// disable the strict CSP so the SPA and its runtime styles load — this matches the
+// nginx setup used in the Docker deployment, which does not set a CSP either.
+app.use(helmet({
+    contentSecurityPolicy: process.env.SERVE_CLIENT_DIR ? false : undefined,
+}));
 app.use(cors({
     origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true
@@ -85,6 +92,19 @@ app.use('/api/planning', planningRoutes);
 app.use('/api/data', dataTransferRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/invites', familyInvitesRoutes);
+app.use('/api/calendar', calendarRoutes);
+
+// Static client (native Windows install): serve the built SPA from the same origin
+// as the API, so the app is reachable from any device on the LAN via http://<ip>:3000.
+if (process.env.SERVE_CLIENT_DIR) {
+    const clientDir = path.resolve(process.env.SERVE_CLIENT_DIR);
+    app.use(express.static(clientDir));
+    // SPA fallback: any non-API GET returns index.html (client-side routing).
+    app.get(/^(?!\/api\/|\/health|\/ws).*/, (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        res.sendFile(path.join(clientDir, 'index.html'));
+    });
+}
 
 // 404 handler
 app.use((req, res) => {

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Bell, BellOff, CheckCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { useNotifications, AppNotification } from '../../hooks/useNotifications';
+import { useWebSocketUpdates } from '../../hooks/useWebSocketUpdates';
 import { Button } from './Button';
 
 function timeAgo(dateStr: string): string {
@@ -15,18 +16,40 @@ function timeAgo(dateStr: string): string {
     return `il y a ${Math.floor(hours / 24)}j`;
 }
 
+// Determine which page a notification should open when clicked.
+function notificationRoute(n: AppNotification): string {
+    const t = n.type || '';
+    if (t.startsWith('family')) return '/family';
+    if (t.startsWith('task')) return '/tasks';
+    if (t.startsWith('appointment') || t.startsWith('reminder') || t.startsWith('calendar')) return '/calendar';
+    if (t.startsWith('shopping')) return '/shopping';
+    if (t.startsWith('meal')) return '/meal-planning';
+    if (t.startsWith('recipe')) return '/recipes';
+    if (t.startsWith('budget')) return '/budget';
+    if (t.startsWith('schedule') || t.startsWith('planning')) return '/planning';
+    return '/';
+}
+
 export const NotificationBell: React.FC = () => {
     const {
         isSupported,
         unreadCount,
         notifications,
         fetchNotifications,
+        fetchUnreadCount,
         markAsRead,
         markAllAsRead,
     } = useNotifications();
 
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
+
+    // Real-time refresh when a new notification is pushed
+    useWebSocketUpdates('notifications', () => {
+        void fetchUnreadCount();
+        if (open) void fetchNotifications();
+    });
 
     // Close on outside click
     useEffect(() => {
@@ -48,6 +71,8 @@ export const NotificationBell: React.FC = () => {
 
     const handleMarkAsRead = (n: AppNotification) => {
         if (!n.is_read) void markAsRead(n.id);
+        setOpen(false);
+        navigate(notificationRoute(n));
     };
 
     if (!isSupported) return null;

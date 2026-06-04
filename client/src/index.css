@@ -19,6 +19,17 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: 'rlig' 1, 'calt' 1;
+    /* Prevent long unbreakable strings (emails, URLs, long words) from overflowing their card */
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Media never forces the layout wider than its container on small screens */
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
   }
 
   h1 {

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { getJwtSecret } from '../config/loadEnv';
+import { query } from '../db';
 
 export interface AuthRequest extends Request {
     /** Effective family-owner user ID — used by all data queries */
@@ -32,4 +33,32 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 
 export const generateToken = (userId: string, ownerId?: string): string => {
     return jwt.sign({ userId, ownerId: ownerId ?? userId }, getJwtSecret(), { expiresIn: '7d' });
+};
+
+/**
+ * Restrict a route to "parent" (or owner) accounts. Accounts with the "enfant"
+ * role get read-only access and are rejected on write operations guarded by this.
+ * Must run after authMiddleware.
+ */
+export const requireParent = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        // The family owner always has full rights.
+        if (req.isOwner) {
+            return next();
+        }
+
+        const result = await query('SELECT role FROM users WHERE id = $1', [req.actualUserId]);
+        const role = result.rows[0]?.role as string | undefined;
+
+        if (role === 'enfant') {
+            return res.status(403).json({
+                success: false,
+                error: 'Action réservée aux parents.',
+            });
+        }
+
+        return next();
+    } catch {
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
 };

@@ -3,7 +3,7 @@ import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
-import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks } from 'lucide-react';
+import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks, Store, ChevronLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -63,6 +63,7 @@ const ShoppingList: React.FC = () => {
     const [error, setError] = useState('');
     const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
     const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
+    const [storeMode, setStoreMode] = useState(false);
 
     useEffect(() => {
         void Promise.all([loadItems(), loadTemplates()]).finally(() => setLoading(false));
@@ -282,6 +283,22 @@ const ShoppingList: React.FC = () => {
     const pendingItems = useMemo(() => items.filter((item) => !item.is_checked), [items]);
     const completedItems = useMemo(() => items.filter((item) => item.is_checked), [items]);
 
+    // Store mode: group every item by category (aisle), keeping checked ones for context.
+    const itemsByAisle = useMemo(() => {
+        const groups = new Map<string, ShoppingItem[]>();
+        for (const cat of categories) groups.set(cat, []);
+        for (const item of items) {
+            const cat = groups.has(item.category) ? item.category : 'Autre';
+            groups.get(cat)!.push(item);
+        }
+        return Array.from(groups.entries())
+            .filter(([, list]) => list.length > 0)
+            .map(([category, list]) => ({
+                category,
+                list: [...list].sort((a, b) => Number(a.is_checked) - Number(b.is_checked)),
+            }));
+    }, [items]);
+
     const totalPrice = useMemo(() => {
         return pendingItems.reduce((sum, item) => {
             const quantity = item.quantity && item.quantity > 0 ? item.quantity : 1;
@@ -301,6 +318,78 @@ const ShoppingList: React.FC = () => {
         );
     }
 
+    // ─── Mode magasin ───────────────────────────────────────────────────────────
+    if (storeMode) {
+        const remaining = pendingItems.length;
+        const total = items.length;
+        const done = total - remaining;
+        return (
+            <div className="mx-auto max-w-2xl space-y-4 pb-28">
+                <div className="sticky top-0 z-20 -mx-4 flex items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur-md">
+                    <Button variant="ghost" size="sm" onClick={() => setStoreMode(false)}>
+                        <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <div className="flex-1">
+                        <h1 className="flex items-center gap-2 text-h2 font-semibold text-foreground">
+                            <Store className="h-5 w-5 text-primary" /> Mode magasin
+                        </h1>
+                        <p className="text-caption text-muted-foreground">
+                            {done}/{total} dans le panier · {remaining} restant{remaining !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                </div>
+
+                {total === 0 ? (
+                    <div className="rounded-card border border-dashed border-border bg-card py-16 text-center">
+                        <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
+                        <p className="text-body font-semibold text-foreground">Liste vide</p>
+                    </div>
+                ) : (
+                    itemsByAisle.map(({ category, list }) => (
+                        <section key={category}>
+                            <h2 className="mb-2 px-1 text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+                                {category}
+                            </h2>
+                            <div className="space-y-2">
+                                {list.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        onClick={() => toggleItem(item)}
+                                        className={`flex w-full items-center gap-4 rounded-card border p-4 text-left transition-all active:scale-[0.99] ${
+                                            item.is_checked
+                                                ? 'border-border bg-muted/30 opacity-60'
+                                                : 'border-border bg-card shadow-surface'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 ${
+                                                item.is_checked ? 'border-primary bg-primary' : 'border-input'
+                                            }`}
+                                        >
+                                            {item.is_checked && <Check className="h-5 w-5 text-white" strokeWidth={3} />}
+                                        </span>
+                                        <span className="min-w-0 flex-1">
+                                            <span className={`block truncate text-body font-medium ${item.is_checked ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                                                {item.name}
+                                            </span>
+                                            {(item.quantity || item.price) && (
+                                                <span className="mt-0.5 flex items-center gap-2 text-micro text-muted-foreground">
+                                                    {item.quantity ? <span>Qt: {item.quantity}{item.unit ? ` ${item.unit}` : ''}</span> : null}
+                                                    {item.price ? <span>{formatCurrency(Number(item.price), currency)}</span> : null}
+                                                </span>
+                                            )}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+                    ))
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="mx-auto max-w-4xl space-y-6">
             {error ? (
@@ -313,10 +402,16 @@ const ShoppingList: React.FC = () => {
                 <div className="rounded-card bg-primary-soft p-3 text-primary">
                     <ShoppingBag className="h-7 w-7" />
                 </div>
-                <div>
+                <div className="flex-1">
                     <h1 className="text-h1 text-foreground">Liste de courses</h1>
                     <p className="text-body text-muted-foreground">{pendingItems.length} articles restants</p>
                 </div>
+                {items.length > 0 && (
+                    <Button onClick={() => setStoreMode(true)}>
+                        <Store className="mr-1 h-4 w-4" />
+                        Mode magasin
+                    </Button>
+                )}
             </div>
 
             <Card>

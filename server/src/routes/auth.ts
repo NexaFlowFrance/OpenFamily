@@ -10,7 +10,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     try {
         // Use actualUserId so members see their own profile, not the owner's
         const result = await query(
-            'SELECT id, email, name, role, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
+            'SELECT id, email, name, role, currency, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
             [req.actualUserId]
         );
         if (result.rows.length === 0) {
@@ -55,7 +55,7 @@ router.post('/register', async (req, res) => {
 
         // Create user
         const result = await query(
-            'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name, role',
+            'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name, role, currency',
             [normalizedEmail, password_hash, cleanedName, cleanedRole]
         );
 
@@ -91,7 +91,7 @@ router.post('/register', async (req, res) => {
         const token = generateToken(user.id, ownerId);
         const isOwner = ownerId === user.id;
 
-        res.json({ success: true, data: { user: { ...user, is_owner: isOwner, role: user.role }, token } });
+        res.json({ success: true, data: { user: { ...user, is_owner: isOwner, role: user.role, currency: user.currency || 'EUR' }, token } });
     } catch (error) {
         console.error('Register error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -131,13 +131,38 @@ router.post('/login', async (req, res) => {
         res.json({
             success: true,
             data: {
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner },
+                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR' },
                 token
             }
         });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Update user currency
+router.put('/currency', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const { currency } = req.body;
+
+        if (!currency || typeof currency !== 'string' || currency.length !== 3) {
+            return res.status(400).json({ success: false, error: 'Invalid currency code' });
+        }
+
+        const result = await query(
+            'UPDATE users SET currency = $1 WHERE id = $2 RETURNING id, email, name, role, currency',
+            [currency.toUpperCase(), req.actualUserId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        return res.json({ success: true, data: { user: result.rows[0] } });
+    } catch (error) {
+        console.error('Update currency error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });
 

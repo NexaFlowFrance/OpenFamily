@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { api } from '../lib/api';
-import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff } from 'lucide-react';
+import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe } from 'lucide-react';
 import { Card, CardContent, Button } from '../components/ui';
 import { useNotifications } from '../hooks/useNotifications';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ImportCounts {
     family_members?: number;
@@ -28,6 +29,19 @@ const ENTITY_LABELS: Record<string, string> = {
     schedule_entries: 'Plannings',
 };
 
+const CURRENCIES = [
+    { code: 'EUR', label: 'Euro (€)' },
+    { code: 'USD', label: 'US Dollar ($)' },
+    { code: 'GBP', label: 'British Pound (£)' },
+    { code: 'CHF', label: 'Swiss Franc (CHF)' },
+    { code: 'CAD', label: 'Canadian Dollar ($)' },
+    { code: 'AUD', label: 'Australian Dollar ($)' },
+    { code: 'JPY', label: 'Japanese Yen (¥)' },
+    { code: 'CNY', label: 'Chinese Yuan (¥)' },
+    { code: 'INR', label: 'Indian Rupee (₹)' },
+    { code: 'BRL', label: 'Brazilian Real (R$)' },
+];
+
 const Settings: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [exportLoading, setExportLoading] = useState(false);
@@ -37,7 +51,10 @@ const Settings: React.FC = () => {
     const [importSuccess, setImportSuccess] = useState<ImportCounts | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [notifError, setNotifError] = useState('');
+    const [currencyLoading, setCurrencyLoading] = useState(false);
+    const [currencyError, setCurrencyError] = useState('');
 
+    const { user, updateCurrency } = useAuth();
     const { isSupported, permission, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = useNotifications();
 
     const handleToggleNotifications = async () => {
@@ -50,6 +67,18 @@ const Settings: React.FC = () => {
             }
         } catch (err) {
             setNotifError(err instanceof Error ? err.message : 'Erreur lors de la configuration des notifications.');
+        }
+    };
+
+    const handleCurrencyChange = async (currency: string) => {
+        setCurrencyLoading(true);
+        setCurrencyError('');
+        try {
+            await updateCurrency(currency);
+        } catch (err) {
+            setCurrencyError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour de la devise.');
+        } finally {
+            setCurrencyLoading(false);
         }
     };
 
@@ -184,6 +213,47 @@ const Settings: React.FC = () => {
                                     Notifications activées sur cet appareil.
                                 </p>
                             )}
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Currency */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                            <Globe className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-caption font-semibold text-foreground">Devise</h3>
+                            <p className="mt-1 text-micro text-muted-foreground">
+                                Sélectionnez la devise pour afficher les montants dans votre application.
+                            </p>
+
+                            {currencyError && (
+                                <p className="mt-2 flex items-center gap-1 text-micro text-destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    {currencyError}
+                                </p>
+                            )}
+
+                            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                {CURRENCIES.map((curr) => (
+                                    <button
+                                        key={curr.code}
+                                        onClick={() => void handleCurrencyChange(curr.code)}
+                                        disabled={currencyLoading}
+                                        className={`rounded-input border px-3 py-2 text-micro font-medium transition-colors ${
+                                            user?.currency === curr.code
+                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                : 'border-border bg-card text-foreground hover:bg-surface-2'
+                                        } ${currencyLoading ? 'opacity-50' : ''}`}
+                                    >
+                                        {curr.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </CardContent>

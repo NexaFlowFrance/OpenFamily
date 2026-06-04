@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
+import { formatCurrency } from '../lib/utils';
 import { ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, Activity, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -15,6 +17,8 @@ interface DashboardStats {
 }
 
 const Dashboard: React.FC = () => {
+    const { user } = useAuth();
+    const currency = user?.currency || 'EUR';
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -81,7 +85,7 @@ const Dashboard: React.FC = () => {
         },
         {
             title: 'Dépenses du mois',
-            value: `${Number(stats?.thisMonthExpenses || 0).toFixed(0)}€`,
+            value: formatCurrency(Number(stats?.thisMonthExpenses || 0), currency),
             icon: Wallet,
             color: 'text-nexus-amber',
             bgColor: 'bg-orange-50',

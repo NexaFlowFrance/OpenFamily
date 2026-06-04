@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
+import { formatCurrency } from '../lib/utils';
 import { Plus, TrendingUp, TrendingDown, DollarSign, Edit2, Trash2, AlertCircle, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Dialog, Input, Select, Textarea, Badge, Tabs } from '../components/ui';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -73,6 +75,8 @@ const toNumber = (value: unknown): number => {
 };
 
 const Budget: React.FC = () => {
+    const { user } = useAuth();
+    const currency = user?.currency || 'EUR';
     const [entries, setEntries] = useState<BudgetEntry[]>([]);
     const [limits, setLimits] = useState<BudgetLimit[]>([]);
     const [stats, setStats] = useState<BudgetStats | null>(null);
@@ -418,7 +422,7 @@ const Budget: React.FC = () => {
                                                         }`}
                                                 >
                                                     {entry.is_expense ? '-' : '+'}
-                                                    {entry.amount.toFixed(2)}€
+                                                    {formatCurrency(entry.amount, currency)}
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-2">
@@ -452,7 +456,7 @@ const Budget: React.FC = () => {
                                             <div>
                                                 <p className="text-label text-muted-foreground mb-1">Dépenses</p>
                                                 <p className="text-2xl font-bold text-red-600">
-                                                    {stats.totalExpenses.toFixed(2)}€
+                                                    {formatCurrency(stats.totalExpenses, currency)}
                                                 </p>
                                             </div>
                                             <TrendingDown className="h-8 w-8 text-red-600" />
@@ -465,7 +469,7 @@ const Budget: React.FC = () => {
                                             <div>
                                                 <p className="text-label text-muted-foreground mb-1">Revenus</p>
                                                 <p className="text-2xl font-bold text-emerald-600">
-                                                    {stats.totalIncome.toFixed(2)}€
+                                                    {formatCurrency(stats.totalIncome, currency)}
                                                 </p>
                                             </div>
                                             <TrendingUp className="h-8 w-8 text-emerald-600" />
@@ -481,7 +485,7 @@ const Budget: React.FC = () => {
                                                     className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-nexus-blue' : 'text-red-600'
                                                         }`}
                                                 >
-                                                    {stats.balance.toFixed(2)}€
+                                                    {formatCurrency(stats.balance, currency)}
                                                 </p>
                                             </div>
                                             <DollarSign className="h-8 w-8 text-nexus-blue" />
@@ -559,7 +563,7 @@ const Budget: React.FC = () => {
                                                     <CartesianGrid strokeDasharray="3 3" />
                                                     <XAxis dataKey="name" />
                                                     <YAxis />
-                                                    <Tooltip formatter={(value: number) => `${value.toFixed(2)}€`} />
+                                                    <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
                                                     <Legend />
                                                     {memberCategories.map((cat, i) => (
                                                         <Bar key={cat} dataKey={cat} stackId="a" fill={CHART_COLOR_PRESETS[i % CHART_COLOR_PRESETS.length]} />
@@ -586,7 +590,7 @@ const Budget: React.FC = () => {
                                                 <CartesianGrid strokeDasharray="3 3" />
                                                 <XAxis dataKey="name" />
                                                 <YAxis />
-                                                <Tooltip formatter={(value: number) => `${value.toFixed(2)}€`} />
+                                                <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
                                                 <Legend />
                                                 <Bar dataKey="Dépenses" fill="#ef4444" />
                                                 <Bar dataKey="Revenus" fill="#10b981" />
@@ -631,13 +635,13 @@ const Budget: React.FC = () => {
                                             <div className="flex justify-between text-body-sm">
                                                 <span className="text-muted-foreground">Dépensé:</span>
                                                 <span className={`font-medium ${isOverLimit ? 'text-red-600' : ''}`}>
-                                                    {spending.toFixed(2)}€
+                                                    {formatCurrency(spending, currency)}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between text-body-sm">
                                                 <span className="text-muted-foreground">Limite:</span>
                                                 <span className="font-medium">
-                                                    {limit > 0 ? `${limit.toFixed(2)}€` : 'Non définie'}
+                                                    {limit > 0 ? `${formatCurrency(limit, currency)}` : 'Non définie'}
                                                 </span>
                                             </div>
                                             {limit > 0 && (
@@ -729,7 +733,7 @@ const Budget: React.FC = () => {
                         />
                     </div>
                     <Input
-                        label="Montant (€)"
+                        label={`Montant (${currency})`}
                         type="number"
                         step="0.01"
                         value={formData.amount}
@@ -797,7 +801,7 @@ const Budget: React.FC = () => {
                         />
                     </div>
                     <Input
-                        label="Limite mensuelle (€)"
+                        label={`Limite mensuelle (${currency})`}
                         type="number"
                         step="0.01"
                         value={limitFormData.monthly_limit}

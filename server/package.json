@@ -20,7 +20,7 @@
         "node-cron": "^4.2.1",
         "pg": "^8.11.3",
         "web-push": "^3.6.6",
-        "ws": "^8.16.0"
+        "ws": "^8.20.1"
     },
     "devDependencies": {
         "@types/bcrypt": "^5.0.2",

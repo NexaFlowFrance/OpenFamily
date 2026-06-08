@@ -708,7 +708,7 @@ const Planning: React.FC = () => {
                             className="mt-0.5 h-4 w-4 rounded border-border"
                         />
                         <span>
-                            <strong>Cette semaine uniquement</strong> — L'horaire ne s'applique qu'a la semaine du{' '}
+                            <strong>Cette semaine uniquement</strong>. L'horaire ne s'applique qu'a la semaine du{' '}
                             {format(weekStart, 'dd MMM yyyy', { locale: fr })}. Sinon, il sera recurrent chaque semaine.
                         </span>
                     </label>

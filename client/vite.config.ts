@@ -16,8 +16,8 @@ export default defineConfig({
                 name: 'OpenFamily',
                 short_name: 'OpenFamily',
                 description: 'Application de gestion familiale',
-                theme_color: '#3B82F6',
-                background_color: '#ffffff',
+                theme_color: '#DC4A60',
+                background_color: '#F7F2E9',
                 display: 'standalone',
                 icons: [
                     {

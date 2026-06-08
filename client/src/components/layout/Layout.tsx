@@ -20,6 +20,7 @@ import {
     X,
     Plus,
     WifiOff,
+    Plug,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
@@ -39,6 +40,7 @@ const navigation = [
     { name: 'Repas', href: '/meal-planning', icon: UtensilsCrossed },
     { name: 'Budget', href: '/budget', icon: Wallet },
     { name: 'Famille', href: '/family', icon: Users },
+    { name: 'Intégrations', href: '/integrations', icon: Plug },
     { name: 'Paramètres', href: '/settings', icon: Settings },
 ];
 
@@ -219,12 +221,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             >
                                 <Menu className="h-5 w-5" />
                             </button>
-                            <div>
-                                <p className="text-micro uppercase tracking-[0.12em] text-muted-foreground">OpenFamily</p>
-                                <h1 className="text-caption font-semibold text-foreground">
-                                    {currentPage?.name || 'Tableau de bord'}
-                                </h1>
-                            </div>
+                            <h1 className="text-caption font-semibold text-foreground">
+                                {currentPage?.name || 'Tableau de bord'}
+                            </h1>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -260,7 +259,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     {isOffline && (
                         <div className="mb-4 flex items-center gap-2 rounded-card border border-amber-300 bg-amber-50 px-4 py-2.5 text-caption text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400">
                             <WifiOff className="h-4 w-4 flex-shrink-0" />
-                            Mode hors ligne — les données affichées proviennent du cache. Les modifications seront possibles au retour de la connexion.
+                            Mode hors ligne. Les données affichées proviennent du cache. Les modifications seront possibles au retour de la connexion.
                         </div>
                     )}
                     {children}

@@ -471,37 +471,37 @@ const Budget: React.FC = () => {
 
                 {/* Bannière lecture seule (enfant) */}
                 {!canEdit && (
-                    <div className="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-3 flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                        <p className="text-sm text-amber-700 dark:text-amber-400">
-                            Mode lecture seule — seuls les parents peuvent modifier le budget.
+                    <div className="rounded-card bg-warning/10 border border-warning/30 p-3 flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-warning flex-shrink-0" />
+                        <p className="text-sm text-warning">
+                            Mode lecture seule. Seuls les parents peuvent modifier le budget.
                         </p>
                     </div>
                 )}
 
                 {/* Alertes de plafond */}
                 {limitAlerts.length > 0 && (
-                    <div className="rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 p-3 space-y-1.5">
+                    <div className="rounded-card bg-danger/10 border border-danger/20 p-3 space-y-1.5">
                         <div className="flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                            <p className="text-sm font-medium text-red-600">Plafonds atteints</p>
+                            <AlertTriangle className="w-4 h-4 text-danger flex-shrink-0" />
+                            <p className="text-sm font-medium text-danger">Plafonds atteints</p>
                         </div>
                         {limitAlerts.map((l) => (
-                            <p key={l.id} className="text-xs text-red-600/90 pl-6">
+                            <p key={l.id} className="text-xs text-danger/80 pl-6">
                                 {l.category} : {formatCurrency(l.spent, currency)} / {formatCurrency(l.monthly_limit, currency)}
-                                {l.spent >= l.monthly_limit ? ' — dépassé' : ' (≥ 80 %)'}
+                                {l.spent >= l.monthly_limit ? ' · dépassé' : ' (≥ 80 %)'}
                             </p>
                         ))}
                     </div>
                 )}
 
 
-                <div className={`rounded-2xl p-5 ${balancePositive ? 'bg-emerald-50 dark:bg-emerald-950/30' : 'bg-red-50 dark:bg-red-950/30'}`}>
+                <div className={`rounded-card p-5 ${balancePositive ? 'bg-success/10' : 'bg-danger/10'}`}>
                     <div className="flex items-center gap-2 mb-1">
-                        <Wallet className={`w-4 h-4 ${balancePositive ? 'text-emerald-600' : 'text-red-500'}`} />
+                        <Wallet className={`w-4 h-4 ${balancePositive ? 'text-success' : 'text-danger'}`} />
                         <span className="text-sm font-medium text-muted-foreground">Solde actuel</span>
                     </div>
-                    <p className={`text-4xl font-bold tracking-tight ${balancePositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                    <p className={`text-4xl font-bold tracking-tight ${balancePositive ? 'text-success' : 'text-danger'}`}>
                         {formatCurrency(forecast?.currentBalance ?? 0, currency)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -512,12 +512,12 @@ const Budget: React.FC = () => {
 
                 {/* Prévisionnel */}
                 {forecast && forecast.unpointedRecurring > 0 && (
-                    <div className={`rounded-2xl p-4 border-2 ${forecastPositive ? 'border-blue-200 bg-blue-50/50 dark:bg-blue-950/20' : 'border-orange-200 bg-orange-50/50 dark:bg-orange-950/20'}`}>
+                    <div className={`rounded-card p-4 border-2 ${forecastPositive ? 'border-info/20 bg-info/5' : 'border-peach/20 bg-peach/5'}`}>
                         <div className="flex items-center gap-2 mb-1">
-                            <Eye className={`w-4 h-4 ${forecastPositive ? 'text-blue-500' : 'text-orange-500'}`} />
+                            <Eye className={`w-4 h-4 ${forecastPositive ? 'text-info' : 'text-peach'}`} />
                             <span className="text-sm font-medium text-muted-foreground">Prévisionnel</span>
                         </div>
-                        <p className={`text-3xl font-bold ${forecastPositive ? 'text-blue-600' : 'text-orange-500'}`}>
+                        <p className={`text-3xl font-bold ${forecastPositive ? 'text-info' : 'text-peach'}`}>
                             {formatCurrency(forecast.forecastBalance, currency)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -530,7 +530,7 @@ const Budget: React.FC = () => {
                 <section className="pt-1">
                     <button
                         onClick={() => setShowAnalytics((v) => !v)}
-                        className="w-full flex items-center justify-between rounded-2xl bg-surface-1 border border-border p-4 active:scale-[0.99] transition-transform"
+                        className="w-full flex items-center justify-between rounded-card bg-surface-1 border border-border p-4 active:scale-[0.99] transition-transform"
                     >
                         <span className="flex items-center gap-2 font-semibold text-base">
                             <BarChart3 className="w-4 h-4 text-primary" />
@@ -621,13 +621,13 @@ const Budget: React.FC = () => {
                                                 >
                                                     <div className="flex items-center justify-between text-sm mb-1">
                                                         <span className="font-medium">{l.category}</span>
-                                                        <span className={over ? 'text-red-500 font-semibold' : warn ? 'text-amber-600' : 'text-muted-foreground'}>
+                                                        <span className={over ? 'text-danger font-semibold' : warn ? 'text-warning' : 'text-muted-foreground'}>
                                                             {formatCurrency(spent, currency)} / {formatCurrency(l.monthly_limit, currency)}
                                                         </span>
                                                     </div>
                                                     <div className="h-2 rounded-full bg-surface-2 overflow-hidden">
                                                         <div
-                                                            className={`h-full rounded-full transition-all ${over ? 'bg-red-500' : warn ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                                            className={`h-full rounded-full transition-all ${over ? 'bg-danger/100' : warn ? 'bg-warning/100' : 'bg-success/100'}`}
                                                             style={{ width: `${ratio * 100}%` }}
                                                         />
                                                     </div>
@@ -664,7 +664,7 @@ const Budget: React.FC = () => {
                     </div>
 
                     {recurring.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-border p-6 text-center">
+                        <div className="rounded-card border border-dashed border-border p-6 text-center">
                             <RefreshCw className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
                             <p className="text-sm text-muted-foreground">Aucun prélèvement récurrent</p>
                             {canEdit && (
@@ -678,7 +678,7 @@ const Budget: React.FC = () => {
                             {recurring.map((r) => (
                                 <div
                                     key={r.id}
-                                    className={`flex items-center gap-3 rounded-2xl p-4 transition-all
+                                    className={`flex items-center gap-3 rounded-card p-4 transition-all
                                         ${r.is_pointed ? 'bg-surface-1 opacity-60' : 'bg-surface-1 border border-border shadow-sm'}`}
                                 >
                                     <button
@@ -686,7 +686,7 @@ const Budget: React.FC = () => {
                                         disabled={!canEdit}
                                         className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center
                                             transition-all active:scale-90 disabled:opacity-50
-                                            ${r.is_pointed ? 'bg-emerald-500 border-emerald-500' : 'border-border hover:border-emerald-400'}`}
+                                            ${r.is_pointed ? 'bg-success/100 border-success' : 'border-border hover:border-success/50'}`}
                                         title={r.is_pointed ? 'Dépointer' : 'Marquer comme débité'}
                                     >
                                         {r.is_pointed && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
@@ -706,7 +706,7 @@ const Budget: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <span className={`text-base font-bold flex-shrink-0 ${r.is_pointed ? 'text-muted-foreground' : 'text-red-500'}`}>
+                                    <span className={`text-base font-bold flex-shrink-0 ${r.is_pointed ? 'text-muted-foreground' : 'text-danger'}`}>
                                         -{formatCurrency(r.amount, currency)}
                                     </span>
 
@@ -721,9 +721,9 @@ const Budget: React.FC = () => {
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteRecurring(r.id)}
-                                                    className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                                                    className="p-1.5 rounded-lg hover:bg-danger/10 transition-colors"
                                                 >
-                                                    <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                                                    <Trash2 className="w-3.5 h-3.5 text-danger/60" />
                                                 </button>
                                             </>
                                         )}
@@ -738,10 +738,10 @@ const Budget: React.FC = () => {
                 <section>
                     <div className="flex items-center justify-between mb-2 mt-4">
                         <div className="flex items-center gap-2">
-                            <TrendingDown className="w-4 h-4 text-red-500" />
+                            <TrendingDown className="w-4 h-4 text-danger" />
                             <h2 className="font-semibold text-base">Dépenses</h2>
                             {expenses.length > 0 && (
-                                <span className="text-xs bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-medium">
+                                <span className="text-xs bg-danger/10 text-danger px-2 py-0.5 rounded-full font-medium">
                                     -{formatCurrency(expenses.reduce((s, e) => s + e.amount, 0), currency)}
                                 </span>
                             )}
@@ -757,7 +757,7 @@ const Budget: React.FC = () => {
                     </div>
 
                     {expenses.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-border p-5 text-center">
+                        <div className="rounded-card border border-dashed border-border p-5 text-center">
                             <p className="text-sm text-muted-foreground">Aucune dépense ce mois</p>
                         </div>
                     ) : (
@@ -780,10 +780,10 @@ const Budget: React.FC = () => {
                 <section>
                     <div className="flex items-center justify-between mb-2 mt-4">
                         <div className="flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-emerald-500" />
+                            <TrendingUp className="w-4 h-4 text-success" />
                             <h2 className="font-semibold text-base">Revenus</h2>
                             {incomes.length > 0 && (
-                                <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">
+                                <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">
                                     +{formatCurrency(incomes.reduce((s, e) => s + e.amount, 0), currency)}
                                 </span>
                             )}
@@ -799,7 +799,7 @@ const Budget: React.FC = () => {
                     </div>
 
                     {incomes.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-border p-5 text-center">
+                        <div className="rounded-card border border-dashed border-border p-5 text-center">
                             <p className="text-sm text-muted-foreground">Aucun revenu ce mois</p>
                         </div>
                     ) : (
@@ -828,7 +828,7 @@ const Budget: React.FC = () => {
             >
                 <form onSubmit={handleSaveRecurring} className="space-y-4">
                     {formError && (
-                        <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
+                        <div className="rounded-xl bg-danger/10 border border-danger/20 px-3 py-2 text-sm text-danger">
                             {formError}
                         </div>
                     )}
@@ -888,7 +888,7 @@ const Budget: React.FC = () => {
             >
                 <form onSubmit={handleSaveEntry} className="space-y-4">
                     {formError && (
-                        <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
+                        <div className="rounded-xl bg-danger/10 border border-danger/20 px-3 py-2 text-sm text-danger">
                             {formError}
                         </div>
                     )}
@@ -897,14 +897,14 @@ const Budget: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setEntryForm((f) => ({ ...f, is_expense: true }))}
-                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${entryForm.is_expense ? 'bg-red-500 text-white' : 'bg-surface-1 text-muted-foreground'}`}
+                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${entryForm.is_expense ? 'bg-danger/100 text-white' : 'bg-surface-1 text-muted-foreground'}`}
                             >
                                 Dépense
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setEntryForm((f) => ({ ...f, is_expense: false }))}
-                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${!entryForm.is_expense ? 'bg-emerald-500 text-white' : 'bg-surface-1 text-muted-foreground'}`}
+                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${!entryForm.is_expense ? 'bg-success/100 text-white' : 'bg-surface-1 text-muted-foreground'}`}
                             >
                                 Revenu
                             </button>
@@ -963,7 +963,7 @@ const Budget: React.FC = () => {
             >
                 <form onSubmit={handleSaveLimit} className="space-y-4">
                     {formError && (
-                        <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
+                        <div className="rounded-xl bg-danger/10 border border-danger/20 px-3 py-2 text-sm text-danger">
                             {formError}
                         </div>
                     )}
@@ -1017,7 +1017,7 @@ const EntryRow: React.FC<{
 }> = ({ entry, currency, canEdit = true, onEdit, onDelete }) => {
     const dateStr = format(new Date(entry.date), 'dd MMM', { locale: fr });
     return (
-        <div className="flex items-center gap-3 bg-surface-1 border border-border rounded-2xl p-3.5 shadow-sm">
+        <div className="flex items-center gap-3 bg-surface-1 border border-border rounded-card p-3.5 shadow-sm">
             <div className="flex-1 min-w-0">
                 <p className="font-medium text-base truncate">
                     {entry.description || entry.category}
@@ -1032,7 +1032,7 @@ const EntryRow: React.FC<{
                     <span className="text-xs text-muted-foreground">{dateStr}</span>
                 </div>
             </div>
-            <span className={`text-base font-bold flex-shrink-0 ${entry.is_expense ? 'text-red-500' : 'text-emerald-600'}`}>
+            <span className={`text-base font-bold flex-shrink-0 ${entry.is_expense ? 'text-danger' : 'text-success'}`}>
                 {entry.is_expense ? '-' : '+'}{formatCurrency(entry.amount, currency)}
             </span>
             {canEdit && (
@@ -1045,9 +1045,9 @@ const EntryRow: React.FC<{
                     </button>
                     <button
                         onClick={() => onDelete(entry.id)}
-                        className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-danger/10 transition-colors"
                     >
-                        <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                        <Trash2 className="w-3.5 h-3.5 text-danger/60" />
                     </button>
                 </div>
             )}

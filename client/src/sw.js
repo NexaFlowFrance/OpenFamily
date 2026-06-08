@@ -5,7 +5,7 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (self);
 
 // workbox-build (injectManifest) searches for the LITERAL string self.__WB_MANIFEST.
-// Must reference self directly here — aliased access (sw.__WB_MANIFEST) is not detected.
+// Must reference self directly here; aliased access (sw.__WB_MANIFEST) is not detected.
 // eslint-disable-next-line no-undef
 const precacheManifest = self.__WB_MANIFEST;
 
@@ -13,8 +13,8 @@ const precacheManifest = self.__WB_MANIFEST;
 // anciens caches a l'activation (voir handler 'activate'). Indispensable pour
 // eviter qu'un ancien bundle (ex. pointant vers une mauvaise URL d'API) reste
 // servi indefiniment apres une mise a jour de l'application.
-const CACHE_NAME = 'openfamily-v2';
-const API_CACHE_NAME = 'openfamily-api-v2';
+const CACHE_NAME = 'openfamily-v3';
+const API_CACHE_NAME = 'openfamily-api-v3';
 const OFFLINE_URL = '/index.html';
 
 sw.addEventListener('install', (event) => {

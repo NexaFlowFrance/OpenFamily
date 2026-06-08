@@ -115,12 +115,12 @@ const Family: React.FC = () => {
                 setSharedAccounts(response.data);
             }
         } catch {
-            // Silently ignore — non-blocking
+            // Silently ignore: non-blocking
         }
     };
 
     const loadJoinData = async () => {
-        // Owner: pending requests addressed to me (403 for non-owners — ignore)
+        // Owner: pending requests addressed to me (403 for non-owners, ignore)
         try {
             const reqRes = await api.get<{ success: boolean; data: JoinRequest[] }>('/api/invites/requests');
             if (reqRes.success) setJoinRequests(reqRes.data);
@@ -132,7 +132,7 @@ const Family: React.FC = () => {
             const mineRes = await api.get<{ success: boolean; data: MyJoinRequest | null }>('/api/invites/requests/mine');
             if (mineRes.success) {
                 if (mineRes.data?.status === 'approved') {
-                    // Access granted — refresh the token so data queries use the new family scope
+                    // Access granted: refresh the token so data queries use the new family scope
                     await refreshToken();
                     await loadSharedAccounts();
                     await loadMembers();
@@ -238,7 +238,7 @@ const Family: React.FC = () => {
                 { newOwnerId: account.id }
             );
             if (res.success) {
-                // Our token now reflects member status — sync it.
+                // Our token now reflects member status; sync it.
                 await refreshToken();
                 await loadSharedAccounts();
                 await loadMembers();

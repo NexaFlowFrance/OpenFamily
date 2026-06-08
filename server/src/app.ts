@@ -17,6 +17,7 @@ import dataTransferRoutes from './routes/dataTransfer';
 import notificationsRoutes from './routes/notifications';
 import familyInvitesRoutes from './routes/familyInvites';
 import calendarRoutes from './routes/calendar';
+import integrationsRoutes from './routes/integrations';
 import { loadEnv } from './config/loadEnv';
 import logger from './lib/logger';
 
@@ -93,6 +94,7 @@ app.use('/api/data', dataTransferRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/invites', familyInvitesRoutes);
 app.use('/api/calendar', calendarRoutes);
+app.use('/api/integrations', integrationsRoutes);
 
 // Static client (native Windows install): serve the built SPA from the same origin
 // as the API, so the app is reachable from any device on the LAN via http://<ip>:3000.

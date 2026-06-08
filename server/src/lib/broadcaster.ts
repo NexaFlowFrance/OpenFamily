@@ -9,9 +9,10 @@ export type WsEntity =
     | 'recipes'
     | 'meal-plans'
     | 'planning'
-    | 'notifications';
+    | 'notifications'
+    | 'integrations';
 
-export type WsAction = 'created' | 'updated' | 'deleted';
+export type WsAction = 'created' | 'updated' | 'deleted' | 'synced';
 
 export interface WsUpdatePayload {
     type: 'update';

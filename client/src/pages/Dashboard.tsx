@@ -3,8 +3,7 @@ import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
-import { ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, Activity, ChevronRight } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, ChevronRight, Clock } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,29 +15,51 @@ interface DashboardStats {
     budgetAlerts: number;
 }
 
+interface Appointment {
+    id: string;
+    title: string;
+    description?: string;
+    start_time: string;
+    end_time?: string;
+    color?: string;
+    members?: { name: string }[];
+}
+
 const Dashboard: React.FC = () => {
     const { user } = useAuth();
     const currency = user?.currency || 'EUR';
     const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        loadStats();
-    }, []);
-    useWebSocketUpdates('tasks', () => { void loadStats(); });
-    useWebSocketUpdates('shopping', () => { void loadStats(); });
-    useWebSocketUpdates('appointments', () => { void loadStats(); });
-    useWebSocketUpdates('budget', () => { void loadStats(); });
+    const today = new Intl.DateTimeFormat('fr-FR', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    }).format(new Date());
 
-    const loadStats = async () => {
+    useEffect(() => { void loadAll(); }, []);
+    useWebSocketUpdates('tasks', () => { void loadAll(); });
+    useWebSocketUpdates('shopping', () => { void loadAll(); });
+    useWebSocketUpdates('appointments', () => { void loadAll(); });
+    useWebSocketUpdates('budget', () => { void loadAll(); });
+
+    const loadAll = async () => {
         try {
-            const response = await api.get<{ success: boolean; data: DashboardStats }>('/api/dashboard');
-            if (response.success) {
-                setStats(response.data);
-            }
-        } catch (error) {
-            console.error('Failed to load dashboard stats:', error);
+            const [statsRes, apptRes] = await Promise.all([
+                api.get<{ success: boolean; data: DashboardStats }>('/api/dashboard'),
+                (() => {
+                    const d = new Date();
+                    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
+                    const end   = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59).toISOString();
+                    return api.get<{ success: boolean; data: Appointment[] }>(
+                        `/api/appointments?start_date=${start}&end_date=${end}`
+                    );
+                })(),
+            ]);
+            if (statsRes.success) setStats(statsRes.data);
+            if (apptRes.success) setTodayAppointments(apptRes.data);
+        } catch (e) {
+            console.error('Dashboard load error:', e);
         } finally {
             setLoading(false);
         }
@@ -49,206 +70,208 @@ const Dashboard: React.FC = () => {
             <div className="flex h-full items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
-                    <p className="text-muted-foreground font-medium animate-pulse">Chargement de votre espace...</p>
+                    <p className="text-muted-foreground font-medium animate-pulse">Chargement…</p>
                 </div>
             </div>
         );
     }
 
+    const fmt = (iso: string) =>
+        new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+
     const statCards = [
-        {
-            title: 'Rendez-vous à venir',
-            value: stats?.upcomingAppointments || 0,
-            icon: Calendar,
-            color: 'text-nexus-blue',
-            bgColor: 'bg-blue-50',
-            borderColor: 'border-blue-100',
-            href: '/calendar',
-        },
-        {
-            title: 'Tâches en attente',
-            value: stats?.pendingTasks || 0,
-            icon: CheckSquare,
-            color: 'text-emerald-600',
-            bgColor: 'bg-emerald-50',
-            borderColor: 'border-emerald-100',
-            href: '/tasks',
-        },
-        {
-            title: 'Articles à acheter',
-            value: stats?.shoppingItems || 0,
-            icon: ShoppingCart,
-            color: 'text-purple-600',
-            bgColor: 'bg-purple-50',
-            borderColor: 'border-purple-100',
-            href: '/shopping',
-        },
+        { title: 'Rendez-vous', value: stats?.upcomingAppointments ?? 0, icon: Calendar,      href: '/calendar' },
+        { title: 'Tâches',      value: stats?.pendingTasks ?? 0,          icon: CheckSquare,   href: '/tasks'    },
+        { title: 'Courses',     value: stats?.shoppingItems ?? 0,          icon: ShoppingCart,  href: '/shopping' },
         {
             title: 'Dépenses du mois',
-            value: formatCurrency(Number(stats?.thisMonthExpenses || 0), currency),
-            icon: Wallet,
-            color: 'text-nexus-amber',
-            bgColor: 'bg-orange-50',
-            borderColor: 'border-orange-100',
-            href: '/budget',
+            value: formatCurrency(Number(stats?.thisMonthExpenses ?? 0), currency),
+            icon: Wallet, href: '/budget', flag: true,
         },
     ];
 
     return (
-        <div className="space-y-8 animate-accordion-down">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-h1 text-foreground mb-1">Bonjour ! 👋</h1>
-                    <p className="text-muted-foreground text-body">Voici ce qu'il se passe dans votre famille aujourd'hui.</p>
-                </div>
-                <div className="flex gap-3">
-                    <Button variant="secondary" size="sm" onClick={() => navigate('/calendar')}>
-                        <Activity className="w-4 h-4 mr-2" />
-                        Voir l'activité
-                    </Button>
-                </div>
+        <div className="space-y-8">
+            {/* En-tête éditorial */}
+            <div>
+                <p className="text-micro uppercase tracking-[0.16em] text-muted-foreground mb-2 first-letter:uppercase">
+                    {today}
+                </p>
+                <h1 className="font-serif text-display text-foreground">
+                    Votre <em className="italic text-primary">journée</em>, en un coup d'œil.
+                </h1>
             </div>
 
+            {/* Alerte budget */}
             {stats && stats.budgetAlerts > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-nexus p-4 flex items-start gap-4 shadow-nexus-sm animate-pulse">
-                    <div className="p-2 bg-amber-100 rounded-full shrink-0">
-                        <AlertCircle className="h-5 w-5 text-amber-600" />
+                <div className="flex items-start gap-4 rounded-card border border-border bg-card p-4">
+                    <div className="p-2 bg-primary-soft rounded-input shrink-0">
+                        <AlertCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1">
-                        <h3 className="font-semibold text-amber-900 text-body-sm">
-                            Attention au budget
-                        </h3>
-                        <p className="text-sm text-amber-800 mt-1">
-                            {stats.budgetAlerts} catégorie{stats.budgetAlerts > 1 ? 's ont' : ' a'} dépassé le
-                            budget mensuel défini.
+                        <h3 className="font-serif text-h2 text-foreground">Attention au budget</h3>
+                        <p className="text-caption text-muted-foreground mt-1">
+                            {stats.budgetAlerts} catégorie{stats.budgetAlerts > 1 ? 's ont' : ' a'} dépassé le budget mensuel défini.
                         </p>
                     </div>
-                    <Button
-                        size="sm"
-                        onClick={() => navigate('/budget')}
-                        className="bg-amber-600 hover:bg-amber-700 text-white shrink-0 shadow-none border-0"
-                    >
+                    <Button size="sm" onClick={() => navigate('/budget')} className="shrink-0">
                         Voir détail
                     </Button>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {statCards.map((card) => {
+            {/* Bande de statistiques */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 overflow-hidden rounded-card border border-border bg-card">
+                {statCards.map((card, i) => {
                     const Icon = card.icon;
                     return (
-                        <Card
+                        <button
+                            type="button"
                             key={card.title}
-                            className={`border ${card.borderColor} bg-card group cursor-pointer`}
                             onClick={() => navigate(card.href)}
+                            className={[
+                                'group flex flex-col items-start gap-3 p-5 text-left transition-colors hover:bg-surface-2',
+                                i < 2 ? 'border-b lg:border-b-0' : '',
+                                i % 2 === 0 ? 'border-r border-border' : '',
+                                'lg:border-b-0 lg:[&:not(:last-child)]:border-r lg:border-border',
+                            ].join(' ')}
                         >
-                            <CardContent className="p-6 flex items-start justify-between">
-                                <div>
-                                    <p className="text-label text-muted-foreground font-medium mb-1">{card.title}</p>
-                                    <h3 className="text-3xl font-bold text-foreground tracking-tight group-hover:scale-105 transition-transform origin-left">
-                                        {card.value}
-                                    </h3>
-                                </div>
-                                <div className={`p-3 rounded-nexus ${card.bgColor} group-hover:rotate-6 transition-transform`}>
-                                    <Icon className={`h-6 w-6 ${card.color}`} />
-                                </div>
-                            </CardContent>
-                        </Card>
+                            <span className="flex items-center gap-2 text-micro uppercase tracking-[0.04em] text-muted-foreground">
+                                <Icon className="h-4 w-4" />
+                                {card.title}
+                            </span>
+                            <span className={`font-serif text-4xl leading-none tracking-tight ${(card as any).flag ? 'text-primary' : 'text-foreground'}`}>
+                                {card.value}
+                            </span>
+                        </button>
                     );
                 })}
             </div>
 
+            {/* Corps : agenda + accès rapides */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-2 shadow-nexus border-none">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xl">Aperçu rapide</CardTitle>
-                        <Button
-                            variant="ghost"
-                            size="sm"
+
+                {/* Agenda du jour */}
+                <section className="lg:col-span-2">
+                    <div className="flex items-baseline justify-between mb-4">
+                        <h2 className="font-serif text-h2">Aujourd'hui</h2>
+                        <button
+                            type="button"
                             onClick={() => navigate('/calendar')}
-                            className="text-nexus-blue hover:text-nexus-blue/80 hover:bg-blue-50"
+                            className="text-caption text-primary hover:underline underline-offset-4 flex items-center gap-1"
                         >
-                            Voir tout <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="relative overflow-hidden rounded-nexus bg-nexus-background p-6">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-nexus-blue-light/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                            Voir la semaine <ChevronRight className="w-3 h-3" />
+                        </button>
+                    </div>
 
-                            <h3 className="text-h2 mb-4 relative z-10">Bienvenue sur votre nouvel espace Nexus</h3>
-                            <p className="text-muted-foreground mb-6 max-w-lg relative z-10 text-body-sm">
-                                Nous avons repensé OpenFamily pour vous offrir une expérience plus claire, plus calme et plus efficace.
-                                Profitez d'une gestion familiale simplifiée.
-                            </p>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
-                                <div className="flex items-center gap-3 p-3 bg-card rounded-lg shadow-sm border border-border/50">
-                                    <div className="w-2 h-2 rounded-full bg-nexus-blue"></div>
-                                    <span className="text-body-sm font-medium">Design Neo-Soft</span>
-                                </div>
-                                <div className="flex items-center gap-3 p-3 bg-card rounded-lg shadow-sm border border-border/50">
-                                    <div className="w-2 h-2 rounded-full bg-nexus-amber"></div>
-                                    <span className="text-body-sm font-medium">Navigation intuitive</span>
-                                </div>
-                                <div className="flex items-center gap-3 p-3 bg-card rounded-lg shadow-sm border border-border/50">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                    <span className="text-body-sm font-medium">Performance accrue</span>
-                                </div>
-                                <div className="flex items-center gap-3 p-3 bg-card rounded-lg shadow-sm border border-border/50">
-                                    <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                                    <span className="text-body-sm font-medium">Sécurité renforcée</span>
-                                </div>
-                            </div>
+                    {todayAppointments.length === 0 ? (
+                        <div className="rounded-card border border-dashed border-border-strong p-8 text-center">
+                            <p className="font-serif text-h2 text-muted-foreground mb-1">Rien de prévu.</p>
+                            <p className="text-caption text-muted-foreground">Ajoutez un rendez-vous pour le voir apparaître ici.</p>
+                            <button
+                                type="button"
+                                onClick={() => navigate('/calendar')}
+                                className="mt-4 text-caption text-primary font-medium hover:underline underline-offset-4"
+                            >
+                                Ajouter un rendez-vous
+                            </button>
                         </div>
-                    </CardContent>
-                </Card>
+                    ) : (
+                        <div className="rounded-card border border-border bg-card divide-y divide-border overflow-hidden">
+                            {todayAppointments.map((appt) => (
+                                <div key={appt.id} className="grid grid-cols-[72px_1fr_auto] gap-4 items-center px-5 py-4">
+                                    <div className="font-serif text-body text-muted-foreground tabular-nums">
+                                        {fmt(appt.start_time)}
+                                    </div>
+                                    <div>
+                                        <p className="text-body font-medium text-foreground">{appt.title}</p>
+                                        {appt.description && (
+                                            <p className="text-caption text-muted-foreground mt-0.5">{appt.description}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-caption text-muted-foreground">
+                                        {appt.color && (
+                                            <span
+                                                className="h-2 w-2 rounded-full flex-none"
+                                                style={{ background: appt.color }}
+                                            />
+                                        )}
+                                        {appt.members?.[0]?.name && (
+                                            <span>{appt.members[0].name}</span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
 
-                <Card className="shadow-nexus border-none h-full">
-                    <CardHeader>
-                        <CardTitle className="text-xl">Démarrage rapide</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <button
-                            type="button"
-                            onClick={() => navigate('/family')}
-                            className="w-full p-4 text-left bg-nexus-background rounded-nexus hover:bg-blue-50 transition-colors cursor-pointer group border border-transparent hover:border-blue-100"
-                        >
-                            <h3 className="font-semibold text-body-sm mb-1 group-hover:text-nexus-blue transition-colors flex items-center gap-2">
-                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-nexus-blue text-white text-[10px]">1</span>
-                                Ajoutez votre famille
-                            </h3>
-                            <p className="text-label text-muted-foreground pl-7">
-                                Créez des profils pour chaque membre
-                            </p>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => navigate('/meal-planning')}
-                            className="w-full p-4 text-left bg-nexus-background rounded-nexus hover:bg-blue-50 transition-colors cursor-pointer group border border-transparent hover:border-blue-100"
-                        >
-                            <h3 className="font-semibold text-body-sm mb-1 group-hover:text-nexus-blue transition-colors flex items-center gap-2">
-                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-nexus-blue text-white text-[10px]">2</span>
-                                Planifiez vos repas
-                            </h3>
-                            <p className="text-label text-muted-foreground pl-7">
-                                Créez votre planning de la semaine
-                            </p>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => navigate('/budget')}
-                            className="w-full p-4 text-left bg-nexus-background rounded-nexus hover:bg-blue-50 transition-colors cursor-pointer group border border-transparent hover:border-blue-100"
-                        >
-                            <h3 className="font-semibold text-body-sm mb-1 group-hover:text-nexus-blue transition-colors flex items-center gap-2">
-                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-nexus-blue text-white text-[10px]">3</span>
-                                Suivez le budget
-                            </h3>
-                            <p className="text-label text-muted-foreground pl-7">
-                                Définissez vos limites mensuelles
-                            </p>
-                        </button>
-                    </CardContent>
-                </Card>
+                {/* Accès rapides */}
+                <aside className="flex flex-col gap-4">
+                    {/* Shopping */}
+                    <div
+                        className="rounded-card border border-border bg-card p-5 cursor-pointer hover:bg-surface-2 transition-colors"
+                        onClick={() => navigate('/shopping')}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && navigate('/shopping')}
+                    >
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-micro uppercase tracking-[0.04em] text-muted-foreground flex items-center gap-2">
+                                <ShoppingCart className="h-4 w-4" /> Courses
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <p className="font-serif text-4xl tracking-tight text-foreground">
+                            {stats?.shoppingItems ?? 0}
+                        </p>
+                        <p className="text-caption text-muted-foreground mt-1">
+                            article{(stats?.shoppingItems ?? 0) !== 1 ? 's' : ''} à acheter
+                        </p>
+                    </div>
+
+                    {/* Budget */}
+                    <div
+                        className="rounded-card border border-border bg-card p-5 cursor-pointer hover:bg-surface-2 transition-colors"
+                        onClick={() => navigate('/budget')}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && navigate('/budget')}
+                    >
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-micro uppercase tracking-[0.04em] text-muted-foreground flex items-center gap-2">
+                                <Wallet className="h-4 w-4" /> Budget du mois
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <p className="font-serif text-4xl tracking-tight text-primary">
+                            {formatCurrency(Number(stats?.thisMonthExpenses ?? 0), currency)}
+                        </p>
+                        <p className="text-caption text-muted-foreground mt-1">dépensés ce mois</p>
+                    </div>
+
+                    {/* Tâches */}
+                    <div
+                        className="rounded-card border border-border bg-card p-5 cursor-pointer hover:bg-surface-2 transition-colors"
+                        onClick={() => navigate('/tasks')}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && navigate('/tasks')}
+                    >
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-micro uppercase tracking-[0.04em] text-muted-foreground flex items-center gap-2">
+                                <Clock className="h-4 w-4" /> Tâches en attente
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <p className="font-serif text-4xl tracking-tight text-foreground">
+                            {stats?.pendingTasks ?? 0}
+                        </p>
+                        <p className="text-caption text-muted-foreground mt-1">
+                            tâche{(stats?.pendingTasks ?? 0) !== 1 ? 's' : ''} à terminer
+                        </p>
+                    </div>
+                </aside>
             </div>
         </div>
     );

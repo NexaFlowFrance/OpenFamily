@@ -1,13 +1,13 @@
 export const CHART_COLOR_PRESETS = [
     'rgb(var(--primary))',
-    'rgb(var(--success))',
+    'rgb(var(--peach))',
+    'rgb(var(--plum))',
     'rgb(var(--warning))',
-    'rgb(var(--info))',
-    'rgb(var(--danger))',
+    'rgb(var(--success))',
     'rgb(var(--muted-foreground))',
 ];
 
-export const DEFAULT_FAMILY_COLOR = '#FF4466';
+export const DEFAULT_FAMILY_COLOR = '#DC4A60';
 
 export const FAMILY_COLOR_PRESETS = [
     { value: '#FF4466', label: 'Corail' },

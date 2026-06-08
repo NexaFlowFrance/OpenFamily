@@ -3,11 +3,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Users } from 'lucide-react';
+import { Users, User, Baby, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 
 const Login: React.FC = () => {
     const { login, register } = useAuth();
+    const { actualTheme, setTheme } = useTheme();
     const registrationEnabled = import.meta.env.VITE_REGISTRATION_ENABLED !== 'false';
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -18,7 +20,7 @@ const Login: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [inviteToken, setInviteToken] = useState<string | null>(null);
 
-    // Detect invite token in URL — auto-switch to registration mode
+    // Detect invite token in URL; auto-switch to registration mode
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const invite = params.get('invite');
@@ -47,22 +49,24 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-nexus-background p-4 relative overflow-hidden">
-            {/* Background decorative elements */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-nexus-blue/10 blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-nexus-blue-light/10 blur-[100px]" />
-            </div>
-
-            <Card className="w-full max-w-md relative z-10 animate-accordion-down" hover={false}>
+        <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+            <button
+                type="button"
+                onClick={() => setTheme(actualTheme === 'dark' ? 'light' : 'dark')}
+                aria-label="Changer de thème"
+                className="absolute top-4 right-4 p-2 rounded-input border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong transition-colors"
+            >
+                {actualTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <Card className="w-full max-w-md" hover={false}>
                 <CardHeader className="text-center pb-8 pt-8">
                     <div className="mx-auto mb-6">
-                        <img src="/OpenFamily.png" alt="OpenFamily" className="w-20 h-20 object-contain mx-auto" />
+                        <img src="/OpenFamily.png" alt="OpenFamily" className="w-16 h-16 rounded-xl object-contain mx-auto" />
                     </div>
-                    <CardTitle className="text-3xl mb-3 text-nexus-blue">
-                        OpenFamily
+                    <CardTitle className="font-serif text-display mb-2">
+                        Open<span className="text-primary">Family</span>
                     </CardTitle>
-                    <p className="text-muted-foreground text-body-sm">
+                    <p className="text-muted-foreground text-caption">
                         Le numérique au service du lien familial
                     </p>
                 </CardHeader>
@@ -70,9 +74,9 @@ const Login: React.FC = () => {
                 <CardContent className="space-y-6 px-8 pb-8">
                     {/* Invite banner */}
                     {inviteToken && !isLogin && (
-                        <div className="flex items-center gap-3 p-3 rounded-nexus bg-nexus-blue/10 border border-nexus-blue/20">
-                            <Users className="w-5 h-5 text-nexus-blue shrink-0" />
-                            <p className="text-label-sm text-nexus-blue font-medium">
+                        <div className="flex items-center gap-3 p-3 rounded-input bg-primary-soft border border-border">
+                            <Users className="w-5 h-5 text-primary shrink-0" />
+                            <p className="text-label-sm text-primary font-medium">
                                 Vous avez été invité à rejoindre une famille ! Créez votre compte pour accepter l'invitation.
                             </p>
                         </div>
@@ -99,25 +103,25 @@ const Login: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => setRole('parent')}
-                                        className={`flex flex-col items-center gap-1.5 p-3 rounded-nexus border-2 transition-colors ${
+                                        className={`flex flex-col items-center gap-2 p-3 rounded-input border transition-colors ${
                                             role === 'parent'
-                                                ? 'border-nexus-blue bg-nexus-blue/10 text-nexus-blue'
-                                                : 'border-border text-muted-foreground hover:border-nexus-blue/50'
+                                                ? 'border-primary bg-primary-soft text-primary'
+                                                : 'border-border text-muted-foreground hover:border-border-strong'
                                         }`}
                                     >
-                                        <span className="text-2xl">👨</span>
+                                        <User className="w-5 h-5" />
                                         <span className="text-label-sm font-semibold">Parent</span>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setRole('enfant')}
-                                        className={`flex flex-col items-center gap-1.5 p-3 rounded-nexus border-2 transition-colors ${
+                                        className={`flex flex-col items-center gap-2 p-3 rounded-input border transition-colors ${
                                             role === 'enfant'
-                                                ? 'border-nexus-blue bg-nexus-blue/10 text-nexus-blue'
-                                                : 'border-border text-muted-foreground hover:border-nexus-blue/50'
+                                                ? 'border-primary bg-primary-soft text-primary'
+                                                : 'border-border text-muted-foreground hover:border-border-strong'
                                         }`}
                                     >
-                                        <span className="text-2xl">🧒</span>
+                                        <Baby className="w-5 h-5" />
                                         <span className="text-label-sm font-semibold">Enfant</span>
                                     </button>
                                 </div>

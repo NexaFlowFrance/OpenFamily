@@ -103,7 +103,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
         ws.onopen = () => {
             reconnectDelay.current = RECONNECT_DELAY_MS;
 
-            // Authenticate with JWT — never send the raw userId
+            // Authenticate with JWT; never send the raw userId
             ws.send(JSON.stringify({ type: 'auth', token: api.getToken() }));
 
             // Heartbeat to keep connection alive through proxies

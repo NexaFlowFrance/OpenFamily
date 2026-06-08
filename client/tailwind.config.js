@@ -54,6 +54,8 @@ export default {
                 warning: 'rgb(var(--warning) / <alpha-value>)',
                 danger: 'rgb(var(--danger) / <alpha-value>)',
                 info: 'rgb(var(--info) / <alpha-value>)',
+                peach: 'rgb(var(--peach) / <alpha-value>)',
+                plum: 'rgb(var(--plum) / <alpha-value>)',
                 card: {
                     DEFAULT: 'rgb(var(--card) / <alpha-value>)',
                     foreground: 'rgb(var(--card-foreground) / <alpha-value>)',
@@ -72,7 +74,8 @@ export default {
                 },
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                sans: ['Instrument Sans', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                serif: ['Fraunces', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
             },
             fontSize: {
                 display: ['28px', { lineHeight: '32px', fontWeight: '600' }],

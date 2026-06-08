@@ -241,53 +241,34 @@ const Tasks: React.FC = () => {
 
             {/* Statistics */}
             {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Card className="border-blue-100 bg-card">
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-label text-muted-foreground mb-1">Total</p>
-                                    <p className="text-2xl font-bold">{stats.total}</p>
-                                </div>
-                                <CheckSquare className="h-8 w-8 text-nexus-blue" />
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="border-emerald-100 bg-card">
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-label text-muted-foreground mb-1">Complétées</p>
-                                    <p className="text-2xl font-bold text-emerald-600">{stats.completed}</p>
-                                </div>
-                                <TrendingUp className="h-8 w-8 text-emerald-600" />
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="border-amber-100 bg-card">
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-label text-muted-foreground mb-1">En attente</p>
-                                    <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
-                                </div>
-                                <Square className="h-8 w-8 text-amber-600" />
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="border-purple-100 bg-card">
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-label text-muted-foreground mb-1">Taux de réussite</p>
-                                    <p className="text-2xl font-bold text-purple-600">{stats.completionRate}%</p>
-                                </div>
-                                <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                                    <span className="text-sm font-bold text-purple-600">%</span>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                <div className="grid grid-cols-2 md:grid-cols-4 overflow-hidden rounded-card border border-border bg-card">
+                    <div className="flex items-center justify-between gap-2 p-4 border-b border-r border-border md:border-b-0">
+                        <div>
+                            <p className="text-label text-muted-foreground mb-1">Total</p>
+                            <p className="font-serif text-3xl tracking-tight">{stats.total}</p>
+                        </div>
+                        <CheckSquare className="h-7 w-7 text-muted-foreground" />
+                    </div>
+                    <div className="flex items-center justify-between gap-2 p-4 border-b border-border md:border-b-0 md:border-r">
+                        <div>
+                            <p className="text-label text-muted-foreground mb-1">Complétées</p>
+                            <p className="font-serif text-3xl tracking-tight text-success">{stats.completed}</p>
+                        </div>
+                        <TrendingUp className="h-7 w-7 text-success" />
+                    </div>
+                    <div className="flex items-center justify-between gap-2 p-4 border-r border-border">
+                        <div>
+                            <p className="text-label text-muted-foreground mb-1">En attente</p>
+                            <p className="font-serif text-3xl tracking-tight">{stats.pending}</p>
+                        </div>
+                        <Square className="h-7 w-7 text-muted-foreground" />
+                    </div>
+                    <div className="flex items-center justify-between gap-2 p-4">
+                        <div>
+                            <p className="text-label text-muted-foreground mb-1">Taux de réussite</p>
+                            <p className="font-serif text-3xl tracking-tight text-primary">{stats.completionRate}%</p>
+                        </div>
+                    </div>
                 </div>
             )}
 

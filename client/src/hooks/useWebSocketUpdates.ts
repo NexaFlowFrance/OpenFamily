@@ -6,7 +6,7 @@ import { useWebSocket, WsEntity } from '../contexts/WebSocketContext';
  * Calls `onUpdate` whenever another client mutates the entity.
  *
  * Uses an internal ref so that pages never need to wrap their load
- * functions in useCallback — the latest version is always called.
+ * functions in useCallback; the latest version is always called.
  *
  * @example
  * useWebSocketUpdates('tasks', loadTasks);

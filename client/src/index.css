@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Instrument+Sans:wght@400;500;600&display=swap');
 @import './design/tokens.css';
 
 @tailwind base;
@@ -32,12 +32,13 @@
     max-width: 100%;
   }
 
+  /* Titres en serif éditorial (Fraunces) */
   h1 {
-    @apply text-h1;
+    @apply text-h1 font-serif;
   }
 
   h2 {
-    @apply text-h2;
+    @apply text-h2 font-serif;
   }
 
   :focus-visible {
@@ -63,7 +64,7 @@
   }
 
   .btn-primary {
-    @apply rounded-pill bg-primary text-primary-foreground shadow-surface;
+    @apply rounded-input bg-primary text-primary-foreground shadow-surface;
     @apply hover:bg-primary-hover active:scale-[0.98] active:bg-primary-pressed;
   }
 
@@ -80,7 +81,7 @@
   }
 
   .btn-destructive {
-    @apply rounded-pill bg-destructive text-destructive-foreground shadow-surface;
+    @apply rounded-input bg-destructive text-destructive-foreground shadow-surface;
     @apply hover:bg-destructive/90 active:scale-[0.98];
   }
 

@@ -1,0 +1,142 @@
+name: Windows Installer
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version à compiler (ex. 1.1.0)"
+        required: false
+        default: "1.1.0"
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "20.18.0"          # runtime Node embarqué dans l'installeur
+  PG_VERSION: "16.4-1"             # binaires PostgreSQL portables (EnterpriseDB)
+
+jobs:
+  build-installer:
+    name: Build OpenFamily-Setup.exe
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "VERSION=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ---------------------------------------------------------------------
+      # 1. Compiler l'application (shared + serveur + client en same-origin)
+      # ---------------------------------------------------------------------
+      - name: Build shared
+        run: |
+          cd shared && npm install --legacy-peer-deps && npm run build
+
+      - name: Build server
+        run: |
+          cd server && npm install --legacy-peer-deps && npm run build
+
+      - name: Build client (same-origin)
+        env:
+          VITE_API_URL: ""
+          VITE_WS_URL: ""
+        run: |
+          cd client && npm install --legacy-peer-deps && npm run build
+
+      # ---------------------------------------------------------------------
+      # 2. Préparer l'arborescence de l'installeur (app\server, app\client...)
+      # ---------------------------------------------------------------------
+      - name: Stage application files
+        shell: pwsh
+        run: |
+          $app = "installer/windows/app"
+          New-Item -ItemType Directory -Force -Path "$app/server","$app/client","$app/runtime" | Out-Null
+
+          # Serveur : code compilé + dépendances de production uniquement
+          Copy-Item server/dist        "$app/server/dist" -Recurse -Force
+          Copy-Item server/package.json "$app/server/package.json" -Force
+          Push-Location "$app/server"
+          npm install --omit=dev --legacy-peer-deps --no-audit --no-fund
+          Pop-Location
+
+          # Client : build statique
+          Copy-Item client/dist/*      "$app/client" -Recurse -Force
+
+          # Schéma de base de données
+          Copy-Item server/schema.sql  "$app/schema.sql" -Force
+
+      # ---------------------------------------------------------------------
+      # 3. Embarquer Node.js et PostgreSQL portables
+      # ---------------------------------------------------------------------
+      - name: Bundle Node.js runtime
+        shell: pwsh
+        run: |
+          $url = "https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-win-x64.zip"
+          Invoke-WebRequest -Uri $url -OutFile node.zip
+          Expand-Archive node.zip -DestinationPath node_tmp -Force
+          $src = (Get-ChildItem node_tmp -Directory | Select-Object -First 1).FullName
+          New-Item -ItemType Directory -Force -Path "installer/windows/app/runtime/node" | Out-Null
+          Copy-Item "$src/*" "installer/windows/app/runtime/node" -Recurse -Force
+
+      - name: Bundle PostgreSQL runtime
+        shell: pwsh
+        run: |
+          $url = "https://get.enterprisedb.com/postgresql/postgresql-${{ env.PG_VERSION }}-windows-x64-binaries.zip"
+          Invoke-WebRequest -Uri $url -OutFile pg.zip
+          Expand-Archive pg.zip -DestinationPath pg_tmp -Force
+          # L'archive contient un dossier "pgsql" avec bin/, lib/, share/
+          New-Item -ItemType Directory -Force -Path "installer/windows/app/runtime/pgsql" | Out-Null
+          Copy-Item "pg_tmp/pgsql/*" "installer/windows/app/runtime/pgsql" -Recurse -Force
+
+      # ---------------------------------------------------------------------
+      # 4. Générer les visuels (logo / icône) puis compiler l'installeur
+      # ---------------------------------------------------------------------
+      - name: Install tooling (Inno Setup + ImageMagick)
+        run: |
+          choco install innosetup --no-progress -y
+          choco install imagemagick.app --no-progress -y
+
+      - name: Generate installer assets from logo
+        shell: pwsh
+        run: |
+          $assets = "installer/windows/assets"
+          New-Item -ItemType Directory -Force -Path $assets | Out-Null
+          $logo = "client/public/OpenFamily.png"
+          Copy-Item $logo "$assets/OpenFamily.png" -Force
+          magick "$logo" -background none -resize 256x256 -define icon:auto-resize=16,24,32,48,64,128,256 "$assets/OpenFamily.ico"
+          magick -size 164x314 xc:"#0f1117" `( "$logo" -resize 120x120 `) -gravity center -composite -alpha remove -type TrueColor "BMP3:$assets/wizard-large.bmp"
+          magick -size 55x58 xc:"#0f1117" `( "$logo" -resize 48x48 `) -gravity center -composite -alpha remove -type TrueColor "BMP3:$assets/wizard-small.bmp"
+
+      - name: Compile installer
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & "$iscc" "installer/windows/OpenFamily.iss" "/DMyAppVersion=${{ steps.version.outputs.VERSION }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenFamily-Setup
+          path: dist/windows/OpenFamily-Setup.exe
+
+      - name: Attach to GitHub Release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/windows/OpenFamily-Setup.exe

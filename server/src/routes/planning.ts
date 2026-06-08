@@ -299,8 +299,8 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'Invalid schedule_type' });
         }
 
-        if (timeToMinutes(endTime) <= timeToMinutes(startTime)) {
-            return res.status(400).json({ success: false, error: 'end_time must be after start_time' });
+        if (timeToMinutes(endTime) === timeToMinutes(startTime)) {
+            return res.status(400).json({ success: false, error: 'start_time and end_time cannot be the same' });
         }
 
         await ensureMemberBelongsToUser(memberId, req.userId!);

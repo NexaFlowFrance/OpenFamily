@@ -43,7 +43,7 @@ Connectez OpenFamily à votre écosystème self-hosted en un clic — sans modif
 | **Grocy** | 🥦 Courses &amp; stock | Synchronisation de la liste de courses et du stock |
 | **Nextcloud** | ☁️ Calendrier | Import CalDAV avec découverte automatique des agendas et déduplification par UID |
 
-> 🎬 **Merci à [Makernix](https://www.youtube.com/@Makernix)** — Pour l'idée de connecter OpenFamily à d'autres applications .
+> 🎬 **Merci à [Makernix](https://www.youtube.com/@Makernix)** — c'est lors d'un échange direct avec lui que l'idée de connecter OpenFamily à l'écosystème self-hosting familial (Mealie, Grocy, Home Assistant, Nextcloud) a émergé.
 ## 🚀 Démarrage rapide
 
 ### Prérequis
@@ -253,4 +253,4 @@ GNU Affero General Public License v3.0 (AGPL-3.0-only) - voir [licence.md](licen
 Développé et maintenu par [NexaFlow France](https://nexaflow.fr).
 Ce projet respecte la philosophie open source et encourage le partage et la contribution communautaire.
 
-> 🎬 Merci à **[Makernix](https://www.youtube.com/@Makernix)** pour ses vidéos sur l'écosystème self-hosting familial (Mealie, Grocy, Home Assistant, Nextcloud), qui ont été à l'origine de l'idée des intégrations tierces.
+> 🎬 Merci à **[Makernix](https://www.youtube.com/@Makernix)** — c'est lors d'un échange direct avec lui que l'idée des intégrations tierces a émergé.

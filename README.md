@@ -43,7 +43,7 @@ Connectez OpenFamily à votre écosystème self-hosted en un clic — sans modif
 | **Grocy** | 🥦 Courses &amp; stock | Synchronisation de la liste de courses et du stock |
 | **Nextcloud** | ☁️ Calendrier | Import CalDAV avec découverte automatique des agendas et déduplification par UID |
 
-> 🎬 **Merci à [Makernix](https://www.youtube.com/@Makernix)** — c'est grâce à ses vidéos sur Mealie, Grocy, Home Assistant et Nextcloud que l'idée de connecter OpenFamily à l'écosystème self-hosting familial a émergé.
+> 🎬 **Merci à [Makernix](https://www.youtube.com/@Makernix)** — Pour l'idée de connecter OpenFamily à d'autres applications .
 ## 🚀 Démarrage rapide
 
 ### Prérequis

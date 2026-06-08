@@ -241,6 +241,47 @@
       .stat strong { font-size: 1.1rem; }
     }
 
+    /* ── INTEGRATIONS ── */
+    .integrations-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .integration-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem 1.25rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+      text-align: center; transition: border-color 0.2s, transform 0.15s;
+    }
+    .integration-card:hover { border-color: rgba(255,87,87,0.4); transform: translateY(-2px); }
+    .integration-icon { font-size: 2rem; }
+    .integration-card h3 { font-size: 0.95rem; font-weight: 600; margin: 0; }
+    .integration-card p { font-size: 0.8rem; color: var(--muted); margin: 0; line-height: 1.5; }
+    .integration-tag {
+      margin-top: 0.4rem;
+      display: inline-block; background: var(--blue-dim); color: var(--blue-light);
+      font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .makernix-card {
+      background: linear-gradient(135deg, rgba(255,87,87,0.06) 0%, rgba(255,87,87,0.02) 100%);
+      border: 1px solid rgba(255,87,87,0.25);
+      border-radius: var(--radius); padding: 1.5rem 2rem;
+      display: flex; align-items: center; gap: 1.5rem;
+      margin-top: 2.5rem; flex-wrap: wrap;
+    }
+    .makernix-card .mk-icon { font-size: 2.5rem; flex-shrink: 0; }
+    .makernix-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--text); }
+    .makernix-card p { font-size: 0.875rem; color: var(--muted); margin: 0; line-height: 1.55; }
+    .makernix-card a { color: var(--blue-light); text-decoration: none; }
+    .makernix-card a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .integrations-grid { grid-template-columns: 1fr 1fr; }
+      .makernix-card { flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 380px) {
+      .integrations-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── CONTRIBUTORS ── */
     .contributors-grid {
       display: flex; flex-wrap: wrap; gap: 1.25rem; justify-content: center;
@@ -280,6 +321,7 @@
   </a>
   <div class="nav-links">
     <a href="#features">Fonctionnalités</a>
+    <a href="#integrations">Intégrations</a>
     <a href="#install">Installation</a>
     <a href="#tech">Technologies</a>
     <a href="#contributors">Équipe</a>
@@ -290,7 +332,7 @@
 <!-- HERO -->
 <div class="hero">
   <a class="hero-badge" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest" target="_blank" rel="noopener">
-    🎉 v1.1.0 - Installeur Windows, mode magasin, export iCal &amp; mode hors ligne
+    🎉 v1.1.1 - Refonte design &amp; intégrations tierces (Mealie, Grocy, Nextcloud…)
   </a>
   <img class="logo" src="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" alt="OpenFamily" />
   <h1>La gestion familiale,<br><span>maîtrisée par vous.</span></h1>
@@ -379,6 +421,54 @@
       <div class="feature-icon">📱</div>
       <h3>PWA installable</h3>
       <p>Installez l'application sur iOS, Android ou desktop comme une app native, avec support offline.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATIONS -->
+<section id="integrations">
+  <div class="section-label">Intégrations</div>
+  <h2>Connecté à votre écosystème self-hosted</h2>
+  <p class="section-desc">Synchronisez OpenFamily avec vos applications auto-hébergées en un clic — aucune modification de fichiers de configuration.</p>
+  <div class="integrations-grid">
+    <div class="integration-card">
+      <div class="integration-icon">🍲</div>
+      <h3>Mealie</h3>
+      <p>Import automatique de toutes vos recettes (pagination, API v1 &amp; v2).</p>
+      <span class="integration-tag">Recettes</span>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">🌿</div>
+      <h3>Tandoor</h3>
+      <p>Import de recettes via l'API Django REST.</p>
+      <span class="integration-tag">Recettes</span>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">🏠</div>
+      <h3>Home Assistant</h3>
+      <p>Sync liste de courses via WebSocket. Compatible entités todo modernes (2023.6+) et legacy.</p>
+      <span class="integration-tag">Courses</span>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">🥦</div>
+      <h3>Grocy</h3>
+      <p>Synchronisation de la liste de courses et du stock avec votre instance Grocy.</p>
+      <span class="integration-tag">Courses &amp; stock</span>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">☁️</div>
+      <h3>Nextcloud</h3>
+      <p>Import de calendriers CalDAV avec découverte automatique des agendas et déduplification par UID.</p>
+      <span class="integration-tag">Calendrier</span>
+    </div>
+  </div>
+
+  <div class="makernix-card">
+    <div class="mk-icon">🎬</div>
+    <div>
+      <h4>Merci à <a href="https://www.youtube.com/@Makernix" target="_blank" rel="noopener">Makernix</a> 🙌</h4>
+      <p>C'est grâce à la chaîne YouTube <strong>Makernix</strong> que l'idée de connecter OpenFamily à l'écosystème self-hosting familial a germé.
+      Ses vidéos sur Mealie, Grocy, Home Assistant et Nextcloud ont mis en lumière à quel point ces outils pouvaient s'articuler avec une application comme OpenFamily.</p>
     </div>
   </div>
 </section>
@@ -508,7 +598,10 @@ API      : http://localhost:3001/health</pre>
       <span class="c-count">1 commit</span>
     </a>
   </div>
-  <p style="margin-top: 2rem; font-size: 0.85rem; color: var(--muted);">
+  <p style="margin-top: 2.5rem; font-size: 0.85rem; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1.25rem; display: inline-block;">
+    🎬 Idée des intégrations : merci à <a href="https://www.youtube.com/@Makernix" target="_blank" rel="noopener" style="color: var(--blue-light);">Makernix</a> pour ses vidéos sur l'écosystème self-hosted familial.
+  </p>
+  <p style="margin-top: 1.25rem; font-size: 0.85rem; color: var(--muted);">
     Vous voulez contribuer ? <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/DOCUMENTATION.md" target="_blank" rel="noopener" style="color: var(--blue-light); text-decoration: none;">Lisez la doc →</a>
   </p>
 </section>

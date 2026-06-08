@@ -31,7 +31,19 @@
 | 👥 **Comptes partagés** | Invitez des membres via lien, **demandes d'accès**, **transfert de propriété** |
 | 🛡️ **Rôles & permissions** | Comptes **parent / enfant** — accès en lecture seule au budget pour les enfants |
 | 📴 **Mode hors ligne** | Consultation des données en cache sans connexion (PWA, network-first) |
+## 🔗 Intégrations tierces
 
+Connectez OpenFamily à votre écosystème self-hosted en un clic — sans modifier aucun fichier de configuration.
+
+| Application | Type | Ce qui est synchronisé |
+|---|---|---|
+| **Mealie** | 🍲 Recettes | Import automatique de toutes les recettes (pagination, API v1 &amp; v2) |
+| **Tandoor** | 🌿 Recettes | Import via l'API Django REST |
+| **Home Assistant** | 🏠 Courses | Sync liste de courses via WebSocket — entités todo modernes (2023.6+) et legacy |
+| **Grocy** | 🥦 Courses &amp; stock | Synchronisation de la liste de courses et du stock |
+| **Nextcloud** | ☁️ Calendrier | Import CalDAV avec découverte automatique des agendas et déduplification par UID |
+
+> 🎬 **Merci à [Makernix](https://www.youtube.com/@Makernix)** — c'est grâce à ses vidéos sur Mealie, Grocy, Home Assistant et Nextcloud que l'idée de connecter OpenFamily à l'écosystème self-hosting familial a émergé.
 ## 🚀 Démarrage rapide
 
 ### Prérequis
@@ -240,3 +252,5 @@ GNU Affero General Public License v3.0 (AGPL-3.0-only) - voir [licence.md](licen
 
 Développé et maintenu par [NexaFlow France](https://nexaflow.fr).
 Ce projet respecte la philosophie open source et encourage le partage et la contribution communautaire.
+
+> 🎬 Merci à **[Makernix](https://www.youtube.com/@Makernix)** pour ses vidéos sur l'écosystème self-hosting familial (Mealie, Grocy, Home Assistant, Nextcloud), qui ont été à l'origine de l'idée des intégrations tierces.

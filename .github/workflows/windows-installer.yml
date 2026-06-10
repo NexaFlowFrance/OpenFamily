@@ -173,3 +173,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/windows/OpenFamily-Setup.exe
+          generate_release_notes: true

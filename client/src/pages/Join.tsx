@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Users, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
+import { intlLocale } from '../i18n/format';
 
 interface InviteInfo {
     ownerName: string;
@@ -12,6 +14,7 @@ interface InviteInfo {
 }
 
 const Join: React.FC = () => {
+    const { t } = useTranslation(['auth', 'common']);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { joinFamily, user } = useAuth();
@@ -26,7 +29,7 @@ const Join: React.FC = () => {
 
     useEffect(() => {
         if (!inviteToken) {
-            setError("Lien d'invitation manquant.");
+            setError(t('auth:invite.missing'));
             setLoading(false);
             return;
         }
@@ -36,12 +39,12 @@ const Join: React.FC = () => {
                 if (res.success && res.data) {
                     setInviteInfo(res.data);
                 } else {
-                    setError('Invitation invalide ou expirée.');
+                    setError(t('auth:invite.invalid'));
                 }
             })
-            .catch(() => setError('Impossible de vérifier l\'invitation.'))
+            .catch(() => setError(t('auth:invite.cannotVerify')))
             .finally(() => setLoading(false));
-    }, [inviteToken]);
+    }, [inviteToken, t]);
 
     const handleJoin = async () => {
         if (!inviteToken) return;
@@ -52,7 +55,7 @@ const Join: React.FC = () => {
             setJoined(true);
             setTimeout(() => navigate('/'), 2000);
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Erreur lors de la jonction.');
+            setError(err instanceof Error ? err.message : t('auth:invite.joinError'));
         } finally {
             setJoining(false);
         }
@@ -70,9 +73,9 @@ const Join: React.FC = () => {
                     <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-nexus-blue/10 flex items-center justify-center">
                         <Users className="w-7 h-7 text-nexus-blue" />
                     </div>
-                    <CardTitle className="text-2xl text-nexus-blue">Rejoindre une famille</CardTitle>
+                    <CardTitle className="text-2xl text-nexus-blue">{t('auth:invite.title')}</CardTitle>
                     {user && (
-                        <p className="text-sm text-muted-foreground mt-1">Connecté en tant que <strong>{user.name}</strong></p>
+                        <p className="text-sm text-muted-foreground mt-1">{t('auth:invite.loggedInAs')} <strong>{user.name}</strong></p>
                     )}
                 </CardHeader>
 
@@ -80,7 +83,7 @@ const Join: React.FC = () => {
                     {loading && (
                         <div className="flex flex-col items-center gap-3 py-4">
                             <Loader2 className="w-6 h-6 text-nexus-blue animate-spin" />
-                            <p className="text-sm text-muted-foreground">Vérification de l'invitation…</p>
+                            <p className="text-sm text-muted-foreground">{t('auth:invite.checking')}</p>
                         </div>
                     )}
 
@@ -95,24 +98,26 @@ const Join: React.FC = () => {
                         <div className="flex flex-col items-center gap-3 py-4 text-center">
                             <CheckCircle className="w-10 h-10 text-green-500" />
                             <p className="text-sm font-medium text-foreground">
-                                Vous avez rejoint la famille de <strong>{inviteInfo?.ownerName}</strong> !
+                                {t('auth:invite.joined', { name: inviteInfo?.ownerName })}
                             </p>
-                            <p className="text-xs text-muted-foreground">Redirection en cours…</p>
+                            <p className="text-xs text-muted-foreground">{t('auth:invite.redirecting')}</p>
                         </div>
                     )}
 
                     {!loading && !error && !joined && inviteInfo && (
                         <>
                             <div className="p-4 rounded-nexus bg-card border border-border text-center">
-                                <p className="text-sm text-muted-foreground mb-1">Invitation de</p>
+                                <p className="text-sm text-muted-foreground mb-1">{t('auth:invite.invitationFrom')}</p>
                                 <p className="text-xl font-semibold text-foreground">{inviteInfo.ownerName}</p>
                                 <p className="text-xs text-muted-foreground mt-2">
-                                    Expire le {new Date(inviteInfo.expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                    {t('auth:invite.expiresOn', {
+                                        date: new Date(inviteInfo.expiresAt).toLocaleDateString(intlLocale(), { day: 'numeric', month: 'long', year: 'numeric' }),
+                                    })}
                                 </p>
                             </div>
 
                             <p className="text-sm text-muted-foreground text-center">
-                                En rejoignant, vous partagerez les données familiales (tâches, courses, agenda, budget…) avec <strong>{inviteInfo.ownerName}</strong>.
+                                {t('auth:invite.shareWarning', { name: inviteInfo.ownerName })}
                             </p>
 
                             <div className="flex gap-3">
@@ -122,7 +127,7 @@ const Join: React.FC = () => {
                                     onClick={() => navigate('/')}
                                     disabled={joining}
                                 >
-                                    Annuler
+                                    {t('common:actions.cancel')}
                                 </Button>
                                 <Button
                                     className="flex-1"
@@ -132,10 +137,10 @@ const Join: React.FC = () => {
                                     {joining ? (
                                         <span className="flex items-center gap-2">
                                             <Loader2 className="w-4 h-4 animate-spin" />
-                                            Jonction…
+                                            {t('auth:invite.joining')}
                                         </span>
                                     ) : (
-                                        'Rejoindre'
+                                        t('auth:invite.join')
                                     )}
                                 </Button>
                             </div>
@@ -144,9 +149,9 @@ const Join: React.FC = () => {
 
                     {!loading && !error && !joined && !inviteInfo && (
                         <div className="text-center py-4">
-                            <p className="text-sm text-muted-foreground">Invitation introuvable.</p>
+                            <p className="text-sm text-muted-foreground">{t('auth:invite.notFound')}</p>
                             <Button variant="secondary" className="mt-4" onClick={() => navigate('/')}>
-                                Retour
+                                {t('common:actions.back')}
                             </Button>
                         </div>
                     )}

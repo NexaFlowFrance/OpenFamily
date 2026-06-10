@@ -1,0 +1,70 @@
+{
+  "loading": "Loading planning…",
+  "noMembers": {
+    "title": "Add your members first",
+    "subtitle": "The weekly planning is based on family profiles.",
+    "cta": "Go to Family"
+  },
+  "title": "Weekly planning",
+  "subtitle": "Recurring work hours and school timetables, week by week.",
+  "newEntry": "New entry",
+  "thisWeek": "This week",
+  "allMembers": "All members",
+  "allTypes": "All types",
+  "types": {
+    "work": "Work",
+    "school": "School",
+    "study": "Studies",
+    "activity": "Activity",
+    "other": "Other"
+  },
+  "add": "Add",
+  "nextDayShort": "+1d",
+  "dayFallback": "Day {{n}}",
+  "dialog": {
+    "editTitle": "Edit an entry",
+    "createTitle": "New entry",
+    "description": "Define an entry and apply it to one or more days."
+  },
+  "form": {
+    "member": "Member",
+    "type": "Type",
+    "title": "Title",
+    "titlePlaceholder": "e.g. Office - Product team / Mathematics",
+    "days": "Days concerned",
+    "weekdays": "Mon-Fri",
+    "fullWeek": "Full week",
+    "selectedDay": "Selected day: {{day}}",
+    "selectedDays": "{{count}} days selected",
+    "start": "Start",
+    "end": "End",
+    "nextDayHint": "Ends the next day (+1 day)",
+    "thisWeekOnlyStrong": "This week only",
+    "thisWeekOnlyRest": ". The entry only applies to the week of {{date}}. Otherwise it recurs every week.",
+    "replaceConflicts": "Replace conflicting entries on the selected days. If conflicts exist and this option is off, those days will be skipped.",
+    "location": "Location (optional)",
+    "locationPlaceholder": "e.g. Lyon office / Jean Moulin school",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Useful info, room, subject, transport…"
+  },
+  "submit": {
+    "applyToDays": "Apply to selected days"
+  },
+  "notice": {
+    "saved": "Entry saved.",
+    "savedDays_one": "Saved on {{count}} day.",
+    "savedDays_other": "Saved on {{count}} days.",
+    "savedDaysConflicts_one": "Saved on {{count}} day. Conflicts detected on: {{days}}.",
+    "savedDaysConflicts_other": "Saved on {{count}} days. Conflicts detected on: {{days}}."
+  },
+  "confirmDelete": "Delete this entry?",
+  "errors": {
+    "loadMembers": "Unable to load members.",
+    "loadEntries": "Unable to load the planning.",
+    "deleteEntry": "Unable to delete this entry.",
+    "memberTitleRequired": "Member and title are required.",
+    "timesSame": "Start and end times cannot be identical.",
+    "selectDay": "Select at least one day.",
+    "save": "Unable to save this entry."
+  }
+}

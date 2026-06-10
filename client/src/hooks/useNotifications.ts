@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 
 export interface AppNotification {
@@ -22,6 +23,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export function useNotifications() {
+    const { t } = useTranslation('notifications');
     const [permission, setPermission] = useState<NotificationPermission>(
         typeof Notification !== 'undefined' ? (Notification.permission as NotificationPermission) : 'default'
     );
@@ -76,20 +78,20 @@ export function useNotifications() {
     }, [fetchUnreadCount]);
 
     const subscribe = useCallback(async (): Promise<void> => {
-        if (!isSupported) throw new Error('Push non supporté sur ce navigateur');
+        if (!isSupported) throw new Error(t('push.unsupported'));
 
         setIsLoading(true);
         try {
             // 1. Request browser permission
             const perm = await Notification.requestPermission();
             setPermission(perm as NotificationPermission);
-            if (perm !== 'granted') throw new Error('Permission refusée');
+            if (perm !== 'granted') throw new Error(t('push.denied'));
 
             // 2. Get VAPID public key from server
             const keyRes = await api.get<{ success: boolean; data: string }>(
                 '/api/notifications/vapid-public-key'
             );
-            if (!keyRes.success || !keyRes.data) throw new Error('Clé VAPID non disponible');
+            if (!keyRes.success || !keyRes.data) throw new Error(t('push.noVapid'));
 
             // 3. Register service worker and subscribe
             const reg = await navigator.serviceWorker.ready;
@@ -109,7 +111,7 @@ export function useNotifications() {
         } finally {
             setIsLoading(false);
         }
-    }, [isSupported]);
+    }, [isSupported, t]);
 
     const unsubscribe = useCallback(async (): Promise<void> => {
         setIsLoading(true);

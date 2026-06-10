@@ -15,7 +15,8 @@ import {
     Users,
 } from 'lucide-react';
 import { addDays, addWeeks, format, startOfWeek, subWeeks } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../i18n/format';
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { Button, Card, CardContent, CardHeader, CardTitle, Dialog, Input, Select, Textarea } from '../components/ui';
@@ -50,32 +51,12 @@ interface PlanningBulkResult {
     conflicts: Array<{ day_of_week: number; conflict_ids: string[] }>;
 }
 
-const DAYS = [
-    { value: 1, label: 'Lundi', short: 'Lun' },
-    { value: 2, label: 'Mardi', short: 'Mar' },
-    { value: 3, label: 'Mercredi', short: 'Mer' },
-    { value: 4, label: 'Jeudi', short: 'Jeu' },
-    { value: 5, label: 'Vendredi', short: 'Ven' },
-    { value: 6, label: 'Samedi', short: 'Sam' },
-    { value: 7, label: 'Dimanche', short: 'Dim' },
-];
-
-const TYPE_OPTIONS = [
-    { value: 'work', label: 'Travail' },
-    { value: 'school', label: 'Ecole' },
-    { value: 'study', label: 'Etudes' },
-    { value: 'activity', label: 'Activite' },
-    { value: 'other', label: 'Autre' },
-];
-
 const WEEKDAYS = [1, 2, 3, 4, 5];
 const FULL_WEEK = [1, 2, 3, 4, 5, 6, 7];
 
 const sortDays = (values: number[]) => [...values].sort((a, b) => a - b);
 
 const formatTime = (raw: string) => raw.slice(0, 5);
-
-const getDayLabel = (day: number) => DAYS.find((item) => item.value === day)?.label || `Jour ${day}`;
 
 const defaultTypeFromRole = (role?: string) => {
     const normalized = (role || '').toLowerCase();
@@ -89,7 +70,23 @@ const defaultTypeFromRole = (role?: string) => {
 };
 
 const Planning: React.FC = () => {
+    const { t } = useTranslation(['planning', 'common']);
     const navigate = useNavigate();
+    const daysLong = t('common:days', { returnObjects: true }) as string[];
+    const daysShort = t('common:daysShort', { returnObjects: true }) as string[];
+    const DAYS = [1, 2, 3, 4, 5, 6, 7].map((value) => ({
+        value,
+        label: daysLong[value - 1],
+        short: daysShort[value - 1],
+    }));
+    const TYPE_OPTIONS = [
+        { value: 'work', label: t('planning:types.work') },
+        { value: 'school', label: t('planning:types.school') },
+        { value: 'study', label: t('planning:types.study') },
+        { value: 'activity', label: t('planning:types.activity') },
+        { value: 'other', label: t('planning:types.other') },
+    ];
+    const getDayLabel = (day: number) => daysLong[day - 1] || t('planning:dayFallback', { n: day });
     const [entries, setEntries] = useState<PlanningEntry[]>([]);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [weekAnchor, setWeekAnchor] = useState(new Date());
@@ -164,7 +161,7 @@ const Planning: React.FC = () => {
             }
         } catch (err) {
             console.error('Failed to load members:', err);
-            setError(err instanceof Error ? err.message : 'Impossible de charger les membres.');
+            setError(err instanceof Error ? err.message : t('planning:errors.loadMembers'));
         }
     };
 
@@ -177,7 +174,7 @@ const Planning: React.FC = () => {
             }
         } catch (err) {
             console.error('Failed to load planning entries:', err);
-            setError(err instanceof Error ? err.message : 'Impossible de charger le planning.');
+            setError(err instanceof Error ? err.message : t('planning:errors.loadEntries'));
         }
     };
 
@@ -227,7 +224,7 @@ const Planning: React.FC = () => {
     };
 
     const handleDelete = async (entryId: string) => {
-        if (!confirm('Supprimer cet horaire ?')) {
+        if (!confirm(t('planning:confirmDelete'))) {
             return;
         }
         setError('');
@@ -237,7 +234,7 @@ const Planning: React.FC = () => {
             await loadEntries(weekStart);
         } catch (err) {
             console.error('Failed to delete planning entry:', err);
-            setError(err instanceof Error ? err.message : 'Impossible de supprimer cet horaire.');
+            setError(err instanceof Error ? err.message : t('planning:errors.deleteEntry'));
         }
     };
 
@@ -259,17 +256,17 @@ const Planning: React.FC = () => {
         setNotice('');
 
         if (!formData.family_member_id || !formData.title.trim()) {
-            setError('Le membre et le titre sont obligatoires.');
+            setError(t('planning:errors.memberTitleRequired'));
             return;
         }
 
         if (!formData.start_time || !formData.end_time || formData.end_time === formData.start_time) {
-            setError("L'heure de debut et de fin ne peuvent pas etre identiques.");
+            setError(t('planning:errors.timesSame'));
             return;
         }
 
         if (selectedDays.length === 0) {
-            setError('Selectionnez au moins un jour.');
+            setError(t('planning:errors.selectDay'));
             return;
         }
 
@@ -303,7 +300,7 @@ const Planning: React.FC = () => {
                 setDialogOpen(false);
                 resetForm(selectedDays[0]);
                 await loadEntries(weekStart);
-                setNotice('Horaire enregistre.');
+                setNotice(t('planning:notice.saved'));
                 return;
             }
 
@@ -328,14 +325,14 @@ const Planning: React.FC = () => {
                     const conflictDays = response.data.conflicts
                         .map((item) => getDayLabel(item.day_of_week))
                         .join(', ');
-                    setNotice(`Enregistre sur ${applied} jour(s). Conflits detectes sur: ${conflictDays}.`);
+                    setNotice(t('planning:notice.savedDaysConflicts', { count: applied, days: conflictDays }));
                 } else {
-                    setNotice(`Enregistre sur ${applied} jour(s).`);
+                    setNotice(t('planning:notice.savedDays', { count: applied }));
                 }
             }
         } catch (err) {
             console.error('Failed to save planning entry:', err);
-            setError(err instanceof Error ? err.message : "Impossible d'enregistrer cet horaire.");
+            setError(err instanceof Error ? err.message : t('planning:errors.save'));
         }
     };
 
@@ -353,18 +350,18 @@ const Planning: React.FC = () => {
 
     const entryTypeBadge = (type: PlanningEntry['schedule_type']) => {
         if (type === 'work') {
-            return { label: 'Travail', variant: 'primary' as const, icon: Briefcase };
+            return { label: t('planning:types.work'), variant: 'primary' as const, icon: Briefcase };
         }
         if (type === 'school') {
-            return { label: 'Ecole', variant: 'success' as const, icon: GraduationCap };
+            return { label: t('planning:types.school'), variant: 'success' as const, icon: GraduationCap };
         }
         if (type === 'study') {
-            return { label: 'Etudes', variant: 'warning' as const, icon: BookOpen };
+            return { label: t('planning:types.study'), variant: 'warning' as const, icon: BookOpen };
         }
         if (type === 'activity') {
-            return { label: 'Activite', variant: 'secondary' as const, icon: CalendarDays };
+            return { label: t('planning:types.activity'), variant: 'secondary' as const, icon: CalendarDays };
         }
-        return { label: 'Autre', variant: 'default' as const, icon: CalendarDays };
+        return { label: t('planning:types.other'), variant: 'default' as const, icon: CalendarDays };
     };
 
     if (loading) {
@@ -372,7 +369,7 @@ const Planning: React.FC = () => {
             <div className="flex h-full min-h-[50vh] items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
-                    <p className="animate-pulse font-medium text-muted-foreground">Chargement du planning...</p>
+                    <p className="animate-pulse font-medium text-muted-foreground">{t('planning:loading')}</p>
                 </div>
             </div>
         );
@@ -383,12 +380,12 @@ const Planning: React.FC = () => {
             <Card>
                 <CardContent className="p-10 text-center">
                     <Users className="mx-auto mb-3 h-12 w-12 text-muted-foreground/60" />
-                    <h2 className="text-h2">Ajoutez d'abord vos membres</h2>
+                    <h2 className="text-h2">{t('planning:noMembers.title')}</h2>
                     <p className="mt-1 text-caption text-muted-foreground">
-                        Le planning hebdomadaire s'appuie sur les profils famille.
+                        {t('planning:noMembers.subtitle')}
                     </p>
                     <Button className="mt-5" onClick={() => navigate('/family')}>
-                        Aller a Famille
+                        {t('planning:noMembers.cta')}
                     </Button>
                 </CardContent>
             </Card>
@@ -410,9 +407,9 @@ const Planning: React.FC = () => {
 
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <h1 className="text-h1">Planning Hebdomadaire</h1>
+                    <h1 className="text-h1">{t('planning:title')}</h1>
                     <p className="text-caption text-muted-foreground">
-                        Horaires recurents de travail et emploi du temps scolaire, semaine par semaine.
+                        {t('planning:subtitle')}
                     </p>
                 </div>
                 <Button
@@ -424,7 +421,7 @@ const Planning: React.FC = () => {
                     }}
                 >
                     <Plus className="mr-2 h-4 w-4" />
-                    Nouvel horaire
+                    {t('planning:newEntry')}
                 </Button>
             </div>
 
@@ -435,13 +432,13 @@ const Planning: React.FC = () => {
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                         <Button variant="secondary" size="sm" onClick={() => setWeekAnchor(new Date())}>
-                            Cette semaine
+                            {t('planning:thisWeek')}
                         </Button>
                         <Button variant="secondary" size="sm" onClick={() => setWeekAnchor(addWeeks(weekAnchor, 1))}>
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                         <span className="ml-2 text-caption text-muted-foreground">
-                            {format(weekStart, 'dd MMM', { locale: fr })} - {format(addDays(weekStart, 6), 'dd MMM yyyy', { locale: fr })}
+                            {format(weekStart, 'dd MMM', { locale: dateLocale() })} - {format(addDays(weekStart, 6), 'dd MMM yyyy', { locale: dateLocale() })}
                         </span>
                     </div>
 
@@ -450,7 +447,7 @@ const Planning: React.FC = () => {
                             value={selectedMemberId}
                             onValueChange={setSelectedMemberId}
                             options={[
-                                { value: '', label: 'Tous les membres' },
+                                { value: '', label: t('planning:allMembers') },
                                 ...familyMembers.map((member) => ({
                                     value: member.id,
                                     label: member.name,
@@ -461,7 +458,7 @@ const Planning: React.FC = () => {
                             value={selectedType}
                             onValueChange={setSelectedType}
                             options={[
-                                { value: 'all', label: 'Tous les types' },
+                                { value: 'all', label: t('planning:allTypes') },
                                 ...TYPE_OPTIONS,
                             ]}
                         />
@@ -480,7 +477,7 @@ const Planning: React.FC = () => {
                                     <div>
                                         <CardTitle className="text-caption">{day.label}</CardTitle>
                                         <p className="text-micro text-muted-foreground">
-                                            {format(dateForHeader, 'dd/MM', { locale: fr })}
+                                            {format(dateForHeader, 'dd/MM', { locale: dateLocale() })}
                                         </p>
                                     </div>
                                     <Button
@@ -500,7 +497,7 @@ const Planning: React.FC = () => {
                                         onClick={() => handleAddForDay(day.value)}
                                         className="w-full rounded-input border border-dashed border-border px-3 py-5 text-center text-micro text-muted-foreground hover:bg-surface-2"
                                     >
-                                        Ajouter
+                                        {t('planning:add')}
                                     </button>
                                 ) : (
                                     dayEntries.map((entry) => {
@@ -520,7 +517,7 @@ const Planning: React.FC = () => {
                                                             <span className="text-muted-foreground">–</span>
                                                             {formatTime(entry.end_time)}
                                                             {entry.end_time < entry.start_time && (
-                                                                <span className="ml-0.5 text-[9px] text-muted-foreground">+1j</span>
+                                                                <span className="ml-0.5 text-[9px] text-muted-foreground">{t('planning:nextDayShort')}</span>
                                                             )}
                                                         </p>
                                                         <div className="flex flex-shrink-0 items-center">
@@ -581,13 +578,13 @@ const Planning: React.FC = () => {
                         resetForm(selectedDays[0] || 1);
                     }
                 }}
-                title={editingEntry ? 'Modifier un horaire' : 'Nouvel horaire'}
-                description="Definissez un horaire et appliquez-le a un ou plusieurs jours."
+                title={editingEntry ? t('planning:dialog.editTitle') : t('planning:dialog.createTitle')}
+                description={t('planning:dialog.description')}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="mb-1.5 block text-label font-medium text-foreground">Membre</label>
+                            <label className="mb-1.5 block text-label font-medium text-foreground">{t('planning:form.member')}</label>
                             <Select
                                 value={formData.family_member_id}
                                 onValueChange={(value) => {
@@ -605,7 +602,7 @@ const Planning: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label className="mb-1.5 block text-label font-medium text-foreground">Type</label>
+                            <label className="mb-1.5 block text-label font-medium text-foreground">{t('planning:form.type')}</label>
                             <Select
                                 value={formData.schedule_type}
                                 onValueChange={(value) => setFormData((prev) => ({ ...prev, schedule_type: value }))}
@@ -615,15 +612,15 @@ const Planning: React.FC = () => {
                     </div>
 
                     <Input
-                        label="Intitule"
+                        label={t('planning:form.title')}
                         value={formData.title}
                         onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-                        placeholder="Ex: Bureau - Equipe Produit / Mathematiques"
+                        placeholder={t('planning:form.titlePlaceholder')}
                         required
                     />
 
                     <div>
-                        <label className="mb-1.5 block text-label font-medium text-foreground">Jours concernes</label>
+                        <label className="mb-1.5 block text-label font-medium text-foreground">{t('planning:form.days')}</label>
                         <div className="flex flex-wrap gap-2">
                             {DAYS.map((day) => {
                                 const active = selectedDays.includes(day.value);
@@ -650,7 +647,7 @@ const Planning: React.FC = () => {
                                 size="sm"
                                 onClick={() => setSelectedDays(WEEKDAYS)}
                             >
-                                Lun-Ven
+                                {t('planning:form.weekdays')}
                             </Button>
                             <Button
                                 type="button"
@@ -658,7 +655,7 @@ const Planning: React.FC = () => {
                                 size="sm"
                                 onClick={() => setSelectedDays(FULL_WEEK)}
                             >
-                                Semaine complete
+                                {t('planning:form.fullWeek')}
                             </Button>
                             <Button
                                 type="button"
@@ -666,19 +663,19 @@ const Planning: React.FC = () => {
                                 size="sm"
                                 onClick={() => setSelectedDays([1])}
                             >
-                                Reinitialiser
+                                {t('common:actions.reset')}
                             </Button>
                         </div>
                         <p className="mt-2 text-micro text-muted-foreground">
                             {selectedDays.length === 1
-                                ? `Jour selectionne: ${getDayLabel(selectedDays[0])}`
-                                : `${selectedDays.length} jours selectionnes`}
+                                ? t('planning:form.selectedDay', { day: getDayLabel(selectedDays[0]) })
+                                : t('planning:form.selectedDays', { count: selectedDays.length })}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <Input
-                            label="Debut"
+                            label={t('planning:form.start')}
                             type="time"
                             value={formData.start_time}
                             onChange={(e) => setFormData((prev) => ({ ...prev, start_time: e.target.value }))}
@@ -686,7 +683,7 @@ const Planning: React.FC = () => {
                         />
                         <div>
                             <Input
-                                label="Fin"
+                                label={t('planning:form.end')}
                                 type="time"
                                 value={formData.end_time}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, end_time: e.target.value }))}
@@ -694,7 +691,7 @@ const Planning: React.FC = () => {
                             />
                             {formData.end_time && formData.start_time && formData.end_time < formData.start_time && (
                                 <p className="mt-1 text-micro text-muted-foreground">
-                                    Se termine le lendemain (+1 jour)
+                                    {t('planning:form.nextDayHint')}
                                 </p>
                             )}
                         </div>
@@ -708,8 +705,7 @@ const Planning: React.FC = () => {
                             className="mt-0.5 h-4 w-4 rounded border-border"
                         />
                         <span>
-                            <strong>Cette semaine uniquement</strong>. L'horaire ne s'applique qu'a la semaine du{' '}
-                            {format(weekStart, 'dd MMM yyyy', { locale: fr })}. Sinon, il sera recurrent chaque semaine.
+                            <strong>{t('planning:form.thisWeekOnlyStrong')}</strong>{t('planning:form.thisWeekOnlyRest', { date: format(weekStart, 'dd MMM yyyy', { locale: dateLocale() }) })}
                         </span>
                     </label>
 
@@ -722,37 +718,36 @@ const Planning: React.FC = () => {
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                             />
                             <span>
-                                Remplacer les horaires en conflit sur les jours selectionnes.
-                                Si des conflits existent et que cette option est desactivee, ces jours seront ignores.
+                                {t('planning:form.replaceConflicts')}
                             </span>
                         </label>
                     ) : null}
 
                     <Input
-                        label="Lieu (optionnel)"
+                        label={t('planning:form.location')}
                         value={formData.location}
                         onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
-                        placeholder="Ex: Bureau Lyon / College Jean Moulin"
+                        placeholder={t('planning:form.locationPlaceholder')}
                     />
 
                     <Textarea
-                        label="Notes (optionnel)"
+                        label={t('planning:form.notes')}
                         value={formData.notes}
                         onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-                        placeholder="Informations utiles, salle, matiere, transport..."
+                        placeholder={t('planning:form.notesPlaceholder')}
                         rows={2}
                     />
 
                     <div className="flex justify-end gap-3 pt-3">
                         <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
-                            Annuler
+                            {t('common:actions.cancel')}
                         </Button>
                         <Button type="submit">
                             {selectedDays.length > 1
-                                ? 'Appliquer aux jours selectionnes'
+                                ? t('planning:submit.applyToDays')
                                 : editingEntry
-                                    ? 'Enregistrer'
-                                    : 'Ajouter'}
+                                    ? t('common:actions.save')
+                                    : t('common:actions.add')}
                         </Button>
                     </div>
                 </form>

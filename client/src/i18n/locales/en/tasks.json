@@ -1,0 +1,74 @@
+{
+  "loading": "Loading tasks…",
+  "title": "Tasks",
+  "subtitle": "Manage your family tasks and track their progress",
+  "newTask": "New task",
+  "priorities": {
+    "Haute": "High",
+    "Moyenne": "Medium",
+    "Basse": "Low"
+  },
+  "frequencies": {
+    "Une fois": "Once",
+    "Quotidien": "Daily",
+    "Hebdomadaire": "Weekly",
+    "Mensuel": "Monthly",
+    "Annuel": "Yearly"
+  },
+  "stats": {
+    "total": "Total",
+    "completed": "Completed",
+    "pending": "Pending",
+    "completionRate": "Completion rate"
+  },
+  "filters": {
+    "label": "Filters:",
+    "statusAll": "All",
+    "statusPending": "Pending",
+    "statusCompleted": "Completed",
+    "allPriorities": "All priorities",
+    "allMembers": "All members",
+    "unassigned": "Unassigned"
+  },
+  "empty": {
+    "none": "No tasks yet. Create your first task!",
+    "noMatch": "No task matches the selected filters."
+  },
+  "due": "Due: {{date}}",
+  "dialog": {
+    "editTitle": "Edit task",
+    "createTitle": "New task",
+    "description": "Fill in the task details"
+  },
+  "form": {
+    "title": "Title",
+    "titlePlaceholder": "e.g. Do the shopping",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "Additional details…",
+    "priority": "Priority",
+    "frequency": "Frequency",
+    "dueDate": "Due date (optional)",
+    "assignTo": "Assign to (optional)",
+    "noMembers": "No members available",
+    "points": "Points to earn (optional)",
+    "pointsHint": "Assigned members earn these points when the task is completed."
+  },
+  "approval": {
+    "pendingBadge": "Awaiting approval",
+    "approve": "Approve",
+    "reject": "Reject",
+    "toastTitle": "Well done, task completed!",
+    "toastDescription": "Your points will be added once a parent approves."
+  },
+  "confirmDelete": "Are you sure you want to delete this task?",
+  "errors": {
+    "loadTasks": "Unable to load tasks.",
+    "loadMembers": "Unable to load members.",
+    "loadStats": "Unable to load statistics.",
+    "saveTask": "Unable to save this task.",
+    "toggleTask": "Unable to update this task.",
+    "deleteTask": "Unable to delete this task.",
+    "approveTask": "Unable to approve this task.",
+    "rejectTask": "Unable to reject this task."
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "title": "Integrations",
+  "subtitle": "Connect your self-hosted apps to centralize recipes, menus, shopping and calendar.",
+  "connected": "Connected",
+  "available": "Available",
+  "status": {
+    "error": "Error",
+    "connected": "Connected"
+  },
+  "lastSync": "Synced {{date}}",
+  "syncTitle": "Sync",
+  "disconnectTitle": "Disconnect",
+  "confirmDisconnect": "Disconnect this integration?",
+  "modal": {
+    "connect": "Connect {{name}}",
+    "test": "Test",
+    "testing": "Testing…",
+    "connecting": "Connecting…",
+    "connectBtn": "Connect",
+    "encrypted": "Credentials are AES-256 encrypted and stored on your server only.",
+    "error": "Error"
+  },
+  "syncs": {
+    "recipes": "Recipes",
+    "menus": "Menus",
+    "shopping": "Shopping list",
+    "stock": "Stock",
+    "calendar": "Calendar",
+    "appointments": "Appointments",
+    "photos": "Photos"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "Recipe manager",
+      "description": "Import your recipes and menus from your self-hosted Mealie instance.",
+      "urlLabel": "Instance URL",
+      "urlPlaceholder": "https://mealie.mydomain.com",
+      "keyLabel": "API key",
+      "keyPlaceholder": "From Mealie > Profile > API keys"
+    },
+    "tandoor": {
+      "tagline": "Recipe book",
+      "description": "Import your recipes from Tandoor, the open-source manager.",
+      "urlLabel": "Instance URL",
+      "urlPlaceholder": "https://tandoor.mydomain.com",
+      "keyLabel": "API token",
+      "keyPlaceholder": "From Tandoor > Settings > Tokens"
+    },
+    "homeassistant": {
+      "tagline": "Smart home",
+      "description": "Sync your shopping list with the Home Assistant list.",
+      "urlLabel": "Instance URL",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "Long-lived token",
+      "tokenPlaceholder": "eyJ… (from Profile > Security)",
+      "entityLabel": "Todo entity (optional)",
+      "entityPlaceholder": "todo.shopping_list"
+    },
+    "grocy": {
+      "tagline": "Household management",
+      "description": "Sync your shopping list and stock from Grocy.",
+      "urlLabel": "Instance URL",
+      "urlPlaceholder": "https://grocy.mydomain.com",
+      "keyLabel": "API key",
+      "keyPlaceholder": "From Grocy > Manage > API keys"
+    },
+    "nextcloud": {
+      "tagline": "Personal cloud",
+      "description": "Import your Nextcloud calendar events into your appointments.",
+      "urlLabel": "Nextcloud URL",
+      "urlPlaceholder": "https://cloud.mydomain.com",
+      "userLabel": "Username",
+      "userPlaceholder": "your.username",
+      "passwordLabel": "Password (or app password)",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "Photo library",
+      "description": "Show random photos from your self-hosted Immich library as the kiosk display background.",
+      "urlLabel": "Instance URL",
+      "urlPlaceholder": "https://immich.mydomain.com",
+      "keyLabel": "API key",
+      "keyPlaceholder": "From Immich > Account settings > API keys"
+    }
+  }
+}

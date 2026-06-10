@@ -4,7 +4,12 @@ const ALGORITHM = 'aes-256-gcm';
 const SALT = 'openfamily-integrations-v1';
 
 function getKey(): Buffer {
-    const secret = process.env.JWT_SECRET || 'fallback-secret-must-be-changed';
+    // NOTE: the key MUST stay derived from the raw (untrimmed) JWT_SECRET with this
+    // exact salt/length, otherwise existing encrypted credentials become undecryptable.
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        throw new Error('JWT_SECRET is required to encrypt/decrypt integration credentials. Set it in your .env file.');
+    }
     return scryptSync(secret, SALT, 32);
 }
 

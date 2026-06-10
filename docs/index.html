@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OpenFamily - Gestion familiale open source</title>
-  <meta name="description" content="OpenFamily est une application de gestion familiale complète, open source et auto-hébergeable. Courses, tâches, calendrier, budget, recettes - tout en un." />
-  <meta property="og:title" content="OpenFamily - Gestion familiale open source" />
-  <meta property="og:description" content="Gardez le contrôle total de vos données familiales avec une application auto-hébergée, open source et pensée pour la vie de famille." />
+  <title>OpenFamily - Open-source family organizer</title>
+  <meta name="description" content="OpenFamily is a complete, open-source and self-hosted family organizer. Shopping, tasks, calendar, budget, recipes - all in one." />
+  <meta property="og:title" content="OpenFamily - Open-source family organizer" />
+  <meta property="og:description" content="Keep full control of your family's data with a self-hosted, open-source app built for family life." />
   <meta property="og:image" content="https://nexaflowfrance.github.io/OpenFamily/openfamily-og.png" />
   <link rel="icon" href="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -153,6 +153,29 @@
       display: flex; flex-direction: column; gap: 0.4rem;
     }
     .feature-card:hover { background: var(--surface-2); }
+
+    /* SCREENSHOTS GRID + LIGHTBOX */
+    .shot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+    .shot-card {
+      display: block; padding: 0; overflow: hidden; cursor: zoom-in;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .shot-card img { width: 100%; display: block; transition: transform 0.3s ease; }
+    .shot-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: rgba(220,74,96,.35); }
+    .shot-card:hover img { transform: scale(1.04); }
+    .lightbox {
+      position: fixed; inset: 0; z-index: 200; display: none;
+      align-items: center; justify-content: center; padding: 2rem;
+      background: rgba(20,14,18,.82); backdrop-filter: blur(4px); cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 96vw; max-height: 92vh; border-radius: 10px; box-shadow: 0 12px 50px rgba(0,0,0,.5); }
+    .lightbox-close {
+      position: absolute; top: 1rem; right: 1.25rem; color: #fff; font-size: 2rem;
+      line-height: 1; background: none; border: none; cursor: pointer; opacity: .85;
+    }
+    .lightbox-close:hover { opacity: 1; }
     .feature-icon { width: 34px; height: 34px; color: var(--primary); margin-bottom: 0.3rem; flex-shrink: 0; }
     .feature-card h3 { font-size: 0.93rem; font-weight: 600; color: var(--text); font-family: 'Instrument Sans', sans-serif; }
     .feature-card p { font-size: 0.84rem; color: var(--muted); line-height: 1.55; }
@@ -339,11 +362,13 @@
     OpenFamily
   </a>
   <div class="nav-links">
-    <a href="#features">Fonctionnalités</a>
-    <a href="#integrations">Intégrations</a>
-    <a href="#install">Installation</a>
-    <a href="#tech">Technologies</a>
-    <a href="#contributors">Équipe</a>
+    <a href="#features">Features</a>
+    <a href="#integrations">Integrations</a>
+    <a href="#install">Install</a>
+    <a href="#tech">Tech</a>
+    <a href="#contributors">Team</a>
+    <a href="index.fr.html" title="Français" aria-label="Français" style="display:inline-flex;align-items:center;"><img src="https://flagcdn.com/fr.svg" alt="Français" width="22" height="16" style="border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.08);" loading="lazy" /></a>
+    <a href="demo/">Live demo</a>
     <a class="btn-nav" href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">GitHub</a>
   </div>
 </nav>
@@ -351,15 +376,19 @@
 <!-- HERO -->
 <div class="hero">
   <a class="hero-badge" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest" target="_blank" rel="noopener">
-    v1.1.1 — Refonte design &amp; intégrations tierces
+    v1.1.1 — Design refresh &amp; third-party integrations
   </a>
   <img class="logo" src="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" alt="OpenFamily" />
-  <h1>La gestion familiale,<br><em>maîtrisée par vous.</em></h1>
-  <p>Application open source et auto-hébergeable pour organiser toute la vie de famille : courses, tâches, calendrier, budget, recettes et plus.</p>
+  <h1>Family life,<br><em>under your control.</em></h1>
+  <p>An open-source, self-hosted app to organize your whole family life: shopping, tasks, calendar, budget, recipes and more.</p>
   <div class="hero-actions">
-    <a class="btn-primary" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe">
+    <a class="btn-primary" href="demo/">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Try the live demo
+    </a>
+    <a class="btn-secondary" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Télécharger pour Windows
+      Download for Windows
     </a>
     <a class="btn-secondary" href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -370,90 +399,113 @@
     <div class="stat"><strong>11</strong><span>modules</span></div>
     <div class="stat"><strong>PWA</strong><span>installable</span></div>
     <div class="stat"><strong>AGPL-3</strong><span>open source</span></div>
-    <div class="stat"><strong>Self-hosted</strong><span>vos données</span></div>
+    <div class="stat"><strong>Self-hosted</strong><span>your data</span></div>
   </div>
 </div>
 
+<!-- SCREENSHOTS -->
+<section id="screenshots">
+  <div class="section-label">Screenshots</div>
+  <h2>See it in action</h2>
+  <p class="section-desc">A clean, fast interface — here filled with a demo family. Try it live, nothing is saved.</p>
+  <div class="shot-grid">
+    <a class="shot-card" href="screenshots/dashboard.png" onclick="return openShot(event)"><img src="screenshots/dashboard.png" alt="Dashboard" loading="lazy" /></a>
+    <a class="shot-card" href="screenshots/budget.png" onclick="return openShot(event)"><img src="screenshots/budget.png" alt="Budget" loading="lazy" /></a>
+    <a class="shot-card" href="screenshots/calendar.png" onclick="return openShot(event)"><img src="screenshots/calendar.png" alt="Calendar" loading="lazy" /></a>
+    <a class="shot-card" href="screenshots/shopping.png" onclick="return openShot(event)"><img src="screenshots/shopping.png" alt="Shopping list" loading="lazy" /></a>
+    <a class="shot-card" href="screenshots/meals.png" onclick="return openShot(event)"><img src="screenshots/meals.png" alt="Meal planner" loading="lazy" /></a>
+    <a class="shot-card" href="screenshots/family.png" onclick="return openShot(event)"><img src="screenshots/family.png" alt="Family" loading="lazy" /></a>
+  </div>
+  <div style="text-align:center;margin-top:2rem;">
+    <a class="btn-primary" href="demo/">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Open the live demo
+    </a>
+  </div>
+</section>
+
+<hr class="divider" />
+
 <!-- FEATURES -->
 <section id="features">
-  <div class="section-label">Fonctionnalités</div>
-  <h2>Tout ce dont votre famille a besoin</h2>
-  <p class="section-desc">11 modules intégrés, synchronisés en temps réel entre tous les appareils.</p>
+  <div class="section-label">Features</div>
+  <h2>Everything your family needs</h2>
+  <p class="section-desc">11 built-in modules, synced in real time across every device.</p>
   <div class="features-grid">
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-      <h3>Liste de courses</h3>
-      <p>Catégorisation automatique, prix, quantités et templates réutilisables. Cochée en temps réel depuis le magasin.</p>
+      <h3>Shopping list</h3>
+      <p>Automatic categories, prices, quantities and reusable templates. Tick items off in real time from the store.</p>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      <h3>Gestion des tâches</h3>
-      <p>Tâches récurrentes, 3 niveaux de priorité, assignation à un membre de la famille.</p>
+      <h3>Task management</h3>
+      <p>Recurring tasks, 3 priority levels, assignment to a family member.</p>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <h3>Calendrier</h3>
-      <p>Vue mensuelle avec code couleur par membre, rendez-vous avec rappels automatiques configurables.</p>
+      <h3>Calendar</h3>
+      <p>Monthly view with color coding per member, appointments with configurable automatic reminders.</p>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="4" x2="9" y2="10"/><line x1="15" y1="4" x2="15" y2="10"/></svg>
-      <h3>Planning hebdomadaire</h3>
-      <p>Emplois du temps professionnels et scolaires de chaque membre, créneaux horaires jour par jour.</p>
+      <h3>Weekly planning</h3>
+      <p>Work and school timetables for each member, time slots day by day.</p>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
-      <h3>Recettes</h3>
-      <p>Bibliothèque familiale avec ingrédients, instructions, photos, tags et filtres avancés.</p>
+      <h3>Recipes</h3>
+      <p>Family library with ingredients, instructions, photos, tags and advanced filters.</p>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-      <h3>Planning des repas</h3>
-      <p>Vue hebdomadaire liée à vos recettes, export PDF du planning de la semaine.</p>
+      <h3>Meal planner</h3>
+      <p>Weekly view linked to your recipes, PDF export of the week's plan.</p>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       <h3>Budget</h3>
-      <p>Suivi mensuel des dépenses, limites par catégorie et graphiques d'évolution du foyer.</p>
+      <p>Monthly expense tracking, per-category limits and household trend charts.</p>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <h3>Profils familiaux</h3>
-      <p>Informations santé, allergies, vaccins, contacts d'urgence par membre.</p>
+      <h3>Family profiles</h3>
+      <p>Health information, allergies, vaccines and emergency contacts per member.</p>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-      <h3>Sync temps réel</h3>
-      <p>Toutes les modifications propagées instantanément sur tous les appareils via WebSocket.</p>
+      <h3>Real-time sync</h3>
+      <p>Every change propagated instantly to all devices over WebSocket.</p>
       <span class="feature-tag">v1.0.7</span>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <h3>Notifications push</h3>
-      <p>Rappels de rendez-vous et alertes tâches via Web Push VAPID, même quand l'app est fermée.</p>
+      <h3>Push notifications</h3>
+      <p>Appointment reminders and task alerts via Web Push VAPID, even when the app is closed.</p>
       <span class="feature-tag">v1.0.7</span>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-      <h3>Comptes partagés</h3>
-      <p>Invitez des membres via un lien. Demandes d'accès, rôles parent/enfant, transfert de propriété.</p>
+      <h3>Shared accounts</h3>
+      <p>Invite members via a link. Access requests, parent/child roles, ownership transfer.</p>
       <span class="feature-tag">v1.0.7</span>
     </div>
 
     <div class="feature-card">
       <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-      <h3>PWA installable</h3>
-      <p>Installez l'application sur iOS, Android ou desktop comme une app native, avec support offline.</p>
+      <h3>Installable PWA</h3>
+      <p>Install the app on iOS, Android or desktop like a native app, with offline support.</p>
     </div>
 
   </div>
@@ -463,31 +515,31 @@
 
 <!-- INTEGRATIONS -->
 <section id="integrations">
-  <div class="section-label">Intégrations</div>
-  <h2>Connecté à votre écosystème self-hosted</h2>
-  <p class="section-desc">Synchronisez OpenFamily avec vos applications auto-hébergées en un clic — sans modifier aucun fichier de configuration.</p>
+  <div class="section-label">Integrations</div>
+  <h2>Connected to your self-hosted ecosystem</h2>
+  <p class="section-desc">Sync OpenFamily with your self-hosted apps in one click — without editing any config file.</p>
 
   <div class="integrations-top">
 
     <div class="integration-card">
-      <svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+      <svg class="integration-icon" viewBox="0 0 24 24" fill="#E58325" aria-hidden="true"><path d="M6.619 13.59 1.444 8.427c-1.925-1.939-1.925-5.063 0-6.989l8.666 8.642-3.491 3.51m6.551-.42 8.51 8.49-1.76 1.74-8.48-8.48-8.502 8.48-1.741-1.74L13.12 9.739l-.25-.272a2.448 2.448 0 0 1 0-3.472L18.23.6l1.14 1.135-3.99 4.024 1.18 1.161 3.99-4.012 1.15 1.136-4.01 4 1.15 1.189 4.03-4.017L24 6.377l-5.4 5.353c-.95.96-2.51.96-3.46 0l-.27-.25z"/></svg>
       <h3>Mealie</h3>
-      <p>Import automatique de toutes vos recettes (pagination, API v1 &amp; v2).</p>
-      <span class="integration-tag">Recettes</span>
+      <p>Automatic import of all your recipes (pagination, API v1 &amp; v2).</p>
+      <span class="integration-tag">Recipes</span>
     </div>
 
     <div class="integration-card">
-      <svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <img class="integration-icon" src="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/tandoor.png" alt="Tandoor" style="object-fit:contain;" />
       <h3>Tandoor</h3>
-      <p>Import de recettes via l'API Django REST.</p>
-      <span class="integration-tag">Recettes</span>
+      <p>Recipe import via the Django REST API.</p>
+      <span class="integration-tag">Recipes</span>
     </div>
 
     <div class="integration-card">
-      <svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <svg class="integration-icon" viewBox="0 0 24 24" fill="#18BCF2" aria-hidden="true"><path d="M22.939 10.627 13.061.749a1.505 1.505 0 0 0-2.121 0l-9.879 9.878C.478 11.21 0 12.363 0 13.187v9c0 .826.675 1.5 1.5 1.5h9.227l-4.063-4.062a2.034 2.034 0 0 1-.664.113c-1.13 0-2.05-.92-2.05-2.05s.92-2.05 2.05-2.05 2.05.92 2.05 2.05c0 .233-.041.456-.113.665l3.163 3.163V9.928a2.05 2.05 0 0 1-1.15-1.84c0-1.13.92-2.05 2.05-2.05s2.05.92 2.05 2.05a2.05 2.05 0 0 1-1.15 1.84v8.127l3.146-3.146A2.051 2.051 0 0 1 18 12.239c1.13 0 2.05.92 2.05 2.05s-.92 2.05-2.05 2.05c-.25 0-.488-.047-.709-.13L12.9 20.602v3.088h9.6c.825 0 1.5-.675 1.5-1.5v-9c0-.825-.477-1.977-1.061-2.561z"/></svg>
       <h3>Home Assistant</h3>
-      <p>Sync liste de courses via WebSocket. Compatible entités todo modernes (2023.6+) et legacy.</p>
-      <span class="integration-tag">Courses</span>
+      <p>Shopping-list sync over WebSocket. Compatible with modern (2023.6+) and legacy todo entities.</p>
+      <span class="integration-tag">Shopping</span>
     </div>
 
   </div>
@@ -495,17 +547,17 @@
   <div class="integrations-bottom">
 
     <div class="integration-card">
-      <svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <svg class="integration-icon" viewBox="0 0 24 24" fill="#337AB7" aria-hidden="true"><path d="M12.621.068C7.527.786 3.608 4.618 2.345 10.082c-.316 1.35-.392 3.896-.163 5.203.62 3.57 2.96 6.574 6.15 7.913 1.36.577 2.1.73 3.842.784 1.22.043 1.862.01 2.722-.13 2.688-.447 5.399-1.699 6.65-3.092l.403-.447-.054-1.872a481.92 481.92 0 0 1-.12-5.344l-.065-3.473-2.907.087c-1.589.033-3.722.098-4.746.142l-1.85.065-.087 2.319c-.055 1.284-.076 2.34-.055 2.362.022.022.882.076 1.916.12l1.872.076v.294c0 .707-.13.98-.555 1.208-.653.326-1.872.479-2.623.326-2.71-.566-3.777-4.55-1.96-7.369C11.86 7.48 13.873 6.62 16.562 6.74c.74.043 1.665.163 2.123.272.446.12.838.174.87.12.098-.142.468-5.726.403-5.9-.087-.24-1.35-.697-2.569-.947-1.252-.25-3.722-.37-4.767-.218z"/></svg>
       <h3>Grocy</h3>
-      <p>Synchronisation de la liste de courses et du stock avec votre instance Grocy.</p>
-      <span class="integration-tag">Courses &amp; stock</span>
+      <p>Shopping list and stock synchronization with your Grocy instance.</p>
+      <span class="integration-tag">Shopping &amp; stock</span>
     </div>
 
     <div class="integration-card">
-      <svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      <svg class="integration-icon" viewBox="0 0 24 24" fill="#0082C9" aria-hidden="true"><path d="M12.018 6.537c-2.5 0-4.6 1.712-5.241 4.015-.56-1.232-1.793-2.105-3.225-2.105A3.569 3.569 0 0 0 0 12a3.569 3.569 0 0 0 3.552 3.553c1.432 0 2.664-.874 3.224-2.106.641 2.304 2.742 4.016 5.242 4.016 2.487 0 4.576-1.693 5.231-3.977.569 1.21 1.783 2.067 3.198 2.067A3.568 3.568 0 0 0 24 12a3.569 3.569 0 0 0-3.553-3.553c-1.416 0-2.63.858-3.199 2.067-.654-2.284-2.743-3.978-5.23-3.977zm0 2.085c1.878 0 3.378 1.5 3.378 3.378 0 1.878-1.5 3.378-3.378 3.378A3.362 3.362 0 0 1 8.641 12c0-1.878 1.5-3.378 3.377-3.378zm-8.466 1.91c.822 0 1.467.645 1.467 1.468s-.644 1.467-1.467 1.468A1.452 1.452 0 0 1 2.085 12c0-.823.644-1.467 1.467-1.467zm16.895 0c.823 0 1.468.645 1.468 1.468s-.645 1.468-1.468 1.468A1.452 1.452 0 0 1 18.98 12c0-.823.644-1.467 1.467-1.467z"/></svg>
       <h3>Nextcloud</h3>
-      <p>Import CalDAV avec découverte automatique des agendas et déduplification par UID.</p>
-      <span class="integration-tag">Calendrier</span>
+      <p>CalDAV import with automatic calendar discovery and per-UID deduplication.</p>
+      <span class="integration-tag">Calendar</span>
     </div>
 
   </div>
@@ -513,8 +565,8 @@
   <div class="makernix-card">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
     <div>
-      <h4>Merci à <a href="https://www.youtube.com/@Makernix" target="_blank" rel="noopener">Makernix</a></h4>
-      <p>C'est lors d'un échange direct avec <strong>Makernix</strong> que l'idée de connecter OpenFamily à l'écosystème self-hosting familial (Mealie, Grocy, Home Assistant, Nextcloud) a émergé.</p>
+      <h4>Thanks to <a href="https://www.youtube.com/@Makernix" target="_blank" rel="noopener">Makernix</a></h4>
+      <p>The idea of connecting OpenFamily to the family self-hosting ecosystem (Mealie, Grocy, Home Assistant, Nextcloud) emerged from a direct exchange with <strong>Makernix</strong>.</p>
     </div>
   </div>
 </section>
@@ -523,16 +575,16 @@
 
 <!-- INSTALL -->
 <section id="install">
-  <div class="section-label">Installation</div>
-  <h2>Prêt en 5 minutes</h2>
-  <p class="section-desc">Sur Windows, un simple double-clic suffit. Sinon, un seul prérequis : Docker.</p>
+  <div class="section-label">Install</div>
+  <h2>Ready in 5 minutes</h2>
+  <p class="section-desc">On Windows, a single double-click is enough. Otherwise, the only prerequisite is Docker.</p>
 
   <div class="windows-card">
-    <h3>Windows — l'installeur tout-en-un</h3>
-    <p>Téléchargez <strong>OpenFamily-Setup.exe</strong> et laissez-vous guider. Node.js et PostgreSQL sont embarqués : aucun Docker, aucune configuration. Une fenêtre s'ouvre avec trois boutons (Démarrer, Arrêter, Ouvrir) et affiche l'adresse locale pour y accéder depuis votre mobile.</p>
+    <h3>Windows — the all-in-one installer</h3>
+    <p>Download <strong>OpenFamily-Setup.exe</strong> and follow the guide. Node.js and PostgreSQL are bundled: no Docker, no configuration. A window opens with three buttons (Start, Stop, Open) and shows the local address to access it from your phone.</p>
     <a class="btn-primary" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Télécharger la dernière version (Windows)
+      Download the latest version (Windows)
     </a>
   </div>
 
@@ -540,36 +592,36 @@
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-content">
-        <h4>Cloner le projet et configurer l'environnement</h4>
-        <p>Copiez le fichier d'environnement et renseignez vos paramètres (secrets JWT, URL, VAPID…).</p>
+        <h4>Clone the project and configure the environment</h4>
+        <p>Copy the environment file and fill in your settings (JWT secrets, URLs, VAPID…).</p>
         <pre>git clone https://github.com/NexaFlowFrance/OpenFamily.git
 cd OpenFamily
 cp .env.example .env
-# Éditez .env avec vos paramètres</pre>
+# Edit .env with your settings</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-content">
-        <h4>Démarrer avec Docker Compose</h4>
-        <p>Lance les 3 services : PostgreSQL, le serveur Express et le frontend Nginx.</p>
+        <h4>Start with Docker Compose</h4>
+        <p>Launches the 3 services: PostgreSQL, the Express server and the Nginx frontend.</p>
         <pre>docker-compose up -d --build</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-content">
-        <h4>Accéder à l'application</h4>
-        <p>L'application est accessible sur votre réseau local (ou votre domaine en production).</p>
-        <pre>Frontend : http://localhost:3000
-API      : http://localhost:3001/health</pre>
+        <h4>Open the app</h4>
+        <p>The app is available on your local network (or your domain in production).</p>
+        <pre>Frontend: http://localhost:3000
+API:      http://localhost:3001/health</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-content">
-        <h4>Vérifier le bon fonctionnement</h4>
-        <p>Lancez le smoke test qui valide tous les modules API.</p>
+        <h4>Verify everything works</h4>
+        <p>Run the smoke test that validates all API modules.</p>
         <pre>npm run smoke:api</pre>
       </div>
     </div>
@@ -580,9 +632,9 @@ API      : http://localhost:3001/health</pre>
 
 <!-- TECH -->
 <section id="tech">
-  <div class="section-label">Technologies</div>
-  <h2>Stack moderne, zéro compromis</h2>
-  <p class="section-desc">Chaque brique choisie pour la performance, la sécurité et la maintenabilité.</p>
+  <div class="section-label">Tech</div>
+  <h2>Modern stack, zero compromise</h2>
+  <p class="section-desc">Every building block chosen for performance, security and maintainability.</p>
   <div class="tech-grid">
     <span class="tech-chip">React 19</span>
     <span class="tech-chip">TypeScript</span>
@@ -609,16 +661,16 @@ API      : http://localhost:3001/health</pre>
 <!-- CTA -->
 <div class="cta-section">
   <div style="max-width:600px; margin:0 auto;">
-    <h2>Open source, auto-hébergé, pour vous.</h2>
-    <p>Vos données restent chez vous. Contribuez au projet ou déployez votre propre instance dès maintenant.</p>
+    <h2>Open source, self-hosted, yours.</h2>
+    <p>Your data stays with you. Contribute to the project or deploy your own instance right now.</p>
     <div style="display:flex; gap:0.85rem; flex-wrap:wrap; justify-content:center;">
-      <a class="btn-primary" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Télécharger pour Windows
+      <a class="btn-primary" href="demo/">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Try the live demo
       </a>
       <a class="btn-secondary" href="https://github.com/NexaFlowFrance/OpenFamily/issues" target="_blank" rel="noopener">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Ouvrir une issue
+        Open an issue
       </a>
     </div>
   </div>
@@ -626,9 +678,9 @@ API      : http://localhost:3001/health</pre>
 
 <!-- CONTRIBUTORS -->
 <section id="contributors" style="text-align: center;">
-  <div class="section-label">Équipe</div>
-  <h2>Remerciements</h2>
-  <p class="section-desc">Merci à toutes les personnes qui contribuent au projet.</p>
+  <div class="section-label">Team</div>
+  <h2>Acknowledgements</h2>
+  <p class="section-desc">Thanks to everyone who contributes to the project.</p>
   <div class="contributors-grid">
     <a class="contributor-card lead" href="https://github.com/NexaFlowFrance" target="_blank" rel="noopener">
       <img src="https://avatars.githubusercontent.com/u/251752333?v=4" alt="NexaFlowFrance" />
@@ -659,25 +711,46 @@ API      : http://localhost:3001/health</pre>
 
   <div class="makernix-mention" style="max-width: 560px; margin: 2.25rem auto 0;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-    <p>Idée des intégrations tierces : merci à <a href="https://www.youtube.com/@Makernix" target="_blank" rel="noopener"><strong>Makernix</strong></a> — l'idée est née d'un échange direct avec lui.</p>
+    <p>Third-party integrations idea: thanks to <a href="https://www.youtube.com/@Makernix" target="_blank" rel="noopener"><strong>Makernix</strong></a> — the idea came from a direct exchange with him.</p>
   </div>
 
   <p style="margin-top: 1.5rem; font-size: 0.82rem; color: var(--muted);">
-    Vous voulez contribuer ?
-    <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/DOCUMENTATION.md" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: none; font-weight: 500;">Lisez la documentation →</a>
+    Want to contribute?
+    <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/DOCUMENTATION.md" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: none; font-weight: 500;">Read the documentation →</a>
   </p>
 </section>
 
 <!-- FOOTER -->
 <footer>
   <p>
-    Développé par <a href="https://nexaflow.fr" target="_blank" rel="noopener">NexaFlow France</a>
+    Built by <a href="https://nexaflow.fr" target="_blank" rel="noopener">NexaFlow France</a>
     &nbsp;·&nbsp;
-    Licence <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/licence.md" target="_blank" rel="noopener">AGPL-3.0</a>
+    Licensed <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/licence.md" target="_blank" rel="noopener">AGPL-3.0</a>
     &nbsp;·&nbsp;
     <a href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">GitHub</a>
   </p>
 </footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeShot()">
+  <button class="lightbox-close" aria-label="Close" onclick="closeShot()">&times;</button>
+  <img id="lightbox-img" src="" alt="" />
+</div>
+<script>
+  function openShot(e) {
+    e.preventDefault();
+    var href = e.currentTarget.getAttribute('href');
+    document.getElementById('lightbox-img').src = href;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    return false;
+  }
+  function closeShot() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeShot(); });
+</script>
 
 </body>
 </html>

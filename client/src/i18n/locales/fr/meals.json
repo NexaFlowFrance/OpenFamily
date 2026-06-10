@@ -1,0 +1,51 @@
+{
+  "loading": "Chargement du planning…",
+  "title": "Planning des repas",
+  "subtitle": "Organisez vos repas de la semaine",
+  "thisWeek": "Cette semaine",
+  "weekOf": "Semaine du {{start}} au {{end}}",
+  "mealTypes": {
+    "Petit-déjeuner": "Petit-déjeuner",
+    "Déjeuner": "Déjeuner",
+    "Dîner": "Dîner",
+    "Snack": "Snack"
+  },
+  "dialog": {
+    "editTitle": "Modifier le repas",
+    "addTitle": "Ajouter un repas",
+    "descriptionFmt": "{{type}} — {{date}}"
+  },
+  "form": {
+    "mealType": "Type de repas",
+    "recipe": "Recette (facultatif)",
+    "noRecipe": "Aucune recette",
+    "customMeal": "Ou repas personnalisé",
+    "customMealPlaceholder": "Ex : Pizza maison",
+    "notes": "Notes (facultatif)",
+    "notesPlaceholder": "Notes supplémentaires…"
+  },
+  "shopping": {
+    "button": "Ajouter les ingrédients aux courses",
+    "dialogTitle": "Ajouter les ingrédients à la liste de courses",
+    "dialogDescription": "Ingrédients des recettes prévues du {{start}} au {{end}}. Décochez ce dont vous n'avez pas besoin.",
+    "empty": "Aucun repas avec recette n'est prévu cette semaine.",
+    "selectedCount": "{{selected}} ingrédient(s) sélectionné(s) sur {{total}}",
+    "alreadyOnList": "déjà dans la liste",
+    "confirm_one": "Ajouter {{count}} ingrédient",
+    "confirm_other": "Ajouter {{count}} ingrédients",
+    "successTitle": "Ingrédients ajoutés",
+    "successDescription_one": "{{count}} article ajouté à la liste de courses.",
+    "successDescription_other": "{{count}} articles ajoutés à la liste de courses.",
+    "partialTitle": "Certains ingrédients n'ont pas pu être ajoutés",
+    "partialDescription": "{{added}} ajouté(s), {{failed}} en échec.",
+    "errorTitle": "Impossible d'ajouter les ingrédients",
+    "errorDescription": "Rien n'a été ajouté à la liste de courses. Veuillez réessayer."
+  },
+  "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce repas ?",
+  "errors": {
+    "loadPlans": "Impossible de charger le planning.",
+    "loadRecipes": "Impossible de charger les recettes.",
+    "save": "Impossible d'enregistrer ce repas.",
+    "delete": "Impossible de supprimer ce repas."
+  }
+}

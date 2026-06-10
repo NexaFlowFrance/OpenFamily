@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
+import { intlLocale } from '../i18n/format';
 import { ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, ChevronRight, Clock } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
+import FamilyNotes, { type FamilyNote } from '../components/app/FamilyNotes';
 
 interface DashboardStats {
     upcomingAppointments: number;
@@ -21,19 +25,20 @@ interface Appointment {
     description?: string;
     start_time: string;
     end_time?: string;
-    color?: string;
-    members?: { name: string }[];
+    family_members_data?: Array<{ id: string; name: string; color: string }>;
 }
 
 const Dashboard: React.FC = () => {
+    const { t } = useTranslation(['dashboard', 'common']);
     const { user } = useAuth();
     const currency = user?.currency || 'EUR';
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
+    const [notes, setNotes] = useState<FamilyNote[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    const today = new Intl.DateTimeFormat('fr-FR', {
+    const today = new Intl.DateTimeFormat(intlLocale(), {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     }).format(new Date());
 
@@ -42,15 +47,28 @@ const Dashboard: React.FC = () => {
     useWebSocketUpdates('shopping', () => { void loadAll(); });
     useWebSocketUpdates('appointments', () => { void loadAll(); });
     useWebSocketUpdates('budget', () => { void loadAll(); });
+    useWebSocketUpdates('notes', () => { void loadNotes(); });
+
+    const loadNotes = async () => {
+        try {
+            const res = await api.get<{ success: boolean; data: FamilyNote[] }>('/api/notes');
+            if (res.success) setNotes(res.data);
+        } catch (e) {
+            console.error('Notes load error:', e);
+        }
+    };
 
     const loadAll = async () => {
         try {
+            void loadNotes();
             const [statsRes, apptRes] = await Promise.all([
                 api.get<{ success: boolean; data: DashboardStats }>('/api/dashboard'),
                 (() => {
+                    // Naive local bounds — appointment times are stored as local
+                    // "YYYY-MM-DDTHH:mm:ss" strings, so the window must not be UTC.
                     const d = new Date();
-                    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
-                    const end   = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59).toISOString();
+                    const start = format(d, "yyyy-MM-dd'T'00:00:00");
+                    const end   = format(d, "yyyy-MM-dd'T'23:59:59");
                     return api.get<{ success: boolean; data: Appointment[] }>(
                         `/api/appointments?start_date=${start}&end_date=${end}`
                     );
@@ -70,21 +88,21 @@ const Dashboard: React.FC = () => {
             <div className="flex h-full items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
-                    <p className="text-muted-foreground font-medium animate-pulse">Chargement…</p>
+                    <p className="text-muted-foreground font-medium animate-pulse">{t('common:states.loading')}</p>
                 </div>
             </div>
         );
     }
 
     const fmt = (iso: string) =>
-        new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+        new Intl.DateTimeFormat(intlLocale(), { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
 
     const statCards = [
-        { title: 'Rendez-vous', value: stats?.upcomingAppointments ?? 0, icon: Calendar,      href: '/calendar' },
-        { title: 'Tâches',      value: stats?.pendingTasks ?? 0,          icon: CheckSquare,   href: '/tasks'    },
-        { title: 'Courses',     value: stats?.shoppingItems ?? 0,          icon: ShoppingCart,  href: '/shopping' },
+        { title: t('dashboard:stats.appointments'), value: stats?.upcomingAppointments ?? 0, icon: Calendar,      href: '/calendar' },
+        { title: t('dashboard:stats.tasks'),        value: stats?.pendingTasks ?? 0,          icon: CheckSquare,   href: '/tasks'    },
+        { title: t('dashboard:stats.shopping'),     value: stats?.shoppingItems ?? 0,          icon: ShoppingCart,  href: '/shopping' },
         {
-            title: 'Dépenses du mois',
+            title: t('dashboard:stats.monthExpenses'),
             value: formatCurrency(Number(stats?.thisMonthExpenses ?? 0), currency),
             icon: Wallet, href: '/budget', flag: true,
         },
@@ -98,7 +116,7 @@ const Dashboard: React.FC = () => {
                     {today}
                 </p>
                 <h1 className="font-serif text-display text-foreground">
-                    Votre <em className="italic text-primary">journée</em>, en un coup d'œil.
+                    {t('dashboard:heading.before')}<em className="italic text-primary">{t('dashboard:heading.highlight')}</em>{t('dashboard:heading.after')}
                 </h1>
             </div>
 
@@ -109,13 +127,13 @@ const Dashboard: React.FC = () => {
                         <AlertCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1">
-                        <h3 className="font-serif text-h2 text-foreground">Attention au budget</h3>
+                        <h3 className="font-serif text-h2 text-foreground">{t('dashboard:budgetAlert.title')}</h3>
                         <p className="text-caption text-muted-foreground mt-1">
-                            {stats.budgetAlerts} catégorie{stats.budgetAlerts > 1 ? 's ont' : ' a'} dépassé le budget mensuel défini.
+                            {t('dashboard:budgetAlert.message', { count: stats.budgetAlerts })}
                         </p>
                     </div>
                     <Button size="sm" onClick={() => navigate('/budget')} className="shrink-0">
-                        Voir détail
+                        {t('dashboard:budgetAlert.cta')}
                     </Button>
                 </div>
             )}
@@ -154,26 +172,26 @@ const Dashboard: React.FC = () => {
                 {/* Agenda du jour */}
                 <section className="lg:col-span-2">
                     <div className="flex items-baseline justify-between mb-4">
-                        <h2 className="font-serif text-h2">Aujourd'hui</h2>
+                        <h2 className="font-serif text-h2">{t('dashboard:today.title')}</h2>
                         <button
                             type="button"
                             onClick={() => navigate('/calendar')}
                             className="text-caption text-primary hover:underline underline-offset-4 flex items-center gap-1"
                         >
-                            Voir la semaine <ChevronRight className="w-3 h-3" />
+                            {t('dashboard:today.viewWeek')} <ChevronRight className="w-3 h-3" />
                         </button>
                     </div>
 
                     {todayAppointments.length === 0 ? (
                         <div className="rounded-card border border-dashed border-border-strong p-8 text-center">
-                            <p className="font-serif text-h2 text-muted-foreground mb-1">Rien de prévu.</p>
-                            <p className="text-caption text-muted-foreground">Ajoutez un rendez-vous pour le voir apparaître ici.</p>
+                            <p className="font-serif text-h2 text-muted-foreground mb-1">{t('dashboard:today.emptyTitle')}</p>
+                            <p className="text-caption text-muted-foreground">{t('dashboard:today.emptySubtitle')}</p>
                             <button
                                 type="button"
                                 onClick={() => navigate('/calendar')}
                                 className="mt-4 text-caption text-primary font-medium hover:underline underline-offset-4"
                             >
-                                Ajouter un rendez-vous
+                                {t('dashboard:today.emptyCta')}
                             </button>
                         </div>
                     ) : (
@@ -190,14 +208,14 @@ const Dashboard: React.FC = () => {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2 text-caption text-muted-foreground">
-                                        {appt.color && (
-                                            <span
-                                                className="h-2 w-2 rounded-full flex-none"
-                                                style={{ background: appt.color }}
-                                            />
-                                        )}
-                                        {appt.members?.[0]?.name && (
-                                            <span>{appt.members[0].name}</span>
+                                        {appt.family_members_data?.[0] && (
+                                            <>
+                                                <span
+                                                    className="h-2 w-2 rounded-full flex-none"
+                                                    style={{ background: appt.family_members_data[0].color }}
+                                                />
+                                                <span>{appt.family_members_data[0].name}</span>
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -218,7 +236,7 @@ const Dashboard: React.FC = () => {
                     >
                         <div className="flex items-center justify-between mb-3">
                             <span className="text-micro uppercase tracking-[0.04em] text-muted-foreground flex items-center gap-2">
-                                <ShoppingCart className="h-4 w-4" /> Courses
+                                <ShoppingCart className="h-4 w-4" /> {t('dashboard:aside.shopping')}
                             </span>
                             <ChevronRight className="w-4 h-4 text-muted-foreground" />
                         </div>
@@ -226,7 +244,7 @@ const Dashboard: React.FC = () => {
                             {stats?.shoppingItems ?? 0}
                         </p>
                         <p className="text-caption text-muted-foreground mt-1">
-                            article{(stats?.shoppingItems ?? 0) !== 1 ? 's' : ''} à acheter
+                            {t('dashboard:aside.shoppingCount', { count: stats?.shoppingItems ?? 0 })}
                         </p>
                     </div>
 
@@ -240,14 +258,14 @@ const Dashboard: React.FC = () => {
                     >
                         <div className="flex items-center justify-between mb-3">
                             <span className="text-micro uppercase tracking-[0.04em] text-muted-foreground flex items-center gap-2">
-                                <Wallet className="h-4 w-4" /> Budget du mois
+                                <Wallet className="h-4 w-4" /> {t('dashboard:aside.budget')}
                             </span>
                             <ChevronRight className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <p className="font-serif text-4xl tracking-tight text-primary">
                             {formatCurrency(Number(stats?.thisMonthExpenses ?? 0), currency)}
                         </p>
-                        <p className="text-caption text-muted-foreground mt-1">dépensés ce mois</p>
+                        <p className="text-caption text-muted-foreground mt-1">{t('dashboard:aside.budgetSubtitle')}</p>
                     </div>
 
                     {/* Tâches */}
@@ -260,7 +278,7 @@ const Dashboard: React.FC = () => {
                     >
                         <div className="flex items-center justify-between mb-3">
                             <span className="text-micro uppercase tracking-[0.04em] text-muted-foreground flex items-center gap-2">
-                                <Clock className="h-4 w-4" /> Tâches en attente
+                                <Clock className="h-4 w-4" /> {t('dashboard:aside.tasks')}
                             </span>
                             <ChevronRight className="w-4 h-4 text-muted-foreground" />
                         </div>
@@ -268,11 +286,17 @@ const Dashboard: React.FC = () => {
                             {stats?.pendingTasks ?? 0}
                         </p>
                         <p className="text-caption text-muted-foreground mt-1">
-                            tâche{(stats?.pendingTasks ?? 0) !== 1 ? 's' : ''} à terminer
+                            {t('dashboard:aside.tasksCount', { count: stats?.pendingTasks ?? 0 })}
                         </p>
                     </div>
                 </aside>
             </div>
+
+            {/* Mots de la famille — post-its sur le frigo numérique */}
+            <section>
+                <h2 className="font-serif text-h2 mb-4">{t('notes:title')}</h2>
+                <FamilyNotes notes={notes} onChanged={() => void loadNotes()} />
+            </section>
         </div>
     );
 };

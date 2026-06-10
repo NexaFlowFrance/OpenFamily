@@ -28,12 +28,18 @@ const foldLine = (line: string): string => {
     return chunks.join('\r\n');
 };
 
-// Format a Date as a floating local timestamp (YYYYMMDDTHHMMSS).
-const formatICSDate = (date: Date): string => {
+// Format a timestamp as an iCal floating local time (YYYYMMDDTHHMMSS — no 'Z', no TZID).
+// Accepts either a naive local ISO string ('YYYY-MM-DDTHH:mm:ss', as returned by the pg
+// TIMESTAMP type parser in db.ts) or a Date (formatted using local getters, never UTC).
+const formatICSDate = (value: string | Date): string => {
+    if (typeof value === 'string') {
+        // '2026-06-10T14:30:00' → '20260610T143000'
+        return value.replace(/[-:]/g, '').slice(0, 15);
+    }
     const pad = (n: number) => String(n).padStart(2, '0');
     return (
-        `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}` +
-        `T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+        `${value.getFullYear()}${pad(value.getMonth() + 1)}${pad(value.getDate())}` +
+        `T${pad(value.getHours())}${pad(value.getMinutes())}${pad(value.getSeconds())}`
     );
 };
 
@@ -51,13 +57,15 @@ const buildICS = (appointments: any[]): string => {
     const stamp = formatICSDate(new Date());
 
     for (const apt of appointments) {
-        const start = new Date(apt.start_time);
-        const end = apt.end_time ? new Date(apt.end_time) : new Date(start.getTime() + 60 * 60 * 1000);
+        // start_time/end_time arrive as naive local strings — keep them floating local.
+        // Default end: start + 1h (new Date(naiveString) parses as local time, and
+        // formatICSDate(Date) emits local components, so no UTC shift occurs).
+        const end = apt.end_time ?? new Date(new Date(apt.start_time).getTime() + 60 * 60 * 1000);
 
         lines.push('BEGIN:VEVENT');
         lines.push(`UID:${apt.id}@openfamily`);
         lines.push(`DTSTAMP:${stamp}`);
-        lines.push(`DTSTART:${formatICSDate(start)}`);
+        lines.push(`DTSTART:${formatICSDate(apt.start_time)}`);
         lines.push(`DTEND:${formatICSDate(end)}`);
         lines.push(foldLine(`SUMMARY:${escapeICS(apt.title || 'Rendez-vous')}`));
         if (apt.description) lines.push(foldLine(`DESCRIPTION:${escapeICS(apt.description)}`));

@@ -1,0 +1,65 @@
+{
+  "appName": "OpenFamily",
+  "demo": {
+    "notice": "Mode démo — vos modifications ne sont pas enregistrées et sont réinitialisées au rechargement.",
+    "reset": "Réinitialiser",
+    "star": "Mettre une étoile sur GitHub"
+  },
+  "language": {
+    "syncError": "Impossible d'enregistrer votre préférence de langue."
+  },
+  "actions": {
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saveChanges": "Enregistrer les modifications",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "back": "Retour",
+    "today": "Aujourd'hui",
+    "retry": "Réessayer",
+    "apply": "Appliquer",
+    "reset": "Réinitialiser",
+    "export": "Exporter",
+    "import": "Importer",
+    "clear": "Vider",
+    "send": "Envoyer",
+    "loadMore": "Charger plus"
+  },
+  "states": {
+    "loading": "Chargement…",
+    "saving": "Enregistrement…",
+    "empty": "Rien pour le moment",
+    "error": "Une erreur est survenue"
+  },
+  "labels": {
+    "name": "Nom",
+    "fullName": "Nom complet",
+    "description": "Description",
+    "date": "Date",
+    "time": "Heure",
+    "startTime": "Heure de début",
+    "endTime": "Heure de fin",
+    "location": "Lieu",
+    "notes": "Notes",
+    "category": "Catégorie",
+    "quantity": "Quantité",
+    "price": "Prix",
+    "amount": "Montant",
+    "email": "Email",
+    "password": "Mot de passe",
+    "optional": "facultatif",
+    "all": "Tous",
+    "none": "Aucun"
+  },
+  "days": ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
+  "daysShort": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+  "months": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
+  "monthsShort": ["Janv", "Févr", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc"]
+}

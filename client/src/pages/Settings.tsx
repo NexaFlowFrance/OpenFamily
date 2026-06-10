@@ -1,9 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
-import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Camera, Trash2 } from 'lucide-react';
-import { Card, CardContent, Button } from '../components/ui';
+import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles } from 'lucide-react';
+import { Card, CardContent, Button, Input, Select } from '../components/ui';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
+import { refreshAiStatus } from '../lib/aiStatus';
+import { aiErrorKey } from '../components/app/MagicInput';
 
 interface ImportCounts {
     family_members?: number;
@@ -16,18 +21,6 @@ interface ImportCounts {
     appointments?: number;
     schedule_entries?: number;
 }
-
-const ENTITY_LABELS: Record<string, string> = {
-    family_members: 'Membres de la famille',
-    tasks: 'Tâches',
-    recipes: 'Recettes',
-    meal_plans: 'Repas planifiés',
-    budget_entries: 'Entrées budget',
-    budget_limits: 'Limites budget',
-    shopping_items: 'Articles de courses',
-    appointments: 'Rendez-vous',
-    schedule_entries: 'Plannings',
-};
 
 const CURRENCIES = [
     { code: 'EUR', label: 'Euro (€)' },
@@ -42,7 +35,304 @@ const CURRENCIES = [
     { code: 'BRL', label: 'Brazilian Real (R$)' },
 ];
 
+type AiProvider = 'ollama' | 'openai' | 'anthropic';
+
+const AI_MODEL_PLACEHOLDERS: Record<AiProvider, string> = {
+    ollama: 'llama3.1',
+    openai: 'gpt-4o-mini',
+    anthropic: 'claude-opus-4-8',
+};
+
+const AI_BASE_URL_PLACEHOLDERS: Record<AiProvider, string> = {
+    ollama: 'http://localhost:11434',
+    openai: 'https://api.openai.com',
+    anthropic: '',
+};
+
+interface AiSettingsData {
+    configured: boolean;
+    enabled: boolean;
+    provider?: AiProvider;
+    base_url?: string | null;
+    model?: string;
+    has_api_key?: boolean;
+}
+
+// "Assistant IA" card — visible to everyone, editable by parents only.
+// The API key is write-only: it is encrypted at rest server-side and never
+// returned by the API (`has_api_key` only signals that one is stored).
+const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
+    const { t } = useTranslation(['ai', 'common']);
+    const [loading, setLoading] = useState(true);
+    const [provider, setProvider] = useState<AiProvider>('ollama');
+    const [baseUrl, setBaseUrl] = useState('');
+    const [apiKey, setApiKey] = useState('');
+    const [hasApiKey, setHasApiKey] = useState(false);
+    const [apiKeyCleared, setApiKeyCleared] = useState(false);
+    const [model, setModel] = useState('');
+    const [enabled, setEnabled] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState('');
+    const [saveSuccess, setSaveSuccess] = useState(false);
+    const [testing, setTesting] = useState(false);
+    const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const response = await api.get<{ success: boolean; data: AiSettingsData }>('/api/ai/settings');
+                if (response.success && response.data.configured) {
+                    setProvider(response.data.provider ?? 'ollama');
+                    setBaseUrl(response.data.base_url ?? '');
+                    setModel(response.data.model ?? '');
+                    setEnabled(response.data.enabled);
+                    setHasApiKey(Boolean(response.data.has_api_key));
+                }
+            } catch (err) {
+                console.error('Failed to load AI settings:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        void load();
+    }, []);
+
+    const aiError = (err: unknown): string => {
+        const key = aiErrorKey(err);
+        if (key) return t(`ai:errors.${key}`);
+        return err instanceof Error ? err.message : t('ai:errors.AI_PROVIDER_ERROR');
+    };
+
+    const handleProviderChange = (value: string) => {
+        const next = value as AiProvider;
+        setProvider(next);
+        setTestResult(null);
+        setSaveSuccess(false);
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        setSaveError('');
+        setSaveSuccess(false);
+        setTestResult(null);
+        try {
+            const trimmedKey = apiKey.trim();
+            const response = await api.put<{ success: boolean; data: AiSettingsData }>('/api/ai/settings', {
+                provider,
+                base_url: provider === 'anthropic' ? null : baseUrl.trim() || null,
+                // '' keeps the stored key, explicit null clears it.
+                api_key: trimmedKey ? trimmedKey : apiKeyCleared ? null : '',
+                model: model.trim(),
+                enabled,
+            });
+            if (response.success) {
+                setSaveSuccess(true);
+                setApiKey('');
+                setApiKeyCleared(false);
+                setHasApiKey(Boolean(response.data.has_api_key));
+                await refreshAiStatus();
+            }
+        } catch (err) {
+            setSaveError(aiError(err));
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleTest = async () => {
+        setTesting(true);
+        setTestResult(null);
+        setSaveSuccess(false);
+        try {
+            const response = await api.post<{ success: boolean; message?: string }>('/api/ai/test', {
+                provider,
+                base_url: provider === 'anthropic' ? undefined : baseUrl.trim() || undefined,
+                api_key: apiKey.trim() || undefined,
+                model: model.trim() || undefined,
+            });
+            setTestResult({ success: Boolean(response.success), message: t('ai:settings.testSuccess') });
+        } catch (err) {
+            setTestResult({ success: false, message: aiError(err) });
+        } finally {
+            setTesting(false);
+        }
+    };
+
+    const providerOptions = [
+        { value: 'ollama', label: t('ai:settings.providers.ollama') },
+        { value: 'openai', label: t('ai:settings.providers.openai') },
+        { value: 'anthropic', label: t('ai:settings.providers.anthropic') },
+    ];
+
+    return (
+        <Card>
+            <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                        <Sparkles className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-caption font-semibold text-foreground">{t('ai:settings.title')}</h3>
+                        <p className="mt-1 text-micro text-muted-foreground">{t('ai:settings.subtitle')}</p>
+
+                        {loading ? (
+                            <div className="mt-4 flex items-center gap-2 text-micro text-muted-foreground">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                {t('common:states.loading')}
+                            </div>
+                        ) : (
+                            <div className="mt-4 space-y-4">
+                                {!isParent && (
+                                    <p className="flex items-center gap-1 text-micro text-muted-foreground">
+                                        <AlertCircle className="h-4 w-4 shrink-0" />
+                                        {t('ai:settings.parentOnly')}
+                                    </p>
+                                )}
+
+                                <div>
+                                    <label className="mb-1.5 block text-caption font-medium text-foreground">
+                                        {t('ai:settings.provider')}
+                                    </label>
+                                    {isParent ? (
+                                        <Select
+                                            value={provider}
+                                            onValueChange={handleProviderChange}
+                                            options={providerOptions}
+                                        />
+                                    ) : (
+                                        <p className="text-caption text-foreground">
+                                            {providerOptions.find((o) => o.value === provider)?.label}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {provider !== 'anthropic' && (
+                                    <Input
+                                        label={t('ai:settings.baseUrl')}
+                                        value={baseUrl}
+                                        onChange={(e) => setBaseUrl(e.target.value)}
+                                        placeholder={AI_BASE_URL_PLACEHOLDERS[provider]}
+                                        disabled={!isParent}
+                                    />
+                                )}
+
+                                {provider !== 'ollama' && (
+                                    <div>
+                                        <Input
+                                            label={t('ai:settings.apiKey')}
+                                            type="password"
+                                            value={apiKey}
+                                            onChange={(e) => {
+                                                setApiKey(e.target.value);
+                                                setTestResult(null);
+                                            }}
+                                            placeholder={hasApiKey && !apiKeyCleared ? t('ai:settings.keyKept') : 'sk-…'}
+                                            disabled={!isParent}
+                                            autoComplete="off"
+                                        />
+                                        {isParent && hasApiKey && !apiKeyCleared && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setApiKeyCleared(true);
+                                                    setApiKey('');
+                                                }}
+                                                className="mt-1.5 text-micro text-destructive hover:underline"
+                                            >
+                                                {t('ai:settings.clearKey')}
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+
+                                <Input
+                                    label={t('ai:settings.model')}
+                                    value={model}
+                                    onChange={(e) => setModel(e.target.value)}
+                                    placeholder={AI_MODEL_PLACEHOLDERS[provider]}
+                                    disabled={!isParent}
+                                />
+
+                                <label className="flex cursor-pointer items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={enabled}
+                                        onChange={(e) => setEnabled(e.target.checked)}
+                                        disabled={!isParent}
+                                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                    />
+                                    <span className="text-caption text-foreground">{t('ai:settings.enabled')}</span>
+                                </label>
+
+                                <p className="rounded-input bg-surface-2 px-3 py-2 text-micro text-muted-foreground">
+                                    {t('ai:settings.privacy')}
+                                </p>
+
+                                {saveError && (
+                                    <p className="flex items-center gap-1 text-micro text-destructive">
+                                        <AlertCircle className="h-4 w-4 shrink-0" />
+                                        {saveError}
+                                    </p>
+                                )}
+                                {saveSuccess && (
+                                    <p className="flex items-center gap-1 text-micro text-green-600 dark:text-green-400">
+                                        <CheckCircle className="h-4 w-4 shrink-0" />
+                                        {t('ai:settings.saved')}
+                                    </p>
+                                )}
+                                {testResult && (
+                                    <p
+                                        className={`flex items-center gap-1 text-micro ${
+                                            testResult.success
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : 'text-destructive'
+                                        }`}
+                                    >
+                                        {testResult.success ? (
+                                            <CheckCircle className="h-4 w-4 shrink-0" />
+                                        ) : (
+                                            <AlertCircle className="h-4 w-4 shrink-0" />
+                                        )}
+                                        {testResult.message}
+                                    </p>
+                                )}
+
+                                {isParent && (
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button onClick={() => void handleSave()} disabled={saving || !model.trim()}>
+                                            {saving ? (
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <CheckCircle className="mr-2 h-4 w-4" />
+                                            )}
+                                            {saving ? t('ai:settings.saving') : t('ai:settings.save')}
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={() => void handleTest()}
+                                            disabled={testing || !model.trim()}
+                                        >
+                                            {testing ? (
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Sparkles className="mr-2 h-4 w-4" />
+                                            )}
+                                            {testing ? t('ai:settings.testing') : t('ai:settings.test')}
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
 const Settings: React.FC = () => {
+    const { t } = useTranslation(['settings', 'common', 'kiosk']);
+    const entityLabel = (key: string) => t(`settings:entities.${key}`, { defaultValue: key });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [exportLoading, setExportLoading] = useState(false);
     const [exportError, setExportError] = useState('');
@@ -59,6 +349,7 @@ const Settings: React.FC = () => {
 
     const { user, updateCurrency, updateProfile } = useAuth();
     const { isSupported, permission, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = useNotifications();
+    const isParent = Boolean(user?.is_owner) || (user?.role ?? '').toLowerCase() !== 'enfant';
 
     const handleToggleNotifications = async () => {
         setNotifError('');
@@ -69,7 +360,7 @@ const Settings: React.FC = () => {
                 await subscribe();
             }
         } catch (err) {
-            setNotifError(err instanceof Error ? err.message : 'Erreur lors de la configuration des notifications.');
+            setNotifError(err instanceof Error ? err.message : t('settings:errors.notif'));
         }
     };
 
@@ -79,7 +370,7 @@ const Settings: React.FC = () => {
         try {
             await updateCurrency(currency);
         } catch (err) {
-            setCurrencyError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour de la devise.');
+            setCurrencyError(err instanceof Error ? err.message : t('settings:errors.currency'));
         } finally {
             setCurrencyLoading(false);
         }
@@ -91,7 +382,7 @@ const Settings: React.FC = () => {
         if (avatarInputRef.current) avatarInputRef.current.value = '';
         if (!file) return;
         if (!file.type.startsWith('image/')) {
-            setAvatarError('Veuillez choisir une image.');
+            setAvatarError(t('settings:errors.avatarImage'));
             return;
         }
         setAvatarError('');
@@ -100,13 +391,13 @@ const Settings: React.FC = () => {
             const dataUrl = await new Promise<string>((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result as string);
-                reader.onerror = () => reject(new Error('Lecture du fichier impossible.'));
+                reader.onerror = () => reject(new Error(t('settings:errors.avatarRead')));
                 reader.readAsDataURL(file);
             });
             const img = await new Promise<HTMLImageElement>((resolve, reject) => {
                 const image = new Image();
                 image.onload = () => resolve(image);
-                image.onerror = () => reject(new Error('Image invalide.'));
+                image.onerror = () => reject(new Error(t('settings:errors.avatarInvalid')));
                 image.src = dataUrl;
             });
             const size = 256;
@@ -114,7 +405,7 @@ const Settings: React.FC = () => {
             canvas.width = size;
             canvas.height = size;
             const ctx = canvas.getContext('2d');
-            if (!ctx) throw new Error('Canvas indisponible.');
+            if (!ctx) throw new Error(t('settings:errors.avatarCanvas'));
             // Cover-crop to a square.
             const min = Math.min(img.width, img.height);
             const sx = (img.width - min) / 2;
@@ -123,7 +414,7 @@ const Settings: React.FC = () => {
             const compressed = canvas.toDataURL('image/jpeg', 0.85);
             await updateProfile({ avatar_url: compressed });
         } catch (err) {
-            setAvatarError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour de la photo.');
+            setAvatarError(err instanceof Error ? err.message : t('settings:errors.avatarUpdate'));
         } finally {
             setAvatarLoading(false);
         }
@@ -135,7 +426,7 @@ const Settings: React.FC = () => {
         try {
             await updateProfile({ avatar_url: null });
         } catch (err) {
-            setAvatarError(err instanceof Error ? err.message : 'Erreur lors de la suppression de la photo.');
+            setAvatarError(err instanceof Error ? err.message : t('settings:errors.avatarRemove'));
         } finally {
             setAvatarLoading(false);
         }
@@ -156,7 +447,7 @@ const Settings: React.FC = () => {
             a.click();
             URL.revokeObjectURL(url);
         } catch (error) {
-            setExportError(error instanceof Error ? error.message : 'Erreur lors de l\'export.');
+            setExportError(error instanceof Error ? error.message : t('settings:errors.export'));
         } finally {
             setExportLoading(false);
         }
@@ -192,9 +483,9 @@ const Settings: React.FC = () => {
             }
         } catch (error) {
             if (error instanceof SyntaxError) {
-                setImportError('Fichier JSON invalide.');
+                setImportError(t('settings:import.invalidJson'));
             } else {
-                setImportError(error instanceof Error ? error.message : 'Erreur lors de l\'import.');
+                setImportError(error instanceof Error ? error.message : t('settings:errors.import'));
             }
         } finally {
             setImportLoading(false);
@@ -204,9 +495,46 @@ const Settings: React.FC = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-title font-bold text-foreground">Paramètres</h2>
-                <p className="text-caption text-muted-foreground">Gérez vos données et préférences.</p>
+                <h2 className="text-title font-bold text-foreground">{t('settings:title')}</h2>
+                <p className="text-caption text-muted-foreground">{t('settings:subtitle')}</p>
             </div>
+
+            {/* Language */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                            <Languages className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-caption font-semibold text-foreground">{t('settings:language.title')}</h3>
+                            <p className="mt-1 text-micro text-muted-foreground">{t('settings:language.subtitle')}</p>
+                            <LanguageSwitcher className="mt-4" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Kiosk display */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                            <MonitorPlay className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-caption font-semibold text-foreground">{t('kiosk:settings.title')}</h3>
+                            <p className="mt-1 text-micro text-muted-foreground">{t('kiosk:settings.subtitle')}</p>
+                            <Link to="/kiosk">
+                                <Button variant="secondary" size="sm" className="mt-4">
+                                    <MonitorPlay className="mr-2 h-4 w-4" />
+                                    {t('kiosk:settings.open')}
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Profile photo */}
             <Card>
@@ -216,7 +544,7 @@ const Settings: React.FC = () => {
                             {user?.avatar_url ? (
                                 <img
                                     src={user.avatar_url}
-                                    alt={user?.name || 'Profil'}
+                                    alt={user?.name || t('settings:profile.title')}
                                     className="h-16 w-16 rounded-full object-cover"
                                 />
                             ) : (
@@ -231,9 +559,9 @@ const Settings: React.FC = () => {
                             )}
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-caption font-semibold text-foreground">Photo de profil</h3>
+                            <h3 className="text-caption font-semibold text-foreground">{t('settings:profile.title')}</h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Choisissez une photo qui apparaîtra dans le menu de l'application.
+                                {t('settings:profile.subtitle')}
                             </p>
                             <div className="mt-3 flex flex-wrap gap-2">
                                 <input
@@ -250,7 +578,7 @@ const Settings: React.FC = () => {
                                     disabled={avatarLoading}
                                 >
                                     <Camera className="mr-2 h-4 w-4" />
-                                    {user?.avatar_url ? 'Changer la photo' : 'Choisir une photo'}
+                                    {user?.avatar_url ? t('settings:profile.change') : t('settings:profile.choose')}
                                 </Button>
                                 {user?.avatar_url && (
                                     <Button
@@ -261,7 +589,7 @@ const Settings: React.FC = () => {
                                         className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
-                                        Retirer
+                                        {t('settings:profile.remove')}
                                     </Button>
                                 )}
                             </div>
@@ -284,24 +612,22 @@ const Settings: React.FC = () => {
                             {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-caption font-semibold text-foreground">Notifications push</h3>
+                            <h3 className="text-caption font-semibold text-foreground">{t('settings:notif.title')}</h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Recevez des rappels pour vos rendez-vous directement sur cet appareil, même
-                                quand l'application est fermée.
+                                {t('settings:notif.subtitle')}
                             </p>
 
                             {!isSupported && (
                                 <p className="mt-2 flex items-center gap-1 text-micro text-muted-foreground">
                                     <AlertCircle className="h-4 w-4" />
-                                    Notifications non supportées sur ce navigateur.
+                                    {t('settings:notif.unsupported')}
                                 </p>
                             )}
 
                             {isSupported && permission === 'denied' && (
                                 <p className="mt-2 flex items-center gap-1 text-micro text-destructive">
                                     <AlertCircle className="h-4 w-4" />
-                                    Permission refusée. Autorisez les notifications dans les paramètres de votre
-                                    navigateur.
+                                    {t('settings:notif.denied')}
                                 </p>
                             )}
 
@@ -327,17 +653,17 @@ const Settings: React.FC = () => {
                                         <Bell className="mr-2 h-4 w-4" />
                                     )}
                                     {notifLoading
-                                        ? 'En cours…'
+                                        ? t('settings:notif.inProgress')
                                         : isSubscribed
-                                          ? 'Désactiver les notifications'
-                                          : 'Activer les notifications'}
+                                          ? t('settings:notif.disable')
+                                          : t('settings:notif.enable')}
                                 </Button>
                             )}
 
                             {isSubscribed && (
                                 <p className="mt-2 flex items-center gap-1 text-micro text-green-600 dark:text-green-400">
                                     <CheckCircle className="h-4 w-4" />
-                                    Notifications activées sur cet appareil.
+                                    {t('settings:notif.active')}
                                 </p>
                             )}
                         </div>
@@ -353,9 +679,9 @@ const Settings: React.FC = () => {
                             <Globe className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-caption font-semibold text-foreground">Devise</h3>
+                            <h3 className="text-caption font-semibold text-foreground">{t('settings:currency.title')}</h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Sélectionnez la devise pour afficher les montants dans votre application.
+                                {t('settings:currency.subtitle')}
                             </p>
 
                             {currencyError && (
@@ -386,6 +712,9 @@ const Settings: React.FC = () => {
                 </CardContent>
             </Card>
 
+            {/* AI assistant */}
+            <AiAssistantCard isParent={isParent} />
+
             {/* Export */}
             <Card>
                 <CardContent className="p-6">
@@ -394,10 +723,9 @@ const Settings: React.FC = () => {
                             <Download className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-caption font-semibold text-foreground">Exporter les données</h3>
+                            <h3 className="text-caption font-semibold text-foreground">{t('settings:export.title')}</h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Télécharge toutes vos données (budget, tâches, recettes, membres, courses,
-                                rendez-vous, plannings, repas) dans un fichier JSON.
+                                {t('settings:export.subtitle')}
                             </p>
                             {exportError && (
                                 <p className="mt-2 flex items-center gap-1 text-micro text-destructive">
@@ -415,7 +743,7 @@ const Settings: React.FC = () => {
                                 ) : (
                                     <Download className="mr-2 h-4 w-4" />
                                 )}
-                                {exportLoading ? 'Export en cours…' : 'Exporter'}
+                                {exportLoading ? t('settings:export.inProgress') : t('settings:export.button')}
                             </Button>
                         </div>
                     </div>
@@ -430,22 +758,21 @@ const Settings: React.FC = () => {
                             <Upload className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-caption font-semibold text-foreground">Importer des données</h3>
+                            <h3 className="text-caption font-semibold text-foreground">{t('settings:import.title')}</h3>
                             <p className="mt-1 text-micro text-muted-foreground">
-                                Restaure des données depuis un fichier d'export OpenFamily. Les données
-                                existantes ne sont pas écrasées (doublons ignorés).
+                                {t('settings:import.subtitle')}
                             </p>
 
                             {importSuccess && (
                                 <div className="mt-3 rounded-input border border-border bg-surface-2 p-3">
                                     <p className="mb-2 flex items-center gap-1 text-micro font-semibold text-foreground">
                                         <CheckCircle className="h-4 w-4 text-green-500" />
-                                        Import réussi
+                                        {t('settings:import.success')}
                                     </p>
                                     <ul className="space-y-0.5 text-micro text-muted-foreground">
                                         {Object.entries(importSuccess).map(([key, count]) => (
                                             <li key={key}>
-                                                {ENTITY_LABELS[key] ?? key} : <span className="font-medium text-foreground">{count}</span> élément(s) importé(s)
+                                                {entityLabel(key)} : <span className="font-medium text-foreground">{count}</span> {t('settings:import.itemsImported', { count: count as number })}
                                             </li>
                                         ))}
                                     </ul>
@@ -470,7 +797,7 @@ const Settings: React.FC = () => {
                                     />
                                     <span className="inline-flex h-9 items-center gap-2 rounded-input border border-border bg-card px-3 text-caption font-medium text-foreground hover:bg-surface-2 transition-colors duration-fast">
                                         <Upload className="h-4 w-4" />
-                                        {selectedFile ? selectedFile.name : 'Choisir un fichier…'}
+                                        {selectedFile ? selectedFile.name : t('settings:import.chooseFile')}
                                     </span>
                                 </label>
                                 {selectedFile && (
@@ -480,7 +807,7 @@ const Settings: React.FC = () => {
                                         ) : (
                                             <Upload className="mr-2 h-4 w-4" />
                                         )}
-                                        {importLoading ? 'Import en cours…' : 'Importer'}
+                                        {importLoading ? t('settings:import.inProgress') : t('settings:import.button')}
                                     </Button>
                                 )}
                             </div>

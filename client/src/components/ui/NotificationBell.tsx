@@ -1,20 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bell, BellOff, CheckCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { useNotifications, AppNotification } from '../../hooks/useNotifications';
 import { useWebSocketUpdates } from '../../hooks/useWebSocketUpdates';
 import { Button } from './Button';
-
-function timeAgo(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return 'à l\'instant';
-    if (minutes < 60) return `il y a ${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `il y a ${hours}h`;
-    return `il y a ${Math.floor(hours / 24)}j`;
-}
 
 // Determine which page a notification should open when clicked.
 function notificationRoute(n: AppNotification): string {
@@ -31,8 +22,8 @@ function notificationRoute(n: AppNotification): string {
 }
 
 export const NotificationBell: React.FC = () => {
+    const { t } = useTranslation('notifications');
     const {
-        isSupported,
         unreadCount,
         notifications,
         fetchNotifications,
@@ -44,6 +35,16 @@ export const NotificationBell: React.FC = () => {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
+
+    const timeAgo = (dateStr: string): string => {
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const minutes = Math.floor(diff / 60000);
+        if (minutes < 1) return t('timeAgo.justNow');
+        if (minutes < 60) return t('timeAgo.minutes', { count: minutes });
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return t('timeAgo.hours', { count: hours });
+        return t('timeAgo.days', { count: Math.floor(hours / 24) });
+    };
 
     // Real-time refresh when a new notification is pushed
     useWebSocketUpdates('notifications', () => {
@@ -75,15 +76,15 @@ export const NotificationBell: React.FC = () => {
         navigate(notificationRoute(n));
     };
 
-    if (!isSupported) return null;
-
+    // The in-app notification list works everywhere; only the push-subscribe UI
+    // (in Settings) depends on Push API support — so always render the bell.
     return (
         <div ref={ref} className="relative">
             <Button
                 variant="secondary"
                 size="icon"
                 onClick={handleOpen}
-                aria-label="Notifications"
+                aria-label={t('title')}
                 className="relative"
             >
                 <Bell className="h-4 w-4" />
@@ -98,7 +99,7 @@ export const NotificationBell: React.FC = () => {
                 <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-card border border-border bg-card shadow-surface-hover">
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                        <span className="text-caption font-semibold text-foreground">Notifications</span>
+                        <span className="text-caption font-semibold text-foreground">{t('title')}</span>
                         {unreadCount > 0 && (
                             <button
                                 type="button"
@@ -106,7 +107,7 @@ export const NotificationBell: React.FC = () => {
                                 className="flex items-center gap-1 text-micro text-primary hover:text-primary/80"
                             >
                                 <CheckCheck className="h-3.5 w-3.5" />
-                                Tout marquer lu
+                                {t('markAll')}
                             </button>
                         )}
                     </div>
@@ -116,7 +117,7 @@ export const NotificationBell: React.FC = () => {
                         {notifications.length === 0 ? (
                             <div className="flex flex-col items-center gap-2 px-4 py-8 text-center text-muted-foreground">
                                 <BellOff className="h-8 w-8 opacity-40" />
-                                <p className="text-micro">Aucune notification</p>
+                                <p className="text-micro">{t('empty')}</p>
                             </div>
                         ) : (
                             notifications.slice(0, 10).map((n) => (
@@ -155,7 +156,7 @@ export const NotificationBell: React.FC = () => {
                             onClick={() => setOpen(false)}
                             className="block text-center text-micro text-primary hover:text-primary/80"
                         >
-                            Gérer les notifications →
+                            {t('manage')}
                         </Link>
                     </div>
                 </div>

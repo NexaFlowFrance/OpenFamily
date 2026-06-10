@@ -1,0 +1,35 @@
+{
+  "title": "Mots de la famille",
+  "add": "Ajouter un mot",
+  "addTitle": "Nouveau mot sur le frigo",
+  "placeholder": "Pense à ton sac de sport !",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "Couleur",
+  "colors": {
+    "yellow": "Jaune",
+    "pink": "Rose",
+    "blue": "Bleu",
+    "green": "Vert",
+    "orange": "Orange"
+  },
+  "expiryLabel": "Expiration",
+  "expiry": {
+    "today": "Jusqu'à ce soir",
+    "day": "24 heures",
+    "week": "1 semaine",
+    "never": "Sans expiration"
+  },
+  "submit": "Coller le mot",
+  "cancel": "Annuler",
+  "delete": "Retirer ce mot",
+  "deleted": "Mot retiré du frigo",
+  "added": "Mot collé sur le frigo",
+  "emptyHint": "Laissez un petit mot à la famille — il s'affichera ici et sur l'écran kiosk.",
+  "by": "par {{name}}",
+  "age": {
+    "now": "à l'instant",
+    "minutes": "il y a {{count}} min",
+    "hours": "il y a {{count}} h",
+    "days": "il y a {{count}} j"
+  }
+}

@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
@@ -21,46 +22,50 @@ import {
     Plus,
     WifiOff,
     Plug,
+    PiggyBank,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
 import { NotificationBell } from '../ui/NotificationBell';
+import { DemoBanner } from '../app/DemoBanner';
+import { MagicInputButton } from '../app/MagicInput';
 
 interface LayoutProps {
     children: ReactNode;
 }
 
 const navigation = [
-    { name: 'Aujourd\'hui', href: '/', icon: Home },
-    { name: 'Courses', href: '/shopping', icon: ShoppingCart },
-    { name: 'Taches', href: '/tasks', icon: CheckSquare },
-    { name: 'Rendez-vous', href: '/calendar', icon: CalendarIcon },
-    { name: 'Planning', href: '/planning', icon: CalendarDays },
-    { name: 'Recettes', href: '/recipes', icon: ChefHat },
-    { name: 'Repas', href: '/meal-planning', icon: UtensilsCrossed },
-    { name: 'Budget', href: '/budget', icon: Wallet },
-    { name: 'Famille', href: '/family', icon: Users },
-    { name: 'Intégrations', href: '/integrations', icon: Plug },
-    { name: 'Paramètres', href: '/settings', icon: Settings },
+    { labelKey: 'items.today', href: '/', icon: Home },
+    { labelKey: 'items.shopping', href: '/shopping', icon: ShoppingCart },
+    { labelKey: 'items.tasks', href: '/tasks', icon: CheckSquare },
+    { labelKey: 'items.rewards', href: '/rewards', icon: PiggyBank },
+    { labelKey: 'items.calendar', href: '/calendar', icon: CalendarIcon },
+    { labelKey: 'items.planning', href: '/planning', icon: CalendarDays },
+    { labelKey: 'items.recipes', href: '/recipes', icon: ChefHat },
+    { labelKey: 'items.meals', href: '/meal-planning', icon: UtensilsCrossed },
+    { labelKey: 'items.budget', href: '/budget', icon: Wallet },
+    { labelKey: 'items.family', href: '/family', icon: Users },
+    { labelKey: 'items.integrations', href: '/integrations', icon: Plug },
+    { labelKey: 'items.settings', href: '/settings', icon: Settings },
 ];
 
 const mobileTabs = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'Planning', href: '/planning', icon: CalendarDays },
-    { name: 'Listes', href: '/shopping', icon: ShoppingCart },
-    { name: 'Budget', href: '/budget', icon: Wallet },
-    { name: 'Famille', href: '/family', icon: Users },
+    { labelKey: 'mobile.home', href: '/', icon: Home },
+    { labelKey: 'mobile.planning', href: '/planning', icon: CalendarDays },
+    { labelKey: 'mobile.lists', href: '/shopping', icon: ShoppingCart },
+    { labelKey: 'mobile.budget', href: '/budget', icon: Wallet },
+    { labelKey: 'mobile.family', href: '/family', icon: Users },
 ];
 
 const quickActions = [
-    { name: 'Ajouter une course', href: '/shopping', icon: ShoppingCart },
-    { name: 'Ajouter une tache', href: '/tasks', icon: CheckSquare },
-    { name: 'Ajouter un rendez-vous', href: '/calendar', icon: CalendarIcon },
-    { name: 'Ajouter un horaire', href: '/planning', icon: CalendarDays },
-    { name: 'Ajouter une recette', href: '/recipes', icon: ChefHat },
-    { name: 'Ajouter un repas', href: '/meal-planning', icon: UtensilsCrossed },
-    { name: 'Ajouter une depense', href: '/budget', icon: Wallet },
-    { name: 'Ajouter un membre', href: '/family', icon: Users },
+    { labelKey: 'quickActions.addShopping', href: '/shopping', icon: ShoppingCart },
+    { labelKey: 'quickActions.addTask', href: '/tasks', icon: CheckSquare },
+    { labelKey: 'quickActions.addAppointment', href: '/calendar', icon: CalendarIcon },
+    { labelKey: 'quickActions.addSchedule', href: '/planning', icon: CalendarDays },
+    { labelKey: 'quickActions.addRecipe', href: '/recipes', icon: ChefHat },
+    { labelKey: 'quickActions.addMeal', href: '/meal-planning', icon: UtensilsCrossed },
+    { labelKey: 'quickActions.addExpense', href: '/budget', icon: Wallet },
+    { labelKey: 'quickActions.addMember', href: '/family', icon: Users },
 ];
 
 const isRouteActive = (pathname: string, href: string) => {
@@ -72,6 +77,7 @@ const isRouteActive = (pathname: string, href: string) => {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
+    const { t } = useTranslation('nav');
     const { user, logout } = useAuth();
     const { setTheme, actualTheme } = useTheme();
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -119,7 +125,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="flex h-full flex-col">
                     <div className="flex h-20 items-center justify-between border-b border-border px-6">
                         <Link to="/" className="flex items-center gap-3" onClick={closeMenus}>
-                            <img src="/OpenFamily.png" alt="OpenFamily" className="h-9 w-9 object-contain" />
+                            <img src={`${import.meta.env.BASE_URL}OpenFamily.png`} alt="OpenFamily" className="h-9 w-9 object-contain" />
                             <span className="text-lg font-semibold tracking-tight">OpenFamily</span>
                         </Link>
                         <button
@@ -137,7 +143,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             const active = isRouteActive(location.pathname, item.href);
                             return (
                                 <Link
-                                    key={item.name}
+                                    key={item.labelKey}
                                     to={item.href}
                                     onClick={closeMenus}
                                     className={cn(
@@ -154,7 +160,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                             active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
                                         )}
                                     />
-                                    <span>{item.name}</span>
+                                    <span>{t(item.labelKey)}</span>
                                 </Link>
                             );
                         })}
@@ -165,7 +171,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             {user?.avatar_url ? (
                                 <img
                                     src={user.avatar_url}
-                                    alt={user?.name || 'Profil'}
+                                    alt={user?.name || t('user.profile')}
                                     className="h-10 w-10 shrink-0 rounded-full object-cover"
                                 />
                             ) : (
@@ -183,7 +189,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 variant="secondary"
                                 size="icon"
                                 onClick={toggleTheme}
-                                aria-label="Changer le theme"
+                                aria-label={t('user.toggleTheme')}
                                 className="flex-1"
                             >
                                 {actualTheme === 'dark' ? (
@@ -196,7 +202,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 variant="ghost"
                                 size="icon"
                                 onClick={logout}
-                                aria-label="Se deconnecter"
+                                aria-label={t('user.logout')}
                                 className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
                                 <LogOut className="h-4 w-4" />
@@ -207,6 +213,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </aside>
 
             <div className="lg:pl-72">
+                <DemoBanner />
                 <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
                     <div className="container flex h-16 max-w-[1200px] items-center justify-between px-4 lg:px-6">
                         <div className="flex items-center gap-3">
@@ -217,23 +224,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     setSidebarOpen(true);
                                 }}
                                 className="rounded-input p-2 text-muted-foreground hover:bg-surface-2 lg:hidden"
-                                aria-label="Ouvrir le menu"
+                                aria-label={t('user.openMenu')}
                             >
                                 <Menu className="h-5 w-5" />
                             </button>
                             <h1 className="text-caption font-semibold text-foreground">
-                                {currentPage?.name || 'Tableau de bord'}
+                                {currentPage ? t(currentPage.labelKey) : t('pageTitleFallback')}
                             </h1>
                         </div>
 
                         <div className="flex items-center gap-2">
+                            <MagicInputButton />
                             <NotificationBell />
                             <div className="hidden items-center gap-2 lg:flex">
                                 <Button
                                     variant="secondary"
                                     size="icon"
                                     onClick={toggleTheme}
-                                    aria-label="Changer le theme"
+                                    aria-label={t('user.toggleTheme')}
                                 >
                                     {actualTheme === 'dark' ? (
                                         <Sun className="h-4 w-4" />
@@ -245,7 +253,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     variant="ghost"
                                     size="icon"
                                     onClick={logout}
-                                    aria-label="Se deconnecter"
+                                    aria-label={t('user.logout')}
                                     className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                                 >
                                     <LogOut className="h-4 w-4" />
@@ -259,7 +267,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     {isOffline && (
                         <div className="mb-4 flex items-center gap-2 rounded-card border border-amber-300 bg-amber-50 px-4 py-2.5 text-caption text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400">
                             <WifiOff className="h-4 w-4 flex-shrink-0" />
-                            Mode hors ligne. Les données affichées proviennent du cache. Les modifications seront possibles au retour de la connexion.
+                            {t('offline')}
                         </div>
                     )}
                     {children}
@@ -273,7 +281,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     setQuickActionsOpen((open) => !open);
                 }}
                 className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98] lg:hidden"
-                aria-label="Actions rapides"
+                aria-label={t('quickActions.title')}
             >
                 <Plus className="h-6 w-6" />
             </button>
@@ -287,19 +295,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         : 'pointer-events-none translate-y-3 opacity-0'
                 )}
             >
-                <p className="mb-3 text-caption font-semibold text-foreground">Actions rapides</p>
+                <p className="mb-3 text-caption font-semibold text-foreground">{t('quickActions.title')}</p>
                 <div className="grid grid-cols-1 gap-2">
                     {quickActions.map((action) => {
                         const Icon = action.icon;
                         return (
                             <Link
-                                key={action.name}
+                                key={action.labelKey}
                                 to={action.href}
                                 onClick={closeMenus}
                                 className="flex items-center gap-2 rounded-input px-3 py-2 text-caption text-foreground hover:bg-surface-2"
                             >
                                 <Icon className="h-4 w-4 text-primary" />
-                                <span>{action.name}</span>
+                                <span>{t(action.labelKey)}</span>
                             </Link>
                         );
                     })}
@@ -313,7 +321,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         const active = isRouteActive(location.pathname, item.href);
                         return (
                             <Link
-                                key={item.name}
+                                key={item.labelKey}
                                 to={item.href}
                                 className={cn(
                                     'flex flex-col items-center justify-center gap-1 rounded-input px-1 py-2',
@@ -323,7 +331,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 )}
                             >
                                 <Icon className="h-4 w-4 shrink-0" />
-                                <span className="text-[10px] font-medium leading-none whitespace-nowrap">{item.name}</span>
+                                <span className="text-[10px] font-medium leading-none whitespace-nowrap">{t(item.labelKey)}</span>
                             </Link>
                         );
                     })}

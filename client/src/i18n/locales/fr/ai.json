@@ -1,0 +1,72 @@
+{
+  "magic": {
+    "open": "Assistant IA",
+    "title": "Assistant IA ✨",
+    "description": "Décrivez ce que vous voulez ajouter, l'assistant s'occupe du reste.",
+    "placeholder": "Ajoute des lasagnes jeudi soir et rappelle à Mia son sac de sport…",
+    "parse": "Analyser",
+    "parsing": "Analyse en cours…",
+    "nothingFound": "Aucun élément actionnable trouvé dans cette note. Essayez de reformuler.",
+    "back": "Retour",
+    "reviewHint": "Vérifiez les propositions, décochez ce que vous ne voulez pas, puis confirmez.",
+    "confirm": "Ajouter ({{count}})",
+    "confirming": "Ajout en cours…",
+    "successTitle": "C'est fait ✨",
+    "successDescription": "{{count}} élément(s) ajouté(s).",
+    "partialTitle": "Ajout partiel",
+    "partialDescription": "{{added}} ajouté(s), {{failed}} en échec.",
+    "allFailed": "Aucun élément n'a pu être ajouté. Réessayez.",
+    "types": {
+      "task": "Tâche",
+      "appointment": "Rendez-vous",
+      "shopping_item": "Course",
+      "budget_entry": "Budget"
+    }
+  },
+  "meals": {
+    "button": "Proposer un menu ✨",
+    "dialogTitle": "Suggestions de dîners",
+    "dialogDescription": "Semaine du {{start}} au {{end}} — à partir de vos propres recettes.",
+    "loading": "L'assistant compose le menu…",
+    "empty": "Tous les dîners de la semaine sont déjà planifiés.",
+    "confirm": "Ajouter au planning ({{count}})",
+    "successTitle": "Menu ajouté ✨",
+    "successDescription": "{{count}} dîner(s) planifié(s).",
+    "partialTitle": "Ajout partiel",
+    "partialDescription": "{{added}} ajouté(s), {{failed}} en échec."
+  },
+  "settings": {
+    "title": "Assistant IA",
+    "subtitle": "Connectez un modèle d'IA (local ou cloud) pour ajouter des éléments en langage naturel et suggérer des menus.",
+    "provider": "Fournisseur",
+    "providers": {
+      "ollama": "Ollama (local)",
+      "openai": "API compatible OpenAI",
+      "anthropic": "Anthropic Claude"
+    },
+    "baseUrl": "URL du serveur",
+    "apiKey": "Clé API",
+    "keyKept": "••• (conservée)",
+    "clearKey": "Effacer la clé enregistrée",
+    "model": "Modèle",
+    "enabled": "Assistant activé",
+    "privacy": "Confidentialité : la clé API est chiffrée et stockée uniquement sur VOTRE serveur. Avec Ollama, rien ne quitte la maison — les notes sont analysées en local.",
+    "parentOnly": "Seuls les parents peuvent modifier ces réglages.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Réglages enregistrés.",
+    "test": "Tester la connexion",
+    "testing": "Test en cours…",
+    "testSuccess": "Connexion réussie — le modèle répond correctement."
+  },
+  "errors": {
+    "AI_NOT_CONFIGURED": "L'assistant IA n'est pas configuré. Rendez-vous dans les Réglages.",
+    "AI_DISABLED": "L'assistant IA est désactivé dans les Réglages.",
+    "AI_UNREACHABLE": "Impossible de joindre le fournisseur IA. Vérifiez l'URL et que le service tourne.",
+    "AI_UNAUTHORIZED": "Clé API refusée. Vérifiez-la dans les Réglages.",
+    "AI_MODEL_NOT_FOUND": "Modèle introuvable chez le fournisseur. Vérifiez son nom (ex. llama3.1).",
+    "AI_INVALID_RESPONSE": "Le modèle a renvoyé une réponse invalide. Réessayez ou changez de modèle.",
+    "AI_PROVIDER_ERROR": "Le fournisseur IA a renvoyé une erreur. Réessayez.",
+    "AI_NOT_ENOUGH_RECIPES": "Ajoutez au moins 5 recettes pour que l'assistant puisse composer un menu."
+  }
+}

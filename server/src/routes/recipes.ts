@@ -3,9 +3,47 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
+import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
+import { fetchHtmlPage, findRecipeJsonLd, normalizeJsonLdRecipe } from '../lib/recipeImport';
 
 const router = Router();
 router.use(authMiddleware);
+
+// Import a recipe from a public URL (schema.org/Recipe JSON-LD).
+// Parses and returns the recipe WITHOUT saving: the client prefills the
+// create form so the user reviews/edits, then saves via POST /api/recipes.
+// Error contract (the client maps these to localized toasts):
+//   400 → invalid/unsafe URL, 502 'FETCH_FAILED' → page unreachable,
+//   422 'NO_RECIPE_FOUND' → no Recipe JSON-LD on the page.
+router.post('/import-url', async (req: AuthRequest, res) => {
+    const { url } = req.body as { url?: unknown };
+    const cleanUrl = typeof url === 'string' ? url.trim() : '';
+    if (!cleanUrl) {
+        return res.status(400).json({ success: false, error: 'url is required' });
+    }
+
+    let html: string;
+    try {
+        // Unlike LAN integrations, this route fetches the public internet:
+        // private/loopback targets are ALWAYS blocked (checked on every redirect hop).
+        html = await fetchHtmlPage(cleanUrl, (target) =>
+            assertSafeIntegrationUrl(target, { blockPrivate: true })
+        );
+    } catch (error) {
+        if (error instanceof UnsafeUrlError) {
+            return res.status(400).json({ success: false, error: error.message });
+        }
+        console.error('Recipe import fetch error:', error instanceof Error ? error.message : error);
+        return res.status(502).json({ success: false, error: 'FETCH_FAILED' });
+    }
+
+    const node = findRecipeJsonLd(html);
+    if (!node) {
+        return res.status(422).json({ success: false, error: 'NO_RECIPE_FOUND' });
+    }
+
+    res.json({ success: true, data: normalizeJsonLdRecipe(node) });
+});
 
 // Get all recipes
 router.get('/', async (req: AuthRequest, res) => {

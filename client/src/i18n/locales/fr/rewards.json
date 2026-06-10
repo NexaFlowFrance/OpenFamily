@@ -1,0 +1,86 @@
+{
+  "loading": "Chargement de l'argent de poche…",
+  "title": "Argent de poche",
+  "subtitle": "Les corvées rapportent des points, les points deviennent de l'argent de poche",
+  "empty": "Aucune récompense pour le moment. Ajoutez des étoiles à une tâche pour commencer !",
+  "streak_one": "{{count}} jour d'affilée",
+  "streak_other": "{{count}} jours d'affilée",
+  "pendingCount_one": "{{count}} en attente",
+  "pendingCount_other": "{{count}} en attente",
+  "worth": "soit {{amount}}",
+  "approvals": {
+    "title_one": "{{count}} tâche à valider",
+    "title_other": "{{count}} tâches à valider",
+    "approve": "Valider",
+    "reject": "Refuser"
+  },
+  "actions": {
+    "adjust": "Ajuster",
+    "redeem": "Verser"
+  },
+  "types": {
+    "earn": "Points gagnés",
+    "adjust": "Ajustement",
+    "redeem": "Argent de poche versé"
+  },
+  "fields": {
+    "note": "Note (facultatif)"
+  },
+  "adjustDialog": {
+    "title": "Ajuster les points de {{name}}",
+    "description": "Ajoutez un bonus ou retirez des points (valeur négative)",
+    "points": "Points (+ ou −)",
+    "notePlaceholder": "Ex : A aidé à ranger les courses"
+  },
+  "redeemDialog": {
+    "title": "Verser l'argent de poche à {{name}}",
+    "description": "Solde disponible : {{balance}} points",
+    "points": "Points à convertir",
+    "amount": "Montant à verser : {{amount}}",
+    "notePlaceholder": "Ex : Tirelire, sortie cinéma…"
+  },
+  "goals": {
+    "add": "Ajouter un objectif",
+    "editTitle": "Modifier l'objectif",
+    "progress": "{{current}} / {{target}}",
+    "markAchieved": "Objectif atteint 🎉"
+  },
+  "goalDialog": {
+    "addTitle": "Nouvel objectif pour {{name}}",
+    "editTitle": "Modifier l'objectif de {{name}}",
+    "description": "Un objectif d'épargne à atteindre avec les points",
+    "emoji": "Emoji",
+    "titleLabel": "Titre",
+    "titlePlaceholder": "Ex : Jeu vidéo",
+    "target": "Montant à atteindre ({{currency}})",
+    "delete": "Supprimer"
+  },
+  "kid": {
+    "hello": "Salut {{name}} !",
+    "subtitle": "Voici ta tirelire",
+    "reached": "Bravo, tu y es arrivé·e ! 🎉",
+    "reachedHint": "Demande à un parent de valider ton objectif.",
+    "missing": "Il te manque {{amount}}",
+    "editGoal": "Modifier mon objectif",
+    "noGoal": "Tu n'as pas encore d'objectif. Choisis un rêve à atteindre !",
+    "addGoal": "Choisir mon objectif",
+    "tasksTitle": "Tes missions",
+    "allTasks": "Tout voir",
+    "tasksEmpty": "Aucune mission en cours, bien joué ! 🎉",
+    "pendingBadge": "À valider",
+    "historyTitle": "Tes dernières activités",
+    "notLinkedTitle": "Ta tirelire t'attend !",
+    "notLinkedMessage": "Demande à un parent de relier ton compte à ton profil depuis la page Famille pour voir tes points et tes objectifs."
+  },
+  "settings": {
+    "rate": "1 point = {{value}}",
+    "title": "Valeur d'un point",
+    "description": "Définissez la valeur en argent d'un point",
+    "label": "Valeur d'un point",
+    "example": "Exemple : {{points}} points = {{amount}}"
+  },
+  "errors": {
+    "load": "Impossible de charger l'argent de poche.",
+    "action": "Impossible d'effectuer cette action."
+  }
+}

@@ -10,7 +10,9 @@ export type WsEntity =
     | 'meal-plans'
     | 'planning'
     | 'notifications'
-    | 'integrations';
+    | 'integrations'
+    | 'rewards'
+    | 'notes';
 
 export type WsAction = 'created' | 'updated' | 'deleted' | 'synced';
 

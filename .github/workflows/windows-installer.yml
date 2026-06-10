@@ -123,11 +123,44 @@ jobs:
           magick -size 164x314 xc:"#0f1117" `( "$logo" -resize 120x120 `) -gravity center -composite -alpha remove -type TrueColor "BMP3:$assets/wizard-large.bmp"
           magick -size 55x58 xc:"#0f1117" `( "$logo" -resize 48x48 `) -gravity center -composite -alpha remove -type TrueColor "BMP3:$assets/wizard-small.bmp"
 
+      - name: Compile native launcher (OpenFamily.exe)
+        shell: pwsh
+        run: |
+          $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+          if (-not (Test-Path $csc)) { $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework\v4.0.30319\csc.exe' }
+          if (-not (Test-Path $csc)) { Write-Error "csc.exe introuvable"; exit 1 }
+          & $csc /nologo /target:winexe /platform:x64 `
+            "/win32icon:installer/windows/assets/OpenFamily.ico" `
+            /reference:System.Windows.Forms.dll `
+            "/out:installer/windows/app/OpenFamily.exe" `
+            "installer/windows/app/OpenFamilyLauncher.cs"
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path "installer/windows/app/OpenFamily.exe")) {
+            Write-Error "La compilation du lanceur a echoue"; exit 1
+          }
+
+      - name: Normalize PowerShell script encoding (UTF-8 BOM)
+        shell: pwsh
+        run: |
+          # PowerShell 5.1 lit les .ps1 sans BOM en ANSI, ce qui casse les accents.
+          $utf8Bom = New-Object System.Text.UTF8Encoding($true)
+          $scripts = @(
+            'installer/windows/app/OpenFamilyControl.ps1',
+            'installer/windows/app/engine/common.ps1',
+            'installer/windows/app/engine/start.ps1',
+            'installer/windows/app/engine/stop.ps1'
+          )
+          foreach ($s in $scripts) {
+            $full = Join-Path $PWD $s
+            $txt = [System.IO.File]::ReadAllText($full)
+            [System.IO.File]::WriteAllText($full, $txt, $utf8Bom)
+          }
+
       - name: Compile installer
         shell: pwsh
         run: |
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           & "$iscc" "installer/windows/OpenFamily.iss" "/DMyAppVersion=${{ steps.version.outputs.VERSION }}"
+          if ($LASTEXITCODE -ne 0) { Write-Error "ISCC a echoue"; exit 1 }
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

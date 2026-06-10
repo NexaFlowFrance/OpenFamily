@@ -1,0 +1,122 @@
+{
+  "loading": "Chargement de la famille…",
+  "title": "Famille",
+  "subtitle": "Gérez les membres de votre famille",
+  "addMember": "Ajouter un membre",
+  "empty": "Aucun membre de la famille. Ajoutez votre premier membre !",
+  "roles": {
+    "Parent": "Parent",
+    "Enfant": "Enfant",
+    "Etudiant": "Étudiant",
+    "Autre": "Autre"
+  },
+  "colors": {
+    "coral": "Corail",
+    "orange": "Orange",
+    "yellow": "Jaune",
+    "green": "Vert",
+    "cyan": "Cyan",
+    "blue": "Bleu",
+    "indigo": "Indigo",
+    "pink": "Rose"
+  },
+  "card": {
+    "age_one": "{{count}} an",
+    "age_other": "{{count}} ans",
+    "health": "Santé",
+    "allergies": "Allergies :",
+    "medications": "Médicaments :",
+    "emergency": "Contact d'urgence"
+  },
+  "shared": {
+    "title": "Comptes partagés",
+    "subtitle": "Partagez l'accès à vos données familiales avec d'autres comptes.",
+    "you": "(vous)",
+    "owner": "Propriétaire",
+    "child": "🧒 Enfant",
+    "parent": "👨 Parent",
+    "none": "Aucun autre compte ne partage encore cette famille.",
+    "roleParent": "Parent",
+    "roleChild": "Enfant",
+    "roleTitle": "Rôle du membre",
+    "transferTitle": "Transférer la propriété à ce compte",
+    "kickTitle": "Retirer ce compte"
+  },
+  "link": {
+    "label": "Compte lié",
+    "none": "Aucun compte lié",
+    "hint": "Reliez ce profil à un compte partagé : un compte enfant verra sa tirelire et ses objectifs."
+  },
+  "requests": {
+    "title": "Demandes d'accès",
+    "accept": "Accepter",
+    "rejectTitle": "Refuser"
+  },
+  "myRequest": {
+    "pendingTitle": "Demande en attente",
+    "sentTo": "Envoyée à {{name}} ({{email}})"
+  },
+  "join": {
+    "title": "Rejoindre une famille",
+    "desc": "Saisissez l'adresse e-mail du propriétaire de la famille à rejoindre. Il recevra une demande à accepter ou refuser.",
+    "rejected": "Votre dernière demande a été refusée.",
+    "emailPlaceholder": "email@exemple.com",
+    "sending": "Envoi…",
+    "send": "Envoyer la demande",
+    "emailRequired": "Adresse e-mail requise"
+  },
+  "invite": {
+    "roleLabel": "Inviter en tant que",
+    "generate": "Générer un lien d'invitation",
+    "generating": "Génération…",
+    "copyTitle": "Copier"
+  },
+  "leave": {
+    "leaving": "Départ en cours…",
+    "leave": "Quitter la famille partagée"
+  },
+  "dialog": {
+    "editTitle": "Modifier le membre",
+    "addTitle": "Ajouter un membre",
+    "description": "Remplissez les informations du membre de la famille"
+  },
+  "form": {
+    "name": "Nom",
+    "namePlaceholder": "Ex : Marie Dupont",
+    "role": "Rôle",
+    "color": "Couleur",
+    "birthdate": "Date de naissance (facultatif)",
+    "healthInfo": "Informations de santé",
+    "allergies": "Allergies (séparées par des virgules)",
+    "allergiesPlaceholder": "Ex : Arachides, Lactose",
+    "medications": "Médicaments (séparés par des virgules)",
+    "medicationsPlaceholder": "Ex : Aspirine, Insuline",
+    "emergencyContact": "Contact d'urgence",
+    "contactName": "Nom du contact",
+    "contactNamePlaceholder": "Ex : Jean Dupont",
+    "contactPhone": "Téléphone du contact",
+    "contactPhonePlaceholder": "Ex : +33 6 12 34 56 78",
+    "notes": "Notes (facultatif)",
+    "notesPlaceholder": "Notes supplémentaires…"
+  },
+  "confirm": {
+    "kick": "Retirer ce compte de la famille ?",
+    "transfer": "Transférer la propriété de la famille à {{name}} ?\n\nVous deviendrez un membre ordinaire. Toutes les données familiales seront conservées et gérées par le nouveau propriétaire. Cette action est irréversible.",
+    "delete": "Êtes-vous sûr de vouloir supprimer ce membre de la famille ?",
+    "leave": "Quitter la famille partagée ? Vous retrouverez vos propres données."
+  },
+  "errors": {
+    "load": "Impossible de charger la famille.",
+    "save": "Impossible d'enregistrer ce membre.",
+    "delete": "Impossible de supprimer ce membre.",
+    "kick": "Impossible de retirer ce membre.",
+    "role": "Impossible de modifier le rôle.",
+    "transfer": "Impossible de transférer la propriété.",
+    "leave": "Impossible de quitter la famille.",
+    "invite": "Impossible de créer un lien d'invitation.",
+    "cancelRequest": "Impossible d'annuler la demande.",
+    "sendRequest": "Impossible d'envoyer la demande.",
+    "approve": "Impossible d'approuver la demande.",
+    "reject": "Impossible de refuser la demande."
+  }
+}

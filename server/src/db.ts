@@ -8,9 +8,21 @@ loadEnv();
 // This prevents timezone-related date shifts (e.g. '2026-03-09' → '2026-03-08T23:00:00.000Z').
 types.setTypeParser(1082, (val: string) => val);
 
+// Return TIMESTAMP (without time zone, OID 1114) columns as naive local ISO strings
+// ('YYYY-MM-DDTHH:mm:ss', no 'Z', fractional seconds stripped) instead of JS Date
+// objects. pg would otherwise build a Date in server-local time that serializes to a
+// UTC ISO string in JSON, shifting appointment times by the server's UTC offset.
+types.setTypeParser(1114, (val: string) => val.replace(' ', 'T').replace(/\.\d+$/, ''));
+
 if (!process.env.POSTGRES_PASSWORD) {
+    if (process.env.NODE_ENV === 'production') {
+        logger.error('db.missing_password', {
+            message: 'POSTGRES_PASSWORD is not set. Refusing to start in production with the default password — set it in your .env file.',
+        });
+        process.exit(1);
+    }
     logger.warn('db.missing_password', {
-        message: 'POSTGRES_PASSWORD is not set — falling back to default. Set it in your .env file.',
+        message: 'POSTGRES_PASSWORD is not set — falling back to default (development only). Set it in your .env file.',
     });
 }
 
@@ -182,6 +194,72 @@ export const runMigrations = async () => {
         // Migration 008: CalDAV UID for reliable Nextcloud event deduplication
         'ALTER TABLE appointments ADD COLUMN IF NOT EXISTS caldav_uid TEXT',
         'CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_caldav_uid ON appointments(user_id, caldav_uid) WHERE caldav_uid IS NOT NULL',
+        // Migration 009: per-user interface/notification language
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(8) NOT NULL DEFAULT 'fr'",
+        // Migration 010: invite carries the account role assigned by the inviter
+        "ALTER TABLE family_invites ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'parent'",
+        // Migration 011: gamified kids mode — chore points and pocket-money ledger
+        'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS points INTEGER NOT NULL DEFAULT 0',
+        'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS pending_approval BOOLEAN NOT NULL DEFAULT false',
+        `CREATE TABLE IF NOT EXISTS reward_transactions (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+            task_id UUID REFERENCES tasks(id) ON DELETE SET NULL,
+            points INTEGER NOT NULL,
+            type VARCHAR(20) NOT NULL CHECK (type IN ('earn', 'adjust', 'redeem')),
+            note TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_reward_transactions_user ON reward_transactions(user_id)',
+        'CREATE INDEX IF NOT EXISTS idx_reward_transactions_member ON reward_transactions(member_id)',
+        'CREATE INDEX IF NOT EXISTS idx_reward_transactions_task ON reward_transactions(task_id)',
+        `CREATE TABLE IF NOT EXISTS reward_settings (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+            points_value NUMERIC(10,4) NOT NULL DEFAULT 0.10,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`,
+        // Migration 012: savings goals + linking a user account to a member profile
+        'ALTER TABLE family_members ADD COLUMN IF NOT EXISTS linked_user_id UUID REFERENCES users(id) ON DELETE SET NULL',
+        `CREATE TABLE IF NOT EXISTS reward_goals (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+            title VARCHAR(200) NOT NULL,
+            emoji VARCHAR(16),
+            target_amount NUMERIC(10,2) NOT NULL CHECK (target_amount > 0),
+            status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'achieved', 'archived')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            achieved_at TIMESTAMP
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_reward_goals_user_member ON reward_goals(user_id, member_id)',
+        // Migration 013: family post-its (digital fridge notes)
+        `CREATE TABLE IF NOT EXISTS family_notes (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            author_name VARCHAR(100) NOT NULL,
+            content VARCHAR(500) NOT NULL,
+            color VARCHAR(20) NOT NULL DEFAULT 'yellow',
+            expires_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`,
+        // Widen content for installs that created the table at VARCHAR(300) (idempotent)
+        'ALTER TABLE family_notes ALTER COLUMN content TYPE VARCHAR(500)',
+        'CREATE INDEX IF NOT EXISTS idx_family_notes_user ON family_notes(user_id)',
+        // Migration 014: local-first AI assistant — provider settings (one row per family)
+        `CREATE TABLE IF NOT EXISTS ai_settings (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            provider VARCHAR(20) NOT NULL CHECK (provider IN ('ollama', 'openai', 'anthropic')),
+            base_url TEXT,
+            encrypted_api_key TEXT,
+            model VARCHAR(100) NOT NULL,
+            enabled BOOLEAN NOT NULL DEFAULT true,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`,
     ];
 
     for (const migration of migrations) {

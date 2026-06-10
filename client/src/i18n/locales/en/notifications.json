@@ -1,0 +1,17 @@
+{
+  "title": "Notifications",
+  "markAll": "Mark all read",
+  "empty": "No notifications",
+  "manage": "Manage notifications →",
+  "timeAgo": {
+    "justNow": "just now",
+    "minutes": "{{count}} min ago",
+    "hours": "{{count}}h ago",
+    "days": "{{count}}d ago"
+  },
+  "push": {
+    "unsupported": "Push not supported on this browser",
+    "denied": "Permission denied",
+    "noVapid": "VAPID key unavailable"
+  }
+}

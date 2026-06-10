@@ -1,9 +1,21 @@
 import { Router } from 'express';
 import { getClient, query } from '../db';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { authMiddleware, requireParent, AuthRequest } from '../middleware/auth';
 
-// Only allow column names that are safe SQL identifiers (letters, digits, underscore)
-const SAFE_IDENTIFIER = /^[a-z_][a-z0-9_]*$/i;
+// Explicit per-table column whitelist matching the export format. `id` stays allowed
+// (UUIDs preserve relation integrity and let ON CONFLICT DO NOTHING deduplicate);
+// `user_id` is always forced to the importing family and is never taken from the file.
+const IMPORT_COLUMNS: Record<string, ReadonlySet<string>> = {
+    family_members: new Set(['id', 'name', 'role', 'birth_date', 'color', 'blood_type', 'allergies', 'medications', 'vaccines', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact', 'notes', 'medical_notes', 'avatar_url', 'created_at', 'updated_at']),
+    tasks: new Set(['id', 'title', 'description', 'is_completed', 'due_date', 'frequency', 'priority', 'assigned_to', 'completed_at', 'created_at', 'updated_at']),
+    recipes: new Set(['id', 'name', 'category', 'description', 'ingredients', 'instructions', 'prep_time', 'cook_time', 'servings', 'difficulty', 'tags', 'image_url', 'created_at', 'updated_at']),
+    meal_plans: new Set(['id', 'date', 'meal_type', 'recipe_id', 'custom_meal', 'notes', 'created_at', 'updated_at']),
+    budget_entries: new Set(['id', 'category', 'amount', 'description', 'date', 'is_expense', 'assigned_to', 'created_at', 'updated_at']),
+    budget_limits: new Set(['id', 'category', 'monthly_limit', 'month', 'year', 'created_at', 'updated_at']),
+    shopping_items: new Set(['id', 'name', 'category', 'quantity', 'unit', 'price', 'is_checked', 'notes', 'created_at', 'updated_at']),
+    appointments: new Set(['id', 'title', 'description', 'start_time', 'end_time', 'location', 'family_member_ids', 'reminder_30min', 'reminder_1hour', 'notes', 'caldav_uid', 'created_at', 'updated_at']),
+    schedule_entries: new Set(['id', 'family_member_id', 'schedule_type', 'title', 'day_of_week', 'start_time', 'end_time', 'specific_date', 'location', 'notes', 'created_at', 'updated_at']),
+};
 
 const router = Router();
 router.use(authMiddleware);
@@ -56,8 +68,8 @@ router.get('/export', async (req: AuthRequest, res) => {
     }
 });
 
-// Import user data
-router.post('/import', async (req: AuthRequest, res) => {
+// Import user data (parents only — overwrites/extends the whole family dataset)
+router.post('/import', requireParent, async (req: AuthRequest, res) => {
     const userId = req.userId!;
     const importData = req.body;
 
@@ -70,11 +82,13 @@ router.post('/import', async (req: AuthRequest, res) => {
 
     const importRows = async (table: string, rows: unknown) => {
         if (!Array.isArray(rows) || rows.length === 0) return;
+        const allowedColumns = IMPORT_COLUMNS[table];
+        if (!allowedColumns) return;
         let count = 0;
         for (const row of rows) {
             const entry: Record<string, unknown> = { ...(row as Record<string, unknown>), user_id: userId };
-            // Strip any key that is not a safe SQL identifier to prevent injection
-            const keys = Object.keys(entry).filter((k) => SAFE_IDENTIFIER.test(k));
+            // Keep only whitelisted columns for this table (user_id is always forced above)
+            const keys = Object.keys(entry).filter((k) => k === 'user_id' || allowedColumns.has(k));
             if (keys.length === 0) continue;
             const values = keys.map((k) => entry[k]);
             const placeholders = keys.map((_, i) => `$${i + 1}`);

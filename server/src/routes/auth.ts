@@ -10,7 +10,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     try {
         // Use actualUserId so members see their own profile, not the owner's
         const result = await query(
-            'SELECT id, email, name, role, currency, avatar_url, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
+            'SELECT id, email, name, role, currency, language, avatar_url, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
             [req.actualUserId]
         );
         if (result.rows.length === 0) {
@@ -31,10 +31,9 @@ router.post('/register', async (req, res) => {
     }
 
     try {
-        const { email, password, name, inviteToken, role } = req.body;
+        const { email, password, name, inviteToken } = req.body;
         const normalizedEmail = typeof email === 'string' ? normalizeEmail(email) : '';
         const cleanedName = typeof name === 'string' ? name.trim() : '';
-        const cleanedRole = ['parent', 'enfant'].includes(role) ? role : 'parent';
 
         if (!normalizedEmail || !password || !cleanedName) {
             return res.status(400).json({ success: false, error: 'Missing required fields' });
@@ -44,19 +43,20 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ success: false, error: 'Password must be at least 8 characters' });
         }
 
-        // Check if user exists
+        // Check if user exists. Keep the error generic so the endpoint
+        // cannot be used to enumerate registered email addresses.
         const existingUser = await query('SELECT id FROM users WHERE LOWER(email) = $1', [normalizedEmail]);
         if (existingUser.rows.length > 0) {
-            return res.status(400).json({ success: false, error: 'User already exists' });
+            return res.status(400).json({ success: false, error: 'Registration failed' });
         }
 
         // A new account joins an existing family ONLY via an explicit, valid invite token.
         // Validate the invite BEFORE creating the account so an invalid token never leaves an orphan user.
         // Without a token the user becomes their own family owner (standalone account).
-        let invite: { id: string; owner_id: string } | null = null;
+        let invite: { id: string; owner_id: string; role: string } | null = null;
         if (typeof inviteToken === 'string' && inviteToken.length > 0) {
             const inviteResult = await query(
-                `SELECT id, owner_id, invitee_email FROM family_invites
+                `SELECT id, owner_id, invitee_email, role FROM family_invites
                  WHERE token = $1 AND status = 'pending' AND expires_at > NOW()`,
                 [inviteToken]
             );
@@ -64,22 +64,26 @@ router.post('/register', async (req, res) => {
                 return res.status(400).json({ success: false, error: 'Invitation invalide ou expirée' });
             }
 
-            const row = inviteResult.rows[0] as { id: string; owner_id: string; invitee_email: string | null };
+            const row = inviteResult.rows[0] as { id: string; owner_id: string; invitee_email: string | null; role: string | null };
 
             // If the invite targets a specific email, enforce it matches the registering account.
             if (row.invitee_email && normalizeEmail(row.invitee_email) !== normalizedEmail) {
                 return res.status(403).json({ success: false, error: 'Cette invitation est réservée à une autre adresse e-mail' });
             }
 
-            invite = { id: row.id, owner_id: row.owner_id };
+            invite = { id: row.id, owner_id: row.owner_id, role: row.role === 'enfant' ? 'enfant' : 'parent' };
         }
+
+        // The account role is NEVER taken from the client: an invited member gets the
+        // role chosen by the inviter; a standalone account owns its family → 'parent'.
+        const cleanedRole = invite ? invite.role : 'parent';
 
         // Hash password
         const password_hash = await bcrypt.hash(password, 12);
 
         // Create user
         const result = await query(
-            'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name, role, currency, avatar_url',
+            'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name, role, currency, language, avatar_url',
             [normalizedEmail, password_hash, cleanedName, cleanedRole]
         );
 
@@ -135,7 +139,7 @@ router.post('/login', async (req, res) => {
         res.json({
             success: true,
             data: {
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', avatar_url: user.avatar_url ?? null },
+                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', avatar_url: user.avatar_url ?? null },
                 token
             }
         });
@@ -149,7 +153,7 @@ router.post('/login', async (req, res) => {
 router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const result = await query(
-            'SELECT id, email, name, role, currency, avatar_url, family_owner_id FROM users WHERE id = $1',
+            'SELECT id, email, name, role, currency, language, avatar_url, family_owner_id FROM users WHERE id = $1',
             [req.actualUserId]
         );
         if (result.rows.length === 0) {
@@ -165,7 +169,7 @@ router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
             success: true,
             data: {
                 token,
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', avatar_url: user.avatar_url ?? null },
+                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', avatar_url: user.avatar_url ?? null },
             },
         });
     } catch (error) {
@@ -184,7 +188,7 @@ router.put('/currency', authMiddleware, async (req: AuthRequest, res) => {
         }
 
         const result = await query(
-            'UPDATE users SET currency = $1 WHERE id = $2 RETURNING id, email, name, role, currency, avatar_url',
+            'UPDATE users SET currency = $1 WHERE id = $2 RETURNING id, email, name, role, currency, language, avatar_url',
             [currency.toUpperCase(), req.actualUserId]
         );
 
@@ -239,7 +243,7 @@ router.put('/profile', authMiddleware, async (req: AuthRequest, res) => {
 
         values.push(req.actualUserId);
         const result = await query(
-            `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING id, email, name, role, currency, avatar_url`,
+            `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING id, email, name, role, currency, language, avatar_url`,
             values
         );
 

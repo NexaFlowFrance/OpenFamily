@@ -1,0 +1,35 @@
+{
+  "title": "Family notes",
+  "add": "Add a note",
+  "addTitle": "New fridge note",
+  "placeholder": "Don't forget your gym bag!",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "Color",
+  "colors": {
+    "yellow": "Yellow",
+    "pink": "Pink",
+    "blue": "Blue",
+    "green": "Green",
+    "orange": "Orange"
+  },
+  "expiryLabel": "Expiry",
+  "expiry": {
+    "today": "Until tonight",
+    "day": "24 hours",
+    "week": "1 week",
+    "never": "No expiry"
+  },
+  "submit": "Stick the note",
+  "cancel": "Cancel",
+  "delete": "Remove this note",
+  "deleted": "Note removed from the fridge",
+  "added": "Note stuck on the fridge",
+  "emptyHint": "Leave a little note for the family — it shows up here and on the kiosk display.",
+  "by": "by {{name}}",
+  "age": {
+    "now": "just now",
+    "minutes": "{{count}} min ago",
+    "hours": "{{count}} h ago",
+    "days": "{{count}} d ago"
+  }
+}

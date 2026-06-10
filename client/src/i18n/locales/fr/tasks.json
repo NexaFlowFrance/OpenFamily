@@ -1,0 +1,74 @@
+{
+  "loading": "Chargement des tâches…",
+  "title": "Tâches",
+  "subtitle": "Gérez vos tâches familiales et suivez leur progression",
+  "newTask": "Nouvelle tâche",
+  "priorities": {
+    "Haute": "Haute",
+    "Moyenne": "Moyenne",
+    "Basse": "Basse"
+  },
+  "frequencies": {
+    "Une fois": "Une fois",
+    "Quotidien": "Quotidien",
+    "Hebdomadaire": "Hebdomadaire",
+    "Mensuel": "Mensuel",
+    "Annuel": "Annuel"
+  },
+  "stats": {
+    "total": "Total",
+    "completed": "Complétées",
+    "pending": "En attente",
+    "completionRate": "Taux de réussite"
+  },
+  "filters": {
+    "label": "Filtres :",
+    "statusAll": "Toutes",
+    "statusPending": "En attente",
+    "statusCompleted": "Complétées",
+    "allPriorities": "Toutes priorités",
+    "allMembers": "Tous les membres",
+    "unassigned": "Non assignées"
+  },
+  "empty": {
+    "none": "Aucune tâche pour le moment. Créez votre première tâche !",
+    "noMatch": "Aucune tâche ne correspond aux filtres sélectionnés."
+  },
+  "due": "Échéance : {{date}}",
+  "dialog": {
+    "editTitle": "Modifier la tâche",
+    "createTitle": "Nouvelle tâche",
+    "description": "Remplissez les informations de la tâche"
+  },
+  "form": {
+    "title": "Titre",
+    "titlePlaceholder": "Ex : Faire les courses",
+    "description": "Description (facultatif)",
+    "descriptionPlaceholder": "Détails supplémentaires…",
+    "priority": "Priorité",
+    "frequency": "Fréquence",
+    "dueDate": "Date d'échéance (facultatif)",
+    "assignTo": "Assigner à (facultatif)",
+    "noMembers": "Aucun membre disponible",
+    "points": "Points à gagner (facultatif)",
+    "pointsHint": "Les membres assignés gagnent ces points quand la tâche est terminée."
+  },
+  "approval": {
+    "pendingBadge": "En attente de validation",
+    "approve": "Valider",
+    "reject": "Refuser",
+    "toastTitle": "Bravo, tâche terminée !",
+    "toastDescription": "Tes points seront ajoutés dès qu'un parent aura validé."
+  },
+  "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette tâche ?",
+  "errors": {
+    "loadTasks": "Impossible de charger les tâches.",
+    "loadMembers": "Impossible de charger les membres.",
+    "loadStats": "Impossible de charger les statistiques.",
+    "saveTask": "Impossible d'enregistrer cette tâche.",
+    "toggleTask": "Impossible de mettre à jour cette tâche.",
+    "deleteTask": "Impossible de supprimer cette tâche.",
+    "approveTask": "Impossible de valider cette tâche.",
+    "rejectTask": "Impossible de refuser cette tâche."
+  }
+}

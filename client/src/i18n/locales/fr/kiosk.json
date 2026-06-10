@@ -1,0 +1,36 @@
+{
+  "exit": "Quitter",
+  "fullscreen": "Plein écran",
+  "exitFullscreen": "Quitter le plein écran",
+  "schedule": "Au programme aujourd'hui",
+  "meals": "Repas du jour",
+  "tasks": "À faire aujourd'hui",
+  "whereabouts": "Qui est où aujourd'hui",
+  "shopping": "Liste de courses",
+  "allDay": "Toute la journée",
+  "undo": "Annuler",
+  "empty": {
+    "appointments": "Rien de prévu aujourd'hui",
+    "meals": "Aucun repas prévu",
+    "tasks": "Tout est fait ✨",
+    "whereabouts": "Personne de prévu aujourd'hui",
+    "shopping": "Rien à acheter"
+  },
+  "displaySettings": {
+    "open": "Réglages de l'affichage",
+    "title": "Réglages de l'affichage",
+    "close": "Fermer",
+    "location": "Lieu pour la météo",
+    "searchPlaceholder": "Rechercher une ville…",
+    "noResults": "Aucun résultat",
+    "noLocation": "Choisissez un lieu pour afficher la météo sur cet écran.",
+    "change": "Changer",
+    "photoBackground": "Fond photo",
+    "photoBackgroundHint": "Affiche des photos aléatoires de votre bibliothèque en arrière-plan. Nécessite une intégration Immich connectée."
+  },
+  "settings": {
+    "title": "Affichage kiosk",
+    "subtitle": "Un affichage plein écran en lecture seule pour une tablette murale ou un écran de frigo — agenda du jour, repas, tâches et qui est où.",
+    "open": "Ouvrir l'affichage kiosk"
+  }
+}

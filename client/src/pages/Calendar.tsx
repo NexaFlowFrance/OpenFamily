@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api, API_BASE_URL } from '../lib/api';
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { dateLocale } from '../i18n/format';
 import { useNavigate } from 'react-router-dom';
 
 interface Appointment {
@@ -56,6 +57,7 @@ const addMinutes = (dateTime: string, minutes: number) => {
 };
 
 const Calendar: React.FC = () => {
+    const { t } = useTranslation(['calendar', 'common']);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
@@ -90,17 +92,19 @@ const Calendar: React.FC = () => {
 
     const loadAppointments = async () => {
         try {
-            const start = startOfMonth(currentDate);
-            const end = endOfMonth(currentDate);
+            // Naive local strings: start_time/end_time are stored as local
+            // "YYYY-MM-DDTHH:mm:ss" without timezone, so query bounds must match.
+            const start = format(startOfMonth(currentDate), "yyyy-MM-dd'T'00:00:00");
+            const end = format(endOfMonth(currentDate), "yyyy-MM-dd'T'23:59:59");
             const response = await api.get<{ success: boolean; data: Appointment[] }>(
-                `/api/appointments?start_date=${start.toISOString()}&end_date=${end.toISOString()}`
+                `/api/appointments?start_date=${start}&end_date=${end}`
             );
             if (response.success) {
                 setAppointments(response.data);
             }
         } catch (error) {
             console.error('Failed to load appointments:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de charger les rendez-vous.');
+            setError(error instanceof Error ? error.message : t('calendar:errors.loadAppointments'));
         } finally {
             setLoading(false);
         }
@@ -114,11 +118,14 @@ const Calendar: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to load family members:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de charger les membres.');
+            setError(error instanceof Error ? error.message : t('calendar:errors.loadMembers'));
         }
     };
 
-    const feedUrl = feedToken ? `${API_BASE_URL}/api/calendar/${feedToken}/openfamily.ics` : '';
+    // In same-origin production builds API_BASE_URL is '' — fall back to the page
+    // origin so the subscription URL is absolute (and webcal:// rewriting works).
+    const feedBaseUrl = API_BASE_URL || window.location.origin;
+    const feedUrl = feedToken ? `${feedBaseUrl}/api/calendar/${feedToken}/openfamily.ics` : '';
     const feedWebcalUrl = feedUrl.replace(/^https?:\/\//, 'webcal://');
 
     const openFeedDialog = async () => {
@@ -129,13 +136,13 @@ const Calendar: React.FC = () => {
                 const res = await api.get<{ success: boolean; data: { token: string } }>('/api/calendar/token');
                 if (res.success) setFeedToken(res.data.token);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Impossible de récupérer le lien iCal.');
+                setError(err instanceof Error ? err.message : t('calendar:errors.icalFetch'));
             }
         }
     };
 
     const resetFeedToken = async () => {
-        if (!confirm('Régénérer le lien ? Les anciens abonnements cesseront de fonctionner.')) return;
+        if (!confirm(t('calendar:confirmRegen'))) return;
         try {
             const res = await api.post<{ success: boolean; data: { token: string } }>('/api/calendar/token/reset', {});
             if (res.success) {
@@ -143,7 +150,7 @@ const Calendar: React.FC = () => {
                 setFeedCopied(false);
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Impossible de régénérer le lien.');
+            setError(err instanceof Error ? err.message : t('calendar:errors.icalRegen'));
         }
     };
 
@@ -162,12 +169,12 @@ const Calendar: React.FC = () => {
         setError('');
 
         if (!formData.start_time) {
-            setError('Veuillez renseigner une date et une heure de debut.');
+            setError(t('calendar:errors.startRequired'));
             return;
         }
 
         if (formData.end_time && new Date(formData.end_time).getTime() < new Date(formData.start_time).getTime()) {
-            setError('L heure de fin doit etre apres l heure de debut.');
+            setError(t('calendar:errors.endAfterStart'));
             return;
         }
 
@@ -182,18 +189,18 @@ const Calendar: React.FC = () => {
             loadAppointments();
         } catch (error) {
             console.error('Failed to save appointment:', error);
-            setError(error instanceof Error ? error.message : 'Impossible d’enregistrer ce rendez-vous.');
+            setError(error instanceof Error ? error.message : t('calendar:errors.save'));
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce rendez-vous ?')) return;
+        if (!confirm(t('calendar:confirmDelete'))) return;
         try {
             await api.delete(`/api/appointments/${id}`);
             loadAppointments();
         } catch (error) {
             console.error('Failed to delete appointment:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de supprimer ce rendez-vous.');
+            setError(error instanceof Error ? error.message : t('calendar:errors.delete'));
         }
     };
 
@@ -215,11 +222,12 @@ const Calendar: React.FC = () => {
     };
 
     const handleDayClick = (date: Date) => {
-        const dateStr = format(date, "yyyy-MM-dd'T'09:00");
-        setEndManuallySet(false);
+        // Always start from a clean slate: a previously opened edit dialog must
+        // not leak its appointment or form values into a new creation.
+        resetForm();
         setFormData((prev) => ({
             ...prev,
-            start_time: dateStr,
+            start_time: format(date, "yyyy-MM-dd'T'09:00"),
             end_time: format(date, "yyyy-MM-dd'T'10:00"),
         }));
         setDialogOpen(true);
@@ -328,14 +336,14 @@ const Calendar: React.FC = () => {
         });
     };
 
-    const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+    const weekDays = t('common:daysShort', { returnObjects: true }) as string[];
 
     if (loading) {
         return (
             <div className="flex h-full items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
-                    <p className="text-muted-foreground font-medium animate-pulse">Chargement du calendrier...</p>
+                    <p className="text-muted-foreground font-medium animate-pulse">{t('calendar:loading')}</p>
                 </div>
             </div>
         );
@@ -350,17 +358,17 @@ const Calendar: React.FC = () => {
             ) : null}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-h1 mb-1">Calendrier</h1>
-                    <p className="text-muted-foreground text-body">Gérez vos rendez-vous familiaux</p>
+                    <h1 className="text-h1 mb-1">{t('calendar:title')}</h1>
+                    <p className="text-muted-foreground text-body">{t('calendar:subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="secondary" onClick={openFeedDialog}>
                         <CalendarPlus className="w-4 h-4 mr-2" />
-                        Exporter (iCal)
+                        {t('calendar:exportIcal')}
                     </Button>
                     <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
                         <Plus className="w-4 h-4 mr-2" />
-                        Nouveau rendez-vous
+                        {t('calendar:newAppointment')}
                     </Button>
                 </div>
             </div>
@@ -369,8 +377,8 @@ const Calendar: React.FC = () => {
             <Card>
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-h2 font-semibold">
-                            {format(currentDate, 'MMMM yyyy', { locale: fr })}
+                        <h2 className="text-h2 font-semibold capitalize">
+                            {format(currentDate, 'MMMM yyyy', { locale: dateLocale() })}
                         </h2>
                         <div className="flex gap-2">
                             <Button
@@ -385,7 +393,7 @@ const Calendar: React.FC = () => {
                                 size="sm"
                                 onClick={() => setCurrentDate(new Date())}
                             >
-                                Aujourd'hui
+                                {t('common:actions.today')}
                             </Button>
                             <Button
                                 variant="secondary"
@@ -462,7 +470,7 @@ const Calendar: React.FC = () => {
                                         ))}
                                         {dayAppointments.length > 3 && (
                                             <div className="text-[10px] text-muted-foreground text-center">
-                                                +{dayAppointments.length - 3} autres
+                                                {t('calendar:moreOthers', { count: dayAppointments.length - 3 })}
                                             </div>
                                         )}
                                     </div>
@@ -476,7 +484,7 @@ const Calendar: React.FC = () => {
             {/* Upcoming Appointments */}
             <Card>
                 <CardContent className="p-6">
-                    <h3 className="text-h2 font-semibold mb-4">Rendez-vous à venir</h3>
+                    <h3 className="text-h2 font-semibold mb-4">{t('calendar:upcoming.title')}</h3>
                     <div className="space-y-3">
                         {appointments
                             .filter((apt) => new Date(apt.start_time) >= new Date())
@@ -496,9 +504,9 @@ const Calendar: React.FC = () => {
                                         <div className="flex flex-wrap items-center gap-3 text-body-sm text-muted-foreground">
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />
-                                                {format(new Date(apt.start_time), 'dd MMM yyyy', { locale: fr })}
+                                                {format(new Date(apt.start_time), 'dd MMM yyyy', { locale: dateLocale() })}
                                                 {apt.end_time && !isSameDay(new Date(apt.start_time), new Date(apt.end_time)) && (
-                                                    <span> → {format(new Date(apt.end_time), 'dd MMM yyyy', { locale: fr })}</span>
+                                                    <span> → {format(new Date(apt.end_time), 'dd MMM yyyy', { locale: dateLocale() })}</span>
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-1">
@@ -535,7 +543,7 @@ const Calendar: React.FC = () => {
                             ))}
                         {appointments.filter((apt) => new Date(apt.start_time) >= new Date()).length === 0 && (
                             <p className="text-center text-muted-foreground py-8">
-                                Aucun rendez-vous à venir
+                                {t('calendar:upcoming.empty')}
                             </p>
                         )}
                     </div>
@@ -545,50 +553,55 @@ const Calendar: React.FC = () => {
             {/* Dialog */}
             <Dialog
                 open={dialogOpen}
-                onOpenChange={setDialogOpen}
-                title={editingAppointment ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous'}
-                description="Remplissez les informations du rendez-vous"
+                onOpenChange={(open) => {
+                    setDialogOpen(open);
+                    // Closing the dialog (Cancel, X, overlay, Escape) must drop any
+                    // stale editing state so the next open never reuses it.
+                    if (!open) resetForm();
+                }}
+                title={editingAppointment ? t('calendar:dialog.editTitle') : t('calendar:dialog.createTitle')}
+                description={t('calendar:dialog.description')}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input
-                        label="Titre"
+                        label={t('calendar:form.title')}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         required
-                        placeholder="Ex: Rendez-vous médecin"
+                        placeholder={t('calendar:form.titlePlaceholder')}
                     />
                     <Textarea
-                        label="Description (optionnel)"
+                        label={t('calendar:form.description')}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Détails supplémentaires..."
+                        placeholder={t('calendar:form.descriptionPlaceholder')}
                         rows={3}
                     />
                     <div className="rounded-input border border-border bg-surface-2/40 p-3">
-                        <p className="mb-3 text-caption font-medium text-foreground">Planification</p>
+                        <p className="mb-3 text-caption font-medium text-foreground">{t('calendar:form.scheduling')}</p>
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <Input
-                                label="Debut date"
+                                label={t('calendar:form.startDate')}
                                 type="date"
                                 value={selectedDate}
                                 onChange={(e) => handleDateChange(e.target.value)}
                                 required
                             />
                             <Input
-                                label="Debut heure"
+                                label={t('calendar:form.startTime')}
                                 type="time"
                                 value={selectedStartTime}
                                 onChange={(e) => handleStartTimeChange(e.target.value)}
                                 required
                             />
                             <Input
-                                label="Fin date"
+                                label={t('calendar:form.endDate')}
                                 type="date"
                                 value={selectedEndDate}
                                 onChange={(e) => handleEndDateChange(e.target.value)}
                             />
                             <Input
-                                label="Fin heure"
+                                label={t('calendar:form.endTime')}
                                 type="time"
                                 value={selectedEndTime}
                                 onChange={(e) => handleEndTimeChange(e.target.value)}
@@ -607,19 +620,19 @@ const Calendar: React.FC = () => {
                         </div>
                     </div>
                     <Input
-                        label="Lieu (optionnel)"
+                        label={t('calendar:form.location')}
                         value={formData.location}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="Ex: Cabinet médical"
+                        placeholder={t('calendar:form.locationPlaceholder')}
                     />
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
-                            Membres de la famille (optionnel)
+                            {t('calendar:form.members')}
                         </label>
                         {familyMembers.length === 0 ? (
                             <div className="mt-2 flex items-center justify-between rounded-input border border-border bg-surface-2 px-3 py-2">
                                 <span className="text-micro text-muted-foreground">
-                                    Ajoutez un membre pour l assigner rapidement.
+                                    {t('calendar:form.noMembersHint')}
                                 </span>
                                 <Button
                                     type="button"
@@ -630,7 +643,7 @@ const Calendar: React.FC = () => {
                                         navigate('/family');
                                     }}
                                 >
-                                    Aller a Famille
+                                    {t('calendar:form.goToFamily')}
                                 </Button>
                             </div>
                         ) : (
@@ -661,7 +674,7 @@ const Calendar: React.FC = () => {
                         )}
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-label font-medium text-foreground">Rappels</label>
+                        <label className="block text-label font-medium text-foreground">{t('calendar:form.reminders')}</label>
                         <div className="flex items-center gap-4">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
@@ -672,7 +685,7 @@ const Calendar: React.FC = () => {
                                     }
                                     className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                                 />
-                                <span className="text-body-sm">30 minutes avant</span>
+                                <span className="text-body-sm">{t('calendar:form.reminder30')}</span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
@@ -683,15 +696,15 @@ const Calendar: React.FC = () => {
                                     }
                                     className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                                 />
-                                <span className="text-body-sm">1 heure avant</span>
+                                <span className="text-body-sm">{t('calendar:form.reminder1h')}</span>
                             </label>
                         </div>
                     </div>
                     <Textarea
-                        label="Notes (optionnel)"
+                        label={t('calendar:form.notes')}
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder="Notes supplémentaires..."
+                        placeholder={t('calendar:form.notesPlaceholder')}
                         rows={2}
                     />
                     <div className="flex items-center justify-between gap-3 pt-4">
@@ -709,15 +722,15 @@ const Calendar: React.FC = () => {
                                     }}
                                 >
                                     <Trash2 className="mr-2 h-4 w-4" />
-                                    Supprimer
+                                    {t('common:actions.delete')}
                                 </Button>
                             )}
                         </div>
                         <div className="flex gap-3">
-                            <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
-                                Annuler
+                            <Button type="button" variant="secondary" onClick={() => { setDialogOpen(false); resetForm(); }}>
+                                {t('common:actions.cancel')}
                             </Button>
-                            <Button type="submit">{editingAppointment ? 'Enregistrer' : 'Créer'}</Button>
+                            <Button type="submit">{editingAppointment ? t('common:actions.save') : t('common:actions.create')}</Button>
                         </div>
                     </div>
                 </form>
@@ -727,16 +740,16 @@ const Calendar: React.FC = () => {
             <Dialog
                 open={feedDialogOpen}
                 onOpenChange={setFeedDialogOpen}
-                title="Exporter le calendrier (iCal)"
-                description="Abonnez-vous depuis Apple Calendar, Google Agenda ou Outlook pour synchroniser automatiquement vos rendez-vous."
+                title={t('calendar:feed.title')}
+                description={t('calendar:feed.description')}
             >
                 <div className="space-y-4">
                     {!feedToken ? (
-                        <p className="text-body-sm text-muted-foreground py-4 text-center">Génération du lien…</p>
+                        <p className="text-body-sm text-muted-foreground py-4 text-center">{t('calendar:feed.generating')}</p>
                     ) : (
                         <>
                             <div>
-                                <label className="block text-label font-medium text-foreground mb-1">Lien d'abonnement</label>
+                                <label className="block text-label font-medium text-foreground mb-1">{t('calendar:feed.subscribeLink')}</label>
                                 <div className="flex items-center gap-2">
                                     <input
                                         readOnly
@@ -754,24 +767,24 @@ const Calendar: React.FC = () => {
                                 <a href={feedWebcalUrl}>
                                     <Button variant="secondary" size="sm">
                                         <CalendarPlus className="h-4 w-4 mr-2" />
-                                        S'abonner (Apple / Outlook)
+                                        {t('calendar:feed.subscribeApple')}
                                     </Button>
                                 </a>
                                 <a href={feedUrl} download="openfamily.ics">
                                     <Button variant="secondary" size="sm">
-                                        Télécharger le fichier .ics
+                                        {t('calendar:feed.downloadIcs')}
                                     </Button>
                                 </a>
                             </div>
 
                             <p className="text-caption text-muted-foreground">
-                                Ce lien est privé : toute personne le possédant peut consulter vos rendez-vous.
+                                {t('calendar:feed.privateNote')}
                             </p>
 
                             <div className="flex justify-end pt-2 border-t border-border">
                                 <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={resetFeedToken}>
                                     <RefreshCw className="h-4 w-4 mr-2" />
-                                    Régénérer le lien
+                                    {t('calendar:feed.regenerate')}
                                 </Button>
                             </div>
                         </>

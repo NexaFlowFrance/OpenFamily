@@ -1,0 +1,69 @@
+{
+  "title": "Settings",
+  "subtitle": "Manage your data and preferences.",
+  "language": {
+    "title": "Language",
+    "subtitle": "Choose the language of the app interface."
+  },
+  "profile": {
+    "title": "Profile photo",
+    "subtitle": "Choose a photo that will appear in the app menu.",
+    "change": "Change photo",
+    "choose": "Choose a photo",
+    "remove": "Remove"
+  },
+  "notif": {
+    "title": "Push notifications",
+    "subtitle": "Get reminders for your appointments directly on this device, even when the app is closed.",
+    "unsupported": "Notifications are not supported on this browser.",
+    "denied": "Permission denied. Allow notifications in your browser settings.",
+    "enable": "Enable notifications",
+    "disable": "Disable notifications",
+    "inProgress": "Working…",
+    "active": "Notifications enabled on this device."
+  },
+  "currency": {
+    "title": "Currency",
+    "subtitle": "Select the currency used to display amounts in your app."
+  },
+  "export": {
+    "title": "Export data",
+    "subtitle": "Download all your data (budget, tasks, recipes, members, shopping, appointments, planning, meals) as a JSON file.",
+    "button": "Export",
+    "inProgress": "Exporting…"
+  },
+  "import": {
+    "title": "Import data",
+    "subtitle": "Restore data from an OpenFamily export file. Existing data is not overwritten (duplicates are skipped).",
+    "success": "Import successful",
+    "itemsImported_one": "item imported",
+    "itemsImported_other": "items imported",
+    "chooseFile": "Choose a file…",
+    "button": "Import",
+    "inProgress": "Importing…",
+    "invalidJson": "Invalid JSON file."
+  },
+  "entities": {
+    "family_members": "Family members",
+    "tasks": "Tasks",
+    "recipes": "Recipes",
+    "meal_plans": "Planned meals",
+    "budget_entries": "Budget entries",
+    "budget_limits": "Budget limits",
+    "shopping_items": "Shopping items",
+    "appointments": "Appointments",
+    "schedule_entries": "Planning entries"
+  },
+  "errors": {
+    "notif": "Error while configuring notifications.",
+    "currency": "Error while updating the currency.",
+    "avatarImage": "Please choose an image.",
+    "avatarRead": "Could not read the file.",
+    "avatarInvalid": "Invalid image.",
+    "avatarCanvas": "Canvas unavailable.",
+    "avatarUpdate": "Error while updating the photo.",
+    "avatarRemove": "Error while removing the photo.",
+    "export": "Error during export.",
+    "import": "Error during import."
+  }
+}

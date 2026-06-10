@@ -1,0 +1,13 @@
+# Fichiers prepares automatiquement par la CI (voir windows-installer.yml)
+assets/OpenFamily.ico
+assets/OpenFamily.png
+assets/wizard-large.bmp
+assets/wizard-small.bmp
+app/schema.sql
+app/server/
+app/client/
+app/runtime/
+# Lanceur natif compile par la CI depuis OpenFamilyLauncher.cs
+app/OpenFamily.exe
+# Brouillons locaux
+OpenFamily 2.iss

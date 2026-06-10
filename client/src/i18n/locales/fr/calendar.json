@@ -1,0 +1,60 @@
+{
+  "loading": "Chargement du calendrier…",
+  "title": "Calendrier",
+  "subtitle": "Gérez vos rendez-vous familiaux",
+  "exportIcal": "Exporter (iCal)",
+  "newAppointment": "Nouveau rendez-vous",
+  "moreOthers": "+{{count}} autres",
+  "upcoming": {
+    "title": "Rendez-vous à venir",
+    "empty": "Aucun rendez-vous à venir"
+  },
+  "dialog": {
+    "editTitle": "Modifier le rendez-vous",
+    "createTitle": "Nouveau rendez-vous",
+    "description": "Remplissez les informations du rendez-vous"
+  },
+  "form": {
+    "title": "Titre",
+    "titlePlaceholder": "Ex : Rendez-vous médecin",
+    "description": "Description (facultatif)",
+    "descriptionPlaceholder": "Détails supplémentaires…",
+    "scheduling": "Planification",
+    "startDate": "Début date",
+    "startTime": "Début heure",
+    "endDate": "Fin date",
+    "endTime": "Fin heure",
+    "location": "Lieu (facultatif)",
+    "locationPlaceholder": "Ex : Cabinet médical",
+    "members": "Membres de la famille (facultatif)",
+    "noMembersHint": "Ajoutez un membre pour l'assigner rapidement.",
+    "goToFamily": "Aller à Famille",
+    "reminders": "Rappels",
+    "reminder30": "30 minutes avant",
+    "reminder1h": "1 heure avant",
+    "notes": "Notes (facultatif)",
+    "notesPlaceholder": "Notes supplémentaires…"
+  },
+  "feed": {
+    "title": "Exporter le calendrier (iCal)",
+    "description": "Abonnez-vous depuis Apple Calendar, Google Agenda ou Outlook pour synchroniser automatiquement vos rendez-vous.",
+    "generating": "Génération du lien…",
+    "subscribeLink": "Lien d'abonnement",
+    "subscribeApple": "S'abonner (Apple / Outlook)",
+    "downloadIcs": "Télécharger le fichier .ics",
+    "privateNote": "Ce lien est privé : toute personne le possédant peut consulter vos rendez-vous.",
+    "regenerate": "Régénérer le lien"
+  },
+  "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce rendez-vous ?",
+  "confirmRegen": "Régénérer le lien ? Les anciens abonnements cesseront de fonctionner.",
+  "errors": {
+    "loadAppointments": "Impossible de charger les rendez-vous.",
+    "loadMembers": "Impossible de charger les membres.",
+    "icalFetch": "Impossible de récupérer le lien iCal.",
+    "icalRegen": "Impossible de régénérer le lien.",
+    "startRequired": "Veuillez renseigner une date et une heure de début.",
+    "endAfterStart": "L'heure de fin doit être après l'heure de début.",
+    "save": "Impossible d'enregistrer ce rendez-vous.",
+    "delete": "Impossible de supprimer ce rendez-vous."
+  }
+}

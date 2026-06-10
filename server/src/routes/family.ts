@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { query } from '../db';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { authMiddleware, requireParent, AuthRequest } from '../middleware/auth';
 import { parseStringArray, serializeStringArray, toNullIfEmpty } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
 
@@ -71,6 +71,7 @@ const mapFamilyMember = (row: any) => {
         emergency_contact_name: emergency.name,
         emergency_contact_phone: emergency.phone,
         notes: row.notes ?? row.medical_notes ?? null,
+        linked_user_id: row.linked_user_id ?? null,
         created_at: row.created_at,
         updated_at: row.updated_at,
     };
@@ -111,8 +112,8 @@ router.get('/:id', async (req: AuthRequest, res) => {
     }
 });
 
-// Create family member
-router.post('/', async (req: AuthRequest, res) => {
+// Create family member (parents only — contains medical data)
+router.post('/', requireParent, async (req: AuthRequest, res) => {
     try {
         const {
             name,
@@ -199,8 +200,8 @@ router.post('/', async (req: AuthRequest, res) => {
     }
 });
 
-// Update family member
-router.put('/:id', async (req: AuthRequest, res) => {
+// Update family member (parents only — contains medical data)
+router.put('/:id', requireParent, async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
         const {
@@ -320,8 +321,57 @@ router.put('/:id', async (req: AuthRequest, res) => {
     }
 });
 
-// Delete family member
-router.delete('/:id', async (req: AuthRequest, res) => {
+// Link / unlink a member profile to a user account (family owner only).
+// Body: { user_id: string | null }. An account can be linked to one profile at most.
+router.put('/:id/link', async (req: AuthRequest, res) => {
+    try {
+        if (!req.isOwner) {
+            return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
+        }
+
+        const { id } = req.params;
+        const rawUserId = (req.body as { user_id?: unknown } | undefined)?.user_id;
+        const targetUserId = typeof rawUserId === 'string' && rawUserId.trim() ? rawUserId.trim() : null;
+
+        const memberCheck = await query(
+            'SELECT id FROM family_members WHERE id = $1 AND user_id = $2',
+            [id, req.userId]
+        );
+        if (memberCheck.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Family member not found' });
+        }
+
+        if (targetUserId) {
+            // The target account must belong to this family (the owner or a shared account).
+            const userCheck = await query(
+                'SELECT id FROM users WHERE id = $1 AND (id = $2 OR family_owner_id = $2)',
+                [targetUserId, req.userId]
+            );
+            if (userCheck.rows.length === 0) {
+                return res.status(400).json({ success: false, error: 'User not found in this family' });
+            }
+            // One profile per account: clear any previous link before setting the new one.
+            await query(
+                'UPDATE family_members SET linked_user_id = NULL WHERE user_id = $1 AND linked_user_id = $2 AND id <> $3',
+                [req.userId, targetUserId, id]
+            );
+        }
+
+        const result = await query(
+            'UPDATE family_members SET linked_user_id = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+            [targetUserId, id, req.userId]
+        );
+
+        broadcast(req.userId!, { type: 'update', entity: 'family', action: 'updated' });
+        res.json({ success: true, data: mapFamilyMember(result.rows[0]) });
+    } catch (error) {
+        console.error('Link family member error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Delete family member (parents only)
+router.delete('/:id', requireParent, async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
 

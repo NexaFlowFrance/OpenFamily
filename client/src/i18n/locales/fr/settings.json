@@ -1,0 +1,69 @@
+{
+  "title": "Paramètres",
+  "subtitle": "Gérez vos données et préférences.",
+  "language": {
+    "title": "Langue",
+    "subtitle": "Choisissez la langue de l'interface de l'application."
+  },
+  "profile": {
+    "title": "Photo de profil",
+    "subtitle": "Choisissez une photo qui apparaîtra dans le menu de l'application.",
+    "change": "Changer la photo",
+    "choose": "Choisir une photo",
+    "remove": "Retirer"
+  },
+  "notif": {
+    "title": "Notifications push",
+    "subtitle": "Recevez des rappels pour vos rendez-vous directement sur cet appareil, même quand l'application est fermée.",
+    "unsupported": "Notifications non supportées sur ce navigateur.",
+    "denied": "Permission refusée. Autorisez les notifications dans les paramètres de votre navigateur.",
+    "enable": "Activer les notifications",
+    "disable": "Désactiver les notifications",
+    "inProgress": "En cours…",
+    "active": "Notifications activées sur cet appareil."
+  },
+  "currency": {
+    "title": "Devise",
+    "subtitle": "Sélectionnez la devise pour afficher les montants dans votre application."
+  },
+  "export": {
+    "title": "Exporter les données",
+    "subtitle": "Télécharge toutes vos données (budget, tâches, recettes, membres, courses, rendez-vous, plannings, repas) dans un fichier JSON.",
+    "button": "Exporter",
+    "inProgress": "Export en cours…"
+  },
+  "import": {
+    "title": "Importer des données",
+    "subtitle": "Restaure des données depuis un fichier d'export OpenFamily. Les données existantes ne sont pas écrasées (doublons ignorés).",
+    "success": "Import réussi",
+    "itemsImported_one": "élément importé",
+    "itemsImported_other": "éléments importés",
+    "chooseFile": "Choisir un fichier…",
+    "button": "Importer",
+    "inProgress": "Import en cours…",
+    "invalidJson": "Fichier JSON invalide."
+  },
+  "entities": {
+    "family_members": "Membres de la famille",
+    "tasks": "Tâches",
+    "recipes": "Recettes",
+    "meal_plans": "Repas planifiés",
+    "budget_entries": "Entrées budget",
+    "budget_limits": "Limites budget",
+    "shopping_items": "Articles de courses",
+    "appointments": "Rendez-vous",
+    "schedule_entries": "Plannings"
+  },
+  "errors": {
+    "notif": "Erreur lors de la configuration des notifications.",
+    "currency": "Erreur lors de la mise à jour de la devise.",
+    "avatarImage": "Veuillez choisir une image.",
+    "avatarRead": "Lecture du fichier impossible.",
+    "avatarInvalid": "Image invalide.",
+    "avatarCanvas": "Canvas indisponible.",
+    "avatarUpdate": "Erreur lors de la mise à jour de la photo.",
+    "avatarRemove": "Erreur lors de la suppression de la photo.",
+    "export": "Erreur lors de l'export.",
+    "import": "Erreur lors de l'import."
+  }
+}

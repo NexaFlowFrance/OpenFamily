@@ -52,9 +52,10 @@ ios/
 client/public/sw.js
 client/public/workbox-*.js
 
-# Windows installer (scripts de compilation — distribué via Release .exe)
-installer/
-.github/workflows/windows-installer.yml
+# Windows installer : les sources (OpenFamily.iss, scripts engine, launcher)
+# sont versionnées ; le contenu généré par la CI est exclu via
+# installer/windows/.gitignore
+._*
 
 # Assets internes non distribués
 logo nexaflow.png

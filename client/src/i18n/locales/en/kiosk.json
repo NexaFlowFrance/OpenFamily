@@ -1,0 +1,36 @@
+{
+  "exit": "Exit",
+  "fullscreen": "Fullscreen",
+  "exitFullscreen": "Exit fullscreen",
+  "schedule": "Today's schedule",
+  "meals": "Today's meals",
+  "tasks": "To do today",
+  "whereabouts": "Who's where today",
+  "shopping": "Shopping list",
+  "allDay": "All day",
+  "undo": "Undo",
+  "empty": {
+    "appointments": "Nothing planned today",
+    "meals": "No meals planned",
+    "tasks": "All caught up ✨",
+    "whereabouts": "Nobody scheduled today",
+    "shopping": "Nothing to buy"
+  },
+  "displaySettings": {
+    "open": "Display settings",
+    "title": "Display settings",
+    "close": "Close",
+    "location": "Weather location",
+    "searchPlaceholder": "Search for a city…",
+    "noResults": "No results",
+    "noLocation": "Pick a location to show the weather on this display.",
+    "change": "Change",
+    "photoBackground": "Photo background",
+    "photoBackgroundHint": "Shows random photos from your library as the background. Requires a connected Immich integration."
+  },
+  "settings": {
+    "title": "Kiosk display",
+    "subtitle": "A full-screen, read-only display for a wall tablet or fridge screen — today's calendar, meals, tasks and who's where.",
+    "open": "Open kiosk display"
+  }
+}

@@ -20,7 +20,10 @@ export type WsEntity =
     | 'recipes'
     | 'meal-plans'
     | 'planning'
-    | 'notifications';
+    | 'notifications'
+    | 'integrations'
+    | 'rewards'
+    | 'notes';
 
 export type WsAction = 'created' | 'updated' | 'deleted';
 
@@ -54,6 +57,8 @@ const resolveWsBase = (): string => {
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${window.location.host}`;
 };
+
+const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
 
 const RECONNECT_DELAY_MS = 2_000;
 const RECONNECT_MAX_DELAY_MS = 30_000;
@@ -89,7 +94,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
     };
 
     const connect = useCallback(() => {
-        if (unmounted.current || !user) return;
+        if (unmounted.current || !user || IS_DEMO) return;
 
         // Close any existing socket
         if (wsRef.current) {

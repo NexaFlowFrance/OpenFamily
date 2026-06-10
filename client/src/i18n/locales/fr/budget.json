@@ -1,0 +1,98 @@
+{
+  "loading": "Chargement du budget…",
+  "categories": {
+    "Logement": "Logement",
+    "Alimentation": "Alimentation",
+    "Transport": "Transport",
+    "Santé": "Santé",
+    "Loisirs": "Loisirs",
+    "Abonnements": "Abonnements",
+    "Assurance": "Assurance",
+    "Enfants": "Enfants",
+    "Maison": "Maison",
+    "Autre": "Autre"
+  },
+  "readOnly": "Mode lecture seule. Seuls les parents peuvent modifier le budget.",
+  "alerts": {
+    "title": "Plafonds atteints",
+    "over": " · dépassé",
+    "warn": " (≥ 80 %)"
+  },
+  "balance": {
+    "current": "Solde actuel",
+    "pointed_one": "{{count}} prélèvement pointé",
+    "pointed_other": "{{count}} prélèvements pointés",
+    "expenses_one": "{{count}} dépense",
+    "expenses_other": "{{count}} dépenses"
+  },
+  "forecast": {
+    "title": "Prévisionnel",
+    "subtitle": "Encore {{amount}} de prélèvements à pointer"
+  },
+  "analytics": "Analyse & plafonds",
+  "charts": {
+    "expensesByCategory": "Dépenses par catégorie",
+    "noExpenses": "Aucune dépense ce mois",
+    "yearEvolution": "Évolution sur l'année",
+    "income": "Revenus",
+    "expenses": "Dépenses"
+  },
+  "limits": {
+    "title": "Plafonds mensuels",
+    "subtitle": "Suivi des dépenses par catégorie",
+    "define": "Définir",
+    "none": "Aucun plafond défini"
+  },
+  "sections": {
+    "recurring": "Prélèvements",
+    "expenses": "Dépenses",
+    "income": "Revenus"
+  },
+  "recurring": {
+    "empty": "Aucun prélèvement récurrent",
+    "addOne": "+ Ajouter un prélèvement",
+    "markOn": "Marquer comme débité",
+    "markOff": "Dépointer",
+    "dayPrefix": "j."
+  },
+  "empty": {
+    "expenses": "Aucune dépense ce mois",
+    "income": "Aucun revenu ce mois"
+  },
+  "sheets": {
+    "recurringEdit": "Modifier le prélèvement",
+    "recurringNew": "Nouveau prélèvement",
+    "edit": "Modifier",
+    "newExpense": "Nouvelle dépense",
+    "newIncome": "Nouveau revenu",
+    "limit": "Plafond mensuel"
+  },
+  "toggle": {
+    "expense": "Dépense",
+    "income": "Revenu"
+  },
+  "fields": {
+    "name": "Nom du prélèvement",
+    "namePlaceholder": "Ex : Loyer, EDF, Netflix…",
+    "amount": "Montant ({{currency}})",
+    "debitDay": "Jour de débit dans le mois (1 à 31)",
+    "debitDayPlaceholder": "Ex : 5",
+    "description": "Description (facultatif)",
+    "descriptionPlaceholder": "Ex : Courses Leclerc, Salaire…",
+    "date": "Date",
+    "category": "Catégorie",
+    "limit": "Plafond mensuel ({{currency}})",
+    "limitHint": "Définir 0 pour retirer le suivi de cette catégorie."
+  },
+  "errors": {
+    "amountInvalid": "Montant invalide.",
+    "nameRequired": "Nom requis.",
+    "debitDayInvalid": "Jour de débit invalide (1-31).",
+    "save": "Erreur lors de l'enregistrement.",
+    "limitInvalid": "Plafond invalide."
+  },
+  "confirm": {
+    "deleteRecurring": "Supprimer ce prélèvement récurrent ?",
+    "deleteEntry": "Supprimer cette entrée ?"
+  }
+}

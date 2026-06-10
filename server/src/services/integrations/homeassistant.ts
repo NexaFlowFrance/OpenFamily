@@ -16,7 +16,9 @@ interface HATodoItem {
 function getTodoItemsViaWebSocket(baseUrl: string, token: string, entityId: string): Promise<HATodoItem[]> {
     return new Promise((resolve, reject) => {
         const wsUrl = baseUrl.replace(/^https?/, (p) => (p === 'https' ? 'wss' : 'ws')) + '/api/websocket';
-        const ws = new WebSocket(wsUrl, { rejectUnauthorized: false });
+        // TLS certificates are verified (no rejectUnauthorized bypass) — consistent
+        // with the REST calls to the same server, which also verify certificates.
+        const ws = new WebSocket(wsUrl);
         const msgId = 1;
         let authenticated = false;
 

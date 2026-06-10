@@ -1,0 +1,42 @@
+{
+  "items": {
+    "today": "Today",
+    "shopping": "Shopping",
+    "tasks": "Tasks",
+    "rewards": "Pocket money",
+    "calendar": "Appointments",
+    "planning": "Planning",
+    "recipes": "Recipes",
+    "meals": "Meals",
+    "budget": "Budget",
+    "family": "Family",
+    "integrations": "Integrations",
+    "settings": "Settings"
+  },
+  "mobile": {
+    "home": "Home",
+    "planning": "Planning",
+    "lists": "Lists",
+    "budget": "Budget",
+    "family": "Family"
+  },
+  "quickActions": {
+    "title": "Quick actions",
+    "addShopping": "Add a grocery item",
+    "addTask": "Add a task",
+    "addAppointment": "Add an appointment",
+    "addSchedule": "Add a schedule entry",
+    "addRecipe": "Add a recipe",
+    "addMeal": "Add a meal",
+    "addExpense": "Add an expense",
+    "addMember": "Add a member"
+  },
+  "user": {
+    "profile": "Profile",
+    "toggleTheme": "Toggle theme",
+    "logout": "Log out",
+    "openMenu": "Open menu"
+  },
+  "offline": "Offline mode. The data shown comes from the cache. Changes will be possible again once the connection is back.",
+  "pageTitleFallback": "Dashboard"
+}

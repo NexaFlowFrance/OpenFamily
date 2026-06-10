@@ -1,0 +1,74 @@
+name: Deploy GitHub Pages
+
+# Publishes the landing page (docs/) and the interactive, backend-less demo
+# (client built with VITE_DEMO) to GitHub Pages.
+#   - Landing  → https://nexaflowfrance.github.io/OpenFamily/
+#   - Demo     → https://nexaflowfrance.github.io/OpenFamily/demo/
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'client/**'
+      - 'shared/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm run install:all
+
+      - name: Build shared
+        run: npm run build:shared
+
+      - name: Build demo (client)
+        run: npm run build:client
+        env:
+          VITE_DEMO: 'true'
+
+      - name: Assemble site
+        run: |
+          rm -rf _site
+          mkdir -p _site/demo
+          cp -r docs/* _site/
+          cp -r client/dist/* _site/demo/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

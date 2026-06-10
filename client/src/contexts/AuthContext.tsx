@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api } from '../lib/api';
+import { applyServerLanguage } from '../lib/language';
 
 interface User {
     id: string;
@@ -9,6 +10,7 @@ interface User {
     role?: string;
     currency?: string;
     avatar_url?: string | null;
+    language?: string;
 }
 
 interface AuthContextType {
@@ -27,6 +29,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AUTH_EXPIRED_EVENT = 'openfamily:auth-expired';
+const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
@@ -51,7 +54,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const bootstrapSession = async () => {
             const token = api.getToken();
-            if (!token) {
+            // In the static demo there is no real auth: load the seeded user directly.
+            if (!token && !IS_DEMO) {
                 if (mounted) {
                     setLoading(false);
                 }
@@ -67,6 +71,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (response.success && response.data?.user) {
                     setUser(response.data.user);
                     localStorage.setItem('user', JSON.stringify(response.data.user));
+                    // Once per session load: reconcile UI language with the account.
+                    applyServerLanguage(response.data.user.language);
                 } else {
                     clearSession();
                 }
@@ -94,6 +100,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setUser(response.user);
             // Also store in localStorage for persistence
             localStorage.setItem('user', JSON.stringify(response.user));
+            // Once per login: reconcile UI language with the account.
+            applyServerLanguage(response.user.language);
         }
     };
 
@@ -102,6 +110,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (response.success && response.user) {
             setUser(response.user);
             localStorage.setItem('user', JSON.stringify(response.user));
+            applyServerLanguage(response.user.language);
         }
     };
 

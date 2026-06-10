@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { CheckCircle2, AlertCircle, RefreshCw, Unplug, Plug, X, Clock } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { intlLocale } from '../i18n/format';
 
 // Brand SVG icons (Simple Icons paths, viewBox 0 0 24 24)
 const BRAND_SVG: Record<string, { path: string; hex: string }> = {
@@ -20,6 +22,10 @@ const BRAND_SVG: Record<string, { path: string; hex: string }> = {
         hex: '337AB7',
         path: 'M12.621.068C7.527.786 3.608 4.618 2.345 10.082c-.316 1.35-.392 3.896-.163 5.203.62 3.57 2.96 6.574 6.15 7.913 1.36.577 2.1.73 3.842.784 1.22.043 1.862.01 2.722-.13 2.688-.447 5.399-1.699 6.65-3.092l.403-.447-.054-1.872a481.92 481.92 0 0 1-.12-5.344l-.065-3.473-2.907.087c-1.589.033-3.722.098-4.746.142l-1.85.065-.087 2.319c-.055 1.284-.076 2.34-.055 2.362.022.022.882.076 1.916.12l1.872.076v.294c0 .707-.13.98-.555 1.208-.653.326-1.872.479-2.623.326-2.71-.566-3.777-4.55-1.96-7.369C11.86 7.48 13.873 6.62 16.562 6.74c.74.043 1.665.163 2.123.272.446.12.838.174.87.12.098-.142.468-5.726.403-5.9-.087-.24-1.35-.697-2.569-.947-1.252-.25-3.722-.37-4.767-.218z',
     },
+    immich: {
+        hex: '4250AF',
+        path: 'M11.9863.2695c-2.409 0-5.207 1.091-5.207 3.8946v.1523c1.3428.597 2.9347 1.6629 4.4121 2.9707 1.5713 1.3912 2.8374 2.8821 3.6524 4.2871 1.3997-2.5034 2.3358-5.4784 2.3476-7.373V4.164c0-2.8035-2.796-3.8946-5.205-3.8946m7.5117 4.4903c-.3778-.0081-.7747.0502-1.1914.1855-.0366.0118-.086.0278-.1445.0469-.1525 1.4611-.6756 3.304-1.4629 5.1133-.8373 1.9243-1.8627 3.5898-2.9472 4.7988 2.8132.558 5.9307.5273 7.7363-.0469.0126-.004.0246-.0065.0351-.0097 2.6665-.8666 2.84-3.8636 2.0957-6.1543-.6279-1.9332-2.081-3.89-4.121-3.9336m-14.996.039C2.4618 4.8424 1.0088 6.7973.3809 8.7305c-.7442 2.291-.5708 5.288 2.0957 6.1543l.1445.0468c.982-1.0926 2.4873-2.2761 4.1875-3.2773 1.8088-1.0646 3.619-1.808 5.207-2.1484-1.9483-2.1049-4.4884-3.9132-6.287-4.5098l-.0352-.0117c-.4167-.1354-.8136-.1936-1.1914-.1856m4.6718 6.7578c-2.6038 1.2025-5.1088 3.0598-6.2324 4.586l-.0215.0293c-1.6478 2.2683-.0272 4.7953 1.9219 6.211 1.9487 1.4159 4.8518 2.1765 6.5-.0919.0228-.0309.0536-.071.0898-.121-.7356-1.2717-1.396-3.0718-1.8222-4.9981-.4534-2.0492-.6023-4-.4356-5.6153m1.0723 3.338c.3387 2.8478 1.3315 5.8037 2.4355 7.3437l.0215.0293c1.6478 2.2683 4.551 1.5078 6.5.0918 1.9487-1.416 3.5697-3.943 1.9219-6.211-.0228-.0309-.0517-.073-.0879-.123-1.4367.3066-3.3522.3794-5.3164.1894-2.089-.2017-3.9895-.6623-5.4746-1.3203',
+    },
     nextcloud: {
         hex: '0082C9',
         path: 'M12.018 6.537c-2.5 0-4.6 1.712-5.241 4.015-.56-1.232-1.793-2.105-3.225-2.105A3.569 3.569 0 0 0 0 12a3.569 3.569 0 0 0 3.552 3.553c1.432 0 2.664-.874 3.224-2.106.641 2.304 2.742 4.016 5.242 4.016 2.487 0 4.576-1.693 5.231-3.977.569 1.21 1.783 2.067 3.198 2.067A3.568 3.568 0 0 0 24 12a3.569 3.569 0 0 0-3.553-3.553c-1.416 0-2.63.858-3.199 2.067-.654-2.284-2.743-3.978-5.23-3.977zm0 2.085c1.878 0 3.378 1.5 3.378 3.378 0 1.878-1.5 3.378-3.378 3.378A3.362 3.362 0 0 1 8.641 12c0-1.878 1.5-3.378 3.377-3.378zm-8.466 1.91c.822 0 1.467.645 1.467 1.468s-.644 1.467-1.467 1.468A1.452 1.452 0 0 1 2.085 12c0-.823.644-1.467 1.467-1.467zm16.895 0c.823 0 1.468.645 1.468 1.468s-.645 1.468-1.468 1.468A1.452 1.452 0 0 1 18.98 12c0-.823.644-1.467 1.467-1.467z',
@@ -28,7 +34,7 @@ const BRAND_SVG: Record<string, { path: string; hex: string }> = {
 
 // For Tandoor we use the real PNG logo placed in public/
 const IMG_ICONS: Record<string, string> = {
-    tandoor: '/tandoor.png',
+    tandoor: `${import.meta.env.BASE_URL}tandoor.png`,
 };
 
 function BrandIcon({ id, size = 20 }: { id: string; size?: number }) {
@@ -79,67 +85,78 @@ interface CatalogItem {
     fields: FieldDef[];
 }
 
-const CATALOG: CatalogItem[] = [
-    {
-        id: 'mealie',
-        name: 'Mealie',
-        tagline: 'Gestionnaire de recettes',
-        description: 'Importez vos recettes et menus depuis votre instance Mealie auto-hébergée.',
-        syncs: ['Recettes', 'Menus'],
-        fields: [
-            { key: 'base_url', label: 'URL de l\'instance', placeholder: 'https://mealie.mondomaine.com', type: 'url' },
-            { key: 'apiKey', label: 'Clé API', placeholder: 'Depuis Mealie > Profil > Cles API', type: 'password' },
-        ],
-    },
-    {
-        id: 'tandoor',
-        name: 'Tandoor',
-        tagline: 'Livre de recettes',
-        description: 'Importez vos recettes depuis Tandoor, le gestionnaire open source.',
-        syncs: ['Recettes'],
-        fields: [
-            { key: 'base_url', label: 'URL de l\'instance', placeholder: 'https://tandoor.mondomaine.com', type: 'url' },
-            { key: 'apiKey', label: 'Token API', placeholder: 'Depuis Tandoor > Parametres > Jetons', type: 'password' },
-        ],
-    },
-    {
-        id: 'homeassistant',
-        name: 'Home Assistant',
-        tagline: 'Maison connectée',
-        description: 'Synchronisez votre liste de courses avec la liste Home Assistant.',
-        syncs: ['Liste de courses'],
-        fields: [
-            { key: 'base_url', label: 'URL de l\'instance', placeholder: 'http://homeassistant.local:8123', type: 'url' },
-            { key: 'token', label: 'Token longue durée', placeholder: 'eyJ... (depuis Profil > Securite)', type: 'password' },
-            { key: 'ha_entity_id', label: 'Entité todo (optionnel)', placeholder: 'todo.shopping_list', type: 'text', optional: true },
-        ],
-    },
-    {
-        id: 'grocy',
-        name: 'Grocy',
-        tagline: 'Gestion du foyer',
-        description: 'Synchronisez votre liste de courses et vos stocks depuis Grocy.',
-        syncs: ['Liste de courses', 'Stock'],
-        fields: [
-            { key: 'base_url', label: 'URL de l\'instance', placeholder: 'https://grocy.mondomaine.com', type: 'url' },
-            { key: 'apiKey', label: 'Clé API', placeholder: 'Depuis Grocy > Gestion > Cles API', type: 'password' },
-        ],
-    },
-    {
-        id: 'nextcloud',
-        name: 'Nextcloud',
-        tagline: 'Cloud personnel',
-        description: 'Importez vos événements de calendrier Nextcloud dans les rendez-vous.',
-        syncs: ['Calendrier', 'Rendez-vous'],
-        fields: [
-            { key: 'base_url', label: 'URL Nextcloud', placeholder: 'https://cloud.mondomaine.com', type: 'url' },
-            { key: 'username', label: 'Identifiant', placeholder: 'votre.identifiant', type: 'text' },
-            { key: 'password', label: 'Mot de passe (ou app password)', placeholder: '****', type: 'password' },
-        ],
-    },
-];
-
 const Integrations: React.FC = () => {
+    const { t } = useTranslation(['integrations', 'common']);
+    const CATALOG: CatalogItem[] = [
+        {
+            id: 'mealie',
+            name: 'Mealie',
+            tagline: t('integrations:catalog.mealie.tagline'),
+            description: t('integrations:catalog.mealie.description'),
+            syncs: [t('integrations:syncs.recipes'), t('integrations:syncs.menus')],
+            fields: [
+                { key: 'base_url', label: t('integrations:catalog.mealie.urlLabel'), placeholder: t('integrations:catalog.mealie.urlPlaceholder'), type: 'url' },
+                { key: 'apiKey', label: t('integrations:catalog.mealie.keyLabel'), placeholder: t('integrations:catalog.mealie.keyPlaceholder'), type: 'password' },
+            ],
+        },
+        {
+            id: 'tandoor',
+            name: 'Tandoor',
+            tagline: t('integrations:catalog.tandoor.tagline'),
+            description: t('integrations:catalog.tandoor.description'),
+            syncs: [t('integrations:syncs.recipes')],
+            fields: [
+                { key: 'base_url', label: t('integrations:catalog.tandoor.urlLabel'), placeholder: t('integrations:catalog.tandoor.urlPlaceholder'), type: 'url' },
+                { key: 'apiKey', label: t('integrations:catalog.tandoor.keyLabel'), placeholder: t('integrations:catalog.tandoor.keyPlaceholder'), type: 'password' },
+            ],
+        },
+        {
+            id: 'homeassistant',
+            name: 'Home Assistant',
+            tagline: t('integrations:catalog.homeassistant.tagline'),
+            description: t('integrations:catalog.homeassistant.description'),
+            syncs: [t('integrations:syncs.shopping')],
+            fields: [
+                { key: 'base_url', label: t('integrations:catalog.homeassistant.urlLabel'), placeholder: t('integrations:catalog.homeassistant.urlPlaceholder'), type: 'url' },
+                { key: 'token', label: t('integrations:catalog.homeassistant.tokenLabel'), placeholder: t('integrations:catalog.homeassistant.tokenPlaceholder'), type: 'password' },
+                { key: 'ha_entity_id', label: t('integrations:catalog.homeassistant.entityLabel'), placeholder: t('integrations:catalog.homeassistant.entityPlaceholder'), type: 'text', optional: true },
+            ],
+        },
+        {
+            id: 'grocy',
+            name: 'Grocy',
+            tagline: t('integrations:catalog.grocy.tagline'),
+            description: t('integrations:catalog.grocy.description'),
+            syncs: [t('integrations:syncs.shopping'), t('integrations:syncs.stock')],
+            fields: [
+                { key: 'base_url', label: t('integrations:catalog.grocy.urlLabel'), placeholder: t('integrations:catalog.grocy.urlPlaceholder'), type: 'url' },
+                { key: 'apiKey', label: t('integrations:catalog.grocy.keyLabel'), placeholder: t('integrations:catalog.grocy.keyPlaceholder'), type: 'password' },
+            ],
+        },
+        {
+            id: 'nextcloud',
+            name: 'Nextcloud',
+            tagline: t('integrations:catalog.nextcloud.tagline'),
+            description: t('integrations:catalog.nextcloud.description'),
+            syncs: [t('integrations:syncs.calendar'), t('integrations:syncs.appointments')],
+            fields: [
+                { key: 'base_url', label: t('integrations:catalog.nextcloud.urlLabel'), placeholder: t('integrations:catalog.nextcloud.urlPlaceholder'), type: 'url' },
+                { key: 'username', label: t('integrations:catalog.nextcloud.userLabel'), placeholder: t('integrations:catalog.nextcloud.userPlaceholder'), type: 'text' },
+                { key: 'password', label: t('integrations:catalog.nextcloud.passwordLabel'), placeholder: t('integrations:catalog.nextcloud.passwordPlaceholder'), type: 'password' },
+            ],
+        },
+        {
+            id: 'immich',
+            name: 'Immich',
+            tagline: t('integrations:catalog.immich.tagline'),
+            description: t('integrations:catalog.immich.description'),
+            syncs: [t('integrations:syncs.photos')],
+            fields: [
+                { key: 'base_url', label: t('integrations:catalog.immich.urlLabel'), placeholder: t('integrations:catalog.immich.urlPlaceholder'), type: 'url' },
+                { key: 'apiKey', label: t('integrations:catalog.immich.keyLabel'), placeholder: t('integrations:catalog.immich.keyPlaceholder'), type: 'password' },
+            ],
+        },
+    ];
     const [integrations, setIntegrations] = useState<Integration[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -183,7 +200,7 @@ const Integrations: React.FC = () => {
             });
             setTestStatus({ ok: res.success, message: res.message });
         } catch (e) {
-            setTestStatus({ ok: false, message: e instanceof Error ? e.message : 'Erreur' });
+            setTestStatus({ ok: false, message: e instanceof Error ? e.message : t('integrations:modal.error') });
         } finally {
             setTesting(false);
         }
@@ -207,7 +224,7 @@ const Integrations: React.FC = () => {
     };
 
     const handleDisconnect = async (id: string) => {
-        if (!confirm('Déconnecter cette intégration ?')) return;
+        if (!confirm(t('integrations:confirmDisconnect'))) return;
         await api.delete(`/api/integrations/${id}`);
         setIntegrations((prev) => prev.filter((i) => i.id !== id));
     };
@@ -224,7 +241,7 @@ const Integrations: React.FC = () => {
 
     const fmtDate = (iso: string | null) => {
         if (!iso) return null;
-        return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+        return new Intl.DateTimeFormat(intlLocale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
     };
 
     const connectedMap = new Map(integrations.map((i) => [i.type, i]));
@@ -242,15 +259,15 @@ const Integrations: React.FC = () => {
     return (
         <div className="space-y-8 max-w-2xl">
             <div>
-                <h1 className="font-serif text-display text-foreground">Intégrations</h1>
+                <h1 className="font-serif text-display text-foreground">{t('integrations:title')}</h1>
                 <p className="text-caption text-muted-foreground mt-1">
-                    Connectez vos applications auto-hébergées pour centraliser recettes, menus, courses et calendrier.
+                    {t('integrations:subtitle')}
                 </p>
             </div>
 
             {activeCatalog.length > 0 && (
                 <section>
-                    <h2 className="font-serif text-h2 mb-4">Connectées</h2>
+                    <h2 className="font-serif text-h2 mb-4">{t('integrations:connected')}</h2>
                     <div className="rounded-card border border-border bg-card divide-y divide-border overflow-hidden">
                         {activeCatalog.map((item) => {
                             const integ = connectedMap.get(item.id)!;
@@ -265,11 +282,11 @@ const Integrations: React.FC = () => {
                                             <p className="text-body font-semibold text-foreground">{item.name}</p>
                                             {integ.status === 'error' ? (
                                                 <span className="inline-flex items-center gap-1 text-micro text-danger">
-                                                    <AlertCircle className="h-3 w-3" /> Erreur
+                                                    <AlertCircle className="h-3 w-3" /> {t('integrations:status.error')}
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 text-micro text-success">
-                                                    <CheckCircle2 className="h-3 w-3" /> Connectée
+                                                    <CheckCircle2 className="h-3 w-3" /> {t('integrations:status.connected')}
                                                 </span>
                                             )}
                                         </div>
@@ -280,7 +297,7 @@ const Integrations: React.FC = () => {
                                         {integ.last_synced_at && (
                                             <p className="text-micro text-muted-foreground mt-0.5 flex items-center gap-1">
                                                 <Clock className="h-3 w-3" />
-                                                Synced {fmtDate(integ.last_synced_at)}
+                                                {t('integrations:lastSync', { date: fmtDate(integ.last_synced_at) })}
                                             </p>
                                         )}
                                     </div>
@@ -289,7 +306,7 @@ const Integrations: React.FC = () => {
                                             type="button"
                                             onClick={() => handleSync(integ.id)}
                                             disabled={syncing}
-                                            title="Synchroniser"
+                                            title={t('integrations:syncTitle')}
                                             className="p-2 rounded-input text-muted-foreground hover:bg-surface-2 hover:text-foreground disabled:opacity-50 transition-colors"
                                         >
                                             <RefreshCw className={cn('h-4 w-4', syncing && 'animate-spin')} />
@@ -297,7 +314,7 @@ const Integrations: React.FC = () => {
                                         <button
                                             type="button"
                                             onClick={() => handleDisconnect(integ.id)}
-                                            title="Déconnecter"
+                                            title={t('integrations:disconnectTitle')}
                                             className="p-2 rounded-input text-muted-foreground hover:bg-danger/10 hover:text-danger transition-colors"
                                         >
                                             <Unplug className="h-4 w-4" />
@@ -312,7 +329,7 @@ const Integrations: React.FC = () => {
 
             {availableCatalog.length > 0 && (
                 <section>
-                    <h2 className="font-serif text-h2 mb-4">Disponibles</h2>
+                    <h2 className="font-serif text-h2 mb-4">{t('integrations:available')}</h2>
                     <div className="grid gap-3">
                         {availableCatalog.map((item) => (
                             <button
@@ -358,7 +375,7 @@ const Integrations: React.FC = () => {
                                         </div>
                                         <div>
                                             <CardTitle className="font-serif text-h2">
-                                                Connecter {item.name}
+                                                {t('integrations:modal.connect', { name: item.name })}
                                             </CardTitle>
                                             <p className="text-caption text-muted-foreground mt-0.5">{item.description}</p>
                                         </div>
@@ -408,9 +425,9 @@ const Integrations: React.FC = () => {
                                         {testing ? (
                                             <span className="flex items-center gap-2">
                                                 <span className="h-3.5 w-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                                                Test...
+                                                {t('integrations:modal.testing')}
                                             </span>
-                                        ) : 'Tester'}
+                                        ) : t('integrations:modal.test')}
                                     </Button>
                                     <Button
                                         onClick={handleConnect}
@@ -420,19 +437,19 @@ const Integrations: React.FC = () => {
                                         {saving ? (
                                             <span className="flex items-center gap-2">
                                                 <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                Connexion...
+                                                {t('integrations:modal.connecting')}
                                             </span>
                                         ) : (
                                             <span className="flex items-center gap-2">
                                                 <Plug className="h-3.5 w-3.5" />
-                                                Connecter
+                                                {t('integrations:modal.connectBtn')}
                                             </span>
                                         )}
                                     </Button>
                                 </div>
 
                                 <p className="text-micro text-muted-foreground text-center">
-                                    Les identifiants sont chiffrés AES-256 et stockés sur votre serveur uniquement.
+                                    {t('integrations:modal.encrypted')}
                                 </p>
                             </CardContent>
                         </Card>

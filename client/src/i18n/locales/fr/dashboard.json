@@ -1,0 +1,36 @@
+{
+  "heading": {
+    "before": "Votre ",
+    "highlight": "journée",
+    "after": ", en un coup d'œil."
+  },
+  "budgetAlert": {
+    "title": "Attention au budget",
+    "message_one": "{{count}} catégorie a dépassé le budget mensuel défini.",
+    "message_other": "{{count}} catégories ont dépassé le budget mensuel défini.",
+    "cta": "Voir le détail"
+  },
+  "stats": {
+    "appointments": "Rendez-vous",
+    "tasks": "Tâches",
+    "shopping": "Courses",
+    "monthExpenses": "Dépenses du mois"
+  },
+  "today": {
+    "title": "Aujourd'hui",
+    "viewWeek": "Voir la semaine",
+    "emptyTitle": "Rien de prévu.",
+    "emptySubtitle": "Ajoutez un rendez-vous pour le voir apparaître ici.",
+    "emptyCta": "Ajouter un rendez-vous"
+  },
+  "aside": {
+    "shopping": "Courses",
+    "shoppingCount_one": "article à acheter",
+    "shoppingCount_other": "articles à acheter",
+    "budget": "Budget du mois",
+    "budgetSubtitle": "dépensés ce mois",
+    "tasks": "Tâches en attente",
+    "tasksCount_one": "tâche à terminer",
+    "tasksCount_other": "tâches à terminer"
+  }
+}

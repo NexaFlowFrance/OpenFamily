@@ -1,0 +1,81 @@
+{
+  "loading": "Chargement de votre liste…",
+  "header": {
+    "title": "Liste de courses",
+    "remaining_one": "{{count}} article restant",
+    "remaining_other": "{{count}} articles restants"
+  },
+  "categories": {
+    "Alimentation": "Alimentation",
+    "Bebe": "Bébé",
+    "Menage": "Ménage",
+    "Sante": "Santé",
+    "Autre": "Autre"
+  },
+  "qty": "Qté",
+  "storeMode": {
+    "enter": "Mode magasin",
+    "title": "Mode magasin",
+    "cart": "{{done}}/{{total}} dans le panier",
+    "remaining_one": "{{count}} restant",
+    "remaining_other": "{{count}} restants",
+    "emptyList": "Liste vide"
+  },
+  "add": {
+    "title": "Ajouter un article",
+    "namePlaceholder": "Ex : Lait, Pain",
+    "category": "Catégorie",
+    "qtyPlaceholder": "1",
+    "pricePlaceholder": "2.50"
+  },
+  "templates": {
+    "title": "Templates de courses",
+    "newLabel": "Nouveau template",
+    "newPlaceholder": "Ex : Courses semaine",
+    "create": "Créer un template",
+    "existing": "Template existant",
+    "selectPlaceholder": "Sélectionner un template",
+    "optionItems_one": "{{count}} article",
+    "optionItems_other": "{{count}} articles"
+  },
+  "list": {
+    "emptyTitle": "Votre liste est vide",
+    "emptySubtitle": "Ajoutez des articles ou appliquez un template.",
+    "completed_one": "Article coché ({{count}})",
+    "completed_other": "Articles cochés ({{count}})",
+    "clean": "Nettoyer"
+  },
+  "footer": {
+    "estimatedTotal": "Total estimé"
+  },
+  "dialog": {
+    "title": "Nouveau template de courses",
+    "description": "Sélectionnez les articles à inclure dans ce template",
+    "nameLabel": "Nom du template",
+    "namePlaceholder": "Ex : Courses semaine, Fruits et légumes…",
+    "itemsSelected": "Articles ({{selected}}/{{total}} sélectionnés)",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner",
+    "deselect": "Désélectionner",
+    "create": "Créer le template"
+  },
+  "errors": {
+    "loadItems": "Impossible de charger la liste de courses.",
+    "loadTemplates": "Impossible de charger les templates.",
+    "nameRequired": "Le nom de l'article est obligatoire.",
+    "quantityInvalid": "La quantité doit être un nombre positif.",
+    "priceInvalid": "Le prix doit être un nombre valide.",
+    "addFailed": "Impossible d'ajouter cet article.",
+    "toggleFailed": "Impossible de mettre à jour cet article.",
+    "deleteFailed": "Impossible de supprimer cet article.",
+    "clearFailed": "Impossible de vider les articles cochés.",
+    "noItemsForTemplate": "Aucun article dans la liste pour créer un template.",
+    "templateNameRequired": "Donnez un nom au template.",
+    "selectAtLeastOne": "Sélectionnez au moins un article pour le template.",
+    "saveTemplateFailed": "Impossible d'enregistrer le template.",
+    "selectTemplateApply": "Sélectionnez un template à appliquer.",
+    "applyTemplateFailed": "Impossible d'appliquer ce template.",
+    "selectTemplateDelete": "Sélectionnez un template à supprimer.",
+    "deleteTemplateFailed": "Impossible de supprimer ce template."
+  }
+}

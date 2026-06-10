@@ -1,0 +1,60 @@
+{
+  "loading": "Loading calendar…",
+  "title": "Calendar",
+  "subtitle": "Manage your family appointments",
+  "exportIcal": "Export (iCal)",
+  "newAppointment": "New appointment",
+  "moreOthers": "+{{count}} more",
+  "upcoming": {
+    "title": "Upcoming appointments",
+    "empty": "No upcoming appointments"
+  },
+  "dialog": {
+    "editTitle": "Edit appointment",
+    "createTitle": "New appointment",
+    "description": "Fill in the appointment details"
+  },
+  "form": {
+    "title": "Title",
+    "titlePlaceholder": "e.g. Doctor's appointment",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "Additional details…",
+    "scheduling": "Scheduling",
+    "startDate": "Start date",
+    "startTime": "Start time",
+    "endDate": "End date",
+    "endTime": "End time",
+    "location": "Location (optional)",
+    "locationPlaceholder": "e.g. Doctor's office",
+    "members": "Family members (optional)",
+    "noMembersHint": "Add a member to assign them quickly.",
+    "goToFamily": "Go to Family",
+    "reminders": "Reminders",
+    "reminder30": "30 minutes before",
+    "reminder1h": "1 hour before",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Additional notes…"
+  },
+  "feed": {
+    "title": "Export calendar (iCal)",
+    "description": "Subscribe from Apple Calendar, Google Calendar or Outlook to sync your appointments automatically.",
+    "generating": "Generating link…",
+    "subscribeLink": "Subscription link",
+    "subscribeApple": "Subscribe (Apple / Outlook)",
+    "downloadIcs": "Download the .ics file",
+    "privateNote": "This link is private: anyone who has it can view your appointments.",
+    "regenerate": "Regenerate link"
+  },
+  "confirmDelete": "Are you sure you want to delete this appointment?",
+  "confirmRegen": "Regenerate the link? Existing subscriptions will stop working.",
+  "errors": {
+    "loadAppointments": "Unable to load appointments.",
+    "loadMembers": "Unable to load members.",
+    "icalFetch": "Unable to retrieve the iCal link.",
+    "icalRegen": "Unable to regenerate the link.",
+    "startRequired": "Please enter a start date and time.",
+    "endAfterStart": "The end time must be after the start time.",
+    "save": "Unable to save this appointment.",
+    "delete": "Unable to delete this appointment."
+  }
+}

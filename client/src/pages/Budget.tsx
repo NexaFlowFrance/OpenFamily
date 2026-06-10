@@ -13,8 +13,9 @@ import {
     ResponsiveContainer, Legend,
 } from 'recharts';
 import ChartCard from '../components/app/ChartCard';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { format, parseISO } from 'date-fns';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../i18n/format';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -143,23 +144,28 @@ const Field: React.FC<{
     </div>
 );
 
-const CategorySelect: React.FC<{ value: string; onChange: (v: string) => void }> = ({ value, onChange }) => (
-    <div>
-        <label className="block text-sm font-medium text-foreground mb-1">Catégorie</label>
-        <select
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface-1 text-foreground text-base
-                       focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
-        >
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
-    </div>
-);
+const CategorySelect: React.FC<{ value: string; onChange: (v: string) => void }> = ({ value, onChange }) => {
+    const { t } = useTranslation('budget');
+    return (
+        <div>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('fields.category')}</label>
+            <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface-1 text-foreground text-base
+                           focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+            >
+                {CATEGORIES.map((c) => <option key={c} value={c}>{t(`categories.${c}`, { defaultValue: c })}</option>)}
+            </select>
+        </div>
+    );
+};
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const Budget: React.FC = () => {
+    const { t } = useTranslation(['budget', 'common']);
+    const categoryLabel = (v: string) => t(`budget:categories.${v}`, { defaultValue: v });
     const { user } = useAuth();
     const currency = user?.currency || 'EUR';
     const canEdit = Boolean(user?.is_owner) || (user?.role ?? '').toLowerCase() !== 'enfant';
@@ -191,12 +197,14 @@ const Budget: React.FC = () => {
     const [limitForm, setLimitForm] = useState({ category: 'Alimentation', monthly_limit: '' });
     const [formError, setFormError] = useState('');
 
+    // Local-date formatting: toISOString() shifts to UTC and can drop the first
+    // or last day of the month depending on the user's timezone.
     const startOfMonth = useCallback(() =>
-        new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0],
+        format(new Date(currentYear, currentMonth - 1, 1), 'yyyy-MM-dd'),
         [currentYear, currentMonth]
     );
     const endOfMonth = useCallback(() =>
-        new Date(currentYear, currentMonth, 0).toISOString().split('T')[0],
+        format(new Date(currentYear, currentMonth, 0), 'yyyy-MM-dd'),
         [currentYear, currentMonth]
     );
 
@@ -309,9 +317,9 @@ const Budget: React.FC = () => {
         setFormError('');
         const amount = parseFloat(recurringForm.amount.replace(',', '.'));
         const day = parseInt(recurringForm.debit_day, 10);
-        if (!isFinite(amount) || amount <= 0) { setFormError('Montant invalide.'); return; }
-        if (!recurringForm.label.trim()) { setFormError('Nom requis.'); return; }
-        if (day < 1 || day > 31) { setFormError('Jour de débit invalide (1-31).'); return; }
+        if (!isFinite(amount) || amount <= 0) { setFormError(t('budget:errors.amountInvalid')); return; }
+        if (!recurringForm.label.trim()) { setFormError(t('budget:errors.nameRequired')); return; }
+        if (day < 1 || day > 31) { setFormError(t('budget:errors.debitDayInvalid')); return; }
         try {
             if (editingRecurring) {
                 await api.put(`/api/budget/recurring/${editingRecurring.id}`, {
@@ -325,12 +333,12 @@ const Budget: React.FC = () => {
             setSheetRecurring(false);
             void loadAll();
         } catch (err) {
-            setFormError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setFormError(err instanceof Error ? err.message : t('budget:errors.save'));
         }
     };
 
     const handleDeleteRecurring = async (id: string) => {
-        if (!confirm('Supprimer ce prélèvement récurrent ?')) return;
+        if (!confirm(t('budget:confirm.deleteRecurring'))) return;
         try { await api.delete(`/api/budget/recurring/${id}`); void loadAll(); } catch { /* ignore */ }
     };
 
@@ -360,7 +368,7 @@ const Budget: React.FC = () => {
         e.preventDefault();
         setFormError('');
         const amount = parseFloat(entryForm.amount.replace(',', '.'));
-        if (!isFinite(amount) || amount <= 0) { setFormError('Montant invalide.'); return; }
+        if (!isFinite(amount) || amount <= 0) { setFormError(t('budget:errors.amountInvalid')); return; }
         try {
             if (editingEntry) {
                 await api.put(`/api/budget/entries/${editingEntry.id}`, {
@@ -376,12 +384,12 @@ const Budget: React.FC = () => {
             setSheetEntry(false);
             void loadAll();
         } catch (err) {
-            setFormError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setFormError(err instanceof Error ? err.message : t('budget:errors.save'));
         }
     };
 
     const handleDeleteEntry = async (id: string) => {
-        if (!confirm('Supprimer cette entrée ?')) return;
+        if (!confirm(t('budget:confirm.deleteEntry'))) return;
         try { await api.delete(`/api/budget/entries/${id}`); void loadAll(); } catch { /* ignore */ }
     };
 
@@ -399,7 +407,7 @@ const Budget: React.FC = () => {
         e.preventDefault();
         setFormError('');
         const limit = parseFloat(limitForm.monthly_limit.replace(',', '.'));
-        if (!isFinite(limit) || limit < 0) { setFormError('Plafond invalide.'); return; }
+        if (!isFinite(limit) || limit < 0) { setFormError(t('budget:errors.limitInvalid')); return; }
         try {
             await api.post('/api/budget/limits', {
                 category: limitForm.category,
@@ -410,7 +418,7 @@ const Budget: React.FC = () => {
             setSheetLimit(false);
             void loadAll();
         } catch (err) {
-            setFormError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+            setFormError(err instanceof Error ? err.message : t('budget:errors.save'));
         }
     };
 
@@ -436,7 +444,7 @@ const Budget: React.FC = () => {
             <div className="flex h-full items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
-                    <p className="text-muted-foreground font-medium animate-pulse">Chargement du budget…</p>
+                    <p className="text-muted-foreground font-medium animate-pulse">{t('budget:loading')}</p>
                 </div>
             </div>
         );
@@ -457,7 +465,7 @@ const Budget: React.FC = () => {
                     <ChevronLeft className="w-5 h-5" />
                 </button>
                 <span className="text-lg font-semibold capitalize">
-                    {format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: fr })}
+                    {format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: dateLocale() })}
                 </span>
                 <button
                     onClick={() => navigateMonth(1)}
@@ -474,7 +482,7 @@ const Budget: React.FC = () => {
                     <div className="rounded-card bg-warning/10 border border-warning/30 p-3 flex items-center gap-2">
                         <Lock className="w-4 h-4 text-warning flex-shrink-0" />
                         <p className="text-sm text-warning">
-                            Mode lecture seule. Seuls les parents peuvent modifier le budget.
+                            {t('budget:readOnly')}
                         </p>
                     </div>
                 )}
@@ -484,12 +492,12 @@ const Budget: React.FC = () => {
                     <div className="rounded-card bg-danger/10 border border-danger/20 p-3 space-y-1.5">
                         <div className="flex items-center gap-2">
                             <AlertTriangle className="w-4 h-4 text-danger flex-shrink-0" />
-                            <p className="text-sm font-medium text-danger">Plafonds atteints</p>
+                            <p className="text-sm font-medium text-danger">{t('budget:alerts.title')}</p>
                         </div>
                         {limitAlerts.map((l) => (
                             <p key={l.id} className="text-xs text-danger/80 pl-6">
-                                {l.category} : {formatCurrency(l.spent, currency)} / {formatCurrency(l.monthly_limit, currency)}
-                                {l.spent >= l.monthly_limit ? ' · dépassé' : ' (≥ 80 %)'}
+                                {categoryLabel(l.category)} : {formatCurrency(l.spent, currency)} / {formatCurrency(l.monthly_limit, currency)}
+                                {l.spent >= l.monthly_limit ? t('budget:alerts.over') : t('budget:alerts.warn')}
                             </p>
                         ))}
                     </div>
@@ -499,14 +507,14 @@ const Budget: React.FC = () => {
                 <div className={`rounded-card p-5 ${balancePositive ? 'bg-success/10' : 'bg-danger/10'}`}>
                     <div className="flex items-center gap-2 mb-1">
                         <Wallet className={`w-4 h-4 ${balancePositive ? 'text-success' : 'text-danger'}`} />
-                        <span className="text-sm font-medium text-muted-foreground">Solde actuel</span>
+                        <span className="text-sm font-medium text-muted-foreground">{t('budget:balance.current')}</span>
                     </div>
                     <p className={`text-4xl font-bold tracking-tight ${balancePositive ? 'text-success' : 'text-danger'}`}>
                         {formatCurrency(forecast?.currentBalance ?? 0, currency)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                        {pointedCount} prélèvement{pointedCount !== 1 ? 's' : ''} pointé{pointedCount !== 1 ? 's' : ''}
-                        {' '}· {expenses.length} dépense{expenses.length !== 1 ? 's' : ''}
+                        {t('budget:balance.pointed', { count: pointedCount })}
+                        {' '}· {t('budget:balance.expenses', { count: expenses.length })}
                     </p>
                 </div>
 
@@ -515,13 +523,13 @@ const Budget: React.FC = () => {
                     <div className={`rounded-card p-4 border-2 ${forecastPositive ? 'border-info/20 bg-info/5' : 'border-peach/20 bg-peach/5'}`}>
                         <div className="flex items-center gap-2 mb-1">
                             <Eye className={`w-4 h-4 ${forecastPositive ? 'text-info' : 'text-peach'}`} />
-                            <span className="text-sm font-medium text-muted-foreground">Prévisionnel</span>
+                            <span className="text-sm font-medium text-muted-foreground">{t('budget:forecast.title')}</span>
                         </div>
                         <p className={`text-3xl font-bold ${forecastPositive ? 'text-info' : 'text-peach'}`}>
                             {formatCurrency(forecast.forecastBalance, currency)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                            Encore {formatCurrency(forecast.unpointedRecurring, currency)} de prélèvements à pointer
+                            {t('budget:forecast.subtitle', { amount: formatCurrency(forecast.unpointedRecurring, currency) })}
                         </p>
                     </div>
                 )}
@@ -534,7 +542,7 @@ const Budget: React.FC = () => {
                     >
                         <span className="flex items-center gap-2 font-semibold text-base">
                             <BarChart3 className="w-4 h-4 text-primary" />
-                            Analyse & plafonds
+                            {t('budget:analytics')}
                         </span>
                         <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${showAnalytics ? 'rotate-90' : ''}`} />
                     </button>
@@ -543,8 +551,8 @@ const Budget: React.FC = () => {
                         <div className="space-y-3 mt-3">
                             {/* Répartition par catégorie */}
                             <ChartCard
-                                title="Dépenses par catégorie"
-                                subtitle={format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: fr })}
+                                title={t('budget:charts.expensesByCategory')}
+                                subtitle={format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: dateLocale() })}
                             >
                                 {stats && stats.byCategory.length > 0 ? (
                                     <ResponsiveContainer width="100%" height={240}>
@@ -556,7 +564,7 @@ const Budget: React.FC = () => {
                                                 cx="50%"
                                                 cy="50%"
                                                 outerRadius={80}
-                                                label={(e: any) => e.category}
+                                                label={(e: any) => categoryLabel(e.category)}
                                             >
                                                 {stats.byCategory.map((_, i) => (
                                                     <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
@@ -566,44 +574,44 @@ const Budget: React.FC = () => {
                                         </PieChart>
                                     </ResponsiveContainer>
                                 ) : (
-                                    <p className="text-sm text-muted-foreground text-center py-8">Aucune dépense ce mois</p>
+                                    <p className="text-sm text-muted-foreground text-center py-8">{t('budget:charts.noExpenses')}</p>
                                 )}
                             </ChartCard>
 
                             {/* Évolution mensuelle */}
-                            <ChartCard title="Évolution sur l'année" subtitle={`${currentYear}`}>
+                            <ChartCard title={t('budget:charts.yearEvolution')} subtitle={`${currentYear}`}>
                                 <ResponsiveContainer width="100%" height={240}>
                                     <BarChart data={monthly.map((m) => ({
-                                        mois: format(new Date(currentYear, m.month - 1), 'MMM', { locale: fr }),
-                                        Dépenses: m.totalExpenses,
-                                        Revenus: m.totalIncome,
+                                        month: format(new Date(currentYear, m.month - 1), 'MMM', { locale: dateLocale() }),
+                                        expenses: m.totalExpenses,
+                                        income: m.totalIncome,
                                     }))}>
-                                        <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
+                                        <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                                         <YAxis tick={{ fontSize: 11 }} width={40} />
                                         <Tooltip formatter={(v: number) => formatCurrency(v, currency)} />
                                         <Legend wrapperStyle={{ fontSize: 12 }} />
-                                        <Bar dataKey="Revenus" fill="#10b981" radius={[4, 4, 0, 0]} />
-                                        <Bar dataKey="Dépenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="income" name={t('budget:charts.income')} fill="#10b981" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="expenses" name={t('budget:charts.expenses')} fill="#ef4444" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </ChartCard>
 
                             {/* Plafonds par catégorie */}
                             <ChartCard
-                                title="Plafonds mensuels"
-                                subtitle="Suivi des dépenses par catégorie"
+                                title={t('budget:limits.title')}
+                                subtitle={t('budget:limits.subtitle')}
                                 action={canEdit ? (
                                     <button
                                         onClick={() => openLimitSheet()}
                                         className="flex items-center gap-1 text-sm font-medium text-primary active:scale-95 transition-transform"
                                     >
-                                        <Plus className="w-4 h-4" /> Définir
+                                        <Plus className="w-4 h-4" /> {t('budget:limits.define')}
                                     </button>
                                 ) : undefined}
                             >
                                 {limits.length === 0 ? (
                                     <p className="text-sm text-muted-foreground text-center py-6">
-                                        Aucun plafond défini
+                                        {t('budget:limits.none')}
                                     </p>
                                 ) : (
                                     <div className="space-y-3">
@@ -620,7 +628,7 @@ const Budget: React.FC = () => {
                                                     disabled={!canEdit}
                                                 >
                                                     <div className="flex items-center justify-between text-sm mb-1">
-                                                        <span className="font-medium">{l.category}</span>
+                                                        <span className="font-medium">{categoryLabel(l.category)}</span>
                                                         <span className={over ? 'text-danger font-semibold' : warn ? 'text-warning' : 'text-muted-foreground'}>
                                                             {formatCurrency(spent, currency)} / {formatCurrency(l.monthly_limit, currency)}
                                                         </span>
@@ -646,7 +654,7 @@ const Budget: React.FC = () => {
                     <div className="flex items-center justify-between mb-2 mt-4">
                         <div className="flex items-center gap-2">
                             <RefreshCw className="w-4 h-4 text-muted-foreground" />
-                            <h2 className="font-semibold text-base">Prélèvements</h2>
+                            <h2 className="font-semibold text-base">{t('budget:sections.recurring')}</h2>
                             {recurring.length > 0 && (
                                 <span className="text-xs bg-surface-2 text-muted-foreground px-2 py-0.5 rounded-full">
                                     {pointedCount}/{recurring.length}
@@ -659,17 +667,17 @@ const Budget: React.FC = () => {
                             className="flex items-center gap-1.5 text-sm font-medium text-primary active:scale-95 transition-transform disabled:opacity-40 disabled:pointer-events-none"
                         >
                             <Plus className="w-4 h-4" />
-                            Ajouter
+                            {t('common:actions.add')}
                         </button>
                     </div>
 
                     {recurring.length === 0 ? (
                         <div className="rounded-card border border-dashed border-border p-6 text-center">
                             <RefreshCw className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
-                            <p className="text-sm text-muted-foreground">Aucun prélèvement récurrent</p>
+                            <p className="text-sm text-muted-foreground">{t('budget:recurring.empty')}</p>
                             {canEdit && (
                                 <button onClick={openNewRecurring} className="mt-2 text-sm text-primary font-medium">
-                                    + Ajouter un prélèvement
+                                    {t('budget:recurring.addOne')}
                                 </button>
                             )}
                         </div>
@@ -687,7 +695,7 @@ const Budget: React.FC = () => {
                                         className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center
                                             transition-all active:scale-90 disabled:opacity-50
                                             ${r.is_pointed ? 'bg-success/100 border-success' : 'border-border hover:border-success/50'}`}
-                                        title={r.is_pointed ? 'Dépointer' : 'Marquer comme débité'}
+                                        title={r.is_pointed ? t('budget:recurring.markOff') : t('budget:recurring.markOn')}
                                     >
                                         {r.is_pointed && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
                                     </button>
@@ -697,11 +705,11 @@ const Budget: React.FC = () => {
                                             {r.label}
                                         </p>
                                         <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-xs text-muted-foreground">{r.category}</span>
+                                            <span className="text-xs text-muted-foreground">{categoryLabel(r.category)}</span>
                                             <span className="text-xs text-muted-foreground">·</span>
                                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                 <Calendar className="w-3 h-3" />
-                                                j. {r.debit_day}
+                                                {t('budget:recurring.dayPrefix')} {r.debit_day}
                                             </span>
                                         </div>
                                     </div>
@@ -739,7 +747,7 @@ const Budget: React.FC = () => {
                     <div className="flex items-center justify-between mb-2 mt-4">
                         <div className="flex items-center gap-2">
                             <TrendingDown className="w-4 h-4 text-danger" />
-                            <h2 className="font-semibold text-base">Dépenses</h2>
+                            <h2 className="font-semibold text-base">{t('budget:sections.expenses')}</h2>
                             {expenses.length > 0 && (
                                 <span className="text-xs bg-danger/10 text-danger px-2 py-0.5 rounded-full font-medium">
                                     -{formatCurrency(expenses.reduce((s, e) => s + e.amount, 0), currency)}
@@ -752,13 +760,13 @@ const Budget: React.FC = () => {
                             className="flex items-center gap-1.5 text-sm font-medium text-primary active:scale-95 transition-transform disabled:opacity-40 disabled:pointer-events-none"
                         >
                             <Plus className="w-4 h-4" />
-                            Ajouter
+                            {t('common:actions.add')}
                         </button>
                     </div>
 
                     {expenses.length === 0 ? (
                         <div className="rounded-card border border-dashed border-border p-5 text-center">
-                            <p className="text-sm text-muted-foreground">Aucune dépense ce mois</p>
+                            <p className="text-sm text-muted-foreground">{t('budget:empty.expenses')}</p>
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -781,7 +789,7 @@ const Budget: React.FC = () => {
                     <div className="flex items-center justify-between mb-2 mt-4">
                         <div className="flex items-center gap-2">
                             <TrendingUp className="w-4 h-4 text-success" />
-                            <h2 className="font-semibold text-base">Revenus</h2>
+                            <h2 className="font-semibold text-base">{t('budget:sections.income')}</h2>
                             {incomes.length > 0 && (
                                 <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">
                                     +{formatCurrency(incomes.reduce((s, e) => s + e.amount, 0), currency)}
@@ -794,13 +802,13 @@ const Budget: React.FC = () => {
                             className="flex items-center gap-1.5 text-sm font-medium text-primary active:scale-95 transition-transform disabled:opacity-40 disabled:pointer-events-none"
                         >
                             <Plus className="w-4 h-4" />
-                            Ajouter
+                            {t('common:actions.add')}
                         </button>
                     </div>
 
                     {incomes.length === 0 ? (
                         <div className="rounded-card border border-dashed border-border p-5 text-center">
-                            <p className="text-sm text-muted-foreground">Aucun revenu ce mois</p>
+                            <p className="text-sm text-muted-foreground">{t('budget:empty.income')}</p>
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -824,7 +832,7 @@ const Budget: React.FC = () => {
             <Sheet
                 open={sheetRecurring}
                 onClose={() => setSheetRecurring(false)}
-                title={editingRecurring ? 'Modifier le prélèvement' : 'Nouveau prélèvement'}
+                title={editingRecurring ? t('budget:sheets.recurringEdit') : t('budget:sheets.recurringNew')}
             >
                 <form onSubmit={handleSaveRecurring} className="space-y-4">
                     {formError && (
@@ -833,14 +841,14 @@ const Budget: React.FC = () => {
                         </div>
                     )}
                     <Field
-                        label="Nom du prélèvement"
+                        label={t('budget:fields.name')}
                         value={recurringForm.label}
                         onChange={(v) => setRecurringForm((f) => ({ ...f, label: v }))}
-                        placeholder="Ex : Loyer, EDF, Netflix…"
+                        placeholder={t('budget:fields.namePlaceholder')}
                         required
                     />
                     <Field
-                        label={`Montant (${currency})`}
+                        label={t('budget:fields.amount', { currency })}
                         type="number"
                         value={recurringForm.amount}
                         onChange={(v) => setRecurringForm((f) => ({ ...f, amount: v }))}
@@ -850,11 +858,11 @@ const Budget: React.FC = () => {
                         required
                     />
                     <Field
-                        label="Jour de débit dans le mois (1 à 31)"
+                        label={t('budget:fields.debitDay')}
                         type="number"
                         value={recurringForm.debit_day}
                         onChange={(v) => setRecurringForm((f) => ({ ...f, debit_day: v }))}
-                        placeholder="Ex : 5"
+                        placeholder={t('budget:fields.debitDayPlaceholder')}
                         min="1"
                         required
                     />
@@ -868,13 +876,13 @@ const Budget: React.FC = () => {
                             onClick={() => setSheetRecurring(false)}
                             className="flex-1 py-3 rounded-xl border border-border text-foreground font-medium active:scale-95 transition-transform"
                         >
-                            Annuler
+                            {t('common:actions.cancel')}
                         </button>
                         <button
                             type="submit"
                             className="flex-1 py-3 rounded-xl bg-primary text-white font-medium active:scale-95 transition-transform"
                         >
-                            {editingRecurring ? 'Enregistrer' : 'Ajouter'}
+                            {editingRecurring ? t('common:actions.save') : t('common:actions.add')}
                         </button>
                     </div>
                 </form>
@@ -884,7 +892,7 @@ const Budget: React.FC = () => {
             <Sheet
                 open={sheetEntry}
                 onClose={() => setSheetEntry(false)}
-                title={editingEntry ? 'Modifier' : entryForm.is_expense ? 'Nouvelle dépense' : 'Nouveau revenu'}
+                title={editingEntry ? t('budget:sheets.edit') : entryForm.is_expense ? t('budget:sheets.newExpense') : t('budget:sheets.newIncome')}
             >
                 <form onSubmit={handleSaveEntry} className="space-y-4">
                     {formError && (
@@ -899,25 +907,25 @@ const Budget: React.FC = () => {
                                 onClick={() => setEntryForm((f) => ({ ...f, is_expense: true }))}
                                 className={`flex-1 py-2.5 text-sm font-medium transition-colors ${entryForm.is_expense ? 'bg-danger/100 text-white' : 'bg-surface-1 text-muted-foreground'}`}
                             >
-                                Dépense
+                                {t('budget:toggle.expense')}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setEntryForm((f) => ({ ...f, is_expense: false }))}
                                 className={`flex-1 py-2.5 text-sm font-medium transition-colors ${!entryForm.is_expense ? 'bg-success/100 text-white' : 'bg-surface-1 text-muted-foreground'}`}
                             >
-                                Revenu
+                                {t('budget:toggle.income')}
                             </button>
                         </div>
                     )}
                     <Field
-                        label="Description (optionnel)"
+                        label={t('budget:fields.description')}
                         value={entryForm.description}
                         onChange={(v) => setEntryForm((f) => ({ ...f, description: v }))}
-                        placeholder="Ex : Courses Leclerc, Salaire…"
+                        placeholder={t('budget:fields.descriptionPlaceholder')}
                     />
                     <Field
-                        label={`Montant (${currency})`}
+                        label={t('budget:fields.amount', { currency })}
                         type="number"
                         value={entryForm.amount}
                         onChange={(v) => setEntryForm((f) => ({ ...f, amount: v }))}
@@ -927,7 +935,7 @@ const Budget: React.FC = () => {
                         required
                     />
                     <Field
-                        label="Date"
+                        label={t('budget:fields.date')}
                         type="date"
                         value={entryForm.date}
                         onChange={(v) => setEntryForm((f) => ({ ...f, date: v }))}
@@ -943,13 +951,13 @@ const Budget: React.FC = () => {
                             onClick={() => setSheetEntry(false)}
                             className="flex-1 py-3 rounded-xl border border-border text-foreground font-medium active:scale-95 transition-transform"
                         >
-                            Annuler
+                            {t('common:actions.cancel')}
                         </button>
                         <button
                             type="submit"
                             className="flex-1 py-3 rounded-xl bg-primary text-white font-medium active:scale-95 transition-transform"
                         >
-                            {editingEntry ? 'Enregistrer' : 'Ajouter'}
+                            {editingEntry ? t('common:actions.save') : t('common:actions.add')}
                         </button>
                     </div>
                 </form>
@@ -959,7 +967,7 @@ const Budget: React.FC = () => {
             <Sheet
                 open={sheetLimit}
                 onClose={() => setSheetLimit(false)}
-                title="Plafond mensuel"
+                title={t('budget:sheets.limit')}
             >
                 <form onSubmit={handleSaveLimit} className="space-y-4">
                     {formError && (
@@ -972,7 +980,7 @@ const Budget: React.FC = () => {
                         onChange={(v) => setLimitForm((f) => ({ ...f, category: v }))}
                     />
                     <Field
-                        label={`Plafond mensuel (${currency})`}
+                        label={t('budget:fields.limit', { currency })}
                         type="number"
                         value={limitForm.monthly_limit}
                         onChange={(v) => setLimitForm((f) => ({ ...f, monthly_limit: v }))}
@@ -982,7 +990,7 @@ const Budget: React.FC = () => {
                         required
                     />
                     <p className="text-xs text-muted-foreground">
-                        Définir 0 pour retirer le suivi de cette catégorie.
+                        {t('budget:fields.limitHint')}
                     </p>
                     <div className="flex gap-3 pt-2">
                         <button
@@ -990,13 +998,13 @@ const Budget: React.FC = () => {
                             onClick={() => setSheetLimit(false)}
                             className="flex-1 py-3 rounded-xl border border-border text-foreground font-medium active:scale-95 transition-transform"
                         >
-                            Annuler
+                            {t('common:actions.cancel')}
                         </button>
                         <button
                             type="submit"
                             className="flex-1 py-3 rounded-xl bg-primary text-white font-medium active:scale-95 transition-transform"
                         >
-                            Enregistrer
+                            {t('common:actions.save')}
                         </button>
                     </div>
                 </form>
@@ -1015,17 +1023,21 @@ const EntryRow: React.FC<{
     onEdit: (e: BudgetEntry) => void;
     onDelete: (id: string) => void;
 }> = ({ entry, currency, canEdit = true, onEdit, onDelete }) => {
-    const dateStr = format(new Date(entry.date), 'dd MMM', { locale: fr });
+    const { t } = useTranslation('budget');
+    const categoryLabel = (v: string) => t(`categories.${v}`, { defaultValue: v });
+    // parseISO treats date-only strings ("yyyy-MM-dd") as local midnight,
+    // avoiding the previous-day shift that new Date() (UTC midnight) causes.
+    const dateStr = format(parseISO(entry.date), 'dd MMM', { locale: dateLocale() });
     return (
         <div className="flex items-center gap-3 bg-surface-1 border border-border rounded-card p-3.5 shadow-sm">
             <div className="flex-1 min-w-0">
                 <p className="font-medium text-base truncate">
-                    {entry.description || entry.category}
+                    {entry.description || categoryLabel(entry.category)}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
                     {entry.description && (
                         <>
-                            <span className="text-xs text-muted-foreground">{entry.category}</span>
+                            <span className="text-xs text-muted-foreground">{categoryLabel(entry.category)}</span>
                             <span className="text-xs text-muted-foreground">·</span>
                         </>
                     )}

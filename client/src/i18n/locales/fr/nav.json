@@ -1,0 +1,42 @@
+{
+  "items": {
+    "today": "Aujourd'hui",
+    "shopping": "Courses",
+    "tasks": "Tâches",
+    "rewards": "Argent de poche",
+    "calendar": "Rendez-vous",
+    "planning": "Planning",
+    "recipes": "Recettes",
+    "meals": "Repas",
+    "budget": "Budget",
+    "family": "Famille",
+    "integrations": "Intégrations",
+    "settings": "Paramètres"
+  },
+  "mobile": {
+    "home": "Accueil",
+    "planning": "Planning",
+    "lists": "Listes",
+    "budget": "Budget",
+    "family": "Famille"
+  },
+  "quickActions": {
+    "title": "Actions rapides",
+    "addShopping": "Ajouter une course",
+    "addTask": "Ajouter une tâche",
+    "addAppointment": "Ajouter un rendez-vous",
+    "addSchedule": "Ajouter un horaire",
+    "addRecipe": "Ajouter une recette",
+    "addMeal": "Ajouter un repas",
+    "addExpense": "Ajouter une dépense",
+    "addMember": "Ajouter un membre"
+  },
+  "user": {
+    "profile": "Profil",
+    "toggleTheme": "Changer le thème",
+    "logout": "Se déconnecter",
+    "openMenu": "Ouvrir le menu"
+  },
+  "offline": "Mode hors ligne. Les données affichées proviennent du cache. Les modifications seront possibles au retour de la connexion.",
+  "pageTitleFallback": "Tableau de bord"
+}

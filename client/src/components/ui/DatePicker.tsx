@@ -1,4 +1,5 @@
 import React from 'react';
+import { format } from 'date-fns';
 import { cn } from '../../lib/utils';
 
 interface DatePickerProps {
@@ -34,7 +35,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
     if (type === 'datetime-local') {
         const { date, time } = parseDateTimeValue(value);
-        const today = new Date().toISOString().slice(0, 10);
+        // Local date — toISOString() would give the UTC day, which is wrong near
+        // midnight for users outside UTC.
+        const today = format(new Date(), 'yyyy-MM-dd');
         const minDate = min ? min.slice(0, 10) : undefined;
         const maxDate = max ? max.slice(0, 10) : undefined;
 

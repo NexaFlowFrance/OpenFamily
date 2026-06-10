@@ -1,0 +1,81 @@
+{
+  "loading": "Loading your list…",
+  "header": {
+    "title": "Shopping list",
+    "remaining_one": "{{count}} item remaining",
+    "remaining_other": "{{count}} items remaining"
+  },
+  "categories": {
+    "Alimentation": "Groceries",
+    "Bebe": "Baby",
+    "Menage": "Household",
+    "Sante": "Health",
+    "Autre": "Other"
+  },
+  "qty": "Qty",
+  "storeMode": {
+    "enter": "Store mode",
+    "title": "Store mode",
+    "cart": "{{done}}/{{total}} in cart",
+    "remaining_one": "{{count}} left",
+    "remaining_other": "{{count}} left",
+    "emptyList": "Empty list"
+  },
+  "add": {
+    "title": "Add an item",
+    "namePlaceholder": "e.g. Milk, Bread",
+    "category": "Category",
+    "qtyPlaceholder": "1",
+    "pricePlaceholder": "2.50"
+  },
+  "templates": {
+    "title": "Shopping templates",
+    "newLabel": "New template",
+    "newPlaceholder": "e.g. Weekly shopping",
+    "create": "Create a template",
+    "existing": "Existing template",
+    "selectPlaceholder": "Select a template",
+    "optionItems_one": "{{count}} item",
+    "optionItems_other": "{{count}} items"
+  },
+  "list": {
+    "emptyTitle": "Your list is empty",
+    "emptySubtitle": "Add items or apply a template.",
+    "completed_one": "Checked item ({{count}})",
+    "completed_other": "Checked items ({{count}})",
+    "clean": "Clear"
+  },
+  "footer": {
+    "estimatedTotal": "Estimated total"
+  },
+  "dialog": {
+    "title": "New shopping template",
+    "description": "Select the items to include in this template",
+    "nameLabel": "Template name",
+    "namePlaceholder": "e.g. Weekly shopping, Fruit & veg…",
+    "itemsSelected": "Items ({{selected}}/{{total}} selected)",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "deselect": "Deselect",
+    "create": "Create template"
+  },
+  "errors": {
+    "loadItems": "Unable to load the shopping list.",
+    "loadTemplates": "Unable to load templates.",
+    "nameRequired": "The item name is required.",
+    "quantityInvalid": "Quantity must be a positive number.",
+    "priceInvalid": "Price must be a valid number.",
+    "addFailed": "Unable to add this item.",
+    "toggleFailed": "Unable to update this item.",
+    "deleteFailed": "Unable to delete this item.",
+    "clearFailed": "Unable to clear checked items.",
+    "noItemsForTemplate": "No items in the list to create a template.",
+    "templateNameRequired": "Give the template a name.",
+    "selectAtLeastOne": "Select at least one item for the template.",
+    "saveTemplateFailed": "Unable to save the template.",
+    "selectTemplateApply": "Select a template to apply.",
+    "applyTemplateFailed": "Unable to apply this template.",
+    "selectTemplateDelete": "Select a template to delete.",
+    "deleteTemplateFailed": "Unable to delete this template."
+  }
+}

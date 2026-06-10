@@ -1,0 +1,70 @@
+{
+  "loading": "Chargement du planning…",
+  "noMembers": {
+    "title": "Ajoutez d'abord vos membres",
+    "subtitle": "Le planning hebdomadaire s'appuie sur les profils famille.",
+    "cta": "Aller à Famille"
+  },
+  "title": "Planning hebdomadaire",
+  "subtitle": "Horaires récurrents de travail et emploi du temps scolaire, semaine par semaine.",
+  "newEntry": "Nouvel horaire",
+  "thisWeek": "Cette semaine",
+  "allMembers": "Tous les membres",
+  "allTypes": "Tous les types",
+  "types": {
+    "work": "Travail",
+    "school": "École",
+    "study": "Études",
+    "activity": "Activité",
+    "other": "Autre"
+  },
+  "add": "Ajouter",
+  "nextDayShort": "+1j",
+  "dayFallback": "Jour {{n}}",
+  "dialog": {
+    "editTitle": "Modifier un horaire",
+    "createTitle": "Nouvel horaire",
+    "description": "Définissez un horaire et appliquez-le à un ou plusieurs jours."
+  },
+  "form": {
+    "member": "Membre",
+    "type": "Type",
+    "title": "Intitulé",
+    "titlePlaceholder": "Ex : Bureau - Équipe Produit / Mathématiques",
+    "days": "Jours concernés",
+    "weekdays": "Lun-Ven",
+    "fullWeek": "Semaine complète",
+    "selectedDay": "Jour sélectionné : {{day}}",
+    "selectedDays": "{{count}} jours sélectionnés",
+    "start": "Début",
+    "end": "Fin",
+    "nextDayHint": "Se termine le lendemain (+1 jour)",
+    "thisWeekOnlyStrong": "Cette semaine uniquement",
+    "thisWeekOnlyRest": ". L'horaire ne s'applique qu'à la semaine du {{date}}. Sinon, il sera récurrent chaque semaine.",
+    "replaceConflicts": "Remplacer les horaires en conflit sur les jours sélectionnés. Si des conflits existent et que cette option est désactivée, ces jours seront ignorés.",
+    "location": "Lieu (facultatif)",
+    "locationPlaceholder": "Ex : Bureau Lyon / Collège Jean Moulin",
+    "notes": "Notes (facultatif)",
+    "notesPlaceholder": "Informations utiles, salle, matière, transport…"
+  },
+  "submit": {
+    "applyToDays": "Appliquer aux jours sélectionnés"
+  },
+  "notice": {
+    "saved": "Horaire enregistré.",
+    "savedDays_one": "Enregistré sur {{count}} jour.",
+    "savedDays_other": "Enregistré sur {{count}} jours.",
+    "savedDaysConflicts_one": "Enregistré sur {{count}} jour. Conflits détectés sur : {{days}}.",
+    "savedDaysConflicts_other": "Enregistré sur {{count}} jours. Conflits détectés sur : {{days}}."
+  },
+  "confirmDelete": "Supprimer cet horaire ?",
+  "errors": {
+    "loadMembers": "Impossible de charger les membres.",
+    "loadEntries": "Impossible de charger le planning.",
+    "deleteEntry": "Impossible de supprimer cet horaire.",
+    "memberTitleRequired": "Le membre et le titre sont obligatoires.",
+    "timesSame": "L'heure de début et de fin ne peuvent pas être identiques.",
+    "selectDay": "Sélectionnez au moins un jour.",
+    "save": "Impossible d'enregistrer cet horaire."
+  }
+}

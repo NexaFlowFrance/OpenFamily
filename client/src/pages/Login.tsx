@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Users, User, Baby, Sun, Moon } from 'lucide-react';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+import { Users, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 
 const Login: React.FC = () => {
+    const { t } = useTranslation(['auth', 'common', 'nav']);
     const { login, register } = useAuth();
     const { actualTheme, setTheme } = useTheme();
     const registrationEnabled = import.meta.env.VITE_REGISTRATION_ENABLED !== 'false';
@@ -15,7 +18,6 @@ const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
-    const [role, setRole] = useState<'parent' | 'enfant'>('parent');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [inviteToken, setInviteToken] = useState<string | null>(null);
@@ -39,10 +41,12 @@ const Login: React.FC = () => {
             if (isLogin) {
                 await login(email, password);
             } else {
-                await register(email, password, name, inviteToken ?? undefined, role);
+                // The account role is decided server-side: invited members get the role
+                // chosen by the inviter; standalone accounts own their family (parent).
+                await register(email, password, name, inviteToken ?? undefined);
             }
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+            setError(err instanceof Error ? err.message : t('common:states.error'));
         } finally {
             setLoading(false);
         }
@@ -50,10 +54,11 @@ const Login: React.FC = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+            <LanguageSwitcher className="absolute top-4 left-4" />
             <button
                 type="button"
                 onClick={() => setTheme(actualTheme === 'dark' ? 'light' : 'dark')}
-                aria-label="Changer de thème"
+                aria-label={t('nav:user.toggleTheme')}
                 className="absolute top-4 right-4 p-2 rounded-input border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong transition-colors"
             >
                 {actualTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -61,13 +66,13 @@ const Login: React.FC = () => {
             <Card className="w-full max-w-md" hover={false}>
                 <CardHeader className="text-center pb-8 pt-8">
                     <div className="mx-auto mb-6">
-                        <img src="/OpenFamily.png" alt="OpenFamily" className="w-16 h-16 rounded-xl object-contain mx-auto" />
+                        <img src={`${import.meta.env.BASE_URL}OpenFamily.png`} alt="OpenFamily" className="w-16 h-16 rounded-xl object-contain mx-auto" />
                     </div>
                     <CardTitle className="font-serif text-display mb-2">
                         Open<span className="text-primary">Family</span>
                     </CardTitle>
                     <p className="text-muted-foreground text-caption">
-                        Le numérique au service du lien familial
+                        {t('auth:tagline')}
                     </p>
                 </CardHeader>
 
@@ -77,7 +82,7 @@ const Login: React.FC = () => {
                         <div className="flex items-center gap-3 p-3 rounded-input bg-primary-soft border border-border">
                             <Users className="w-5 h-5 text-primary shrink-0" />
                             <p className="text-label-sm text-primary font-medium">
-                                Vous avez été invité à rejoindre une famille ! Créez votre compte pour accepter l'invitation.
+                                {t('auth:invite.banner')}
                             </p>
                         </div>
                     )}
@@ -86,62 +91,30 @@ const Login: React.FC = () => {
                         {!isLogin && (
                             <div className="space-y-1.5">
                                 <Input
-                                    label="Nom complet"
+                                    label={t('auth:fields.fullName')}
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required={!isLogin}
-                                    placeholder="Ex: Jean Dupont"
+                                    placeholder={t('auth:fields.fullNamePlaceholder')}
                                 />
-                            </div>
-                        )}
-
-                        {!isLogin && (
-                            <div className="space-y-1.5">
-                                <label className="text-label-sm font-medium text-foreground block">Rôle dans la famille</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setRole('parent')}
-                                        className={`flex flex-col items-center gap-2 p-3 rounded-input border transition-colors ${
-                                            role === 'parent'
-                                                ? 'border-primary bg-primary-soft text-primary'
-                                                : 'border-border text-muted-foreground hover:border-border-strong'
-                                        }`}
-                                    >
-                                        <User className="w-5 h-5" />
-                                        <span className="text-label-sm font-semibold">Parent</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setRole('enfant')}
-                                        className={`flex flex-col items-center gap-2 p-3 rounded-input border transition-colors ${
-                                            role === 'enfant'
-                                                ? 'border-primary bg-primary-soft text-primary'
-                                                : 'border-border text-muted-foreground hover:border-border-strong'
-                                        }`}
-                                    >
-                                        <Baby className="w-5 h-5" />
-                                        <span className="text-label-sm font-semibold">Enfant</span>
-                                    </button>
-                                </div>
                             </div>
                         )}
 
                         <div className="space-y-1.5">
                             <Input
-                                label="Email"
+                                label={t('auth:fields.email')}
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                placeholder="votre@email.com"
+                                placeholder={t('auth:fields.emailPlaceholder')}
                             />
                         </div>
 
                         <div className="space-y-1.5">
                             <Input
-                                label="Mot de passe"
+                                label={t('auth:fields.password')}
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -165,12 +138,12 @@ const Login: React.FC = () => {
                             {loading ? (
                                 <span className="flex items-center gap-2">
                                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Chargement...
+                                    {t('common:states.loading')}
                                 </span>
                             ) : isLogin ? (
-                                'Se connecter'
+                                t('auth:login.submit')
                             ) : (
-                                "S'inscrire"
+                                t('auth:register.submit')
                             )}
                         </Button>
                     </form>
@@ -185,8 +158,8 @@ const Login: React.FC = () => {
                                 className="text-body-sm text-nexus-blue hover:text-nexus-blue/80 font-medium transition-colors hover:underline underline-offset-4"
                             >
                                 {isLogin
-                                    ? "Je n'ai pas de compte, m'inscrire"
-                                    : 'J\'ai déjà un compte, me connecter'}
+                                    ? t('auth:login.noAccount')
+                                    : t('auth:login.haveAccount')}
                             </button>
                         </div>
                     )}
@@ -194,7 +167,7 @@ const Login: React.FC = () => {
             </Card>
 
             <p className="absolute bottom-6 text-label-sm text-muted-foreground text-center w-full">
-                &copy; {new Date().getFullYear()} OpenFamily <a href="https://nexaflow.fr" target="_blank" rel="noopener noreferrer" className="text-nexus-blue hover:underline">NexaFlow</a> &middot; Confiance & Sécurité
+                &copy; {new Date().getFullYear()} OpenFamily <a href="https://nexaflow.fr" target="_blank" rel="noopener noreferrer" className="text-nexus-blue hover:underline">NexaFlow</a> &middot; {t('auth:footer')}
             </p>
         </div>
     );

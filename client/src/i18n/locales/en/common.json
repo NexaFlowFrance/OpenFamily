@@ -1,0 +1,65 @@
+{
+  "appName": "OpenFamily",
+  "demo": {
+    "notice": "Demo mode — your changes are not saved and reset on reload.",
+    "reset": "Reset",
+    "star": "Star on GitHub"
+  },
+  "language": {
+    "syncError": "Could not save your language preference."
+  },
+  "actions": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "close": "Close",
+    "confirm": "Confirm",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "back": "Back",
+    "today": "Today",
+    "retry": "Retry",
+    "apply": "Apply",
+    "reset": "Reset",
+    "export": "Export",
+    "import": "Import",
+    "clear": "Clear",
+    "send": "Send",
+    "loadMore": "Load more"
+  },
+  "states": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "empty": "Nothing here yet",
+    "error": "An error occurred"
+  },
+  "labels": {
+    "name": "Name",
+    "fullName": "Full name",
+    "description": "Description",
+    "date": "Date",
+    "time": "Time",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "location": "Location",
+    "notes": "Notes",
+    "category": "Category",
+    "quantity": "Quantity",
+    "price": "Price",
+    "amount": "Amount",
+    "email": "Email",
+    "password": "Password",
+    "optional": "optional",
+    "all": "All",
+    "none": "None"
+  },
+  "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+  "daysShort": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+  "monthsShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+}

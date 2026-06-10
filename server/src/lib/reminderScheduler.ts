@@ -8,8 +8,39 @@ interface AppointmentRow {
     id: string;
     user_id: string;
     title: string;
-    start_time: Date;
+    /** Naive local timestamp string ('YYYY-MM-DDTHH:mm:ss') — see the pg type parser in db.ts */
+    start_time: string;
     location?: string;
+    /** Recipient's preferred language ('fr' | 'en'), defaults to 'fr' */
+    language: string;
+}
+
+// appointments.start_time is a naive TIMESTAMP holding LOCAL wall-clock time, so the
+// comparison windows must be formatted as naive server-local strings — NOT toISOString(),
+// which is UTC and would shift the windows by the server's UTC offset.
+const toLocalNaive = (d: Date): string => format(d, "yyyy-MM-dd'T'HH:mm:ss");
+
+interface ReminderTexts {
+    title: string;
+    body: string;
+}
+
+function buildTexts(appt: AppointmentRow, kind: '30min' | '1hour'): ReminderTexts {
+    // start_time is 'YYYY-MM-DDTHH:mm:ss' — extract HH:mm directly, no Date round-trip.
+    const timeStr = appt.start_time.slice(11, 16);
+    const suffix = `${timeStr}${appt.location ? ` · ${appt.location}` : ''}`;
+    const lang = appt.language === 'en' ? 'en' : 'fr';
+
+    if (lang === 'en') {
+        return {
+            title: `⏰ Reminder: ${appt.title}`,
+            body: `${kind === '30min' ? 'In 30 minutes' : 'In 1 hour'} — ${suffix}`,
+        };
+    }
+    return {
+        title: `⏰ Rappel : ${appt.title}`,
+        body: `${kind === '30min' ? 'Dans 30 minutes' : 'Dans 1 heure'} — ${suffix}`,
+    };
 }
 
 async function checkReminders(): Promise<void> {
@@ -26,8 +57,10 @@ async function checkReminders(): Promise<void> {
     try {
         // ── 30-minute reminders ──────────────────────────────────────────────
         const { rows: appts30 } = await query(
-            `SELECT a.id, a.user_id, a.title, a.start_time, a.location
+            `SELECT a.id, a.user_id, a.title, a.start_time, a.location,
+                    COALESCE(u.language, 'fr') AS language
              FROM appointments a
+             JOIN users u ON u.id = a.user_id
              WHERE a.reminder_30min = true
                AND a.start_time BETWEEN $1 AND $2
                AND NOT EXISTS (
@@ -35,13 +68,11 @@ async function checkReminders(): Promise<void> {
                  WHERE n.related_id = a.id
                    AND n.type = 'reminder_30min'
                )`,
-            [w30Start.toISOString(), w30End.toISOString()]
+            [toLocalNaive(w30Start), toLocalNaive(w30End)]
         );
 
         for (const appt of appts30 as AppointmentRow[]) {
-            const timeStr = format(new Date(appt.start_time), 'HH:mm');
-            const title = `⏰ Rappel : ${appt.title}`;
-            const body  = `Dans 30 minutes — ${timeStr}${appt.location ? ` · ${appt.location}` : ''}`;
+            const { title, body } = buildTexts(appt, '30min');
 
             await query(
                 `INSERT INTO notifications (user_id, title, message, type, related_id)
@@ -55,8 +86,10 @@ async function checkReminders(): Promise<void> {
 
         // ── 1-hour reminders ─────────────────────────────────────────────────
         const { rows: appts60 } = await query(
-            `SELECT a.id, a.user_id, a.title, a.start_time, a.location
+            `SELECT a.id, a.user_id, a.title, a.start_time, a.location,
+                    COALESCE(u.language, 'fr') AS language
              FROM appointments a
+             JOIN users u ON u.id = a.user_id
              WHERE a.reminder_1hour = true
                AND a.start_time BETWEEN $1 AND $2
                AND NOT EXISTS (
@@ -64,13 +97,11 @@ async function checkReminders(): Promise<void> {
                  WHERE n.related_id = a.id
                    AND n.type = 'reminder_1hour'
                )`,
-            [w60Start.toISOString(), w60End.toISOString()]
+            [toLocalNaive(w60Start), toLocalNaive(w60End)]
         );
 
         for (const appt of appts60 as AppointmentRow[]) {
-            const timeStr = format(new Date(appt.start_time), 'HH:mm');
-            const title = `⏰ Rappel : ${appt.title}`;
-            const body  = `Dans 1 heure — ${timeStr}${appt.location ? ` · ${appt.location}` : ''}`;
+            const { title, body } = buildTexts(appt, '1hour');
 
             await query(
                 `INSERT INTO notifications (user_id, title, message, type, related_id)

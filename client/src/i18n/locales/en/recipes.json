@@ -1,0 +1,88 @@
+{
+  "loading": "Loading recipes…",
+  "title": "Recipes",
+  "subtitle": "Your family recipe library",
+  "newRecipe": "New recipe",
+  "categories": {
+    "Entrée": "Starter",
+    "Plat": "Main course",
+    "Dessert": "Dessert",
+    "Snack": "Snack"
+  },
+  "difficulties": {
+    "Facile": "Easy",
+    "Moyen": "Medium",
+    "Difficile": "Hard"
+  },
+  "searchPlaceholder": "Search for a recipe…",
+  "allCategories": "All categories",
+  "allDifficulties": "All difficulties",
+  "empty": {
+    "none": "No recipes yet. Create your first recipe!",
+    "noMatch": "No recipe matches your search."
+  },
+  "card": {
+    "min": "{{n}} min",
+    "servings_one": "{{count}} serving",
+    "servings_other": "{{count}} servings",
+    "view": "View"
+  },
+  "dialog": {
+    "editTitle": "Edit recipe",
+    "createTitle": "New recipe",
+    "description": "Fill in the recipe details"
+  },
+  "form": {
+    "name": "Recipe name",
+    "namePlaceholder": "e.g. Apple pie",
+    "category": "Category",
+    "difficulty": "Difficulty",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "Short description of the recipe…",
+    "prep": "Prep (min)",
+    "prepPlaceholder": "30",
+    "cook": "Cook (min)",
+    "cookPlaceholder": "45",
+    "servings": "Servings",
+    "servingsPlaceholder": "4",
+    "ingredients": "Ingredients (one per line)",
+    "ingredientsPlaceholder": "200g flour\n3 eggs\n100g sugar",
+    "instructions": "Instructions (one step per line)",
+    "instructionsPlaceholder": "Preheat the oven to 180°C\nMix the flour and sugar\nAdd the eggs",
+    "tags": "Tags (comma-separated)",
+    "tagsPlaceholder": "vegetarian, quick, budget",
+    "image": "Image URL (optional)",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "Import from link",
+    "title": "Import a recipe",
+    "description": "Paste the link to a recipe page (Marmiton, 750g, a blog…) and we'll fill in the form for you.",
+    "urlLabel": "Recipe page URL",
+    "urlPlaceholder": "https://www.marmiton.org/recettes/…",
+    "submit": "Import",
+    "importing": "Importing…",
+    "successTitle": "Recipe imported",
+    "successDescription": "Review the details, then save.",
+    "errors": {
+      "notFoundTitle": "No recipe found",
+      "notFound": "This page doesn't contain a readable recipe.",
+      "fetchTitle": "Import failed",
+      "fetch": "Unable to fetch this page. Check the link and try again."
+    }
+  },
+  "detail": {
+    "prep": "Prep:",
+    "cook": "Cook:",
+    "servings": "Servings:",
+    "minUnit": "min",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions"
+  },
+  "confirmDelete": "Are you sure you want to delete this recipe?",
+  "errors": {
+    "load": "Unable to load recipes.",
+    "save": "Unable to save this recipe.",
+    "delete": "Unable to delete this recipe."
+  }
+}

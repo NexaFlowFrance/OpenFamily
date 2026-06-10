@@ -1,0 +1,51 @@
+{
+  "loading": "Loading planner…",
+  "title": "Meal planner",
+  "subtitle": "Plan your meals for the week",
+  "thisWeek": "This week",
+  "weekOf": "Week of {{start}} to {{end}}",
+  "mealTypes": {
+    "Petit-déjeuner": "Breakfast",
+    "Déjeuner": "Lunch",
+    "Dîner": "Dinner",
+    "Snack": "Snack"
+  },
+  "dialog": {
+    "editTitle": "Edit meal",
+    "addTitle": "Add a meal",
+    "descriptionFmt": "{{type}} — {{date}}"
+  },
+  "form": {
+    "mealType": "Meal type",
+    "recipe": "Recipe (optional)",
+    "noRecipe": "No recipe",
+    "customMeal": "Or custom meal",
+    "customMealPlaceholder": "e.g. Homemade pizza",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Additional notes…"
+  },
+  "shopping": {
+    "button": "Add ingredients to shopping list",
+    "dialogTitle": "Add ingredients to the shopping list",
+    "dialogDescription": "Ingredients from the recipes planned between {{start}} and {{end}}. Uncheck anything you don't need.",
+    "empty": "No meal with a recipe is planned this week.",
+    "selectedCount": "{{selected}} of {{total}} ingredients selected",
+    "alreadyOnList": "already on the list",
+    "confirm_one": "Add {{count}} ingredient",
+    "confirm_other": "Add {{count}} ingredients",
+    "successTitle": "Ingredients added",
+    "successDescription_one": "{{count}} item added to the shopping list.",
+    "successDescription_other": "{{count}} items added to the shopping list.",
+    "partialTitle": "Some ingredients could not be added",
+    "partialDescription": "{{added}} added, {{failed}} failed.",
+    "errorTitle": "Unable to add ingredients",
+    "errorDescription": "Nothing was added to the shopping list. Please try again."
+  },
+  "confirmDelete": "Are you sure you want to delete this meal?",
+  "errors": {
+    "loadPlans": "Unable to load the planner.",
+    "loadRecipes": "Unable to load recipes.",
+    "save": "Unable to save this meal.",
+    "delete": "Unable to delete this meal."
+  }
+}

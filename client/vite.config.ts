@@ -3,10 +3,15 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
+// The static GitHub Pages demo is served from a sub-path and must not register
+// a service worker (it would cache the demo as if it were the real app).
+const isDemo = process.env.VITE_DEMO === 'true';
+
 export default defineConfig({
+    base: isDemo ? '/OpenFamily/demo/' : '/',
     plugins: [
         react(),
-        VitePWA({
+        ...(isDemo ? [] : [VitePWA({
             registerType: 'autoUpdate',
             strategies: 'injectManifest',
             srcDir: 'src',
@@ -35,7 +40,7 @@ export default defineConfig({
             devOptions: {
                 enabled: false,
             },
-        })
+        })])
     ],
     resolve: {
         alias: {

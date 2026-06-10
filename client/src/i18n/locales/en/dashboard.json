@@ -1,0 +1,36 @@
+{
+  "heading": {
+    "before": "Your ",
+    "highlight": "day",
+    "after": ", at a glance."
+  },
+  "budgetAlert": {
+    "title": "Budget warning",
+    "message_one": "{{count}} category has exceeded its monthly budget.",
+    "message_other": "{{count}} categories have exceeded their monthly budget.",
+    "cta": "View details"
+  },
+  "stats": {
+    "appointments": "Appointments",
+    "tasks": "Tasks",
+    "shopping": "Shopping",
+    "monthExpenses": "This month's expenses"
+  },
+  "today": {
+    "title": "Today",
+    "viewWeek": "View week",
+    "emptyTitle": "Nothing planned.",
+    "emptySubtitle": "Add an appointment to see it appear here.",
+    "emptyCta": "Add an appointment"
+  },
+  "aside": {
+    "shopping": "Shopping",
+    "shoppingCount_one": "item to buy",
+    "shoppingCount_other": "items to buy",
+    "budget": "This month's budget",
+    "budgetSubtitle": "spent this month",
+    "tasks": "Pending tasks",
+    "tasksCount_one": "task to complete",
+    "tasksCount_other": "tasks to complete"
+  }
+}

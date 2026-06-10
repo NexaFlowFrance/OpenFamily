@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { Plus, Edit2, Trash2, User, Phone, Heart, AlertTriangle, Users, Link2, Copy, LogOut, Crown, UserX, Check, UserPlus, Send, Clock, X } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, Badge } from '../components/ui';
 import { DEFAULT_FAMILY_COLOR, FAMILY_COLOR_PRESETS } from '../design/colorPresets';
+
+const COLOR_KEYS = ['coral', 'orange', 'yellow', 'green', 'cyan', 'blue', 'indigo', 'pink'];
 
 interface FamilyMember {
     id: string;
@@ -17,14 +20,8 @@ interface FamilyMember {
     emergency_contact_name?: string;
     emergency_contact_phone?: string;
     notes?: string;
+    linked_user_id?: string | null;
 }
-
-const ROLES = [
-    { value: 'Parent', label: 'Parent' },
-    { value: 'Enfant', label: 'Enfant' },
-    { value: 'Etudiant', label: 'Etudiant' },
-    { value: 'Autre', label: 'Autre' },
-];
 
 interface SharedAccount {
     id: string;
@@ -50,6 +47,22 @@ interface MyJoinRequest {
 }
 
 const Family: React.FC = () => {
+    const { t } = useTranslation(['family', 'common']);
+    const ROLES = [
+        { value: 'Parent', label: t('family:roles.Parent') },
+        { value: 'Enfant', label: t('family:roles.Enfant') },
+        { value: 'Etudiant', label: t('family:roles.Etudiant') },
+        { value: 'Autre', label: t('family:roles.Autre') },
+    ];
+    const roleLabel = (v: string) => t(`family:roles.${v}`, { defaultValue: v });
+    const ACCOUNT_ROLES = [
+        { value: 'parent', label: t('family:shared.roleParent') },
+        { value: 'enfant', label: t('family:shared.roleChild') },
+    ];
+    const colorOptions = FAMILY_COLOR_PRESETS.map((c, i) => ({
+        value: c.value,
+        label: t(`family:colors.${COLOR_KEYS[i]}`, { defaultValue: c.label }),
+    }));
     const { user, leaveFamily, refreshToken } = useAuth();
     const [members, setMembers] = useState<FamilyMember[]>([]);
     const [loading, setLoading] = useState(true);
@@ -61,6 +74,7 @@ const Family: React.FC = () => {
     const [sharedAccounts, setSharedAccounts] = useState<SharedAccount[]>([]);
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [inviteLinkLoading, setInviteLinkLoading] = useState(false);
+    const [inviteRole, setInviteRole] = useState<'parent' | 'enfant'>('parent');
     const [copied, setCopied] = useState(false);
     const [leavingFamily, setLeavingFamily] = useState(false);
 
@@ -81,7 +95,10 @@ const Family: React.FC = () => {
         emergency_contact_name: '',
         emergency_contact_phone: '',
         notes: '',
+        linked_user_id: '',
     });
+
+    const isOwner = sharedAccounts.find((a) => a.id === user?.id)?.is_owner ?? true;
 
     useEffect(() => {
         loadMembers();
@@ -102,7 +119,7 @@ const Family: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to load family members:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de charger la famille.');
+            setError(error instanceof Error ? error.message : t('family:errors.load'));
         } finally {
             setLoading(false);
         }
@@ -150,7 +167,7 @@ const Family: React.FC = () => {
         e.preventDefault();
         setJoinError('');
         if (!joinEmail.trim()) {
-            setJoinError('Adresse e-mail requise');
+            setJoinError(t('family:join.emailRequired'));
             return;
         }
         setJoinSubmitting(true);
@@ -159,7 +176,7 @@ const Family: React.FC = () => {
             setJoinEmail('');
             await loadJoinData();
         } catch (err) {
-            setJoinError(err instanceof Error ? err.message : 'Impossible d\'envoyer la demande.');
+            setJoinError(err instanceof Error ? err.message : t('family:errors.sendRequest'));
         } finally {
             setJoinSubmitting(false);
         }
@@ -170,7 +187,7 @@ const Family: React.FC = () => {
             await api.delete('/api/invites/requests/mine');
             setMyRequest(null);
         } catch {
-            setError('Impossible d\'annuler la demande.');
+            setError(t('family:errors.cancelRequest'));
         }
     };
 
@@ -180,7 +197,7 @@ const Family: React.FC = () => {
             await loadJoinData();
             await loadSharedAccounts();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Impossible d\'approuver la demande.');
+            setError(err instanceof Error ? err.message : t('family:errors.approve'));
         }
     };
 
@@ -189,20 +206,20 @@ const Family: React.FC = () => {
             await api.post(`/api/invites/requests/${id}/reject`, {});
             await loadJoinData();
         } catch {
-            setError('Impossible de refuser la demande.');
+            setError(t('family:errors.reject'));
         }
     };
 
     const handleGenerateInvite = async () => {
         setInviteLinkLoading(true);
         try {
-            const response = await api.post<{ success: boolean; data: { token: string } }>('/api/invites', {});
+            const response = await api.post<{ success: boolean; data: { token: string } }>('/api/invites', { role: inviteRole });
             if (response.success && response.data) {
                 const baseUrl = window.location.origin;
                 setInviteLink(`${baseUrl}/join?invite=${response.data.token}`);
             }
         } catch {
-            setError('Impossible de créer un lien d\'invitation.');
+            setError(t('family:errors.invite'));
         } finally {
             setInviteLinkLoading(false);
         }
@@ -216,22 +233,27 @@ const Family: React.FC = () => {
         });
     };
 
+    const handleChangeMemberRole = async (userId: string, role: 'parent' | 'enfant') => {
+        try {
+            await api.put(`/api/invites/members/${userId}/role`, { role });
+            await loadSharedAccounts();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : t('family:errors.role'));
+        }
+    };
+
     const handleKickMember = async (userId: string) => {
-        if (!confirm('Retirer ce compte de la famille ?')) return;
+        if (!confirm(t('family:confirm.kick'))) return;
         try {
             await api.delete(`/api/invites/members/${userId}`);
             await loadSharedAccounts();
         } catch {
-            setError('Impossible de retirer ce membre.');
+            setError(t('family:errors.kick'));
         }
     };
 
     const handleTransferOwnership = async (account: SharedAccount) => {
-        if (!confirm(
-            `Transférer la propriété de la famille à ${account.name} ?\n\n` +
-            'Vous deviendrez un membre ordinaire. Toutes les données familiales seront conservées ' +
-            'et gérées par le nouveau propriétaire. Cette action est irréversible.'
-        )) return;
+        if (!confirm(t('family:confirm.transfer', { name: account.name }))) return;
         try {
             const res = await api.post<{ success: boolean; data?: { token: string; user: any } }>(
                 '/api/invites/transfer-ownership',
@@ -244,18 +266,18 @@ const Family: React.FC = () => {
                 await loadMembers();
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Impossible de transférer la propriété.');
+            setError(err instanceof Error ? err.message : t('family:errors.transfer'));
         }
     };
 
     const handleLeaveFamily = async () => {
-        if (!confirm('Quitter la famille partagée ? Vous retrouverez vos propres données.')) return;
+        if (!confirm(t('family:confirm.leave'))) return;
         setLeavingFamily(true);
         try {
             await leaveFamily();
             setSharedAccounts([]);
         } catch {
-            setError('Impossible de quitter la famille.');
+            setError(t('family:errors.leave'));
         } finally {
             setLeavingFamily(false);
         }
@@ -277,6 +299,12 @@ const Family: React.FC = () => {
 
             if (editingMember) {
                 await api.put(`/api/family/${editingMember.id}`, payload);
+                // Account link is a separate, owner-only endpoint — only call it on change.
+                if (isOwner && (formData.linked_user_id || '') !== (editingMember.linked_user_id || '')) {
+                    await api.put(`/api/family/${editingMember.id}/link`, {
+                        user_id: formData.linked_user_id || null,
+                    });
+                }
             } else {
                 await api.post('/api/family', payload);
             }
@@ -285,18 +313,18 @@ const Family: React.FC = () => {
             loadMembers();
         } catch (error) {
             console.error('Failed to save family member:', error);
-            setError(error instanceof Error ? error.message : 'Impossible d’enregistrer ce membre.');
+            setError(error instanceof Error ? error.message : t('family:errors.save'));
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce membre de la famille ?')) return;
+        if (!confirm(t('family:confirm.delete'))) return;
         try {
             await api.delete(`/api/family/${id}`);
             loadMembers();
         } catch (error) {
             console.error('Failed to delete family member:', error);
-            setError(error instanceof Error ? error.message : 'Impossible de supprimer ce membre.');
+            setError(error instanceof Error ? error.message : t('family:errors.delete'));
         }
     };
 
@@ -312,6 +340,7 @@ const Family: React.FC = () => {
             emergency_contact_name: member.emergency_contact_name || '',
             emergency_contact_phone: member.emergency_contact_phone || '',
             notes: member.notes || '',
+            linked_user_id: member.linked_user_id || '',
         });
         setDialogOpen(true);
     };
@@ -328,6 +357,7 @@ const Family: React.FC = () => {
             emergency_contact_name: '',
             emergency_contact_phone: '',
             notes: '',
+            linked_user_id: '',
         });
     };
 
@@ -347,7 +377,7 @@ const Family: React.FC = () => {
             <div className="flex h-full items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="spinner-brand" />
-                    <p className="text-muted-foreground font-medium animate-pulse">Chargement de la famille...</p>
+                    <p className="text-muted-foreground font-medium animate-pulse">{t('family:loading')}</p>
                 </div>
             </div>
         );
@@ -362,12 +392,12 @@ const Family: React.FC = () => {
             ) : null}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-h1 mb-1">Famille</h1>
-                    <p className="text-muted-foreground text-body">Gérez les membres de votre famille</p>
+                    <h1 className="text-h1 mb-1">{t('family:title')}</h1>
+                    <p className="text-muted-foreground text-body">{t('family:subtitle')}</p>
                 </div>
                 <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Ajouter un membre
+                    {t('family:addMember')}
                 </Button>
             </div>
 
@@ -375,7 +405,7 @@ const Family: React.FC = () => {
                 <Card>
                     <CardContent className="p-8 text-center">
                         <User className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                        <p className="text-muted-foreground">Aucun membre de la famille. Ajoutez votre premier membre !</p>
+                        <p className="text-muted-foreground">{t('family:empty')}</p>
                     </CardContent>
                 </Card>
             ) : (
@@ -393,11 +423,11 @@ const Family: React.FC = () => {
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-body font-semibold truncate">{member.name}</h3>
                                         <Badge variant="primary" className="mt-1">
-                                            {member.role}
+                                            {roleLabel(member.role)}
                                         </Badge>
                                         {member.birthdate && (
                                             <p className="text-body-sm text-muted-foreground mt-1">
-                                                {calculateAge(member.birthdate)} ans
+                                                {t('family:card.age', { count: calculateAge(member.birthdate) })}
                                             </p>
                                         )}
                                     </div>
@@ -408,11 +438,11 @@ const Family: React.FC = () => {
                                     <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                                         <div className="flex items-center gap-2 mb-2">
                                             <Heart className="h-4 w-4 text-amber-600" />
-                                            <span className="text-label font-semibold text-amber-900">Santé</span>
+                                            <span className="text-label font-semibold text-amber-900">{t('family:card.health')}</span>
                                         </div>
                                         {member.allergies && member.allergies.length > 0 && (
                                             <div className="mb-2">
-                                                <p className="text-[11px] font-medium text-amber-900 mb-1">Allergies:</p>
+                                                <p className="text-[11px] font-medium text-amber-900 mb-1">{t('family:card.allergies')}</p>
                                                 <div className="flex flex-wrap gap-1">
                                                     {member.allergies.map((allergy, idx) => (
                                                         <span
@@ -427,7 +457,7 @@ const Family: React.FC = () => {
                                         )}
                                         {member.medications && member.medications.length > 0 && (
                                             <div>
-                                                <p className="text-[11px] font-medium text-amber-900 mb-1">Médicaments:</p>
+                                                <p className="text-[11px] font-medium text-amber-900 mb-1">{t('family:card.medications')}</p>
                                                 <div className="flex flex-wrap gap-1">
                                                     {member.medications.map((med, idx) => (
                                                         <span
@@ -448,7 +478,7 @@ const Family: React.FC = () => {
                                     <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                                         <div className="flex items-center gap-2 mb-2">
                                             <AlertTriangle className="h-4 w-4 text-red-600" />
-                                            <span className="text-label font-semibold text-red-900">Contact d'urgence</span>
+                                            <span className="text-label font-semibold text-red-900">{t('family:card.emergency')}</span>
                                         </div>
                                         <p className="text-body-sm text-red-900 font-medium">
                                             {member.emergency_contact_name}
@@ -483,7 +513,7 @@ const Family: React.FC = () => {
                                         className="flex-1"
                                     >
                                         <Edit2 className="h-4 w-4 mr-1" />
-                                        Modifier
+                                        {t('common:actions.edit')}
                                     </Button>
                                     <Button variant="ghost" size="sm" onClick={() => handleDelete(member.id)}>
                                         <Trash2 className="h-4 w-4 text-red-500" />
@@ -497,17 +527,14 @@ const Family: React.FC = () => {
 
             {/* Shared accounts section */}
             {(() => {
-                const currentAccount = sharedAccounts.find((a) => a.id === user?.id);
-                const isOwner = currentAccount?.is_owner ?? true;
-
                 return (
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <Users className="w-5 h-5 text-nexus-blue" />
-                            <h2 className="text-h2">Comptes partagés</h2>
+                            <h2 className="text-h2">{t('family:shared.title')}</h2>
                         </div>
                         <p className="text-body-sm text-muted-foreground">
-                            Partagez l'accès à vos données familiales avec d'autres comptes.
+                            {t('family:shared.subtitle')}
                         </p>
 
                         {/* Account list */}
@@ -526,21 +553,33 @@ const Family: React.FC = () => {
                                                 <p className="text-body font-medium truncate">
                                                     {account.name}
                                                     {account.id === user?.id && (
-                                                        <span className="ml-2 text-label-sm text-muted-foreground">(vous)</span>
+                                                        <span className="ml-2 text-label-sm text-muted-foreground">{t('family:shared.you')}</span>
                                                     )}
                                                 </p>
                                                 <p className="text-body-sm text-muted-foreground truncate">{account.email}</p>
                                             </div>
-                                            <Badge variant={account.is_owner ? 'primary' : 'default'}>
-                                                {account.is_owner ? 'Propriétaire' : (account.role === 'enfant' ? '🧒 Enfant' : '👨 Parent')}
-                                            </Badge>
+                                            {account.is_owner ? (
+                                                <Badge variant="primary">{t('family:shared.owner')}</Badge>
+                                            ) : isOwner ? (
+                                                <div className="w-32" title={t('family:shared.roleTitle')}>
+                                                    <Select
+                                                        value={account.role === 'enfant' ? 'enfant' : 'parent'}
+                                                        onValueChange={(value) => handleChangeMemberRole(account.id, value as 'parent' | 'enfant')}
+                                                        options={ACCOUNT_ROLES}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <Badge variant="default">
+                                                    {account.role === 'enfant' ? t('family:shared.child') : t('family:shared.parent')}
+                                                </Badge>
+                                            )}
                                             {/* Owner can kick non-owner members (except themselves) */}
                                             {isOwner && !account.is_owner && (
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleTransferOwnership(account)}
-                                                    title="Transférer la propriété à ce compte"
+                                                    title={t('family:shared.transferTitle')}
                                                 >
                                                     <Crown className="w-4 h-4 text-amber-500" />
                                                 </Button>
@@ -550,7 +589,7 @@ const Family: React.FC = () => {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleKickMember(account.id)}
-                                                    title="Retirer ce compte"
+                                                    title={t('family:shared.kickTitle')}
                                                 >
                                                     <UserX className="w-4 h-4 text-red-500" />
                                                 </Button>
@@ -564,7 +603,7 @@ const Family: React.FC = () => {
                         {sharedAccounts.length <= 1 && (
                             <Card hover={false}>
                                 <CardContent className="p-4 text-center text-muted-foreground text-body-sm">
-                                    Aucun autre compte ne partage encore cette famille.
+                                    {t('family:shared.none')}
                                 </CardContent>
                             </Card>
                         )}
@@ -574,7 +613,7 @@ const Family: React.FC = () => {
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
                                     <UserPlus className="w-4 h-4 text-nexus-blue" />
-                                    <h3 className="text-body font-semibold">Demandes d'accès</h3>
+                                    <h3 className="text-body font-semibold">{t('family:requests.title')}</h3>
                                     <Badge variant="primary">{joinRequests.length}</Badge>
                                 </div>
                                 {joinRequests.map((reqItem) => (
@@ -592,16 +631,16 @@ const Family: React.FC = () => {
                                                 size="sm"
                                                 onClick={() => handleApproveRequest(reqItem.id)}
                                                 className="flex items-center gap-1 text-green-600"
-                                                title="Accepter"
+                                                title={t('family:requests.accept')}
                                             >
                                                 <Check className="w-4 h-4" />
-                                                Accepter
+                                                {t('family:requests.accept')}
                                             </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => handleRejectRequest(reqItem.id)}
-                                                title="Refuser"
+                                                title={t('family:requests.rejectTitle')}
                                             >
                                                 <X className="w-4 h-4 text-red-500" />
                                             </Button>
@@ -620,13 +659,13 @@ const Family: React.FC = () => {
                                             <Clock className="w-5 h-5 text-amber-600" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-body font-medium">Demande en attente</p>
+                                            <p className="text-body font-medium">{t('family:myRequest.pendingTitle')}</p>
                                             <p className="text-body-sm text-muted-foreground truncate">
-                                                Envoyée à {myRequest.owner_name} ({myRequest.owner_email})
+                                                {t('family:myRequest.sentTo', { name: myRequest.owner_name, email: myRequest.owner_email })}
                                             </p>
                                         </div>
                                         <Button variant="ghost" size="sm" onClick={handleCancelJoinRequest}>
-                                            Annuler
+                                            {t('common:actions.cancel')}
                                         </Button>
                                     </CardContent>
                                 </Card>
@@ -634,15 +673,14 @@ const Family: React.FC = () => {
                                 <div className="space-y-3 border-t pt-4">
                                     <div className="flex items-center gap-2">
                                         <UserPlus className="w-4 h-4 text-nexus-blue" />
-                                        <h3 className="text-body font-semibold">Rejoindre une famille</h3>
+                                        <h3 className="text-body font-semibold">{t('family:join.title')}</h3>
                                     </div>
                                     <p className="text-body-sm text-muted-foreground">
-                                        Saisissez l'adresse e-mail du propriétaire de la famille à rejoindre. Il recevra une demande
-                                        à accepter ou refuser.
+                                        {t('family:join.desc')}
                                     </p>
                                     {myRequest && myRequest.status === 'rejected' && (
                                         <p className="text-body-sm text-red-500">
-                                            Votre dernière demande a été refusée.
+                                            {t('family:join.rejected')}
                                         </p>
                                     )}
                                     {joinError && (
@@ -653,7 +691,7 @@ const Family: React.FC = () => {
                                             type="email"
                                             value={joinEmail}
                                             onChange={(e) => setJoinEmail(e.target.value)}
-                                            placeholder="email@exemple.com"
+                                            placeholder={t('family:join.emailPlaceholder')}
                                             className="flex-1"
                                         />
                                         <Button
@@ -663,7 +701,7 @@ const Family: React.FC = () => {
                                             className="flex items-center justify-center gap-2"
                                         >
                                             <Send className="w-4 h-4" />
-                                            {joinSubmitting ? 'Envoi…' : 'Envoyer la demande'}
+                                            {joinSubmitting ? t('family:join.sending') : t('family:join.send')}
                                         </Button>
                                     </form>
                                 </div>
@@ -673,15 +711,27 @@ const Family: React.FC = () => {
                         {/* Owner: generate invite */}
                         {isOwner && (
                             <div className="space-y-3">
-                                <Button
-                                    variant="secondary"
-                                    onClick={handleGenerateInvite}
-                                    disabled={inviteLinkLoading}
-                                    className="flex items-center gap-2"
-                                >
-                                    <Link2 className="w-4 h-4" />
-                                    {inviteLinkLoading ? 'Génération…' : 'Générer un lien d\'invitation'}
-                                </Button>
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                                    <div className="w-full sm:w-44">
+                                        <label className="block text-label font-medium text-foreground mb-1.5">
+                                            {t('family:invite.roleLabel')}
+                                        </label>
+                                        <Select
+                                            value={inviteRole}
+                                            onValueChange={(value) => setInviteRole(value as 'parent' | 'enfant')}
+                                            options={ACCOUNT_ROLES}
+                                        />
+                                    </div>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={handleGenerateInvite}
+                                        disabled={inviteLinkLoading}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Link2 className="w-4 h-4" />
+                                        {inviteLinkLoading ? t('family:invite.generating') : t('family:invite.generate')}
+                                    </Button>
+                                </div>
 
                                 {inviteLink && (
                                     <div className="flex items-center gap-2 p-3 rounded-nexus bg-nexus-blue/5 border border-nexus-blue/20">
@@ -693,7 +743,7 @@ const Family: React.FC = () => {
                                         <button
                                             onClick={handleCopyInvite}
                                             className="shrink-0 p-1 rounded hover:bg-nexus-blue/10 transition-colors"
-                                            title="Copier"
+                                            title={t('family:invite.copyTitle')}
                                         >
                                             {copied
                                                 ? <Check className="w-4 h-4 text-green-500" />
@@ -714,7 +764,7 @@ const Family: React.FC = () => {
                                 className="flex items-center gap-2 text-red-500 hover:bg-red-50 hover:text-red-600"
                             >
                                 <LogOut className="w-4 h-4" />
-                                {leavingFamily ? 'Départ en cours…' : 'Quitter la famille partagée'}
+                                {leavingFamily ? t('family:leave.leaving') : t('family:leave.leave')}
                             </Button>
                         )}
                     </div>
@@ -725,20 +775,20 @@ const Family: React.FC = () => {
             <Dialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
-                title={editingMember ? 'Modifier le membre' : 'Ajouter un membre'}
-                description="Remplissez les informations du membre de la famille"
+                title={editingMember ? t('family:dialog.editTitle') : t('family:dialog.addTitle')}
+                description={t('family:dialog.description')}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input
-                        label="Nom"
+                        label={t('family:form.name')}
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
-                        placeholder="Ex: Marie Dupont"
+                        placeholder={t('family:form.namePlaceholder')}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-label font-medium text-foreground mb-1.5">Rôle</label>
+                            <label className="block text-label font-medium text-foreground mb-1.5">{t('family:form.role')}</label>
                             <Select
                                 value={formData.role}
                                 onValueChange={(value) => setFormData({ ...formData, role: value })}
@@ -746,71 +796,88 @@ const Family: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-label font-medium text-foreground mb-1.5">Couleur</label>
+                            <label className="block text-label font-medium text-foreground mb-1.5">{t('family:form.color')}</label>
                             <Select
                                 value={formData.color}
                                 onValueChange={(value) => setFormData({ ...formData, color: value })}
-                                options={FAMILY_COLOR_PRESETS}
+                                options={colorOptions}
                             />
                         </div>
                     </div>
                     <Input
-                        label="Date de naissance (optionnel)"
+                        label={t('family:form.birthdate')}
                         type="date"
                         value={formData.birthdate}
                         onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
                     />
+                    {/* Owner only: link this profile to one of the family's shared accounts */}
+                    {editingMember && isOwner && sharedAccounts.length > 0 && (
+                        <div>
+                            <label className="block text-label font-medium text-foreground mb-1.5">
+                                {t('family:link.label')}
+                            </label>
+                            <Select
+                                value={formData.linked_user_id}
+                                onValueChange={(value) => setFormData({ ...formData, linked_user_id: value })}
+                                options={[
+                                    { value: '', label: t('family:link.none') },
+                                    ...sharedAccounts.map((a) => ({ value: a.id, label: `${a.name} (${a.email})` })),
+                                ]}
+                            />
+                            <p className="text-body-sm text-muted-foreground mt-1">{t('family:link.hint')}</p>
+                        </div>
+                    )}
                     <div className="border-t pt-4">
                         <h4 className="text-body font-semibold mb-3 flex items-center gap-2">
                             <Heart className="h-4 w-4 text-amber-600" />
-                            Informations de santé
+                            {t('family:form.healthInfo')}
                         </h4>
                         <Input
-                            label="Allergies (séparées par des virgules)"
+                            label={t('family:form.allergies')}
                             value={formData.allergies}
                             onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
-                            placeholder="Ex: Arachides, Lactose"
+                            placeholder={t('family:form.allergiesPlaceholder')}
                         />
                         <Input
-                            label="Médicaments (séparés par des virgules)"
+                            label={t('family:form.medications')}
                             value={formData.medications}
                             onChange={(e) => setFormData({ ...formData, medications: e.target.value })}
-                            placeholder="Ex: Aspirine, Insuline"
+                            placeholder={t('family:form.medicationsPlaceholder')}
                             className="mt-3"
                         />
                     </div>
                     <div className="border-t pt-4">
                         <h4 className="text-body font-semibold mb-3 flex items-center gap-2">
                             <AlertTriangle className="h-4 w-4 text-red-600" />
-                            Contact d'urgence
+                            {t('family:form.emergencyContact')}
                         </h4>
                         <Input
-                            label="Nom du contact"
+                            label={t('family:form.contactName')}
                             value={formData.emergency_contact_name}
                             onChange={(e) => setFormData({ ...formData, emergency_contact_name: e.target.value })}
-                            placeholder="Ex: Jean Dupont"
+                            placeholder={t('family:form.contactNamePlaceholder')}
                         />
                         <Input
-                            label="Téléphone du contact"
+                            label={t('family:form.contactPhone')}
                             type="tel"
                             value={formData.emergency_contact_phone}
                             onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
-                            placeholder="Ex: +33 6 12 34 56 78"
+                            placeholder={t('family:form.contactPhonePlaceholder')}
                             className="mt-3"
                         />
                     </div>
                     <Textarea
-                        label="Notes (optionnel)"
+                        label={t('family:form.notes')}
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder="Notes supplémentaires..."
+                        placeholder={t('family:form.notesPlaceholder')}
                         rows={2}
                     />
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
-                            Annuler
+                            {t('common:actions.cancel')}
                         </Button>
-                        <Button type="submit">{editingMember ? 'Enregistrer' : 'Ajouter'}</Button>
+                        <Button type="submit">{editingMember ? t('common:actions.save') : t('common:actions.add')}</Button>
                     </div>
                 </form>
             </Dialog>

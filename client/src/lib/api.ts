@@ -4,6 +4,10 @@
 // via http://<ip-du-pc>:3000. On ne se repose pas sur une variable vide passée
 // au build : PowerShell supprime les variables d'environnement vides, ce qui
 // faisait basculer le client sur localhost:3001 (d'où les « Failed to fetch »).
+import { mockRequest } from '../demo/mockApi';
+
+const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
+
 const rawApiUrl = import.meta.env.VITE_API_URL as string | undefined;
 const API_URL = rawApiUrl !== undefined
     ? rawApiUrl
@@ -36,6 +40,13 @@ class ApiClient {
         endpoint: string,
         options: RequestInit = {}
     ): Promise<T> {
+        // Static GitHub Pages demo: serve everything from the in-browser mock.
+        if (IS_DEMO) {
+            const method = (options.method as string) || 'GET';
+            const body = options.body ? JSON.parse(options.body as string) : undefined;
+            return mockRequest<T>(method, endpoint, body);
+        }
+
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
         };
@@ -75,6 +86,21 @@ class ApiClient {
 
     async get<T>(endpoint: string): Promise<T> {
         return this.request<T>(endpoint, { method: 'GET' });
+    }
+
+    /**
+     * Fetches binary content (images…) with the auth header.
+     * Not supported by the static demo mock — throws so callers fall back.
+     */
+    async getBlob(endpoint: string): Promise<Blob> {
+        if (IS_DEMO) throw new Error('Binary endpoints are not available in demo mode');
+
+        const headers: Record<string, string> = {};
+        if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
+
+        const response = await fetch(`${this.baseURL}${endpoint}`, { headers });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.blob();
     }
 
     async post<T>(endpoint: string, body: any): Promise<T> {

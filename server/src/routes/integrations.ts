@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, requireParent, AuthRequest } from '../middleware/auth';
 import { encryptCredentials, decryptCredentials } from '../utils/crypto';
+import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
 import { testMealieConnection, syncMealie } from '../services/integrations/mealie';
 import { testTandoorConnection, syncTandoor } from '../services/integrations/tandoor';
 import { testHomeAssistantConnection, syncHomeAssistant } from '../services/integrations/homeassistant';
 import { testGrocyConnection, syncGrocy } from '../services/integrations/grocy';
 import { testNextcloudConnection, syncNextcloud } from '../services/integrations/nextcloud';
+import { testImmichConnection, syncImmich, fetchImmichRandomPhoto } from '../services/integrations/immich';
 import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
@@ -26,12 +28,43 @@ router.get('/', async (req: AuthRequest, res) => {
     }
 });
 
+// GET /api/integrations/immich/photo - proxy a random photo from the family's
+// Immich instance (the Immich API key never reaches the browser).
+router.get('/immich/photo', async (req: AuthRequest, res) => {
+    try {
+        const result = await query(
+            `SELECT base_url, encrypted_credentials FROM integrations
+             WHERE family_id = $1 AND type = 'immich'`,
+            [req.userId]
+        );
+        const integ = result.rows[0] as { base_url: string; encrypted_credentials: string | null } | undefined;
+        if (!integ || !integ.encrypted_credentials) {
+            return res.status(404).json({ success: false, error: 'Aucune integration Immich configuree' });
+        }
+
+        // Re-validate the stored URL at use time (DNS answers can change).
+        await assertSafeIntegrationUrl(integ.base_url);
+
+        const photo = await fetchImmichRandomPhoto(integ.base_url, integ.encrypted_credentials);
+        res.set('Content-Type', photo.contentType);
+        res.set('Cache-Control', 'no-store');
+        res.send(photo.buffer);
+    } catch (e) {
+        if (e instanceof UnsafeUrlError) {
+            return res.status(400).json({ success: false, error: e.message });
+        }
+        res.status(502).json({ success: false, error: 'Immich indisponible' });
+    }
+});
+
 // POST /api/integrations/test - test without saving
 router.post('/test', requireParent, async (req: AuthRequest, res) => {
     const { type, base_url, apiKey, token } = req.body as Record<string, string>;
     const cleanUrl = (base_url || '').replace(/\/$/, '');
 
     try {
+        await assertSafeIntegrationUrl(cleanUrl);
+
         let result: { success: boolean; message: string };
         switch (type) {
             case 'mealie':        result = await testMealieConnection(cleanUrl, apiKey); break;
@@ -39,6 +72,7 @@ router.post('/test', requireParent, async (req: AuthRequest, res) => {
             case 'homeassistant': result = await testHomeAssistantConnection(cleanUrl, token); break;
             case 'grocy':         result = await testGrocyConnection(cleanUrl, apiKey); break;
             case 'nextcloud':     result = await testNextcloudConnection(cleanUrl, (req.body as Record<string, string>).username, (req.body as Record<string, string>).password); break;
+            case 'immich':        result = await testImmichConnection(cleanUrl, apiKey); break;
             default:              result = { success: false, message: "Type d'integration inconnu" };
         }
         res.json(result);
@@ -67,6 +101,14 @@ router.post('/', requireParent, async (req: AuthRequest, res) => {
     const config = Object.keys(extraConfig).length > 0 ? { ...(configFromBody || {}), ...extraConfig } : (configFromBody || {});
 
     const cleanUrl = base_url.replace(/\/$/, '');
+
+    // Validate the URL at save time (it is validated again at every use).
+    try {
+        await assertSafeIntegrationUrl(cleanUrl);
+    } catch (e) {
+        return res.status(400).json({ success: false, error: e instanceof UnsafeUrlError ? e.message : 'URL invalide' });
+    }
+
     const encrypted = Object.keys(credentials).length > 0 ? encryptCredentials(credentials) : null;
 
     try {
@@ -109,6 +151,9 @@ router.post('/:id/sync', requireParent, async (req: AuthRequest, res) => {
         await query("UPDATE integrations SET status = 'syncing', updated_at = NOW() WHERE id = $1", [integ.id]);
 
         try {
+            // Re-validate the stored URL at use time (DNS answers can change).
+            await assertSafeIntegrationUrl(integ.base_url);
+
             let syncResult: { imported: number; errors: number };
 
             switch (integ.type) {
@@ -117,6 +162,7 @@ router.post('/:id/sync', requireParent, async (req: AuthRequest, res) => {
                 case 'homeassistant': syncResult = await syncHomeAssistant(integ.id, req.userId!, integ.base_url, integ.encrypted_credentials, integ.config || {}); break;
                 case 'grocy':         syncResult = await syncGrocy(integ.id, req.userId!, integ.base_url, integ.encrypted_credentials); break;
                 case 'nextcloud':     syncResult = await syncNextcloud(integ.id, req.userId!, integ.base_url, integ.encrypted_credentials, integ.config || {}); break;
+                case 'immich':        syncResult = await syncImmich(integ.id, req.userId!, integ.base_url, integ.encrypted_credentials); break;
                 default: throw new Error('Type inconnu');
             }
 

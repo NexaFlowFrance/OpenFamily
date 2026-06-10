@@ -8,6 +8,10 @@ import { normalizeEmail } from '../lib/normalize';
 
 const router = Router();
 
+// Account roles assignable to family members ('parent' = full access, 'enfant' = read-mostly)
+const cleanAccountRole = (value: unknown): 'parent' | 'enfant' =>
+    value === 'enfant' ? 'enfant' : 'parent';
+
 // ── Public endpoint (no auth) ─────────────────────────────────────────────────
 
 // GET /info/:token — get invite preview info for the Join page
@@ -53,20 +57,22 @@ router.post('/', async (req: AuthRequest, res) => {
         return res.status(403).json({ success: false, error: 'Seul le propriétaire peut créer des invitations' });
     }
 
-    const { inviteeEmail, expiresInDays = 7 } = req.body as {
+    const { inviteeEmail, expiresInDays = 7, role } = req.body as {
         inviteeEmail?: string;
         expiresInDays?: number;
+        role?: string;
     };
 
     const days = Math.min(Math.max(Number(expiresInDays) || 7, 1), 30);
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    const inviteRole = cleanAccountRole(role);
 
     const { rows } = await query(
-        `INSERT INTO family_invites (owner_id, token, invitee_email, expires_at)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id, token, invitee_email, status, expires_at, created_at`,
-        [req.userId, token, inviteeEmail ?? null, expiresAt.toISOString()]
+        `INSERT INTO family_invites (owner_id, token, invitee_email, expires_at, role)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, token, invitee_email, status, expires_at, role, created_at`,
+        [req.userId, token, inviteeEmail ?? null, expiresAt.toISOString(), inviteRole]
     );
 
     return res.json({ success: true, data: rows[0] });
@@ -79,7 +85,7 @@ router.get('/', async (req: AuthRequest, res) => {
     }
 
     const { rows } = await query(
-        `SELECT id, token, invitee_email, status, expires_at, created_at
+        `SELECT id, token, invitee_email, status, expires_at, role, created_at
          FROM family_invites
          WHERE owner_id = $1
            AND status = 'pending'
@@ -100,7 +106,7 @@ router.post('/join', async (req: AuthRequest, res) => {
     }
 
     const inviteResult = await query(
-        `SELECT id, owner_id FROM family_invites
+        `SELECT id, owner_id, role FROM family_invites
          WHERE token = $1 AND status = 'pending' AND expires_at > NOW()`,
         [token]
     );
@@ -109,14 +115,17 @@ router.post('/join', async (req: AuthRequest, res) => {
         return res.status(404).json({ success: false, error: 'Invitation invalide ou expirée' });
     }
 
-    const invite = inviteResult.rows[0] as { id: string; owner_id: string };
+    const invite = inviteResult.rows[0] as { id: string; owner_id: string; role: string | null };
 
     if (invite.owner_id === req.actualUserId) {
         return res.status(400).json({ success: false, error: 'Vous êtes déjà propriétaire de cette famille' });
     }
 
-    // Update family membership
-    await query('UPDATE users SET family_owner_id = $1 WHERE id = $2', [invite.owner_id, req.actualUserId]);
+    // Update family membership; the account role is set from the invite (chosen by the inviter)
+    await query(
+        'UPDATE users SET family_owner_id = $1, role = $2 WHERE id = $3',
+        [invite.owner_id, cleanAccountRole(invite.role), req.actualUserId]
+    );
     await query("UPDATE family_invites SET status = 'accepted' WHERE id = $1", [invite.id]);
 
     const userResult = await query('SELECT name, email FROM users WHERE id = $1', [req.actualUserId]);
@@ -177,6 +186,35 @@ router.delete('/members/:userId', async (req: AuthRequest, res) => {
     return res.json({ success: true });
 });
 
+// PUT /members/:userId/role — owner changes a member's account role (parent / enfant)
+router.put('/members/:userId/role', async (req: AuthRequest, res) => {
+    if (!req.isOwner) {
+        return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
+    }
+
+    const role = (req.body as { role?: string } | undefined)?.role;
+    if (role !== 'parent' && role !== 'enfant') {
+        return res.status(400).json({ success: false, error: 'Rôle invalide' });
+    }
+
+    // The owner cannot change their own role (they always have full rights).
+    if (req.params.userId === req.actualUserId) {
+        return res.status(400).json({ success: false, error: 'Le propriétaire ne peut pas modifier son propre rôle' });
+    }
+
+    // The target must be a member of the owner's family.
+    const { rows } = await query(
+        'UPDATE users SET role = $1 WHERE id = $2 AND family_owner_id = $3 RETURNING id, role',
+        [role, req.params.userId, req.userId]
+    );
+    if (rows.length === 0) {
+        return res.status(404).json({ success: false, error: 'Membre introuvable' });
+    }
+
+    broadcast(req.userId!, { type: 'update', entity: 'family', action: 'updated' });
+    return res.json({ success: true, data: rows[0] });
+});
+
 // Family-scoped tables whose user_id points to the family owner.
 const FAMILY_SCOPED_TABLES = [
     'family_members',
@@ -191,6 +229,9 @@ const FAMILY_SCOPED_TABLES = [
     'budget_limits',
     'recurring_expenses',
     'recurring_expense_logs',
+    'reward_transactions',
+    'reward_settings',
+    'reward_goals',
 ] as const;
 
 // POST /transfer-ownership — owner hands the family (and all its data) to a member
@@ -404,7 +445,12 @@ router.post('/requests/:id/approve', async (req: AuthRequest, res) => {
         return res.status(409).json({ success: false, error: 'Ce compte fait déjà partie d\'une famille' });
     }
 
-    await query('UPDATE users SET family_owner_id = $1 WHERE id = $2', [req.userId, request.requester_id]);
+    // The approver picks the new member's role (defaults to 'parent')
+    const memberRole = cleanAccountRole((req.body as { role?: string } | undefined)?.role);
+    await query(
+        'UPDATE users SET family_owner_id = $1, role = $2 WHERE id = $3',
+        [req.userId, memberRole, request.requester_id]
+    );
     await query("UPDATE family_join_requests SET status = 'approved', responded_at = NOW() WHERE id = $1", [request.id]);
 
     // Notify both sides so their UI refreshes

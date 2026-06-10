@@ -1,0 +1,98 @@
+{
+  "loading": "Loading budget…",
+  "categories": {
+    "Logement": "Housing",
+    "Alimentation": "Groceries",
+    "Transport": "Transport",
+    "Santé": "Health",
+    "Loisirs": "Leisure",
+    "Abonnements": "Subscriptions",
+    "Assurance": "Insurance",
+    "Enfants": "Children",
+    "Maison": "Home",
+    "Autre": "Other"
+  },
+  "readOnly": "Read-only mode. Only parents can edit the budget.",
+  "alerts": {
+    "title": "Limits reached",
+    "over": " · exceeded",
+    "warn": " (≥ 80%)"
+  },
+  "balance": {
+    "current": "Current balance",
+    "pointed_one": "{{count}} debit marked",
+    "pointed_other": "{{count}} debits marked",
+    "expenses_one": "{{count}} expense",
+    "expenses_other": "{{count}} expenses"
+  },
+  "forecast": {
+    "title": "Forecast",
+    "subtitle": "Still {{amount}} of debits to mark"
+  },
+  "analytics": "Analytics & limits",
+  "charts": {
+    "expensesByCategory": "Expenses by category",
+    "noExpenses": "No expenses this month",
+    "yearEvolution": "Yearly trend",
+    "income": "Income",
+    "expenses": "Expenses"
+  },
+  "limits": {
+    "title": "Monthly limits",
+    "subtitle": "Spending tracking per category",
+    "define": "Set",
+    "none": "No limit set"
+  },
+  "sections": {
+    "recurring": "Recurring",
+    "expenses": "Expenses",
+    "income": "Income"
+  },
+  "recurring": {
+    "empty": "No recurring debit",
+    "addOne": "+ Add a debit",
+    "markOn": "Mark as debited",
+    "markOff": "Unmark",
+    "dayPrefix": "day"
+  },
+  "empty": {
+    "expenses": "No expenses this month",
+    "income": "No income this month"
+  },
+  "sheets": {
+    "recurringEdit": "Edit debit",
+    "recurringNew": "New debit",
+    "edit": "Edit",
+    "newExpense": "New expense",
+    "newIncome": "New income",
+    "limit": "Monthly limit"
+  },
+  "toggle": {
+    "expense": "Expense",
+    "income": "Income"
+  },
+  "fields": {
+    "name": "Debit name",
+    "namePlaceholder": "e.g. Rent, electricity, Netflix…",
+    "amount": "Amount ({{currency}})",
+    "debitDay": "Debit day of the month (1 to 31)",
+    "debitDayPlaceholder": "e.g. 5",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "e.g. Groceries, salary…",
+    "date": "Date",
+    "category": "Category",
+    "limit": "Monthly limit ({{currency}})",
+    "limitHint": "Set 0 to remove tracking for this category."
+  },
+  "errors": {
+    "amountInvalid": "Invalid amount.",
+    "nameRequired": "Name required.",
+    "debitDayInvalid": "Invalid debit day (1-31).",
+    "save": "Error while saving.",
+    "limitInvalid": "Invalid limit."
+  },
+  "confirm": {
+    "deleteRecurring": "Delete this recurring debit?",
+    "deleteEntry": "Delete this entry?"
+  }
+}

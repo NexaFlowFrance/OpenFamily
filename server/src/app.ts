@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import path from 'path';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
+import userSettingsRoutes from './routes/userSettings';
 import shoppingRoutes from './routes/shopping';
 import tasksRoutes from './routes/tasks';
 import appointmentsRoutes from './routes/appointments';
@@ -18,6 +19,9 @@ import notificationsRoutes from './routes/notifications';
 import familyInvitesRoutes from './routes/familyInvites';
 import calendarRoutes from './routes/calendar';
 import integrationsRoutes from './routes/integrations';
+import rewardsRoutes from './routes/rewards';
+import notesRoutes from './routes/notes';
+import aiRoutes from './routes/ai';
 import { loadEnv } from './config/loadEnv';
 import logger from './lib/logger';
 
@@ -42,10 +46,30 @@ const authRateLimiter = rateLimit({
 
 // Middleware
 // When the Express server also serves the built client (native Windows install),
-// disable the strict CSP so the SPA and its runtime styles load — this matches the
-// nginx setup used in the Docker deployment, which does not set a CSP either.
+// apply an explicit CSP tailored to the SPA instead of helmet's default (which is
+// too strict for it) — the Vite build has no inline scripts, but Radix/Recharts
+// inject inline styles, recipe images come from arbitrary https URLs (and data
+// URLs for avatars), and the app talks to its own origin via fetch + WebSocket.
+const spaContentSecurityPolicy = {
+    useDefaults: false,
+    directives: {
+        'default-src': ["'self'"],
+        'script-src': ["'self'"],
+        'style-src': ["'self'", "'unsafe-inline'"],
+        'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+        'connect-src': ["'self'", 'ws:', 'wss:'],
+        'font-src': ["'self'", 'data:'],
+        'worker-src': ["'self'"],
+        'manifest-src': ["'self'"],
+        'object-src': ["'none'"],
+        'frame-ancestors': ["'self'"],
+        'base-uri': ["'self'"],
+        'form-action': ["'self'"],
+    },
+};
+
 app.use(helmet({
-    contentSecurityPolicy: process.env.SERVE_CLIENT_DIR ? false : undefined,
+    contentSecurityPolicy: process.env.SERVE_CLIENT_DIR ? spaContentSecurityPolicy : undefined,
 }));
 app.use(cors({
     origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'],
@@ -81,6 +105,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth/login', authRateLimiter);
 app.use('/api/auth/register', authRateLimiter);
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', userSettingsRoutes);
 app.use('/api/shopping', shoppingRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/appointments', appointmentsRoutes);
@@ -95,6 +120,9 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/invites', familyInvitesRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/integrations', integrationsRoutes);
+app.use('/api/rewards', rewardsRoutes);
+app.use('/api/notes', notesRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Static client (native Windows install): serve the built SPA from the same origin
 // as the API, so the app is reachable from any device on the LAN via http://<ip>:3000.

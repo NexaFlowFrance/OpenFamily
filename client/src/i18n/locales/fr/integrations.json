@@ -1,0 +1,86 @@
+{
+  "title": "Intégrations",
+  "subtitle": "Connectez vos applications auto-hébergées pour centraliser recettes, menus, courses et calendrier.",
+  "connected": "Connectées",
+  "available": "Disponibles",
+  "status": {
+    "error": "Erreur",
+    "connected": "Connectée"
+  },
+  "lastSync": "Synchronisé {{date}}",
+  "syncTitle": "Synchroniser",
+  "disconnectTitle": "Déconnecter",
+  "confirmDisconnect": "Déconnecter cette intégration ?",
+  "modal": {
+    "connect": "Connecter {{name}}",
+    "test": "Tester",
+    "testing": "Test…",
+    "connecting": "Connexion…",
+    "connectBtn": "Connecter",
+    "encrypted": "Les identifiants sont chiffrés AES-256 et stockés sur votre serveur uniquement.",
+    "error": "Erreur"
+  },
+  "syncs": {
+    "recipes": "Recettes",
+    "menus": "Menus",
+    "shopping": "Liste de courses",
+    "stock": "Stock",
+    "calendar": "Calendrier",
+    "appointments": "Rendez-vous",
+    "photos": "Photos"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "Gestionnaire de recettes",
+      "description": "Importez vos recettes et menus depuis votre instance Mealie auto-hébergée.",
+      "urlLabel": "URL de l'instance",
+      "urlPlaceholder": "https://mealie.mondomaine.com",
+      "keyLabel": "Clé API",
+      "keyPlaceholder": "Depuis Mealie > Profil > Clés API"
+    },
+    "tandoor": {
+      "tagline": "Livre de recettes",
+      "description": "Importez vos recettes depuis Tandoor, le gestionnaire open source.",
+      "urlLabel": "URL de l'instance",
+      "urlPlaceholder": "https://tandoor.mondomaine.com",
+      "keyLabel": "Token API",
+      "keyPlaceholder": "Depuis Tandoor > Paramètres > Jetons"
+    },
+    "homeassistant": {
+      "tagline": "Maison connectée",
+      "description": "Synchronisez votre liste de courses avec la liste Home Assistant.",
+      "urlLabel": "URL de l'instance",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "Token longue durée",
+      "tokenPlaceholder": "eyJ… (depuis Profil > Sécurité)",
+      "entityLabel": "Entité todo (facultatif)",
+      "entityPlaceholder": "todo.shopping_list"
+    },
+    "grocy": {
+      "tagline": "Gestion du foyer",
+      "description": "Synchronisez votre liste de courses et vos stocks depuis Grocy.",
+      "urlLabel": "URL de l'instance",
+      "urlPlaceholder": "https://grocy.mondomaine.com",
+      "keyLabel": "Clé API",
+      "keyPlaceholder": "Depuis Grocy > Gestion > Clés API"
+    },
+    "nextcloud": {
+      "tagline": "Cloud personnel",
+      "description": "Importez vos événements de calendrier Nextcloud dans vos rendez-vous.",
+      "urlLabel": "URL Nextcloud",
+      "urlPlaceholder": "https://cloud.mondomaine.com",
+      "userLabel": "Identifiant",
+      "userPlaceholder": "votre.identifiant",
+      "passwordLabel": "Mot de passe (ou app password)",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "Photothèque",
+      "description": "Affichez des photos aléatoires de votre bibliothèque Immich auto-hébergée en fond du mode kiosque.",
+      "urlLabel": "URL de l'instance",
+      "urlPlaceholder": "https://immich.mondomaine.com",
+      "keyLabel": "Clé API",
+      "keyPlaceholder": "Depuis Immich > Paramètres du compte > Clés API"
+    }
+  }
+}

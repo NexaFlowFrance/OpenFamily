@@ -37,6 +37,45 @@ export async function testImmichConnection(baseUrl: string, apiKey: string): Pro
     }
 }
 
+/**
+ * Fetches one random photo from the family's Immich instance and returns the
+ * image bytes so the route can proxy them (the API key never reaches the browser).
+ *
+ * API choice: POST /api/search/random ({ size: 1, type: 'IMAGE' }) — this is the
+ * supported way to get random assets on current Immich versions (the old
+ * GET /api/assets/random was deprecated in v1.116 and later removed). We then
+ * download the asset's preview thumbnail (GET /api/assets/:id/thumbnail?size=preview,
+ * ~1440px) which is plenty for a wall display and far lighter than the original.
+ */
+export async function fetchImmichRandomPhoto(
+    baseUrl: string,
+    encryptedCredentials: string
+): Promise<{ buffer: Buffer; contentType: string }> {
+    const creds = decryptCredentials(encryptedCredentials);
+    const apiKey = creds.apiKey;
+    if (!apiKey) throw new Error('Cle API manquante');
+
+    const randomResp = await fetch(`${baseUrl}/api/search/random`, {
+        method: 'POST',
+        headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ size: 1, type: 'IMAGE' }),
+    });
+    if (!randomResp.ok) throw new Error(`Immich API error: ${randomResp.status}`);
+
+    const assets = await randomResp.json() as { id?: string }[];
+    const assetId = Array.isArray(assets) && assets.length > 0 ? assets[0]?.id : undefined;
+    if (!assetId) throw new Error('Aucune photo disponible');
+
+    const thumbResp = await fetch(`${baseUrl}/api/assets/${assetId}/thumbnail?size=preview`, {
+        headers: { 'x-api-key': apiKey },
+    });
+    if (!thumbResp.ok) throw new Error(`Immich API error: ${thumbResp.status}`);
+
+    const contentType = thumbResp.headers.get('content-type') || 'image/jpeg';
+    const buffer = Buffer.from(await thumbResp.arrayBuffer());
+    return { buffer, contentType };
+}
+
 export async function syncImmich(
     _integrationId: string,
     _userId: string,

@@ -1,0 +1,88 @@
+{
+  "loading": "Chargement des recettes…",
+  "title": "Recettes",
+  "subtitle": "Votre bibliothèque de recettes familiales",
+  "newRecipe": "Nouvelle recette",
+  "categories": {
+    "Entrée": "Entrée",
+    "Plat": "Plat",
+    "Dessert": "Dessert",
+    "Snack": "Snack"
+  },
+  "difficulties": {
+    "Facile": "Facile",
+    "Moyen": "Moyen",
+    "Difficile": "Difficile"
+  },
+  "searchPlaceholder": "Rechercher une recette…",
+  "allCategories": "Toutes catégories",
+  "allDifficulties": "Toutes difficultés",
+  "empty": {
+    "none": "Aucune recette pour le moment. Créez votre première recette !",
+    "noMatch": "Aucune recette ne correspond à votre recherche."
+  },
+  "card": {
+    "min": "{{n}} min",
+    "servings_one": "{{count}} pers.",
+    "servings_other": "{{count}} pers.",
+    "view": "Voir"
+  },
+  "dialog": {
+    "editTitle": "Modifier la recette",
+    "createTitle": "Nouvelle recette",
+    "description": "Remplissez les informations de la recette"
+  },
+  "form": {
+    "name": "Nom de la recette",
+    "namePlaceholder": "Ex : Tarte aux pommes",
+    "category": "Catégorie",
+    "difficulty": "Difficulté",
+    "description": "Description (facultatif)",
+    "descriptionPlaceholder": "Brève description de la recette…",
+    "prep": "Préparation (min)",
+    "prepPlaceholder": "30",
+    "cook": "Cuisson (min)",
+    "cookPlaceholder": "45",
+    "servings": "Portions",
+    "servingsPlaceholder": "4",
+    "ingredients": "Ingrédients (un par ligne)",
+    "ingredientsPlaceholder": "200g de farine\n3 œufs\n100g de sucre",
+    "instructions": "Instructions (une étape par ligne)",
+    "instructionsPlaceholder": "Préchauffer le four à 180°C\nMélanger la farine et le sucre\nAjouter les œufs",
+    "tags": "Tags (séparés par des virgules)",
+    "tagsPlaceholder": "végétarien, rapide, économique",
+    "image": "URL de l'image (facultatif)",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "Importer depuis un lien",
+    "title": "Importer une recette",
+    "description": "Collez le lien d'une page de recette (Marmiton, 750g, un blog…) et nous remplissons le formulaire pour vous.",
+    "urlLabel": "Adresse de la page de recette",
+    "urlPlaceholder": "https://www.marmiton.org/recettes/…",
+    "submit": "Importer",
+    "importing": "Import en cours…",
+    "successTitle": "Recette importée",
+    "successDescription": "Vérifiez les informations, puis enregistrez.",
+    "errors": {
+      "notFoundTitle": "Aucune recette trouvée",
+      "notFound": "Cette page ne contient pas de recette lisible.",
+      "fetchTitle": "Échec de l'import",
+      "fetch": "Impossible de récupérer cette page. Vérifiez le lien et réessayez."
+    }
+  },
+  "detail": {
+    "prep": "Préparation :",
+    "cook": "Cuisson :",
+    "servings": "Portions :",
+    "minUnit": "min",
+    "ingredients": "Ingrédients",
+    "instructions": "Instructions"
+  },
+  "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette recette ?",
+  "errors": {
+    "load": "Impossible de charger les recettes.",
+    "save": "Impossible d'enregistrer cette recette.",
+    "delete": "Impossible de supprimer cette recette."
+  }
+}

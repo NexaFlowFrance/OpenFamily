@@ -10,6 +10,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     currency VARCHAR(3) DEFAULT 'EUR',
+    language VARCHAR(8) NOT NULL DEFAULT 'fr',
     avatar_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -33,6 +34,7 @@ CREATE TABLE family_members (
     notes TEXT,
     medical_notes TEXT,
     avatar_url TEXT,
+    linked_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -73,6 +75,8 @@ CREATE TABLE tasks (
     frequency VARCHAR(50),
     priority VARCHAR(50),
     assigned_to JSONB DEFAULT '[]'::jsonb,
+    points INTEGER NOT NULL DEFAULT 0,
+    pending_approval BOOLEAN NOT NULL DEFAULT false,
     completed_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -172,6 +176,64 @@ CREATE TABLE budget_limits (
     UNIQUE(user_id, category, month, year)
 );
 
+-- Reward Transactions table (gamified kids mode â€” points ledger per family member)
+CREATE TABLE reward_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    task_id UUID REFERENCES tasks(id) ON DELETE SET NULL,
+    points INTEGER NOT NULL,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('earn', 'adjust', 'redeem')),
+    note TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Reward Settings table (currency value of one point, per family)
+CREATE TABLE reward_settings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    points_value NUMERIC(10,4) NOT NULL DEFAULT 0.10,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Reward Goals table (savings goals, in family currency)
+CREATE TABLE reward_goals (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    emoji VARCHAR(16),
+    target_amount NUMERIC(10,2) NOT NULL CHECK (target_amount > 0),
+    status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'achieved', 'archived')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    achieved_at TIMESTAMP
+);
+
+-- Family Notes table (digital fridge post-its)
+CREATE TABLE family_notes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    author_name VARCHAR(100) NOT NULL,
+    content VARCHAR(500) NOT NULL,
+    color VARCHAR(20) NOT NULL DEFAULT 'yellow',
+    expires_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- AI Assistant Settings table (local-first AI assistant â€” one provider config per family)
+CREATE TABLE ai_settings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider VARCHAR(20) NOT NULL CHECK (provider IN ('ollama', 'openai', 'anthropic')),
+    base_url TEXT,
+    encrypted_api_key TEXT,
+    model VARCHAR(100) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Notifications table
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -213,6 +275,11 @@ CREATE INDEX idx_budget_entries_user_id ON budget_entries(user_id);
 CREATE INDEX idx_budget_entries_date ON budget_entries(date);
 CREATE INDEX idx_budget_entries_category ON budget_entries(category);
 CREATE INDEX idx_budget_entries_assigned_to ON budget_entries(assigned_to);
+CREATE INDEX idx_reward_transactions_user ON reward_transactions(user_id);
+CREATE INDEX idx_reward_transactions_member ON reward_transactions(member_id);
+CREATE INDEX idx_reward_transactions_task ON reward_transactions(task_id);
+CREATE INDEX idx_reward_goals_user_member ON reward_goals(user_id, member_id);
+CREATE INDEX idx_family_notes_user ON family_notes(user_id);
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_is_read ON notifications(is_read);
 

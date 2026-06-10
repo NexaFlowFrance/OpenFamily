@@ -36,21 +36,46 @@ export const generateToken = (userId: string, ownerId?: string): string => {
 };
 
 /**
+ * Authoritative (DB-backed) check: is the logged-in account a parent or the
+ * family owner? Used by routes that change behaviour for child accounts
+ * without rejecting the request outright (e.g. task completion → approval).
+ */
+export const isParentAccount = async (actualUserId: string | undefined): Promise<boolean> => {
+    const result = await query(
+        'SELECT role, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
+        [actualUserId]
+    );
+    const row = result.rows[0] as { role?: string; is_owner?: boolean } | undefined;
+    if (!row) return false;
+    if (row.is_owner) return true;
+    return row.role !== 'enfant';
+};
+
+/**
  * Restrict a route to "parent" (or owner) accounts. Accounts with the "enfant"
  * role get read-only access and are rejected on write operations guarded by this.
  * Must run after authMiddleware.
  */
 export const requireParent = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
+        // Authoritative check: read the CURRENT owner status and role from the DB,
+        // never from (potentially stale) JWT claims.
+        const result = await query(
+            'SELECT role, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
+            [req.actualUserId]
+        );
+        const row = result.rows[0] as { role?: string; is_owner?: boolean } | undefined;
+
+        if (!row) {
+            return res.status(401).json({ success: false, error: 'Invalid token' });
+        }
+
         // The family owner always has full rights.
-        if (req.isOwner) {
+        if (row.is_owner) {
             return next();
         }
 
-        const result = await query('SELECT role FROM users WHERE id = $1', [req.actualUserId]);
-        const role = result.rows[0]?.role as string | undefined;
-
-        if (role === 'enfant') {
+        if (row.role === 'enfant') {
             return res.status(403).json({
                 success: false,
                 error: 'Action réservée aux parents.',

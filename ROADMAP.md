@@ -1,21 +1,21 @@
 # OpenFamily — Roadmap
 
 This document tracks larger ideas that are not yet implemented, and records decisions
-about features that were considered.
+about features that were considered. It is not a commitment or a schedule: priorities
+can shift based on feedback — issues and discussions are welcome.
 
 ## Shipped
 
 - **Family command center / kiosk display** *(v1.1, expanded in v1.2)* — full-screen
   view for a wall tablet (fridge / hallway): today's shared calendar, meals, tasks,
   who's where. v1.2 added weather (Open-Meteo), an optional Immich photo background,
-  a shopping panel and touch interactions (tap to complete/check). A free alternative
-  to hardware like Skylight Calendar.
+  a shopping panel and touch interactions (tap to complete/check).
 - **Kids mode with chores → allowance** *(v1.2)* — points on tasks, parent approval
   flow, pocket-money page (balances, streaks, adjust/redeem), savings goals with
-  progress bars and a dedicated kid view (piggy bank, confetti at 100%).
+  progress bars and a dedicated kid view.
 - **Local-first AI assistant** *(v1.2, first slice)* — provider abstraction
   (Ollama / OpenAI-compatible / Anthropic, bring-your-own-key, keys encrypted at
-  rest): natural-language magic input (Ctrl+K) that turns a sentence into tasks,
+  rest): natural-language input (Ctrl+K) that turns a sentence into tasks,
   appointments, shopping items or budget entries, and automatic weekly dinner
   suggestions from the recipe library.
 - **Recipe import from URL** *(v1.2)* — paste a link, the server parses the
@@ -25,21 +25,37 @@ about features that were considered.
 - **Family sticky notes** *(v1.2)* — digital fridge notes with colors and expiry,
   shown on the Dashboard and the Kiosk in realtime.
 
-## Under consideration (high "wow", marketing value)
+## Under consideration
 
+- **More languages** — the interface is currently English/French. The i18n
+  infrastructure is in place (namespaced JSON locales); the goal is to add German,
+  Spanish, Italian, Dutch and more, ideally through a community translation
+  workflow (e.g. Weblate). Contributions welcome.
 - **Two-way Google Calendar / CalDAV sync** (today: Nextcloud import + iCal export
   only). CalDAV two-way first (covers Nextcloud, iCloud, Fastmail), Google later
   (OAuth verification burden).
-- **Self-hosted family location** — a private "Life360" via OwnTracks / Traccar /
-  Home Assistant `device_tracker`, plus geo-reminders ("you're near the supermarket,
-  5 items on the list"). Would replace the static planning on the Kiosk "who's where".
+- **Self-hosted family location** — private location sharing via OwnTracks /
+  Traccar / Home Assistant `device_tracker`, plus geo-reminders ("you're near the
+  supermarket, 5 items on the list"). Would replace the static planning on the
+  Kiosk "who's where".
 - **AI assistant, next slices** — receipt photo → budget entries and dish photo →
   recipe (needs a vision-capable model), streaming responses, per-member rate limits.
 - **Barcode scanning & native pantry** — camera (PWA) + OpenFoodFacts for shopping
   and pantry; expiry dates with "use it up" recipe suggestions; connects to Grocy
   for those who have it, works standalone otherwise.
-- **Public temporary list sharing** — share a shopping list via an expiring public
-  link (partner without an account, babysitter, grandparents).
+- **Offline mode** — the PWA currently needs a network connection; the goal is
+  read access to today's data (calendar, lists, meals) when offline, then queued
+  writes with background sync.
+- **Weekly family digest** — an optional email or notification every Sunday
+  evening summarizing the week ahead: appointments, chores, meals, budget status.
+- **Scheduled backups** — automatic, recurring export of the family data
+  (JSON/SQL) to a local folder, S3-compatible storage or WebDAV, with retention.
+- **Deeper Home Assistant integration** — beyond the shopping-list sync: expose
+  appointments and tasks as HA calendars/sensors so they can drive automations
+  (e.g. light up when a chore is due).
+- **Guest access** — a temporary, limited account or share link for a babysitter
+  or grandparents (today's schedule, emergency contacts), and public temporary
+  shopping-list links for a partner without an account.
 
 ## Pronote / EcoleDirecte (deferred — no official free API)
 
@@ -54,5 +70,6 @@ There is **no official, free, public API** for either service.
 
 **Decision:** not a pillar feature for now. If pursued later, it should be an **optional,
 clearly-labelled "best-effort / unsupported" integration**, server-side (credentials +
-scraping), most likely a small Python service built on `pronotepy`. The ROI is much lower
-than the items above for attracting users/stars, and the maintenance burden is high.
+scraping), most likely a small Python service built on `pronotepy`. The value would be
+real for French families but the maintenance burden and fragility are high compared to
+the items above.

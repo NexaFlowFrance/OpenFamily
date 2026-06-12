@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>OpenFamily-Server</Name>
+  <Repository>ghcr.io/nexaflowfrance/openfamily-server:1.2.0</Repository>
+  <Registry>https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily-server</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/NexaFlowFrance/OpenFamily/issues</Support>
+  <Project>https://nexaflowfrance.github.io/OpenFamily/</Project>
+  <Overview>
+  API server for OpenFamily, a family organizer: shared calendar, tasks and chores with a kids rewards system, shopping lists, meal planning and recipes, family budget, kiosk mode and an optional AI assistant. English and French interface.[br][br]
+  OpenFamily is a three-container app. Install in this order:[br]
+  1. A PostgreSQL 16 container from Community Applications (e.g. "postgresql16"). Create a dedicated database and user for OpenFamily.[br]
+  2. Import the OpenFamily schema ONCE into that database (Unraid terminal, adjust the container name):[br]
+  [b]wget -qO- https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/v1.2.0/server/schema.sql | docker exec -i postgresql16 psql -U openfamily -d openfamily[/b][br]
+  3. This container (the API server).[br]
+  4. The OpenFamily-Client container (the web interface - this is what you open in the browser).[br][br]
+  Generate JWT_SECRET with: openssl rand -hex 32 (the server refuses to start with a short or placeholder secret).</Overview>
+  <Category>Productivity: Tools: Status:Stable</Category>
+  <WebUI/>
+  <TemplateURL>https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/packaging/unraid/openfamily-server.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png</Icon>
+  <Requires>A PostgreSQL 16 container (from CA) with the OpenFamily schema imported (see Overview), and the OpenFamily-Client container as the web entry point.</Requires>
+  <Config Name="API Port" Target="3001" Default="3001" Mode="tcp" Description="Container Port: 3001 (REST API + WebSocket, consumed by the OpenFamily-Client container)" Type="Port" Display="always" Required="true" Mask="false">3001</Config>
+  <Config Name="PostgreSQL Host" Target="POSTGRES_HOST" Default="" Mode="" Description="IP or hostname of your PostgreSQL container, e.g. 192.168.1.50" Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="PostgreSQL Port" Target="POSTGRES_PORT" Default="5432" Mode="" Description="Container Variable: POSTGRES_PORT" Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
+  <Config Name="PostgreSQL Database" Target="POSTGRES_DB" Default="openfamily" Mode="" Description="Container Variable: POSTGRES_DB" Type="Variable" Display="always" Required="true" Mask="false">openfamily</Config>
+  <Config Name="PostgreSQL User" Target="POSTGRES_USER" Default="openfamily" Mode="" Description="Container Variable: POSTGRES_USER" Type="Variable" Display="always" Required="true" Mask="false">openfamily</Config>
+  <Config Name="PostgreSQL Password" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="Container Variable: POSTGRES_PASSWORD (required - the server refuses to start in production without it)" Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="JWT Secret" Target="JWT_SECRET" Default="" Mode="" Description="Random secret used to sign sessions, minimum 32 characters (48+ recommended). Generate with: openssl rand -hex 32" Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Allow Registration" Target="REGISTRATION_ENABLED" Default="true" Mode="" Description="Set to false to disable new account creation once the family is set up" Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="CORS Origins" Target="CORS_ORIGINS" Default="" Mode="" Description="Comma-separated allowed origins. Not needed for the default setup (all traffic is same-origin through the OpenFamily-Client proxy); only set when calling the API from another origin." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Node Environment" Target="NODE_ENV" Default="production" Mode="" Description="Container Variable: NODE_ENV" Type="Variable" Display="advanced" Required="true" Mask="false">production</Config>
+  <Config Name="Server Port (internal)" Target="SERVER_PORT" Default="3001" Mode="" Description="Container Variable: SERVER_PORT (leave at 3001 unless you also change the port mapping)" Type="Variable" Display="advanced" Required="true" Mask="false">3001</Config>
+  <Config Name="Uploads Path" Target="/app/uploads" Default="/mnt/user/appdata/openfamily/uploads" Mode="rw" Description="Container Path: /app/uploads (server-side persisted files)" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/openfamily/uploads</Config>
+</Container>

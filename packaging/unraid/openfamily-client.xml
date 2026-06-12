@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>OpenFamily-Client</Name>
+  <Repository>ghcr.io/nexaflowfrance/openfamily-client:1.2.0</Repository>
+  <Registry>https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily-client</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/NexaFlowFrance/OpenFamily/issues</Support>
+  <Project>https://nexaflowfrance.github.io/OpenFamily/</Project>
+  <Overview>
+  Web interface for OpenFamily, a family organizer: shared calendar, tasks and chores with a kids rewards system, shopping lists, meal planning and recipes, family budget, kiosk mode and an optional AI assistant. English and French interface.[br][br]
+  This container is the single entry point you open in the browser. It serves the app and proxies /api and /ws to the OpenFamily-Server container, so everything stays same-origin and works from phones and tablets on your network.[br][br]
+  ONE-TIME SETUP (required, from the Unraid terminal, before first start):[br]
+  [b]mkdir -p /mnt/user/appdata/openfamily/nginx[/b][br]
+  [b]wget -O /mnt/user/appdata/openfamily/nginx/default.conf.template https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/packaging/unraid/nginx/default.conf.template[/b][br][br]
+  Then set "Server Address" below to the IP:port of the OpenFamily-Server container (e.g. 192.168.1.50:3001). Without the template file the app loads but cannot reach the API.</Overview>
+  <Category>Productivity: Tools: Status:Stable</Category>
+  <WebUI>http://[IP]:[PORT:80]</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/packaging/unraid/openfamily-client.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png</Icon>
+  <Requires>The OpenFamily-Server container (and its PostgreSQL database), plus the one-time nginx template download described in the Overview.</Requires>
+  <Config Name="WebUI Port" Target="80" Default="8480" Mode="tcp" Description="Container Port: 80 (web interface)" Type="Port" Display="always" Required="true" Mask="false">8480</Config>
+  <Config Name="Server Address" Target="OPENFAMILY_SERVER_ADDR" Default="" Mode="" Description="IP:port where the OpenFamily-Server container is reachable, e.g. 192.168.1.50:3001 (used by the bundled nginx proxy)" Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="Nginx Template Path" Target="/etc/nginx/templates" Default="/mnt/user/appdata/openfamily/nginx" Mode="ro" Description="Container Path: /etc/nginx/templates (must contain default.conf.template - see Overview)" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/openfamily/nginx</Config>
+</Container>

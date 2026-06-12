@@ -1,0 +1,68 @@
+services:
+  openfamily:
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.2.0
+    restart: unless-stopped
+    volumes:
+      # Shipped in this app's data/ folder: nginx config that proxies
+      # /api, /ws and /health to openfamily-server (same-origin topology).
+      - ${APP_DATA_DIR}/data/nginx:/etc/nginx/conf.d:ro
+    depends_on:
+      openfamily-server:
+        condition: service_healthy
+    healthcheck:
+      test: wget -qO- http://127.0.0.1:80 >/dev/null 2>&1 || exit 1
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    x-runtipi:
+      is_main: true
+      internal_port: 80
+
+  openfamily-server:
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.2.0
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - SERVER_PORT=3001
+      - POSTGRES_HOST=openfamily-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=openfamily
+      - POSTGRES_USER=openfamily
+      - POSTGRES_PASSWORD=${OPENFAMILY_DB_PASSWORD}
+      - JWT_SECRET=${OPENFAMILY_JWT_SECRET}
+      # Same-origin through the client's nginx proxy: CORS is never triggered
+      # for normal use. Kept aligned with the app domain for exposed setups.
+      - CORS_ORIGINS=${APP_PROTOCOL:-http}://${APP_DOMAIN}
+      - REGISTRATION_ENABLED=${OPENFAMILY_REGISTRATION_ENABLED:-true}
+    volumes:
+      - ${APP_DATA_DIR}/data/uploads:/app/uploads
+    depends_on:
+      openfamily-db:
+        condition: service_healthy
+    healthcheck:
+      test: wget -qO- http://localhost:3001/health >/dev/null 2>&1 || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  openfamily-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=openfamily
+      - POSTGRES_USER=openfamily
+      - POSTGRES_PASSWORD=${OPENFAMILY_DB_PASSWORD}
+    volumes:
+      - ${APP_DATA_DIR}/data/postgres:/var/lib/postgresql/data
+      # Shipped in this app's data/ folder: base schema applied on first start.
+      - ${APP_DATA_DIR}/data/db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: pg_isready -U openfamily
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+x-runtipi:
+  schema_version: 2

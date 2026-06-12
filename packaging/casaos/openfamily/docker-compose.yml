@@ -1,0 +1,254 @@
+# OpenFamily for CasaOS (BigBearCasaOS format)
+#
+# SECURITY - CHANGE ME BEFORE INSTALLING:
+# CasaOS has no secret generator, so this file ships with random-looking
+# placeholder secrets. Replace BOTH values below with your own random strings
+# (e.g. `openssl rand -hex 32`), in every place they appear:
+#   - JWT_SECRET           (min 32 chars, 48+ recommended)
+#   - POSTGRES_PASSWORD    (appears in the server AND the db service)
+
+# Name of the big-bear-openfamily application
+name: big-bear-openfamily
+# Service definitions for the big-bear-openfamily application
+services:
+  # Web client (nginx). Single exposed entry point: serves the app and
+  # proxies /api, /ws and /health to the server container (same-origin).
+  big-bear-openfamily:
+    # Name of the container
+    container_name: big-bear-openfamily
+    # Image to be used for the container
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.2.0
+    # Container restart policy
+    restart: unless-stopped
+    # The published client image is built with absolute http://localhost:3001
+    # API/WS URLs and its nginx does not proxy the API. This command writes a
+    # corrected nginx config (same-origin proxy + URL rewrite) before starting.
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat > /etc/nginx/conf.d/default.conf <<'NGINXCONF'
+        server {
+            listen 80;
+            server_name _;
+            root /usr/share/nginx/html;
+            index index.html;
+
+            gzip on;
+            gzip_vary on;
+            gzip_min_length 1024;
+            gzip_types text/plain text/css text/xml text/javascript application/javascript application/json;
+
+            add_header X-Frame-Options "SAMEORIGIN" always;
+            add_header X-Content-Type-Options "nosniff" always;
+
+            sub_filter_types application/javascript text/javascript;
+            sub_filter_once off;
+            sub_filter 'http://localhost:3001' '';
+            sub_filter 'ws://localhost:3001' '';
+
+            location /api/ {
+                proxy_pass http://big-bear-openfamily-server:3001;
+                proxy_http_version 1.1;
+                proxy_set_header Host $$host;
+                proxy_set_header X-Real-IP $$remote_addr;
+                proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $$scheme;
+            }
+
+            location = /health {
+                proxy_pass http://big-bear-openfamily-server:3001;
+            }
+
+            location /ws {
+                proxy_pass http://big-bear-openfamily-server:3001;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $$http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $$host;
+                proxy_read_timeout 300s;
+                proxy_send_timeout 300s;
+            }
+
+            location / {
+                try_files $$uri $$uri/ /index.html;
+            }
+
+            location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$$ {
+                expires 1y;
+                add_header Cache-Control "public, immutable";
+            }
+
+            location = /sw.js {
+                add_header Cache-Control "no-cache";
+                expires off;
+                access_log off;
+            }
+        }
+        NGINXCONF
+        exec nginx -g 'daemon off;'
+    # Ports mapping between host and container
+    ports:
+      # Mapping port 8480 of the host to port 80 of the container
+      - "8480:80"
+    networks:
+      - big-bear-openfamily-network
+    depends_on:
+      big-bear-openfamily-server:
+        condition: service_healthy
+    healthcheck:
+      test: wget -qO- http://127.0.0.1:80 >/dev/null 2>&1 || exit 1
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    x-casaos:
+      ports:
+        - container: "80"
+          description:
+            en_us: 'Container Port: 80 (web interface)'
+
+  # API server
+  big-bear-openfamily-server:
+    container_name: big-bear-openfamily-server
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.2.0
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - SERVER_PORT=3001
+      - POSTGRES_HOST=big-bear-openfamily-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=openfamily
+      - POSTGRES_USER=openfamily
+      # CHANGE ME - must match POSTGRES_PASSWORD in big-bear-openfamily-db below
+      - POSTGRES_PASSWORD=ed6c1da4103a04684efa33ceeed0ec5bfa4483057fb5a88a
+      # CHANGE ME - random secret, minimum 32 chars (48+ recommended)
+      - JWT_SECRET=0ef74a9f3b3d4493f711936d0b1564ac46ca65f3665f9e552370abee16cb5556
+      # All traffic is same-origin through the client's nginx proxy, so CORS is
+      # never triggered in the default setup. Only change this if you call the
+      # API from a different origin (e.g. a custom domain on another port).
+      - CORS_ORIGINS=http://localhost:8480
+      - REGISTRATION_ENABLED=true
+    volumes:
+      - /DATA/AppData/$AppID/uploads:/app/uploads
+    networks:
+      - big-bear-openfamily-network
+    depends_on:
+      big-bear-openfamily-db:
+        condition: service_healthy
+    healthcheck:
+      test: wget -qO- http://localhost:3001/health >/dev/null 2>&1 || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    x-casaos:
+      envs:
+        - container: POSTGRES_PASSWORD
+          description:
+            en_us: 'Database password - CHANGE ME (must match the db service)'
+        - container: JWT_SECRET
+          description:
+            en_us: 'JWT signing secret - CHANGE ME (random, min 32 chars)'
+        - container: CORS_ORIGINS
+          description:
+            en_us: 'Extra allowed CORS origins (not needed for the default same-origin setup)'
+        - container: REGISTRATION_ENABLED
+          description:
+            en_us: 'Set to false to disable new account creation after the family is set up'
+      volumes:
+        - container: /app/uploads
+          description:
+            en_us: 'Container Path: /app/uploads'
+
+  # PostgreSQL database
+  big-bear-openfamily-db:
+    container_name: big-bear-openfamily-db
+    image: postgres:16-alpine
+    restart: unless-stopped
+    # On the very first start (empty data dir) the base schema is downloaded
+    # from the pinned v1.2.0 release and applied by the postgres init process.
+    # Later starts skip the download entirely.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ ! -s "$$PGDATA/PG_VERSION" ] && [ ! -s /docker-entrypoint-initdb.d/01-schema.sql ]; then
+          wget -q -O /docker-entrypoint-initdb.d/01-schema.sql \
+            https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/v1.2.0/server/schema.sql \
+            || { echo "OpenFamily: failed to download database schema"; exit 1; }
+        fi
+        exec docker-entrypoint.sh postgres
+    environment:
+      - POSTGRES_DB=openfamily
+      - POSTGRES_USER=openfamily
+      # CHANGE ME - must match POSTGRES_PASSWORD in the server service above
+      - POSTGRES_PASSWORD=ed6c1da4103a04684efa33ceeed0ec5bfa4483057fb5a88a
+    volumes:
+      - /DATA/AppData/$AppID/pgdata:/var/lib/postgresql/data
+    networks:
+      - big-bear-openfamily-network
+    healthcheck:
+      test: pg_isready -U openfamily
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    x-casaos:
+      envs:
+        - container: POSTGRES_PASSWORD
+          description:
+            en_us: 'Database password - CHANGE ME (must match the server service)'
+      volumes:
+        - container: /var/lib/postgresql/data
+          description:
+            en_us: 'Container Path: /var/lib/postgresql/data'
+
+networks:
+  big-bear-openfamily-network:
+    driver: bridge
+
+x-casaos:
+  # Supported CPU architectures for this application
+  architectures:
+    - amd64
+    - arm64
+  # Main service for this application
+  main: big-bear-openfamily
+  # Detailed description for the application
+  description:
+    en_us: OpenFamily keeps the whole household organized from your own server. Shared family calendar with reminders and iCal feed, tasks and chores with a points and rewards system for kids, collaborative shopping lists with live updates, weekly meal planning with a recipe book and recipe import, family budget tracking, a wall-mounted kiosk mode and an optional AI assistant. English and French interface. Integrates with Mealie, Tandoor, Grocy, Home Assistant and Nextcloud (CalDAV).
+    fr_fr: OpenFamily organise toute la famille depuis votre propre serveur. Calendrier familial partagé avec rappels et flux iCal, tâches et corvées avec un système de points et de récompenses pour les enfants, listes de courses collaboratives mises à jour en direct, planification des repas avec livre de recettes et import de recettes, budget familial, mode kiosque pour tablette murale et assistant IA optionnel. Interface en français et en anglais. S'intègre avec Mealie, Tandoor, Grocy, Home Assistant et Nextcloud (CalDAV).
+  # Brief tagline for the application
+  tagline:
+    en_us: Family organizer - calendar, chores and rewards, shopping, meals, budget
+    fr_fr: Organiseur familial - calendrier, corvées et récompenses, courses, repas, budget
+  # Developer's information
+  developer: NexaFlowFrance
+  # Author of this particular configuration
+  author: NexaFlowFrance
+  # Icon URL for the application
+  icon: https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png
+  # Thumbnail image for the application (if any)
+  thumbnail: ""
+  # Installation tips
+  tips:
+    before_install:
+      en_us: |
+        Before installing, replace the two placeholder secrets in this compose
+        (JWT_SECRET and POSTGRES_PASSWORD - the password appears twice and the
+        values must match). Generate them with: openssl rand -hex 32
+        After the first start, open the web UI and create the first (admin) account.
+        Project: https://github.com/NexaFlowFrance/OpenFamily
+      fr_fr: |
+        Avant l'installation, remplacez les deux secrets d'exemple de ce compose
+        (JWT_SECRET et POSTGRES_PASSWORD - le mot de passe apparait deux fois et
+        les valeurs doivent correspondre). Generez-les avec : openssl rand -hex 32
+        Apres le premier demarrage, ouvrez l'interface web et creez le premier compte (admin).
+        Projet : https://github.com/NexaFlowFrance/OpenFamily
+  # Title for the application
+  title:
+    en_us: OpenFamily
+  # Category under which the application falls
+  category: BigBearCasaOS
+  # Default port mapping for the application
+  port_map: "8480"

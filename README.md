@@ -144,7 +144,7 @@ server-side input validation · structured logs (no sensitive data).
 
 ## 🗺️ Roadmap
 
-Planned "wow" features and design decisions live in [ROADMAP.md](ROADMAP.md).
+Planned features and design decisions live in [ROADMAP.md](ROADMAP.md).
 
 ## 🤝 Contributing
 

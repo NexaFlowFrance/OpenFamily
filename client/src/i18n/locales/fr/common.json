@@ -13,6 +13,7 @@
     "budget": "Budget",
     "family": "Famille",
     "house": "Maison",
+    "garden": "Jardin",
     "vacations": "Vacances",
     "settings": "Paramètres",
     "mobile": {
@@ -35,6 +36,7 @@
     "add_expense": "Ajouter une dépense",
     "add_member": "Ajouter un membre",
     "add_equipment": "Ajouter un équipement",
+    "add_garden": "Ajouter au jardin",
     "add_vacation": "Planifier des vacances"
   },
   "header": {

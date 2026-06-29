@@ -35,6 +35,7 @@ import frMeals from './locales/fr/meals.json';
 import frBudget from './locales/fr/budget.json';
 import frFamily from './locales/fr/family.json';
 import frHouse from './locales/fr/house.json';
+import frGarden from './locales/fr/garden.json';
 import frDialogs from './locales/fr/dialogs.json';
 import frDomain from './locales/fr/domain.json';
 
@@ -52,6 +53,7 @@ import enMeals from './locales/en/meals.json';
 import enBudget from './locales/en/budget.json';
 import enFamily from './locales/en/family.json';
 import enHouse from './locales/en/house.json';
+import enGarden from './locales/en/garden.json';
 import enDialogs from './locales/en/dialogs.json';
 import enDomain from './locales/en/domain.json';
 
@@ -73,6 +75,7 @@ const fr = {
     ...frBudget,
     ...frFamily,
     ...frHouse,
+    ...frGarden,
     ...frDialogs,
     ...frDomain,
 };
@@ -92,6 +95,7 @@ const en = {
     ...enBudget,
     ...enFamily,
     ...enHouse,
+    ...enGarden,
     ...enDialogs,
     ...enDomain,
 };

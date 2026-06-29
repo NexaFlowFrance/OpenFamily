@@ -7,6 +7,12 @@ import type {
     RecipeDifficulty,
     TaskPriority,
     BloodType,
+    GardenZoneType,
+    GardenLocation,
+    GardenSunExposure,
+    GardenPlantType,
+    GardenHealthStatus,
+    GardenCareType,
 } from './constants';
 
 // Base Entity
@@ -305,4 +311,53 @@ export interface DashboardStats {
     shoppingItems: number;
     thisMonthExpenses: number;
     budgetAlerts: number;
+}
+
+// Garden & Lawn Types
+export interface GardenZone extends BaseEntity {
+    user_id: string;
+    name: string;
+    zone_type: GardenZoneType;
+    location?: GardenLocation | null;
+    area_m2?: number | null;
+    sun_exposure?: GardenSunExposure | null;
+    soil_type?: string | null;
+    notes?: string | null;
+}
+
+export interface GardenPlant extends BaseEntity {
+    user_id: string;
+    zone_id?: string | null;
+    name: string;
+    plant_type: GardenPlantType;
+    variety?: string | null;
+    planted_date?: string | null;
+    watering_frequency_days?: number | null;
+    health_status: GardenHealthStatus;
+    photo_url?: string | null;
+    notes?: string | null;
+}
+
+export interface GardenCare extends BaseEntity {
+    user_id: string;
+    zone_id?: string | null;
+    plant_id?: string | null;
+    care_type: GardenCareType;
+    title: string;
+    planned_date?: string | null;
+    performed_date?: string | null;
+    cost?: number | null;
+    recurrence_days?: number | null;
+    notes?: string | null;
+}
+
+export interface GardenObservation extends BaseEntity {
+    user_id: string;
+    zone_id?: string | null;
+    plant_id?: string | null;
+    observed_at: string;
+    health_status?: GardenHealthStatus | null;
+    height_cm?: number | null;
+    notes?: string | null;
+    photo_url?: string | null;
 }

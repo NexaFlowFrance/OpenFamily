@@ -13,6 +13,7 @@
     "budget": "Budget",
     "family": "Family",
     "house": "Home",
+    "garden": "Garden",
     "vacations": "Vacations",
     "settings": "Settings",
     "mobile": {
@@ -35,6 +36,7 @@
     "add_expense": "Add an expense",
     "add_member": "Add a family member",
     "add_equipment": "Add an equipment",
+    "add_garden": "Add to garden",
     "add_vacation": "Plan a vacation"
   },
   "header": {

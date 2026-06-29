@@ -152,3 +152,17 @@ export const generateVacationLuggageBodySchema = z
     .strict();
 
 export type GenerateVacationLuggageBody = z.infer<typeof generateVacationLuggageBodySchema>;
+
+// Gardening tips. The route resolves the zone + its plants server-side from
+// zoneId, so the client cannot reach into someone else's garden. `season` is
+// supplied by the client (it knows the user's locale/hemisphere); the rest is
+// derived from the persisted zone.
+export const generateGardeningTipsBodySchema = z
+    .object({
+        zoneId: z.string().uuid(),
+        season: z.enum(['Printemps', 'Été', 'Automne', 'Hiver']),
+        climate: z.string().trim().max(120).optional(),
+    })
+    .strict();
+
+export type GenerateGardeningTipsBody = z.infer<typeof generateGardeningTipsBodySchema>;

@@ -14,6 +14,7 @@ import {
     analyzeBudgetMonth,
     generateVacationPlan,
     generateVacationLuggage,
+    generateGardeningTips,
     type RecipeMemberInput,
     type PlannedMealLine,
     type LunchboxMemberInput,
@@ -21,6 +22,7 @@ import {
     type BudgetTrendPoint,
     type VacationPlanParticipant,
     type VacationLuggageParticipant,
+    type GardeningPlantInput,
 } from '../ai/AIService';
 import { AiError } from '../ai/errors';
 import {
@@ -32,6 +34,7 @@ import {
     generateRecipesBodySchema,
     generateVacationLuggageBodySchema,
     generateVacationPlanBodySchema,
+    generateGardeningTipsBodySchema,
     parseShoppingNLBodySchema,
 } from '../schemas/ai';
 import { query } from '../db';
@@ -1169,6 +1172,67 @@ router.post(
             });
         } catch (error) {
             sendAiError(res, error, 'vacation_luggage');
+        }
+    },
+);
+
+/**
+ * POST /api/ai/garden/tips
+ * Body: { zoneId, season, climate? }
+ * Returns: { tips, model }
+ *
+ * Resolves the zone + its plants server-side from zoneId (scoped to the user),
+ * so the client can't inflate the input or reach into someone else's garden.
+ * Read-only — never writes anything.
+ */
+router.post(
+    '/garden/tips',
+    validate({ body: generateGardeningTipsBodySchema }),
+    async (req: AuthRequest, res) => {
+        try {
+            const { zoneId, season, climate } =
+                req.body as import('../schemas/ai').GenerateGardeningTipsBody;
+
+            const zoneRow = await query(
+                `SELECT zone_type, location, sun_exposure, soil_type
+                 FROM garden_zones WHERE id = $1 AND user_id = $2`,
+                [zoneId, req.userId],
+            );
+            if (zoneRow.rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Zone not found' });
+            }
+            const zone = zoneRow.rows[0];
+
+            const plantsRows = await query(
+                `SELECT name, plant_type, variety
+                 FROM garden_plants
+                 WHERE zone_id = $1 AND user_id = $2
+                 ORDER BY name ASC
+                 LIMIT 40`,
+                [zoneId, req.userId],
+            );
+            const plants: GardeningPlantInput[] = plantsRows.rows.map((p: any) => ({
+                name: p.name as string,
+                type: p.plant_type as string,
+                variety: p.variety ?? null,
+            }));
+
+            const result = await generateGardeningTips(
+                {
+                    zoneType: zone.zone_type as string,
+                    location: zone.location ?? null,
+                    season,
+                    sunExposure: zone.sun_exposure ?? null,
+                    soilType: zone.soil_type ?? null,
+                    climate: climate ?? null,
+                    plants,
+                },
+                { userId: req.userId! },
+            );
+
+            res.json({ success: true, data: result });
+        } catch (error) {
+            sendAiError(res, error, 'garden_tips');
         }
     },
 );

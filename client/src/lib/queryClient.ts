@@ -93,4 +93,26 @@ export const queryKeys = {
             unlinked?: boolean;
         }) => [...queryKeys.documents.all, 'list', filters ?? null] as const,
     },
+    garden: {
+        all: ['garden'] as const,
+        zones: (filters?: { zone_type?: string; q?: string }) =>
+            [...queryKeys.garden.all, 'zones', filters ?? null] as const,
+        plants: (filters?: {
+            zone_id?: string;
+            plant_type?: string;
+            health_status?: string;
+            q?: string;
+        }) => [...queryKeys.garden.all, 'plants', filters ?? null] as const,
+        care: (filters?: {
+            zone_id?: string;
+            plant_id?: string;
+            care_type?: string;
+            status?: 'upcoming' | 'done' | 'all';
+            from?: string;
+            to?: string;
+        }) => [...queryKeys.garden.all, 'care', filters ?? null] as const,
+        observations: (filters?: { zone_id?: string; plant_id?: string }) =>
+            [...queryKeys.garden.all, 'observations', filters ?? null] as const,
+        statistics: () => [...queryKeys.garden.all, 'statistics'] as const,
+    },
 } as const;

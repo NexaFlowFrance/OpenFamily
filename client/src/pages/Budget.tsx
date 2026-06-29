@@ -621,7 +621,7 @@ const Budget: React.FC = () => {
                     </div>
 
                     {filteredEntries.length > ENTRIES_PER_PAGE && (
-                        <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
+                        <div className="flex items-center justify-between gap-3 flex-wrap pt-1 pb-20 lg:pb-0">
                             <p className="text-label text-muted-foreground">
                                 {t('budget.pagination.showing', {
                                     from: pageStart + 1,

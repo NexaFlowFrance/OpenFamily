@@ -189,6 +189,34 @@ const runMorningPulse = async (): Promise<void> => {
         });
     }
 
+    // (e bis) Garden care planned for today/tomorrow (watering, mowing, …).
+    const dueGardenCare = await query(
+        `SELECT c.id, c.user_id, c.title, c.care_type, c.planned_date,
+                z.name AS zone_name, p.name AS plant_name
+         FROM garden_care c
+         LEFT JOIN garden_zones z ON c.zone_id = z.id
+         LEFT JOIN garden_plants p ON c.plant_id = p.id
+         WHERE c.planned_date IS NOT NULL
+           AND c.performed_date IS NULL
+           AND c.planned_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '1 day'`,
+    );
+    for (const row of dueGardenCare.rows) {
+        const daysUntil = Math.max(
+            0,
+            Math.round((new Date(row.planned_date).getTime() - Date.now()) / (24 * 60 * 60 * 1000)),
+        );
+        const when = daysUntil === 0 ? "aujourd'hui" : 'demain';
+        const target = row.plant_name ?? row.zone_name;
+        await createNotificationIfNotExists({
+            userId: row.user_id,
+            type: 'garden_care_due',
+            title: 'Entretien jardin à faire',
+            message: target ? `${row.title} — ${target} — ${when}` : `${row.title} — ${when}`,
+            relatedId: row.id,
+            dedupWindowHours: 23,
+        });
+    }
+
     // (e) Warranties expiring in the next 30 days. Notify once a week per
     // equipment (long dedup window) since the user can't act every day.
     const expiringWarranties = await query(

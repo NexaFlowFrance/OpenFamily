@@ -1,0 +1,189 @@
+{
+  "garden": {
+    "page": {
+      "title": "Jardin & Pelouse",
+      "subtitle": "Gérez vos zones, plantes, entretiens et votre journal de jardinage."
+    },
+    "tabs": {
+      "overview": "Vue d'ensemble",
+      "zones": "Zones",
+      "plants": "Plantes",
+      "care": "Entretien",
+      "journal": "Journal"
+    },
+    "common": {
+      "all": "Tous",
+      "none": "Aucun",
+      "loading": "Chargement…",
+      "error": "Une erreur est survenue.",
+      "genericError": "Action impossible. Réessayez.",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "zoneTypes": {
+      "Pelouse": "Pelouse",
+      "Potager": "Potager",
+      "Massif fleuri": "Massif fleuri",
+      "Verger": "Verger",
+      "Haie": "Haie",
+      "Autre": "Autre"
+    },
+    "locations": {
+      "Devant": "Devant",
+      "Derrière": "Derrière",
+      "Côté": "Côté",
+      "Autour": "Autour",
+      "Autre": "Autre"
+    },
+    "sunExposures": {
+      "Plein soleil": "Plein soleil",
+      "Mi-ombre": "Mi-ombre",
+      "Ombre": "Ombre"
+    },
+    "plantTypes": {
+      "Légume": "Légume",
+      "Fleur": "Fleur",
+      "Arbre": "Arbre",
+      "Arbuste": "Arbuste",
+      "Aromatique": "Aromatique",
+      "Gazon": "Gazon",
+      "Autre": "Autre"
+    },
+    "healthStatuses": {
+      "En bonne santé": "En bonne santé",
+      "À surveiller": "À surveiller",
+      "Malade": "Malade",
+      "Mort": "Mort"
+    },
+    "careTypes": {
+      "Arrosage": "Arrosage",
+      "Tonte": "Tonte",
+      "Fertilisation": "Fertilisation",
+      "Taille": "Taille",
+      "Désherbage": "Désherbage",
+      "Traitement": "Traitement",
+      "Inspection": "Inspection",
+      "Plantation": "Plantation",
+      "Récolte": "Récolte"
+    },
+    "seasons": {
+      "Printemps": "Printemps",
+      "Été": "Été",
+      "Automne": "Automne",
+      "Hiver": "Hiver"
+    },
+    "stats": {
+      "zones": "Zones",
+      "plants": "Plantes",
+      "plantsToWatch": "À surveiller",
+      "careDueToday": "Entretiens aujourd'hui",
+      "careDue7d": "Entretiens à 7 jours"
+    },
+    "overview": {
+      "zonesTitle": "Conseils IA par zone",
+      "noZones": "Aucune zone pour l'instant. Créez-en une dans l'onglet Zones.",
+      "upcomingTitle": "Entretiens à venir",
+      "noUpcoming": "Aucun entretien à venir."
+    },
+    "zone": {
+      "add": "Ajouter une zone",
+      "editTitle": "Modifier la zone",
+      "name": "Nom",
+      "type": "Type",
+      "location": "Emplacement",
+      "areaLabel": "Surface (m²)",
+      "area": "{{area}} m²",
+      "sunExposure": "Exposition",
+      "soilType": "Type de sol",
+      "notes": "Notes",
+      "plantsCount": "{{count}} plante",
+      "plantsCount_other": "{{count}} plantes",
+      "aiTips": "Conseils IA",
+      "searchPlaceholder": "Rechercher une zone…",
+      "emptyTitle": "Aucune zone",
+      "emptyDescription": "Ajoutez votre première zone (pelouse, potager, massif…).",
+      "deleteConfirm": "Supprimer la zone « {{name}} » ?"
+    },
+    "plant": {
+      "add": "Ajouter une plante",
+      "editTitle": "Modifier la plante",
+      "name": "Nom",
+      "type": "Type",
+      "zone": "Zone",
+      "variety": "Variété",
+      "plantedDate": "Date de plantation",
+      "plantedOn": "Plantée le {{date}}",
+      "wateringFrequency": "Arrosage (jours)",
+      "wateringEvery": "Tous les {{count}} j",
+      "wateringEvery_other": "Tous les {{count}} j",
+      "healthStatus": "État de santé",
+      "notes": "Notes",
+      "allZones": "Toutes les zones",
+      "searchPlaceholder": "Rechercher une plante…",
+      "emptyTitle": "Aucune plante",
+      "emptyDescription": "Ajoutez les plantes de votre jardin pour suivre leur santé.",
+      "deleteConfirm": "Supprimer la plante « {{name}} » ?"
+    },
+    "care": {
+      "add": "Ajouter un entretien",
+      "editTitle": "Modifier l'entretien",
+      "title": "Titre",
+      "type": "Type",
+      "zone": "Zone",
+      "plant": "Plante",
+      "plannedDate": "Date prévue",
+      "performedDate": "Date réalisée",
+      "cost": "Coût (€)",
+      "recurrence": "Récurrence (jours)",
+      "recurrenceDays": "Tous les {{count}} j",
+      "recurrenceDays_other": "Tous les {{count}} j",
+      "notes": "Notes",
+      "done": "Fait",
+      "plannedOn": "Prévu le {{date}}",
+      "performedOn": "Réalisé le {{date}}",
+      "inDays": "dans {{days}} j",
+      "overdueBy": "en retard de {{days}} j",
+      "dateRequired": "Indiquez une date prévue ou réalisée.",
+      "completedToast": "Entretien marqué comme fait",
+      "nextOccurrence": "Prochaine occurrence le {{date}}",
+      "filter": {
+        "upcoming": "À venir",
+        "done": "Réalisés",
+        "all": "Tous"
+      },
+      "emptyTitle": "Aucun entretien",
+      "emptyDescription": "Planifiez l'arrosage, la tonte, la taille…",
+      "deleteConfirm": "Supprimer l'entretien « {{title}} » ?"
+    },
+    "journal": {
+      "add": "Ajouter une observation",
+      "intro": "Notez l'évolution de votre jardin au fil du temps.",
+      "zone": "Zone",
+      "plant": "Plante",
+      "observedAt": "Date d'observation",
+      "healthStatus": "État de santé",
+      "heightLabel": "Hauteur (cm)",
+      "height": "{{height}} cm",
+      "notes": "Notes",
+      "targetRequired": "Sélectionnez une zone ou une plante.",
+      "emptyTitle": "Aucune observation",
+      "emptyDescription": "Ajoutez une première note à votre journal de jardinage.",
+      "deleteConfirm": "Supprimer cette observation ?"
+    },
+    "tips": {
+      "title": "Conseils de jardinage IA",
+      "description": "Conseils personnalisés pour la zone « {{zone}} ».",
+      "season": "Saison",
+      "generate": "Générer",
+      "generating": "Génération en cours…",
+      "recommendations": "Recommandations",
+      "watering": "Plan d'arrosage",
+      "warnings": "Points de vigilance",
+      "failed": "La génération des conseils a échoué.",
+      "softNotice": "Les conseils IA sont momentanément indisponibles (service désactivé ou quota atteint). Réessayez plus tard."
+    }
+  }
+}

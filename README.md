@@ -4,14 +4,37 @@ KeurTonux est une application de gestion familiale complète proposée en open s
 
 ## 🎯 Fonctionnalités
 
-- 🛒 **Liste de courses** - Catégorisation automatique, prix, quantités, templates
-- ✅ **Tâches** - Tâches récurrentes, assignation familiale, statistiques
-- 📅 **Rendez-vous** - Calendrier mensuel, rappels automatiques, code couleur
-- 🗓️ **Planning hebdomadaire** - Horaires de travail et emploi du temps scolaire par membre
+### Modules principaux
+
+- 🛒 **Liste de courses** - Catégorisation automatique, prix, quantités, templates, catalogue
+- ✅ **Tâches** - Tâches récurrentes, assignation multi-membres, filtrage par membre, statistiques
+- 📅 **Rendez-vous** - Calendrier mensuel, rappels automatiques, code couleur, événements multi-jours
+- 🗓️ **Planning hebdomadaire** - Horaires de travail et emploi du temps scolaire par membre, horaires à cheval sur minuit
 - 🍳 **Recettes** - Bibliothèque familiale, filtres avancés, temps de préparation
-- 🍽️ **Planning repas** - Vue hebdomadaire, export PDF, liaison recettes
-- 💰 **Budget** - Suivi mensuel, limites par catégorie, statistiques
+- 🍽️ **Planning repas** - Vue hebdomadaire, export PDF, liaison recettes, suivi des lunchbox
+- 💰 **Budget** - Suivi mensuel, navigation par mois, limites par catégorie, dépenses par membre, statistiques avancées
 - 👨‍👩‍👧‍👦 **Famille** - Profils membres, informations santé, contacts d'urgence
+- 🏠 **Maison** - Suivi des équipements et des opérations de maintenance
+- 🏖️ **Vacances** - Planification de voyages et gestion des bagages
+- 📄 **Documents** - Stockage et organisation de documents familiaux (stockage objet MinIO/S3)
+
+### Fonctionnalités transverses
+
+- 🤖 **IA intégrée** - Couche IA branchable (NVIDIA NIM par défaut ou Google Gemini), désactivable :
+  - Classification automatique et saisie en langage naturel des courses
+  - Génération de recettes à partir d'ingrédients & analyse nutritionnelle
+  - Analyse de la semaine de repas et idées de lunchbox
+  - Scan de tickets de caisse (vision) → entrée budget automatique
+  - Analyse mensuelle du budget et recommandations
+  - Génération d'itinéraires de vacances et de listes de bagages
+  - Suggestions de tenues pour les enfants selon la météo
+- 🔔 **Notifications** - Notifications in-app + emails (SMTP Resend) avec digest quotidien
+- 👥 **Invitations** - Invitation de membres / comptes par email
+- 🌤️ **Météo** - Prévisions hebdomadaires et du lendemain (Open-Meteo)
+- 💱 **Multi-devises** - Gestion de la devise par utilisateur avec onboarding
+- 🌍 **Internationalisation** - Interface FR / EN (i18next)
+- 🔒 **Mode confidentialité** - Masquage des montants et données sensibles
+- 📤 **Export / Import** - Sauvegarde et restauration de toutes les données
 
 ## 🚀 Démarrage rapide
 
@@ -57,8 +80,8 @@ npm run install:all
 2. Configurez PostgreSQL et créez la base de données :
 
 ```bash
-psql -U postgres -c "CREATE DATABASE keurtonux;"
-psql -U postgres -d keurtonux -f server/schema.sql
+psql -U postgres -c "CREATE DATABASE openfamily;"
+psql -U postgres -d openfamily -f server/schema.sql
 ```
 
 3. Configurez les variables d'environnement :
@@ -113,6 +136,35 @@ curl -sS http://localhost:3001/health
 npm run smoke:api
 ```
 
+## ⚙️ Configuration des services
+
+Toutes les variables sont documentées dans `.env.example`. Les fonctionnalités optionnelles peuvent être désactivées sans modifier le code.
+
+### Couche IA (`AI_ENABLED`)
+
+Sélection du fournisseur via `AI_PROVIDER` :
+
+- `nvidia` (par défaut) — NVIDIA NIM, clé `NVIDIA_API_KEY` ([build.nvidia.com](https://build.nvidia.com))
+- `gemini` — Google Gemini via son endpoint compatible OpenAI, clé `GEMINI_API_KEY`
+
+Paramètres communs : `AI_MODEL_DEFAULT`, `AI_MODEL_HEAVY`, `AI_MODEL_VISION`, `AI_MONTHLY_TOKEN_LIMIT_PER_USER` (quota par utilisateur), `AI_REQUEST_TIMEOUT_MS`.
+
+### Emails & notifications (`EMAIL_ENABLED`)
+
+SMTP Resend (`RESEND_SMTP_*`), expéditeur `EMAIL_FROM`, lien CTA `APP_BASE_URL`, heure du digest quotidien `EMAIL_DIGEST_HOUR`. La cloche de notifications in-app fonctionne même sans email configuré.
+
+### Météo
+
+Fournie par Open-Meteo (aucune clé requise) : `OPEN_METEO_BASE_URL`, `WEATHER_DEFAULT_LANG`, `WEATHER_CACHE_TTL_MS`.
+
+### Stockage des documents (MinIO / S3)
+
+`MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET`, `MINIO_REGION`. Le service MinIO est inclus dans `docker-compose.yml`.
+
+### Comptes
+
+`REGISTRATION_ENABLED=false` désactive la création de nouveaux comptes (les invitations restent possibles).
+
 ## 🛠️ Technologies
 
 ### Frontend
@@ -122,39 +174,49 @@ npm run smoke:api
 - TailwindCSS + Radix UI
 - React Router
 - date-fns, Recharts
+- i18next / react-i18next (FR / EN)
 
 ### Backend
 
 - Node.js 20 + Express
 - PostgreSQL 16
 - WebSocket (ws)
-- JWT Authentication
+- JWT Authentication (cookies httpOnly)
+- Couche IA : NVIDIA NIM & Google Gemini (branchable via `AI_PROVIDER`)
+- Nodemailer (SMTP Resend) pour les emails
+- Multer + MinIO/S3 pour le stockage de fichiers
 - TypeScript
 
 ### DevOps
 
 - Docker + Docker Compose
+- MinIO (stockage objet S3-compatible)
 - Multi-stage builds
 - Nginx (production)
 
 ## 📦 Structure du projet
 
 ```
-Nexus/
-├── client/          # Application React
+OpenFamily/
+├── client/              # Application React
 │   ├── src/
 │   │   ├── components/
-│   │   ├── contexts/
+│   │   ├── contexts/    # Auth, Theme, Privacy
 │   │   ├── pages/
+│   │   ├── i18n/        # Locales FR / EN
 │   │   └── lib/
 │   └── Dockerfile
-├── server/          # API Express
+├── server/              # API Express
 │   ├── src/
-│   │   ├── routes/
-│   │   └── middleware/
+│   │   ├── routes/      # shopping, tasks, budget, ai, house, vacations, documents…
+│   │   ├── ai/          # Providers (NVIDIA, Gemini) + prompts
+│   │   ├── email/       # EmailService + templates
+│   │   ├── weather/     # WeatherService (Open-Meteo)
+│   │   ├── middleware/
+│   │   └── schemas/
 │   ├── schema.sql
 │   └── Dockerfile
-├── shared/          # Types et constantes partagés
+├── shared/              # Types et constantes partagés
 └── docker-compose.yml
 ```
 

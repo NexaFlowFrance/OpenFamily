@@ -65,6 +65,11 @@ import {
     budgetAnalysisSystemPrompt,
 } from './prompts/budgetAnalysisPrompts';
 import {
+    type GardeningTipsInput,
+    buildGardeningTipsUserPrompt,
+    gardeningTipsSystemPrompt,
+} from './prompts/gardeningPrompts';
+import {
     type VacationPlanInput,
     buildVacationPlanUserPrompt,
     vacationPlanSystemPrompt,
@@ -1292,6 +1297,98 @@ export type {
     BudgetMonthSnapshot,
     BudgetTrendPoint,
 } from './prompts/budgetAnalysisPrompts';
+
+// ---------------------------------------------------------------------------
+// Gardening tips — Garden page "Conseils IA"
+// ---------------------------------------------------------------------------
+
+export interface GardeningTip {
+    title: string;
+    detail: string;
+    timing: string;
+}
+
+export interface GardeningTips {
+    summary: string;
+    tips: GardeningTip[];
+    wateringSchedule: string;
+    warnings: string[];
+}
+
+export interface GenerateGardeningTipsResult {
+    tips: GardeningTips;
+    model: string;
+}
+
+const sanitizeGardeningTip = (raw: unknown): GardeningTip | null => {
+    if (!raw || typeof raw !== 'object') return null;
+    const r = raw as Record<string, unknown>;
+    const title = typeof r.title === 'string' ? r.title.trim().slice(0, 80) : '';
+    const detail = typeof r.detail === 'string' ? r.detail.trim().slice(0, 220) : '';
+    const timing = typeof r.timing === 'string' ? r.timing.trim().slice(0, 80) : '';
+    if (!title || !detail) return null;
+    return { title, detail, timing };
+};
+
+const sanitizeGardeningTips = (raw: unknown): GardeningTips | null => {
+    if (!raw || typeof raw !== 'object') return null;
+    const r = raw as Record<string, unknown>;
+
+    const summary = typeof r.summary === 'string' ? r.summary.trim().slice(0, 400) : '';
+    const wateringSchedule =
+        typeof r.wateringSchedule === 'string' ? r.wateringSchedule.trim().slice(0, 220) : '';
+    const warnings = stringArray(r.warnings, 4);
+
+    const tipsRaw = Array.isArray(r.tips) ? r.tips : [];
+    const tips: GardeningTip[] = [];
+    for (const item of tipsRaw) {
+        if (tips.length >= 6) break;
+        const tip = sanitizeGardeningTip(item);
+        if (tip) tips.push(tip);
+    }
+
+    if (tips.length === 0 && !summary && warnings.length === 0) {
+        return null;
+    }
+
+    return { summary, tips, wateringSchedule, warnings };
+};
+
+/**
+ * Produce season-aware gardening advice for one zone + its plants. Default
+ * model: the task is short and well-bounded, no need for the heavy model.
+ *
+ * No cache: the input (plants, season, zone metadata) varies per zone and the
+ * advice is cheap enough to regenerate on demand.
+ */
+export const generateGardeningTips = async (
+    input: GardeningTipsInput,
+    ctx: { userId: string },
+): Promise<GenerateGardeningTipsResult> => {
+    const response = await AIService.chat(
+        {
+            messages: [
+                { role: 'system', content: gardeningTipsSystemPrompt },
+                { role: 'user', content: buildGardeningTipsUserPrompt(input) },
+            ],
+            temperature: 0.5,
+            maxTokens: 700,
+            jsonMode: true,
+        },
+        { userId: ctx.userId, feature: 'garden.tips' },
+    );
+
+    const parsed = safeParseJson(response.content);
+    const tips = sanitizeGardeningTips(parsed);
+    if (!tips) {
+        throw new AiError('BAD_JSON', 'Model did not return usable gardening tips');
+    }
+
+    return { tips, model: response.model };
+};
+
+/** Re-export so routes can build the input shape with proper types. */
+export type { GardeningTipsInput, GardeningPlantInput } from './prompts/gardeningPrompts';
 
 // ---------------------------------------------------------------------------
 // Vacation plan generation — Vacations page "Generate AI plan"

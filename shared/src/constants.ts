@@ -130,3 +130,64 @@ export const SUPPORTED_CURRENCY_CODES = SUPPORTED_CURRENCIES.map((c) => c.code);
 export type CurrencyCode = (typeof SUPPORTED_CURRENCIES)[number]['code'];
 
 export const DEFAULT_CURRENCY: CurrencyCode = 'EUR';
+
+// =============================================================================
+// Garden & Lawn module ("Jardin & Pelouse")
+//
+// Like the other modules, enum-like values are stored in French in the DB and
+// translated only at render time (DATA-vs-UI rule). The API enforces these via
+// zod; the DB columns stay free-form VARCHAR.
+// =============================================================================
+
+// Garden zone types — the kinds of spaces the user maintains.
+export const GARDEN_ZONE_TYPES = [
+    'Pelouse',
+    'Potager',
+    'Massif fleuri',
+    'Verger',
+    'Haie',
+    'Autre',
+] as const;
+export type GardenZoneType = (typeof GARDEN_ZONE_TYPES)[number];
+
+// Where a zone sits relative to the house.
+export const GARDEN_LOCATIONS = ['Devant', 'Derrière', 'Côté', 'Autour', 'Autre'] as const;
+export type GardenLocation = (typeof GARDEN_LOCATIONS)[number];
+
+// Sun exposure of a zone.
+export const GARDEN_SUN_EXPOSURES = ['Plein soleil', 'Mi-ombre', 'Ombre'] as const;
+export type GardenSunExposure = (typeof GARDEN_SUN_EXPOSURES)[number];
+
+// Plant categories.
+export const GARDEN_PLANT_TYPES = [
+    'Légume',
+    'Fleur',
+    'Arbre',
+    'Arbuste',
+    'Aromatique',
+    'Gazon',
+    'Autre',
+] as const;
+export type GardenPlantType = (typeof GARDEN_PLANT_TYPES)[number];
+
+// Health status shared by plants and observations.
+export const GARDEN_HEALTH_STATUSES = ['En bonne santé', 'À surveiller', 'Malade', 'Mort'] as const;
+export type GardenHealthStatus = (typeof GARDEN_HEALTH_STATUSES)[number];
+
+// Care/maintenance task types.
+export const GARDEN_CARE_TYPES = [
+    'Arrosage',
+    'Tonte',
+    'Fertilisation',
+    'Taille',
+    'Désherbage',
+    'Traitement',
+    'Inspection',
+    'Plantation',
+    'Récolte',
+] as const;
+export type GardenCareType = (typeof GARDEN_CARE_TYPES)[number];
+
+// Seasons — used to give the AI tips feature temporal context.
+export const GARDEN_SEASONS = ['Printemps', 'Été', 'Automne', 'Hiver'] as const;
+export type GardenSeason = (typeof GARDEN_SEASONS)[number];

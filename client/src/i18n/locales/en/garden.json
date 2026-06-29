@@ -1,0 +1,189 @@
+{
+  "garden": {
+    "page": {
+      "title": "Garden & Lawn",
+      "subtitle": "Manage your zones, plants, care tasks and gardening journal."
+    },
+    "tabs": {
+      "overview": "Overview",
+      "zones": "Zones",
+      "plants": "Plants",
+      "care": "Care",
+      "journal": "Journal"
+    },
+    "common": {
+      "all": "All",
+      "none": "None",
+      "loading": "Loading…",
+      "error": "Something went wrong.",
+      "genericError": "Action failed. Try again.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "close": "Close",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "zoneTypes": {
+      "Pelouse": "Lawn",
+      "Potager": "Vegetable garden",
+      "Massif fleuri": "Flower bed",
+      "Verger": "Orchard",
+      "Haie": "Hedge",
+      "Autre": "Other"
+    },
+    "locations": {
+      "Devant": "Front",
+      "Derrière": "Back",
+      "Côté": "Side",
+      "Autour": "Around",
+      "Autre": "Other"
+    },
+    "sunExposures": {
+      "Plein soleil": "Full sun",
+      "Mi-ombre": "Partial shade",
+      "Ombre": "Shade"
+    },
+    "plantTypes": {
+      "Légume": "Vegetable",
+      "Fleur": "Flower",
+      "Arbre": "Tree",
+      "Arbuste": "Shrub",
+      "Aromatique": "Herb",
+      "Gazon": "Grass",
+      "Autre": "Other"
+    },
+    "healthStatuses": {
+      "En bonne santé": "Healthy",
+      "À surveiller": "Needs watching",
+      "Malade": "Diseased",
+      "Mort": "Dead"
+    },
+    "careTypes": {
+      "Arrosage": "Watering",
+      "Tonte": "Mowing",
+      "Fertilisation": "Fertilizing",
+      "Taille": "Pruning",
+      "Désherbage": "Weeding",
+      "Traitement": "Treatment",
+      "Inspection": "Inspection",
+      "Plantation": "Planting",
+      "Récolte": "Harvest"
+    },
+    "seasons": {
+      "Printemps": "Spring",
+      "Été": "Summer",
+      "Automne": "Autumn",
+      "Hiver": "Winter"
+    },
+    "stats": {
+      "zones": "Zones",
+      "plants": "Plants",
+      "plantsToWatch": "Needs watching",
+      "careDueToday": "Care due today",
+      "careDue7d": "Care due in 7 days"
+    },
+    "overview": {
+      "zonesTitle": "AI tips by zone",
+      "noZones": "No zones yet. Create one in the Zones tab.",
+      "upcomingTitle": "Upcoming care",
+      "noUpcoming": "No upcoming care."
+    },
+    "zone": {
+      "add": "Add a zone",
+      "editTitle": "Edit zone",
+      "name": "Name",
+      "type": "Type",
+      "location": "Location",
+      "areaLabel": "Area (m²)",
+      "area": "{{area}} m²",
+      "sunExposure": "Sun exposure",
+      "soilType": "Soil type",
+      "notes": "Notes",
+      "plantsCount": "{{count}} plant",
+      "plantsCount_other": "{{count}} plants",
+      "aiTips": "AI tips",
+      "searchPlaceholder": "Search a zone…",
+      "emptyTitle": "No zones",
+      "emptyDescription": "Add your first zone (lawn, vegetable garden, flower bed…).",
+      "deleteConfirm": "Delete the zone \"{{name}}\"?"
+    },
+    "plant": {
+      "add": "Add a plant",
+      "editTitle": "Edit plant",
+      "name": "Name",
+      "type": "Type",
+      "zone": "Zone",
+      "variety": "Variety",
+      "plantedDate": "Planting date",
+      "plantedOn": "Planted on {{date}}",
+      "wateringFrequency": "Watering (days)",
+      "wateringEvery": "Every {{count}} d",
+      "wateringEvery_other": "Every {{count}} d",
+      "healthStatus": "Health status",
+      "notes": "Notes",
+      "allZones": "All zones",
+      "searchPlaceholder": "Search a plant…",
+      "emptyTitle": "No plants",
+      "emptyDescription": "Add your garden plants to track their health.",
+      "deleteConfirm": "Delete the plant \"{{name}}\"?"
+    },
+    "care": {
+      "add": "Add a care task",
+      "editTitle": "Edit care task",
+      "title": "Title",
+      "type": "Type",
+      "zone": "Zone",
+      "plant": "Plant",
+      "plannedDate": "Planned date",
+      "performedDate": "Performed date",
+      "cost": "Cost (€)",
+      "recurrence": "Recurrence (days)",
+      "recurrenceDays": "Every {{count}} d",
+      "recurrenceDays_other": "Every {{count}} d",
+      "notes": "Notes",
+      "done": "Done",
+      "plannedOn": "Planned for {{date}}",
+      "performedOn": "Performed on {{date}}",
+      "inDays": "in {{days}} d",
+      "overdueBy": "{{days}} d overdue",
+      "dateRequired": "Provide a planned or performed date.",
+      "completedToast": "Care task marked as done",
+      "nextOccurrence": "Next occurrence on {{date}}",
+      "filter": {
+        "upcoming": "Upcoming",
+        "done": "Done",
+        "all": "All"
+      },
+      "emptyTitle": "No care tasks",
+      "emptyDescription": "Schedule watering, mowing, pruning…",
+      "deleteConfirm": "Delete the care task \"{{title}}\"?"
+    },
+    "journal": {
+      "add": "Add an observation",
+      "intro": "Track how your garden evolves over time.",
+      "zone": "Zone",
+      "plant": "Plant",
+      "observedAt": "Observation date",
+      "healthStatus": "Health status",
+      "heightLabel": "Height (cm)",
+      "height": "{{height}} cm",
+      "notes": "Notes",
+      "targetRequired": "Select a zone or a plant.",
+      "emptyTitle": "No observations",
+      "emptyDescription": "Add your first note to the gardening journal.",
+      "deleteConfirm": "Delete this observation?"
+    },
+    "tips": {
+      "title": "AI gardening tips",
+      "description": "Personalized tips for the \"{{zone}}\" zone.",
+      "season": "Season",
+      "generate": "Generate",
+      "generating": "Generating…",
+      "recommendations": "Recommendations",
+      "watering": "Watering schedule",
+      "warnings": "Things to watch",
+      "failed": "Failed to generate tips.",
+      "softNotice": "AI tips are temporarily unavailable (service disabled or quota reached). Try again later."
+    }
+  }
+}

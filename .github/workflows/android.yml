@@ -6,8 +6,7 @@ name: Android APK
 #
 # This produces a DEBUG-signed APK (installable by sideloading / suitable for
 # GitHub Releases and testing). For a Play Store upload you'd add a release
-# keystore (see docs/MOBILE.md). F-Droid builds & signs from source itself
-# (see docs/FDROID.md).
+# keystore (see docs/MOBILE.md).
 
 on:
   push:

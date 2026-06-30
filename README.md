@@ -92,6 +92,25 @@ Run `OpenFamily-Setup.exe`, click **Start**, and the app opens at http://localho
 The window also shows your local network address so you can open it from a phone on the same
 Wi-Fi, and the **Settings** tab explains how to set up Tailscale for secure remote access.
 
+### 📱 Android app (APK)
+
+OpenFamily also has a native **Android app** — a thin client that connects to **your own**
+server (you enter its address on first launch, just like the Nextcloud or Home Assistant
+apps). It hosts nothing itself.
+
+<p>
+  <a href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily.apk">
+    <img src="https://img.shields.io/badge/⬇️%20Download%20the%20APK-OpenFamily%20for%20Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download OpenFamily for Android" />
+  </a>
+</p>
+
+Install the APK, allow installs from unknown sources when prompted, open the app and enter
+your server URL (e.g. `http://192.168.1.10:3001`, or your HTTPS / Tailscale address).
+
+> 🔄 **Stay up to date automatically:** add the repo to
+> **[Obtainium](https://github.com/ImranR98/Obtainium)** to receive app updates straight from
+> GitHub Releases — no app store required.
+
 ### 🐳 Docker (recommended for a server)
 
 ```bash

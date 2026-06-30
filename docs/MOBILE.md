@@ -25,7 +25,12 @@ like the Nextcloud / Home Assistant / Jellyfin apps. OpenFamily (NexaFlow) hosts
 ### Via GitHub Actions (recommended)
 Push a `v*` tag or run the **Android APK** workflow manually
 ([`.github/workflows/android.yml`](../.github/workflows/android.yml)). It outputs a
-debug‑signed `OpenFamily.apk` (sideload‑installable) and attaches it to the Release.
+debug‑signed `OpenFamily.apk` (sideload‑installable) and attaches it to the Release, so the
+latest build is always available at:
+
+```
+https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily.apk
+```
 
 ### Locally
 Prerequisites: Node 20+, JDK 21, Android SDK (Android Studio).
@@ -34,7 +39,7 @@ Prerequisites: Node 20+, JDK 21, Android SDK (Android Studio).
 npm run install:all
 npm run build:shared
 cd client
-npm run android:add     # first time only — generates client/android/ (commit it for F-Droid)
+npm run android:add     # first time only — (re)generates client/android/ (already committed)
 npm run cap:sync        # build:native + cap sync
 npm run android:open    # open in Android Studio → Run / Build APK
 # or a one-liner onto a connected device/emulator:
@@ -43,16 +48,22 @@ npm run android:run
 
 The debug APK lands at `client/android/app/build/outputs/apk/debug/app-debug.apk`.
 
+## Distribute to users
+
+Point people at the GitHub Release download URL above. For **automatic updates** without an
+app store, they can add the repo to [Obtainium](https://github.com/ImranR98/Obtainium),
+which tracks GitHub Releases and updates the APK on its own.
+
 ## Release signing (only for the Play Store)
 
-F-Droid and sideloaded debug APKs don't need this. For a Play Store upload, create a
-keystore and configure `client/android/app/build.gradle` signing (or pass it via the
-workflow as base64 secrets), then `./gradlew assembleRelease`.
+Sideloaded debug APKs don't need this. For a Play Store upload, create a keystore and
+configure `client/android/app/build.gradle` signing (or pass it via the workflow as base64
+secrets), then `./gradlew assembleRelease`.
 
 ## Notes
 
 - **Push notifications**: the app reuses the existing **Web Push (VAPID)** — no Firebase
-  (keeps it Google‑free, which matters for F-Droid). Native UnifiedPush/ntfy can come later.
+  (keeps it Google‑free). Native UnifiedPush/ntfy can come later.
 - **Service worker** is disabled in the native build (`vite build --mode native`); the app
   shell is already local, only API calls go to your server.
-- Commit `client/android/` once generated — F-Droid builds the app from it.
+- `client/android/` is committed so CI and local builds use the exact same project.

@@ -59,6 +59,25 @@
   </a>
 </p>
 
+### 📱 Application Android (APK)
+
+OpenFamily dispose aussi d'une **application Android native** — un client léger qui se
+connecte à **votre propre** serveur (vous saisissez son adresse au premier lancement, comme
+les apps Nextcloud ou Home Assistant). Elle n'héberge rien elle-même.
+
+<p>
+  <a href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily.apk">
+    <img src="https://img.shields.io/badge/⬇️%20Télécharger%20l'APK-OpenFamily%20pour%20Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Télécharger OpenFamily pour Android" />
+  </a>
+</p>
+
+Installez l'APK, autorisez les sources inconnues si demandé, ouvrez l'app et saisissez
+l'adresse de votre serveur (ex. `http://192.168.1.10:3001`, ou votre adresse HTTPS / Tailscale).
+
+> 🔄 **Mises à jour automatiques :** ajoutez le dépôt à
+> **[Obtainium](https://github.com/ImranR98/Obtainium)** pour recevoir les mises à jour
+> directement depuis les Releases GitHub — sans store.
+
 ### 🐳 Docker (recommandé pour serveur)
 
 ```bash

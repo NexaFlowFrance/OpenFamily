@@ -1,25 +1,16 @@
-// VITE_API_URL non défini en dev -> http://localhost:3001.
-// En build de production (installeur Windows, Docker...), on utilise la MÊME
-// ORIGINE par défaut (chaîne vide) afin que l'accès fonctionne depuis un mobile
-// via http://<ip-du-pc>:3000. On ne se repose pas sur une variable vide passée
-// au build : PowerShell supprime les variables d'environnement vides, ce qui
-// faisait basculer le client sur localhost:3001 (d'où les « Failed to fetch »).
+// The API base URL is resolved at request time by `apiBase()`:
+//  - web: same-origin in prod ('' ), localhost:3001 in dev (see serverConfig);
+//  - native (Capacitor): the server URL the user configured on the device.
 import { mockRequest } from '../demo/mockApi';
+import { apiBase } from './serverConfig';
 
 const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
-
-const rawApiUrl = import.meta.env.VITE_API_URL as string | undefined;
-const API_URL = rawApiUrl !== undefined
-    ? rawApiUrl
-    : (import.meta.env.PROD ? '' : 'http://localhost:3001');
 const AUTH_EXPIRED_EVENT = 'openfamily:auth-expired';
 
 class ApiClient {
-    private baseURL: string;
     private token: string | null = null;
 
-    constructor(baseURL: string) {
-        this.baseURL = baseURL;
+    constructor() {
         this.token = localStorage.getItem('token');
     }
 
@@ -55,7 +46,7 @@ class ApiClient {
             headers['Authorization'] = `Bearer ${this.token}`;
         }
 
-        const response = await fetch(`${this.baseURL}${endpoint}`, {
+        const response = await fetch(`${apiBase()}${endpoint}`, {
             ...options,
             headers: {
                 ...headers,
@@ -98,7 +89,7 @@ class ApiClient {
         const headers: Record<string, string> = {};
         if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
 
-        const response = await fetch(`${this.baseURL}${endpoint}`, { headers });
+        const response = await fetch(`${apiBase()}${endpoint}`, { headers });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.blob();
     }
@@ -183,5 +174,4 @@ class ApiClient {
     }
 }
 
-export const api = new ApiClient(API_URL);
-export const API_BASE_URL = API_URL;
+export const api = new ApiClient();

@@ -1,0 +1,19 @@
+{
+  "title": "Connectez-vous à votre serveur",
+  "subtitle": "OpenFamily est auto-hébergé — indiquez l'adresse de votre propre serveur.",
+  "urlLabel": "Adresse du serveur",
+  "placeholder": "http://192.168.1.10:3001",
+  "hint": "Utilisez la même adresse que dans votre navigateur (ex. http://192.168.1.10:3001), ou votre adresse HTTPS / Tailscale.",
+  "connect": "Se connecter",
+  "connecting": "Connexion…",
+  "errors": {
+    "invalid": "Entrez une URL valide commençant par http:// ou https://",
+    "unreachable": "Impossible de joindre ce serveur. Vérifiez l'adresse et que le serveur est démarré."
+  },
+  "settings": {
+    "title": "Serveur",
+    "connectedTo": "Connecté à {{url}}",
+    "change": "Changer de serveur",
+    "disconnect": "Déconnecter"
+  }
+}

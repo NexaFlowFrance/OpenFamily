@@ -6,25 +6,29 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { WebSocketProvider } from './contexts/WebSocketContext';
 import { AppToastProvider } from './components/ui';
 import App from './App';
+import { isNative, initServerConfig } from './lib/serverConfig';
 import './i18n';
 import './index.css';
 
-// The static GitHub Pages demo is served from a sub-path with no server-side
-// routing, so it uses HashRouter; the real app keeps clean BrowserRouter URLs.
-const Router = import.meta.env.VITE_DEMO ? HashRouter : BrowserRouter;
+// Demo (sub-path Pages) and the native app (no server-side routing) both use
+// HashRouter; the real web app keeps clean BrowserRouter URLs.
+const Router = import.meta.env.VITE_DEMO || isNative() ? HashRouter : BrowserRouter;
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <Router>
-            <ThemeProvider>
-                <AppToastProvider>
-                    <AuthProvider>
-                        <WebSocketProvider>
-                            <App />
-                        </WebSocketProvider>
-                    </AuthProvider>
-                </AppToastProvider>
-            </ThemeProvider>
-        </Router>
-    </React.StrictMode>
-);
+// Load the saved server URL (native only) before first render, then mount.
+void initServerConfig().finally(() => {
+    ReactDOM.createRoot(document.getElementById('root')!).render(
+        <React.StrictMode>
+            <Router>
+                <ThemeProvider>
+                    <AppToastProvider>
+                        <AuthProvider>
+                            <WebSocketProvider>
+                                <App />
+                            </WebSocketProvider>
+                        </AuthProvider>
+                    </AppToastProvider>
+                </ThemeProvider>
+            </Router>
+        </React.StrictMode>
+    );
+});

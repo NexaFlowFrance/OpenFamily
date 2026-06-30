@@ -1,10 +1,13 @@
 import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './contexts/AuthContext';
+import { isNative, isServerConfigured } from './lib/serverConfig';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import Kiosk from './pages/Kiosk';
+import ServerSetup from './pages/ServerSetup';
 import Dashboard from './pages/Dashboard';
 import ShoppingList from './pages/ShoppingList';
 import Tasks from './pages/Tasks';
@@ -28,6 +31,13 @@ function App() {
     // redirect to the dashboard so a bookmarked/typed URL never shows a hidden page.
     const moduleRoute = (key: string, element: ReactElement) =>
         isModuleEnabled(key) ? element : <Navigate to="/" replace />;
+
+    const [serverReady, setServerReady] = useState(isServerConfigured());
+
+    // Native app, first launch: ask which self-hosted server to connect to.
+    if (isNative() && !serverReady) {
+        return <ServerSetup onConfigured={() => setServerReady(true)} />;
+    }
 
     if (loading) {
         return (

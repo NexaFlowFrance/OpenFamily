@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
-import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid } from 'lucide-react';
+import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid, Server } from 'lucide-react';
 import { Card, CardContent, Button, Input, Select } from '../components/ui';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
+import { isNative, getServerUrl, clearServerUrl } from '../lib/serverConfig';
 import { refreshAiStatus } from '../lib/aiStatus';
 import { aiErrorKey } from '../components/app/MagicInput';
 
@@ -428,7 +429,7 @@ const ModulesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
 };
 
 const Settings: React.FC = () => {
-    const { t } = useTranslation(['settings', 'common', 'kiosk']);
+    const { t } = useTranslation(['settings', 'common', 'kiosk', 'server']);
     const entityLabel = (key: string) => t(`settings:entities.${key}`, { defaultValue: key });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [exportLoading, setExportLoading] = useState(false);
@@ -611,6 +612,34 @@ const Settings: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Server (native app only) */}
+            {isNative() && (
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                                <Server className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-caption font-semibold text-foreground">{t('server:settings.title')}</h3>
+                                <p className="mt-1 text-micro text-muted-foreground break-all">
+                                    {t('server:settings.connectedTo', { url: getServerUrl() })}
+                                </p>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="mt-4"
+                                    onClick={() => { void clearServerUrl().then(() => window.location.reload()); }}
+                                >
+                                    <Server className="mr-2 h-4 w-4" />
+                                    {t('server:settings.change')}
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Kiosk display */}
             <Card>

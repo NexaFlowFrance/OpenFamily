@@ -44,7 +44,9 @@ lerna-debug.log*
 postgres-data/
 
 # Mobile
-android/
+# client/android/ IS committed on purpose — F-Droid builds the app from source.
+# Build artifacts inside it (build/, .gradle/, local.properties…) are excluded by
+# Capacitor's generated client/android/.gitignore.
 ios/
 .capacitor/
 

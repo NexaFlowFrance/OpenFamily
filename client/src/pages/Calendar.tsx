@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
-import { api, API_BASE_URL } from '../lib/api';
+import { api } from '../lib/api';
+import { apiBase } from '../lib/serverConfig';
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
@@ -122,9 +123,9 @@ const Calendar: React.FC = () => {
         }
     };
 
-    // In same-origin production builds API_BASE_URL is '' — fall back to the page
+    // In same-origin production builds apiBase() is '' — fall back to the page
     // origin so the subscription URL is absolute (and webcal:// rewriting works).
-    const feedBaseUrl = API_BASE_URL || window.location.origin;
+    const feedBaseUrl = apiBase() || window.location.origin;
     const feedUrl = feedToken ? `${feedBaseUrl}/api/calendar/${feedToken}/openfamily.ics` : '';
     const feedWebcalUrl = feedUrl.replace(/^https?:\/\//, 'webcal://');
 

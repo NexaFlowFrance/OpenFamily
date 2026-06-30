@@ -89,9 +89,19 @@ const spaContentSecurityPolicy = {
 app.use(helmet({
     contentSecurityPolicy: process.env.SERVE_CLIENT_DIR ? spaContentSecurityPolicy : undefined,
 }));
+// The native (Capacitor) app loads from a fixed local shell origin and
+// authenticates with a Bearer token (no cookies), so these are always allowed in
+// addition to the configured web origins — the mobile app can then reach any
+// server without the user having to touch CORS_ORIGINS.
+const APP_SHELL_ORIGINS = ['http://localhost', 'https://localhost', 'capacitor://localhost'];
+const corsOrigins = [
+    ...(process.env.CORS_ORIGINS?.split(',').map((o) => o.trim()).filter(Boolean)
+        || ['http://localhost:5173', 'http://localhost:3000']),
+    ...APP_SHELL_ORIGINS,
+];
 app.use(cors({
-    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'],
-    credentials: true
+    origin: corsOrigins,
+    credentials: true,
 }));
 
 app.use(express.json({ limit: '1mb' }));

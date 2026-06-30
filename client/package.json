@@ -5,9 +5,18 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview"
+        "build:native": "tsc && vite build --mode native",
+        "preview": "vite preview",
+        "android:add": "cap add android",
+        "cap:sync": "npm run build:native && cap sync android",
+        "android:open": "cap open android",
+        "android:run": "npm run build:native && cap sync android && cap run android"
     },
     "dependencies": {
+        "@capacitor/android": "^8.4.1",
+        "@capacitor/app": "^8.1.0",
+        "@capacitor/core": "^8.4.1",
+        "@capacitor/preferences": "^8.0.1",
         "@hookform/resolvers": "^3.3.4",
         "@radix-ui/react-dialog": "^1.0.5",
         "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -35,6 +44,7 @@
         "zod": "^3.22.4"
     },
     "devDependencies": {
+        "@capacitor/cli": "^8.4.1",
         "@types/react": "^18.2.47",
         "@types/react-dom": "^18.2.18",
         "@vitejs/plugin-react": "^4.2.1",

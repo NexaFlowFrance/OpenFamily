@@ -1,0 +1,82 @@
+name: Android APK
+
+# Builds the Capacitor Android app and attaches the APK to the GitHub Release.
+# The app is a thin client: at first launch it asks for the user's own
+# self-hosted server URL (see client/src/pages/ServerSetup.tsx).
+#
+# This produces a DEBUG-signed APK (installable by sideloading / suitable for
+# GitHub Releases and testing). For a Play Store upload you'd add a release
+# keystore (see docs/MOBILE.md). F-Droid builds & signs from source itself
+# (see docs/FDROID.md).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build OpenFamily.apk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm run install:all
+
+      - name: Build shared
+        run: npm run build:shared
+
+      - name: Build web assets (native mode)
+        working-directory: client
+        run: npm run build:native
+
+      - name: Add / sync Android platform
+        working-directory: client
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          else
+            npx cap sync android
+          fi
+
+      - name: Build debug APK
+        working-directory: client/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: |
+          mkdir -p dist/android
+          cp client/android/app/build/outputs/apk/debug/app-debug.apk dist/android/OpenFamily.apk
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenFamily-APK
+          path: dist/android/OpenFamily.apk
+
+      - name: Attach to GitHub Release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/android/OpenFamily.apk

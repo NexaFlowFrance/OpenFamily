@@ -43,6 +43,11 @@ lerna-debug.log*
 *.sqlite
 postgres-data/
 
+# Redundant per-workspace lockfiles — the root package-lock.json is authoritative
+# (Docker uses `npm install`, not these; they only caused duplicate Dependabot scans)
+client/package-lock.json
+server/package-lock.json
+
 # Mobile
 # client/android/ IS committed on purpose so CI and local builds use the same project.
 # Build artifacts inside it (build/, .gradle/, local.properties…) are excluded by

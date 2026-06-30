@@ -62,6 +62,8 @@ export function createSeed(): DemoStore {
             is_owner: true,
             role: 'parent',
             avatar_url: null,
+            // Nothing hidden by default → the demo shows every module.
+            disabled_modules: [],
         },
         familyMembers: [dad, mom, kid1, kid2],
         shopping: [

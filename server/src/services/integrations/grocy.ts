@@ -1,5 +1,11 @@
 import { query } from '../../db';
 import { decryptCredentials } from '../../utils/crypto';
+import { safeFetch } from '../../lib/safeFetch';
+
+// Outbound Grocy calls go through safeFetch: redirects are re-validated on every
+// hop (no SSRF bypass via a 302 to an internal/metadata address) and each request
+// is bounded by a hard timeout.
+const GROCY_TIMEOUT_MS = 15_000;
 
 interface GrocyShoppingItem {
     id: string;
@@ -15,8 +21,9 @@ interface GrocyProduct {
 
 export async function testGrocyConnection(baseUrl: string, apiKey: string): Promise<{ success: boolean; message: string }> {
     try {
-        const resp = await fetch(`${baseUrl}/api/system/info`, {
+        const resp = await safeFetch(`${baseUrl}/api/system/info`, {
             headers: { 'GROCY-API-KEY': apiKey },
+            timeoutMs: GROCY_TIMEOUT_MS,
         });
         if (resp.ok) {
             const data = await resp.json() as { grocy_version?: { Version: string } };
@@ -41,13 +48,13 @@ export async function syncGrocy(
     const headers = { 'GROCY-API-KEY': apiKey, 'Content-Type': 'application/json' };
 
     // Fetch shopping list (undone items only)
-    const resp = await fetch(`${baseUrl}/api/objects/shopping_list?query[]=done=0`, { headers });
+    const resp = await safeFetch(`${baseUrl}/api/objects/shopping_list?query[]=done=0`, { headers, timeoutMs: GROCY_TIMEOUT_MS });
     if (!resp.ok) throw new Error(`Grocy API error: ${resp.status}`);
 
     const items = await resp.json() as GrocyShoppingItem[];
 
     // Fetch all products in one call for efficiency
-    const prodResp = await fetch(`${baseUrl}/api/objects/products`, { headers });
+    const prodResp = await safeFetch(`${baseUrl}/api/objects/products`, { headers, timeoutMs: GROCY_TIMEOUT_MS });
     const productMap = new Map<string, string>();
     if (prodResp.ok) {
         const products = await prodResp.json() as GrocyProduct[];

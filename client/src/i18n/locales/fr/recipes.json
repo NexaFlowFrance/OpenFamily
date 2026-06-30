@@ -14,9 +14,16 @@
     "Moyen": "Moyen",
     "Difficile": "Difficile"
   },
+  "durations": {
+    "under15": "≤ 15 min",
+    "under30": "≤ 30 min",
+    "under60": "≤ 1 h",
+    "over60": "> 1 h"
+  },
   "searchPlaceholder": "Rechercher une recette…",
   "allCategories": "Toutes catégories",
   "allDifficulties": "Toutes difficultés",
+  "anyDuration": "Toute durée",
   "empty": {
     "none": "Aucune recette pour le moment. Créez votre première recette !",
     "noMatch": "Aucune recette ne correspond à votre recherche."

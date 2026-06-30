@@ -1,6 +1,13 @@
 import WebSocket from 'ws';
 import { query } from '../../db';
 import { decryptCredentials } from '../../utils/crypto';
+import { safeFetch } from '../../lib/safeFetch';
+
+// Outbound Home Assistant REST calls go through safeFetch: redirects are re-validated
+// on every hop (no SSRF bypass via a 302 to an internal/metadata address) and each
+// request is bounded by a hard timeout. The live-sync WebSocket below is intentionally
+// left on the native `ws` client and is NOT routed through safeFetch.
+const HA_TIMEOUT_MS = 15_000;
 
 interface HAShoppingItem {
     name: string;
@@ -71,7 +78,7 @@ function getTodoItemsViaWebSocket(baseUrl: string, token: string, entityId: stri
 export async function testHomeAssistantConnection(baseUrl: string, token: string): Promise<{ success: boolean; message: string }> {
     try {
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-        const resp = await fetch(`${baseUrl}/api/`, { headers });
+        const resp = await safeFetch(`${baseUrl}/api/`, { headers, timeoutMs: HA_TIMEOUT_MS });
 
         if (!resp.ok) {
             if (resp.status === 401) return { success: false, message: 'Token invalide ou expiré' };
@@ -79,7 +86,7 @@ export async function testHomeAssistantConnection(baseUrl: string, token: string
         }
 
         // Check which shopping API is available and warn accordingly
-        const slResp = await fetch(`${baseUrl}/api/shopping_list`, { headers });
+        const slResp = await safeFetch(`${baseUrl}/api/shopping_list`, { headers, timeoutMs: HA_TIMEOUT_MS });
         if (slResp.ok) {
             return { success: true, message: 'Connecté a Home Assistant (integration shopping_list détectée)' };
         }
@@ -118,7 +125,7 @@ export async function syncHomeAssistant(
     const entityId = (config.ha_entity_id as string) || 'todo.shopping_list';
 
     // Strategy 1: legacy REST shopping_list endpoint
-    const slResp = await fetch(`${baseUrl}/api/shopping_list`, { headers });
+    const slResp = await safeFetch(`${baseUrl}/api/shopping_list`, { headers, timeoutMs: HA_TIMEOUT_MS });
     if (slResp.ok) {
         const items = await slResp.json() as HAShoppingItem[];
         for (const item of items) {

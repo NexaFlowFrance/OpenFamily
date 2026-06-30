@@ -30,7 +30,7 @@ interface Appointment {
 
 const Dashboard: React.FC = () => {
     const { t } = useTranslation(['dashboard', 'common']);
-    const { user } = useAuth();
+    const { user, isModuleEnabled } = useAuth();
     const currency = user?.currency || 'EUR';
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
@@ -293,10 +293,12 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Mots de la famille — post-its sur le frigo numérique */}
-            <section>
-                <h2 className="font-serif text-h2 mb-4">{t('notes:title')}</h2>
-                <FamilyNotes notes={notes} onChanged={() => void loadNotes()} />
-            </section>
+            {isModuleEnabled('notes') && (
+                <section>
+                    <h2 className="font-serif text-h2 mb-4">{t('notes:title')}</h2>
+                    <FamilyNotes notes={notes} onChanged={() => void loadNotes()} />
+                </section>
+            )}
         </div>
     );
 };

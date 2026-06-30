@@ -44,6 +44,22 @@ const authRateLimiter = rateLimit({
     }
 });
 
+// Separate, looser limiter for endpoints that trigger OUTBOUND requests (AI
+// providers, recipe import, integration test/sync). These can each fan out to a
+// user-supplied host, so they get rate-limited to blunt abuse / SSRF probing,
+// but the cap stays high enough that normal family use and the CI smoke test
+// (which does not hammer these routes) are unaffected. Keyed by IP (default).
+const outboundRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: 'Too many requests. Please try again later.'
+    }
+});
+
 // Middleware
 // When the Express server also serves the built client (native Windows install),
 // apply an explicit CSP tailored to the SPA instead of helmet's default (which is
@@ -57,7 +73,9 @@ const spaContentSecurityPolicy = {
         'script-src': ["'self'"],
         'style-src': ["'self'", "'unsafe-inline'"],
         'img-src': ["'self'", 'data:', 'blob:', 'https:'],
-        'connect-src': ["'self'", 'ws:', 'wss:'],
+        // 'self' + WebSocket for the app's own API; the two Open-Meteo hosts are
+        // the Kiosk weather widget's direct browser fetches (no broad https:).
+        'connect-src': ["'self'", 'ws:', 'wss:', 'https://api.open-meteo.com', 'https://geocoding-api.open-meteo.com'],
         'font-src': ["'self'", 'data:'],
         'worker-src': ["'self'"],
         'manifest-src': ["'self'"],
@@ -104,6 +122,10 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth/login', authRateLimiter);
 app.use('/api/auth/register', authRateLimiter);
+// Outbound-triggering routes: looser limiter applied to the whole path prefix.
+app.use('/api/ai', outboundRateLimiter);
+app.use('/api/recipes/import-url', outboundRateLimiter);
+app.use('/api/integrations', outboundRateLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', userSettingsRoutes);
 app.use('/api/shopping', shoppingRoutes);

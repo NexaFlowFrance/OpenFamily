@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './contexts/AuthContext';
@@ -19,9 +20,14 @@ import Join from './pages/Join';
 import Integrations from './pages/Integrations';
 
 function App() {
-    const { isAuthenticated, loading } = useAuth();
+    const { isAuthenticated, loading, isModuleEnabled } = useAuth();
     const { t } = useTranslation('common');
     const location = useLocation();
+
+    // For an optional module: render its element only when enabled, otherwise
+    // redirect to the dashboard so a bookmarked/typed URL never shows a hidden page.
+    const moduleRoute = (key: string, element: ReactElement) =>
+        isModuleEnabled(key) ? element : <Navigate to="/" replace />;
 
     if (loading) {
         return (
@@ -40,7 +46,7 @@ function App() {
 
     // Kiosk is a full-screen, chrome-less display — render it outside the Layout.
     if (location.pathname === '/kiosk') {
-        return <Kiosk />;
+        return isModuleEnabled('kiosk') ? <Kiosk /> : <Navigate to="/" replace />;
     }
 
     return (
@@ -49,15 +55,15 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/shopping" element={<ShoppingList />} />
                 <Route path="/tasks" element={<Tasks />} />
-                <Route path="/rewards" element={<Rewards />} />
+                <Route path="/rewards" element={moduleRoute('rewards', <Rewards />)} />
                 <Route path="/calendar" element={<Calendar />} />
-                <Route path="/planning" element={<Planning />} />
-                <Route path="/recipes" element={<Recipes />} />
-                <Route path="/meal-planning" element={<MealPlanning />} />
-                <Route path="/budget" element={<Budget />} />
+                <Route path="/planning" element={moduleRoute('planning', <Planning />)} />
+                <Route path="/recipes" element={moduleRoute('recipes', <Recipes />)} />
+                <Route path="/meal-planning" element={moduleRoute('meals', <MealPlanning />)} />
+                <Route path="/budget" element={moduleRoute('budget', <Budget />)} />
                 <Route path="/family" element={<Family />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/integrations" element={<Integrations />} />
+                <Route path="/integrations" element={moduleRoute('integrations', <Integrations />)} />
                 <Route path="/join" element={<Join />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

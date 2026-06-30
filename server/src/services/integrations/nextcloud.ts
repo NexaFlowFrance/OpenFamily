@@ -1,5 +1,11 @@
 import { query } from '../../db';
 import { decryptCredentials } from '../../utils/crypto';
+import { safeFetch } from '../../lib/safeFetch';
+
+// Outbound Nextcloud/CalDAV calls go through safeFetch: redirects are re-validated
+// on every hop (no SSRF bypass via a 302 to an internal/metadata address) and each
+// request is bounded by a hard timeout.
+const NEXTCLOUD_TIMEOUT_MS = 15_000;
 
 interface CalDAVEvent {
     uid: string;
@@ -65,10 +71,11 @@ function parseICS(rawData: string): CalDAVEvent[] {
 async function discoverCalendars(baseUrl: string, username: string, authHeader: string): Promise<string[]> {
     const root = `${baseUrl}/remote.php/dav/calendars/${encodeURIComponent(username)}/`;
     try {
-        const resp = await fetch(root, {
+        const resp = await safeFetch(root, {
             method: 'PROPFIND',
             headers: { 'Authorization': authHeader, 'Depth': '1', 'Content-Type': 'application/xml' },
             body: `<?xml version="1.0"?><D:propfind xmlns:D="DAV:"><D:prop><D:resourcetype/></D:prop></D:propfind>`,
+            timeoutMs: NEXTCLOUD_TIMEOUT_MS,
         });
         if (!resp.ok) return [];
         const xml = await resp.text();
@@ -88,14 +95,15 @@ async function discoverCalendars(baseUrl: string, username: string, authHeader: 
 
 export async function testNextcloudConnection(baseUrl: string, username: string, password: string): Promise<{ success: boolean; message: string }> {
     try {
-        const statusResp = await fetch(`${baseUrl}/status.php`);
+        const statusResp = await safeFetch(`${baseUrl}/status.php`, { timeoutMs: NEXTCLOUD_TIMEOUT_MS });
         if (!statusResp.ok) return { success: false, message: `Serveur inaccessible (HTTP ${statusResp.status})` };
         const status = await statusResp.json() as { versionstring?: string; version?: string };
 
         const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-        const davResp = await fetch(`${baseUrl}/remote.php/dav/calendars/${encodeURIComponent(username)}/`, {
+        const davResp = await safeFetch(`${baseUrl}/remote.php/dav/calendars/${encodeURIComponent(username)}/`, {
             method: 'PROPFIND',
             headers: { 'Authorization': authHeader, 'Depth': '0', 'Content-Type': 'application/xml' },
+            timeoutMs: NEXTCLOUD_TIMEOUT_MS,
         });
 
         if (davResp.status === 401) return { success: false, message: 'Identifiants incorrects. Si la double authentification est activée, utilisez un App Password.' };
@@ -153,10 +161,11 @@ export async function syncNextcloud(
     for (const href of calendarHrefs) {
         const calUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
         try {
-            const resp = await fetch(calUrl, {
+            const resp = await safeFetch(calUrl, {
                 method: 'REPORT',
                 headers: { 'Authorization': authHeader, 'Depth': '1', 'Content-Type': 'application/xml' },
                 body: reportBody,
+                timeoutMs: NEXTCLOUD_TIMEOUT_MS,
             });
             if (!resp.ok && resp.status !== 207) continue;
 

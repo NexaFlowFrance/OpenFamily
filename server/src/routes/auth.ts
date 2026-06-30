@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { query } from '../db';
 import { authMiddleware, AuthRequest, generateToken } from '../middleware/auth';
 import { normalizeEmail } from '../lib/normalize';
+import { parseDisabledModules } from './userSettings';
 
 const router = Router();
 
@@ -17,7 +18,11 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
 
-        return res.json({ success: true, data: { user: result.rows[0] } });
+        // disabled_modules is family-wide: always read it from the owner's row.
+        const ownerModules = await query('SELECT disabled_modules FROM users WHERE id = $1', [req.userId]);
+        const disabled_modules = parseDisabledModules(ownerModules.rows[0]?.disabled_modules);
+
+        return res.json({ success: true, data: { user: { ...result.rows[0], disabled_modules } } });
     } catch (error) {
         console.error('Get current user error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
@@ -99,7 +104,15 @@ router.post('/register', async (req, res) => {
         const token = generateToken(user.id, ownerId);
         const isOwner = ownerId === user.id;
 
-        res.json({ success: true, data: { user: { ...user, is_owner: isOwner, role: user.role, currency: user.currency || 'EUR' }, token } });
+        // disabled_modules is family-wide: a brand-new owner has none; an invited
+        // member inherits the owner's current setting.
+        let disabled_modules: string[] = [];
+        if (!isOwner) {
+            const ownerModules = await query('SELECT disabled_modules FROM users WHERE id = $1', [ownerId]);
+            disabled_modules = parseDisabledModules(ownerModules.rows[0]?.disabled_modules);
+        }
+
+        res.json({ success: true, data: { user: { ...user, is_owner: isOwner, role: user.role, currency: user.currency || 'EUR', disabled_modules }, token } });
     } catch (error) {
         console.error('Register error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -136,10 +149,15 @@ router.post('/login', async (req, res) => {
         const token = generateToken(user.id, ownerId);
         const isOwner = !user.family_owner_id;
 
+        // disabled_modules is family-wide: read it from the owner's row (own row if owner).
+        const disabled_modules = isOwner
+            ? parseDisabledModules(user.disabled_modules)
+            : parseDisabledModules((await query('SELECT disabled_modules FROM users WHERE id = $1', [ownerId])).rows[0]?.disabled_modules);
+
         res.json({
             success: true,
             data: {
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', avatar_url: user.avatar_url ?? null },
+                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', avatar_url: user.avatar_url ?? null, disabled_modules },
                 token
             }
         });
@@ -153,7 +171,7 @@ router.post('/login', async (req, res) => {
 router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const result = await query(
-            'SELECT id, email, name, role, currency, language, avatar_url, family_owner_id FROM users WHERE id = $1',
+            'SELECT id, email, name, role, currency, language, avatar_url, disabled_modules, family_owner_id FROM users WHERE id = $1',
             [req.actualUserId]
         );
         if (result.rows.length === 0) {
@@ -165,11 +183,16 @@ router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
         const token = generateToken(user.id, ownerId);
         const isOwner = !user.family_owner_id;
 
+        // disabled_modules is family-wide: read it from the owner's row (own row if owner).
+        const disabled_modules = isOwner
+            ? parseDisabledModules(user.disabled_modules)
+            : parseDisabledModules((await query('SELECT disabled_modules FROM users WHERE id = $1', [ownerId])).rows[0]?.disabled_modules);
+
         return res.json({
             success: true,
             data: {
                 token,
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', avatar_url: user.avatar_url ?? null },
+                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', avatar_url: user.avatar_url ?? null, disabled_modules },
             },
         });
     } catch (error) {

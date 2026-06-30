@@ -14,6 +14,7 @@ import {
 import { format } from 'date-fns';
 import { api } from '../../lib/api';
 import { useAiEnabled } from '../../lib/aiStatus';
+import { useAuth } from '../../contexts/AuthContext';
 import { dateLocale } from '../../i18n/format';
 import { Button, Dialog, Textarea, useToast } from '../ui';
 
@@ -203,6 +204,7 @@ const ProposalCard: React.FC<{
 export const MagicInputButton: React.FC = () => {
     const { t } = useTranslation(['ai', 'common']);
     const aiEnabled = useAiEnabled();
+    const { isModuleEnabled } = useAuth();
     const { showToast } = useToast();
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
@@ -242,7 +244,7 @@ export const MagicInputButton: React.FC = () => {
         [t]
     );
 
-    if (!aiEnabled) return null;
+    if (!aiEnabled || !isModuleEnabled('ai')) return null;
 
     const handleParse = async () => {
         if (!text.trim()) return;

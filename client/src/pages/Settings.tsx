@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
-import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles } from 'lucide-react';
+import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid } from 'lucide-react';
 import { Card, CardContent, Button, Input, Select } from '../components/ui';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useNotifications } from '../hooks/useNotifications';
@@ -323,6 +323,103 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                                 )}
                             </div>
                         )}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
+// The optional modules a family can hide, mirroring TOGGLEABLE_MODULES on the
+// server. `labelKey` reuses an existing nav label where one exists, otherwise a
+// dedicated settings label (for modules without a nav entry).
+const MODULE_DEFINITIONS: { key: string; labelKey: string; descKey: string }[] = [
+    { key: 'budget', labelKey: 'nav:items.budget', descKey: 'settings:modules.descriptions.budget' },
+    { key: 'rewards', labelKey: 'nav:items.rewards', descKey: 'settings:modules.descriptions.rewards' },
+    { key: 'meals', labelKey: 'nav:items.meals', descKey: 'settings:modules.descriptions.meals' },
+    { key: 'recipes', labelKey: 'nav:items.recipes', descKey: 'settings:modules.descriptions.recipes' },
+    { key: 'planning', labelKey: 'nav:items.planning', descKey: 'settings:modules.descriptions.planning' },
+    { key: 'integrations', labelKey: 'nav:items.integrations', descKey: 'settings:modules.descriptions.integrations' },
+    { key: 'kiosk', labelKey: 'settings:modules.names.kiosk', descKey: 'settings:modules.descriptions.kiosk' },
+    { key: 'notes', labelKey: 'settings:modules.names.notes', descKey: 'settings:modules.descriptions.notes' },
+    { key: 'ai', labelKey: 'settings:modules.names.ai', descKey: 'settings:modules.descriptions.ai' },
+];
+
+// "Modules" card — visible to everyone, editable by parents only.
+// Lets a family hide optional modules they don't use. The setting is family-wide.
+const ModulesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
+    const { t } = useTranslation(['settings', 'nav']);
+    const { disabledModules, updateDisabledModules } = useAuth();
+    const [saving, setSaving] = useState<string | null>(null);
+    const [error, setError] = useState('');
+
+    const toggleModule = async (key: string, enabled: boolean) => {
+        // enabled === true means the module should be ON → remove it from disabled.
+        const next = enabled
+            ? disabledModules.filter((m) => m !== key)
+            : Array.from(new Set([...disabledModules, key]));
+        setSaving(key);
+        setError('');
+        try {
+            await updateDisabledModules(next);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : t('settings:modules.error'));
+        } finally {
+            setSaving(null);
+        }
+    };
+
+    return (
+        <Card>
+            <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                        <LayoutGrid className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-caption font-semibold text-foreground">{t('settings:modules.title')}</h3>
+                        <p className="mt-1 text-micro text-muted-foreground">{t('settings:modules.subtitle')}</p>
+
+                        {!isParent && (
+                            <p className="mt-3 flex items-center gap-1 text-micro text-muted-foreground">
+                                <AlertCircle className="h-4 w-4 shrink-0" />
+                                {t('settings:modules.parentOnly')}
+                            </p>
+                        )}
+
+                        {error && (
+                            <p className="mt-3 flex items-center gap-1 text-micro text-destructive">
+                                <AlertCircle className="h-4 w-4 shrink-0" />
+                                {error}
+                            </p>
+                        )}
+
+                        <div className="mt-4 space-y-2">
+                            {MODULE_DEFINITIONS.map((mod) => {
+                                const enabled = !disabledModules.includes(mod.key);
+                                return (
+                                    <label
+                                        key={mod.key}
+                                        className={`flex items-start gap-3 rounded-input border border-border bg-card px-3 py-2.5 ${
+                                            isParent ? 'cursor-pointer hover:bg-surface-2' : 'opacity-80'
+                                        }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={enabled}
+                                            disabled={!isParent || saving !== null}
+                                            onChange={(e) => void toggleModule(mod.key, e.target.checked)}
+                                            className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                        />
+                                        <span className="flex-1">
+                                            <span className="block text-caption font-medium text-foreground">{t(mod.labelKey)}</span>
+                                            <span className="block text-micro text-muted-foreground">{t(mod.descKey)}</span>
+                                        </span>
+                                        {saving === mod.key && <Loader2 className="mt-0.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                                    </label>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </CardContent>
@@ -714,6 +811,9 @@ const Settings: React.FC = () => {
 
             {/* AI assistant */}
             <AiAssistantCard isParent={isParent} />
+
+            {/* Optional modules */}
+            <ModulesCard isParent={isParent} />
 
             {/* Export */}
             <Card>

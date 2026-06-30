@@ -11,6 +11,8 @@ interface User {
     currency?: string;
     avatar_url?: string | null;
     language?: string;
+    /** Family-wide list of optional modules the family has hidden. */
+    disabled_modules?: string[];
 }
 
 interface AuthContextType {
@@ -25,6 +27,12 @@ interface AuthContextType {
     isAuthenticated: boolean;
     updateCurrency: (currency: string) => Promise<void>;
     updateProfile: (data: { name?: string; avatar_url?: string | null }) => Promise<void>;
+    /** Family-wide list of hidden optional modules (empty when nothing is hidden). */
+    disabledModules: string[];
+    /** True when a module is not hidden by the family. Always-on modules are always enabled. */
+    isModuleEnabled: (key: string) => boolean;
+    /** Persist the family's hidden-modules list (parents only) and update the context. */
+    updateDisabledModules: (modules: string[]) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -160,6 +168,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
+    const disabledModules = user?.disabled_modules ?? [];
+
+    const isModuleEnabled = (key: string) => !disabledModules.includes(key);
+
+    const updateDisabledModules = async (modules: string[]) => {
+        const response = await api.put<{ success: boolean; data: { disabled_modules: string[] } }>(
+            '/api/auth/modules',
+            { disabled_modules: modules }
+        );
+        if (response.success && response.data) {
+            setUser((prev) => {
+                if (!prev) return prev;
+                const next = { ...prev, disabled_modules: response.data.disabled_modules };
+                localStorage.setItem('user', JSON.stringify(next));
+                return next;
+            });
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -174,6 +201,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 isAuthenticated: !!user,
                 updateCurrency,
                 updateProfile,
+                disabledModules,
+                isModuleEnabled,
+                updateDisabledModules,
             }}
         >
             {children}

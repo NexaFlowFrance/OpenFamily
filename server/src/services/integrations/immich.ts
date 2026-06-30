@@ -1,4 +1,5 @@
 import { decryptCredentials } from '../../utils/crypto';
+import { safeFetch, readCappedBuffer } from '../../lib/safeFetch';
 
 interface ImmichStats {
     photos: number;
@@ -6,10 +7,19 @@ interface ImmichStats {
     usage: number;
 }
 
+// Outbound Immich calls go through safeFetch: redirects are re-validated on every
+// hop (no SSRF bypass via a 302 to an internal/metadata address) and the request
+// is bounded by a hard timeout.
+const IMMICH_TIMEOUT_MS = 15_000;
+// Cap on the proxied image so a hostile/misconfigured upstream cannot stream
+// unbounded data into the server's memory.
+const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
+
 export async function testImmichConnection(baseUrl: string, apiKey: string): Promise<{ success: boolean; message: string; stats?: ImmichStats }> {
     try {
-        const resp = await fetch(`${baseUrl}/api/server/version`, {
+        const resp = await safeFetch(`${baseUrl}/api/server/version`, {
             headers: { 'x-api-key': apiKey },
+            timeoutMs: IMMICH_TIMEOUT_MS,
         });
         if (!resp.ok) {
             if (resp.status === 401) return { success: false, message: 'Cle API incorrecte' };
@@ -19,8 +29,9 @@ export async function testImmichConnection(baseUrl: string, apiKey: string): Pro
         const vstr = version.major != null ? `${version.major}.${version.minor}.${version.patch}` : '';
 
         // Fetch stats
-        const statsResp = await fetch(`${baseUrl}/api/server/statistics`, {
+        const statsResp = await safeFetch(`${baseUrl}/api/server/statistics`, {
             headers: { 'x-api-key': apiKey },
+            timeoutMs: IMMICH_TIMEOUT_MS,
         });
         if (statsResp.ok) {
             const stats = await statsResp.json() as { photos?: number; videos?: number; usage?: number };
@@ -55,10 +66,11 @@ export async function fetchImmichRandomPhoto(
     const apiKey = creds.apiKey;
     if (!apiKey) throw new Error('Cle API manquante');
 
-    const randomResp = await fetch(`${baseUrl}/api/search/random`, {
+    const randomResp = await safeFetch(`${baseUrl}/api/search/random`, {
         method: 'POST',
         headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
         body: JSON.stringify({ size: 1, type: 'IMAGE' }),
+        timeoutMs: IMMICH_TIMEOUT_MS,
     });
     if (!randomResp.ok) throw new Error(`Immich API error: ${randomResp.status}`);
 
@@ -66,13 +78,15 @@ export async function fetchImmichRandomPhoto(
     const assetId = Array.isArray(assets) && assets.length > 0 ? assets[0]?.id : undefined;
     if (!assetId) throw new Error('Aucune photo disponible');
 
-    const thumbResp = await fetch(`${baseUrl}/api/assets/${assetId}/thumbnail?size=preview`, {
+    const thumbResp = await safeFetch(`${baseUrl}/api/assets/${assetId}/thumbnail?size=preview`, {
         headers: { 'x-api-key': apiKey },
+        timeoutMs: IMMICH_TIMEOUT_MS,
     });
     if (!thumbResp.ok) throw new Error(`Immich API error: ${thumbResp.status}`);
 
     const contentType = thumbResp.headers.get('content-type') || 'image/jpeg';
-    const buffer = Buffer.from(await thumbResp.arrayBuffer());
+    // Cap the proxied image so an oversized/hostile upstream can't exhaust memory.
+    const buffer = await readCappedBuffer(thumbResp, MAX_IMAGE_BYTES);
     return { buffer, contentType };
 }
 
@@ -86,8 +100,9 @@ export async function syncImmich(
     const apiKey = creds.apiKey;
     if (!apiKey) throw new Error('Cle API manquante');
 
-    const statsResp = await fetch(`${baseUrl}/api/server/statistics`, {
+    const statsResp = await safeFetch(`${baseUrl}/api/server/statistics`, {
         headers: { 'x-api-key': apiKey },
+        timeoutMs: IMMICH_TIMEOUT_MS,
     });
     if (!statsResp.ok) throw new Error(`Immich API error: ${statsResp.status}`);
 

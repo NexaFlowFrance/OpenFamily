@@ -1,5 +1,11 @@
 import { query } from '../../db';
 import { decryptCredentials } from '../../utils/crypto';
+import { safeFetch } from '../../lib/safeFetch';
+
+// Outbound Tandoor calls go through safeFetch: redirects are re-validated on every
+// hop (no SSRF bypass via a 302 to an internal/metadata address) and each request
+// is bounded by a hard timeout.
+const TANDOOR_TIMEOUT_MS = 15_000;
 
 interface TandoorRecipe {
     id: number;
@@ -23,8 +29,9 @@ interface TandoorRecipe {
 
 export async function testTandoorConnection(baseUrl: string, apiKey: string): Promise<{ success: boolean; message: string }> {
     try {
-        const resp = await fetch(`${baseUrl}/api/user-preferences/`, {
+        const resp = await safeFetch(`${baseUrl}/api/user-preferences/`, {
             headers: { 'Authorization': `Token ${apiKey}` },
+            timeoutMs: TANDOOR_TIMEOUT_MS,
         });
         if (resp.ok) return { success: true, message: 'Connecté a Tandoor' };
         if (resp.status === 401 || resp.status === 403) return { success: false, message: 'Token API incorrect' };
@@ -51,7 +58,7 @@ export async function syncTandoor(
     let page = 1;
 
     while (true) {
-        const resp = await fetch(`${baseUrl}/api/recipe/?format=json&page=${page}&page_size=50`, { headers });
+        const resp = await safeFetch(`${baseUrl}/api/recipe/?format=json&page=${page}&page_size=50`, { headers, timeoutMs: TANDOOR_TIMEOUT_MS });
         if (!resp.ok) throw new Error(`Tandoor API error ${resp.status}`);
 
         const data = await resp.json() as { results: TandoorRecipe[]; next?: string };

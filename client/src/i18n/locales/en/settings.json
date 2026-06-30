@@ -26,6 +26,28 @@
     "title": "Currency",
     "subtitle": "Select the currency used to display amounts in your app."
   },
+  "modules": {
+    "title": "Modules",
+    "subtitle": "Enable or hide optional modules to keep only the ones your family uses.",
+    "parentOnly": "Only parents can change the modules.",
+    "error": "Error while updating the modules.",
+    "names": {
+      "kiosk": "Kiosk mode",
+      "notes": "Dashboard notes",
+      "ai": "AI assistant"
+    },
+    "descriptions": {
+      "budget": "Family budget tracking, expenses and income.",
+      "rewards": "Children's pocket money and rewards.",
+      "meals": "Weekly meal planning.",
+      "recipes": "The family's recipe book.",
+      "planning": "Weekly schedules (work, school, activities).",
+      "integrations": "Connections to third-party services (Mealie, Home Assistant…).",
+      "kiosk": "Full-screen display for a shared home screen.",
+      "notes": "Sticky notes shown on the dashboard.",
+      "ai": "Smart assistant to quickly capture and organize."
+    }
+  },
   "export": {
     "title": "Export data",
     "subtitle": "Download all your data (budget, tasks, recipes, members, shopping, appointments, planning, meals) as a JSON file.",

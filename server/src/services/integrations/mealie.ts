@@ -1,5 +1,11 @@
 import { query } from '../../db';
 import { decryptCredentials } from '../../utils/crypto';
+import { safeFetch } from '../../lib/safeFetch';
+
+// Outbound Mealie calls go through safeFetch: redirects are re-validated on every
+// hop (no SSRF bypass via a 302 to an internal/metadata address) and each request
+// is bounded by a hard timeout.
+const MEALIE_TIMEOUT_MS = 15_000;
 
 interface MealieRecipe {
     slug: string;
@@ -39,8 +45,9 @@ function parseDuration(s?: string): number | null {
 
 export async function testMealieConnection(baseUrl: string, apiKey: string): Promise<{ success: boolean; message: string }> {
     try {
-        const resp = await fetch(`${baseUrl}/api/app/about`, {
+        const resp = await safeFetch(`${baseUrl}/api/app/about`, {
             headers: { 'Authorization': `Bearer ${apiKey}` },
+            timeoutMs: MEALIE_TIMEOUT_MS,
         });
         if (resp.ok) {
             const data = await resp.json() as { version?: string };
@@ -70,7 +77,7 @@ export async function syncMealie(
     let errors = 0;
 
     while (true) {
-        const resp = await fetch(`${baseUrl}/api/recipes?page=${page}&perPage=50`, { headers });
+        const resp = await safeFetch(`${baseUrl}/api/recipes?page=${page}&perPage=50`, { headers, timeoutMs: MEALIE_TIMEOUT_MS });
         if (!resp.ok) throw new Error(`Mealie API error ${resp.status}`);
 
         const data = await resp.json() as MealieListResponse;

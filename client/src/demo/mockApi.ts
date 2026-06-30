@@ -235,6 +235,15 @@ async function route(method: string, path: string, q: Record<string, string>, bo
         return ok({ user: store.user });
     }
     if (path === '/api/auth/profile') { store.user = { ...store.user, ...body }; return ok({ user: store.user }); }
+    if (path === '/api/auth/modules') {
+        if (method === 'PUT') {
+            const list = Array.isArray(body.disabled_modules) ? (body.disabled_modules as string[]) : [];
+            const cleaned = Array.from(new Set(list));
+            store.user = { ...store.user, disabled_modules: cleaned };
+            return ok({ disabled_modules: cleaned });
+        }
+        return ok({ disabled_modules: (store.user.disabled_modules as string[]) ?? [] });
+    }
 
     // ── Dashboard ───────────────────────────────────────────────────────────
     if (path === '/api/dashboard') return ok(dashboard());

@@ -48,6 +48,12 @@ const Recipes: React.FC = () => {
         { value: 'Moyen', label: t('recipes:difficulties.Moyen') },
         { value: 'Difficile', label: t('recipes:difficulties.Difficile') },
     ];
+    const DURATIONS = [
+        { value: 'under15', label: t('recipes:durations.under15') },
+        { value: 'under30', label: t('recipes:durations.under30') },
+        { value: 'under60', label: t('recipes:durations.under60') },
+        { value: 'over60', label: t('recipes:durations.over60') },
+    ];
     const categoryLabel = (v: string) => t(`recipes:categories.${v}`, { defaultValue: v });
     const difficultyLabel = (v?: string) => (v ? t(`recipes:difficulties.${v}`, { defaultValue: v }) : '');
     const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -59,6 +65,7 @@ const Recipes: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterCategory, setFilterCategory] = useState('');
     const [filterDifficulty, setFilterDifficulty] = useState('');
+    const [filterDuration, setFilterDuration] = useState('');
     const [error, setError] = useState('');
     const [importDialogOpen, setImportDialogOpen] = useState(false);
     const [importUrl, setImportUrl] = useState('');
@@ -235,6 +242,16 @@ const Recipes: React.FC = () => {
         }
         if (filterCategory && recipe.category !== filterCategory) return false;
         if (filterDifficulty && recipe.difficulty !== filterDifficulty) return false;
+        if (filterDuration) {
+            // Total time = prep + cook (minutes). Recipes with no time data (total 0)
+            // only ever appear under "All", never in a bounded bucket.
+            const total = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+            if (total <= 0) return false;
+            if (filterDuration === 'under15' && total > 15) return false;
+            if (filterDuration === 'under30' && total > 30) return false;
+            if (filterDuration === 'under60' && total > 60) return false;
+            if (filterDuration === 'over60' && total <= 60) return false;
+        }
         return true;
     });
 
@@ -304,7 +321,7 @@ const Recipes: React.FC = () => {
             {/* Filters */}
             <Card>
                 <CardContent className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
@@ -323,6 +340,11 @@ const Recipes: React.FC = () => {
                             value={filterDifficulty}
                             onValueChange={setFilterDifficulty}
                             options={[{ value: '', label: t('recipes:allDifficulties') }, ...DIFFICULTIES]}
+                        />
+                        <Select
+                            value={filterDuration}
+                            onValueChange={setFilterDuration}
+                            options={[{ value: '', label: t('recipes:anyDuration') }, ...DURATIONS]}
                         />
                     </div>
                 </CardContent>

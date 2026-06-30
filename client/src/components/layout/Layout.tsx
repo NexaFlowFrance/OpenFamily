@@ -34,37 +34,39 @@ interface LayoutProps {
     children: ReactNode;
 }
 
-const navigation = [
+// `module` ties a nav entry to an optional module key (see TOGGLEABLE_MODULES on
+// the server). Entries without a `module` are always-on and can never be hidden.
+const navigation: { labelKey: string; href: string; icon: typeof Home; module?: string }[] = [
     { labelKey: 'items.today', href: '/', icon: Home },
     { labelKey: 'items.shopping', href: '/shopping', icon: ShoppingCart },
     { labelKey: 'items.tasks', href: '/tasks', icon: CheckSquare },
-    { labelKey: 'items.rewards', href: '/rewards', icon: PiggyBank },
+    { labelKey: 'items.rewards', href: '/rewards', icon: PiggyBank, module: 'rewards' },
     { labelKey: 'items.calendar', href: '/calendar', icon: CalendarIcon },
-    { labelKey: 'items.planning', href: '/planning', icon: CalendarDays },
-    { labelKey: 'items.recipes', href: '/recipes', icon: ChefHat },
-    { labelKey: 'items.meals', href: '/meal-planning', icon: UtensilsCrossed },
-    { labelKey: 'items.budget', href: '/budget', icon: Wallet },
+    { labelKey: 'items.planning', href: '/planning', icon: CalendarDays, module: 'planning' },
+    { labelKey: 'items.recipes', href: '/recipes', icon: ChefHat, module: 'recipes' },
+    { labelKey: 'items.meals', href: '/meal-planning', icon: UtensilsCrossed, module: 'meals' },
+    { labelKey: 'items.budget', href: '/budget', icon: Wallet, module: 'budget' },
     { labelKey: 'items.family', href: '/family', icon: Users },
-    { labelKey: 'items.integrations', href: '/integrations', icon: Plug },
+    { labelKey: 'items.integrations', href: '/integrations', icon: Plug, module: 'integrations' },
     { labelKey: 'items.settings', href: '/settings', icon: Settings },
 ];
 
-const mobileTabs = [
+const mobileTabs: { labelKey: string; href: string; icon: typeof Home; module?: string }[] = [
     { labelKey: 'mobile.home', href: '/', icon: Home },
-    { labelKey: 'mobile.planning', href: '/planning', icon: CalendarDays },
+    { labelKey: 'mobile.planning', href: '/planning', icon: CalendarDays, module: 'planning' },
     { labelKey: 'mobile.lists', href: '/shopping', icon: ShoppingCart },
-    { labelKey: 'mobile.budget', href: '/budget', icon: Wallet },
+    { labelKey: 'mobile.budget', href: '/budget', icon: Wallet, module: 'budget' },
     { labelKey: 'mobile.family', href: '/family', icon: Users },
 ];
 
-const quickActions = [
+const quickActions: { labelKey: string; href: string; icon: typeof Home; module?: string }[] = [
     { labelKey: 'quickActions.addShopping', href: '/shopping', icon: ShoppingCart },
     { labelKey: 'quickActions.addTask', href: '/tasks', icon: CheckSquare },
     { labelKey: 'quickActions.addAppointment', href: '/calendar', icon: CalendarIcon },
-    { labelKey: 'quickActions.addSchedule', href: '/planning', icon: CalendarDays },
-    { labelKey: 'quickActions.addRecipe', href: '/recipes', icon: ChefHat },
-    { labelKey: 'quickActions.addMeal', href: '/meal-planning', icon: UtensilsCrossed },
-    { labelKey: 'quickActions.addExpense', href: '/budget', icon: Wallet },
+    { labelKey: 'quickActions.addSchedule', href: '/planning', icon: CalendarDays, module: 'planning' },
+    { labelKey: 'quickActions.addRecipe', href: '/recipes', icon: ChefHat, module: 'recipes' },
+    { labelKey: 'quickActions.addMeal', href: '/meal-planning', icon: UtensilsCrossed, module: 'meals' },
+    { labelKey: 'quickActions.addExpense', href: '/budget', icon: Wallet, module: 'budget' },
     { labelKey: 'quickActions.addMember', href: '/family', icon: Users },
 ];
 
@@ -78,8 +80,13 @@ const isRouteActive = (pathname: string, href: string) => {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
     const { t } = useTranslation('nav');
-    const { user, logout } = useAuth();
+    const { user, logout, isModuleEnabled } = useAuth();
     const { setTheme, actualTheme } = useTheme();
+
+    // Hide entries whose optional module the family has disabled.
+    const visibleNavigation = navigation.filter((item) => !item.module || isModuleEnabled(item.module));
+    const visibleMobileTabs = mobileTabs.filter((item) => !item.module || isModuleEnabled(item.module));
+    const visibleQuickActions = quickActions.filter((item) => !item.module || isModuleEnabled(item.module));
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
     const [quickActionsOpen, setQuickActionsOpen] = React.useState(false);
     const [isOffline, setIsOffline] = React.useState(!navigator.onLine);
@@ -138,7 +145,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
 
                     <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6 scrollbar-hide">
-                        {navigation.map((item) => {
+                        {visibleNavigation.map((item) => {
                             const Icon = item.icon;
                             const active = isRouteActive(location.pathname, item.href);
                             return (
@@ -297,7 +304,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             >
                 <p className="mb-3 text-caption font-semibold text-foreground">{t('quickActions.title')}</p>
                 <div className="grid grid-cols-1 gap-2">
-                    {quickActions.map((action) => {
+                    {visibleQuickActions.map((action) => {
                         const Icon = action.icon;
                         return (
                             <Link
@@ -315,8 +322,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur lg:hidden">
-                <div className="grid grid-cols-5 gap-1 px-2 py-2">
-                    {mobileTabs.map((item) => {
+                <div
+                    className="grid gap-1 px-2 py-2"
+                    style={{ gridTemplateColumns: `repeat(${visibleMobileTabs.length}, minmax(0, 1fr))` }}
+                >
+                    {visibleMobileTabs.map((item) => {
                         const Icon = item.icon;
                         const active = isRouteActive(location.pathname, item.href);
                         return (

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
+import { useAuth } from '../contexts/AuthContext';
 import { intlLocale } from '../i18n/format';
 import { cn } from '../lib/utils';
 import FamilyNotes, { type FamilyNote } from '../components/app/FamilyNotes';
@@ -119,6 +120,7 @@ const PhotoLayer: React.FC<{ url: string }> = ({ url }) => {
 
 const Kiosk: React.FC = () => {
     const { t, i18n } = useTranslation(['kiosk', 'meals', 'notes', 'common']);
+    const { isModuleEnabled } = useAuth();
     const [now, setNow] = useState(new Date());
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -600,7 +602,7 @@ const Kiosk: React.FC = () => {
                 </div>
 
                 {/* Family notes — post-its, shown only when there's something on the fridge */}
-                {(visibleNotes.length > 0 || dismissedNotes.length > 0) && (
+                {isModuleEnabled('notes') && (visibleNotes.length > 0 || dismissedNotes.length > 0) && (
                     <section className={cn(panelClass, 'lg:col-span-3')}>
                         <h2 className="mb-5 flex items-center gap-3 font-serif text-h1">
                             <StickyNote className="h-7 w-7 text-primary" /> {t('notes:title')}

@@ -12,6 +12,8 @@ CREATE TABLE users (
     currency VARCHAR(3) DEFAULT 'EUR',
     language VARCHAR(8) NOT NULL DEFAULT 'fr',
     avatar_url TEXT,
+    -- Family-wide optional modules: JSON array of disabled module keys (set on the family owner's row).
+    disabled_modules TEXT NOT NULL DEFAULT '[]',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

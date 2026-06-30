@@ -7,6 +7,7 @@ import { Card, CardContent, Button, Dialog, Input, Select, Textarea, useToast } 
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks } from 'date-fns';
 import { dateLocale } from '../i18n/format';
 import { useAiEnabled } from '../lib/aiStatus';
+import { useAuth } from '../contexts/AuthContext';
 import { aiErrorKey } from '../components/app/MagicInput';
 
 interface MealPlan {
@@ -65,6 +66,7 @@ const MealPlanning: React.FC = () => {
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
     const [addingIngredients, setAddingIngredients] = useState(false);
     const aiEnabled = useAiEnabled();
+    const { isModuleEnabled } = useAuth();
     const [aiDialogOpen, setAiDialogOpen] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState('');
@@ -435,7 +437,7 @@ const MealPlanning: React.FC = () => {
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         {t('meals:shopping.button')}
                     </Button>
-                    {aiEnabled && (
+                    {aiEnabled && isModuleEnabled('ai') && (
                         <Button size="sm" variant="secondary" onClick={() => void handleSuggestMeals()}>
                             <Sparkles className="w-4 h-4 mr-2 text-primary" />
                             {t('ai:meals.button')}

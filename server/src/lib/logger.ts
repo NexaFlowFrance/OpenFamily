@@ -9,7 +9,10 @@ const LEVEL_PRIORITY: Record<LogLevel, number> = {
     error: 40,
 };
 
-const REDACT_KEYS = ['password', 'token', 'secret', 'authorization', 'cookie', 'jwt'];
+// Substring-matched against object keys (see shouldRedact). 'key' masks apiKey /
+// api_key / encrypted_api_key; 'credential' masks encrypted_credentials. These are
+// secret-bearing field names only — no critical non-secret field contains them.
+const REDACT_KEYS = ['password', 'token', 'secret', 'authorization', 'cookie', 'jwt', 'key', 'credential'];
 const MAX_DEPTH = 4;
 
 const parseLogLevel = (value: string | undefined): LogLevel => {

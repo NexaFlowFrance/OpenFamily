@@ -26,6 +26,28 @@
     "title": "Devise",
     "subtitle": "Sélectionnez la devise pour afficher les montants dans votre application."
   },
+  "modules": {
+    "title": "Modules",
+    "subtitle": "Activez ou masquez les modules optionnels pour ne garder que ceux que votre famille utilise.",
+    "parentOnly": "Seuls les parents peuvent modifier les modules.",
+    "error": "Erreur lors de la mise à jour des modules.",
+    "names": {
+      "kiosk": "Mode kiosque",
+      "notes": "Notes du tableau de bord",
+      "ai": "Assistant IA"
+    },
+    "descriptions": {
+      "budget": "Suivi du budget familial, dépenses et revenus.",
+      "rewards": "Argent de poche et récompenses des enfants.",
+      "meals": "Planification des repas de la semaine.",
+      "recipes": "Carnet de recettes de la famille.",
+      "planning": "Plannings hebdomadaires (travail, école, activités).",
+      "integrations": "Connexions à des services tiers (Mealie, Home Assistant…).",
+      "kiosk": "Affichage plein écran pour un écran partagé de la maison.",
+      "notes": "Pense-bêtes affichés sur le tableau de bord.",
+      "ai": "Assistant intelligent pour saisir et organiser rapidement."
+    }
+  },
   "export": {
     "title": "Exporter les données",
     "subtitle": "Télécharge toutes vos données (budget, tâches, recettes, membres, courses, rendez-vous, plannings, repas) dans un fichier JSON.",

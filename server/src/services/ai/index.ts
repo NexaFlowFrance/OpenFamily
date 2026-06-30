@@ -51,21 +51,27 @@ export const DEFAULT_BASE_URLS: Record<AiProvider, string | null> = {
 };
 
 /**
- * fetch() with the shared 60s AbortController timeout. Network-level failures
- * are mapped to AI_UNREACHABLE with a readable message.
+ * fetch() with the shared 60s AbortController timeout AND SSRF-safe redirect
+ * handling: redirects are followed manually and re-validated on every hop
+ * (safeFetch), so a user-set base_url cannot 302 the server to a blocked /
+ * internal / cloud-metadata address that bypassed the initial guard. The base
+ * URL itself is still validated by each provider before calling aiFetch.
+ * Network-level failures are mapped to AI_UNREACHABLE with a readable message.
+ *
+ * Imported lazily to avoid a circular import (safeFetch imports AI_TIMEOUT_MS
+ * from this module).
  */
 export async function aiFetch(url: string, init: RequestInit): Promise<Response> {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+    const { safeFetch } = await import('../../lib/safeFetch');
     try {
-        return await fetch(url, { ...init, signal: controller.signal });
+        // LAN/private targets stay legitimate here (local Ollama, LM Studio…);
+        // the guard always blocks metadata endpoints regardless.
+        return await safeFetch(url, { ...init, timeoutMs: AI_TIMEOUT_MS });
     } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
             throw new AiError('AI_UNREACHABLE', `Le fournisseur IA n'a pas répondu en ${AI_TIMEOUT_MS / 1000}s`);
         }
         throw new AiError('AI_UNREACHABLE', error instanceof Error ? error.message : 'Fournisseur IA injoignable');
-    } finally {
-        clearTimeout(timer);
     }
 }
 

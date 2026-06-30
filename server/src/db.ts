@@ -260,6 +260,9 @@ export const runMigrations = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`,
+        // Migration 015: family-wide optional modules — JSON array of disabled module keys,
+        // stored on the family owner's row. Default '[]' = nothing disabled (no behaviour change).
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS disabled_modules TEXT NOT NULL DEFAULT '[]'",
     ];
 
     for (const migration of migrations) {

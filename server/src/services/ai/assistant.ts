@@ -72,7 +72,13 @@ export function localToday(): { iso: string; weekday: string } {
     };
 }
 
-export function buildParsePrompt(members: FamilyMemberRef[]): string {
+export function buildParsePrompt(
+    members: FamilyMemberRef[],
+    // Families can customize their category lists (issue #68) — the AI must offer
+    // THEIR categories, not the defaults.
+    shoppingCategories: readonly string[] = SHOPPING_CATEGORIES,
+    budgetCategories: readonly string[] = BUDGET_CATEGORIES,
+): string {
     const { iso, weekday } = localToday();
     const memberList = members.length > 0
         ? members.map((m) => `- ${m.name}`).join('\n')
@@ -89,8 +95,8 @@ export function buildParsePrompt(members: FamilyMemberRef[]): string {
         `Types d'éléments :`,
         `- "task" : tâche/corvée/rappel. title = intitulé. date = échéance "YYYY-MM-DD" ou "". priority parmi ${TASK_PRIORITIES.join('/')} ou "". frequency parmi ${TASK_FREQUENCIES.join('/')} ou "". member_names = personnes assignées.`,
         `- "appointment" : rendez-vous/événement à une heure précise. start_time = "YYYY-MM-DDTHH:mm:ss" (heure locale, obligatoire), end_time pareil ou "". location = lieu ou "". member_names = personnes concernées.`,
-        `- "shopping_item" : article à acheter. title = nom de l'article. category parmi ${SHOPPING_CATEGORIES.join('/')}. quantity = nombre (0 si inconnu), unit = unité ("kg", "L"…) ou "".`,
-        `- "budget_entry" : dépense ou revenu. title = libellé. amount = montant (nombre > 0). is_expense = true pour une dépense, false pour un revenu. category parmi ${BUDGET_CATEGORIES.join('/')}. date = "YYYY-MM-DD" ("" = aujourd'hui).`,
+        `- "shopping_item" : article à acheter. title = nom de l'article. category parmi ${shoppingCategories.join('/')}. quantity = nombre (0 si inconnu), unit = unité ("kg", "L"…) ou "".`,
+        `- "budget_entry" : dépense ou revenu. title = libellé. amount = montant (nombre > 0). is_expense = true pour une dépense, false pour un revenu. category parmi ${budgetCategories.join('/')}. date = "YYYY-MM-DD" ("" = aujourd'hui).`,
         ``,
         `Règles :`,
         `- Chaque champ non pertinent vaut "" (chaîne vide), 0 (nombre) ou [] (liste). is_expense vaut true par défaut.`,
@@ -206,7 +212,12 @@ const resolveMembers = (
  * Structural validation of the model output: drop invalid items, clamp values,
  * resolve member names → ids (case-insensitively). Returns at most 20 proposals.
  */
-export function validateParsedItems(raw: Record<string, unknown>, members: FamilyMemberRef[]): ParsedProposal[] {
+export function validateParsedItems(
+    raw: Record<string, unknown>,
+    members: FamilyMemberRef[],
+    shoppingCategories: readonly string[] = SHOPPING_CATEGORIES,
+    budgetCategories: readonly string[] = BUDGET_CATEGORIES,
+): ParsedProposal[] {
     const items = Array.isArray(raw.items) ? (raw.items as RawParsedItem[]) : [];
     const proposals: ParsedProposal[] = [];
 
@@ -256,7 +267,9 @@ export function validateParsedItems(raw: Record<string, unknown>, members: Famil
                 proposals.push({
                     type: 'shopping_item',
                     name: title,
-                    category: (SHOPPING_CATEGORIES as readonly string[]).includes(category) ? category : 'Autre',
+                    category: shoppingCategories.includes(category)
+                        ? category
+                        : (shoppingCategories.includes('Autre') ? 'Autre' : shoppingCategories[0]),
                     quantity: cleanPositiveNumber(item.quantity, 9999),
                     unit: cleanString(item.unit, 20) || null,
                 });
@@ -268,7 +281,9 @@ export function validateParsedItems(raw: Record<string, unknown>, members: Famil
                 const category = cleanString(item.category, 50);
                 proposals.push({
                     type: 'budget_entry',
-                    category: (BUDGET_CATEGORIES as readonly string[]).includes(category) ? category : 'Autre',
+                    category: budgetCategories.includes(category)
+                        ? category
+                        : (budgetCategories.includes('Autre') ? 'Autre' : budgetCategories[0]),
                     amount,
                     description: description ?? title,
                     date: cleanDate(item.date) ?? localToday().iso,

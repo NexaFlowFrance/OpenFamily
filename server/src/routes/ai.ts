@@ -14,6 +14,7 @@ import {
     type FamilyMemberRef,
     type RecipeRef,
 } from '../services/ai/assistant';
+import { getFamilyCategories } from './categories';
 import logger from '../lib/logger';
 
 const router = Router();
@@ -259,14 +260,16 @@ router.post('/parse', async (req: AuthRequest, res) => {
             [req.userId]
         );
         const members = membersResult.rows as FamilyMemberRef[];
+        // Offer the family's own (possibly customized) category lists to the model.
+        const familyCategories = await getFamilyCategories(req.userId!);
 
         const raw = await aiComplete(settings, {
-            system: buildParsePrompt(members),
+            system: buildParsePrompt(members, familyCategories.shopping, familyCategories.budget),
             user: text.slice(0, 2000),
             jsonSchema: PARSE_SCHEMA,
         });
 
-        const items = validateParsedItems(raw, members);
+        const items = validateParsedItems(raw, members, familyCategories.shopping, familyCategories.budget);
         res.json({ success: true, data: { items } });
     } catch (error) {
         handleAiError(res, error, 'parse');

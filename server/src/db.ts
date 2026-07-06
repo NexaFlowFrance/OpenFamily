@@ -292,6 +292,11 @@ export const runMigrations = async () => {
         'CREATE INDEX IF NOT EXISTS idx_recurring_expenses_user_id ON recurring_expenses(user_id)',
         'CREATE INDEX IF NOT EXISTS idx_recurring_expense_logs_user_id ON recurring_expense_logs(user_id)',
         'CREATE INDEX IF NOT EXISTS idx_recurring_expense_logs_month_year ON recurring_expense_logs(month, year)',
+        // Migration 017: per-family customizable categories (issue #68). JSON object
+        // { shopping: string[], recipe: string[], budget: string[] } stored as text on
+        // the family owner's row — NULL/empty means "use the defaults" (no behaviour
+        // change for existing installs). Same pattern as disabled_modules.
+        'ALTER TABLE users ADD COLUMN IF NOT EXISTS custom_categories TEXT',
     ];
 
     for (const migration of migrations) {

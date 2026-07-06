@@ -22,6 +22,7 @@ import integrationsRoutes from './routes/integrations';
 import rewardsRoutes from './routes/rewards';
 import notesRoutes from './routes/notes';
 import aiRoutes from './routes/ai';
+import categoriesRoutes from './routes/categories';
 import { loadEnv } from './config/loadEnv';
 import logger from './lib/logger';
 
@@ -155,6 +156,7 @@ app.use('/api/integrations', integrationsRoutes);
 app.use('/api/rewards', rewardsRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/categories', categoriesRoutes);
 
 // Static client (native Windows install): serve the built SPA from the same origin
 // as the API, so the app is reachable from any device on the LAN via http://<ip>:3000.

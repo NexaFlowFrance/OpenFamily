@@ -4,6 +4,7 @@ import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { Plus, Search, Edit2, Trash2, Clock, Users, ChefHat, Eye, Link2 } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, Badge, useToast } from '../components/ui';
+import { useCategories } from '../hooks/useCategories';
 
 /** Parsed recipe returned by POST /api/recipes/import-url (nothing saved yet). */
 interface ImportedRecipe {
@@ -37,12 +38,15 @@ interface Recipe {
 
 const Recipes: React.FC = () => {
     const { t } = useTranslation(['recipes', 'common']);
-    const CATEGORIES = [
-        { value: 'Entrée', label: t('recipes:categories.Entrée') },
-        { value: 'Plat', label: t('recipes:categories.Plat') },
-        { value: 'Dessert', label: t('recipes:categories.Dessert') },
-        { value: 'Snack', label: t('recipes:categories.Snack') },
-    ];
+    // Family-customizable list (Settings → Categories); defaults are translated,
+    // custom names are shown as-is.
+    const { categories: familyCategories } = useCategories();
+    const CATEGORIES = familyCategories.recipe.map((value) => ({
+        value,
+        label: t(`recipes:categories.${value}`, { defaultValue: value }),
+    }));
+    // Sensible default for new/imported recipes even when 'Plat' was customized away.
+    const defaultCategory = familyCategories.recipe.includes('Plat') ? 'Plat' : familyCategories.recipe[0];
     const DIFFICULTIES = [
         { value: 'Facile', label: t('recipes:difficulties.Facile') },
         { value: 'Moyen', label: t('recipes:difficulties.Moyen') },
@@ -177,7 +181,7 @@ const Recipes: React.FC = () => {
             setEditingRecipe(null);
             setFormData({
                 name: parsed.name || '',
-                category: parsed.category || 'Plat',
+                category: parsed.category || defaultCategory,
                 description: parsed.description || '',
                 ingredients: (parsed.ingredients || []).join('\n'),
                 instructions: (parsed.instructions || []).join('\n'),
@@ -223,7 +227,7 @@ const Recipes: React.FC = () => {
         setEditingRecipe(null);
         setFormData({
             name: '',
-            category: 'Plat',
+            category: defaultCategory,
             description: '',
             ingredients: '',
             instructions: '',

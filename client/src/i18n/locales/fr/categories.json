@@ -1,0 +1,25 @@
+{
+  "title": "Catégories",
+  "subtitle": "Personnalisez les listes de catégories des Courses, Recettes et Budget. Renommer une catégorie met à jour vos éléments existants.",
+  "parentOnly": "Seuls les parents peuvent modifier les catégories.",
+  "modules": {
+    "shopping": "Courses",
+    "recipe": "Recettes",
+    "budget": "Budget"
+  },
+  "addPlaceholder": "Nouvelle catégorie…",
+  "add": "Ajouter",
+  "save": "Enregistrer",
+  "saved": "Catégories enregistrées.",
+  "reset": "Annuler les modifications",
+  "moveUp": "Monter",
+  "moveDown": "Descendre",
+  "remove": "Supprimer",
+  "hintReassign": "Les éléments d'une catégorie supprimée sont déplacés vers « {{fallback}} ».",
+  "errors": {
+    "empty": "Le nom d'une catégorie ne peut pas être vide.",
+    "duplicate": "Catégorie en double : {{name}}",
+    "atLeastOne": "Conservez au moins une catégorie.",
+    "save": "Impossible d'enregistrer les catégories."
+  }
+}

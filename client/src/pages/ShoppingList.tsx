@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Dialog } from '../components/ui';
+import { useCategories } from '../hooks/useCategories';
 
 interface ShoppingItem {
     id: string;
@@ -34,8 +35,6 @@ interface ShoppingTemplate {
     }>;
 }
 
-const categories = ['Alimentation', 'Bebe', 'Menage', 'Sante', 'Autre'];
-
 const parseOptionalPositiveNumber = (value: string): number | undefined => {
     const trimmed = value.trim();
     if (!trimmed) {
@@ -51,6 +50,9 @@ const ShoppingList: React.FC = () => {
     const categoryLabel = (value: string) => t(`shopping:categories.${value}`, { defaultValue: value });
     const { user } = useAuth();
     const currency = user?.currency || 'EUR';
+    // Family-customizable category list (Settings → Categories).
+    const { categories: familyCategories } = useCategories();
+    const categories = familyCategories.shopping;
     const [items, setItems] = useState<ShoppingItem[]>([]);
     const [templates, setTemplates] = useState<ShoppingTemplate[]>([]);
     const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -71,6 +73,12 @@ const ShoppingList: React.FC = () => {
     useEffect(() => {
         void Promise.all([loadItems(), loadTemplates()]).finally(() => setLoading(false));
     }, []);
+
+    // If the family's custom list doesn't contain the form's current category
+    // (custom lists load async, or a category was renamed/removed), realign it.
+    useEffect(() => {
+        setNewItem((prev) => (categories.includes(prev.category) ? prev : { ...prev, category: categories[0] }));
+    }, [categories]);
     useWebSocketUpdates('shopping', () => { void loadItems(); });
 
     const loadItems = async () => {
@@ -130,7 +138,7 @@ const ShoppingList: React.FC = () => {
 
             if (response.success) {
                 setItems((prev) => [response.data, ...prev]);
-                setNewItem({ name: '', category: 'Alimentation', quantity: '', price: '', unit: '' });
+                setNewItem({ name: '', category: categories[0], quantity: '', price: '', unit: '' });
             }
         } catch (err) {
             console.error('Failed to add item:', err);
@@ -290,8 +298,11 @@ const ShoppingList: React.FC = () => {
     const itemsByAisle = useMemo(() => {
         const groups = new Map<string, ShoppingItem[]>();
         for (const cat of categories) groups.set(cat, []);
+        // Items whose category is not in the family's (customizable) list fall back
+        // to "Autre" when it exists, otherwise to a trailing catch-all group.
+        const fallback = groups.has('Autre') ? 'Autre' : categories[categories.length - 1];
         for (const item of items) {
-            const cat = groups.has(item.category) ? item.category : 'Autre';
+            const cat = groups.has(item.category) ? item.category : fallback;
             groups.get(cat)!.push(item);
         }
         return Array.from(groups.entries())
@@ -300,7 +311,7 @@ const ShoppingList: React.FC = () => {
                 category,
                 list: [...list].sort((a, b) => Number(a.is_checked) - Number(b.is_checked)),
             }));
-    }, [items]);
+    }, [items, categories]);
 
     const totalPrice = useMemo(() => {
         return pendingItems.reduce((sum, item) => {

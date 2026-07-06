@@ -16,6 +16,7 @@ import ChartCard from '../components/app/ChartCard';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../i18n/format';
+import { useCategories } from '../hooks/useCategories';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -76,11 +77,6 @@ interface BudgetLimit {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const CATEGORIES = [
-    'Logement', 'Alimentation', 'Transport', 'Santé', 'Loisirs',
-    'Abonnements', 'Assurance', 'Enfants', 'Maison', 'Autre',
-];
 
 const CHART_COLORS = [
     '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -146,6 +142,13 @@ const Field: React.FC<{
 
 const CategorySelect: React.FC<{ value: string; onChange: (v: string) => void }> = ({ value, onChange }) => {
     const { t } = useTranslation('budget');
+    // Family-customizable list (Settings → Categories). If the current value is no
+    // longer in the list (legacy row, renamed category), keep it selectable so the
+    // form doesn't silently change the entry's category.
+    const { categories: familyCategories } = useCategories();
+    const list = !value || familyCategories.budget.includes(value)
+        ? familyCategories.budget
+        : [value, ...familyCategories.budget];
     return (
         <div>
             <label className="block text-sm font-medium text-foreground mb-1">{t('fields.category')}</label>
@@ -155,7 +158,7 @@ const CategorySelect: React.FC<{ value: string; onChange: (v: string) => void }>
                 className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface-1 text-foreground text-base
                            focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
             >
-                {CATEGORIES.map((c) => <option key={c} value={c}>{t(`categories.${c}`, { defaultValue: c })}</option>)}
+                {list.map((c) => <option key={c} value={c}>{t(`categories.${c}`, { defaultValue: c })}</option>)}
             </select>
         </div>
     );

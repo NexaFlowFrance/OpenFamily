@@ -20,12 +20,18 @@ export const RECIPE_CATEGORIES = {
 export type RecipeCategory = typeof RECIPE_CATEGORIES[keyof typeof RECIPE_CATEGORIES];
 
 // Budget Categories
+// NOTE: these are the DEFAULTS — families can customize their category lists
+// (Settings → Categories, stored in users.custom_categories, see issue #68).
 export const BUDGET_CATEGORIES = {
+    HOUSING: 'Logement',
     FOOD: 'Alimentation',
+    TRANSPORT: 'Transport',
     HEALTH: 'Santé',
+    LEISURE: 'Loisirs',
+    SUBSCRIPTIONS: 'Abonnements',
+    INSURANCE: 'Assurance',
     CHILDREN: 'Enfants',
     HOUSE: 'Maison',
-    LEISURE: 'Loisirs',
     OTHER: 'Autre',
 } as const;
 

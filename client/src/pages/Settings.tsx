@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
-import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid, Server } from 'lucide-react';
+import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid, Server, Tags, ArrowUp, ArrowDown, Plus } from 'lucide-react';
 import { Card, CardContent, Button, Input, Select } from '../components/ui';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
 import { isNative, getServerUrl, clearServerUrl } from '../lib/serverConfig';
+import { useCategories, CATEGORY_MODULES, type CategoryModule } from '../hooks/useCategories';
 import { refreshAiStatus } from '../lib/aiStatus';
 import { aiErrorKey } from '../components/app/MagicInput';
 
@@ -421,6 +422,197 @@ const ModulesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                                 );
                             })}
                         </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
+// "Categories" card — visible to everyone, editable by parents only.
+// Lets a family customize the category lists used by Shopping, Recipes and Budget.
+// Renames follow the existing items; removed categories are reassigned server-side.
+const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
+    const { t } = useTranslation(['categories', 'common']);
+    const { categories, saveCategories } = useCategories();
+    const [module, setModule] = useState<CategoryModule>('shopping');
+    const [rows, setRows] = useState<Array<{ original: string | null; value: string }>>(
+        () => categories.shopping.map((c) => ({ original: c, value: c }))
+    );
+    const [newName, setNewName] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
+    const [saved, setSaved] = useState(false);
+
+    // Re-seed the editor whenever the module tab changes or fresh data arrives.
+    useEffect(() => {
+        setRows(categories[module].map((c) => ({ original: c, value: c })));
+        setNewName('');
+        setError('');
+    }, [module, categories]);
+
+    const dirty = rows.length !== categories[module].length
+        || rows.some((r, i) => r.original !== categories[module][i] || r.value !== r.original);
+
+    const move = (index: number, delta: number) => {
+        const target = index + delta;
+        if (target < 0 || target >= rows.length) return;
+        setRows((prev) => {
+            const next = [...prev];
+            [next[index], next[target]] = [next[target], next[index]];
+            return next;
+        });
+    };
+
+    const addRow = () => {
+        const name = newName.trim();
+        if (!name) return;
+        if (rows.some((r) => r.value.trim() === name)) {
+            setError(t('categories:errors.duplicate', { name }));
+            return;
+        }
+        setRows((prev) => [...prev, { original: null, value: name }]);
+        setNewName('');
+        setError('');
+    };
+
+    const save = async () => {
+        const list = rows.map((r) => r.value.trim());
+        if (list.some((v) => v.length === 0)) { setError(t('categories:errors.empty')); return; }
+        if (list.length === 0) { setError(t('categories:errors.atLeastOne')); return; }
+        const seen = new Set<string>();
+        for (const name of list) {
+            if (seen.has(name)) { setError(t('categories:errors.duplicate', { name })); return; }
+            seen.add(name);
+        }
+        const renames: Record<string, string> = {};
+        for (const row of rows) {
+            if (row.original && row.value.trim() !== row.original) renames[row.original] = row.value.trim();
+        }
+        setSaving(true);
+        setError('');
+        setSaved(false);
+        try {
+            await saveCategories(module, list, renames);
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2500);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : t('categories:errors.save'));
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const fallback = rows.some((r) => r.value.trim() === 'Autre') ? 'Autre' : rows[0]?.value.trim() || '';
+
+    return (
+        <Card>
+            <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                        <Tags className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-caption font-semibold text-foreground">{t('categories:title')}</h3>
+                        <p className="mt-1 text-micro text-muted-foreground">{t('categories:subtitle')}</p>
+
+                        {!isParent && (
+                            <p className="mt-3 flex items-center gap-1 text-micro text-muted-foreground">
+                                <AlertCircle className="h-4 w-4 shrink-0" />
+                                {t('categories:parentOnly')}
+                            </p>
+                        )}
+
+                        <div className="mt-4 flex gap-1 rounded-input border border-border bg-surface-2 p-1">
+                            {CATEGORY_MODULES.map((key) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => setModule(key)}
+                                    className={`flex-1 rounded-input px-2 py-1.5 text-caption font-medium transition ${
+                                        module === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                >
+                                    {t(`categories:modules.${key}`)}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="mt-3 space-y-2">
+                            {rows.map((row, index) => (
+                                <div key={`${row.original ?? 'new'}-${index}`} className="flex items-center gap-2">
+                                    <Input
+                                        value={row.value}
+                                        disabled={!isParent || saving}
+                                        onChange={(e) => setRows((prev) => prev.map((r, i) => (i === index ? { ...r, value: e.target.value } : r)))}
+                                        className="flex-1"
+                                    />
+                                    <Button type="button" variant="ghost" size="sm" disabled={!isParent || saving || index === 0}
+                                        onClick={() => move(index, -1)} aria-label={t('categories:moveUp')}>
+                                        <ArrowUp className="h-4 w-4" />
+                                    </Button>
+                                    <Button type="button" variant="ghost" size="sm" disabled={!isParent || saving || index === rows.length - 1}
+                                        onClick={() => move(index, 1)} aria-label={t('categories:moveDown')}>
+                                        <ArrowDown className="h-4 w-4" />
+                                    </Button>
+                                    <Button type="button" variant="ghost" size="sm" disabled={!isParent || saving || rows.length <= 1}
+                                        onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))} aria-label={t('categories:remove')}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+
+                        {isParent && (
+                            <div className="mt-3 flex items-center gap-2">
+                                <Input
+                                    value={newName}
+                                    disabled={saving}
+                                    placeholder={t('categories:addPlaceholder')}
+                                    onChange={(e) => setNewName(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addRow(); } }}
+                                    className="flex-1"
+                                />
+                                <Button type="button" variant="secondary" size="sm" disabled={saving || !newName.trim()} onClick={addRow}>
+                                    <Plus className="h-4 w-4" />
+                                    {t('categories:add')}
+                                </Button>
+                            </div>
+                        )}
+
+                        {fallback && (
+                            <p className="mt-3 text-micro text-muted-foreground">
+                                {t('categories:hintReassign', { fallback })}
+                            </p>
+                        )}
+
+                        {error && (
+                            <p className="mt-3 flex items-center gap-1 text-micro text-destructive">
+                                <AlertCircle className="h-4 w-4 shrink-0" />
+                                {error}
+                            </p>
+                        )}
+                        {saved && (
+                            <p className="mt-3 flex items-center gap-1 text-micro text-success">
+                                <CheckCircle className="h-4 w-4 shrink-0" />
+                                {t('categories:saved')}
+                            </p>
+                        )}
+
+                        {isParent && (
+                            <div className="mt-4 flex gap-2">
+                                <Button type="button" size="sm" disabled={saving || !dirty} onClick={() => void save()}>
+                                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                                    {t('categories:save')}
+                                </Button>
+                                {dirty && !saving && (
+                                    <Button type="button" variant="ghost" size="sm"
+                                        onClick={() => setRows(categories[module].map((c) => ({ original: c, value: c })))}>
+                                        {t('categories:reset')}
+                                    </Button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </CardContent>
@@ -843,6 +1035,9 @@ const Settings: React.FC = () => {
 
             {/* Optional modules */}
             <ModulesCard isParent={isParent} />
+
+            {/* Custom categories */}
+            <CategoriesCard isParent={isParent} />
 
             {/* Export */}
             <Card>

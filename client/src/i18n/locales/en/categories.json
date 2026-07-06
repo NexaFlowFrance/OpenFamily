@@ -1,0 +1,25 @@
+{
+  "title": "Categories",
+  "subtitle": "Customize the category lists used by Shopping, Recipes and Budget. Renaming a category updates your existing items.",
+  "parentOnly": "Only parents can edit categories.",
+  "modules": {
+    "shopping": "Shopping",
+    "recipe": "Recipes",
+    "budget": "Budget"
+  },
+  "addPlaceholder": "New category…",
+  "add": "Add",
+  "save": "Save",
+  "saved": "Categories saved.",
+  "reset": "Cancel changes",
+  "moveUp": "Move up",
+  "moveDown": "Move down",
+  "remove": "Remove",
+  "hintReassign": "Items in a removed category are moved to \"{{fallback}}\".",
+  "errors": {
+    "empty": "Category names can't be empty.",
+    "duplicate": "Duplicate category: {{name}}",
+    "atLeastOne": "Keep at least one category.",
+    "save": "Could not save categories."
+  }
+}

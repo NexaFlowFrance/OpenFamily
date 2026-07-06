@@ -58,8 +58,10 @@ services:
       context: .
       dockerfile: ./client/Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
-        VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:3001}
+        # Empty → same-origin; nginx proxies /api and /ws to the server, so the app
+        # works from any device. Set these only to serve the API from a separate origin.
+        VITE_API_URL: ${VITE_API_URL:-}
+        VITE_WS_URL: ${VITE_WS_URL:-}
     container_name: openfamily-client
     restart: unless-stopped
     ports:

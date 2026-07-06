@@ -215,11 +215,10 @@ function budgetStatistics(month: number, year: number) {
     const totalIncome = entries.filter((e) => !e.is_expense).reduce((s, e) => s + num(e.amount), 0);
     const byCatMap: Record<string, number> = {};
     for (const e of entries) if (e.is_expense) byCatMap[e.category as string] = (byCatMap[e.category as string] || 0) + num(e.amount);
-    // Mirror the server: recurring debits count in the category pie too.
-    for (const r of recurringForMonth(month, year)) {
-        const cat = (r.category as string) || 'Maison';
-        byCatMap[cat] = (byCatMap[cat] || 0) + num(r.amount);
-    }
+    // Mirror the server: recurring debits show as one dedicated "Prélèvements"
+    // slice in the category pie (not merged into their own categories).
+    const recurringTotal = recurringForMonth(month, year).reduce((s, r) => s + num(r.amount), 0);
+    if (recurringTotal > 0) byCatMap['Prélèvements'] = (byCatMap['Prélèvements'] || 0) + recurringTotal;
     const byCategory = Object.entries(byCatMap).map(([category, category_total]) => ({ category, category_total }));
     return { totalExpenses, totalIncome, balance: totalIncome - totalExpenses, byCategory };
 }

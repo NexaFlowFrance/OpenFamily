@@ -10,7 +10,8 @@
     "Assurance": "Assurance",
     "Enfants": "Enfants",
     "Maison": "Maison",
-    "Autre": "Autre"
+    "Autre": "Autre",
+    "Prélèvements": "Prélèvements"
   },
   "readOnly": "Mode lecture seule. Seuls les parents peuvent modifier le budget.",
   "alerts": {

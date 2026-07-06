@@ -10,7 +10,8 @@
     "Assurance": "Insurance",
     "Enfants": "Children",
     "Maison": "Home",
-    "Autre": "Other"
+    "Autre": "Other",
+    "Prélèvements": "Recurring debits"
   },
   "readOnly": "Read-only mode. Only parents can edit the budget.",
   "alerts": {

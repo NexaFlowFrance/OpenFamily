@@ -289,25 +289,27 @@ router.get('/statistics', async (req: AuthRequest, res) => {
         );
 
         // Recurring debits (prélèvements) are not budget_entries rows, but they are
-        // real expenses: include the ones active for the requested month (created
-        // during-or-before it) in the category pie. totalExpenses/balance stay
-        // entry-only — the forecast already accounts for recurring separately.
-        const recurringByCategory = await query(
-            `SELECT category, SUM(amount) as category_total
+        // real expenses: show the ones active for the requested month (created
+        // during-or-before it) as ONE dedicated "Prélèvements" slice in the pie —
+        // not merged into their own categories, which would silently inflate
+        // "Maison" & co. totalExpenses/balance stay entry-only — the forecast
+        // already accounts for recurring separately.
+        const recurringTotalResult = await query(
+            `SELECT COALESCE(SUM(amount), 0) as total
        FROM recurring_expenses
        WHERE user_id = $1
          AND is_active = true
-         AND created_at < make_date($3, $2, 1) + interval '1 month'
-       GROUP BY category`,
+         AND created_at < make_date($3, $2, 1) + interval '1 month'`,
             [req.userId, parsedMonth, parsedYear]
         );
+        const recurringTotal = toNumber(recurringTotalResult.rows[0]?.total);
 
         const categoryTotals = new Map<string, number>();
         for (const row of result.rows) {
             categoryTotals.set(row.category, toNumber(row.category_total));
         }
-        for (const row of recurringByCategory.rows) {
-            categoryTotals.set(row.category, (categoryTotals.get(row.category) || 0) + toNumber(row.category_total));
+        if (recurringTotal > 0) {
+            categoryTotals.set('Prélèvements', (categoryTotals.get('Prélèvements') || 0) + recurringTotal);
         }
 
         const totalExpenses = parseFloat(totals.rows[0]?.total_expenses || '0');

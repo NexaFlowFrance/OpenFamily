@@ -35,7 +35,8 @@
     "noExpenses": "No expenses this month",
     "yearEvolution": "Yearly trend",
     "income": "Income",
-    "expenses": "Expenses"
+    "expenses": "Expenses",
+    "recurring": "Recurring debits"
   },
   "limits": {
     "title": "Monthly limits",

@@ -35,7 +35,8 @@
     "noExpenses": "Aucune dépense ce mois",
     "yearEvolution": "Évolution sur l'année",
     "income": "Revenus",
-    "expenses": "Dépenses"
+    "expenses": "Dépenses",
+    "recurring": "Prélèvements"
   },
   "limits": {
     "title": "Plafonds mensuels",

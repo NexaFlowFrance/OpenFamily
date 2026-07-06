@@ -288,6 +288,28 @@ router.get('/statistics', async (req: AuthRequest, res) => {
             [req.userId, parsedMonth, parsedYear]
         );
 
+        // Recurring debits (prélèvements) are not budget_entries rows, but they are
+        // real expenses: include the ones active for the requested month (created
+        // during-or-before it) in the category pie. totalExpenses/balance stay
+        // entry-only — the forecast already accounts for recurring separately.
+        const recurringByCategory = await query(
+            `SELECT category, SUM(amount) as category_total
+       FROM recurring_expenses
+       WHERE user_id = $1
+         AND is_active = true
+         AND created_at < make_date($3, $2, 1) + interval '1 month'
+       GROUP BY category`,
+            [req.userId, parsedMonth, parsedYear]
+        );
+
+        const categoryTotals = new Map<string, number>();
+        for (const row of result.rows) {
+            categoryTotals.set(row.category, toNumber(row.category_total));
+        }
+        for (const row of recurringByCategory.rows) {
+            categoryTotals.set(row.category, (categoryTotals.get(row.category) || 0) + toNumber(row.category_total));
+        }
+
         const totalExpenses = parseFloat(totals.rows[0]?.total_expenses || '0');
         const totalIncome = parseFloat(totals.rows[0]?.total_income || '0');
 
@@ -297,9 +319,9 @@ router.get('/statistics', async (req: AuthRequest, res) => {
                 totalExpenses,
                 totalIncome,
                 balance: totalIncome - totalExpenses,
-                byCategory: result.rows.map((row) => ({
-                    category: row.category,
-                    category_total: toNumber(row.category_total),
+                byCategory: Array.from(categoryTotals.entries()).map(([category, category_total]) => ({
+                    category,
+                    category_total,
                 })),
                 byMember: byMember.rows.map((row) => ({
                     assigned_to: row.assigned_to,
@@ -339,13 +361,30 @@ router.get('/statistics/monthly', async (req: AuthRequest, res) => {
             [req.userId, parsedYear]
         );
 
+        // Monthly recurring debits (prélèvements): a recurring expense counts for
+        // every month from its creation month onwards (as long as it is active).
+        const recurring = await query(
+            `SELECT EXTRACT(MONTH FROM gs)::int as month,
+              COALESCE(SUM(re.amount), 0) as total_recurring
+       FROM generate_series(make_date($2, 1, 1), make_date($2, 12, 1), interval '1 month') AS gs
+       LEFT JOIN recurring_expenses re
+         ON re.user_id = $1
+        AND re.is_active = true
+        AND re.created_at < gs + interval '1 month'
+       GROUP BY gs
+       ORDER BY month`,
+            [req.userId, parsedYear]
+        );
+
         const monthlyData = Array.from({ length: 12 }, (_, i) => {
             const monthNum = i + 1;
             const row = result.rows.find((r) => r.month === monthNum);
+            const recurringRow = recurring.rows.find((r) => r.month === monthNum);
             return {
                 month: monthNum,
                 totalExpenses: row ? toNumber(row.total_expenses) : 0,
                 totalIncome: row ? toNumber(row.total_income) : 0,
+                totalRecurring: recurringRow ? toNumber(recurringRow.total_recurring) : 0,
                 balance: row ? toNumber(row.total_income) - toNumber(row.total_expenses) : 0,
             };
         });

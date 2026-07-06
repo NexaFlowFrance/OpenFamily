@@ -65,6 +65,7 @@ interface MonthlyStat {
     month: number;
     totalExpenses: number;
     totalIncome: number;
+    totalRecurring: number;
     balance: number;
 }
 
@@ -588,6 +589,7 @@ const Budget: React.FC = () => {
                                         month: format(new Date(currentYear, m.month - 1), 'MMM', { locale: dateLocale() }),
                                         expenses: m.totalExpenses,
                                         income: m.totalIncome,
+                                        recurring: m.totalRecurring ?? 0,
                                     }))}>
                                         <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                                         <YAxis tick={{ fontSize: 11 }} width={40} />
@@ -595,6 +597,7 @@ const Budget: React.FC = () => {
                                         <Legend wrapperStyle={{ fontSize: 12 }} />
                                         <Bar dataKey="income" name={t('budget:charts.income')} fill="#10b981" radius={[4, 4, 0, 0]} />
                                         <Bar dataKey="expenses" name={t('budget:charts.expenses')} fill="#ef4444" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="recurring" name={t('budget:charts.recurring')} fill="#f59e0b" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </ChartCard>

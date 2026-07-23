@@ -48,8 +48,8 @@ export interface DemoStore {
 }
 
 export function createSeed(): DemoStore {
-    const dad = { id: 'm-dad', name: 'Alex', role: 'Parent', color: '#2563EB', birthdate: '1986-04-12' };
-    const mom = { id: 'm-mom', name: 'Sam', role: 'Parent', color: '#DB2777', birthdate: '1988-09-03' };
+    const dad = { id: 'm-dad', name: 'Alex', role: 'Parent', color: '#2563EB', birthdate: '1986-04-12', monthly_income: 2600 };
+    const mom = { id: 'm-mom', name: 'Sam', role: 'Parent', color: '#DB2777', birthdate: '1988-09-03', monthly_income: 2100 };
     const kid1 = { id: 'm-kid1', name: 'Mia', role: 'Enfant', color: '#16A34A', birthdate: `${y - 9}-02-18`, allergies: ['Peanuts'] };
     const kid2 = { id: 'm-kid2', name: 'Noah', role: 'Enfant', color: '#F97316', birthdate: `${y - 6}-11-27` };
 
@@ -122,7 +122,7 @@ export function createSeed(): DemoStore {
             { id: 'b2', category: 'Transport', amount: 60, description: 'Fuel', date: isoDate(dayInMonth(6)), is_expense: true },
             { id: 'b3', category: 'Loisirs', amount: 32, description: 'Cinema', date: isoDate(dayInMonth(9)), is_expense: true },
             { id: 'b4', category: 'Enfants', amount: 45, description: 'School supplies', date: isoDate(dayInMonth(11)), is_expense: true },
-            { id: 'b5', category: 'Logement', amount: 2600, description: 'Salary', date: isoDate(dayInMonth(1)), is_expense: false },
+            { id: 'b5', category: 'Autre', amount: 1500, description: 'Bonus', date: isoDate(dayInMonth(1)), is_expense: false },
         ],
         budgetRecurring: [
             { id: 'rc1', label: 'Rent', amount: 950, category: 'Logement', debit_day: 5, is_active: true, is_pointed: true },

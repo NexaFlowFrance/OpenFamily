@@ -297,6 +297,26 @@ export const runMigrations = async () => {
         // the family owner's row — NULL/empty means "use the defaults" (no behaviour
         // change for existing installs). Same pattern as disabled_modules.
         'ALTER TABLE users ADD COLUMN IF NOT EXISTS custom_categories TEXT',
+        // Migration 018: kakeibo budgeting mode.
+        // - monthly_income: fixed salary carried over every month for each earning
+        //   member (0 = does not earn).
+        // - kakeibo_months: per-month savings goal + end-of-month review notes.
+        // - users.kakeibo_pillars: JSON map { budgetCategory: pillar } where pillar is
+        //   one of survival/wants/culture/extra (defaults applied server-side).
+        'ALTER TABLE family_members ADD COLUMN IF NOT EXISTS monthly_income DECIMAL(10, 2) NOT NULL DEFAULT 0',
+        `CREATE TABLE IF NOT EXISTS kakeibo_months (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            month INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
+            year INTEGER NOT NULL,
+            savings_goal DECIMAL(10, 2) NOT NULL DEFAULT 0,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, month, year)
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_kakeibo_months_user_id ON kakeibo_months(user_id)',
+        'ALTER TABLE users ADD COLUMN IF NOT EXISTS kakeibo_pillars TEXT',
     ];
 
     for (const migration of migrations) {

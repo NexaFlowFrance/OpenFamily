@@ -1,0 +1,33 @@
+{
+  "mode": {
+    "classic": "Classic",
+    "kakeibo": "Kakeibo"
+  },
+  "availableTitle": "Available to spend",
+  "availableSub": "{{income}} income − {{goal}} savings goal",
+  "spentSoFar": "Spent: {{amount}}",
+  "householdIncome": "Household income",
+  "extraIncome": "Extra income this month",
+  "totalIncome": "Total income",
+  "savingsGoal": "Savings goal",
+  "pillarsTitle": "Where does the money go?",
+  "pillars": {
+    "survival": "Survival",
+    "wants": "Wants",
+    "culture": "Culture",
+    "extra": "Extra"
+  },
+  "pillarHint": {
+    "survival": "needs",
+    "wants": "pleasures",
+    "culture": "self-growth",
+    "extra": "unexpected"
+  },
+  "noExpenses": "No expenses recorded this month.",
+  "reviewTitle": "End-of-month review",
+  "actualSavings": "Actually saved",
+  "goalReached": "Goal reached — {{amount}} above target!",
+  "goalMissed": "{{amount}} short of your goal.",
+  "notesLabel": "Reflection notes",
+  "notesPlaceholder": "What went well? What can improve next month?"
+}

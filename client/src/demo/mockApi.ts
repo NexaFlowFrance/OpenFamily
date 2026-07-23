@@ -223,6 +223,51 @@ function budgetStatistics(month: number, year: number) {
     return { totalExpenses, totalIncome, balance: totalIncome - totalExpenses, byCategory };
 }
 
+// ── Kakeibo (mirrors server/src/routes/kakeibo.ts) ──────────────────────────
+const KAKEIBO_PILLAR_BY_CATEGORY: Record<string, string> = {
+    'Logement': 'survival', 'Alimentation': 'survival', 'Transport': 'survival',
+    'Santé': 'survival', 'Assurance': 'survival', 'Enfants': 'survival',
+    'Abonnements': 'wants', 'Maison': 'wants', 'Loisirs': 'culture',
+    'Autre': 'extra', 'Prélèvements': 'survival',
+};
+const kakeiboState = { savingsGoal: 400, notes: '' as string };
+const pillarFor = (cat: string) => KAKEIBO_PILLAR_BY_CATEGORY[cat] || 'wants';
+
+function kakeiboSummary(month: number, year: number) {
+    const members = store.familyMembers as Json[];
+    const incomes = members
+        .filter((m) => num(m.monthly_income) > 0)
+        .map((m) => ({ id: m.id, name: m.name, color: m.color, monthly_income: num(m.monthly_income) }));
+    const salaryIncome = incomes.reduce((s, m) => s + m.monthly_income, 0);
+    const entries = entriesForMonth(month, year);
+    const extraIncome = entries.filter((e) => !e.is_expense).reduce((s, e) => s + num(e.amount), 0);
+    const totalIncome = salaryIncome + extraIncome;
+
+    const spentByCategory: Record<string, number> = {};
+    for (const e of entries) if (e.is_expense) spentByCategory[e.category as string] = (spentByCategory[e.category as string] || 0) + num(e.amount);
+    for (const r of recurringForMonth(month, year)) {
+        const c = (r.category as string) || 'Maison';
+        spentByCategory[c] = (spentByCategory[c] || 0) + num(r.amount);
+    }
+    const byPillar: Record<string, number> = { survival: 0, wants: 0, culture: 0, extra: 0 };
+    const byCategory = Object.entries(spentByCategory).map(([category, amount]) => {
+        const pillar = pillarFor(category);
+        byPillar[pillar] += amount;
+        return { category, amount, pillar };
+    }).sort((a, b) => b.amount - a.amount);
+    const totalExpenses = Object.values(spentByCategory).reduce((s, v) => s + v, 0);
+
+    const savingsGoal = kakeiboState.savingsGoal;
+    const availableToSpend = totalIncome - savingsGoal;
+    const actualSavings = totalIncome - totalExpenses;
+    return {
+        month, year, incomes, salaryIncome, extraIncome, totalIncome,
+        savingsGoal, availableToSpend, totalExpenses, actualSavings,
+        savingsGoalReached: actualSavings >= savingsGoal, byPillar, byCategory,
+        notes: kakeiboState.notes || null,
+    };
+}
+
 function budgetMonthly(year: number) {
     const totalRecurring = (store.budgetRecurring as Json[])
         .filter((r) => r.is_active !== false)
@@ -514,6 +559,26 @@ async function route(method: string, path: string, q: Record<string, string>, bo
     if (path === '/api/budget/forecast') { const { month, year } = monthYearOf(q); return ok(budgetForecast(month, year)); }
     if (path === '/api/budget/statistics') { const { month, year } = monthYearOf(q); return ok(budgetStatistics(month, year)); }
     if (path === '/api/budget/statistics/monthly') return ok(budgetMonthly(monthYearOf(q).year));
+
+    // ── Kakeibo ───────────────────────────────────────────────────────────────
+    if (path === '/api/kakeibo') { const { month, year } = monthYearOf(q); return ok(kakeiboSummary(month, year)); }
+    if (path === '/api/kakeibo/income' && method === 'PUT') {
+        const incomes = (body.incomes || {}) as Record<string, number>;
+        store.familyMembers = (store.familyMembers as Json[]).map((m) =>
+            typeof m.id === 'string' && m.id in incomes ? { ...m, monthly_income: num(incomes[m.id]) } : m) as never;
+        return ok({});
+    }
+    if (path === '/api/kakeibo/month' && method === 'PUT') {
+        kakeiboState.savingsGoal = num(body.savings_goal);
+        kakeiboState.notes = typeof body.notes === 'string' ? body.notes : '';
+        return ok({});
+    }
+    if (path === '/api/kakeibo/pillars') {
+        const budget = demoCategories.budget;
+        const mapping: Record<string, string> = {};
+        for (const c of budget) mapping[c] = pillarFor(c);
+        return ok({ pillars: ['survival', 'wants', 'culture', 'extra'], mapping });
+    }
     if (path === '/api/budget/recurring' && method === 'GET') { const { month, year } = monthYearOf(q); return ok(recurringForMonth(month, year)); }
     if (path === '/api/budget/recurring' && method === 'POST') return ok(create('budgetRecurring', { is_active: true, is_pointed: false, ...body }));
     if (seg[1] === 'budget' && seg[2] === 'recurring' && seg[4] === 'point') {

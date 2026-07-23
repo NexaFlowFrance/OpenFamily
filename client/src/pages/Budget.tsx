@@ -17,6 +17,7 @@ import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../i18n/format';
 import { useCategories } from '../hooks/useCategories';
+import KakeiboView from './budget/KakeiboView';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -168,11 +169,20 @@ const CategorySelect: React.FC<{ value: string; onChange: (v: string) => void }>
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const Budget: React.FC = () => {
-    const { t } = useTranslation(['budget', 'common']);
+    const { t } = useTranslation(['budget', 'kakeibo', 'common']);
     const categoryLabel = (v: string) => t(`budget:categories.${v}`, { defaultValue: v });
     const { user } = useAuth();
     const currency = user?.currency || 'EUR';
     const canEdit = Boolean(user?.is_owner) || (user?.role ?? '').toLowerCase() !== 'enfant';
+
+    // Classic budget vs kakeibo mode. Persisted per browser so the choice sticks.
+    const [mode, setMode] = useState<'classic' | 'kakeibo'>(
+        () => (localStorage.getItem('openfamily.budgetMode') === 'kakeibo' ? 'kakeibo' : 'classic')
+    );
+    const switchMode = (next: 'classic' | 'kakeibo') => {
+        setMode(next);
+        localStorage.setItem('openfamily.budgetMode', next);
+    };
 
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -479,7 +489,38 @@ const Budget: React.FC = () => {
                 </button>
             </div>
 
-            <div className="px-4 pt-4 space-y-3">
+            {/* Mode switch: classic budget vs kakeibo */}
+            <div className="px-4 pt-4">
+                <div className="flex gap-1 rounded-input border border-border bg-surface-2 p-1">
+                    {(['classic', 'kakeibo'] as const).map((m) => (
+                        <button
+                            key={m}
+                            type="button"
+                            onClick={() => switchMode(m)}
+                            className={`flex-1 rounded-input px-3 py-1.5 text-sm font-medium transition ${
+                                mode === m ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            {t(`kakeibo:mode.${m}`)}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {mode === 'kakeibo' && (
+                <div className="px-4 pt-3">
+                    <KakeiboView
+                        month={currentMonth}
+                        year={currentYear}
+                        canEdit={canEdit}
+                        currency={currency}
+                        categoryLabel={categoryLabel}
+                        reloadKey={entries.length + recurring.length}
+                    />
+                </div>
+            )}
+
+            <div className="px-4 pt-4 space-y-3" style={{ display: mode === 'classic' ? undefined : 'none' }}>
 
                 {/* Bannière lecture seule (enfant) */}
                 {!canEdit && (

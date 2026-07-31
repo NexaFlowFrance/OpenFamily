@@ -1,0 +1,66 @@
+{
+  "appName": "OpenFamily",
+  "demo": {
+    "notice": "演示模式——更改不会保存，并会在重新加载后重置。",
+    "reset": "重置",
+    "star": "在 GitHub 上加星"
+  },
+  "language": {
+    "syncError": "无法保存语言偏好。",
+    "currencySyncError": "无法更新默认货币。"
+  },
+  "actions": {
+    "add": "添加",
+    "edit": "编辑",
+    "delete": "删除",
+    "cancel": "取消",
+    "save": "保存",
+    "saveChanges": "保存更改",
+    "close": "关闭",
+    "confirm": "确认",
+    "create": "创建",
+    "update": "更新",
+    "search": "搜索",
+    "filter": "筛选",
+    "back": "返回",
+    "today": "今天",
+    "retry": "重试",
+    "apply": "应用",
+    "reset": "重置",
+    "export": "导出",
+    "import": "导入",
+    "clear": "清除",
+    "send": "发送",
+    "loadMore": "加载更多"
+  },
+  "states": {
+    "loading": "正在加载……",
+    "saving": "正在保存……",
+    "empty": "这里暂时没有内容",
+    "error": "发生错误"
+  },
+  "labels": {
+    "name": "名称",
+    "fullName": "姓名",
+    "description": "说明",
+    "date": "日期",
+    "time": "时间",
+    "startTime": "开始时间",
+    "endTime": "结束时间",
+    "location": "地点",
+    "notes": "备注",
+    "category": "类别",
+    "quantity": "数量",
+    "price": "价格",
+    "amount": "金额",
+    "email": "电子邮箱",
+    "password": "密码",
+    "optional": "可选",
+    "all": "全部",
+    "none": "无"
+  },
+  "days": ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
+  "daysShort": ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+  "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+  "monthsShort": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+}

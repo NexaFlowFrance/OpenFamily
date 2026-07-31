@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { CONFIGURED_LANGUAGE_ORDER } from './languages';
 
 // Auto-import every locale file: ./locales/<lng>/<namespace>.json
 // Dropping a new JSON file in that folder is enough — no manual wiring needed.
@@ -20,12 +21,12 @@ for (const filePath in modules) {
 
 // Languages are discovered from the locale folders themselves: to add a new
 // language, just drop a `locales/<lng>/` folder of JSON files — it appears in
-// the switcher automatically. `en` and `fr` are listed first, the rest A→Z.
-const PREFERRED_ORDER = ['en', 'fr'];
+// the switcher automatically. Configured languages are listed first in config
+// order, followed by unconfigured locale folders A→Z.
 const discovered = Object.keys(resources);
 export const SUPPORTED_LANGUAGES: string[] = [
-    ...PREFERRED_ORDER.filter((l) => discovered.includes(l)),
-    ...discovered.filter((l) => !PREFERRED_ORDER.includes(l)).sort(),
+    ...CONFIGURED_LANGUAGE_ORDER.filter((l) => discovered.includes(l)),
+    ...discovered.filter((l) => !CONFIGURED_LANGUAGE_ORDER.includes(l)).sort(),
 ];
 
 const namespaces = Array.from(

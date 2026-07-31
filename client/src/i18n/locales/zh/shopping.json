@@ -1,0 +1,81 @@
+{
+  "loading": "正在加载购物清单……",
+  "header": {
+    "title": "购物清单",
+    "remaining_one": "还剩 {{count}} 个项目",
+    "remaining_other": "还剩 {{count}} 个项目"
+  },
+  "categories": {
+    "Alimentation": "食品杂货",
+    "Bebe": "婴儿用品",
+    "Menage": "家居用品",
+    "Sante": "健康",
+    "Autre": "其他"
+  },
+  "qty": "数量",
+  "storeMode": {
+    "enter": "商店模式",
+    "title": "商店模式",
+    "cart": "购物车中有 {{done}}/{{total}} 项",
+    "remaining_one": "还剩 {{count}} 项",
+    "remaining_other": "还剩 {{count}} 项",
+    "emptyList": "清单为空"
+  },
+  "add": {
+    "title": "添加项目",
+    "namePlaceholder": "例如：牛奶、面包",
+    "category": "类别",
+    "qtyPlaceholder": "1",
+    "pricePlaceholder": "2.50"
+  },
+  "templates": {
+    "title": "购物模板",
+    "newLabel": "新建模板",
+    "newPlaceholder": "例如：每周采购",
+    "create": "创建模板",
+    "existing": "现有模板",
+    "selectPlaceholder": "选择模板",
+    "optionItems_one": "{{count}} 个项目",
+    "optionItems_other": "{{count}} 个项目"
+  },
+  "list": {
+    "emptyTitle": "购物清单为空",
+    "emptySubtitle": "添加项目或应用模板。",
+    "completed_one": "已勾选项目（{{count}}）",
+    "completed_other": "已勾选项目（{{count}}）",
+    "clean": "清除"
+  },
+  "footer": {
+    "estimatedTotal": "预计总额"
+  },
+  "dialog": {
+    "title": "新建购物模板",
+    "description": "选择要包含在此模板中的项目",
+    "nameLabel": "模板名称",
+    "namePlaceholder": "例如：每周采购、水果蔬菜……",
+    "itemsSelected": "项目（已选择 {{selected}}/{{total}}）",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "deselect": "取消选择",
+    "create": "创建模板"
+  },
+  "errors": {
+    "loadItems": "无法加载购物清单。",
+    "loadTemplates": "无法加载模板。",
+    "nameRequired": "必须填写项目名称。",
+    "quantityInvalid": "数量必须为正数。",
+    "priceInvalid": "价格必须为有效数字。",
+    "addFailed": "无法添加此项目。",
+    "toggleFailed": "无法更新此项目。",
+    "deleteFailed": "无法删除此项目。",
+    "clearFailed": "无法清除已勾选项目。",
+    "noItemsForTemplate": "清单中没有可用于创建模板的项目。",
+    "templateNameRequired": "请填写模板名称。",
+    "selectAtLeastOne": "请至少选择一个项目加入模板。",
+    "saveTemplateFailed": "无法保存模板。",
+    "selectTemplateApply": "请选择要应用的模板。",
+    "applyTemplateFailed": "无法应用此模板。",
+    "selectTemplateDelete": "请选择要删除的模板。",
+    "deleteTemplateFailed": "无法删除此模板。"
+  }
+}

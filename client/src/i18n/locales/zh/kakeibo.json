@@ -1,0 +1,33 @@
+{
+  "mode": {
+    "classic": "经典",
+    "kakeibo": "家计簿"
+  },
+  "availableTitle": "可支配金额",
+  "availableSub": "收入 {{income}} − 储蓄目标 {{goal}}",
+  "spentSoFar": "已支出：{{amount}}",
+  "householdIncome": "家庭收入",
+  "extraIncome": "本月额外收入",
+  "totalIncome": "总收入",
+  "savingsGoal": "储蓄目标",
+  "pillarsTitle": "钱花到哪里了？",
+  "pillars": {
+    "survival": "生存",
+    "wants": "享受",
+    "culture": "成长",
+    "extra": "额外"
+  },
+  "pillarHint": {
+    "survival": "生活必需",
+    "wants": "兴趣享受",
+    "culture": "自我成长",
+    "extra": "意外支出"
+  },
+  "noExpenses": "本月暂无支出记录。",
+  "reviewTitle": "月末回顾",
+  "actualSavings": "实际储蓄",
+  "goalReached": "已达成目标，并超出 {{amount}}！",
+  "goalMissed": "距离目标还差 {{amount}}。",
+  "notesLabel": "复盘笔记",
+  "notesPlaceholder": "哪些方面做得好？下个月可以如何改进？"
+}

@@ -1,0 +1,51 @@
+{
+  "loading": "正在加载餐食计划……",
+  "title": "餐食计划",
+  "subtitle": "规划本周餐食",
+  "thisWeek": "本周",
+  "weekOf": "{{start}} 至 {{end}} 这一周",
+  "mealTypes": {
+    "Petit-déjeuner": "早餐",
+    "Déjeuner": "午餐",
+    "Dîner": "晚餐",
+    "Snack": "加餐"
+  },
+  "dialog": {
+    "editTitle": "编辑餐食",
+    "addTitle": "添加餐食",
+    "descriptionFmt": "{{type}} — {{date}}"
+  },
+  "form": {
+    "mealType": "餐食类型",
+    "recipe": "食谱（可选）",
+    "noRecipe": "不使用食谱",
+    "customMeal": "或自定义餐食",
+    "customMealPlaceholder": "例如：自制披萨",
+    "notes": "备注（可选）",
+    "notesPlaceholder": "更多备注……"
+  },
+  "shopping": {
+    "button": "将食材添加到购物清单",
+    "dialogTitle": "将食材添加到购物清单",
+    "dialogDescription": "{{start}} 至 {{end}} 期间计划食谱中的食材。取消勾选不需要的食材。",
+    "empty": "本周没有安排包含食谱的餐食。",
+    "selectedCount": "已选择 {{selected}}/{{total}} 种食材",
+    "alreadyOnList": "已在清单中",
+    "confirm_one": "添加 {{count}} 种食材",
+    "confirm_other": "添加 {{count}} 种食材",
+    "successTitle": "食材已添加",
+    "successDescription_one": "已向购物清单添加 {{count}} 个项目。",
+    "successDescription_other": "已向购物清单添加 {{count}} 个项目。",
+    "partialTitle": "部分食材未能添加",
+    "partialDescription": "已添加 {{added}} 个，{{failed}} 个失败。",
+    "errorTitle": "无法添加食材",
+    "errorDescription": "没有项目添加到购物清单，请重试。"
+  },
+  "confirmDelete": "确定要删除这项餐食吗？",
+  "errors": {
+    "loadPlans": "无法加载餐食计划。",
+    "loadRecipes": "无法加载食谱。",
+    "save": "无法保存此餐食。",
+    "delete": "无法删除此餐食。"
+  }
+}

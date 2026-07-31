@@ -1,0 +1,70 @@
+{
+  "loading": "正在加载计划……",
+  "noMembers": {
+    "title": "请先添加家庭成员",
+    "subtitle": "每周计划以家庭成员档案为基础。",
+    "cta": "前往“家庭”"
+  },
+  "title": "每周计划",
+  "subtitle": "按周管理重复的工作时间和课程安排。",
+  "newEntry": "新建条目",
+  "thisWeek": "本周",
+  "allMembers": "所有成员",
+  "allTypes": "所有类型",
+  "types": {
+    "work": "工作",
+    "school": "上学",
+    "study": "学习",
+    "activity": "活动",
+    "other": "其他"
+  },
+  "add": "添加",
+  "nextDayShort": "+1天",
+  "dayFallback": "第 {{n}} 天",
+  "dialog": {
+    "editTitle": "编辑条目",
+    "createTitle": "新建条目",
+    "description": "定义条目并应用到一天或多天。"
+  },
+  "form": {
+    "member": "成员",
+    "type": "类型",
+    "title": "标题",
+    "titlePlaceholder": "例如：办公室 - 产品团队 / 数学课",
+    "days": "适用日期",
+    "weekdays": "周一至周五",
+    "fullWeek": "整周",
+    "selectedDay": "已选择：{{day}}",
+    "selectedDays": "已选择 {{count}} 天",
+    "start": "开始",
+    "end": "结束",
+    "nextDayHint": "于次日结束（+1 天）",
+    "thisWeekOnlyStrong": "仅本周",
+    "thisWeekOnlyRest": "。此条目仅适用于 {{date}} 所在的一周，否则将每周重复。",
+    "replaceConflicts": "替换所选日期中冲突的条目。如果存在冲突但未开启此选项，将跳过这些日期。",
+    "location": "地点（可选）",
+    "locationPlaceholder": "例如：上海办公室 / 第一中学",
+    "notes": "备注（可选）",
+    "notesPlaceholder": "实用信息、教室、科目、交通等……"
+  },
+  "submit": {
+    "applyToDays": "应用到所选日期"
+  },
+  "notice": {
+    "saved": "条目已保存。",
+    "savedDays_one": "已保存到 {{count}} 天。",
+    "savedDays_other": "已保存到 {{count}} 天。",
+    "savedDaysConflicts_one": "已保存到 {{count}} 天。以下日期存在冲突：{{days}}。",
+    "savedDaysConflicts_other": "已保存到 {{count}} 天。以下日期存在冲突：{{days}}。"
+  },
+  "confirmDelete": "删除此条目？",
+  "errors": {
+    "loadMembers": "无法加载成员。",
+    "loadEntries": "无法加载计划。",
+    "deleteEntry": "无法删除此条目。",
+    "memberTitleRequired": "必须填写成员和标题。",
+    "timesSame": "开始时间和结束时间不能相同。",
+    "selectDay": "请至少选择一天。",
+    "save": "无法保存此条目。"
+  }
+}

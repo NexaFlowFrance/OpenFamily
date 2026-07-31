@@ -1,0 +1,25 @@
+{
+  "title": "类别",
+  "subtitle": "自定义购物、食谱和预算使用的类别列表。重命名类别会同步更新现有项目。",
+  "parentOnly": "只有家长可以编辑类别。",
+  "modules": {
+    "shopping": "购物",
+    "recipe": "食谱",
+    "budget": "预算"
+  },
+  "addPlaceholder": "新类别……",
+  "add": "添加",
+  "save": "保存",
+  "saved": "类别已保存。",
+  "reset": "取消更改",
+  "moveUp": "上移",
+  "moveDown": "下移",
+  "remove": "移除",
+  "hintReassign": "已移除类别中的项目将移至“{{fallback}}”。",
+  "errors": {
+    "empty": "类别名称不能为空。",
+    "duplicate": "类别重复：{{name}}",
+    "atLeastOne": "请至少保留一个类别。",
+    "save": "无法保存类别。"
+  }
+}

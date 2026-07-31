@@ -1,0 +1,122 @@
+{
+  "loading": "正在加载家庭……",
+  "title": "家庭",
+  "subtitle": "管理家庭成员",
+  "addMember": "添加成员",
+  "empty": "暂无家庭成员，添加第一位成员吧！",
+  "roles": {
+    "Parent": "家长",
+    "Enfant": "孩子",
+    "Etudiant": "学生",
+    "Autre": "其他"
+  },
+  "colors": {
+    "coral": "珊瑚色",
+    "orange": "橙色",
+    "yellow": "黄色",
+    "green": "绿色",
+    "cyan": "青色",
+    "blue": "蓝色",
+    "indigo": "靛蓝色",
+    "pink": "粉色"
+  },
+  "card": {
+    "age_one": "{{count}} 岁",
+    "age_other": "{{count}} 岁",
+    "health": "健康",
+    "allergies": "过敏：",
+    "medications": "药物：",
+    "emergency": "紧急联系人"
+  },
+  "shared": {
+    "title": "共享账号",
+    "subtitle": "与其他账号共享你的家庭数据。",
+    "you": "（你）",
+    "owner": "所有者",
+    "child": "🧒 孩子",
+    "parent": "👨 家长",
+    "none": "目前没有其他账号共享此家庭。",
+    "roleParent": "家长",
+    "roleChild": "孩子",
+    "roleTitle": "成员角色",
+    "transferTitle": "将所有权转让给此账号",
+    "kickTitle": "移除此账号"
+  },
+  "link": {
+    "label": "关联账号",
+    "none": "未关联账号",
+    "hint": "将此档案关联到共享账号：孩子账号将能看到自己的储蓄罐和目标。"
+  },
+  "requests": {
+    "title": "访问请求",
+    "accept": "接受",
+    "rejectTitle": "拒绝"
+  },
+  "myRequest": {
+    "pendingTitle": "等待处理的请求",
+    "sentTo": "已发送给 {{name}}（{{email}}）"
+  },
+  "join": {
+    "title": "加入家庭",
+    "desc": "输入你想加入的家庭所有者邮箱，对方将收到请求并决定接受或拒绝。",
+    "rejected": "你上次的请求已被拒绝。",
+    "emailPlaceholder": "email@example.com",
+    "sending": "正在发送……",
+    "send": "发送请求",
+    "emailRequired": "必须填写电子邮箱地址"
+  },
+  "invite": {
+    "roleLabel": "邀请身份",
+    "generate": "生成邀请链接",
+    "generating": "正在生成……",
+    "copyTitle": "复制"
+  },
+  "leave": {
+    "leaving": "正在退出……",
+    "leave": "退出共享家庭"
+  },
+  "dialog": {
+    "editTitle": "编辑成员",
+    "addTitle": "添加成员",
+    "description": "填写家庭成员详情"
+  },
+  "form": {
+    "name": "姓名",
+    "namePlaceholder": "例如：张三",
+    "role": "角色",
+    "color": "颜色",
+    "birthdate": "出生日期（可选）",
+    "healthInfo": "健康信息",
+    "allergies": "过敏项（用逗号分隔）",
+    "allergiesPlaceholder": "例如：花生、乳糖",
+    "medications": "药物（用逗号分隔）",
+    "medicationsPlaceholder": "例如：阿司匹林、胰岛素",
+    "emergencyContact": "紧急联系人",
+    "contactName": "联系人姓名",
+    "contactNamePlaceholder": "例如：李四",
+    "contactPhone": "联系电话",
+    "contactPhonePlaceholder": "例如：+86 138 0000 0000",
+    "notes": "备注（可选）",
+    "notesPlaceholder": "更多备注……"
+  },
+  "confirm": {
+    "kick": "将此账号移出家庭？",
+    "transfer": "将家庭所有权转让给 {{name}}？\n\n你将成为普通成员。所有家庭数据都会保留，并由新的所有者管理。此操作无法撤销。",
+    "delete": "确定要删除这位家庭成员吗？",
+    "leave": "退出共享家庭？之后你将恢复自己的独立数据。"
+  },
+  "errors": {
+    "load": "无法加载家庭。",
+    "save": "无法保存此成员。",
+    "delete": "无法删除此成员。",
+    "kick": "无法移除此成员。",
+    "role": "无法更改角色。",
+    "transfer": "无法转让所有权。",
+    "leave": "无法退出家庭。",
+    "invite": "无法创建邀请链接。",
+    "cancelRequest": "无法取消请求。",
+    "sendRequest": "无法发送请求。",
+    "approve": "无法接受请求。",
+    "reject": "无法拒绝请求。"
+  }
+}

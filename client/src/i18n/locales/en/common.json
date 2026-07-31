@@ -6,7 +6,8 @@
     "star": "Star on GitHub"
   },
   "language": {
-    "syncError": "Could not save your language preference."
+    "syncError": "Could not save your language preference.",
+    "currencySyncError": "Could not update the default currency."
   },
   "actions": {
     "add": "Add",

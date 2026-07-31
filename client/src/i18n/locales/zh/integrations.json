@@ -1,0 +1,86 @@
+{
+  "title": "集成",
+  "subtitle": "连接你的自托管应用，集中管理食谱、菜单、购物和日历。",
+  "connected": "已连接",
+  "available": "可用",
+  "status": {
+    "error": "错误",
+    "connected": "已连接"
+  },
+  "lastSync": "同步于 {{date}}",
+  "syncTitle": "同步",
+  "disconnectTitle": "断开连接",
+  "confirmDisconnect": "断开此集成？",
+  "modal": {
+    "connect": "连接 {{name}}",
+    "test": "测试",
+    "testing": "正在测试……",
+    "connecting": "正在连接……",
+    "connectBtn": "连接",
+    "encrypted": "凭据使用 AES-256 加密，并且只存储在你的服务器上。",
+    "error": "错误"
+  },
+  "syncs": {
+    "recipes": "食谱",
+    "menus": "菜单",
+    "shopping": "购物清单",
+    "stock": "库存",
+    "calendar": "日历",
+    "appointments": "日程",
+    "photos": "照片"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "食谱管理器",
+      "description": "从自托管的 Mealie 实例导入食谱和菜单。",
+      "urlLabel": "实例 URL",
+      "urlPlaceholder": "https://mealie.mydomain.com",
+      "keyLabel": "API 密钥",
+      "keyPlaceholder": "在 Mealie > 个人资料 > API 密钥中获取"
+    },
+    "tandoor": {
+      "tagline": "食谱簿",
+      "description": "从开源管理器 Tandoor 导入食谱。",
+      "urlLabel": "实例 URL",
+      "urlPlaceholder": "https://tandoor.mydomain.com",
+      "keyLabel": "API 令牌",
+      "keyPlaceholder": "在 Tandoor > 设置 > 令牌中获取"
+    },
+    "homeassistant": {
+      "tagline": "智能家居",
+      "description": "将购物清单与 Home Assistant 清单同步。",
+      "urlLabel": "实例 URL",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "长期访问令牌",
+      "tokenPlaceholder": "eyJ……（在个人资料 > 安全中获取）",
+      "entityLabel": "待办实体（可选）",
+      "entityPlaceholder": "todo.shopping_list"
+    },
+    "grocy": {
+      "tagline": "家庭管理",
+      "description": "同步 Grocy 中的购物清单和库存。",
+      "urlLabel": "实例 URL",
+      "urlPlaceholder": "https://grocy.mydomain.com",
+      "keyLabel": "API 密钥",
+      "keyPlaceholder": "在 Grocy > 管理 > API 密钥中获取"
+    },
+    "nextcloud": {
+      "tagline": "个人云",
+      "description": "将 Nextcloud 日历事件导入你的日程。",
+      "urlLabel": "Nextcloud URL",
+      "urlPlaceholder": "https://cloud.mydomain.com",
+      "userLabel": "用户名",
+      "userPlaceholder": "your.username",
+      "passwordLabel": "密码（或应用密码）",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "照片库",
+      "description": "在信息屏背景中随机显示自托管 Immich 照片库中的照片。",
+      "urlLabel": "实例 URL",
+      "urlPlaceholder": "https://immich.mydomain.com",
+      "keyLabel": "API 密钥",
+      "keyPlaceholder": "在 Immich > 账号设置 > API 密钥中获取"
+    }
+  }
+}

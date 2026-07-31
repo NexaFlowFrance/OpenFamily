@@ -1,0 +1,36 @@
+{
+  "exit": "退出",
+  "fullscreen": "全屏",
+  "exitFullscreen": "退出全屏",
+  "schedule": "今日日程",
+  "meals": "今日餐食",
+  "tasks": "今日待办",
+  "whereabouts": "今日家庭成员去向",
+  "shopping": "购物清单",
+  "allDay": "全天",
+  "undo": "撤销",
+  "empty": {
+    "appointments": "今天暂无安排",
+    "meals": "暂无餐食安排",
+    "tasks": "所有任务都完成了 ✨",
+    "whereabouts": "今天没有成员行程",
+    "shopping": "没有待购商品"
+  },
+  "displaySettings": {
+    "open": "显示设置",
+    "title": "显示设置",
+    "close": "关闭",
+    "location": "天气地点",
+    "searchPlaceholder": "搜索城市……",
+    "noResults": "没有结果",
+    "noLocation": "选择一个地点，在此信息屏上显示天气。",
+    "change": "更改",
+    "photoBackground": "照片背景",
+    "photoBackgroundHint": "随机显示照片库中的照片作为背景，需要连接 Immich 集成。"
+  },
+  "settings": {
+    "title": "信息屏",
+    "subtitle": "适用于壁挂平板或冰箱屏幕的全屏只读视图，展示今日日历、餐食、任务和家庭成员去向。",
+    "open": "打开信息屏"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "title": "设置",
+  "subtitle": "管理你的数据和偏好。",
+  "language": {
+    "title": "语言",
+    "subtitle": "选择应用界面的语言。"
+  },
+  "profile": {
+    "title": "头像",
+    "subtitle": "选择一张显示在应用菜单中的照片。",
+    "change": "更换照片",
+    "choose": "选择照片",
+    "remove": "移除"
+  },
+  "notif": {
+    "title": "推送通知",
+    "subtitle": "即使应用已关闭，也能直接在此设备上收到日程提醒。",
+    "unsupported": "此浏览器不支持通知。",
+    "denied": "权限被拒绝，请在浏览器设置中允许通知。",
+    "enable": "启用通知",
+    "disable": "停用通知",
+    "inProgress": "正在处理……",
+    "active": "已在此设备上启用通知。"
+  },
+  "currency": {
+    "title": "货币",
+    "subtitle": "选择应用中显示金额时使用的货币。"
+  },
+  "modules": {
+    "title": "模块",
+    "subtitle": "启用或隐藏可选模块，只保留你的家庭需要的功能。",
+    "parentOnly": "只有家长可以更改模块。",
+    "error": "更新模块时出错。",
+    "names": {
+      "kiosk": "信息屏模式",
+      "notes": "首页便签",
+      "ai": "AI 助手"
+    },
+    "descriptions": {
+      "budget": "跟踪家庭预算、支出和收入。",
+      "rewards": "管理孩子的零用钱和奖励。",
+      "meals": "规划每周餐食。",
+      "recipes": "家庭食谱簿。",
+      "planning": "每周安排（工作、上学、活动）。",
+      "integrations": "连接第三方服务（Mealie、Home Assistant 等）。",
+      "kiosk": "用于家庭共享屏幕的全屏显示。",
+      "notes": "显示在首页上的便签。",
+      "ai": "用于快速记录和整理的智能助手。"
+    }
+  },
+  "export": {
+    "title": "导出数据",
+    "subtitle": "将所有数据（预算、任务、食谱、成员、购物、日程、计划、餐食）下载为 JSON 文件。",
+    "button": "导出",
+    "inProgress": "正在导出……"
+  },
+  "import": {
+    "title": "导入数据",
+    "subtitle": "从 OpenFamily 导出文件恢复数据。现有数据不会被覆盖（重复项会跳过）。",
+    "success": "导入成功",
+    "itemsImported_one": "个项目已导入",
+    "itemsImported_other": "个项目已导入",
+    "chooseFile": "选择文件……",
+    "button": "导入",
+    "inProgress": "正在导入……",
+    "invalidJson": "JSON 文件无效。"
+  },
+  "entities": {
+    "family_members": "家庭成员",
+    "tasks": "任务",
+    "recipes": "食谱",
+    "meal_plans": "餐食计划",
+    "budget_entries": "预算记录",
+    "budget_limits": "预算限额",
+    "shopping_items": "购物项目",
+    "appointments": "日程",
+    "schedule_entries": "计划条目"
+  },
+  "errors": {
+    "notif": "配置通知时出错。",
+    "currency": "更新货币时出错。",
+    "avatarImage": "请选择图片。",
+    "avatarRead": "无法读取文件。",
+    "avatarInvalid": "图片无效。",
+    "avatarCanvas": "画布不可用。",
+    "avatarUpdate": "更新照片时出错。",
+    "avatarRemove": "移除照片时出错。",
+    "export": "导出时出错。",
+    "import": "导入时出错。"
+  }
+}

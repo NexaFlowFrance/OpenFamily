@@ -37,7 +37,7 @@
         "react-dom": "^19.0.0",
         "react-hook-form": "^7.49.3",
         "react-i18next": "^17.0.8",
-        "react-router-dom": "^6.21.1",
+        "react-router-dom": "^7.18.2",
         "recharts": "^2.10.3",
         "simple-icons": "^16.23.0",
         "tailwind-merge": "^2.2.0",

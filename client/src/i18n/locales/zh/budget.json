@@ -1,0 +1,100 @@
+{
+  "loading": "正在加载预算……",
+  "categories": {
+    "Logement": "住房",
+    "Alimentation": "食品杂货",
+    "Transport": "交通",
+    "Santé": "健康",
+    "Loisirs": "休闲",
+    "Abonnements": "订阅",
+    "Assurance": "保险",
+    "Enfants": "子女",
+    "Maison": "家居",
+    "Autre": "其他",
+    "Prélèvements": "定期扣款"
+  },
+  "readOnly": "只读模式。只有家长可以编辑预算。",
+  "alerts": {
+    "title": "已达到限额",
+    "over": " · 已超出",
+    "warn": "（≥ 80%）"
+  },
+  "balance": {
+    "current": "当前余额",
+    "pointed_one": "已标记 {{count}} 笔扣款",
+    "pointed_other": "已标记 {{count}} 笔扣款",
+    "expenses_one": "{{count}} 笔支出",
+    "expenses_other": "{{count}} 笔支出"
+  },
+  "forecast": {
+    "title": "预测",
+    "subtitle": "还有 {{amount}} 的扣款待标记"
+  },
+  "analytics": "分析与限额",
+  "charts": {
+    "expensesByCategory": "按类别统计支出",
+    "noExpenses": "本月暂无支出",
+    "yearEvolution": "年度趋势",
+    "income": "收入",
+    "expenses": "支出",
+    "recurring": "定期扣款"
+  },
+  "limits": {
+    "title": "每月限额",
+    "subtitle": "按类别跟踪支出",
+    "define": "设置",
+    "none": "未设置限额"
+  },
+  "sections": {
+    "recurring": "定期扣款",
+    "expenses": "支出",
+    "income": "收入"
+  },
+  "recurring": {
+    "empty": "暂无定期扣款",
+    "addOne": "+ 添加扣款",
+    "markOn": "标记为已扣款",
+    "markOff": "取消标记",
+    "dayPrefix": "每月"
+  },
+  "empty": {
+    "expenses": "本月暂无支出",
+    "income": "本月暂无收入"
+  },
+  "sheets": {
+    "recurringEdit": "编辑扣款",
+    "recurringNew": "新建扣款",
+    "edit": "编辑",
+    "newExpense": "新增支出",
+    "newIncome": "新增收入",
+    "limit": "每月限额"
+  },
+  "toggle": {
+    "expense": "支出",
+    "income": "收入"
+  },
+  "fields": {
+    "name": "扣款名称",
+    "namePlaceholder": "例如：房租、电费、Netflix……",
+    "amount": "金额（{{currency}}）",
+    "debitDay": "每月扣款日（1 至 31）",
+    "debitDayPlaceholder": "例如：5",
+    "description": "说明（可选）",
+    "descriptionPlaceholder": "例如：食品杂货、工资……",
+    "date": "日期",
+    "category": "类别",
+    "limit": "每月限额（{{currency}}）",
+    "limitHint": "设为 0 可取消对此类别的跟踪。"
+  },
+  "errors": {
+    "amountInvalid": "金额无效。",
+    "nameRequired": "必须填写名称。",
+    "debitDayInvalid": "扣款日无效（1-31）。",
+    "save": "保存时出错。",
+    "limitInvalid": "限额无效。"
+  },
+  "confirm": {
+    "deleteRecurring": "删除这笔定期扣款？",
+    "deleteEntry": "删除这条记录？"
+  }
+}

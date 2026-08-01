@@ -1,0 +1,74 @@
+{
+  "loading": "正在加载任务……",
+  "title": "任务",
+  "subtitle": "管理家庭任务并跟踪进度",
+  "newTask": "新建任务",
+  "priorities": {
+    "Haute": "高",
+    "Moyenne": "中",
+    "Basse": "低"
+  },
+  "frequencies": {
+    "Une fois": "一次",
+    "Quotidien": "每天",
+    "Hebdomadaire": "每周",
+    "Mensuel": "每月",
+    "Annuel": "每年"
+  },
+  "stats": {
+    "total": "总计",
+    "completed": "已完成",
+    "pending": "待完成",
+    "completionRate": "完成率"
+  },
+  "filters": {
+    "label": "筛选：",
+    "statusAll": "全部",
+    "statusPending": "待完成",
+    "statusCompleted": "已完成",
+    "allPriorities": "所有优先级",
+    "allMembers": "所有成员",
+    "unassigned": "未指派"
+  },
+  "empty": {
+    "none": "还没有任务，创建第一项任务吧！",
+    "noMatch": "没有符合所选筛选条件的任务。"
+  },
+  "due": "截止：{{date}}",
+  "dialog": {
+    "editTitle": "编辑任务",
+    "createTitle": "新建任务",
+    "description": "填写任务详情"
+  },
+  "form": {
+    "title": "标题",
+    "titlePlaceholder": "例如：采购食品",
+    "description": "说明（可选）",
+    "descriptionPlaceholder": "更多详情……",
+    "priority": "优先级",
+    "frequency": "频率",
+    "dueDate": "截止日期（可选）",
+    "assignTo": "指派给（可选）",
+    "noMembers": "没有可用成员",
+    "points": "可获得积分（可选）",
+    "pointsHint": "任务完成后，被指派的成员将获得这些积分。"
+  },
+  "approval": {
+    "pendingBadge": "等待批准",
+    "approve": "批准",
+    "reject": "拒绝",
+    "toastTitle": "做得好，任务已完成！",
+    "toastDescription": "家长批准后，你的积分就会到账。"
+  },
+  "confirmDelete": "确定要删除此任务吗？",
+  "errors": {
+    "loadTasks": "无法加载任务。",
+    "loadMembers": "无法加载成员。",
+    "loadStats": "无法加载统计数据。",
+    "saveTask": "无法保存此任务。",
+    "toggleTask": "无法更新此任务。",
+    "deleteTask": "无法删除此任务。",
+    "approveTask": "无法批准此任务。",
+    "rejectTask": "无法拒绝此任务。"
+  }
+}

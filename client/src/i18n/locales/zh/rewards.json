@@ -1,0 +1,86 @@
+{
+  "loading": "正在加载零用钱……",
+  "title": "零用钱",
+  "subtitle": "完成家务赚积分，积分可以兑换零用钱",
+  "empty": "还没有奖励，先给任务添加星星吧！",
+  "streak_one": "已连续 {{count}} 天",
+  "streak_other": "已连续 {{count}} 天",
+  "pendingCount_one": "{{count}} 项待处理",
+  "pendingCount_other": "{{count}} 项待处理",
+  "worth": "价值 {{amount}}",
+  "approvals": {
+    "title_one": "{{count}} 项任务待批准",
+    "title_other": "{{count}} 项任务待批准",
+    "approve": "批准",
+    "reject": "拒绝"
+  },
+  "actions": {
+    "adjust": "调整",
+    "redeem": "兑换"
+  },
+  "types": {
+    "earn": "获得积分",
+    "adjust": "积分调整",
+    "redeem": "已兑换零用钱"
+  },
+  "fields": {
+    "note": "备注（可选）"
+  },
+  "adjustDialog": {
+    "title": "调整 {{name}} 的积分",
+    "description": "添加奖励或扣除积分（输入负数）",
+    "points": "积分（+ 或 −）",
+    "notePlaceholder": "例如：帮忙整理了买回来的商品"
+  },
+  "redeemDialog": {
+    "title": "为 {{name}} 兑换零用钱",
+    "description": "可用余额：{{balance}} 积分",
+    "points": "要兑换的积分",
+    "amount": "兑换金额：{{amount}}",
+    "notePlaceholder": "例如：存钱罐、看电影……"
+  },
+  "goals": {
+    "add": "添加目标",
+    "editTitle": "编辑目标",
+    "progress": "{{current}} / {{target}}",
+    "markAchieved": "目标已达成 🎉"
+  },
+  "goalDialog": {
+    "addTitle": "为 {{name}} 新建目标",
+    "editTitle": "编辑 {{name}} 的目标",
+    "description": "用积分实现的储蓄目标",
+    "emoji": "表情符号",
+    "titleLabel": "标题",
+    "titlePlaceholder": "例如：电子游戏",
+    "target": "目标金额（{{currency}}）",
+    "delete": "删除"
+  },
+  "kid": {
+    "hello": "你好，{{name}}！",
+    "subtitle": "这是你的存钱罐",
+    "reached": "太棒了，你做到了！🎉",
+    "reachedHint": "请家长确认你的目标。",
+    "missing": "还差 {{amount}}",
+    "editGoal": "编辑我的目标",
+    "noGoal": "你还没有目标，选一个想实现的愿望吧！",
+    "addGoal": "选择我的目标",
+    "tasksTitle": "你的任务",
+    "allTasks": "查看全部",
+    "tasksEmpty": "现在没有任务，做得好！🎉",
+    "pendingBadge": "等待批准",
+    "historyTitle": "最近动态",
+    "notLinkedTitle": "你的存钱罐在等你！",
+    "notLinkedMessage": "请家长在“家庭”页面将你的账号关联到个人档案，以查看积分和目标。"
+  },
+  "settings": {
+    "rate": "1 积分 = {{value}}",
+    "title": "单个积分的价值",
+    "description": "设置每个积分对应的金额",
+    "label": "单个积分的价值",
+    "example": "示例：{{points}} 积分 = {{amount}}"
+  },
+  "errors": {
+    "load": "无法加载零用钱。",
+    "action": "无法执行此操作。"
+  }
+}

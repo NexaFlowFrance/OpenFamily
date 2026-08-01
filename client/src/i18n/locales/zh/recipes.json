@@ -1,0 +1,95 @@
+{
+  "loading": "正在加载食谱……",
+  "title": "食谱",
+  "subtitle": "你的家庭食谱库",
+  "newRecipe": "新建食谱",
+  "categories": {
+    "Entrée": "前菜",
+    "Plat": "主菜",
+    "Dessert": "甜点",
+    "Snack": "小吃"
+  },
+  "difficulties": {
+    "Facile": "简单",
+    "Moyen": "中等",
+    "Difficile": "困难"
+  },
+  "durations": {
+    "under15": "≤ 15 分钟",
+    "under30": "≤ 30 分钟",
+    "under60": "≤ 1 小时",
+    "over60": "> 1 小时"
+  },
+  "searchPlaceholder": "搜索食谱……",
+  "allCategories": "所有类别",
+  "allDifficulties": "所有难度",
+  "anyDuration": "不限时长",
+  "empty": {
+    "none": "还没有食谱，创建第一份食谱吧！",
+    "noMatch": "没有符合搜索条件的食谱。"
+  },
+  "card": {
+    "min": "{{n}} 分钟",
+    "servings_one": "{{count}} 人份",
+    "servings_other": "{{count}} 人份",
+    "view": "查看"
+  },
+  "dialog": {
+    "editTitle": "编辑食谱",
+    "createTitle": "新建食谱",
+    "description": "填写食谱详情"
+  },
+  "form": {
+    "name": "食谱名称",
+    "namePlaceholder": "例如：苹果派",
+    "category": "类别",
+    "difficulty": "难度",
+    "description": "说明（可选）",
+    "descriptionPlaceholder": "食谱简介……",
+    "prep": "准备（分钟）",
+    "prepPlaceholder": "30",
+    "cook": "烹饪（分钟）",
+    "cookPlaceholder": "45",
+    "servings": "份数",
+    "servingsPlaceholder": "4",
+    "ingredients": "食材（每行一种）",
+    "ingredientsPlaceholder": "200 克面粉\n3 个鸡蛋\n100 克糖",
+    "instructions": "步骤（每行一步）",
+    "instructionsPlaceholder": "烤箱预热至 180°C\n混合面粉和糖\n加入鸡蛋",
+    "tags": "标签（用逗号分隔）",
+    "tagsPlaceholder": "素食、快手、省钱",
+    "image": "图片 URL（可选）",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "从链接导入",
+    "title": "导入食谱",
+    "description": "粘贴食谱页面链接（Marmiton、750g、博客等），我们会自动填写表单。",
+    "urlLabel": "食谱页面 URL",
+    "urlPlaceholder": "https://www.marmiton.org/recettes/…",
+    "submit": "导入",
+    "importing": "正在导入……",
+    "successTitle": "食谱已导入",
+    "successDescription": "检查详情后保存。",
+    "errors": {
+      "notFoundTitle": "未找到食谱",
+      "notFound": "此页面中没有可读取的食谱。",
+      "fetchTitle": "导入失败",
+      "fetch": "无法获取此页面，请检查链接后重试。"
+    }
+  },
+  "detail": {
+    "prep": "准备：",
+    "cook": "烹饪：",
+    "servings": "份数：",
+    "minUnit": "分钟",
+    "ingredients": "食材",
+    "instructions": "步骤"
+  },
+  "confirmDelete": "确定要删除这份食谱吗？",
+  "errors": {
+    "load": "无法加载食谱。",
+    "save": "无法保存此食谱。",
+    "delete": "无法删除此食谱。"
+  }
+}

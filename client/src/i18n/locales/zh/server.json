@@ -1,0 +1,19 @@
+{
+  "title": "连接到你的服务器",
+  "subtitle": "OpenFamily 是自托管应用，请将客户端连接到你自己的服务器。",
+  "urlLabel": "服务器地址",
+  "placeholder": "http://192.168.1.10:3001",
+  "hint": "使用你在浏览器中打开的同一地址（例如 http://192.168.1.10:3001），或使用 HTTPS / Tailscale 地址。",
+  "connect": "连接",
+  "connecting": "正在连接……",
+  "errors": {
+    "invalid": "请输入以 http:// 或 https:// 开头的有效 URL",
+    "unreachable": "无法连接此服务器，请检查地址以及服务器是否正在运行。"
+  },
+  "settings": {
+    "title": "服务器",
+    "connectedTo": "已连接到 {{url}}",
+    "change": "更换服务器",
+    "disconnect": "断开连接"
+  }
+}

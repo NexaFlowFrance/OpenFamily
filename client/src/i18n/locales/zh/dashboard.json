@@ -1,0 +1,36 @@
+{
+  "heading": {
+    "before": "你的",
+    "highlight": "一天",
+    "after": "，一目了然。"
+  },
+  "budgetAlert": {
+    "title": "预算警告",
+    "message_one": "{{count}} 个类别已超出每月预算。",
+    "message_other": "{{count}} 个类别已超出每月预算。",
+    "cta": "查看详情"
+  },
+  "stats": {
+    "appointments": "日程",
+    "tasks": "任务",
+    "shopping": "购物",
+    "monthExpenses": "本月支出"
+  },
+  "today": {
+    "title": "今天",
+    "viewWeek": "查看本周",
+    "emptyTitle": "暂无安排。",
+    "emptySubtitle": "添加日程后会显示在这里。",
+    "emptyCta": "添加日程"
+  },
+  "aside": {
+    "shopping": "购物",
+    "shoppingCount_one": "件待购商品",
+    "shoppingCount_other": "件待购商品",
+    "budget": "本月预算",
+    "budgetSubtitle": "本月已支出",
+    "tasks": "待办任务",
+    "tasksCount_one": "项待完成任务",
+    "tasksCount_other": "项待完成任务"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "title": "通知",
+  "markAll": "全部标为已读",
+  "empty": "暂无通知",
+  "manage": "管理通知 →",
+  "timeAgo": {
+    "justNow": "刚刚",
+    "minutes": "{{count}} 分钟前",
+    "hours": "{{count}} 小时前",
+    "days": "{{count}} 天前"
+  },
+  "push": {
+    "unsupported": "此浏览器不支持推送通知",
+    "denied": "权限被拒绝",
+    "noVapid": "VAPID 密钥不可用"
+  }
+}

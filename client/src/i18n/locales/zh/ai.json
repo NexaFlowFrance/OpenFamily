@@ -1,0 +1,72 @@
+{
+  "magic": {
+    "open": "AI 助手",
+    "title": "AI 助手 ✨",
+    "description": "描述你想添加的内容，助手会处理其余工作。",
+    "placeholder": "添加周四晚上的千层面，并提醒小明带健身包……",
+    "parse": "分析",
+    "parsing": "正在分析……",
+    "nothingFound": "未在这条内容中找到可执行事项，请尝试换种说法。",
+    "back": "返回",
+    "reviewHint": "检查建议，取消勾选不需要的项目，然后确认。",
+    "confirm": "添加（{{count}}）",
+    "confirming": "正在添加……",
+    "successTitle": "完成 ✨",
+    "successDescription": "已添加 {{count}} 个项目。",
+    "partialTitle": "部分添加成功",
+    "partialDescription": "已添加 {{added}} 个，{{failed}} 个失败。",
+    "allFailed": "没有项目被添加，请重试。",
+    "types": {
+      "task": "任务",
+      "appointment": "日程",
+      "shopping_item": "购物",
+      "budget_entry": "预算"
+    }
+  },
+  "meals": {
+    "button": "推荐菜单 ✨",
+    "dialogTitle": "晚餐建议",
+    "dialogDescription": "{{start}} 至 {{end}} 这一周，根据你的食谱推荐。",
+    "loading": "助手正在编排菜单……",
+    "empty": "本周所有晚餐都已安排。",
+    "confirm": "添加到计划（{{count}}）",
+    "successTitle": "菜单已添加 ✨",
+    "successDescription": "已安排 {{count}} 顿晚餐。",
+    "partialTitle": "部分添加成功",
+    "partialDescription": "已添加 {{added}} 个，{{failed}} 个失败。"
+  },
+  "settings": {
+    "title": "AI 助手",
+    "subtitle": "连接本地或云端 AI 模型，用自然语言添加事项并获取菜单建议。",
+    "provider": "服务提供商",
+    "providers": {
+      "ollama": "Ollama（本地）",
+      "openai": "OpenAI 兼容 API",
+      "anthropic": "Anthropic Claude"
+    },
+    "baseUrl": "服务器 URL",
+    "apiKey": "API 密钥",
+    "keyKept": "•••（已保留）",
+    "clearKey": "清除已保存的密钥",
+    "model": "模型",
+    "enabled": "启用助手",
+    "privacy": "隐私说明：API 密钥经过加密，仅存储在你的服务器上。使用 Ollama 时，任何内容都不会离开家中，笔记会在本地处理。",
+    "parentOnly": "只有家长可以更改这些设置。",
+    "save": "保存",
+    "saving": "正在保存……",
+    "saved": "设置已保存。",
+    "test": "测试连接",
+    "testing": "正在测试……",
+    "testSuccess": "连接成功，模型响应正常。"
+  },
+  "errors": {
+    "AI_NOT_CONFIGURED": "尚未配置 AI 助手，请前往“设置”。",
+    "AI_DISABLED": "AI 助手已在“设置”中停用。",
+    "AI_UNREACHABLE": "无法连接 AI 服务提供商，请检查 URL 及服务是否正在运行。",
+    "AI_UNAUTHORIZED": "API 密钥被拒绝，请在“设置”中检查。",
+    "AI_MODEL_NOT_FOUND": "服务提供商中未找到该模型，请检查模型名称（例如 llama3.1）。",
+    "AI_INVALID_RESPONSE": "模型返回了无效响应，请重试或切换模型。",
+    "AI_PROVIDER_ERROR": "AI 服务提供商返回错误，请重试。",
+    "AI_NOT_ENOUGH_RECIPES": "请至少添加 5 份食谱，以便助手编排菜单。"
+  }
+}

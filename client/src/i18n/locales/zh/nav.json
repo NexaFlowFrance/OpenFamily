@@ -1,0 +1,42 @@
+{
+  "items": {
+    "today": "今天",
+    "shopping": "购物",
+    "tasks": "任务",
+    "rewards": "零用钱",
+    "calendar": "日程",
+    "planning": "计划",
+    "recipes": "食谱",
+    "meals": "餐食",
+    "budget": "预算",
+    "family": "家庭",
+    "integrations": "集成",
+    "settings": "设置"
+  },
+  "mobile": {
+    "home": "首页",
+    "planning": "计划",
+    "lists": "清单",
+    "budget": "预算",
+    "family": "家庭"
+  },
+  "quickActions": {
+    "title": "快捷操作",
+    "addShopping": "添加待购商品",
+    "addTask": "添加任务",
+    "addAppointment": "添加日程",
+    "addSchedule": "添加计划条目",
+    "addRecipe": "添加食谱",
+    "addMeal": "添加餐食",
+    "addExpense": "添加支出",
+    "addMember": "添加成员"
+  },
+  "user": {
+    "profile": "个人资料",
+    "toggleTheme": "切换主题",
+    "logout": "退出登录",
+    "openMenu": "打开菜单"
+  },
+  "offline": "当前处于离线模式，显示的数据来自缓存。恢复连接后即可继续更改。",
+  "pageTitleFallback": "首页"
+}

@@ -1,0 +1,60 @@
+{
+  "loading": "正在加载日历……",
+  "title": "日历",
+  "subtitle": "管理家庭日程",
+  "exportIcal": "导出（iCal）",
+  "newAppointment": "新建日程",
+  "moreOthers": "另有 {{count}} 项",
+  "upcoming": {
+    "title": "即将开始的日程",
+    "empty": "暂无即将开始的日程"
+  },
+  "dialog": {
+    "editTitle": "编辑日程",
+    "createTitle": "新建日程",
+    "description": "填写日程详情"
+  },
+  "form": {
+    "title": "标题",
+    "titlePlaceholder": "例如：医生预约",
+    "description": "说明（可选）",
+    "descriptionPlaceholder": "更多详情……",
+    "scheduling": "时间安排",
+    "startDate": "开始日期",
+    "startTime": "开始时间",
+    "endDate": "结束日期",
+    "endTime": "结束时间",
+    "location": "地点（可选）",
+    "locationPlaceholder": "例如：医生诊所",
+    "members": "家庭成员（可选）",
+    "noMembersHint": "添加成员后即可快速指派。",
+    "goToFamily": "前往“家庭”",
+    "reminders": "提醒",
+    "reminder30": "提前 30 分钟",
+    "reminder1h": "提前 1 小时",
+    "notes": "备注（可选）",
+    "notesPlaceholder": "更多备注……"
+  },
+  "feed": {
+    "title": "导出日历（iCal）",
+    "description": "通过 Apple 日历、Google 日历或 Outlook 订阅，自动同步你的日程。",
+    "generating": "正在生成链接……",
+    "subscribeLink": "订阅链接",
+    "subscribeApple": "订阅（Apple / Outlook）",
+    "downloadIcs": "下载 .ics 文件",
+    "privateNote": "此链接为私密链接：任何拥有链接的人都可以查看你的日程。",
+    "regenerate": "重新生成链接"
+  },
+  "confirmDelete": "确定要删除这项日程吗？",
+  "confirmRegen": "重新生成链接？现有订阅将停止工作。",
+  "errors": {
+    "loadAppointments": "无法加载日程。",
+    "loadMembers": "无法加载成员。",
+    "icalFetch": "无法获取 iCal 链接。",
+    "icalRegen": "无法重新生成链接。",
+    "startRequired": "请输入开始日期和时间。",
+    "endAfterStart": "结束时间必须晚于开始时间。",
+    "save": "无法保存此日程。",
+    "delete": "无法删除此日程。"
+  }
+}

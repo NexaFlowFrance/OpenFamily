@@ -1,0 +1,35 @@
+{
+  "title": "家庭便签",
+  "add": "添加便签",
+  "addTitle": "新建冰箱便签",
+  "placeholder": "别忘了带健身包！",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "颜色",
+  "colors": {
+    "yellow": "黄色",
+    "pink": "粉色",
+    "blue": "蓝色",
+    "green": "绿色",
+    "orange": "橙色"
+  },
+  "expiryLabel": "有效期",
+  "expiry": {
+    "today": "今晚到期",
+    "day": "24 小时",
+    "week": "1 周",
+    "never": "永不过期"
+  },
+  "submit": "贴上便签",
+  "cancel": "取消",
+  "delete": "移除此便签",
+  "deleted": "便签已从冰箱移除",
+  "added": "便签已贴到冰箱上",
+  "emptyHint": "给家人留张小便签，它会显示在这里和信息屏上。",
+  "by": "{{name}} 留言",
+  "age": {
+    "now": "刚刚",
+    "minutes": "{{count}} 分钟前",
+    "hours": "{{count}} 小时前",
+    "days": "{{count}} 天前"
+  }
+}

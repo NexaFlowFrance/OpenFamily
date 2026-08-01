@@ -28,7 +28,9 @@ jobs:
         run: npm run install:all
 
       - name: Audit production dependencies
-        run: npm audit --omit=dev
+        # Strict gate with a documented allow-list (see scripts/audit-ci.mjs) so a
+        # non-applicable advisory can't be "fixed" by a harmful downgrade.
+        run: node scripts/audit-ci.mjs
 
       - name: Build shared
         run: npm run build:shared

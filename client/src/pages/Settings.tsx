@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
-import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid, Server, Tags, ArrowUp, ArrowDown, Plus } from 'lucide-react';
+import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid, Server, Tags, ArrowUp, ArrowDown, Plus, Heart, Star } from 'lucide-react';
 import { Card, CardContent, Button, Input, Select } from '../components/ui';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useNotifications } from '../hooks/useNotifications';
@@ -1134,6 +1134,42 @@ const Settings: React.FC = () => {
                                         {importLoading ? t('settings:import.inProgress') : t('settings:import.button')}
                                     </Button>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Support the project — a passive link, never a prompt or a nag: this
+                app is self-hosted and must stay out of the user's way. */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-primary-soft text-primary">
+                            <Heart className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-caption font-semibold text-foreground">{t('settings:support.title')}</h3>
+                            <p className="mt-1 text-micro text-muted-foreground">{t('settings:support.subtitle')}</p>
+                            <div className="mt-4 flex flex-wrap items-center gap-3">
+                                <a
+                                    href="https://ko-fi.com/nexaflowfrance"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex h-9 items-center gap-2 rounded-input border border-border bg-card px-3 text-caption font-medium text-foreground hover:bg-surface-2 transition-colors duration-fast"
+                                >
+                                    <Heart className="h-4 w-4" />
+                                    {t('settings:support.sponsor')}
+                                </a>
+                                <a
+                                    href="https://github.com/NexaFlowFrance/OpenFamily"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex h-9 items-center gap-2 rounded-input border border-border bg-card px-3 text-caption font-medium text-foreground hover:bg-surface-2 transition-colors duration-fast"
+                                >
+                                    <Star className="h-4 w-4" />
+                                    {t('settings:support.star')}
+                                </a>
                             </div>
                         </div>
                     </div>

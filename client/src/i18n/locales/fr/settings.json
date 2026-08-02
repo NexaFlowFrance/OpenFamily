@@ -87,5 +87,11 @@
     "avatarRemove": "Erreur lors de la suppression de la photo.",
     "export": "Erreur lors de l'export.",
     "import": "Erreur lors de l'import."
+  },
+  "support": {
+    "title": "Soutenir OpenFamily",
+    "subtitle": "OpenFamily est gratuit, open source et auto-hébergé sur votre propre serveur. Si l'application aide votre famille, vous pouvez soutenir son développement — elle restera gratuite dans tous les cas.",
+    "sponsor": "Offrir un café",
+    "star": "Mettre une étoile sur GitHub"
   }
 }

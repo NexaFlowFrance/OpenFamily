@@ -87,5 +87,11 @@
     "avatarRemove": "移除照片时出错。",
     "export": "导出时出错。",
     "import": "导入时出错。"
+  },
+  "support": {
+    "title": "支持 OpenFamily",
+    "subtitle": "OpenFamily 是免费开源的，自托管在你自己的服务器上。如果它对你的家庭有帮助，你可以支持它的开发——无论如何它都会保持免费。",
+    "sponsor": "请我喝杯咖啡",
+    "star": "在 GitHub 上加星"
   }
 }

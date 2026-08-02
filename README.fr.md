@@ -107,6 +107,20 @@ npm run dev
 
 JWT (7 j, refresh auto) · bcrypt (cost 12) · helmet · rate limiting · CORS strict · validation serveur.
 
+## 💛 Soutenir le projet
+
+OpenFamily est gratuit, open source (AGPL-3.0) et auto-hébergé — sans publicité, sans
+pistage, sans version payante. Il est développé et maintenu sur du temps personnel. Si
+l'application aide votre famille, vous pouvez soutenir son développement :
+
+<p>
+  <a href="https://ko-fi.com/nexaflowfrance">
+    <img src="https://img.shields.io/badge/☕%20Offrir%20un%20café-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Soutenir OpenFamily sur Ko-fi" />
+  </a>
+</p>
+
+Mettre une étoile au dépôt aide tout autant — c'est ainsi que d'autres familles découvrent le projet.
+
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues — ouvrez une [issue](https://github.com/NexaFlowFrance/OpenFamily/issues) ou une [pull request](https://github.com/NexaFlowFrance/OpenFamily/pulls).

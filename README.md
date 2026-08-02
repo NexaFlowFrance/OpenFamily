@@ -165,6 +165,20 @@ server-side input validation · structured logs (no sensitive data).
 
 Planned features and design decisions live in [ROADMAP.md](ROADMAP.md).
 
+## 💛 Support the project
+
+OpenFamily is free, open source (AGPL-3.0) and self-hosted — no ads, no tracking, no paid
+tier. It is built and maintained on personal time. If it helps your family, you can support
+its development:
+
+<p>
+  <a href="https://ko-fi.com/nexaflowfrance">
+    <img src="https://img.shields.io/badge/☕%20Buy%20me%20a%20coffee-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support OpenFamily on Ko-fi" />
+  </a>
+</p>
+
+Starring the repository helps just as much — it is how other families find the project.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Open an [issue](https://github.com/NexaFlowFrance/OpenFamily/issues)

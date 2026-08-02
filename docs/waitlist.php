@@ -20,6 +20,9 @@ header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 
 const MAX_PER_IP_PER_HOUR = 5;
+// ~45 000 records. Far beyond a pre-launch list, and small enough that the
+// dedupe scan can never become the thing that takes the hosting account down.
+const MAX_STORAGE_BYTES = 5 * 1024 * 1024;
 
 function respond(int $status, array $payload): never
 {
@@ -66,33 +69,76 @@ if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email
     respond(422, ['ok' => false, 'error' => 'invalid_email']);
 }
 
-// ── Rate limit per IP (best effort, file based) ──────────────────────────────
+// ── Rate limit per IP ────────────────────────────────────────────────────────
+// REMOTE_ADDR is the real client on this host (LiteSpeed terminates TLS itself).
+// X-Forwarded-For is NOT read on purpose: with no proxy in front it is fully
+// attacker-controlled, which would turn the limit into a no-op.
 $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
-$throttleFile = sys_get_temp_dir() . '/of-waitlist-' . hash('sha256', $ip) . '.txt';
 $now = time();
-$hits = is_file($throttleFile)
-    ? array_filter(array_map('intval', explode(',', (string) file_get_contents($throttleFile))), fn($t) => $t > $now - 3600)
-    : [];
+$throttleFile = sys_get_temp_dir() . '/of-waitlist-' . hash('sha256', $ip) . '.txt';
+
+// One exclusive lock held across BOTH the read and the write: without it,
+// concurrent requests all read the same counter, all pass, and all overwrite
+// each other — the limit would only ever count sequential requests.
+$fh = @fopen($throttleFile, 'c+');
+if (!$fh || !flock($fh, LOCK_EX)) {
+    if ($fh) { fclose($fh); }
+    respond(503, ['ok' => false, 'error' => 'unavailable']);
+}
+$hits = array_values(array_filter(
+    array_map('intval', explode(',', (string) stream_get_contents($fh))),
+    static fn($t) => $t > $now - 3600
+));
 if (count($hits) >= MAX_PER_IP_PER_HOUR) {
+    flock($fh, LOCK_UN);
+    fclose($fh);
     respond(429, ['ok' => false, 'error' => 'too_many_requests']);
 }
 $hits[] = $now;
-@file_put_contents($throttleFile, implode(',', $hits), LOCK_EX);
+ftruncate($fh, 0);
+rewind($fh);
+fwrite($fh, implode(',', $hits));
+fflush($fh);
+flock($fh, LOCK_UN);
+fclose($fh);
+
+// Drop stale throttle files now and then: one per visitor IP would otherwise
+// pile up until the account runs out of inodes.
+if (random_int(1, 100) === 1) {
+    foreach (glob(sys_get_temp_dir() . '/of-waitlist-*.txt') ?: [] as $stale) {
+        if (@filemtime($stale) < $now - 3600) { @unlink($stale); }
+    }
+}
 
 // ── Store (deduplicated) ─────────────────────────────────────────────────────
+// Hard ceiling: the dedupe below scans the whole file, so an unbounded file
+// would make every signup slower until the account hits its resource limit and
+// takes the WHOLE site down. Fail loudly instead of degrading silently.
+if (is_file($storage) && filesize($storage) > MAX_STORAGE_BYTES) {
+    error_log('waitlist: storage cap reached, refusing new signups');
+    respond(503, ['ok' => false, 'error' => 'storage_unavailable']);
+}
+
 $normalized = strtolower($email);
+$alreadyListed = false;
 if (is_file($storage)) {
     $handle = @fopen($storage, 'r');
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
             $row = json_decode($line, true);
             if (is_array($row) && strtolower((string) ($row['email'] ?? '')) === $normalized) {
-                fclose($handle);
-                respond(200, ['ok' => true, 'already' => true]);
+                $alreadyListed = true;
+                break;
             }
         }
         fclose($handle);
     }
+}
+// Answer exactly like a fresh signup. Reporting "already registered" would turn
+// this endpoint into a membership oracle: anyone could test an address and learn
+// whether that person signed up.
+if ($alreadyListed) {
+    respond(200, ['ok' => true]);
 }
 
 $record = [
@@ -102,11 +148,28 @@ $record = [
     'ip' => hash('sha256', $ip), // hashed: enough to spot abuse, not personal data at rest
 ];
 
+// Create it already locked down: chmod after the first write would leave the
+// file world-readable for the duration of that request.
+if (!is_file($storage)) {
+    @touch($storage);
+    @chmod($storage, 0600);
+}
+
 $written = @file_put_contents($storage, json_encode($record, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
 if ($written === false) {
+    // Without this the signup would vanish with no trace anywhere: the client
+    // sees a generic error and the notification below is never reached.
+    error_log('waitlist: cannot write storage');
+    if (!empty($config['notify'])) {
+        @mail(
+            (string) $config['notify'],
+            'OpenFamily - ECHEC ecriture liste attente',
+            "Une inscription n'a pas pu etre enregistree. Verifiez config.php, le chemin de stockage et ses droits.\n",
+            "From: no-reply@openfamily.fr\r\nContent-Type: text/plain; charset=utf-8\r\n"
+        );
+    }
     respond(500, ['ok' => false, 'error' => 'storage_unavailable']);
 }
-@chmod($storage, 0600);
 
 // ── Notify (best effort — never fails the request) ───────────────────────────
 if (!empty($config['notify'])) {

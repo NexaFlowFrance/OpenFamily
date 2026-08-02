@@ -14,6 +14,10 @@
   <meta property="og:url" content="https://openfamily.fr/" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://openfamily.fr/openfamily-og.png" />
+  <link rel="canonical" href="https://openfamily.fr/fr" />
+  <link rel="alternate" hreflang="en" href="https://openfamily.fr/" />
+  <link rel="alternate" hreflang="fr" href="https://openfamily.fr/fr" />
+  <link rel="alternate" hreflang="x-default" href="https://openfamily.fr/" />
   <link rel="icon" href="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -402,7 +406,7 @@
     <a href="#install">Installation</a>
     <a href="#tech">Technologies</a>
     <a href="#contributors">Équipe</a>
-    <a href="index.html" title="English" aria-label="English" style="display:inline-flex;align-items:center;"><img src="https://flagcdn.com/gb.svg" alt="English" width="22" height="16" style="border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.08);" loading="lazy" /></a>
+    <a href="/en" title="English" aria-label="English" style="display:inline-flex;align-items:center;"><img src="https://flagcdn.com/gb.svg" alt="English" width="22" height="16" style="border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.08);" loading="lazy" /></a>
     <a href="demo/">Démo</a>
     <a class="btn-nav" href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">GitHub</a>
   </div>
@@ -852,7 +856,7 @@ API      : http://localhost:3001/health</pre>
       .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
       .then(function (res) {
         if (res.body && res.body.ok) {
-          msg.textContent = res.body.already ? T.already : T.ok;
+          msg.textContent = T.ok;
           msg.className = 'waitlist-msg is-ok';
           form.reset();
         } else if (res.status === 422) { msg.textContent = T.invalid; msg.className = 'waitlist-msg is-error'; }

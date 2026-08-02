@@ -60,4 +60,14 @@ void i18n
         },
     });
 
+// index.html ships a hard-coded <html lang>, which would stay wrong for every
+// other language — screen readers announce the page in it and search engines
+// use it. Keep it in sync with the language actually rendered.
+const syncDocumentLang = () => {
+    const lng = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0];
+    if (typeof document !== 'undefined') document.documentElement.lang = lng;
+};
+i18n.on('languageChanged', syncDocumentLang);
+syncDocumentLang();
+
 export default i18n;

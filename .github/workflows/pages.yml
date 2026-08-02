@@ -1,17 +1,19 @@
 name: Deploy GitHub Pages
 
-# Publishes the landing page (docs/) and the interactive, backend-less demo
-# (client built with VITE_DEMO) to GitHub Pages.
-#   - Landing  → https://nexaflowfrance.github.io/OpenFamily/
-#   - Demo     → https://nexaflowfrance.github.io/OpenFamily/demo/
+# The website now lives at https://openfamily.fr (landing + demo + the PHP
+# waiting-list endpoint, which GitHub Pages cannot run). Pages is kept ONLY to
+# redirect the historical URLs — they are linked from READMEs, packaging
+# manifests, videos and bookmarks we don't control, so they must not 404.
+#   - https://nexaflowfrance.github.io/OpenFamily/       → https://openfamily.fr/
+#   - https://nexaflowfrance.github.io/OpenFamily/demo/  → https://openfamily.fr/demo/
+#
+# Publishing a full copy here instead would mean two diverging sites, duplicate
+# content for search engines, and a waiting-list form that can never work.
 
 on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
-      - 'client/**'
-      - 'shared/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -24,37 +26,57 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  SITE: https://openfamily.fr
+
 jobs:
   build:
-    name: Build site
+    name: Build redirects
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm run install:all
-
-      - name: Build shared
-        run: npm run build:shared
-
-      - name: Build demo (client)
-        run: npm run build:client
-        env:
-          VITE_DEMO: 'true'
-
-      - name: Assemble site
+      - name: Generate redirect pages
         run: |
+          set -euo pipefail
           rm -rf _site
           mkdir -p _site/demo
-          cp -r docs/* _site/
-          cp -r client/dist/* _site/demo/
+
+          # $1 = output file, $2 = target URL
+          make_redirect() {
+            cat > "$1" <<HTML
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <title>OpenFamily has moved to openfamily.fr</title>
+            <link rel="canonical" href="$2" />
+            <meta name="robots" content="noindex, follow" />
+            <meta http-equiv="refresh" content="0; url=$2" />
+            <style>
+              body { font-family: system-ui, sans-serif; background: #f7f2e9; color: #2a2028;
+                     display: grid; place-items: center; min-height: 100vh; margin: 0; text-align: center; }
+              a { color: #dc4a60; }
+            </style>
+          </head>
+          <body>
+            <main>
+              <h1>OpenFamily</h1>
+              <p>This page has moved to <a href="$2">$2</a>.</p>
+            </main>
+            <script>location.replace("$2");</script>
+          </body>
+          </html>
+          HTML
+          }
+
+          make_redirect _site/index.html      "${SITE}/"
+          make_redirect _site/index.fr.html   "${SITE}/index.fr.html"
+          make_redirect _site/demo/index.html "${SITE}/demo/"
+          make_redirect _site/404.html        "${SITE}/"
+
+          ls -R _site
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -24,4 +24,4 @@ OpenFamily keeps the whole household organized from your own server. One app for
 ## Links
 
 - Source: <https://github.com/NexaFlowFrance/OpenFamily>
-- Website & demo: <https://nexaflowfrance.github.io/OpenFamily/>
+- Website & demo: <https://openfamily.fr/>

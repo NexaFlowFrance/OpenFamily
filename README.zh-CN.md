@@ -8,7 +8,7 @@
 
   [![Release](https://img.shields.io/github/v/release/NexaFlowFrance/OpenFamily?color=2563eb&label=version)](https://github.com/NexaFlowFrance/OpenFamily/releases/latest)
   [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
-  [![Live demo](https://img.shields.io/badge/Live%20demo-online-DC4A60)](https://nexaflowfrance.github.io/OpenFamily/demo/)
+  [![Live demo](https://img.shields.io/badge/Live%20demo-online-DC4A60)](https://openfamily.fr/demo/)
   [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily-client)
   [![License: AGPL v3](https://img.shields.io/badge/License-AGPL--v3-blue.svg)](licence.md)
   [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](https://github.com/NexaFlowFrance/OpenFamily)
@@ -18,7 +18,7 @@
 
 <div align="center">
 
-### 🎬 [在线体验 →](https://nexaflowfrance.github.io/OpenFamily/demo/)
+### 🎬 [在线体验 →](https://openfamily.fr/demo/)
 
 *无需注册，完全在浏览器中运行，不会保存任何数据。*
 

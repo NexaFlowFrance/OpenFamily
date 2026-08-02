@@ -16,6 +16,7 @@
     "build:shared": "cd shared && npm run build",
     "build:server": "cd server && npm run build",
     "build:client": "cd client && npm run build",
+    "build:site": "node scripts/build-site.mjs",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:build": "docker-compose build",

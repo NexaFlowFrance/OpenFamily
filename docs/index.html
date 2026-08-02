@@ -7,13 +7,13 @@
   <meta name="description" content="OpenFamily is a complete, open-source and self-hosted family organizer. Shopping, tasks, calendar, budget, recipes - all in one." />
   <meta property="og:title" content="OpenFamily - Open-source family organizer" />
   <meta property="og:description" content="Keep full control of your family's data with a self-hosted, open-source app built for family life." />
-  <meta property="og:image" content="https://nexaflowfrance.github.io/OpenFamily/openfamily-og.png" />
+  <meta property="og:image" content="https://openfamily.fr/openfamily-og.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://nexaflowfrance.github.io/OpenFamily/" />
+  <meta property="og:url" content="https://openfamily.fr/" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="https://nexaflowfrance.github.io/OpenFamily/openfamily-og.png" />
+  <meta name="twitter:image" content="https://openfamily.fr/openfamily-og.png" />
   <link rel="icon" href="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -262,6 +262,35 @@
     }
     .windows-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.6rem; font-family: 'Instrument Sans', sans-serif; }
     .windows-card p { font-size: 0.86rem; color: var(--muted); margin-bottom: 1.2rem; max-width: 520px; margin-left: auto; margin-right: auto; }
+
+/* WAITLIST (Cloud) */
+    .waitlist-form {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+      justify-content: center; align-items: center;
+    }
+    .waitlist-form input[type=email] {
+      flex: 1 1 260px; max-width: 320px;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      padding: 0.75rem 1rem; font: inherit; font-size: 0.95rem;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .waitlist-form input[type=email]:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    .waitlist-form button[disabled] { opacity: 0.6; cursor: progress; }
+    .waitlist-form button { border: none; cursor: pointer; font-family: inherit; }
+    .waitlist-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+    .waitlist-msg {
+      margin-top: 0.9rem !important; font-size: 0.88rem !important; min-height: 1.2em;
+    }
+    .waitlist-msg.is-ok { color: #1f7a4d; }
+    .waitlist-msg.is-error { color: var(--primary); }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
 
     /* TECH */
     .tech-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
@@ -649,6 +678,33 @@ API:      http://localhost:3001/health</pre>
 
 <hr class="divider" />
 
+<!-- CLOUD (waitlist) -->
+<section id="cloud">
+  <div class="section-label">Cloud</div>
+  <h2>Don't want to host it yourself?</h2>
+  <p class="section-desc">Self-hosting stays <strong>free forever</strong>. For families who'd rather not run a server, we're preparing <strong>OpenFamily Cloud</strong>: the exact same app, hosted for you.</p>
+
+  <div class="windows-card">
+    <h3>OpenFamily Cloud — coming soon</h3>
+    <p>Zero install, automatic updates and backups, data hosted in France. Same open-source app, no ads, no tracking — and you can <strong>export everything and switch to self-hosting whenever you want</strong>.</p>
+    <p style="margin-top:0.85rem;"><strong>39 €/year</strong> (3.25 €/month) per family — or 4.90 €/month. One subscription covers the whole household. Free 30-day trial, no card required.</p>
+    <form class="waitlist-form" id="waitlist-form" novalidate>
+      <label class="sr-only" for="waitlist-email">Your email address</label>
+      <input type="email" id="waitlist-email" name="email" required autocomplete="email" placeholder="you@example.com" />
+      <!-- Anti-spam: invisible field, only bots fill it in. -->
+      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="waitlist-hp" />
+      <button type="submit" class="btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><polyline points="4 7 12 13 20 7"/></svg>
+        Notify me
+      </button>
+    </form>
+    <p class="waitlist-msg" id="waitlist-msg" role="status" aria-live="polite"></p>
+    <p style="margin-top:0.85rem; font-size:0.85em; opacity:0.75;">No commitment — we'll only email you once, when it opens. Your address is used for nothing else, never shared, and you can ask for its deletion at any time.</p>
+  </div>
+</section>
+
+<hr class="divider" />
+
 <!-- TECH -->
 <section id="tech">
   <div class="section-label">Tech</div>
@@ -771,5 +827,42 @@ API:      http://localhost:3001/health</pre>
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeShot(); });
 </script>
 
+<script>
+// Waiting-list form: posts to waitlist.php on the same host. If the page is
+// served statically (GitHub Pages has no PHP), the request fails and we fall
+// back to telling the visitor to email us — the form never silently dies.
+(function () {
+  var form = document.getElementById('waitlist-form');
+  if (!form) return;
+  var msg = document.getElementById('waitlist-msg');
+  var T = {"sending":"Sending…","ok":"You're on the list! We'll email you at launch.","already":"You are already on the list — thank you!","invalid":"This email address looks invalid.","rate":"Too many attempts, please retry in an hour.","fail":"Could not send right now. Write to us at contact@nexaflow.fr."};
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var button = form.querySelector('button[type=submit]');
+    var email = form.querySelector('input[name=email]').value.trim();
+    msg.className = 'waitlist-msg';
+    if (!email || email.indexOf('@') < 1) { msg.textContent = T.invalid; msg.className = 'waitlist-msg is-error'; return; }
+    button.disabled = true;
+    msg.textContent = T.sending;
+    fetch('waitlist.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, locale: 'en', website: form.querySelector('input[name=website]').value })
+    })
+      .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+      .then(function (res) {
+        if (res.body && res.body.ok) {
+          msg.textContent = res.body.already ? T.already : T.ok;
+          msg.className = 'waitlist-msg is-ok';
+          form.reset();
+        } else if (res.status === 422) { msg.textContent = T.invalid; msg.className = 'waitlist-msg is-error'; }
+        else if (res.status === 429) { msg.textContent = T.rate; msg.className = 'waitlist-msg is-error'; }
+        else { throw new Error('failed'); }
+      })
+      .catch(function () { msg.textContent = T.fail; msg.className = 'waitlist-msg is-error'; })
+      .finally(function () { button.disabled = false; });
+  });
+})();
+</script>
 </body>
 </html>

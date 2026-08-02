@@ -10,7 +10,7 @@
   "tipi_version": 1,
   "version": "1.2.0",
   "source": "https://github.com/NexaFlowFrance/OpenFamily",
-  "website": "https://nexaflowfrance.github.io/OpenFamily/",
+  "website": "https://openfamily.fr/",
   "exposable": true,
   "dynamic_config": true,
   "min_tipi_version": "4.0.0",

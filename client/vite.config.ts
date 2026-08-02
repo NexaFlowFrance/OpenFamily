@@ -5,7 +5,9 @@ import path from 'path';
 
 // Build variants:
 //  - default  → the web app / Windows-served SPA (PWA enabled, base '/').
-//  - demo     → static GitHub Pages demo (VITE_DEMO=true, sub-path base, no SW).
+//  - demo     → static demo (VITE_DEMO=true, sub-path base, no SW). The base
+//               defaults to the GitHub Pages path; set VITE_DEMO_BASE to build
+//               the demo for another host (e.g. '/demo/' for openfamily.fr).
 //  - native   → Capacitor Android shell (`vite build --mode native`): base '/'
 //               and NO service worker (the app shell is bundled in the APK).
 export default defineConfig(({ mode }) => {
@@ -14,7 +16,7 @@ export default defineConfig(({ mode }) => {
     const usePwa = !isDemo && !isNativeBuild;
 
     return {
-        base: isDemo ? '/OpenFamily/demo/' : '/',
+        base: isDemo ? (process.env.VITE_DEMO_BASE || '/OpenFamily/demo/') : '/',
         plugins: [
             react(),
             ...(usePwa ? [VitePWA({

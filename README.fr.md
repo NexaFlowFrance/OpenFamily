@@ -8,13 +8,13 @@
 
   [![Release](https://img.shields.io/github/v/release/NexaFlowFrance/OpenFamily?color=2563eb&label=version)](https://github.com/NexaFlowFrance/OpenFamily/releases/latest)
   [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
-  [![Démo](https://img.shields.io/badge/Démo-en%20ligne-DC4A60)](https://nexaflowfrance.github.io/OpenFamily/demo/)
+  [![Démo](https://img.shields.io/badge/Démo-en%20ligne-DC4A60)](https://openfamily.fr/demo/)
   [![License: AGPL v3](https://img.shields.io/badge/License-AGPL--v3-blue.svg)](licence.md)
 </div>
 
 ---
 
-> 🎬 **[Essayez la démo en ligne →](https://nexaflowfrance.github.io/OpenFamily/demo/)** — aucune inscription, rien n'est enregistré.
+> 🎬 **[Essayez la démo en ligne →](https://openfamily.fr/demo/)** — aucune inscription, rien n'est enregistré.
 
 ## 🎯 Fonctionnalités
 

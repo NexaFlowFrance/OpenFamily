@@ -66,3 +66,7 @@ client/public/workbox-*.js
 
 # Assets internes non distribués
 logo nexaflow.png
+
+# Waiting-list endpoint secrets/data (server-side only, never committed)
+docs/config.php
+*.jsonl

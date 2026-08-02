@@ -161,6 +161,22 @@ JWT 身份验证（有效期 7 天，自动刷新）· 使用 **bcrypt（cost 12
 
 计划功能和设计决策请参阅 [ROADMAP.md](ROADMAP.md)。
 
+## 💛 支持项目
+
+OpenFamily 是免费、开源（AGPL-3.0）且自托管的——没有广告、没有追踪、没有付费版本。
+它由个人业余时间开发和维护。如果它对你的家庭有帮助，欢迎支持它的开发：
+
+<p>
+  <a href="https://github.com/sponsors/NexaFlowFrance">
+    <img src="https://img.shields.io/badge/💛%20赞助-GitHub%20Sponsors-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="在 GitHub 上赞助 OpenFamily" />
+  </a>
+  <a href="https://ko-fi.com/nexaflowfrance">
+    <img src="https://img.shields.io/badge/☕%20请我喝咖啡-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="在 Ko-fi 上支持 OpenFamily" />
+  </a>
+</p>
+
+给仓库点个 Star 同样有帮助——其他家庭正是这样发现这个项目的。
+
 ## 🤝 参与贡献
 
 欢迎贡献！你可以创建 [Issue](https://github.com/NexaFlowFrance/OpenFamily/issues)

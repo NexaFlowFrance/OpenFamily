@@ -114,6 +114,9 @@ pistage, sans version payante. Il est développé et maintenu sur du temps perso
 l'application aide votre famille, vous pouvez soutenir son développement :
 
 <p>
+  <a href="https://github.com/sponsors/NexaFlowFrance">
+    <img src="https://img.shields.io/badge/💛%20Sponsor-GitHub%20Sponsors-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Soutenir OpenFamily sur GitHub" />
+  </a>
   <a href="https://ko-fi.com/nexaflowfrance">
     <img src="https://img.shields.io/badge/☕%20Offrir%20un%20café-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Soutenir OpenFamily sur Ko-fi" />
   </a>

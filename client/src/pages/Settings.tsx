@@ -1153,6 +1153,15 @@ const Settings: React.FC = () => {
                             <p className="mt-1 text-micro text-muted-foreground">{t('settings:support.subtitle')}</p>
                             <div className="mt-4 flex flex-wrap items-center gap-3">
                                 <a
+                                    href="https://github.com/sponsors/NexaFlowFrance"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex h-9 items-center gap-2 rounded-input border border-border bg-card px-3 text-caption font-medium text-foreground hover:bg-surface-2 transition-colors duration-fast"
+                                >
+                                    <Heart className="h-4 w-4" />
+                                    {t('settings:support.sponsorGithub')}
+                                </a>
+                                <a
                                     href="https://ko-fi.com/nexaflowfrance"
                                     target="_blank"
                                     rel="noopener noreferrer"

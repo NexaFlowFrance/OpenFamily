@@ -172,6 +172,9 @@ tier. It is built and maintained on personal time. If it helps your family, you 
 its development:
 
 <p>
+  <a href="https://github.com/sponsors/NexaFlowFrance">
+    <img src="https://img.shields.io/badge/💛%20Sponsor-GitHub%20Sponsors-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor OpenFamily on GitHub" />
+  </a>
   <a href="https://ko-fi.com/nexaflowfrance">
     <img src="https://img.shields.io/badge/☕%20Buy%20me%20a%20coffee-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support OpenFamily on Ko-fi" />
   </a>

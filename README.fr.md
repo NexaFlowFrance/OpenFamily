@@ -4,7 +4,7 @@
   <p><strong>Application de gestion familiale open source, auto-hébergeable</strong><br>
   Gardez le contrôle total de vos données — hébergez-la sur votre propre serveur.</p>
 
-  🇬🇧 <a href="README.md">English</a> · 🇫🇷 <strong>Français</strong>
+  🇬🇧 <a href="README.md">English</a> · 🇫🇷 <strong>Français</strong> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a>
 
   [![Release](https://img.shields.io/github/v/release/NexaFlowFrance/OpenFamily?color=2563eb&label=version)](https://github.com/NexaFlowFrance/OpenFamily/releases/latest)
   [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
@@ -32,7 +32,7 @@
 | 🔔 **Notifications** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) + in-app |
 | 👥 **Comptes partagés** | Invitations par lien, demandes d'accès, transfert de propriété |
 | 🛡️ **Rôles & permissions** | Comptes **parent / enfant** — budget en lecture seule pour les enfants |
-| 🌍 **Bilingue** | Interface **français / anglais** avec détection automatique |
+| 🌍 **Multilingue** | Interface **français / anglais / chinois simplifié** avec détection automatique |
 | 📴 **Mode hors ligne** | Consultation des données en cache sans connexion (PWA) |
 
 ## 🔗 Intégrations tierces

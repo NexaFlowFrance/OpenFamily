@@ -18,11 +18,134 @@
   <link rel="alternate" hreflang="en" href="https://openfamily.fr/" />
   <link rel="alternate" hreflang="fr" href="https://openfamily.fr/fr" />
   <link rel="alternate" hreflang="x-default" href="https://openfamily.fr/" />
-  <link rel="icon" href="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="OpenFamily.png" />
   <style>
+    /* latin-ext */
+    @font-face {
+      font-family: 'Fraunces';
+      font-display: swap;
+      font-style: italic;
+      font-weight: 500;
+      src: url('fonts/Fraunces-500-italic-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    
+    /* latin */
+    @font-face {
+      font-family: 'Fraunces';
+      font-display: swap;
+      font-style: italic;
+      font-weight: 500;
+      src: url('fonts/Fraunces-500-italic-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    
+    /* latin-ext */
+    @font-face {
+      font-family: 'Fraunces';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 500;
+      src: url('fonts/Fraunces-500-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    
+    /* latin */
+    @font-face {
+      font-family: 'Fraunces';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 500;
+      src: url('fonts/Fraunces-500-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    
+    /* latin-ext */
+    @font-face {
+      font-family: 'Fraunces';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 600;
+      src: url('fonts/Fraunces-500-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    
+    /* latin */
+    @font-face {
+      font-family: 'Fraunces';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 600;
+      src: url('fonts/Fraunces-500-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    
+    /* latin-ext */
+    @font-face {
+      font-family: 'Instrument Sans';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 400;
+      font-stretch: 100%;
+      src: url('fonts/InstrumentSans-400-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    
+    /* latin */
+    @font-face {
+      font-family: 'Instrument Sans';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 400;
+      font-stretch: 100%;
+      src: url('fonts/InstrumentSans-400-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    
+    /* latin-ext */
+    @font-face {
+      font-family: 'Instrument Sans';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 500;
+      font-stretch: 100%;
+      src: url('fonts/InstrumentSans-400-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    
+    /* latin */
+    @font-face {
+      font-family: 'Instrument Sans';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 500;
+      font-stretch: 100%;
+      src: url('fonts/InstrumentSans-400-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    
+    /* latin-ext */
+    @font-face {
+      font-family: 'Instrument Sans';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 600;
+      font-stretch: 100%;
+      src: url('fonts/InstrumentSans-400-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    
+    /* latin */
+    @font-face {
+      font-family: 'Instrument Sans';
+      font-display: swap;
+      font-style: normal;
+      font-weight: 600;
+      font-stretch: 100%;
+      src: url('fonts/InstrumentSans-400-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -397,7 +520,7 @@
 <!-- NAV -->
 <nav>
   <a class="nav-brand" href="#">
-    <img src="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" alt="OpenFamily" />
+    <img src="OpenFamily.png" alt="OpenFamily" />
     OpenFamily
   </a>
   <div class="nav-links">
@@ -406,7 +529,7 @@
     <a href="#install">Install</a>
     <a href="#tech">Tech</a>
     <a href="#contributors">Team</a>
-    <a href="/fr" title="Français" aria-label="Français" style="display:inline-flex;align-items:center;"><img src="https://flagcdn.com/fr.svg" alt="Français" width="22" height="16" style="border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.08);" loading="lazy" /></a>
+    <a href="/fr" title="Français" aria-label="Français" style="display:inline-flex;align-items:center;"><img src="flag-fr.svg" alt="Français" width="22" height="16" style="border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.08);" loading="lazy" /></a>
     <a href="demo/">Live demo</a>
     <a class="btn-nav" href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">GitHub</a>
   </div>
@@ -417,7 +540,7 @@
   <a class="hero-badge" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest" target="_blank" rel="noopener">
     v1.5.0: kakeibo budgeting mode with household salaries &amp; savings goals
   </a>
-  <img class="logo" src="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png" alt="OpenFamily" />
+  <img class="logo" src="OpenFamily.png" alt="OpenFamily" />
   <h1>Family life,<br><em>under your control.</em></h1>
   <p>An open-source, self-hosted app to organize your whole family life: shopping, tasks, calendar, budget, recipes and more.</p>
   <div class="hero-actions">
@@ -572,7 +695,7 @@
     </div>
 
     <div class="integration-card">
-      <img class="integration-icon" src="https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/tandoor.png" alt="Tandoor" style="object-fit:contain;" />
+      <img class="integration-icon" src="tandoor.png" alt="Tandoor" style="object-fit:contain;" />
       <h3>Tandoor</h3>
       <p>Recipe import via the Django REST API.</p>
       <span class="integration-tag">Recipes</span>
@@ -703,7 +826,7 @@ API:      http://localhost:3001/health</pre>
       </button>
     </form>
     <p class="waitlist-msg" id="waitlist-msg" role="status" aria-live="polite"></p>
-    <p style="margin-top:0.85rem; font-size:0.85em; opacity:0.75;">No commitment — we'll only email you once, when it opens. Your address is used for nothing else, never shared, and you can ask for its deletion at any time.</p>
+    <p style="margin-top:0.85rem; font-size:0.85em; opacity:0.75;">No commitment: we keep only your email address and your language, to send you <strong>one single email</strong> at launch (12 months at most). No tracking, never shared with anyone. Deletion on request at <a href="mailto:contact@nexaflow.fr">contact@nexaflow.fr</a> — see the <a href="/privacy.html">privacy policy</a>.</p>
   </div>
 </section>
 
@@ -762,27 +885,27 @@ API:      http://localhost:3001/health</pre>
   <p class="section-desc">Thanks to everyone who contributes to the project.</p>
   <div class="contributors-grid">
     <a class="contributor-card lead" href="https://github.com/NexaFlowFrance" target="_blank" rel="noopener">
-      <img src="https://avatars.githubusercontent.com/u/251752333?v=4" alt="NexaFlowFrance" />
+      <img src="contributors/251752333.png" alt="NexaFlowFrance" />
       <span class="c-name">NexaFlowFrance</span>
       <span class="c-count">55 commits</span>
     </a>
     <a class="contributor-card" href="https://github.com/LoicHarrang1" target="_blank" rel="noopener">
-      <img src="https://avatars.githubusercontent.com/u/128454842?v=4" alt="LoicHarrang1" />
+      <img src="contributors/128454842.png" alt="LoicHarrang1" />
       <span class="c-name">LoicHarrang1</span>
       <span class="c-count">4 commits</span>
     </a>
     <a class="contributor-card" href="https://github.com/victorprouff" target="_blank" rel="noopener">
-      <img src="https://avatars.githubusercontent.com/u/36435533?v=4" alt="victorprouff" />
+      <img src="contributors/36435533.png" alt="victorprouff" />
       <span class="c-name">victorprouff</span>
       <span class="c-count">3 commits</span>
     </a>
     <a class="contributor-card" href="https://github.com/lakhassane" target="_blank" rel="noopener">
-      <img src="https://avatars.githubusercontent.com/u/8411231?v=4" alt="lakhassane" />
+      <img src="contributors/8411231.png" alt="lakhassane" />
       <span class="c-name">lakhassane</span>
       <span class="c-count">1 commit</span>
     </a>
     <a class="contributor-card" href="https://github.com/caludeayi" target="_blank" rel="noopener">
-      <img src="https://avatars.githubusercontent.com/u/258476110?v=4" alt="caludeayi" />
+      <img src="contributors/258476110.png" alt="caludeayi" />
       <span class="c-name">caludeayi</span>
       <span class="c-count">1 commit</span>
     </a>
@@ -807,6 +930,11 @@ API:      http://localhost:3001/health</pre>
     Licensed <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/licence.md" target="_blank" rel="noopener">AGPL-3.0</a>
     &nbsp;·&nbsp;
     <a href="https://github.com/NexaFlowFrance/OpenFamily" target="_blank" rel="noopener">GitHub</a>
+  </p>
+  <p style="margin-top:0.5rem;">
+    <a href="/legal-notice.html">Legal notice</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy policy</a>
   </p>
 </footer>
 

@@ -141,11 +141,14 @@ if ($alreadyListed) {
     respond(200, ['ok' => true]);
 }
 
+// Deliberately minimal: no IP is stored. A SHA-256 of an IPv4 address is
+// reversible by brute force over the whole address space, so it would still be
+// personal data at rest — and abuse is already handled by the throttle above,
+// which keeps its counters outside this file and expires them after an hour.
 $record = [
     'email' => $email,
     'locale' => $locale,
     'date' => gmdate('c'),
-    'ip' => hash('sha256', $ip), // hashed: enough to spot abuse, not personal data at rest
 ];
 
 // Create it already locked down: chmod after the first write would leave the

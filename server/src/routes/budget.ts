@@ -7,6 +7,21 @@ import { broadcast } from '../lib/broadcaster';
 const router = Router();
 router.use(authMiddleware);
 
+// A budget entry can be assigned to a family member, and that id comes from the
+// client — so verify it belongs to THIS family before storing it (same guard as
+// planning / tasks / appointments / rewards). Without it a family could store
+// another family's member id and read its name/color back through the JOINs below.
+const ensureMemberBelongsToUser = async (memberId: unknown, userId: string): Promise<boolean> => {
+    if (typeof memberId !== 'string' || !memberId.trim()) {
+        return false;
+    }
+    const result = await query(
+        'SELECT id FROM family_members WHERE id = $1 AND user_id = $2',
+        [memberId, userId]
+    );
+    return result.rows.length > 0;
+};
+
 const toNumber = (value: unknown): number => {
     if (typeof value === 'number') {
         return value;
@@ -38,7 +53,7 @@ router.get('/entries', async (req: AuthRequest, res) => {
 
         let queryText = `SELECT be.*, fm.name as assigned_to_name, fm.color as assigned_to_color
             FROM budget_entries be
-            LEFT JOIN family_members fm ON be.assigned_to = fm.id
+            LEFT JOIN family_members fm ON be.assigned_to = fm.id AND fm.user_id = be.user_id
             WHERE be.user_id = $1`;
         const params: any[] = [req.userId];
 
@@ -82,17 +97,22 @@ router.post('/entries', requireParent, async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'category, amount and date are required' });
         }
 
+        const assignedTo = toNullIfEmpty(assigned_to) as string | null;
+        if (assignedTo && !(await ensureMemberBelongsToUser(assignedTo, req.userId!))) {
+            return res.status(400).json({ success: false, error: 'Member not found' });
+        }
+
         const result = await query(
             `INSERT INTO budget_entries (user_id, category, amount, description, date, is_expense, assigned_to)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-            [req.userId, category, parsedAmount, toNullIfEmpty(description), date, Boolean(is_expense), toNullIfEmpty(assigned_to)]
+            [req.userId, category, parsedAmount, toNullIfEmpty(description), date, Boolean(is_expense), assignedTo]
         );
 
         // Re-fetch with JOIN to get member name/color
         const full = await query(
             `SELECT be.*, fm.name as assigned_to_name, fm.color as assigned_to_color
-             FROM budget_entries be LEFT JOIN family_members fm ON be.assigned_to = fm.id
-             WHERE be.id = $1`, [result.rows[0].id]
+             FROM budget_entries be LEFT JOIN family_members fm ON be.assigned_to = fm.id AND fm.user_id = be.user_id
+             WHERE be.id = $1 AND be.user_id = $2`, [result.rows[0].id, req.userId]
         );
 
         broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'created' });
@@ -116,6 +136,10 @@ router.put('/entries/:id', requireParent, async (req: AuthRequest, res) => {
 
         // Handle assigned_to: allow explicit null to unassign
         const assignedToValue = assigned_to === '' || assigned_to === null ? null : assigned_to;
+
+        if (assignedToValue && !(await ensureMemberBelongsToUser(assignedToValue, req.userId!))) {
+            return res.status(400).json({ success: false, error: 'Member not found' });
+        }
 
         const result = await query(
             `UPDATE budget_entries
@@ -145,8 +169,8 @@ router.put('/entries/:id', requireParent, async (req: AuthRequest, res) => {
         // Re-fetch with JOIN
         const full = await query(
             `SELECT be.*, fm.name as assigned_to_name, fm.color as assigned_to_color
-             FROM budget_entries be LEFT JOIN family_members fm ON be.assigned_to = fm.id
-             WHERE be.id = $1`, [id]
+             FROM budget_entries be LEFT JOIN family_members fm ON be.assigned_to = fm.id AND fm.user_id = be.user_id
+             WHERE be.id = $1 AND be.user_id = $2`, [id, req.userId]
         );
 
         broadcast(req.userId!, { type: 'update', entity: 'budget', action: 'updated' });
@@ -278,7 +302,7 @@ router.get('/statistics', async (req: AuthRequest, res) => {
          be.category,
          SUM(be.amount) as amount
        FROM budget_entries be
-       INNER JOIN family_members fm ON be.assigned_to = fm.id
+       INNER JOIN family_members fm ON be.assigned_to = fm.id AND fm.user_id = be.user_id
        WHERE be.user_id = $1
          AND be.is_expense = true
          AND EXTRACT(MONTH FROM be.date) = $2

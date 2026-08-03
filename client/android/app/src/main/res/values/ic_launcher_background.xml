@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- OpenFamily brand navy, sampled from the logo. Was #FFFFFF, which showed
+         as a white ring around the icon on some launchers. -->
+    <color name="ic_launcher_background">#080024</color>
 </resources>

@@ -55,6 +55,12 @@ server/package-lock.json
 ios/
 .capacitor/
 
+# Android release signing — NEVER commit these (the upload key & its passwords)
+keystore.properties
+client/android/keystore.properties
+*.jks
+*.keystore
+
 # PWA
 client/public/sw.js
 client/public/workbox-*.js
@@ -70,3 +76,6 @@ logo nexaflow.png
 # Waiting-list endpoint secrets/data (server-side only, never committed)
 docs/config.php
 *.jsonl
+
+# Play Store assets (icone, captures, fiche) : local uniquement
+store/

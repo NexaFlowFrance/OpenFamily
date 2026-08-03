@@ -1,5 +1,20 @@
 apply plugin: 'com.android.application'
 
+// --- Signature de release --------------------------------------------------
+// Lit les identifiants depuis client/android/keystore.properties (local,
+// gitignoré) ou, à défaut, depuis des variables d'environnement (CI). Si aucun
+// n'est présent, le build release reste non signé — seuls bundleRelease /
+// assembleRelease en ont besoin, l'APK debug n'est pas affecté. Voir docs/MOBILE.md.
+def keystorePropsFile = rootProject.file("keystore.properties")
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+def ksStoreFile = keystoreProps.getProperty("storeFile") ?: System.getenv("ANDROID_KEYSTORE_FILE")
+def ksStorePassword = keystoreProps.getProperty("storePassword") ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+def ksKeyAlias = keystoreProps.getProperty("keyAlias") ?: System.getenv("ANDROID_KEY_ALIAS")
+def ksKeyPassword = keystoreProps.getProperty("keyPassword") ?: System.getenv("ANDROID_KEY_PASSWORD")
+
 android {
     namespace = "fr.nexaflow.openfamily"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,10 +31,23 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (ksStoreFile) {
+                storeFile rootProject.file(ksStoreFile)
+                storePassword ksStorePassword
+                keyAlias ksKeyAlias
+                keyPassword ksKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (ksStoreFile) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

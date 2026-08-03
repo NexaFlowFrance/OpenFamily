@@ -1,0 +1,80 @@
+name: Android AAB (Play Store)
+
+# Builds a RELEASE-signed Android App Bundle (.aab) for upload to Google Play.
+# Runs only on manual dispatch (keeps store releases deliberate). The existing
+# android.yml still produces the debug APK for GitHub Releases / Obtainium.
+#
+# Requires four repository secrets (Settings → Secrets and variables → Actions):
+#   ANDROID_KEYSTORE_BASE64  — the upload keystore, base64-encoded
+#                              (`base64 -w0 upload-keystore.jks` on Linux,
+#                               `[Convert]::ToBase64String([IO.File]::ReadAllBytes("upload-keystore.jks"))` on Windows)
+#   ANDROID_KEYSTORE_PASSWORD
+#   ANDROID_KEY_ALIAS
+#   ANDROID_KEY_PASSWORD
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-aab:
+    name: Build signed AAB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm run install:all
+
+      - name: Build shared
+        run: npm run build:shared
+
+      - name: Build web assets (native mode)
+        working-directory: client
+        run: npm run build:native
+
+      - name: Sync Android platform
+        working-directory: client
+        run: npx cap sync android
+
+      - name: Decode upload keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > client/android/upload-keystore.jks
+
+      - name: Build signed AAB
+        working-directory: client/android
+        env:
+          ANDROID_KEYSTORE_FILE: upload-keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew bundleRelease --no-daemon
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f client/android/upload-keystore.jks
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenFamily-release-aab
+          path: client/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error

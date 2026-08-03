@@ -56,9 +56,47 @@ which tracks GitHub Releases and updates the APK on its own.
 
 ## Release signing (only for the Play Store)
 
-Sideloaded debug APKs don't need this. For a Play Store upload, create a keystore and
-configure `client/android/app/build.gradle` signing (or pass it via the workflow as base64
-secrets), then `./gradlew assembleRelease`.
+Sideloaded debug APKs don't need this. Google Play requires a **release-signed
+App Bundle (`.aab`)**, not an APK. The signing config is already wired in
+[`client/android/app/build.gradle`](../client/android/app/build.gradle): it reads
+credentials from `client/android/keystore.properties` (gitignored) or, in CI, from
+environment variables.
+
+### 1. Create your upload keystore (once)
+
+```bash
+keytool -genkeypair -v -keystore upload-keystore.jks -alias upload \
+  -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Keep this `.jks` file and its passwords **safe and backed up** — with Play App
+Signing you can reset a lost upload key via Google, but losing it is still a hassle.
+Place the file at `client/android/upload-keystore.jks`.
+
+### 2. Point the build at it
+
+Copy `client/android/keystore.properties.example` to
+`client/android/keystore.properties` and fill in your passwords/alias. Both files'
+secrets are gitignored (`keystore.properties`, `*.jks`, `*.keystore`).
+
+### 3. Build the signed bundle
+
+```bash
+npm run cap:sync          # from client/ — rebuild web assets + sync native
+cd android
+./gradlew bundleRelease   # Windows: .\gradlew.bat bundleRelease
+```
+
+Output: `client/android/app/build/outputs/bundle/release/app-release.aab` — this is
+the file you upload to the Play Console.
+
+### In CI
+
+The **Android AAB (Play Store)** workflow
+([`.github/workflows/android-release.yml`](../.github/workflows/android-release.yml))
+builds the same signed `.aab` from four repository secrets
+(`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
+`ANDROID_KEY_PASSWORD`). Run it manually from the Actions tab.
 
 ## Notes
 

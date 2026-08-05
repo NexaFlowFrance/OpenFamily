@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Privacy policy — OpenFamily</title>
-  <meta name="description" content="What openfamily.fr collects, why, for how long, and how to have it deleted." />
+  <meta name="description" content="What OpenFamily collects depending on whether you self-host or use the Cloud plan, why, for how long, and how to have it deleted." />
   <link rel="canonical" href="https://openfamily.fr/privacy.html" />
   <link rel="icon" href="/OpenFamily.png" />
   <style>
@@ -20,15 +20,18 @@
     h1 { font-size: 1.9rem; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
     .updated { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
     h2 { font-size: 1.05rem; margin: 2.2rem 0 0.6rem; }
+    h3 { font-size: 0.95rem; margin: 1.4rem 0 0.4rem; }
     p, li { color: var(--muted); }
     ul { padding-left: 1.2rem; margin-top: 0.4rem; }
     li { margin-bottom: 0.3rem; }
     .lead { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.35rem; }
     .lead p { color: var(--text); margin: 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 0.7rem; font-size: 0.92rem; }
+    .lead p + p { margin-top: 0.6rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.7rem; font-size: 0.9rem; }
     th, td { text-align: left; padding: 0.55rem 0.7rem; border: 1px solid var(--border); vertical-align: top; }
     th { background: var(--surface); color: var(--text); font-weight: 600; }
     td { color: var(--muted); }
+    .note { border-left: 3px solid var(--primary); padding-left: 0.9rem; margin-top: 0.8rem; }
     footer { max-width: 46rem; margin: 3.5rem auto 0; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
     footer a { margin-right: 1rem; }
   </style>
@@ -41,9 +44,15 @@
 
   <div class="lead">
     <p>
-      In short: this site sets <strong>no cookies</strong>, uses <strong>no analytics</strong> and sends
-      <strong>no data to any third party</strong>. The only thing we keep is the email address you
-      choose to give us so we can tell you when OpenFamily Cloud opens.
+      OpenFamily comes in two forms, and what happens to your data depends entirely on
+      which one you choose.
+    </p>
+    <p>
+      <strong>Self-hosted</strong> (free): you install OpenFamily on your own server. Your data never
+      passes through us and we have no access to it.
+      <br>
+      <strong>OpenFamily Cloud</strong> (subscription): we host the server for you. Your data is then
+      stored with us, in France, and this policy sets out exactly what and why.
     </p>
   </div>
 
@@ -54,61 +63,129 @@
     <a href="/legal-notice.html">legal notice</a>.
   </p>
 
-  <h2>2. What we collect, and why</h2>
+  <h2>2. The openfamily.fr website</h2>
+  <p>
+    The site sets <strong>no cookies</strong>, uses <strong>no analytics</strong> and makes
+    <strong>no request to any third-party service</strong> when it loads: fonts, images and flags are
+    served from this site.
+  </p>
   <table>
     <tr><th>Data</th><th>Purpose</th><th>Legal basis</th><th>Retention</th></tr>
     <tr>
-      <td>Your email address</td>
+      <td>Email address (waiting list)</td>
       <td>To send you <strong>one single email</strong> when OpenFamily Cloud opens</td>
-      <td>Your consent (GDPR art. 6.1.a)</td>
+      <td>Consent (art. 6.1.a)</td>
       <td>Until that email is sent, 12 months at most</td>
     </tr>
-    <tr>
-      <td>The page language (fr or en)</td>
-      <td>To write to you in your language</td>
-      <td>Your consent</td>
-      <td>Same</td>
-    </tr>
   </table>
-  <p style="margin-top:0.8rem;">
-    We <strong>do not store your IP address</strong>. It is used only for the duration of the request,
-    to limit how many sign-ups an address can make per hour (abuse protection); that temporary counter
-    expires after one hour and is never linked to an email address.
-  </p>
-  <p>
-    Nothing else is collected: no profiling, no reselling, no sharing with third parties, ever.
+  <p style="margin-top:0.7rem;">
+    We do not store your IP address: it is used only for the duration of the request, to limit how
+    many sign-ups can be made per hour. That counter expires after an hour and is never linked to an
+    email address.
   </p>
 
-  <h2>3. Cookies and trackers</h2>
+  <h2>3. The mobile app</h2>
+
+  <h3>3.1 — In self-hosted mode</h3>
   <p>
-    This site uses no cookies. The <a href="/demo/">live demo</a> keeps a few preferences (language,
-    theme) and its fictional data <strong>inside your browser</strong> using local storage: nothing is
-    sent to a server, and it all disappears when you clear the site's data.
+    You enter your own server's address. The app talks <strong>only to that server</strong>. No data
+    is sent to NexaFlow, no account is created with us, and we have no technical means of accessing
+    anything. In this case <strong>you are the data controller</strong> for your family's data.
+  </p>
+  <p>
+    The app contains no analytics, no advertising tracker and no third-party collection SDK. It keeps
+    locally, on your device, your server address, your session token and your preferences (language,
+    theme).
   </p>
 
-  <h2>4. Hosting and recipients</h2>
+  <h3>3.2 — With an OpenFamily Cloud subscription</h3>
   <p>
-    Data is stored on this website's server, hosted by Hostinger International Ltd (European Union),
-    in a file kept outside the web-accessible area. Only NexaFlow has access to it. No marketing
-    processor, and no transfer outside the European Union.
+    If you choose the Cloud plan, the server is ours, so we host the following data for the sole
+    purpose of running the service you subscribed to:
+  </p>
+  <table>
+    <tr><th>Category</th><th>Contents</th></tr>
+    <tr><td>Account</td><td>Name, email address, password (hashed, never readable), language, currency</td></tr>
+    <tr><td>Household members</td><td>First names, roles, dates of birth, colours, avatars</td></tr>
+    <tr><td>Health data <em>(optional)</em></td><td>Allergies, medications, blood type, vaccines, emergency contacts</td></tr>
+    <tr><td>Organisation</td><td>Shopping lists, tasks, appointments, planning, recipes, meals, notes</td></tr>
+    <tr><td>Budget</td><td>Expenses, income, recurring debits and limits you enter</td></tr>
+    <tr><td>Subscription</td><td>Google Play purchase identifier, status and expiry date</td></tr>
+  </table>
+  <p style="margin-top:0.7rem;">
+    <strong>Legal basis:</strong> performance of our contract with you (art. 6.1.b) — without this
+    data the service cannot work.<br>
+    <strong>Retention:</strong> for as long as your account exists, then <strong>30 days</strong>
+    after you delete it (a safety window against accidental deletion), after which erasure is
+    permanent. Encrypted backups are purged within 35 days.
   </p>
 
-  <h2>5. Your rights</h2>
+  <div class="note">
+    <p>
+      <strong>Health data.</strong> The health fields are <strong>optional</strong> and entirely
+      free-form: you are never required to fill them in. Because the GDPR treats them as sensitive
+      data (art. 9), filling them in constitutes explicit consent to storing them (art. 9.2.a). You
+      can erase them at any time from the app without deleting the rest of your account. We never use
+      them for any other purpose and never disclose them to anyone.
+    </p>
+  </div>
+
+  <h2>4. Payments</h2>
   <p>
-    You have the right to access, rectify, erase, restrict and port your data, and to withdraw your
-    consent at any time.
+    Subscriptions are sold and charged by <strong>Google Play</strong>. We never see or store your
+    payment details: Google only gives us an anonymous purchase identifier and your subscription
+    status, so we can unlock the service and know when it expires. Billing is covered by
+    <a href="https://policies.google.com/privacy" rel="noopener">Google's privacy policy</a>.
+  </p>
+
+  <h2>5. Hosting and processors</h2>
+  <ul>
+    <li><strong>openfamily.fr website</strong> — Hostinger International Ltd (European Union)</li>
+    <li><strong>OpenFamily Cloud servers</strong> — Scaleway SAS, <strong>in France</strong></li>
+    <li><strong>Payments</strong> — Google Ireland Ltd (Google Play)</li>
+  </ul>
+  <p style="margin-top:0.6rem;">
+    No other recipients. No reselling, no sharing for advertising purposes, and no transfer of your
+    data outside the European Union for hosting.
+  </p>
+
+  <h2>6. Security</h2>
+  <p>
+    Encryption in transit (HTTPS), passwords hashed with bcrypt, strict isolation between families
+    (every query is scoped to one household), and encrypted backups. No system is infallible: should
+    a breach affect your data, we will inform you and the French supervisory authority as required by
+    art. 33 GDPR.
+  </p>
+
+  <h2>7. Your rights</h2>
+  <p>
+    You have the right to access, rectify, erase, restrict, object to and port your data, and to
+    withdraw your consent at any time.
   </p>
   <ul>
-    <li>Write to <a href="mailto:contact@nexaflow.fr">contact@nexaflow.fr</a> — we answer within 30 days.</li>
-    <li>For deletion, the subject line "Delete from waiting list" is enough; no justification needed.</li>
+    <li><strong>Export your data</strong>: in the app, Settings → Export (a complete JSON file, at any time, without contacting us).</li>
+    <li>
+      <strong>Delete your account and all your data</strong>: write to
+      <a href="mailto:contact@nexaflow.fr?subject=Account%20deletion">contact@nexaflow.fr</a>
+      with the subject "Account deletion". No justification is required. Deletion permanently erases
+      all of the household's data.
+    </li>
+    <li>Any request is handled within 30 days at most.</li>
     <li>You may lodge a complaint with the French data-protection authority, the <a href="https://www.cnil.fr/en" rel="noopener">CNIL</a>.</li>
   </ul>
 
-  <h2>6. What if you self-host OpenFamily?</h2>
+  <h2>8. Children</h2>
   <p>
-    This policy only covers the openfamily.fr website. If you install OpenFamily on your own server,
-    <strong>your family's data stays with you</strong>: it never passes through us and we have no
-    access to it whatsoever. You are then the data controller for it.
+    OpenFamily is not intended for children as independent users: accounts are created and
+    administered by an adult in the household, who decides which profiles to create and what to put
+    in them. We never collect data directly from a child, and we carry out no advertising profiling
+    at any age.
+  </p>
+
+  <h2>9. Changes</h2>
+  <p>
+    Any change to this policy will be published on this page with a new update date. If a change
+    materially affects your rights, Cloud subscribers will be notified by email.
   </p>
 </main>
 <footer>

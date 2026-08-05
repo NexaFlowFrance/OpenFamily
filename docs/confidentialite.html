@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Politique de confidentialité — OpenFamily</title>
-  <meta name="description" content="Quelles données openfamily.fr collecte, pourquoi, combien de temps, et comment les faire supprimer." />
+  <meta name="description" content="Quelles données OpenFamily collecte selon que vous auto-hébergez ou utilisez l'offre Cloud, pourquoi, combien de temps, et comment les faire supprimer." />
   <link rel="canonical" href="https://openfamily.fr/confidentialite.html" />
   <link rel="icon" href="/OpenFamily.png" />
   <style>
@@ -20,15 +20,18 @@
     h1 { font-size: 1.9rem; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
     .updated { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
     h2 { font-size: 1.05rem; margin: 2.2rem 0 0.6rem; }
+    h3 { font-size: 0.95rem; margin: 1.4rem 0 0.4rem; }
     p, li { color: var(--muted); }
     ul { padding-left: 1.2rem; margin-top: 0.4rem; }
     li { margin-bottom: 0.3rem; }
     .lead { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.35rem; }
     .lead p { color: var(--text); margin: 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 0.7rem; font-size: 0.92rem; }
+    .lead p + p { margin-top: 0.6rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.7rem; font-size: 0.9rem; }
     th, td { text-align: left; padding: 0.55rem 0.7rem; border: 1px solid var(--border); vertical-align: top; }
     th { background: var(--surface); color: var(--text); font-weight: 600; }
     td { color: var(--muted); }
+    .note { border-left: 3px solid var(--primary); padding-left: 0.9rem; margin-top: 0.8rem; }
     footer { max-width: 46rem; margin: 3.5rem auto 0; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
     footer a { margin-right: 1rem; }
   </style>
@@ -41,10 +44,16 @@
 
   <div class="lead">
     <p>
-      En résumé : ce site ne dépose <strong>aucun cookie</strong>, n'utilise <strong>aucun outil de
-      mesure d'audience</strong> et n'envoie <strong>aucune donnée à un service tiers</strong>. La seule
-      donnée que nous conservons est l'adresse e-mail que vous nous confiez volontairement pour être
-      prévenu du lancement d'OpenFamily Cloud.
+      OpenFamily existe sous deux formes, et ce qui arrive à vos données dépend entièrement
+      de celle que vous choisissez.
+    </p>
+    <p>
+      <strong>Auto-hébergé</strong> (gratuit) : vous installez OpenFamily sur votre serveur.
+      Vos données ne transitent jamais par nous et nous n'y avons aucun accès.
+      <br>
+      <strong>OpenFamily Cloud</strong> (abonnement) : nous hébergeons le serveur pour vous.
+      Vos données sont alors stockées chez nous, en France, et cette politique décrit
+      précisément lesquelles et pourquoi.
     </p>
   </div>
 
@@ -55,63 +64,133 @@
     <a href="/mentions-legales.html">mentions légales</a>.
   </p>
 
-  <h2>2. Ce que nous collectons, et pourquoi</h2>
+  <h2>2. Le site openfamily.fr</h2>
+  <p>
+    Le site ne dépose <strong>aucun cookie</strong>, n'utilise <strong>aucune mesure d'audience</strong>
+    et n'envoie <strong>aucune requête à un service tiers</strong> lors de son affichage : les polices,
+    images et drapeaux sont hébergés sur ce site.
+  </p>
   <table>
     <tr><th>Donnée</th><th>Finalité</th><th>Base légale</th><th>Conservation</th></tr>
     <tr>
-      <td>Votre adresse e-mail</td>
-      <td>Vous envoyer <strong>un seul e-mail</strong>, à l'ouverture d'OpenFamily Cloud</td>
-      <td>Votre consentement (RGPD art. 6.1.a)</td>
-      <td>Jusqu'à cet envoi, et 12 mois au maximum</td>
-    </tr>
-    <tr>
-      <td>La langue de la page (fr ou en)</td>
-      <td>Vous écrire dans votre langue</td>
-      <td>Votre consentement</td>
-      <td>Idem</td>
+      <td>Adresse e-mail (liste d'attente)</td>
+      <td>Vous envoyer <strong>un seul e-mail</strong> à l'ouverture d'OpenFamily Cloud</td>
+      <td>Consentement (art. 6.1.a)</td>
+      <td>Jusqu'à cet envoi, 12 mois maximum</td>
     </tr>
   </table>
-  <p style="margin-top:0.8rem;">
-    Nous <strong>ne conservons pas votre adresse IP</strong>. Elle est utilisée le temps de la requête
-    uniquement, pour limiter le nombre d'inscriptions par heure (protection anti-abus) ; ce compteur
-    temporaire expire au bout d'une heure et n'est associé à aucune adresse e-mail.
-  </p>
-  <p>
-    Aucune autre donnée n'est collectée : pas de profilage, pas de revente, pas de transmission à un
-    tiers, jamais.
+  <p style="margin-top:0.7rem;">
+    Nous ne conservons pas votre adresse IP : elle sert uniquement, le temps de la requête, à limiter
+    le nombre d'inscriptions par heure. Ce compteur expire au bout d'une heure et n'est lié à aucune
+    adresse e-mail.
   </p>
 
-  <h2>3. Cookies et traceurs</h2>
+  <h2>3. L'application mobile</h2>
+
+  <h3>3.1 — En mode auto-hébergé</h3>
   <p>
-    Le site n'utilise aucun cookie. La <a href="/demo/">démonstration en ligne</a> enregistre
-    certaines préférences (langue, thème) et ses données fictives <strong>dans votre navigateur</strong>
-    via le stockage local : rien n'est transmis à un serveur, et tout disparaît si vous effacez les
-    données du site.
+    Vous saisissez l'adresse de votre propre serveur. L'application communique <strong>exclusivement
+    avec lui</strong>. Aucune donnée n'est transmise à NexaFlow, aucun compte n'est créé chez nous,
+    et nous n'avons techniquement aucun moyen d'accéder à quoi que ce soit. Dans ce cas,
+    <strong>c'est vous le responsable de traitement</strong> de vos données familiales.
+  </p>
+  <p>
+    L'application ne contient aucun outil de mesure d'audience, aucun traceur publicitaire et aucun
+    SDK tiers de collecte. Elle conserve localement, sur votre appareil, l'adresse de votre serveur,
+    votre jeton de connexion et vos préférences (langue, thème).
   </p>
 
-  <h2>4. Hébergement et destinataires</h2>
+  <h3>3.2 — Avec un abonnement OpenFamily Cloud</h3>
   <p>
-    Les données sont stockées sur le serveur du site, hébergé par Hostinger International Ltd
-    (Union européenne), dans un fichier situé hors de la zone accessible depuis le web. Seul NexaFlow
-    y a accès. Aucun sous-traitant marketing, aucun transfert hors de l'Union européenne.
+    Si vous choisissez l'offre Cloud, le serveur est le nôtre et nous hébergeons donc les données
+    suivantes, dans le seul but de faire fonctionner le service que vous avez souscrit :
+  </p>
+  <table>
+    <tr><th>Catégorie</th><th>Contenu</th></tr>
+    <tr><td>Compte</td><td>Nom, adresse e-mail, mot de passe (haché, jamais lisible), langue, devise</td></tr>
+    <tr><td>Membres du foyer</td><td>Prénoms, rôles, dates de naissance, couleurs, avatars</td></tr>
+    <tr><td>Données de santé <em>(facultatif)</em></td><td>Allergies, traitements, groupe sanguin, vaccins, contacts d'urgence</td></tr>
+    <tr><td>Organisation</td><td>Listes de courses, tâches, rendez-vous, planning, recettes, repas, notes</td></tr>
+    <tr><td>Budget</td><td>Dépenses, revenus, prélèvements et plafonds que vous saisissez</td></tr>
+    <tr><td>Abonnement</td><td>Identifiant d'achat Google Play, statut et date d'expiration</td></tr>
+  </table>
+  <p style="margin-top:0.7rem;">
+    <strong>Base légale :</strong> l'exécution du contrat qui nous lie (art. 6.1.b) — sans ces données,
+    le service ne peut pas fonctionner.<br>
+    <strong>Conservation :</strong> tant que votre compte existe, puis <strong>30 jours</strong> après
+    sa suppression (délai de sécurité contre les suppressions accidentelles), après quoi l'effacement
+    est définitif. Les sauvegardes chiffrées sont purgées sous 35 jours.
   </p>
 
-  <h2>5. Vos droits</h2>
+  <div class="note">
+    <p>
+      <strong>Données de santé.</strong> Les champs santé sont <strong>facultatifs</strong> et
+      entièrement libres : vous n'êtes jamais obligé de les remplir. Comme le RGPD les traite comme
+      des données sensibles (art. 9), les renseigner vaut consentement explicite à leur conservation
+      (art. 9.2.a). Vous pouvez les effacer à tout moment depuis l'application, sans supprimer le
+      reste de votre compte. Nous ne les exploitons pour aucun autre usage et ne les communiquons à
+      personne.
+    </p>
+  </div>
+
+  <h2>4. Paiements</h2>
   <p>
-    Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et de portabilité,
-    ainsi que du droit de retirer votre consentement à tout moment.
+    Les abonnements sont vendus et encaissés par <strong>Google Play</strong>. Nous ne voyons ni ne
+    stockons vos coordonnées bancaires : nous recevons uniquement de Google un identifiant d'achat
+    anonyme et l'état de votre abonnement, afin de débloquer l'accès au service et de savoir quand
+    il expire. La facturation relève de la
+    <a href="https://policies.google.com/privacy" rel="noopener">politique de confidentialité de Google</a>.
+  </p>
+
+  <h2>5. Hébergement et sous-traitants</h2>
+  <ul>
+    <li><strong>Site openfamily.fr</strong> — Hostinger International Ltd (Union européenne)</li>
+    <li><strong>Serveurs OpenFamily Cloud</strong> — Scaleway SAS, <strong>en France</strong></li>
+    <li><strong>Paiements</strong> — Google Ireland Ltd (Google Play)</li>
+  </ul>
+  <p style="margin-top:0.6rem;">
+    Aucun autre destinataire. Aucune revente, aucun partage à des fins publicitaires, aucun transfert
+    hors de l'Union européenne pour l'hébergement de vos données.
+  </p>
+
+  <h2>6. Sécurité</h2>
+  <p>
+    Chiffrement en transit (HTTPS), mots de passe hachés avec bcrypt, cloisonnement strict entre
+    familles (chaque requête est filtrée par foyer), et sauvegardes chiffrées. Aucun système n'est
+    infaillible : en cas de violation de données affectant vos informations, nous vous en informerons
+    ainsi que la CNIL, conformément à l'article 33 du RGPD.
+  </p>
+
+  <h2>7. Vos droits</h2>
+  <p>
+    Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et
+    de portabilité, ainsi que du droit de retirer votre consentement à tout moment.
   </p>
   <ul>
-    <li>Écrivez à <a href="mailto:contact@nexaflow.fr">contact@nexaflow.fr</a> : nous traitons votre demande sous 30 jours.</li>
-    <li>Pour une suppression, l'objet « Suppression liste d'attente » suffit — aucune justification n'est requise.</li>
+    <li><strong>Exporter vos données</strong> : depuis l'application, Réglages → Exporter (fichier JSON complet, à tout moment et sans nous contacter).</li>
+    <li>
+      <strong>Supprimer votre compte et toutes vos données</strong> : écrivez à
+      <a href="mailto:contact@nexaflow.fr?subject=Suppression%20de%20compte">contact@nexaflow.fr</a>
+      avec l'objet « Suppression de compte ». Aucune justification n'est demandée. La suppression
+      entraîne l'effacement définitif de l'ensemble des données du foyer.
+    </li>
+    <li>Toute demande est traitée sous 30 jours maximum.</li>
     <li>Vous pouvez introduire une réclamation auprès de la <a href="https://www.cnil.fr" rel="noopener">CNIL</a>.</li>
   </ul>
 
-  <h2>6. Et si vous hébergez OpenFamily vous-même ?</h2>
+  <h2>8. Enfants</h2>
   <p>
-    Cette politique ne concerne que le site openfamily.fr. Si vous installez OpenFamily sur votre
-    propre serveur, <strong>vos données de famille restent chez vous</strong> : elles ne transitent
-    jamais par nous, et nous n'y avons aucun accès. Vous en êtes alors le responsable de traitement.
+    OpenFamily n'est pas destiné aux enfants en tant qu'utilisateurs autonomes : les comptes sont
+    créés et administrés par un adulte du foyer, qui décide des profils à créer et des informations à
+    y inscrire. Nous ne collectons jamais de données directement auprès d'un enfant et ne faisons
+    aucun profilage publicitaire, quel que soit l'âge.
+  </p>
+
+  <h2>9. Modifications</h2>
+  <p>
+    Toute évolution de cette politique sera publiée sur cette page avec une nouvelle date de mise à
+    jour. Si le changement affecte significativement vos droits, les abonnés Cloud en seront informés
+    par e-mail.
   </p>
 </main>
 <footer>

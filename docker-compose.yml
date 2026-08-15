@@ -1,10 +1,12 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: openfamily-db
     restart: unless-stopped
+    env_file:
+      # Change this to your .env file
+      - .env.common     # Shared file with all the services you link this file to.
+      #- .env.postgress     # Service-specific
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-openfamily}
       POSTGRES_USER: ${POSTGRES_USER:-openfamily}
@@ -26,6 +28,10 @@ services:
       dockerfile: ./server/Dockerfile
     container_name: openfamily-server
     restart: unless-stopped
+    env_file:
+      # Change this to your .env file
+      - .env.common     # Shared file with all the services you link this file to.
+      #- .env.server     # Service-specific
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
@@ -64,6 +70,10 @@ services:
         VITE_WS_URL: ${VITE_WS_URL:-}
     container_name: openfamily-client
     restart: unless-stopped
+    env_file:
+      # Change this to your .env file
+      - .env.common     # Shared file with all the services you link this file to.
+      #- .env.client     # Service-specific
     ports:
       - "3000:80"
     depends_on:

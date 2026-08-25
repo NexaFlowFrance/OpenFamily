@@ -1,6 +1,6 @@
 {
   "name": "openfamily",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Application open source pour gérer la vie de famille",
   "private": true,
   "workspaces": [

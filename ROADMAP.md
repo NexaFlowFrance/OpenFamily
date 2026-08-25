@@ -34,6 +34,19 @@ can shift based on feedback — issues and discussions are welcome.
   open these links straight in the app when you publish your own assetlinks file.
 - **Customisable dashboard** *(v1.5)*: per-member widget order and visibility, a
   day/week toggle for the agenda, and the week's plannings on the home page.
+- **Planning activities with several participants** *(v1.6)*: swimming with both
+  children is one entry, not two. Overlap detection covers every participant, and
+  removing someone from the family removes them from the activities rather than
+  leaving an id pointing at nobody.
+- **Skip a single occurrence** *(v1.6)*: call off one date of a weekly entry, for a
+  day off or a cancelled lesson, without touching the series. Recorded as a
+  subtraction, the way `EXDATE` works in iCalendar.
+- **Appointments in the planning week** *(v1.6)*: shown read-only next to the
+  schedule, since a week you have to read in two places is not a week you can plan
+  against.
+- **Editable shopping quantities** *(v1.6)*: correct a quantity in place instead of
+  deleting the line and typing it again, plus around fifty ready-made items offered
+  as you type.
 
 ## Under consideration
 

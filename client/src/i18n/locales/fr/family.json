@@ -69,7 +69,15 @@
     "roleLabel": "Inviter en tant que",
     "generate": "Générer un lien d'invitation",
     "generating": "Génération…",
-    "copyTitle": "Copier"
+    "copyTitle": "Copier",
+    "title": "Inviter un membre",
+    "desc": "Envoyez l'invitation par e-mail, ou partagez le lien vous-même. La personne invitée crée son compte via ce lien : elle rejoint votre famille sans payer d'abonnement supplémentaire.",
+    "emailLabel": "E-mail (facultatif)",
+    "emailPlaceholder": "membre@exemple.fr",
+    "send": "Envoyer l'invitation",
+    "sent": "Invitation envoyée à {{email}}.",
+    "sendFailed": "L'e-mail n'a pas pu être envoyé. Partagez le lien ci-dessous vous-même.",
+    "linkHint": "Ce lien est valable 7 jours. La personne invitée doit créer son compte via ce lien pour rejoindre votre famille."
   },
   "leave": {
     "leaving": "Départ en cours…",

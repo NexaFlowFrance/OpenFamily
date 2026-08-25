@@ -7,6 +7,7 @@ import { WebSocketProvider } from './contexts/WebSocketContext';
 import { AppToastProvider } from './components/ui';
 import App from './App';
 import { isNative, initServerConfig } from './lib/serverConfig';
+import { initDeepLinks } from './lib/deepLinks';
 import './i18n';
 import './index.css';
 
@@ -15,6 +16,9 @@ import './index.css';
 const Router = import.meta.env.VITE_DEMO || isNative() ? HashRouter : BrowserRouter;
 
 // Load the saved server URL (native only) before first render, then mount.
+// Deep links are wired up in parallel: they only ever navigate, so they do not
+// need to be ready before the first paint.
+void initDeepLinks();
 void initServerConfig().finally(() => {
     ReactDOM.createRoot(document.getElementById('root')!).render(
         <React.StrictMode>

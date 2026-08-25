@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Users, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Users, CheckCircle, AlertCircle, Loader2, Link2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { intlLocale } from '../i18n/format';
@@ -13,27 +14,35 @@ interface InviteInfo {
     expiresAt: string;
 }
 
+// Invite tokens are 32 random bytes in hex; accept a bare code or a full link.
+const extractInviteToken = (raw: string): string | null =>
+    raw.match(/[a-f0-9]{64}/i)?.[0] ?? null;
+
 const Join: React.FC = () => {
     const { t } = useTranslation(['auth', 'common']);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { joinFamily, user } = useAuth();
 
-    const inviteToken = searchParams.get('invite');
+    // From the URL when the invite link was opened directly; otherwise the user
+    // pastes the link (or the bare code) into the form below.
+    const [inviteToken, setInviteToken] = useState<string | null>(searchParams.get('invite'));
+    const [pasted, setPasted] = useState('');
+    const [pasteError, setPasteError] = useState<string | null>(null);
 
     const [inviteInfo, setInviteInfo] = useState<InviteInfo | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(Boolean(searchParams.get('invite')));
     const [joining, setJoining] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [joined, setJoined] = useState(false);
 
     useEffect(() => {
         if (!inviteToken) {
-            setError(t('auth:invite.missing'));
-            setLoading(false);
             return;
         }
 
+        setLoading(true);
+        setError(null);
         api.get<{ success: boolean; data: InviteInfo }>(`/api/invites/info/${inviteToken}`)
             .then((res) => {
                 if (res.success && res.data) {
@@ -45,6 +54,18 @@ const Join: React.FC = () => {
             .catch(() => setError(t('auth:invite.cannotVerify')))
             .finally(() => setLoading(false));
     }, [inviteToken, t]);
+
+    const handlePasteSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const token = extractInviteToken(pasted);
+        if (!token) {
+            setPasteError(t('auth:invite.pasteInvalid'));
+            return;
+        }
+        setPasteError(null);
+        setInviteInfo(null);
+        setInviteToken(token);
+    };
 
     const handleJoin = async () => {
         if (!inviteToken) return;
@@ -87,11 +108,41 @@ const Join: React.FC = () => {
                         </div>
                     )}
 
-                    {!loading && error && (
+                    {!loading && error && !joined && (
                         <div className="flex items-start gap-3 p-4 rounded-nexus bg-destructive/10 border border-destructive/20">
                             <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                             <p className="text-sm text-destructive">{error}</p>
                         </div>
+                    )}
+
+                    {/* No usable link (or an invalid one): let the user paste the
+                        invitation link or code they received. */}
+                    {!loading && !joined && (!inviteToken || (error && !inviteInfo)) && (
+                        <form onSubmit={handlePasteSubmit} className="space-y-3">
+                            <p className="text-sm text-muted-foreground text-center">{t('auth:invite.pasteDesc')}</p>
+                            <Input
+                                value={pasted}
+                                onChange={(e) => setPasted(e.target.value)}
+                                placeholder={t('auth:invite.pastePlaceholder')}
+                            />
+                            {pasteError && (
+                                <p className="text-sm text-destructive text-center">{pasteError}</p>
+                            )}
+                            <div className="flex gap-3">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="flex-1"
+                                    onClick={() => navigate('/')}
+                                >
+                                    {t('common:actions.back')}
+                                </Button>
+                                <Button type="submit" className="flex-1">
+                                    <Link2 className="w-4 h-4 mr-2" />
+                                    {t('auth:invite.pasteSubmit')}
+                                </Button>
+                            </div>
+                        </form>
                     )}
 
                     {!loading && joined && (
@@ -147,14 +198,6 @@ const Join: React.FC = () => {
                         </>
                     )}
 
-                    {!loading && !error && !joined && !inviteInfo && (
-                        <div className="text-center py-4">
-                            <p className="text-sm text-muted-foreground">{t('auth:invite.notFound')}</p>
-                            <Button variant="secondary" className="mt-4" onClick={() => navigate('/')}>
-                                {t('common:actions.back')}
-                            </Button>
-                        </div>
-                    )}
                 </CardContent>
             </Card>
         </div>

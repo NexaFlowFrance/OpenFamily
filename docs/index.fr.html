@@ -805,28 +805,27 @@ API      : http://localhost:3001/health</pre>
 
 <hr class="divider" />
 
-<!-- CLOUD (liste d'attente) -->
+<!-- CLOUD -->
 <section id="cloud">
   <div class="section-label">Cloud</div>
   <h2>Pas envie d'héberger vous-même ?</h2>
-  <p class="section-desc">L'auto-hébergement reste <strong>gratuit, pour toujours</strong>. Pour les familles qui préfèrent ne pas gérer de serveur, nous préparons <strong>OpenFamily Cloud</strong> : exactement la même application, hébergée pour vous.</p>
+  <p class="section-desc">L'auto-hébergement reste <strong>gratuit, pour toujours</strong>. Pour les familles qui préfèrent ne pas gérer de serveur, <strong>OpenFamily Cloud</strong> est disponible : exactement la même application, hébergée pour vous.</p>
 
   <div class="windows-card">
-    <h3>OpenFamily Cloud — bientôt disponible</h3>
-    <p>Aucune installation, mises à jour et sauvegardes automatiques, données hébergées en France. La même application open source, sans publicité ni pistage — et vous pouvez <strong>tout exporter et repasser en auto-hébergé quand vous voulez</strong>.</p>
-    <p style="margin-top:0.85rem;"><strong>39 €/an</strong> (3,25 €/mois) par famille — ou 4,90 €/mois. Un seul abonnement pour tout le foyer. Essai gratuit de 30 jours, sans carte bancaire.</p>
-    <form class="waitlist-form" id="waitlist-form" novalidate>
-      <label class="sr-only" for="waitlist-email">Votre adresse e-mail</label>
-      <input type="email" id="waitlist-email" name="email" required autocomplete="email" placeholder="vous@exemple.fr" />
-      <!-- Anti-spam : champ invisible, seuls les robots le remplissent. -->
-      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="waitlist-hp" />
-      <button type="submit" class="btn-primary">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><polyline points="4 7 12 13 20 7"/></svg>
-        Me prévenir
-      </button>
-    </form>
-    <p class="waitlist-msg" id="waitlist-msg" role="status" aria-live="polite"></p>
-    <p style="margin-top:0.85rem; font-size:0.85em; opacity:0.75;">Sans engagement : nous conservons uniquement votre adresse e-mail et votre langue, pour vous envoyer <strong>un seul e-mail</strong> au lancement (12 mois maximum). Aucun pistage, aucune transmission à un tiers. Suppression sur simple demande à <a href="mailto:contact@nexaflow.fr">contact@nexaflow.fr</a> — voir la <a href="/confidentialite.html">politique de confidentialité</a>.</p>
+    <h3>OpenFamily Cloud — disponible</h3>
+    <p>Aucune installation, mises à jour automatiques, données hébergées en France. La même application open source, sans publicité ni pistage — et vous pouvez <strong>tout exporter et repasser en auto-hébergé quand vous voulez</strong>.</p>
+    <p style="margin-top:0.85rem;"><strong>3,90 €/mois</strong> par famille. Un seul abonnement pour tout le foyer : les autres membres rejoignent gratuitement, sur invitation. Sans engagement, résiliable à tout moment depuis Google Play.</p>
+    <div style="display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:center; margin-top:1.2rem;">
+      <a class="btn-primary" href="https://play.google.com/store/apps/details?id=fr.nexaflow.openfamily">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8a1 1 0 0 0-.5.9v18.6a1 1 0 0 0 .5.9l10-10.2-10-10.2zm11.1 9.1 2.9-2.9-8.4-4.8 5.5 7.7zm0 2.2-5.5 7.7 8.4-4.8-2.9-2.9zm4.4-3.4-2.3 2.3 2.3 2.3 2.1-1.2c.7-.4.7-1.8 0-2.2l-2.1-1.2z"/></svg>
+        Télécharger sur Google Play
+      </a>
+      <a class="btn-secondary" href="https://app.openfamily.fr">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Ouvrir dans le navigateur
+      </a>
+    </div>
+    <p style="margin-top:0.85rem; font-size:0.85em; opacity:0.75;">L'abonnement se souscrit depuis l'application Android (Google Play). Vos données restent hébergées en France, sans publicité ni pistage — voir la <a href="/confidentialite.html">politique de confidentialité</a>. Une question ? <a href="mailto:contact@nexaflow.fr">contact@nexaflow.fr</a></p>
   </div>
 </section>
 

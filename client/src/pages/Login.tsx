@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
-import { Users, Sun, Moon } from 'lucide-react';
+import { Users, Sun, Moon, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 
@@ -22,15 +23,47 @@ const Login: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [inviteToken, setInviteToken] = useState<string | null>(null);
 
-    // Detect invite token in URL; auto-switch to registration mode
+    // "Forgot password" sub-form, shown in place of the credentials form.
+    const [forgotMode, setForgotMode] = useState(false);
+    const [forgotSent, setForgotSent] = useState(false);
+
+    // Detect invite token in URL (both the plain ?invite= form and the hash route
+    // used by the native shell); auto-switch to registration mode.
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const invite = params.get('invite');
+        const fromSearch = new URLSearchParams(window.location.search).get('invite');
+        const hashQuery = window.location.hash.split('?')[1] ?? '';
+        const fromHash = new URLSearchParams(hashQuery).get('invite');
+        const invite = fromSearch || fromHash;
         if (invite) {
             setInviteToken(invite);
             setIsLogin(false);
         }
     }, []);
+
+    const handleForgotSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+            await api.post('/api/auth/password/forgot', { email });
+            setForgotSent(true);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : '';
+            // The server says so explicitly when it has no mail relay: a
+            // self-hosted install must tell the user to ask their administrator.
+            setError(message === 'mail_not_configured'
+                ? t('auth:forgot.mailNotConfigured')
+                : message || t('common:states.error'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const leaveForgotMode = () => {
+        setForgotMode(false);
+        setForgotSent(false);
+        setError('');
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,7 +111,7 @@ const Login: React.FC = () => {
 
                 <CardContent className="space-y-6 px-8 pb-8">
                     {/* Invite banner */}
-                    {inviteToken && !isLogin && (
+                    {inviteToken && !isLogin && !forgotMode && (
                         <div className="flex items-center gap-3 p-3 rounded-input bg-primary-soft border border-border">
                             <Users className="w-5 h-5 text-primary shrink-0" />
                             <p className="text-label-sm text-primary font-medium">
@@ -87,6 +120,53 @@ const Login: React.FC = () => {
                         </div>
                     )}
 
+                    {forgotMode ? (
+                        <div className="space-y-5">
+                            {forgotSent ? (
+                                <>
+                                    <div className="p-3 rounded-input bg-primary-soft border border-border">
+                                        <p className="text-label-sm text-primary font-medium text-center">
+                                            {t('auth:forgot.sent')}
+                                        </p>
+                                    </div>
+                                    <Button type="button" variant="secondary" className="w-full" onClick={leaveForgotMode}>
+                                        <ArrowLeft className="w-4 h-4 mr-2" />
+                                        {t('auth:forgot.backToLogin')}
+                                    </Button>
+                                </>
+                            ) : (
+                                <form onSubmit={handleForgotSubmit} className="space-y-5">
+                                    <p className="text-body-sm text-muted-foreground text-center">
+                                        {t('auth:forgot.desc')}
+                                    </p>
+                                    <Input
+                                        label={t('auth:fields.email')}
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        placeholder={t('auth:fields.emailPlaceholder')}
+                                    />
+                                    {error && (
+                                        <div className="p-3 rounded-nexus bg-destructive/10 border border-destructive/20">
+                                            <p className="text-label-sm text-destructive font-medium text-center">{error}</p>
+                                        </div>
+                                    )}
+                                    <Button type="submit" disabled={loading} className="w-full h-12 text-body-sm font-semibold" size="lg">
+                                        {loading ? t('common:states.loading') : t('auth:forgot.submit')}
+                                    </Button>
+                                    <button
+                                        type="button"
+                                        onClick={leaveForgotMode}
+                                        className="w-full text-body-sm text-nexus-blue hover:text-nexus-blue/80 font-medium transition-colors hover:underline underline-offset-4"
+                                    >
+                                        {t('auth:forgot.backToLogin')}
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+                    ) : (
+                    <>
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {!isLogin && (
                             <div className="space-y-1.5">
@@ -148,6 +228,21 @@ const Login: React.FC = () => {
                         </Button>
                     </form>
 
+                    {isLogin && (
+                        <div className="text-center">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setForgotMode(true);
+                                    setError('');
+                                }}
+                                className="text-body-sm text-muted-foreground hover:text-foreground font-medium transition-colors hover:underline underline-offset-4"
+                            >
+                                {t('auth:forgot.link')}
+                            </button>
+                        </div>
+                    )}
+
                     {registrationEnabled && (
                         <div className="mt-8 text-center pt-2 border-t border-border">
                             <button
@@ -162,6 +257,8 @@ const Login: React.FC = () => {
                                     : t('auth:login.haveAccount')}
                             </button>
                         </div>
+                    )}
+                    </>
                     )}
                 </CardContent>
             </Card>

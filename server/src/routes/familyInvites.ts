@@ -1,20 +1,40 @@
 import crypto from 'node:crypto';
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { query, getClient } from '../db';
 import { authMiddleware, AuthRequest, generateToken } from '../middleware/auth';
 import { broadcast } from '../lib/broadcaster';
 import { createNotification } from '../lib/notifications';
 import { normalizeEmail } from '../lib/normalize';
+import { isMailEnabled, sendFamilyInviteEmail } from '../lib/mailer';
+import { resolveAppBaseUrl } from '../lib/appUrl';
 
 const router = Router();
+
+// Invite creation can send an email to an arbitrary address, so cap it well
+// above family use but low enough to blunt abuse as a spam relay.
+const inviteRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: 'Too many invitations. Please try again later.'
+    }
+});
 
 // Account roles assignable to family members ('parent' = full access, 'enfant' = read-mostly)
 const cleanAccountRole = (value: unknown): 'parent' | 'enfant' =>
     value === 'enfant' ? 'enfant' : 'parent';
 
+// Loose shape check: enough to catch typos before an email is stored/sent,
+// without rejecting valid but unusual addresses.
+const looksLikeEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+
 // ── Public endpoint (no auth) ─────────────────────────────────────────────────
 
-// GET /info/:token — get invite preview info for the Join page
+// GET /info/:token - get invite preview info for the Join page
 router.get('/info/:token', async (req, res) => {
     const { rows } = await query(
         `SELECT fi.id, fi.expires_at, u.name AS owner_name, u.id AS owner_id
@@ -38,7 +58,7 @@ router.get('/info/:token', async (req, res) => {
 
 router.use(authMiddleware);
 
-// GET /members — list all user accounts in this family
+// GET /members - list all user accounts in this family
 router.get('/members', async (req: AuthRequest, res) => {
     const { rows } = await query(
         `SELECT id, name, email, role, (family_owner_id IS NULL) AS is_owner, created_at
@@ -51,8 +71,10 @@ router.get('/members', async (req: AuthRequest, res) => {
     return res.json({ success: true, data: rows });
 });
 
-// POST / — create an invite link (owner only)
-router.post('/', async (req: AuthRequest, res) => {
+// POST / - create an invite link (owner only). When inviteeEmail is provided the
+// invitation is ALSO emailed to that address (with the join link), and the invite
+// becomes restricted to it at registration time (see auth register).
+router.post('/', inviteRateLimiter, async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Seul le propriétaire peut créer des invitations' });
     }
@@ -63,6 +85,14 @@ router.post('/', async (req: AuthRequest, res) => {
         role?: string;
     };
 
+    let cleanedInviteeEmail: string | null = null;
+    if (typeof inviteeEmail === 'string' && inviteeEmail.trim() !== '') {
+        cleanedInviteeEmail = normalizeEmail(inviteeEmail);
+        if (!looksLikeEmail(cleanedInviteeEmail)) {
+            return res.status(400).json({ success: false, error: 'Adresse e-mail invalide' });
+        }
+    }
+
     const days = Math.min(Math.max(Number(expiresInDays) || 7, 1), 30);
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
@@ -72,13 +102,36 @@ router.post('/', async (req: AuthRequest, res) => {
         `INSERT INTO family_invites (owner_id, token, invitee_email, expires_at, role)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING id, token, invitee_email, status, expires_at, role, created_at`,
-        [req.userId, token, inviteeEmail ?? null, expiresAt.toISOString(), inviteRole]
+        [req.userId, token, cleanedInviteeEmail, expiresAt.toISOString(), inviteRole]
     );
 
-    return res.json({ success: true, data: rows[0] });
+    // Canonical share link, built server-side so the native app never leaks its
+    // local shell origin (http://localhost) into a link meant for someone else.
+    const inviteUrl = `${resolveAppBaseUrl(req)}/join?invite=${token}`;
+
+    // Email delivery is best-effort: the invite (and its link) exists either way.
+    // email_sent: true = handed to SMTP, false = send failed, null = not requested.
+    let emailSent: boolean | null = null;
+    if (cleanedInviteeEmail) {
+        if (!isMailEnabled()) {
+            emailSent = false;
+        } else {
+            const ownerResult = await query('SELECT name, language FROM users WHERE id = $1', [req.userId]);
+            const owner = ownerResult.rows[0] as { name: string; language: string | null } | undefined;
+            emailSent = await sendFamilyInviteEmail({
+                email: cleanedInviteeEmail,
+                inviterName: owner?.name || 'Un membre OpenFamily',
+                joinUrl: inviteUrl,
+                language: owner?.language,
+                expiresAt,
+            });
+        }
+    }
+
+    return res.json({ success: true, data: { ...rows[0], invite_url: inviteUrl, email_sent: emailSent } });
 });
 
-// GET / — list pending invites (owner only)
+// GET / - list pending invites (owner only)
 router.get('/', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
@@ -97,7 +150,7 @@ router.get('/', async (req: AuthRequest, res) => {
     return res.json({ success: true, data: rows });
 });
 
-// POST /join — already-logged-in user joins using an invite token (returns new JWT)
+// POST /join - already-logged-in user joins using an invite token (returns new JWT)
 router.post('/join', async (req: AuthRequest, res) => {
     const { token } = req.body as { token?: string };
 
@@ -121,6 +174,16 @@ router.post('/join', async (req: AuthRequest, res) => {
         return res.status(400).json({ success: false, error: 'Vous êtes déjà propriétaire de cette famille' });
     }
 
+    // Same rule as POST /requests: an owner who still has members attached
+    // cannot join another family (their members would be orphaned).
+    const ownMembers = await query('SELECT 1 FROM users WHERE family_owner_id = $1 LIMIT 1', [req.actualUserId]);
+    if (ownMembers.rows.length > 0) {
+        return res.status(400).json({
+            success: false,
+            error: 'Retirez d\'abord les comptes rattachés au vôtre avant de rejoindre une autre famille',
+        });
+    }
+
     // Update family membership; the account role is set from the invite (chosen by the inviter)
     await query(
         'UPDATE users SET family_owner_id = $1, role = $2 WHERE id = $3',
@@ -142,7 +205,7 @@ router.post('/join', async (req: AuthRequest, res) => {
     });
 });
 
-// DELETE /leave — member leaves the family (returns new standalone JWT)
+// DELETE /leave - member leaves the family (returns new standalone JWT)
 router.delete('/leave', async (req: AuthRequest, res) => {
     if (req.isOwner) {
         return res.status(400).json({
@@ -167,7 +230,7 @@ router.delete('/leave', async (req: AuthRequest, res) => {
     });
 });
 
-// DELETE /:id — revoke a pending invite (owner only)
+// DELETE /:id - revoke a pending invite (owner only)
 router.delete('/members/:userId', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
@@ -182,11 +245,16 @@ router.delete('/members/:userId', async (req: AuthRequest, res) => {
         return res.status(404).json({ success: false, error: 'Membre introuvable' });
     }
 
-    await query('UPDATE users SET family_owner_id = NULL WHERE id = $1', [req.params.userId]);
+    // Defence in depth: re-scope the mutation itself so it can never detach a
+    // user who is not (or no longer) a member of this owner's family.
+    await query(
+        'UPDATE users SET family_owner_id = NULL WHERE id = $1 AND family_owner_id = $2',
+        [req.params.userId, req.userId]
+    );
     return res.json({ success: true });
 });
 
-// PUT /members/:userId/role — owner changes a member's account role (parent / enfant)
+// PUT /members/:userId/role - owner changes a member's account role (parent / enfant)
 router.put('/members/:userId/role', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
@@ -234,7 +302,7 @@ const FAMILY_SCOPED_TABLES = [
     'reward_goals',
 ] as const;
 
-// POST /transfer-ownership — owner hands the family (and all its data) to a member
+// POST /transfer-ownership - owner hands the family (and all its data) to a member
 router.post('/transfer-ownership', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Seul le propriétaire peut transférer la famille' });
@@ -290,7 +358,7 @@ router.post('/transfer-ownership', async (req: AuthRequest, res) => {
         client.release();
     }
 
-    // Refresh the (former) owner's JWT — they are now a regular member.
+    // Refresh the (former) owner's JWT - they are now a regular member.
     const newToken = generateToken(oldOwnerId, newOwnerId);
     const userResult = await query('SELECT name, email, role, currency FROM users WHERE id = $1', [oldOwnerId]);
     const user = userResult.rows[0] as { name: string; email: string; role: string; currency: string };
@@ -323,7 +391,7 @@ router.post('/transfer-ownership', async (req: AuthRequest, res) => {
 
 // ── Join requests (ask an owner for access) ───────────────────────────────────
 
-// POST /requests — a standalone user asks to join a family identified by the owner's email
+// POST /requests - a standalone user asks to join a family identified by the owner's email
 router.post('/requests', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(400).json({ success: false, error: 'Vous faites déjà partie d\'une famille' });
@@ -334,27 +402,38 @@ router.post('/requests', async (req: AuthRequest, res) => {
         return res.status(400).json({ success: false, error: 'Adresse e-mail requise' });
     }
 
-    // The target must be an existing family owner (standalone account, not a member of another family)
-    const ownerResult = await query(
-        'SELECT id FROM users WHERE LOWER(email) = $1 AND family_owner_id IS NULL',
-        [ownerEmail]
-    );
-    if (ownerResult.rows.length === 0) {
-        return res.status(404).json({ success: false, error: 'Aucune famille trouvée pour cette adresse e-mail' });
-    }
-
-    const ownerId = (ownerResult.rows[0] as { id: string }).id;
-    if (ownerId === req.actualUserId) {
-        return res.status(400).json({ success: false, error: 'Vous ne pouvez pas rejoindre votre propre famille' });
-    }
-
-    // Block if the requester already has members attached to them (joining would orphan them)
+    // Requester-side checks first, so the response never depends on whether the
+    // target email exists (anti-enumeration): block if the requester already has
+    // members attached to them (joining would orphan them).
     const ownMembers = await query('SELECT 1 FROM users WHERE family_owner_id = $1 LIMIT 1', [req.actualUserId]);
     if (ownMembers.rows.length > 0) {
         return res.status(400).json({
             success: false,
             error: 'Retirez d\'abord les comptes rattachés au vôtre avant de rejoindre une autre famille',
         });
+    }
+
+    // Generic response whether or not the email matches a family owner, so this
+    // endpoint cannot be used to enumerate registered email addresses.
+    const genericResponse = {
+        success: true,
+        message: 'Si cette adresse correspond à une famille, une demande a été envoyée.',
+    };
+
+    // The target must be an existing family owner (standalone account, not a member
+    // of another family). If not found - or if it's the requester's own address -
+    // no request is created but the response stays identical.
+    const ownerResult = await query(
+        'SELECT id FROM users WHERE LOWER(email) = $1 AND family_owner_id IS NULL',
+        [ownerEmail]
+    );
+    if (ownerResult.rows.length === 0) {
+        return res.json(genericResponse);
+    }
+
+    const ownerId = (ownerResult.rows[0] as { id: string }).id;
+    if (ownerId === req.actualUserId) {
+        return res.json(genericResponse);
     }
 
     // Only one pending request at a time per requester
@@ -376,10 +455,10 @@ router.post('/requests', async (req: AuthRequest, res) => {
         url: '/family',
     });
 
-    return res.json({ success: true });
+    return res.json(genericResponse);
 });
 
-// GET /requests/mine — the requester checks the status of their own latest request
+// GET /requests/mine - the requester checks the status of their own latest request
 router.get('/requests/mine', async (req: AuthRequest, res) => {
     const { rows } = await query(
         `SELECT jr.id, jr.status, jr.created_at, u.name AS owner_name, u.email AS owner_email
@@ -393,7 +472,7 @@ router.get('/requests/mine', async (req: AuthRequest, res) => {
     return res.json({ success: true, data: rows[0] ?? null });
 });
 
-// DELETE /requests/mine — the requester cancels their own pending request
+// DELETE /requests/mine - the requester cancels their own pending request
 router.delete('/requests/mine', async (req: AuthRequest, res) => {
     await query(
         "UPDATE family_join_requests SET status = 'cancelled', responded_at = NOW() WHERE requester_id = $1 AND status = 'pending'",
@@ -402,7 +481,7 @@ router.delete('/requests/mine', async (req: AuthRequest, res) => {
     return res.json({ success: true });
 });
 
-// GET /requests — owner lists pending requests addressed to their family
+// GET /requests - owner lists pending requests addressed to their family
 router.get('/requests', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
@@ -419,7 +498,7 @@ router.get('/requests', async (req: AuthRequest, res) => {
     return res.json({ success: true, data: rows });
 });
 
-// POST /requests/:id/approve — owner approves a pending request
+// POST /requests/:id/approve - owner approves a pending request
 router.post('/requests/:id/approve', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
@@ -467,7 +546,7 @@ router.post('/requests/:id/approve', async (req: AuthRequest, res) => {
     return res.json({ success: true });
 });
 
-// POST /requests/:id/reject — owner rejects a pending request
+// POST /requests/:id/reject - owner rejects a pending request
 router.post('/requests/:id/reject', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
@@ -496,7 +575,7 @@ router.post('/requests/:id/reject', async (req: AuthRequest, res) => {
     return res.json({ success: true });
 });
 
-// DELETE /:id — revoke invite (owner only) — after /members/:userId to avoid conflict
+// DELETE /:id - revoke invite (owner only) - after /members/:userId to avoid conflict
 router.delete('/:id', async (req: AuthRequest, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });

@@ -1,11 +1,12 @@
 import type { ReactElement } from 'react';
 import { useState } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './contexts/AuthContext';
 import { isNative, isServerConfigured } from './lib/serverConfig';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
+import ResetPassword from './pages/ResetPassword';
 import Kiosk from './pages/Kiosk';
 import ServerSetup from './pages/ServerSetup';
 import Dashboard from './pages/Dashboard';
@@ -26,6 +27,7 @@ function App() {
     const { isAuthenticated, loading, isModuleEnabled } = useAuth();
     const { t } = useTranslation('common');
     const location = useLocation();
+    const navigate = useNavigate();
 
     // For an optional module: render its element only when enabled, otherwise
     // redirect to the dashboard so a bookmarked/typed URL never shows a hidden page.
@@ -48,6 +50,11 @@ function App() {
                 </div>
             </div>
         );
+    }
+
+    // Password reset arrives by email link, so it must work while logged out.
+    if (location.pathname === '/reset-password') {
+        return <ResetPassword onDone={() => navigate('/', { replace: true })} />;
     }
 
     if (!isAuthenticated) {

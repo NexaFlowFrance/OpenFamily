@@ -18,10 +18,13 @@
   },
   "today": {
     "title": "Aujourd'hui",
-    "viewWeek": "Voir la semaine",
+    "viewWeek": "Semaine",
     "emptyTitle": "Rien de prévu.",
     "emptySubtitle": "Ajoutez un rendez-vous pour le voir apparaître ici.",
-    "emptyCta": "Ajouter un rendez-vous"
+    "emptyCta": "Ajouter un rendez-vous",
+    "weekTitle": "Cette semaine",
+    "viewDay": "Jour",
+    "emptyWeekSubtitle": "Aucun rendez-vous cette semaine."
   },
   "aside": {
     "shopping": "Courses",
@@ -32,5 +35,31 @@
     "tasks": "Tâches en attente",
     "tasksCount_one": "tâche à terminer",
     "tasksCount_other": "tâches à terminer"
+  },
+  "planning": {
+    "title": "Plannings de la semaine",
+    "viewAll": "Voir le planning",
+    "empty": "Aucun planning enregistré pour cette semaine."
+  },
+  "customize": {
+    "button": "Personnaliser",
+    "title": "Personnaliser l'accueil",
+    "description": "Choisissez ce qui s'affiche sur votre page d'accueil, et dans quel ordre. Ce réglage est propre à votre compte.",
+    "agendaViewLabel": "Affichage de l'agenda",
+    "widgetsLabel": "Blocs affichés",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "reset": "Réinitialiser",
+    "allHidden": "Tous les blocs sont masqués. Personnalisez votre accueil pour en réafficher.",
+    "moduleDisabled": "(module désactivé)",
+    "widgets": {
+      "stats": "Chiffres clés",
+      "agenda": "Agenda (rendez-vous)",
+      "planning": "Plannings de la semaine",
+      "quick": "Accès rapides (courses, budget, tâches)",
+      "notes": "Mots de la famille"
+    }
   }
 }

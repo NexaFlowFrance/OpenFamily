@@ -1,8 +1,12 @@
+import crypto from 'node:crypto';
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
+import rateLimit from 'express-rate-limit';
 import { query } from '../db';
 import { authMiddleware, AuthRequest, generateToken } from '../middleware/auth';
 import { normalizeEmail } from '../lib/normalize';
+import { isMailEnabled, sendPasswordResetEmail } from '../lib/mailer';
+import { resolveAppBaseUrl } from '../lib/appUrl';
 import { parseDisabledModules } from './userSettings';
 
 const router = Router();
@@ -164,6 +168,117 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// ── Password reset (email link) ──────────────────────────────────────────────
+
+// Stricter than the login limiter and WITHOUT skipSuccessfulRequests: forgot
+// always answers 200 (anti-enumeration), so successful requests must count or
+// the limiter would never engage and the endpoint could be used to spam inboxes.
+const passwordResetWindowMs = Number.parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || '900000', 10);
+const passwordResetRateLimiter = rateLimit({
+    windowMs: Number.isNaN(passwordResetWindowMs) ? 900000 : passwordResetWindowMs,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: 'Too many password reset attempts. Please try again later.'
+    }
+});
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+
+const hashResetToken = (token: string): string =>
+    crypto.createHash('sha256').update(token).digest('hex');
+
+// Request a reset link. Always answers the same success message whether or not
+// the address matches an account, so it cannot be used to enumerate emails.
+// Only the token's SHA-256 is stored; the raw token exists only in the email.
+router.post('/password/forgot', passwordResetRateLimiter, async (req, res) => {
+    try {
+        const { email } = req.body as { email?: unknown };
+        const normalizedEmail = typeof email === 'string' ? normalizeEmail(email) : '';
+        if (!normalizedEmail) {
+            return res.status(400).json({ success: false, error: 'Missing required fields' });
+        }
+
+        // Without SMTP there is nothing we can ever send: say so honestly (this
+        // reveals server configuration, not account existence). Self-hosted
+        // installs then point the user to their administrator.
+        if (!isMailEnabled()) {
+            return res.status(501).json({ success: false, error: 'mail_not_configured' });
+        }
+
+        const generic = { success: true, message: 'If this address matches an account, a reset email has been sent.' };
+
+        const userResult = await query(
+            'SELECT id, email, name, language FROM users WHERE LOWER(email) = $1',
+            [normalizedEmail]
+        );
+        const user = userResult.rows[0] as { id: string; email: string; name: string | null; language: string | null } | undefined;
+        if (!user) {
+            return res.json(generic);
+        }
+
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+
+        // One outstanding link per account: a new request replaces the old one.
+        await query('DELETE FROM password_resets WHERE user_id = $1 AND used_at IS NULL', [user.id]);
+        await query(
+            'INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
+            [user.id, hashResetToken(token), expiresAt.toISOString()]
+        );
+
+        const resetUrl = `${resolveAppBaseUrl(req)}/reset-password?token=${token}`;
+        await sendPasswordResetEmail({
+            email: user.email,
+            name: user.name,
+            language: user.language,
+            resetUrl,
+        });
+
+        return res.json(generic);
+    } catch (error) {
+        console.error('Password forgot error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Consume a reset link: set the new password and burn the token.
+router.post('/password/reset', passwordResetRateLimiter, async (req, res) => {
+    try {
+        const { token, password } = req.body as { token?: unknown; password?: unknown };
+
+        if (typeof token !== 'string' || !/^[a-f0-9]{64}$/i.test(token)) {
+            return res.status(400).json({ success: false, error: 'invalid_or_expired_token' });
+        }
+        if (typeof password !== 'string' || password.length < 8) {
+            return res.status(400).json({ success: false, error: 'Password must be at least 8 characters' });
+        }
+
+        const resetResult = await query(
+            `SELECT id, user_id FROM password_resets
+             WHERE token_hash = $1 AND used_at IS NULL AND expires_at > NOW()`,
+            [hashResetToken(token)]
+        );
+        const reset = resetResult.rows[0] as { id: string; user_id: string } | undefined;
+        if (!reset) {
+            return res.status(400).json({ success: false, error: 'invalid_or_expired_token' });
+        }
+
+        const password_hash = await bcrypt.hash(password, 12);
+        await query('UPDATE users SET password_hash = $1 WHERE id = $2', [password_hash, reset.user_id]);
+        await query('UPDATE password_resets SET used_at = NOW() WHERE id = $1', [reset.id]);
+        // Burn any other outstanding link for this account too.
+        await query('DELETE FROM password_resets WHERE user_id = $1 AND used_at IS NULL', [reset.user_id]);
+
+        return res.json({ success: true });
+    } catch (error) {
+        console.error('Password reset error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });
 

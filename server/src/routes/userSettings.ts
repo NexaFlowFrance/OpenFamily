@@ -21,6 +21,50 @@ export const TOGGLEABLE_MODULES = [
     'ai',
 ] as const;
 
+// Dashboard widgets, in default display order. 'quick' is the shopping/budget/
+// tasks quick-access card row; 'agenda' carries the day/week toggle.
+export const DASHBOARD_WIDGETS = ['stats', 'agenda', 'planning', 'quick', 'notes'] as const;
+export type DashboardWidget = typeof DASHBOARD_WIDGETS[number];
+
+export interface DashboardPrefs {
+    order: DashboardWidget[];
+    hidden: DashboardWidget[];
+    agendaView: 'day' | 'week';
+}
+
+const isWidget = (v: unknown): v is DashboardWidget =>
+    typeof v === 'string' && (DASHBOARD_WIDGETS as readonly string[]).includes(v);
+
+// Parse the JSON text stored in users.dashboard_prefs into a complete, valid
+// prefs object. Unknown widgets are dropped, missing ones appended in default
+// order, so the dashboard always knows where every widget goes.
+export const parseDashboardPrefs = (raw: unknown): DashboardPrefs => {
+    const defaults: DashboardPrefs = { order: [...DASHBOARD_WIDGETS], hidden: [], agendaView: 'day' };
+    if (typeof raw !== 'string' || raw.trim() === '') return defaults;
+    try {
+        const parsed = JSON.parse(raw) as Partial<DashboardPrefs> | null;
+        if (!parsed || typeof parsed !== 'object') return defaults;
+
+        const order = Array.isArray(parsed.order) ? parsed.order.filter(isWidget) : [];
+        const dedupedOrder = Array.from(new Set(order));
+        for (const widget of DASHBOARD_WIDGETS) {
+            if (!dedupedOrder.includes(widget)) dedupedOrder.push(widget);
+        }
+
+        const hidden = Array.isArray(parsed.hidden)
+            ? Array.from(new Set(parsed.hidden.filter(isWidget)))
+            : [];
+
+        return {
+            order: dedupedOrder,
+            hidden,
+            agendaView: parsed.agendaView === 'week' ? 'week' : 'day',
+        };
+    } catch {
+        return defaults;
+    }
+};
+
 // Parse the JSON text stored in users.disabled_modules into a clean string array.
 // Tolerates legacy/empty values so existing accounts never break.
 export const parseDisabledModules = (raw: unknown): string[] => {
@@ -38,7 +82,7 @@ export const parseDisabledModules = (raw: unknown): string[] => {
 
 // Update the authenticated user's preferred language (used for the UI and for
 // server-generated notifications such as appointment reminders).
-// PUT /api/auth/language — body: { "language": "fr" | "en" | "zh" }
+// PUT /api/auth/language - body: { "language": "fr" | "en" | "zh" }
 router.put('/language', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { language } = req.body as { language?: unknown };
@@ -85,7 +129,7 @@ router.get('/modules', authMiddleware, async (req: AuthRequest, res) => {
 
 // Update the family's optional-modules setting (parents only). The value is
 // family-wide and stored on the owner's row.
-// PUT /api/auth/modules — body: { disabled_modules: string[] }
+// PUT /api/auth/modules - body: { disabled_modules: string[] }
 router.put('/modules', authMiddleware, requireParent, async (req: AuthRequest, res) => {
     try {
         const { disabled_modules } = req.body as { disabled_modules?: unknown };
@@ -118,6 +162,49 @@ router.put('/modules', authMiddleware, requireParent, async (req: AuthRequest, r
         });
     } catch (error) {
         console.error('Update modules error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Read the logged-in member's dashboard personalisation. Per-user (each family
+// member arranges their own home), hence actualUserId.
+// GET /api/auth/dashboard-prefs → { order, hidden, agendaView }
+router.get('/dashboard-prefs', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const result = await query('SELECT dashboard_prefs FROM users WHERE id = $1', [req.actualUserId]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        return res.json({ success: true, data: parseDashboardPrefs(result.rows[0].dashboard_prefs) });
+    } catch (error) {
+        console.error('Get dashboard prefs error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Update the logged-in member's dashboard personalisation. The payload is
+// sanitised through parseDashboardPrefs so only valid widget keys and views are
+// ever stored (child accounts may customise too: it is purely cosmetic).
+// PUT /api/auth/dashboard-prefs - body: { order?, hidden?, agendaView? }
+router.put('/dashboard-prefs', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const body = req.body as Record<string, unknown> | undefined;
+        if (!body || typeof body !== 'object') {
+            return res.status(400).json({ success: false, error: 'Invalid payload' });
+        }
+
+        const cleaned = parseDashboardPrefs(JSON.stringify(body));
+        const result = await query(
+            'UPDATE users SET dashboard_prefs = $1 WHERE id = $2 RETURNING dashboard_prefs',
+            [JSON.stringify(cleaned), req.actualUserId]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        return res.json({ success: true, data: parseDashboardPrefs(result.rows[0].dashboard_prefs) });
+    } catch (error) {
+        console.error('Update dashboard prefs error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });

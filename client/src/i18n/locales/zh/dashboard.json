@@ -18,10 +18,13 @@
   },
   "today": {
     "title": "今天",
-    "viewWeek": "查看本周",
+    "viewWeek": "周",
     "emptyTitle": "暂无安排。",
     "emptySubtitle": "添加日程后会显示在这里。",
-    "emptyCta": "添加日程"
+    "emptyCta": "添加日程",
+    "weekTitle": "本周",
+    "viewDay": "日",
+    "emptyWeekSubtitle": "本周没有约会。"
   },
   "aside": {
     "shopping": "购物",
@@ -32,5 +35,31 @@
     "tasks": "待办任务",
     "tasksCount_one": "项待完成任务",
     "tasksCount_other": "项待完成任务"
+  },
+  "planning": {
+    "title": "本周日程",
+    "viewAll": "查看日程",
+    "empty": "本周没有保存的日程。"
+  },
+  "customize": {
+    "button": "自定义",
+    "title": "自定义首页",
+    "description": "选择首页显示的内容及其顺序。此设置仅适用于您的账户。",
+    "agendaViewLabel": "日程显示",
+    "widgetsLabel": "显示的模块",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "show": "显示",
+    "hide": "隐藏",
+    "reset": "重置",
+    "allHidden": "所有模块均已隐藏。请自定义首页以重新显示。",
+    "moduleDisabled": "（模块已停用）",
+    "widgets": {
+      "stats": "关键数据",
+      "agenda": "日程（约会）",
+      "planning": "本周日程",
+      "quick": "快捷入口（购物、预算、任务）",
+      "notes": "家庭留言"
+    }
   }
 }

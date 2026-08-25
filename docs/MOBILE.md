@@ -54,7 +54,7 @@ Point people at the GitHub Release download URL above. For **automatic updates**
 app store, they can add the repo to [Obtainium](https://github.com/ImranR98/Obtainium),
 which tracks GitHub Releases and updates the APK on its own.
 
-## Release signing (only for the Play Store)
+## Release signing (only for an app store)
 
 Sideloaded debug APKs don't need this. Google Play requires a **release-signed
 App Bundle (`.aab`)**, not an APK. The signing config is already wired in
@@ -69,26 +69,50 @@ keytool -genkeypair -v -keystore upload-keystore.jks -alias upload \
   -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Keep this `.jks` file and its passwords **safe and backed up** — with Play App
+Keep this `.jks` file and its passwords **safe and backed up**. With Play App
 Signing you can reset a lost upload key via Google, but losing it is still a hassle.
 Place the file at `client/android/upload-keystore.jks`.
 
 ### 2. Point the build at it
 
 Copy `client/android/keystore.properties.example` to
-`client/android/keystore.properties` and fill in your passwords/alias. Both files'
-secrets are gitignored (`keystore.properties`, `*.jks`, `*.keystore`).
+`client/android/keystore.properties` and fill in your passwords/alias:
+
+```properties
+storeFile=/absolute/path/to/upload-keystore.jks
+storePassword=...
+keyAlias=...
+keyPassword=...        # optional: a PKCS12 keystore uses the store password
+```
+
+Both files' secrets are gitignored (`keystore.properties`, `*.jks`, `*.keystore`).
+You can also pass the same values as the `ANDROID_KEYSTORE_FILE`,
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`
+environment variables instead.
 
 ### 3. Build the signed bundle
 
 ```bash
-npm run cap:sync          # from client/ — rebuild web assets + sync native
+npm run cap:sync          # from client/: rebuild web assets + sync native
 cd android
 ./gradlew bundleRelease   # Windows: .\gradlew.bat bundleRelease
 ```
 
-Output: `client/android/app/build/outputs/bundle/release/app-release.aab` — this is
-the file you upload to the Play Console.
+Output: `client/android/app/build/outputs/bundle/release/app-release.aab`, the file
+you upload to the Play Console.
+
+Or let the helper script do all of it in one go:
+
+```bash
+bash scripts/build-android-release.sh
+```
+
+It builds the web assets, syncs the Android project, runs `./gradlew bundleRelease`
+and **verifies the result is actually signed** before handing it to you. That check
+matters: without a keystore the Gradle build still succeeds and silently emits an
+*unsigned* bundle, which the store then rejects at upload. Note also that
+`assembleRelease` produces an `.apk`, while stores want the `.aab` bundle that
+`bundleRelease` produces.
 
 ### In CI
 
@@ -97,6 +121,20 @@ The **Android AAB (Play Store)** workflow
 builds the same signed `.aab` from four repository secrets
 (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
 `ANDROID_KEY_PASSWORD`). Run it manually from the Actions tab.
+
+## Deep links (optional)
+
+The app can open `https://<your-server>/join?invite=...` and `/reset-password?token=...`
+directly instead of bouncing through the browser. Two steps, both on your own domain:
+
+1. Add an `<intent-filter android:autoVerify="true">` for your host in
+   `client/android/app/src/main/AndroidManifest.xml` (see the Android
+   [App Links documentation](https://developer.android.com/training/app-links/verify-android-applinks)).
+2. Set `ANDROID_CERT_SHA256` (and `ANDROID_PACKAGE_NAME`) on the server so it publishes
+   `/.well-known/assetlinks.json` with your signing certificate's fingerprint.
+
+No intent-filter ships by default: it would have to name a domain, and yours is not known
+at build time. Without it the links still work, they simply open in the browser.
 
 ## Notes
 

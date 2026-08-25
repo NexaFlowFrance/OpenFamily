@@ -69,7 +69,15 @@
     "roleLabel": "邀请身份",
     "generate": "生成邀请链接",
     "generating": "正在生成……",
-    "copyTitle": "复制"
+    "copyTitle": "复制",
+    "title": "邀请成员",
+    "desc": "通过电子邮件发送邀请，或自行分享链接。受邀者通过此链接创建账户：无需额外付费即可加入您的家庭。",
+    "emailLabel": "电子邮件（可选）",
+    "emailPlaceholder": "member@example.com",
+    "send": "发送邀请",
+    "sent": "邀请已发送至 {{email}}。",
+    "sendFailed": "邮件发送失败。请自行分享下方链接。",
+    "linkHint": "此链接有效期为 7 天。受邀者必须通过此链接创建账户才能加入您的家庭。"
   },
   "leave": {
     "leaving": "正在退出……",

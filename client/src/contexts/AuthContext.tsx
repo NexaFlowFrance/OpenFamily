@@ -15,6 +15,22 @@ interface User {
     disabled_modules?: string[];
 }
 
+/** Dashboard widgets, in default display order (mirrors the server's list). */
+export const DASHBOARD_WIDGETS = ['stats', 'agenda', 'planning', 'quick', 'notes'] as const;
+export type DashboardWidget = typeof DASHBOARD_WIDGETS[number];
+
+export interface DashboardPrefs {
+    order: DashboardWidget[];
+    hidden: DashboardWidget[];
+    agendaView: 'day' | 'week';
+}
+
+export const DEFAULT_DASHBOARD_PREFS: DashboardPrefs = {
+    order: [...DASHBOARD_WIDGETS],
+    hidden: [],
+    agendaView: 'day',
+};
+
 interface AuthContextType {
     user: User | null;
     loading: boolean;
@@ -27,6 +43,10 @@ interface AuthContextType {
     isAuthenticated: boolean;
     updateCurrency: (currency: string) => Promise<void>;
     updateProfile: (data: { name?: string; avatar_url?: string | null }) => Promise<void>;
+    /** This member's dashboard layout (null until loaded). */
+    dashboardPrefs: DashboardPrefs | null;
+    /** Persist this member's dashboard layout and update the context. */
+    updateDashboardPrefs: (prefs: DashboardPrefs) => Promise<void>;
     /** Family-wide list of hidden optional modules (empty when nothing is hidden). */
     disabledModules: string[];
     /** True when a module is not hidden by the family. Always-on modules are always enabled. */
@@ -42,6 +62,7 @@ const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [dashboardPrefs, setDashboardPrefs] = useState<DashboardPrefs | null>(null);
 
     useEffect(() => {
         let mounted = true;
@@ -168,6 +189,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
+    // Dashboard layout belongs to the logged-in member; (re)load it whenever the
+    // session changes. Failure is non-blocking: the dashboard falls back to the
+    // default arrangement.
+    useEffect(() => {
+        if (!user) {
+            setDashboardPrefs(null);
+            return;
+        }
+
+        let active = true;
+        api.get<{ success: boolean; data: DashboardPrefs }>('/api/auth/dashboard-prefs')
+            .then((res) => {
+                if (active && res.success && res.data) setDashboardPrefs(res.data);
+            })
+            .catch(() => {
+                if (active) setDashboardPrefs(DEFAULT_DASHBOARD_PREFS);
+            });
+
+        return () => { active = false; };
+    }, [user?.id]);
+
+    const updateDashboardPrefs = async (prefs: DashboardPrefs) => {
+        // Optimistic: the dashboard reorders instantly, the server confirms.
+        setDashboardPrefs(prefs);
+        const response = await api.put<{ success: boolean; data: DashboardPrefs }>(
+            '/api/auth/dashboard-prefs',
+            prefs
+        );
+        if (response.success && response.data) {
+            setDashboardPrefs(response.data);
+        }
+    };
+
     const disabledModules = user?.disabled_modules ?? [];
 
     const isModuleEnabled = (key: string) => !disabledModules.includes(key);
@@ -201,6 +255,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 isAuthenticated: !!user,
                 updateCurrency,
                 updateProfile,
+                dashboardPrefs,
+                updateDashboardPrefs,
                 disabledModules,
                 isModuleEnabled,
                 updateDisabledModules,

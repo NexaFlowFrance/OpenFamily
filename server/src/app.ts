@@ -131,6 +131,32 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Android App Links verification: lets https://<your-domain>/join?invite=... open
+// the installed app directly instead of the browser. Served only when the operator
+// provides the signing certificate's SHA-256 fingerprint(s) (comma-separated,
+// colon-hex form) for their own build of the app. Unset = 404, and the links keep
+// working normally in the browser.
+app.get('/.well-known/assetlinks.json', (req, res) => {
+    const fingerprints = (process.env.ANDROID_CERT_SHA256 || '')
+        .split(',')
+        .map((f) => f.trim())
+        .filter(Boolean);
+    if (fingerprints.length === 0) {
+        return res.status(404).json({ success: false, error: 'Not configured' });
+    }
+
+    return res.json([
+        {
+            relation: ['delegate_permission/common.handle_all_urls'],
+            target: {
+                namespace: 'android_app',
+                package_name: process.env.ANDROID_PACKAGE_NAME || 'fr.nexaflow.openfamily',
+                sha256_cert_fingerprints: fingerprints,
+            },
+        },
+    ]);
+});
+
 // API Routes
 app.use('/api/auth/login', authRateLimiter);
 app.use('/api/auth/register', authRateLimiter);

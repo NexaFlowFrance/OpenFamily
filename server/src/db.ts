@@ -317,6 +317,24 @@ export const runMigrations = async () => {
         )`,
         'CREATE INDEX IF NOT EXISTS idx_kakeibo_months_user_id ON kakeibo_months(user_id)',
         'ALTER TABLE users ADD COLUMN IF NOT EXISTS kakeibo_pillars TEXT',
+        // Migration 019: password reset by email link. Only the token's SHA-256 is
+        // stored; the raw token lives solely in the emailed link. used_at marks a
+        // consumed token (kept for audit); unconsumed tokens are replaced on each
+        // new request and ignored once expired.
+        `CREATE TABLE IF NOT EXISTS password_resets (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            token_hash VARCHAR(64) NOT NULL,
+            expires_at TIMESTAMPTZ NOT NULL,
+            used_at TIMESTAMPTZ,
+            created_at TIMESTAMPTZ DEFAULT now()
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id)',
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_token_hash ON password_resets(token_hash)',
+        // Migration 020: per-user dashboard personalisation (widget order, hidden
+        // widgets, day/week agenda). JSON text on the MEMBER's own row (unlike
+        // disabled_modules which is family-wide on the owner's row); NULL = defaults.
+        'ALTER TABLE users ADD COLUMN IF NOT EXISTS dashboard_prefs TEXT',
     ];
 
     for (const migration of migrations) {

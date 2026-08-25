@@ -94,14 +94,23 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 - **Informations de santé** : groupe sanguin, allergies, médicaments, vaccins, notes médicales
 - **Contacts d'urgence** par membre
 - Rôles familiaux configurables
+- **Comptes partagés** : le propriétaire invite les autres membres par e-mail (l'invitation
+  part directement depuis le serveur si SMTP est configuré) ou en partageant le lien
+  d'invitation. La personne invitée crée son compte via ce lien et rejoint la famille.
+  Un compte déjà créé peut aussi coller le lien reçu depuis la page « Rejoindre une famille ».
 
 ### ⚙️ Paramètres
 - Export / import des données (transfert de données)
 - Personnalisation de l'application
+- **Mot de passe oublié** : réinitialisation par lien e-mail (valable 60 minutes, à usage
+  unique), disponible dès que SMTP est configuré
 
 ### 📊 Tableau de bord (Dashboard)
 - Vue d'ensemble de l'activité familiale
+- **Agenda au jour ou à la semaine**, au choix
+- **Plannings de la semaine** (travail, école, activités) directement sur l'accueil
 - Résumé des tâches en cours, prochains rendez-vous, budget du mois
+- **Personnalisable par membre** : chaque compte choisit les blocs affichés et leur ordre
 - Accès rapide à tous les modules
 
 ---
@@ -295,6 +304,9 @@ OpenFamily utilise **PostgreSQL 16** avec le schéma suivant :
 | `budget_limits` | Limites mensuelles par catégorie |
 | `notifications` | Notifications internes |
 | `push_subscriptions` | Abonnements push (Web Push / VAPID) |
+| `family_invites` | Invitations à rejoindre une famille (jeton, rôle, expiration) |
+| `family_join_requests` | Demandes d'accès adressées au propriétaire d'une famille |
+| `password_resets` | Jetons de réinitialisation de mot de passe (empreinte SHA-256, usage unique) |
 
 ### Caractéristiques techniques
 - **UUIDs** (v4) comme clés primaires pour toutes les tables
@@ -312,6 +324,8 @@ OpenFamily utilise **PostgreSQL 16** avec le schéma suivant :
 |---|---|
 | **Authentification** | JWT (JSON Web Token) avec expiration à 7 jours |
 | **Hachage des mots de passe** | bcrypt (coût adaptatif) |
+| **Réinitialisation de mot de passe** | Lien e-mail à usage unique, valable 60 minutes. Seule l'empreinte SHA-256 du jeton est stockée ; la réponse est identique que l'adresse existe ou non (pas d'énumération de comptes) et l'endpoint est limité en débit |
+| **Invitations** | Jeton aléatoire de 32 octets, expiration configurable (7 jours par défaut), révocable ; création limitée en débit et réservée au propriétaire de la famille |
 | **CORS** | Origines configurables via variable d'environnement |
 | **Isolation des données** | Chaque requête est filtrée par `user_id` — un utilisateur ne voit que ses propres données |
 | **Variables d'environnement** | Les secrets (JWT_SECRET, mots de passe DB, clés VAPID) ne sont jamais codés en dur |

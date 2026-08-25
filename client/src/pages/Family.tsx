@@ -75,6 +75,8 @@ const Family: React.FC = () => {
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [inviteLinkLoading, setInviteLinkLoading] = useState(false);
     const [inviteRole, setInviteRole] = useState<'parent' | 'enfant'>('parent');
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteNotice, setInviteNotice] = useState<{ kind: 'sent' | 'link'; email?: string } | null>(null);
     const [copied, setCopied] = useState(false);
     const [leavingFamily, setLeavingFamily] = useState(false);
 
@@ -212,14 +214,31 @@ const Family: React.FC = () => {
 
     const handleGenerateInvite = async () => {
         setInviteLinkLoading(true);
+        setInviteNotice(null);
+        setError('');
+        const email = inviteEmail.trim();
         try {
-            const response = await api.post<{ success: boolean; data: { token: string } }>('/api/invites', { role: inviteRole });
+            // invite_url comes from the server: inside the Android shell
+            // window.location.origin is http://localhost, which would produce a
+            // link that is dead for everyone else.
+            const response = await api.post<{
+                success: boolean;
+                data: { token: string; invite_url: string; email_sent: boolean | null };
+            }>('/api/invites', { role: inviteRole, ...(email ? { inviteeEmail: email } : {}) });
+
             if (response.success && response.data) {
-                const baseUrl = window.location.origin;
-                setInviteLink(`${baseUrl}/join?invite=${response.data.token}`);
+                setInviteLink(response.data.invite_url);
+                if (response.data.email_sent === true) {
+                    setInviteNotice({ kind: 'sent', email });
+                    setInviteEmail('');
+                } else if (response.data.email_sent === false) {
+                    // Sending failed (or no mail relay configured): the link itself
+                    // is valid, so tell the owner to share it manually.
+                    setInviteNotice({ kind: 'link' });
+                }
             }
-        } catch {
-            setError(t('family:errors.invite'));
+        } catch (err) {
+            setError(err instanceof Error ? err.message : t('family:errors.invite'));
         } finally {
             setInviteLinkLoading(false);
         }
@@ -299,7 +318,7 @@ const Family: React.FC = () => {
 
             if (editingMember) {
                 await api.put(`/api/family/${editingMember.id}`, payload);
-                // Account link is a separate, owner-only endpoint — only call it on change.
+                // Account link is a separate, owner-only endpoint - only call it on change.
                 if (isOwner && (formData.linked_user_id || '') !== (editingMember.linked_user_id || '')) {
                     await api.put(`/api/family/${editingMember.id}/link`, {
                         user_id: formData.linked_user_id || null,
@@ -708,9 +727,15 @@ const Family: React.FC = () => {
                             )
                         )}
 
-                        {/* Owner: generate invite */}
+                        {/* Owner: invite a new member (by email and/or shared link) */}
                         {isOwner && (
-                            <div className="space-y-3">
+                            <div className="space-y-3 border-t pt-4">
+                                <div className="flex items-center gap-2">
+                                    <UserPlus className="w-4 h-4 text-nexus-blue" />
+                                    <h3 className="text-body font-semibold">{t('family:invite.title')}</h3>
+                                </div>
+                                <p className="text-body-sm text-muted-foreground">{t('family:invite.desc')}</p>
+
                                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                                     <div className="w-full sm:w-44">
                                         <label className="block text-label font-medium text-foreground mb-1.5">
@@ -722,34 +747,59 @@ const Family: React.FC = () => {
                                             options={ACCOUNT_ROLES}
                                         />
                                     </div>
+                                    <div className="flex-1">
+                                        <label className="block text-label font-medium text-foreground mb-1.5">
+                                            {t('family:invite.emailLabel')}
+                                        </label>
+                                        <Input
+                                            type="email"
+                                            value={inviteEmail}
+                                            onChange={(e) => setInviteEmail(e.target.value)}
+                                            placeholder={t('family:invite.emailPlaceholder')}
+                                        />
+                                    </div>
                                     <Button
                                         variant="secondary"
                                         onClick={handleGenerateInvite}
                                         disabled={inviteLinkLoading}
-                                        className="flex items-center gap-2"
+                                        className="flex items-center justify-center gap-2"
                                     >
-                                        <Link2 className="w-4 h-4" />
-                                        {inviteLinkLoading ? t('family:invite.generating') : t('family:invite.generate')}
+                                        {inviteEmail.trim() ? <Send className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+                                        {inviteLinkLoading
+                                            ? t('family:invite.generating')
+                                            : inviteEmail.trim() ? t('family:invite.send') : t('family:invite.generate')}
                                     </Button>
                                 </div>
 
+                                {inviteNotice?.kind === 'sent' && (
+                                    <p className="text-body-sm text-green-600">
+                                        {t('family:invite.sent', { email: inviteNotice.email })}
+                                    </p>
+                                )}
+                                {inviteNotice?.kind === 'link' && (
+                                    <p className="text-body-sm text-amber-600">{t('family:invite.sendFailed')}</p>
+                                )}
+
                                 {inviteLink && (
-                                    <div className="flex items-center gap-2 p-3 rounded-nexus bg-nexus-blue/5 border border-nexus-blue/20">
-                                        <input
-                                            readOnly
-                                            value={inviteLink}
-                                            className="flex-1 bg-transparent text-body-sm text-foreground outline-none truncate"
-                                        />
-                                        <button
-                                            onClick={handleCopyInvite}
-                                            className="shrink-0 p-1 rounded hover:bg-nexus-blue/10 transition-colors"
-                                            title={t('family:invite.copyTitle')}
-                                        >
-                                            {copied
-                                                ? <Check className="w-4 h-4 text-green-500" />
-                                                : <Copy className="w-4 h-4 text-nexus-blue" />
-                                            }
-                                        </button>
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center gap-2 p-3 rounded-nexus bg-nexus-blue/5 border border-nexus-blue/20">
+                                            <input
+                                                readOnly
+                                                value={inviteLink}
+                                                className="flex-1 bg-transparent text-body-sm text-foreground outline-none truncate"
+                                            />
+                                            <button
+                                                onClick={handleCopyInvite}
+                                                className="shrink-0 p-1 rounded hover:bg-nexus-blue/10 transition-colors"
+                                                title={t('family:invite.copyTitle')}
+                                            >
+                                                {copied
+                                                    ? <Check className="w-4 h-4 text-green-500" />
+                                                    : <Copy className="w-4 h-4 text-nexus-blue" />
+                                                }
+                                            </button>
+                                        </div>
+                                        <p className="text-body-sm text-muted-foreground">{t('family:invite.linkHint')}</p>
                                     </div>
                                 )}
                             </div>

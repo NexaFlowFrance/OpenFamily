@@ -69,7 +69,15 @@
     "roleLabel": "Invite as",
     "generate": "Generate an invite link",
     "generating": "Generating…",
-    "copyTitle": "Copy"
+    "copyTitle": "Copy",
+    "title": "Invite a member",
+    "desc": "Send the invitation by email, or share the link yourself. The invitee creates their account through this link: they join your family without paying an extra subscription.",
+    "emailLabel": "Email (optional)",
+    "emailPlaceholder": "member@example.com",
+    "send": "Send invitation",
+    "sent": "Invitation sent to {{email}}.",
+    "sendFailed": "The email could not be sent. Please share the link below yourself.",
+    "linkHint": "This link is valid for 7 days. The invitee must create their account through this link to join your family."
   },
   "leave": {
     "leaving": "Leaving…",

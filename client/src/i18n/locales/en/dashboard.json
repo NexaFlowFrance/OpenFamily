@@ -18,10 +18,13 @@
   },
   "today": {
     "title": "Today",
-    "viewWeek": "View week",
+    "viewWeek": "Week",
     "emptyTitle": "Nothing planned.",
     "emptySubtitle": "Add an appointment to see it appear here.",
-    "emptyCta": "Add an appointment"
+    "emptyCta": "Add an appointment",
+    "weekTitle": "This week",
+    "viewDay": "Day",
+    "emptyWeekSubtitle": "No appointments this week."
   },
   "aside": {
     "shopping": "Shopping",
@@ -32,5 +35,31 @@
     "tasks": "Pending tasks",
     "tasksCount_one": "task to complete",
     "tasksCount_other": "tasks to complete"
+  },
+  "planning": {
+    "title": "This week's schedules",
+    "viewAll": "View schedule",
+    "empty": "No schedule saved for this week."
+  },
+  "customize": {
+    "button": "Customise",
+    "title": "Customise your home page",
+    "description": "Choose what appears on your home page, and in which order. This setting is specific to your account.",
+    "agendaViewLabel": "Agenda display",
+    "widgetsLabel": "Displayed blocks",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "show": "Show",
+    "hide": "Hide",
+    "reset": "Reset",
+    "allHidden": "Every block is hidden. Customise your home page to show some again.",
+    "moduleDisabled": "(module disabled)",
+    "widgets": {
+      "stats": "Key figures",
+      "agenda": "Agenda (appointments)",
+      "planning": "This week's schedules",
+      "quick": "Quick access (shopping, budget, tasks)",
+      "notes": "Family notes"
+    }
   }
 }

@@ -103,6 +103,8 @@ export function createSeed(): DemoStore {
             { id: 'p3', family_member_id: 'm-kid1', family_member_name: 'Mia', family_member_color: '#16A34A', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 1, start_time: '08:30', end_time: '16:30' },
             { id: 'p4', family_member_id: 'm-kid1', family_member_name: 'Mia', family_member_color: '#16A34A', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 2, start_time: '08:30', end_time: '16:30' },
             { id: 'p5', family_member_id: 'm-kid2', family_member_name: 'Noah', family_member_color: '#F97316', family_member_role: 'Enfant', schedule_type: 'activity', title: 'Football', day_of_week: 3, start_time: '18:00', end_time: '19:30' },
+            // Both children: shows an activity with several participants.
+            { id: 'p6', family_member_ids: ['m-kid1', 'm-kid2'], family_member_id: 'm-kid1', family_member_name: 'Mia', family_member_color: '#16A34A', family_member_role: 'Enfant', schedule_type: 'activity', title: 'Swimming', day_of_week: 6, start_time: '10:00', end_time: '11:00' },
         ],
         recipes: [
             { id: 'r1', name: 'Spaghetti Bolognese', category: 'Plat', description: 'A family classic everyone loves.', ingredients: ['400g spaghetti', '500g minced beef', '1 onion', '2 cans chopped tomatoes', 'Olive oil', 'Salt & pepper'], instructions: ['Brown the beef and onion.', 'Add the tomatoes and simmer 20 min.', 'Cook the spaghetti.', 'Combine and serve.'], prep_time: 15, cook_time: 30, servings: 4, difficulty: 'Facile', tags: ['quick', 'family'] },

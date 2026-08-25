@@ -35,6 +35,8 @@ router.get('/export', async (req: AuthRequest, res) => {
             shoppingItems,
             appointments,
             scheduleEntries,
+            scheduleEntryMembers,
+            scheduleEntryExceptions,
         ] = await Promise.all([
             query('SELECT * FROM family_members WHERE user_id = $1', [userId]),
             query('SELECT * FROM tasks WHERE user_id = $1', [userId]),
@@ -45,6 +47,21 @@ router.get('/export', async (req: AuthRequest, res) => {
             query('SELECT * FROM shopping_items WHERE user_id = $1', [userId]),
             query('SELECT * FROM appointments WHERE user_id = $1', [userId]),
             query('SELECT * FROM schedule_entries WHERE user_id = $1', [userId]),
+            // These two hang off schedule_entries and carry no user_id of their
+            // own, so they are scoped through their parent entry.
+            query(
+                `SELECT sem.* FROM schedule_entry_members sem
+                 JOIN schedule_entries se ON se.id = sem.entry_id
+                 WHERE se.user_id = $1`,
+                [userId]
+            ),
+            query(
+                `SELECT see.entry_id, to_char(see.excluded_date, 'YYYY-MM-DD') AS excluded_date
+                 FROM schedule_entry_exceptions see
+                 JOIN schedule_entries se ON se.id = see.entry_id
+                 WHERE se.user_id = $1`,
+                [userId]
+            ),
         ]);
 
         const exportData = {
@@ -59,6 +76,8 @@ router.get('/export', async (req: AuthRequest, res) => {
             shopping_items: shoppingItems.rows,
             appointments: appointments.rows,
             schedule_entries: scheduleEntries.rows,
+            schedule_entry_members: scheduleEntryMembers.rows,
+            schedule_entry_exceptions: scheduleEntryExceptions.rows,
         };
 
         res.json({ success: true, data: exportData });
@@ -103,6 +122,63 @@ router.post('/import', requireParent, async (req: AuthRequest, res) => {
         counts[table] = count;
     };
 
+    /**
+     * Participants and skipped dates of planning entries.
+     *
+     * These two tables have no user_id, so importRows cannot carry them: it
+     * forces user_id on every row. They are scoped through their parent entry
+     * instead, and the INSERT ... WHERE EXISTS below is what enforces it. A
+     * hand-edited export naming somebody else's entry_id writes nothing rather
+     * than writing into their family.
+     */
+    const importEntryChildren = async (data: Record<string, unknown>) => {
+        const members = Array.isArray(data.schedule_entry_members) ? data.schedule_entry_members : [];
+        let memberCount = 0;
+        for (const row of members as Array<Record<string, unknown>>) {
+            if (!row?.entry_id || !row?.family_member_id) continue;
+            const result = await client.query(
+                `INSERT INTO schedule_entry_members (entry_id, family_member_id)
+                 SELECT $1::uuid, $2::uuid
+                 WHERE EXISTS (SELECT 1 FROM schedule_entries WHERE id = $1::uuid AND user_id = $3)
+                   AND EXISTS (SELECT 1 FROM family_members WHERE id = $2::uuid AND user_id = $3)
+                 ON CONFLICT DO NOTHING`,
+                [row.entry_id, row.family_member_id, userId]
+            );
+            memberCount += result.rowCount ?? 0;
+        }
+        counts.schedule_entry_members = memberCount;
+
+        const exceptions = Array.isArray(data.schedule_entry_exceptions) ? data.schedule_entry_exceptions : [];
+        let exceptionCount = 0;
+        for (const row of exceptions as Array<Record<string, unknown>>) {
+            if (!row?.entry_id || !row?.excluded_date) continue;
+            const result = await client.query(
+                `INSERT INTO schedule_entry_exceptions (entry_id, excluded_date)
+                 SELECT $1::uuid, $2::date
+                 WHERE EXISTS (SELECT 1 FROM schedule_entries WHERE id = $1::uuid AND user_id = $3)
+                 ON CONFLICT DO NOTHING`,
+                [row.entry_id, row.excluded_date, userId]
+            );
+            exceptionCount += result.rowCount ?? 0;
+        }
+        counts.schedule_entry_exceptions = exceptionCount;
+
+        // A backup taken before participants existed carries none. The startup
+        // migration cannot help here, it already ran, so give every entry that
+        // still has no participant the one it was exported with.
+        await client.query(
+            `INSERT INTO schedule_entry_members (entry_id, family_member_id)
+             SELECT se.id, se.family_member_id
+             FROM schedule_entries se
+             WHERE se.user_id = $1
+               AND NOT EXISTS (
+                   SELECT 1 FROM schedule_entry_members sem WHERE sem.entry_id = se.id
+               )
+             ON CONFLICT DO NOTHING`,
+            [userId]
+        );
+    };
+
     try {
         await client.query('BEGIN');
 
@@ -116,6 +192,7 @@ router.post('/import', requireParent, async (req: AuthRequest, res) => {
         await importRows('shopping_items', importData.shopping_items);
         await importRows('appointments', importData.appointments);
         await importRows('schedule_entries', importData.schedule_entries);
+        await importEntryChildren(importData);
         await importRows('meal_plans', importData.meal_plans);
 
         await client.query('COMMIT');

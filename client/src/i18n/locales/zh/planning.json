@@ -45,7 +45,9 @@
     "location": "地点（可选）",
     "locationPlaceholder": "例如：上海办公室 / 第一中学",
     "notes": "备注（可选）",
-    "notesPlaceholder": "实用信息、教室、科目、交通等……"
+    "notesPlaceholder": "实用信息、教室、科目、交通等……",
+    "participants": "参与者",
+    "participantsHint": "可选择一位或多位成员。第一位决定该活动的颜色。"
   },
   "submit": {
     "applyToDays": "应用到所选日期"
@@ -55,7 +57,9 @@
     "savedDays_one": "已保存到 {{count}} 天。",
     "savedDays_other": "已保存到 {{count}} 天。",
     "savedDaysConflicts_one": "已保存到 {{count}} 天。以下日期存在冲突：{{days}}。",
-    "savedDaysConflicts_other": "已保存到 {{count}} 天。以下日期存在冲突：{{days}}。"
+    "savedDaysConflicts_other": "已保存到 {{count}} 天。以下日期存在冲突：{{days}}。",
+    "skipped": "该日期已取消",
+    "restored": "已恢复"
   },
   "confirmDelete": "删除此条目？",
   "errors": {
@@ -65,6 +69,15 @@
     "memberTitleRequired": "必须填写成员和标题。",
     "timesSame": "开始时间和结束时间不能相同。",
     "selectDay": "请至少选择一天。",
-    "save": "无法保存此条目。"
+    "save": "无法保存此条目。",
+    "skipOccurrence": "无法修改本次安排"
+  },
+  "occurrence": {
+    "skip": "本次取消",
+    "restore": "恢复本次"
+  },
+  "appointments": {
+    "badge": "预约",
+    "openCalendar": "在日历中打开"
   }
 }

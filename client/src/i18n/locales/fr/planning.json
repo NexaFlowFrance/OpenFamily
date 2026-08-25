@@ -45,7 +45,9 @@
     "location": "Lieu (facultatif)",
     "locationPlaceholder": "Ex : Bureau Lyon / Collège Jean Moulin",
     "notes": "Notes (facultatif)",
-    "notesPlaceholder": "Informations utiles, salle, matière, transport…"
+    "notesPlaceholder": "Informations utiles, salle, matière, transport…",
+    "participants": "Participants",
+    "participantsHint": "Choisissez une ou plusieurs personnes. La première donne la couleur de l'activité."
   },
   "submit": {
     "applyToDays": "Appliquer aux jours sélectionnés"
@@ -55,7 +57,9 @@
     "savedDays_one": "Enregistré sur {{count}} jour.",
     "savedDays_other": "Enregistré sur {{count}} jours.",
     "savedDaysConflicts_one": "Enregistré sur {{count}} jour. Conflits détectés sur : {{days}}.",
-    "savedDaysConflicts_other": "Enregistré sur {{count}} jours. Conflits détectés sur : {{days}}."
+    "savedDaysConflicts_other": "Enregistré sur {{count}} jours. Conflits détectés sur : {{days}}.",
+    "skipped": "Occurrence annulée pour cette date",
+    "restored": "Occurrence rétablie"
   },
   "confirmDelete": "Supprimer cet horaire ?",
   "errors": {
@@ -65,6 +69,15 @@
     "memberTitleRequired": "Le membre et le titre sont obligatoires.",
     "timesSame": "L'heure de début et de fin ne peuvent pas être identiques.",
     "selectDay": "Sélectionnez au moins un jour.",
-    "save": "Impossible d'enregistrer cet horaire."
+    "save": "Impossible d'enregistrer cet horaire.",
+    "skipOccurrence": "Impossible de modifier cette occurrence"
+  },
+  "occurrence": {
+    "skip": "Annuler cette fois-ci",
+    "restore": "Rétablir cette fois-ci"
+  },
+  "appointments": {
+    "badge": "RDV",
+    "openCalendar": "Ouvrir dans le calendrier"
   }
 }

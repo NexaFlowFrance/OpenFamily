@@ -52,20 +52,60 @@ const timeToMinutes = (time: string): number => {
     return (hours * 60) + minutes;
 };
 
-const ensureMemberBelongsToUser = async (memberId: string, userId: string) => {
-    const member = await query(
-        'SELECT id FROM family_members WHERE id = $1 AND user_id = $2',
-        [memberId, userId]
+/**
+ * Participants of an entry, primary first.
+ *
+ * Accepts `family_member_ids` (an array) and falls back to `family_member_id`,
+ * which is what clients older than migration 021 send. Duplicates are dropped
+ * while keeping the first occurrence, so position 0 stays the primary: that is
+ * the one mirrored into schedule_entries.family_member_id.
+ */
+const parseParticipantIds = (body: any): string[] => {
+    const raw: unknown[] = Array.isArray(body?.family_member_ids)
+        ? body.family_member_ids
+        : [body?.family_member_id];
+
+    const cleaned: string[] = raw
+        .map((id) => toNullIfEmpty(id) as string | null)
+        .filter((id): id is string => id !== null);
+
+    return [...new Set(cleaned)];
+};
+
+const ensureMembersBelongToUser = async (memberIds: string[], userId: string) => {
+    const found = await query(
+        'SELECT id FROM family_members WHERE user_id = $1 AND id = ANY($2::uuid[])',
+        [userId, memberIds]
     );
 
-    if (member.rows.length === 0) {
+    if (found.rows.length !== memberIds.length) {
         throw new Error('INVALID_MEMBER');
     }
 };
 
+/**
+ * Rewrites the participant list of an entry. Callers pass an already validated
+ * list. Takes the query function rather than calling the pool directly so the
+ * bulk route can run it inside its transaction.
+ */
+type Queryable = (text: string, params?: any[]) => Promise<any>;
+
+const replaceParticipants = async (
+    runQuery: Queryable,
+    entryId: string,
+    memberIds: string[]
+) => {
+    await runQuery('DELETE FROM schedule_entry_members WHERE entry_id = $1', [entryId]);
+    await runQuery(
+        `INSERT INTO schedule_entry_members (entry_id, family_member_id)
+         SELECT $1, unnest($2::uuid[])`,
+        [entryId, memberIds]
+    );
+};
+
 const ensureNoOverlap = async (
     userId: string,
-    memberId: string,
+    memberIds: string[],
     dayOfWeek: number,
     startTime: string,
     endTime: string,
@@ -73,31 +113,32 @@ const ensureNoOverlap = async (
     excludeId?: string
 ) => {
     const result = await query(
-        `SELECT id
-         FROM schedule_entries
-         WHERE user_id = $1
-           AND family_member_id = $2
-           AND day_of_week = $3
+        `SELECT se.id
+         FROM schedule_entries se
+         JOIN schedule_entry_members sem ON sem.entry_id = se.id
+         WHERE se.user_id = $1
+           AND sem.family_member_id = ANY($2::uuid[])
+           AND se.day_of_week = $3
            AND (
                CASE
-                   WHEN end_time >= start_time AND $4::time >= $5::time THEN
-                       start_time < $4::time AND end_time > $5::time
-                   WHEN end_time < start_time AND $4::time >= $5::time THEN
-                       $5::time < end_time OR $4::time > start_time
-                   WHEN end_time >= start_time AND $4::time < $5::time THEN
-                       start_time < $4::time OR end_time > $5::time
+                   WHEN se.end_time >= se.start_time AND $4::time >= $5::time THEN
+                       se.start_time < $4::time AND se.end_time > $5::time
+                   WHEN se.end_time < se.start_time AND $4::time >= $5::time THEN
+                       $5::time < se.end_time OR $4::time > se.start_time
+                   WHEN se.end_time >= se.start_time AND $4::time < $5::time THEN
+                       se.start_time < $4::time OR se.end_time > $5::time
                    ELSE
                        TRUE
                END
            )
-           AND ($6::uuid IS NULL OR id <> $6::uuid)
+           AND ($6::uuid IS NULL OR se.id <> $6::uuid)
            AND (
-               CASE WHEN $7::date IS NULL THEN specific_date IS NULL
-               ELSE specific_date IS NULL OR specific_date = $7::date
+               CASE WHEN $7::date IS NULL THEN se.specific_date IS NULL
+               ELSE se.specific_date IS NULL OR se.specific_date = $7::date
                END
            )
          LIMIT 1`,
-        [userId, memberId, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
+        [userId, memberIds, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
     );
 
     if (result.rows.length > 0) {
@@ -105,12 +146,48 @@ const ensureNoOverlap = async (
     }
 };
 
+/**
+ * Shared projection. The two lateral joins gather the participants and the
+ * skipped dates in the same round trip, so a week of entries stays one query
+ * instead of one plus two per row.
+ *
+ * Participants come back primary first, then alphabetically.
+ */
+const ENTRY_SELECT = `
+    SELECT se.*,
+           fm.name as family_member_name,
+           fm.color as family_member_color,
+           fm.role as family_member_role,
+           COALESCE(p.participants, '[]'::json) AS participants,
+           COALESCE(x.excluded_dates, '[]'::json) AS excluded_dates
+    FROM schedule_entries se
+    JOIN family_members fm ON se.family_member_id = fm.id
+    LEFT JOIN LATERAL (
+        SELECT json_agg(
+                   json_build_object('id', m.id, 'name', m.name, 'color', m.color, 'role', m.role)
+                   ORDER BY (m.id = se.family_member_id) DESC, m.name
+               ) AS participants
+        FROM schedule_entry_members sem
+        JOIN family_members m ON m.id = sem.family_member_id
+        WHERE sem.entry_id = se.id
+    ) p ON TRUE
+    LEFT JOIN LATERAL (
+        SELECT json_agg(to_char(e.excluded_date, 'YYYY-MM-DD') ORDER BY e.excluded_date) AS excluded_dates
+        FROM schedule_entry_exceptions e
+        WHERE e.entry_id = se.id
+    ) x ON TRUE
+`;
+
 const mapEntryRow = (row: any) => ({
     id: row.id,
     family_member_id: row.family_member_id,
     family_member_name: row.family_member_name,
     family_member_color: row.family_member_color,
     family_member_role: row.family_member_role,
+    participants: row.participants || [],
+    participant_ids: (row.participants || []).map((p: any) => p.id),
+    // Dates on which this weekly entry does not happen, 'YYYY-MM-DD'.
+    excluded_dates: row.excluded_dates || [],
     schedule_type: row.schedule_type,
     title: row.title,
     day_of_week: Number(row.day_of_week),
@@ -125,10 +202,7 @@ const mapEntryRow = (row: any) => ({
 
 const getEntryById = async (id: string, userId: string) => {
     const result = await query(
-        `SELECT se.*, fm.name as family_member_name, fm.color as family_member_color, fm.role as family_member_role
-         FROM schedule_entries se
-         JOIN family_members fm ON se.family_member_id = fm.id
-         WHERE se.id = $1 AND se.user_id = $2`,
+        `${ENTRY_SELECT} WHERE se.id = $1 AND se.user_id = $2`,
         [id, userId]
     );
 
@@ -139,16 +213,17 @@ router.get('/', async (req: AuthRequest, res) => {
     try {
         const { member_id, day_of_week, schedule_type, week_start } = req.query;
         const params: any[] = [req.userId];
-        let queryText = `
-            SELECT se.*, fm.name as family_member_name, fm.color as family_member_color, fm.role as family_member_role
-            FROM schedule_entries se
-            JOIN family_members fm ON se.family_member_id = fm.id
-            WHERE se.user_id = $1
-        `;
+        let queryText = `${ENTRY_SELECT} WHERE se.user_id = $1`;
 
         if (member_id) {
+            // Matches any participant, not just the primary one: filtering on a
+            // child must show the outings they were added to, not only the
+            // entries created under their name.
             params.push(member_id);
-            queryText += ` AND se.family_member_id = $${params.length}`;
+            queryText += ` AND EXISTS (
+                SELECT 1 FROM schedule_entry_members sem
+                WHERE sem.entry_id = se.id AND sem.family_member_id = $${params.length}
+            )`;
         }
 
         if (day_of_week !== undefined) {
@@ -197,7 +272,8 @@ router.post('/', async (req: AuthRequest, res) => {
             notes,
         } = req.body;
 
-        const memberId = toNullIfEmpty(family_member_id) as string | null;
+        const participantIds = parseParticipantIds(req.body);
+        const memberId = participantIds[0] || null;
         const cleanedTitle = typeof title === 'string' ? title.trim() : '';
         const cleanedType = typeof schedule_type === 'string' ? schedule_type.trim().toLowerCase() : '';
         const parsedDay = parseDayOfWeek(day_of_week);
@@ -207,7 +283,7 @@ router.post('/', async (req: AuthRequest, res) => {
         if (!memberId || !cleanedTitle || !parsedDay || !startTime || !endTime) {
             return res.status(400).json({
                 success: false,
-                error: 'family_member_id, title, day_of_week, start_time and end_time are required',
+                error: 'family_member_ids, title, day_of_week, start_time and end_time are required',
             });
         }
 
@@ -221,8 +297,8 @@ router.post('/', async (req: AuthRequest, res) => {
 
         const specificDate = toNullIfEmpty(req.body.specific_date) as string | null;
 
-        await ensureMemberBelongsToUser(memberId, req.userId!);
-        await ensureNoOverlap(req.userId!, memberId, parsedDay, startTime, endTime, specificDate);
+        await ensureMembersBelongToUser(participantIds, req.userId!);
+        await ensureNoOverlap(req.userId!, participantIds, parsedDay, startTime, endTime, specificDate);
 
         const inserted = await query(
             `INSERT INTO schedule_entries (
@@ -242,6 +318,8 @@ router.post('/', async (req: AuthRequest, res) => {
                 toNullIfEmpty(notes),
             ]
         );
+
+        await replaceParticipants(query, inserted.rows[0].id, participantIds);
 
         const row = await getEntryById(inserted.rows[0].id, req.userId!);
         broadcast(req.userId!, { type: 'update', entity: 'planning', action: 'created' });
@@ -264,6 +342,8 @@ router.post('/', async (req: AuthRequest, res) => {
 
 router.post('/bulk', async (req: AuthRequest, res) => {
     const client = await getClient();
+    // Bound so participant writes join this transaction and roll back with it.
+    const txQuery: Queryable = (text, params) => client.query(text, params);
     try {
         const {
             family_member_id,
@@ -279,7 +359,8 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             week_start,
         } = req.body;
 
-        const memberId = toNullIfEmpty(family_member_id) as string | null;
+        const participantIds = parseParticipantIds(req.body);
+        const memberId = participantIds[0] || null;
         const cleanedTitle = typeof title === 'string' ? title.trim() : '';
         const cleanedType = typeof schedule_type === 'string' ? schedule_type.trim().toLowerCase() : '';
         const startTime = normalizeTime(start_time);
@@ -291,7 +372,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
         if (!memberId || !cleanedTitle || !startTime || !endTime || dayList.length === 0) {
             return res.status(400).json({
                 success: false,
-                error: 'family_member_id, title, start_time, end_time and day_of_week_list are required',
+                error: 'family_member_ids, title, start_time, end_time and day_of_week_list are required',
             });
         }
 
@@ -303,7 +384,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'start_time and end_time cannot be the same' });
         }
 
-        await ensureMemberBelongsToUser(memberId, req.userId!);
+        await ensureMembersBelongToUser(participantIds, req.userId!);
 
         let sourceEntry: any = null;
         if (sourceId) {
@@ -327,30 +408,33 @@ router.post('/bulk', async (req: AuthRequest, res) => {
 
         const findOverlaps = async (dayOfWeek: number, specificDate: string | null, excludeId?: string) => {
             const conflict = await client.query(
-                `SELECT id
-                 FROM schedule_entries
-                 WHERE user_id = $1
-                   AND family_member_id = $2
-                   AND day_of_week = $3
+                `SELECT se.id
+                 FROM schedule_entries se
+                 WHERE se.user_id = $1
+                   AND EXISTS (
+                       SELECT 1 FROM schedule_entry_members sem
+                       WHERE sem.entry_id = se.id AND sem.family_member_id = ANY($2::uuid[])
+                   )
+                   AND se.day_of_week = $3
                    AND (
                        CASE
-                           WHEN end_time >= start_time AND $4::time >= $5::time THEN
-                               start_time < $4::time AND end_time > $5::time
-                           WHEN end_time < start_time AND $4::time >= $5::time THEN
-                               $5::time < end_time OR $4::time > start_time
-                           WHEN end_time >= start_time AND $4::time < $5::time THEN
-                               start_time < $4::time OR end_time > $5::time
+                           WHEN se.end_time >= se.start_time AND $4::time >= $5::time THEN
+                               se.start_time < $4::time AND se.end_time > $5::time
+                           WHEN se.end_time < se.start_time AND $4::time >= $5::time THEN
+                               $5::time < se.end_time OR $4::time > se.start_time
+                           WHEN se.end_time >= se.start_time AND $4::time < $5::time THEN
+                               se.start_time < $4::time OR se.end_time > $5::time
                            ELSE
                                TRUE
                        END
                    )
-                   AND ($6::uuid IS NULL OR id <> $6::uuid)
+                   AND ($6::uuid IS NULL OR se.id <> $6::uuid)
                    AND (
-                       CASE WHEN $7::date IS NULL THEN specific_date IS NULL
-                       ELSE specific_date IS NULL OR specific_date = $7::date
+                       CASE WHEN $7::date IS NULL THEN se.specific_date IS NULL
+                       ELSE se.specific_date IS NULL OR se.specific_date = $7::date
                        END
                    )`,
-                [req.userId, memberId, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
+                [req.userId, participantIds, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
             );
             return conflict.rows.map((row) => row.id as string);
         };
@@ -371,30 +455,12 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             }
 
             if (overlapIds.length > 0 && replaceConflicts) {
+                // findOverlaps already resolved exactly which rows clash. Deleting
+                // by id keeps the overlap predicate in one place instead of two
+                // copies that have to be kept identical by hand.
                 await client.query(
-                    `DELETE FROM schedule_entries
-                     WHERE user_id = $1
-                       AND family_member_id = $2
-                       AND day_of_week = $3
-                       AND (
-                           CASE
-                               WHEN end_time >= start_time AND $4::time >= $5::time THEN
-                                   start_time < $4::time AND end_time > $5::time
-                               WHEN end_time < start_time AND $4::time >= $5::time THEN
-                                   $5::time < end_time OR $4::time > start_time
-                               WHEN end_time >= start_time AND $4::time < $5::time THEN
-                                   start_time < $4::time OR end_time > $5::time
-                               ELSE
-                                   TRUE
-                           END
-                       )
-                       AND ($6::uuid IS NULL OR id <> $6::uuid)
-                       AND (
-                           CASE WHEN $7::date IS NULL THEN specific_date IS NULL
-                           ELSE specific_date IS NULL OR specific_date = $7::date
-                           END
-                       )`,
-                    [req.userId, memberId, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
+                    'DELETE FROM schedule_entries WHERE id = ANY($1::uuid[]) AND user_id = $2',
+                    [overlapIds, req.userId]
                 );
             }
 
@@ -425,6 +491,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                         req.userId,
                     ]
                 );
+                await replaceParticipants(txQuery, sourceEntry.id, participantIds);
                 touchedIds.push(sourceEntry.id);
                 updatedCount += 1;
                 continue;
@@ -449,6 +516,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                 ]
             );
 
+            await replaceParticipants(txQuery, inserted.rows[0].id, participantIds);
             touchedIds.push(inserted.rows[0].id);
             createdCount += 1;
         }
@@ -458,9 +526,7 @@ router.post('/bulk', async (req: AuthRequest, res) => {
         let mappedRows: any[] = [];
         if (touchedIds.length > 0) {
             const rows = await query(
-                `SELECT se.*, fm.name as family_member_name, fm.color as family_member_color, fm.role as family_member_role
-                 FROM schedule_entries se
-                 JOIN family_members fm ON se.family_member_id = fm.id
+                `${ENTRY_SELECT}
                  WHERE se.user_id = $1
                    AND se.id = ANY($2::uuid[])
                  ORDER BY se.day_of_week ASC, se.start_time ASC`,
@@ -506,9 +572,33 @@ router.put('/:id', async (req: AuthRequest, res) => {
 
         const current = existing.rows[0];
 
-        const memberId = (req.body.family_member_id !== undefined
-            ? toNullIfEmpty(req.body.family_member_id)
-            : current.family_member_id) as string | null;
+        // Partial update: participants change only when the caller says so.
+        // Otherwise keep the list already stored, which the overlap check below
+        // still needs.
+        const participantsGiven = req.body.family_member_ids !== undefined
+            || req.body.family_member_id !== undefined;
+
+        let participantIds: string[];
+        if (participantsGiven) {
+            participantIds = parseParticipantIds(req.body);
+        } else {
+            const stored = await query(
+                'SELECT family_member_id FROM schedule_entry_members WHERE entry_id = $1',
+                [id]
+            );
+            // An entry created before migration 021 and never touched since has no
+            // join rows yet; its primary is still the truth.
+            participantIds = stored.rows.length > 0
+                ? [
+                    current.family_member_id,
+                    ...stored.rows
+                        .map((r: any) => r.family_member_id as string)
+                        .filter((memberId: string) => memberId !== current.family_member_id),
+                ]
+                : [current.family_member_id];
+        }
+
+        const memberId = participantIds[0] || null;
         const cleanedTitle = typeof req.body.title === 'string'
             ? req.body.title.trim()
             : current.title;
@@ -544,8 +634,8 @@ router.put('/:id', async (req: AuthRequest, res) => {
             ? toNullIfEmpty(req.body.specific_date) as string | null
             : (current.specific_date ? (typeof current.specific_date === 'string' ? current.specific_date.slice(0, 10) : current.specific_date.toISOString().slice(0, 10)) : null);
 
-        await ensureMemberBelongsToUser(memberId, req.userId!);
-        await ensureNoOverlap(req.userId!, memberId, parsedDay, startTime, endTime, specificDate, id);
+        await ensureMembersBelongToUser(participantIds, req.userId!);
+        await ensureNoOverlap(req.userId!, participantIds, parsedDay, startTime, endTime, specificDate, id);
 
         await query(
             `UPDATE schedule_entries
@@ -573,6 +663,8 @@ router.put('/:id', async (req: AuthRequest, res) => {
                 req.userId,
             ]
         );
+
+        await replaceParticipants(query, id, participantIds);
 
         const row = await getEntryById(id, req.userId!);
         broadcast(req.userId!, { type: 'update', entity: 'planning', action: 'updated' });
@@ -609,6 +701,103 @@ router.delete('/:id', async (req: AuthRequest, res) => {
         return res.json({ success: true, message: 'Planning entry deleted' });
     } catch (error) {
         console.error('Delete planning entry error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// ── Skipping a single occurrence ─────────────────────────────────────────────
+//
+// A weekly entry repeats forever. Skipping one date, for a day off or a
+// cancelled lesson, must not touch the series: the same entry still has to
+// happen every other week. So the occurrence is recorded as a subtraction
+// rather than by splitting the series into individual rows.
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Rejects a well-formed but nonexistent date such as 2026-02-30. */
+const isRealDate = (value: string): boolean => {
+    const parsed = new Date(`${value}T00:00:00Z`);
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+};
+
+const ownedEntry = async (id: string, userId: string) => {
+    const result = await query(
+        'SELECT id, day_of_week, specific_date FROM schedule_entries WHERE id = $1 AND user_id = $2',
+        [id, userId]
+    );
+    return result.rows[0] || null;
+};
+
+router.post('/:id/exceptions', async (req: AuthRequest, res) => {
+    try {
+        const { id } = req.params;
+        const date = typeof req.body?.date === 'string' ? req.body.date.trim() : '';
+
+        if (!ISO_DATE.test(date) || !isRealDate(date)) {
+            return res.status(400).json({ success: false, error: 'date must be YYYY-MM-DD' });
+        }
+
+        const entry = await ownedEntry(id, req.userId!);
+        if (!entry) {
+            return res.status(404).json({ success: false, error: 'Planning entry not found' });
+        }
+
+        // A one-off entry has a single occurrence; skipping it means deleting it,
+        // and leaving both paths available would make "cancelled" ambiguous.
+        if (entry.specific_date) {
+            return res.status(400).json({
+                success: false,
+                error: 'This entry happens once. Delete it instead of skipping a date.',
+            });
+        }
+
+        // getUTCDay is 0 for Sunday; day_of_week is 1 (Monday) to 7 (Sunday).
+        const weekday = new Date(`${date}T00:00:00Z`).getUTCDay() || 7;
+        if (weekday !== Number(entry.day_of_week)) {
+            return res.status(400).json({
+                success: false,
+                error: 'That date is not a day this entry happens on',
+            });
+        }
+
+        await query(
+            `INSERT INTO schedule_entry_exceptions (entry_id, excluded_date)
+             VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+            [id, date]
+        );
+
+        const row = await getEntryById(id, req.userId!);
+        broadcast(req.userId!, { type: 'update', entity: 'planning', action: 'updated' });
+        return res.json({ success: true, data: mapEntryRow(row) });
+    } catch (error) {
+        console.error('Skip planning occurrence error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+router.delete('/:id/exceptions/:date', async (req: AuthRequest, res) => {
+    try {
+        const { id, date } = req.params;
+
+        if (!ISO_DATE.test(date) || !isRealDate(date)) {
+            return res.status(400).json({ success: false, error: 'date must be YYYY-MM-DD' });
+        }
+
+        const entry = await ownedEntry(id, req.userId!);
+        if (!entry) {
+            return res.status(404).json({ success: false, error: 'Planning entry not found' });
+        }
+
+        await query(
+            'DELETE FROM schedule_entry_exceptions WHERE entry_id = $1 AND excluded_date = $2',
+            [id, date]
+        );
+
+        const row = await getEntryById(id, req.userId!);
+        broadcast(req.userId!, { type: 'update', entity: 'planning', action: 'updated' });
+        return res.json({ success: true, data: mapEntryRow(row) });
+    } catch (error) {
+        console.error('Restore planning occurrence error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });

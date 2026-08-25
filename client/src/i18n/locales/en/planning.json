@@ -45,7 +45,9 @@
     "location": "Location (optional)",
     "locationPlaceholder": "e.g. Lyon office / Jean Moulin school",
     "notes": "Notes (optional)",
-    "notesPlaceholder": "Useful info, room, subject, transport…"
+    "notesPlaceholder": "Useful info, room, subject, transport…",
+    "participants": "Participants",
+    "participantsHint": "Pick one or more people. The first one gives the activity its colour."
   },
   "submit": {
     "applyToDays": "Apply to selected days"
@@ -55,7 +57,9 @@
     "savedDays_one": "Saved on {{count}} day.",
     "savedDays_other": "Saved on {{count}} days.",
     "savedDaysConflicts_one": "Saved on {{count}} day. Conflicts detected on: {{days}}.",
-    "savedDaysConflicts_other": "Saved on {{count}} days. Conflicts detected on: {{days}}."
+    "savedDaysConflicts_other": "Saved on {{count}} days. Conflicts detected on: {{days}}.",
+    "skipped": "Skipped for that date",
+    "restored": "Put back"
   },
   "confirmDelete": "Delete this entry?",
   "errors": {
@@ -65,6 +69,15 @@
     "memberTitleRequired": "Member and title are required.",
     "timesSame": "Start and end times cannot be identical.",
     "selectDay": "Select at least one day.",
-    "save": "Unable to save this entry."
+    "save": "Unable to save this entry.",
+    "skipOccurrence": "Could not change this occurrence"
+  },
+  "occurrence": {
+    "skip": "Skip this one",
+    "restore": "Put this one back"
+  },
+  "appointments": {
+    "badge": "APPT",
+    "openCalendar": "Open in the calendar"
   }
 }

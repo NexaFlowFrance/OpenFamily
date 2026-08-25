@@ -480,15 +480,53 @@ async function route(method: string, path: string, q: Record<string, string>, bo
     if (path === '/api/calendar/token' || path === '/api/calendar/token/reset') return ok({ token: 'demo-ical-token' });
 
     // ── Planning ────────────────────────────────────────────────────────────────
-    if (path === '/api/planning' && method === 'GET') return ok(store.planning);
-    if (path === '/api/planning' && method === 'POST') return ok(create('planning', body));
+    // The server denormalises the participants into each entry; do the same here
+    // or the week grid has colours and names to show for nobody.
+    const withParticipants = (entry: Json): Json => {
+        const byId = new Map((store.familyMembers as Json[]).map((m) => [m.id, m]));
+        const ids = Array.isArray(entry.family_member_ids)
+            ? (entry.family_member_ids as string[])
+            : [entry.family_member_id as string];
+        const people = ids.map((id) => byId.get(id)).filter(Boolean) as Json[];
+        const primary = people[0];
+        return {
+            ...entry,
+            family_member_id: primary?.id ?? entry.family_member_id,
+            family_member_name: primary?.name ?? entry.family_member_name,
+            family_member_color: primary?.color ?? entry.family_member_color,
+            family_member_role: primary?.role ?? entry.family_member_role,
+            participants: people.map((m) => ({ id: m.id, name: m.name, color: m.color, role: m.role })),
+            participant_ids: people.map((m) => m.id),
+            excluded_dates: (entry.excluded_dates as string[]) || [],
+        };
+    };
+
+    if (path === '/api/planning' && method === 'GET') {
+        return ok((store.planning as Json[]).map(withParticipants));
+    }
+    if (path === '/api/planning' && method === 'POST') {
+        return ok(withParticipants(create('planning', body)));
+    }
     if (path === '/api/planning/bulk') {
         const days = (body.day_of_week_list as number[]) || [];
-        const created = days.map((d) => create('planning', { ...body, day_of_week: d }));
+        const created = days.map((d) => withParticipants(create('planning', { ...body, day_of_week: d })));
         return ok({ entries: created, created: created.length, updated: 0, conflicts: [] });
     }
+    // Skipping one occurrence: /api/planning/:id/exceptions[/:date]
+    if (seg[1] === 'planning' && seg[3] === 'exceptions') {
+        const entry = (store.planning as Json[]).find((e) => e.id === seg[2]);
+        if (!entry) return ok(null);
+        const dates = new Set((entry.excluded_dates as string[]) || []);
+        if (method === 'POST' && typeof body.date === 'string') dates.add(body.date);
+        if (method === 'DELETE' && seg[4]) dates.delete(decodeURIComponent(seg[4]));
+        entry.excluded_dates = [...dates].sort();
+        return ok(withParticipants(entry));
+    }
     if (seg[1] === 'planning' && seg.length === 3) {
-        if (method === 'PUT') return ok(update('planning', seg[2], body));
+        if (method === 'PUT') {
+            const updated = update('planning', seg[2], body);
+            return ok(updated ? withParticipants(updated) : null);
+        }
         if (method === 'DELETE') { remove('planning', seg[2]); return ok({}); }
     }
 

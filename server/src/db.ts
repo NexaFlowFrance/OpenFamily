@@ -335,6 +335,31 @@ export const runMigrations = async () => {
         // widgets, day/week agenda). JSON text on the MEMBER's own row (unlike
         // disabled_modules which is family-wide on the owner's row); NULL = defaults.
         'ALTER TABLE users ADD COLUMN IF NOT EXISTS dashboard_prefs TEXT',
+        // Migration 021: an activity can involve several people (swimming with both
+        // kids, a family outing). This table holds ALL of them and is what the API
+        // reads. schedule_entries.family_member_id stays, always mirroring the first
+        // participant: backups exported before this migration carry that column, and
+        // dropping it would make them un-importable.
+        `CREATE TABLE IF NOT EXISTS schedule_entry_members (
+            entry_id UUID NOT NULL REFERENCES schedule_entries(id) ON DELETE CASCADE,
+            family_member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+            PRIMARY KEY (entry_id, family_member_id)
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_schedule_entry_members_member ON schedule_entry_members(family_member_id)',
+        // Backfill: every existing entry has exactly one participant today. Safe to
+        // re-run, and a no-op once done.
+        `INSERT INTO schedule_entry_members (entry_id, family_member_id)
+         SELECT id, family_member_id FROM schedule_entries
+         ON CONFLICT DO NOTHING`,
+        // Migration 022: skip a single occurrence of a weekly entry, for a day off or
+        // a cancelled lesson, without touching the series itself. Same idea as EXDATE
+        // in iCalendar: the series stays whole and the exception is a subtraction.
+        `CREATE TABLE IF NOT EXISTS schedule_entry_exceptions (
+            entry_id UUID NOT NULL REFERENCES schedule_entries(id) ON DELETE CASCADE,
+            excluded_date DATE NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT now(),
+            PRIMARY KEY (entry_id, excluded_date)
+        )`,
     ];
 
     for (const migration of migrations) {

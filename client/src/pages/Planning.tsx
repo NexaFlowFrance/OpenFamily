@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
     Briefcase,
     BookOpen,
+    CalendarClock,
     CalendarDays,
+    CalendarOff,
     ChevronLeft,
     ChevronRight,
     Edit2,
@@ -11,6 +13,7 @@ import {
     Pin,
     Plus,
     Repeat,
+    RotateCcw,
     Trash2,
     Users,
 } from 'lucide-react';
@@ -28,12 +31,25 @@ interface FamilyMember {
     color: string;
 }
 
+interface Participant {
+    id: string;
+    name: string;
+    color: string;
+    role: string;
+}
+
 interface PlanningEntry {
     id: string;
+    /** First participant. Kept for older payloads and for the member filter. */
     family_member_id: string;
     family_member_name: string;
     family_member_color: string;
     family_member_role: string;
+    /** Everyone taking part, primary first. */
+    participants?: Participant[];
+    participant_ids?: string[];
+    /** Dates, 'YYYY-MM-DD', on which this weekly entry does not happen. */
+    excluded_dates?: string[];
     schedule_type: 'work' | 'school' | 'study' | 'activity' | 'other';
     title: string;
     day_of_week: number;
@@ -42,6 +58,16 @@ interface PlanningEntry {
     specific_date?: string | null;
     location?: string;
     notes?: string;
+}
+
+/** An appointment shown alongside the planning, read-only. */
+interface WeekAppointment {
+    id: string;
+    title: string;
+    start_time: string;
+    end_time?: string | null;
+    location?: string | null;
+    family_member_ids?: string[];
 }
 
 interface PlanningBulkResult {
@@ -101,8 +127,11 @@ const Planning: React.FC = () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingEntry, setEditingEntry] = useState<PlanningEntry | null>(null);
 
+    const [appointments, setAppointments] = useState<WeekAppointment[]>([]);
+
     const [formData, setFormData] = useState({
-        family_member_id: '',
+        // Primary first: the server mirrors position 0 into family_member_id.
+        family_member_ids: [] as string[],
         schedule_type: 'work',
         title: '',
         day_of_week: 1,
@@ -117,7 +146,7 @@ const Planning: React.FC = () => {
     useEffect(() => {
         const bootstrap = async () => {
             try {
-                await Promise.all([loadMembers(), loadEntries(weekStart)]);
+                await Promise.all([loadMembers(), loadEntries(weekStart), loadAppointments(weekStart)]);
             } finally {
                 setLoading(false);
             }
@@ -125,6 +154,8 @@ const Planning: React.FC = () => {
         void bootstrap();
     }, []);
     useWebSocketUpdates('planning', () => { void loadEntries(weekStart); });
+    // An appointment added from the calendar has to appear here too.
+    useWebSocketUpdates('appointments', () => { void loadAppointments(weekStart); });
 
     useEffect(() => {
         if (selectedDays.length === 0) {
@@ -138,19 +169,20 @@ const Planning: React.FC = () => {
     }, [selectedDays]);
 
     useEffect(() => {
-        if (familyMembers.length === 0 || editingEntry || formData.family_member_id) {
+        if (familyMembers.length === 0 || editingEntry || formData.family_member_ids.length > 0) {
             return;
         }
         const first = familyMembers[0];
         setFormData((prev) => ({
             ...prev,
-            family_member_id: first.id,
+            family_member_ids: [first.id],
             schedule_type: defaultTypeFromRole(first.role),
         }));
-    }, [familyMembers, editingEntry, formData.family_member_id]);
+    }, [familyMembers, editingEntry, formData.family_member_ids]);
 
     useEffect(() => {
         loadEntries(weekStart);
+        void loadAppointments(weekStart);
     }, [weekStart]);
 
     const loadMembers = async () => {
@@ -178,6 +210,46 @@ const Planning: React.FC = () => {
         }
     };
 
+    /**
+     * Appointments falling in the displayed week. They are shown next to the
+     * planning because a week you have to read in two places is not a week you
+     * can plan against. They stay read-only here; the calendar owns them.
+     */
+    const loadAppointments = async (ws: Date) => {
+        try {
+            const start = format(ws, 'yyyy-MM-dd');
+            const end = format(addDays(ws, 7), 'yyyy-MM-dd');
+            const response = await api.get<{ success: boolean; data: WeekAppointment[] }>(
+                `/api/appointments?start_date=${start}&end_date=${end}`
+            );
+            if (response.success) {
+                setAppointments(response.data);
+            }
+        } catch (err) {
+            // The planning itself still works without them, so this must not
+            // take the page down with it.
+            console.error('Failed to load appointments:', err);
+        }
+    };
+
+    /** Skips or restores one date of a weekly entry, leaving the series intact. */
+    const toggleOccurrence = async (entry: PlanningEntry, date: string, skipped: boolean) => {
+        setError('');
+        setNotice('');
+        try {
+            if (skipped) {
+                await api.delete(`/api/planning/${entry.id}/exceptions/${date}`);
+            } else {
+                await api.post(`/api/planning/${entry.id}/exceptions`, { date });
+            }
+            await loadEntries(weekStart);
+            setNotice(skipped ? t('planning:notice.restored') : t('planning:notice.skipped'));
+        } catch (err) {
+            console.error('Failed to change occurrence:', err);
+            setError(err instanceof Error ? err.message : t('planning:errors.skipOccurrence'));
+        }
+    };
+
     const resetForm = (dayOfWeek = 1) => {
         setEditingEntry(null);
         setSelectedDays([dayOfWeek]);
@@ -185,7 +257,7 @@ const Planning: React.FC = () => {
         setThisWeekOnly(false);
         const first = familyMembers[0];
         setFormData({
-            family_member_id: first?.id || '',
+            family_member_ids: first ? [first.id] : [],
             schedule_type: defaultTypeFromRole(first?.role),
             title: '',
             day_of_week: dayOfWeek,
@@ -211,7 +283,10 @@ const Planning: React.FC = () => {
         setEditingEntry(entry);
         setSelectedDays([entry.day_of_week]);
         setFormData({
-            family_member_id: entry.family_member_id,
+            // Entries written before participants existed only carry the primary.
+            family_member_ids: entry.participant_ids?.length
+                ? entry.participant_ids
+                : [entry.family_member_id],
             schedule_type: entry.schedule_type,
             title: entry.title,
             day_of_week: entry.day_of_week,
@@ -238,6 +313,37 @@ const Planning: React.FC = () => {
         }
     };
 
+    /**
+     * Adds or removes a participant. The list is never emptied: an activity with
+     * nobody in it cannot be saved, and silently refusing the last removal is
+     * clearer than letting the form reach a state the server will reject.
+     */
+    const toggleParticipant = (memberId: string) => {
+        setFormData((prev) => {
+            if (prev.family_member_ids.includes(memberId)) {
+                if (prev.family_member_ids.length === 1) {
+                    return prev;
+                }
+                return {
+                    ...prev,
+                    family_member_ids: prev.family_member_ids.filter((id) => id !== memberId),
+                };
+            }
+
+            const next = [...prev.family_member_ids, memberId];
+            const member = familyMembers.find((item) => item.id === memberId);
+            return {
+                ...prev,
+                family_member_ids: next,
+                // The first participant still sets the default type, as picking a
+                // single member used to.
+                schedule_type: next.length === 1 && member
+                    ? defaultTypeFromRole(member.role)
+                    : prev.schedule_type,
+            };
+        });
+    };
+
     const toggleDaySelection = (day: number) => {
         setSelectedDays((prev) => {
             if (prev.includes(day)) {
@@ -255,7 +361,7 @@ const Planning: React.FC = () => {
         setError('');
         setNotice('');
 
-        if (!formData.family_member_id || !formData.title.trim()) {
+        if (formData.family_member_ids.length === 0 || !formData.title.trim()) {
             setError(t('planning:errors.memberTitleRequired'));
             return;
         }
@@ -271,7 +377,7 @@ const Planning: React.FC = () => {
         }
 
         const basePayload = {
-            family_member_id: formData.family_member_id,
+            family_member_ids: formData.family_member_ids,
             schedule_type: formData.schedule_type,
             title: formData.title.trim(),
             start_time: formData.start_time,
@@ -336,9 +442,14 @@ const Planning: React.FC = () => {
         }
     };
 
+    const participantIdsOf = (entry: PlanningEntry) =>
+        entry.participant_ids?.length ? entry.participant_ids : [entry.family_member_id];
+
     const visibleEntries = useMemo(() => {
         return entries
-            .filter((entry) => (selectedMemberId ? entry.family_member_id === selectedMemberId : true))
+            // Filtering on a member shows the shared activities they take part
+            // in, not only the ones created under their name.
+            .filter((entry) => (selectedMemberId ? participantIdsOf(entry).includes(selectedMemberId) : true))
             .filter((entry) => (selectedType !== 'all' ? entry.schedule_type === selectedType : true))
             .sort((a, b) => {
                 if (a.day_of_week !== b.day_of_week) {
@@ -347,6 +458,34 @@ const Planning: React.FC = () => {
                 return a.start_time.localeCompare(b.start_time);
             });
     }, [entries, selectedMemberId, selectedType]);
+
+    /** Appointments of the week, grouped by weekday (1 = Monday). */
+    const appointmentsByDay = useMemo(() => {
+        const groups = new Map<number, WeekAppointment[]>();
+
+        for (const appointment of appointments) {
+            const start = new Date(appointment.start_time);
+            if (Number.isNaN(start.getTime())) continue;
+
+            // An appointment with nobody assigned concerns the whole family, so
+            // it stays visible whichever member is being filtered on. Only the
+            // ones explicitly assigned to other people are hidden.
+            const assigned = appointment.family_member_ids || [];
+            if (selectedMemberId && assigned.length > 0 && !assigned.includes(selectedMemberId)) {
+                continue;
+            }
+
+            // getDay is 0 on Sunday; the planning counts Monday as 1.
+            const day = start.getDay() || 7;
+            groups.set(day, [...(groups.get(day) || []), appointment]);
+        }
+
+        for (const list of groups.values()) {
+            list.sort((a, b) => a.start_time.localeCompare(b.start_time));
+        }
+
+        return groups;
+    }, [appointments, selectedMemberId]);
 
     const entryTypeBadge = (type: PlanningEntry['schedule_type']) => {
         if (type === 'work') {
@@ -470,6 +609,10 @@ const Planning: React.FC = () => {
                 {DAYS.map((day, index) => {
                     const dateForHeader = addDays(weekStart, index);
                     const dayEntries = visibleEntries.filter((entry) => entry.day_of_week === day.value);
+                    // The concrete date this column stands for, used to tell a
+                    // skipped occurrence from the series it belongs to.
+                    const dayIso = format(dateForHeader, 'yyyy-MM-dd');
+                    const dayAppointments = appointmentsByDay.get(day.value) || [];
                     return (
                         <Card key={day.value} hover={false} className="min-h-[280px]">
                             <CardHeader className="pb-2">
@@ -491,7 +634,7 @@ const Planning: React.FC = () => {
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-2 pt-0">
-                                {dayEntries.length === 0 ? (
+                                {dayEntries.length === 0 && dayAppointments.length === 0 ? (
                                     <button
                                         type="button"
                                         onClick={() => handleAddForDay(day.value)}
@@ -503,16 +646,28 @@ const Planning: React.FC = () => {
                                     dayEntries.map((entry) => {
                                         const typeMeta = entryTypeBadge(entry.schedule_type);
                                         const TypeIcon = typeMeta.icon;
+                                        // A weekly entry can be called off for this date alone. A one-off
+                                        // has nothing to subtract from, so it is deleted instead.
+                                        const isSeries = !entry.specific_date;
+                                        const skipped = (entry.excluded_dates || []).includes(dayIso);
+                                        const people = entry.participants?.length
+                                            ? entry.participants
+                                            : [{
+                                                id: entry.family_member_id,
+                                                name: entry.family_member_name,
+                                                color: entry.family_member_color,
+                                                role: entry.family_member_role,
+                                            }];
                                         return (
                                             <div
                                                 key={entry.id}
-                                                className="overflow-hidden rounded-input border border-border bg-card shadow-surface"
+                                                className={`overflow-hidden rounded-input border border-border bg-card shadow-surface ${skipped ? 'opacity-45' : ''}`}
                                                 style={{ borderLeftColor: entry.family_member_color, borderLeftWidth: 3 }}
                                             >
                                                 <div className="p-1.5">
                                                     {/* Time + actions row */}
                                                     <div className="flex items-center justify-between gap-1">
-                                                        <p className="text-[10px] font-semibold leading-tight text-foreground">
+                                                        <p className={`text-[10px] font-semibold leading-tight text-foreground ${skipped ? 'line-through' : ''}`}>
                                                             {formatTime(entry.start_time)}
                                                             <span className="text-muted-foreground">–</span>
                                                             {formatTime(entry.end_time)}
@@ -525,6 +680,19 @@ const Planning: React.FC = () => {
                                                                 ? <Pin className="mr-0.5 h-2.5 w-2.5 text-amber-500" />
                                                                 : <Repeat className="mr-0.5 h-2.5 w-2.5 text-muted-foreground/50" />
                                                             }
+                                                            {isSeries && (
+                                                                <button
+                                                                    type="button"
+                                                                    title={skipped ? t('planning:occurrence.restore') : t('planning:occurrence.skip')}
+                                                                    aria-label={skipped ? t('planning:occurrence.restore') : t('planning:occurrence.skip')}
+                                                                    className="rounded p-0.5 text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+                                                                    onClick={() => toggleOccurrence(entry, dayIso, skipped)}
+                                                                >
+                                                                    {skipped
+                                                                        ? <RotateCcw className="h-3 w-3" />
+                                                                        : <CalendarOff className="h-3 w-3" />}
+                                                                </button>
+                                                            )}
                                                             <button
                                                                 type="button"
                                                                 className="rounded p-0.5 text-muted-foreground hover:bg-surface-2 hover:text-foreground"
@@ -542,18 +710,26 @@ const Planning: React.FC = () => {
                                                         </div>
                                                     </div>
                                                     {/* Title */}
-                                                    <p className="mt-0.5 truncate text-[11px] font-medium leading-tight text-foreground">
+                                                    <p className={`mt-0.5 truncate text-[11px] font-medium leading-tight text-foreground ${skipped ? 'line-through' : ''}`}>
                                                         {entry.title}
                                                     </p>
-                                                    {/* Type + member row */}
+                                                    {/* Type + participants row */}
                                                     <div className="mt-1 flex items-center gap-1">
                                                         <TypeIcon className="h-2.5 w-2.5 flex-shrink-0 text-muted-foreground" />
-                                                        <span
-                                                            className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                                                            style={{ backgroundColor: entry.family_member_color }}
-                                                        />
+                                                        <span className="flex flex-shrink-0 items-center -space-x-0.5">
+                                                            {people.map((person) => (
+                                                                <span
+                                                                    key={person.id}
+                                                                    title={person.name}
+                                                                    className="h-1.5 w-1.5 rounded-full ring-1 ring-card"
+                                                                    style={{ backgroundColor: person.color }}
+                                                                />
+                                                            ))}
+                                                        </span>
                                                         <span className="truncate text-[10px] text-muted-foreground">
-                                                            {entry.family_member_name}
+                                                            {people.length === 1
+                                                                ? people[0].name
+                                                                : `${people[0].name} +${people.length - 1}`}
                                                         </span>
                                                     </div>
                                                     {entry.location ? (
@@ -564,6 +740,35 @@ const Planning: React.FC = () => {
                                         );
                                     })
                                 )}
+
+                                {/* Appointments of that day, read-only. Editing them
+                                    belongs to the calendar, which owns reminders and
+                                    guests; tapping one goes there. */}
+                                {dayAppointments.map((appointment) => (
+                                    <button
+                                        key={appointment.id}
+                                        type="button"
+                                        onClick={() => navigate('/calendar')}
+                                        title={t('planning:appointments.openCalendar')}
+                                        className="w-full overflow-hidden rounded-input border border-dashed border-border bg-surface-2/40 p-1.5 text-left hover:border-primary"
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            <CalendarClock className="h-2.5 w-2.5 flex-shrink-0 text-muted-foreground" />
+                                            <p className="text-[10px] font-semibold leading-tight text-foreground">
+                                                {format(new Date(appointment.start_time), 'HH:mm')}
+                                            </p>
+                                            <span className="ml-auto text-[9px] uppercase tracking-wide text-muted-foreground">
+                                                {t('planning:appointments.badge')}
+                                            </span>
+                                        </div>
+                                        <p className="mt-0.5 truncate text-[11px] font-medium leading-tight text-foreground">
+                                            {appointment.title}
+                                        </p>
+                                        {appointment.location ? (
+                                            <p className="mt-0.5 truncate text-[10px] text-muted-foreground">{appointment.location}</p>
+                                        ) : null}
+                                    </button>
+                                ))}
                             </CardContent>
                         </Card>
                     );
@@ -583,23 +788,35 @@ const Planning: React.FC = () => {
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="mb-1.5 block text-label font-medium text-foreground">{t('planning:form.member')}</label>
-                            <Select
-                                value={formData.family_member_id}
-                                onValueChange={(value) => {
-                                    const member = familyMembers.find((item) => item.id === value);
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        family_member_id: value,
-                                        schedule_type: member ? defaultTypeFromRole(member.role) : prev.schedule_type,
-                                    }));
-                                }}
-                                options={familyMembers.map((member) => ({
-                                    value: member.id,
-                                    label: `${member.name} (${member.role})`,
-                                }))}
-                            />
+                        <div className="sm:col-span-2">
+                            <label className="mb-1.5 block text-label font-medium text-foreground">{t('planning:form.participants')}</label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {familyMembers.map((member) => {
+                                    const selected = formData.family_member_ids.includes(member.id);
+                                    return (
+                                        <button
+                                            key={member.id}
+                                            type="button"
+                                            aria-pressed={selected}
+                                            onClick={() => toggleParticipant(member.id)}
+                                            className={`flex items-center gap-1.5 rounded-pill border px-3 py-1.5 text-caption transition-colors ${
+                                                selected
+                                                    ? 'border-primary bg-primary-soft text-primary'
+                                                    : 'border-border bg-card text-muted-foreground hover:border-border-strong'
+                                            }`}
+                                        >
+                                            <span
+                                                className="h-2 w-2 flex-shrink-0 rounded-full"
+                                                style={{ backgroundColor: member.color }}
+                                            />
+                                            {member.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <p className="mt-1.5 text-micro text-muted-foreground">
+                                {t('planning:form.participantsHint')}
+                            </p>
                         </div>
                         <div>
                             <label className="mb-1.5 block text-label font-medium text-foreground">{t('planning:form.type')}</label>

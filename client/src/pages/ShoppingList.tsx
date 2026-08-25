@@ -4,12 +4,13 @@ import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
-import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks, Store, ChevronLeft } from 'lucide-react';
+import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks, Store, ChevronLeft, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Dialog } from '../components/ui';
 import { useCategories } from '../hooks/useCategories';
+import { SHOPPING_CATALOG } from '../lib/shoppingCatalog';
 
 interface ShoppingItem {
     id: string;
@@ -69,6 +70,9 @@ const ShoppingList: React.FC = () => {
     const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
     const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
     const [storeMode, setStoreMode] = useState(false);
+    // Which item's quantity is being edited inline, and the value being typed.
+    const [editingQuantityId, setEditingQuantityId] = useState<string | null>(null);
+    const [quantityDraft, setQuantityDraft] = useState('');
 
     useEffect(() => {
         void Promise.all([loadItems(), loadTemplates()]).finally(() => setLoading(false));
@@ -170,6 +174,59 @@ const ShoppingList: React.FC = () => {
             console.error('Failed to delete item:', err);
             setError(err instanceof Error ? err.message : t('shopping:errors.deleteFailed'));
         }
+    };
+
+    /**
+     * Quantity of an item already on the list. A quantity that reaches zero is
+     * cleared rather than stored, so the item reads as "bread" and not "bread,
+     * 0", which is what you want when you stop counting rather than when you
+     * want none of it.
+     */
+    const setItemQuantity = async (item: ShoppingItem, raw: string) => {
+        const trimmed = raw.trim();
+        const parsed = trimmed === '' ? null : Number(trimmed.replace(',', '.'));
+
+        if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0)) {
+            setError(t('shopping:errors.quantityInvalid'));
+            return;
+        }
+
+        const next = parsed === null || parsed === 0 ? null : parsed;
+        if ((item.quantity ?? null) === next) {
+            return;
+        }
+
+        setError('');
+        // Optimistic: the row is under the finger, so it has to answer at once.
+        setItems((prev) => prev.map((c) => (c.id === item.id ? { ...c, quantity: next ?? undefined } : c)));
+
+        try {
+            const response = await api.put<{ success: boolean; data: ShoppingItem }>(
+                `/api/shopping/${item.id}`,
+                { quantity: next === null ? '' : next }
+            );
+            if (response.success) {
+                setItems((prev) => prev.map((c) => (c.id === item.id ? response.data : c)));
+            }
+        } catch (err) {
+            console.error('Failed to update quantity:', err);
+            setItems((prev) => prev.map((c) => (c.id === item.id ? item : c)));
+            setError(err instanceof Error ? err.message : t('shopping:errors.updateFailed'));
+        }
+    };
+
+    /**
+     * Steps the draft, not the saved value. The buttons sit next to the input,
+     * so acting on the item directly would race the blur handler that saves what
+     * was typed. One value changes, one save, on blur or Enter.
+     */
+    const stepDraft = (delta: number) => {
+        setQuantityDraft((prev) => {
+            const current = Number(prev.replace(',', '.'));
+            const base = Number.isFinite(current) ? current : 0;
+            const next = Math.max(0, Math.round((base + delta) * 100) / 100);
+            return next === 0 ? '' : String(next);
+        });
     };
 
     const clearCheckedItems = async () => {
@@ -293,6 +350,39 @@ const ShoppingList: React.FC = () => {
 
     const pendingItems = useMemo(() => items.filter((item) => !item.is_checked), [items]);
     const completedItems = useMemo(() => items.filter((item) => item.is_checked), [items]);
+
+    /**
+     * Ready-made items to add in one tap. Filtered by what has been typed, and
+     * hiding anything already on the list so a suggestion never produces a
+     * duplicate line.
+     */
+    const suggestions = useMemo(() => {
+        const typed = newItem.name.trim().toLowerCase();
+        const onList = new Set(items.map((item) => item.name.trim().toLowerCase()));
+
+        const matches = SHOPPING_CATALOG
+            .map((entry) => ({
+                ...entry,
+                label: t(`shopping:catalog.${entry.key}`, { defaultValue: entry.key }),
+            }))
+            .filter(({ label }) => {
+                const lower = label.toLowerCase();
+                if (onList.has(lower)) return false;
+                return typed === '' || lower.includes(typed);
+            });
+
+        return matches.slice(0, typed === '' ? 8 : 6);
+    }, [newItem.name, items, t]);
+
+    const applySuggestion = (label: string, category: string) => {
+        setNewItem((prev) => ({
+            ...prev,
+            name: label,
+            // A family that renamed or removed the suggested category keeps
+            // whatever is already selected rather than getting an invalid one.
+            category: categories.includes(category) ? category : prev.category,
+        }));
+    };
 
     // Store mode: group every item by category (aisle), keeping checked ones for context.
     const itemsByAisle = useMemo(() => {
@@ -443,6 +533,26 @@ const ShoppingList: React.FC = () => {
                                 placeholder={t('shopping:add.namePlaceholder')}
                             />
                         </div>
+
+                        {suggestions.length > 0 && (
+                            <div className="md:col-span-8">
+                                <p className="mb-1.5 text-micro font-medium uppercase tracking-wide text-muted-foreground">
+                                    {t('shopping:add.suggestions')}
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {suggestions.map(({ key, label, category }) => (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={() => applySuggestion(label, category)}
+                                            className="rounded-pill border border-border bg-card px-3 py-1 text-caption text-foreground transition-colors hover:border-primary hover:bg-primary-soft hover:text-primary"
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         <div className="md:col-span-2">
                             <label className="mb-1.5 block text-caption font-medium text-foreground">{t('shopping:add.category')}</label>
                             <select
@@ -566,7 +676,68 @@ const ShoppingList: React.FC = () => {
                                     <p className="truncate text-body font-medium text-foreground">{item.name}</p>
                                     <div className="mt-1 flex flex-wrap items-center gap-2 text-micro">
                                         <span className="rounded-pill bg-primary-soft px-2 py-0.5 text-primary">{categoryLabel(item.category)}</span>
-                                        {item.quantity ? <span className="text-muted-foreground">{t('shopping:qty')}: {item.quantity}</span> : null}
+
+                                        {editingQuantityId === item.id ? (
+                                            <span className="flex items-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    aria-label={t('shopping:quantity.decrease')}
+                                                    // Keeps the input focused so the blur-save is not
+                                                    // triggered by pressing the stepper itself.
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onClick={() => stepDraft(-1)}
+                                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-primary hover:text-primary"
+                                                >
+                                                    <Minus className="h-3 w-3" />
+                                                </button>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.1"
+                                                    autoFocus
+                                                    value={quantityDraft}
+                                                    onChange={(e) => setQuantityDraft(e.target.value)}
+                                                    onBlur={() => {
+                                                        void setItemQuantity(item, quantityDraft);
+                                                        setEditingQuantityId(null);
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.currentTarget.blur();
+                                                        }
+                                                        if (e.key === 'Escape') {
+                                                            setEditingQuantityId(null);
+                                                        }
+                                                    }}
+                                                    className="w-16 rounded-md border border-border bg-card px-2 py-0.5 text-center text-micro text-foreground"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    aria-label={t('shopping:quantity.increase')}
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onClick={() => stepDraft(1)}
+                                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-primary hover:text-primary"
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                </button>
+                                                {item.unit ? <span className="text-muted-foreground">{item.unit}</span> : null}
+                                            </span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                title={t('shopping:quantity.edit')}
+                                                onClick={() => {
+                                                    setEditingQuantityId(item.id);
+                                                    setQuantityDraft(item.quantity ? String(item.quantity) : '');
+                                                }}
+                                                className="rounded-pill border border-dashed border-border px-2 py-0.5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                                            >
+                                                {item.quantity
+                                                    ? `${t('shopping:qty')}: ${item.quantity}${item.unit ? ` ${item.unit}` : ''}`
+                                                    : t('shopping:quantity.unset')}
+                                            </button>
+                                        )}
+
                                         {item.price ? <span className="text-muted-foreground">{formatCurrency(Number(item.price), currency)}</span> : null}
                                     </div>
                                 </div>

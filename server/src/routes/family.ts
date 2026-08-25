@@ -375,6 +375,30 @@ router.delete('/:id', requireParent, async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
 
+        // A planning entry cascades away with its primary participant. That is
+        // right for a solo entry, but wrong for a shared one: swimming with both
+        // children must survive one of them leaving. Hand the entry over to a
+        // remaining participant first, and let the cascade take only the entries
+        // this member was alone in.
+        await query(
+            `UPDATE schedule_entries se
+             SET family_member_id = (
+                 SELECT sem.family_member_id
+                 FROM schedule_entry_members sem
+                 JOIN family_members m ON m.id = sem.family_member_id
+                 WHERE sem.entry_id = se.id AND sem.family_member_id <> $1
+                 ORDER BY m.name
+                 LIMIT 1
+             )
+             WHERE se.user_id = $2
+               AND se.family_member_id = $1
+               AND EXISTS (
+                   SELECT 1 FROM schedule_entry_members sem
+                   WHERE sem.entry_id = se.id AND sem.family_member_id <> $1
+               )`,
+            [id, req.userId]
+        );
+
         const result = await query(
             'DELETE FROM family_members WHERE id = $1 AND user_id = $2 RETURNING id',
             [id, req.userId]

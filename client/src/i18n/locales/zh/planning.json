@@ -70,7 +70,8 @@
     "timesSame": "开始时间和结束时间不能相同。",
     "selectDay": "请至少选择一天。",
     "save": "无法保存此条目。",
-    "skipOccurrence": "无法修改本次安排"
+    "skipOccurrence": "无法修改本次安排",
+    "skipUnsupported": "您的服务器尚不支持取消单次安排，请先更新。"
   },
   "occurrence": {
     "skip": "本次取消",

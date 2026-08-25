@@ -246,7 +246,14 @@ const Planning: React.FC = () => {
             setNotice(skipped ? t('planning:notice.restored') : t('planning:notice.skipped'));
         } catch (err) {
             console.error('Failed to change occurrence:', err);
-            setError(err instanceof Error ? err.message : t('planning:errors.skipOccurrence'));
+            // The app updates from the store, the server it points at does not.
+            // A 404 here means the endpoint does not exist yet rather than a
+            // missing entry, and "entry not found" would send the owner looking
+            // in the wrong place.
+            const message = err instanceof Error ? err.message : '';
+            setError(message.includes('404')
+                ? t('planning:errors.skipUnsupported')
+                : (message || t('planning:errors.skipOccurrence')));
         }
     };
 
@@ -378,6 +385,11 @@ const Planning: React.FC = () => {
 
         const basePayload = {
             family_member_ids: formData.family_member_ids,
+            // Also sent on its own because the Android app updates from the store
+            // while the server it points at updates on its owner's schedule. A
+            // server that predates participants reads only this field and records
+            // the primary one; a current server prefers the list above.
+            family_member_id: formData.family_member_ids[0],
             schedule_type: formData.schedule_type,
             title: formData.title.trim(),
             start_time: formData.start_time,

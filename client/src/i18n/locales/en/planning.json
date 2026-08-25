@@ -70,7 +70,8 @@
     "timesSame": "Start and end times cannot be identical.",
     "selectDay": "Select at least one day.",
     "save": "Unable to save this entry.",
-    "skipOccurrence": "Could not change this occurrence"
+    "skipOccurrence": "Could not change this occurrence",
+    "skipUnsupported": "Your server does not support skipping an occurrence yet. Update it."
   },
   "occurrence": {
     "skip": "Skip this one",

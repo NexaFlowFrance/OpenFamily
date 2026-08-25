@@ -70,7 +70,8 @@
     "timesSame": "L'heure de début et de fin ne peuvent pas être identiques.",
     "selectDay": "Sélectionnez au moins un jour.",
     "save": "Impossible d'enregistrer cet horaire.",
-    "skipOccurrence": "Impossible de modifier cette occurrence"
+    "skipOccurrence": "Impossible de modifier cette occurrence",
+    "skipUnsupported": "Votre serveur ne gère pas encore l'annulation d'une occurrence. Mettez-le à jour."
   },
   "occurrence": {
     "skip": "Annuler cette fois-ci",

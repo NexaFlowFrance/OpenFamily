@@ -24,6 +24,12 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Check nothing private leaked in
+        # The core is developed here and merged downstream into the hosted build,
+        # never the reverse. This proves that mechanically: a stray cherry-pick, a
+        # copied file or a credential fails here instead of reaching a clone.
+        run: node scripts/check-public-safe.mjs
+
       - name: Install dependencies
         run: npm run install:all
 

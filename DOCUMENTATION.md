@@ -368,6 +368,7 @@ Prérequis : Node.js 20+, PostgreSQL 16+, npm 10+.
 
 ```bash
 npm run install:all     # Installe toutes les dépendances
+npm run hooks:install   # Active la vérification exécutée avant chaque push
 npm run dev             # Lance client (port 5173) + serveur (port 3001)
 ```
 

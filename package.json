@@ -17,6 +17,8 @@
     "build:server": "cd server && npm run build",
     "build:client": "cd client && npm run build",
     "build:site": "node scripts/build-site.mjs",
+    "check:public": "node scripts/check-public-safe.mjs",
+    "hooks:install": "git config core.hooksPath .githooks",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:build": "docker-compose build",

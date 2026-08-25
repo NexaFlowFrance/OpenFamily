@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Refuses to push anything that belongs to the hosted build or to a private
+# machine.
+#
+# CI runs the same check, but CI runs *after* the push: by then a leaked
+# credential is already public and a failing build does not take it back. This
+# hook is the one that actually prevents it, which is why it lives here as well
+# as in the workflow.
+#
+# Enable it once per clone:   npm run hooks:install
+# Bypass it (you had better be sure):   git push --no-verify
+
+if ! command -v node >/dev/null 2>&1; then
+    echo "pre-push: node not found, cannot run the public-safety check." >&2
+    echo "Install Node, or push with --no-verify if you know what you are doing." >&2
+    exit 1
+fi
+
+node scripts/check-public-safe.mjs || exit 1

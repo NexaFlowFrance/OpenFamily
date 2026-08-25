@@ -15,7 +15,17 @@
  * are listed.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+
+// The hosted build legitimately contains every path and marker listed below, so
+// the same script has to be harmless there. Its checkout carries this marker and
+// the public one never does, which is also why the marker is a committed file
+// rather than a guess from the remote URL: a fresh clone or a renamed remote
+// would silently disable the check exactly where it matters.
+if (existsSync('.openfamily-private')) {
+    console.log('Public-safety check skipped: this checkout is the hosted build.');
+    process.exit(0);
+}
 
 /** Files that only ever exist in the hosted build. Presence alone is a failure. */
 const FORBIDDEN_PATHS = [

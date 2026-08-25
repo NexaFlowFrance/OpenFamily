@@ -24,15 +24,15 @@ can shift based on feedback — issues and discussions are welcome.
   into the shopping list, with deduplication and review before adding.
 - **Family sticky notes** *(v1.2)* — digital fridge notes with colors and expiry,
   shown on the Dashboard and the Kiosk in realtime.
-- **Password reset by email** *(v1.5)* — one-time link valid for 60 minutes; only
+- **Password reset by email** *(v1.5)*: one-time link valid for 60 minutes; only
   the token's SHA-256 is stored, the response never reveals whether an address is
   registered. Requires SMTP; without it the endpoint says so explicitly instead of
   failing silently.
-- **Email invitations & reliable invite links** *(v1.5)* — the owner can have the
+- **Email invitations & reliable invite links** *(v1.5)*: the owner can have the
   invitation emailed directly, and the share link is now built server-side (it used
   to be `http://localhost/...` when generated from the Android app). Android App Links
   open these links straight in the app when you publish your own assetlinks file.
-- **Customisable dashboard** *(v1.5)* — per-member widget order and visibility, a
+- **Customisable dashboard** *(v1.5)*: per-member widget order and visibility, a
   day/week toggle for the agenda, and the week's plannings on the home page.
 
 ## Under consideration

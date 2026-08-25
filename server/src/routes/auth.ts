@@ -233,7 +233,11 @@ router.post('/password/forgot', passwordResetRateLimiter, async (req, res) => {
         );
 
         const resetUrl = `${resolveAppBaseUrl(req)}/reset-password?token=${token}`;
-        await sendPasswordResetEmail({
+        // Deliberately not awaited. A hit would otherwise pay a full SMTP round
+        // trip while a miss returns after a single SELECT, and that gap is a
+        // timing oracle that undoes the generic answer above. deliver() logs and
+        // swallows its own failures, so this never rejects.
+        void sendPasswordResetEmail({
             email: user.email,
             name: user.name,
             language: user.language,

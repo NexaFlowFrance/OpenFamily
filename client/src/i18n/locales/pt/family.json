@@ -69,7 +69,15 @@
     "roleLabel": "Convidar como",
     "generate": "Gerar link de convite",
     "generating": "Gerando…",
-    "copyTitle": "Copiar"
+    "copyTitle": "Copiar",
+    "title": "Convidar um membro",
+    "desc": "Envie o convite por e-mail ou compartilhe o link você mesmo. A pessoa convidada cria a conta dela por esse link e entra na sua família.",
+    "emailLabel": "E-mail (opcional)",
+    "emailPlaceholder": "membro@exemplo.com",
+    "send": "Enviar convite",
+    "sent": "Convite enviado para {{email}}.",
+    "sendFailed": "Não foi possível enviar o e-mail. Compartilhe o link abaixo você mesmo.",
+    "linkHint": "Este link é válido por 7 dias. A pessoa convidada precisa criar a conta dela por esse link para entrar na sua família."
   },
   "leave": {
     "leaving": "Saindo…",

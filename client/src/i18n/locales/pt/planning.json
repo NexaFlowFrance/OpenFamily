@@ -45,7 +45,9 @@
     "location": "Local (opcional)",
     "locationPlaceholder": "ex: Escritório central / Escola municipal",
     "notes": "Observações (opcional)",
-    "notesPlaceholder": "Informações úteis, sala, transporte…"
+    "notesPlaceholder": "Informações úteis, sala, transporte…",
+    "participants": "Participantes",
+    "participantsHint": "Escolha uma ou mais pessoas. A primeira define a cor da atividade."
   },
   "submit": {
     "applyToDays": "Aplicar aos dias selecionados"
@@ -55,7 +57,9 @@
     "savedDays_one": "Salvo em {{count}} dia.",
     "savedDays_other": "Salvo em {{count}} dias.",
     "savedDaysConflicts_one": "Salvo em {{count}} dia. Conflitos detectados em: {{days}}.",
-    "savedDaysConflicts_other": "Salvo em {{count}} dias. Conflitos detectados em: {{days}}."
+    "savedDaysConflicts_other": "Salvo em {{count}} dias. Conflitos detectados em: {{days}}.",
+    "skipped": "Ocorrência cancelada nessa data",
+    "restored": "Ocorrência restaurada"
   },
   "confirmDelete": "Excluir este evento?",
   "errors": {
@@ -65,6 +69,16 @@
     "memberTitleRequired": "Membro e título são obrigatórios.",
     "timesSame": "Os horários de início e término não podem ser idênticos.",
     "selectDay": "Selecione pelo menos um dia.",
-    "save": "Não foi possível salvar este evento."
+    "save": "Não foi possível salvar este evento.",
+    "skipOccurrence": "Não foi possível alterar esta ocorrência",
+    "skipUnsupported": "Seu servidor ainda não permite cancelar uma ocorrência. Atualize-o."
+  },
+  "occurrence": {
+    "skip": "Cancelar desta vez",
+    "restore": "Restaurar desta vez"
+  },
+  "appointments": {
+    "badge": "COMPR",
+    "openCalendar": "Abrir nos compromissos"
   }
 }

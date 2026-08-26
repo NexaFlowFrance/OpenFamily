@@ -21,7 +21,10 @@
     "viewWeek": "Ver semana",
     "emptyTitle": "Nada planejado.",
     "emptySubtitle": "Adicione um compromisso para exibi-lo aqui.",
-    "emptyCta": "Adicionar compromisso"
+    "emptyCta": "Adicionar compromisso",
+    "weekTitle": "Esta semana",
+    "viewDay": "Dia",
+    "emptyWeekSubtitle": "Nenhum compromisso esta semana."
   },
   "aside": {
     "shopping": "Compras",
@@ -32,5 +35,31 @@
     "tasks": "Tarefas pendentes",
     "tasksCount_one": "tarefa a concluir",
     "tasksCount_other": "tarefas a concluir"
+  },
+  "planning": {
+    "title": "Planejamentos da semana",
+    "viewAll": "Ver planejamento",
+    "empty": "Nenhum planejamento salvo para esta semana."
+  },
+  "customize": {
+    "button": "Personalizar",
+    "title": "Personalize sua página inicial",
+    "description": "Escolha o que aparece na sua página inicial e em que ordem. Esta configuração é específica da sua conta.",
+    "agendaViewLabel": "Exibição da agenda",
+    "widgetsLabel": "Blocos exibidos",
+    "moveUp": "Mover para cima",
+    "moveDown": "Mover para baixo",
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "reset": "Restaurar",
+    "allHidden": "Todos os blocos estão ocultos. Personalize sua página inicial para exibi-los novamente.",
+    "moduleDisabled": "(módulo desativado)",
+    "widgets": {
+      "stats": "Números principais",
+      "agenda": "Agenda (compromissos)",
+      "planning": "Planejamentos da semana",
+      "quick": "Acesso rápido (compras, orçamento, tarefas)",
+      "notes": "Recados da família"
+    }
   }
 }

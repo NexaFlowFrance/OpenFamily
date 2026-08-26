@@ -436,8 +436,13 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
     const { t } = useTranslation(['categories', 'common', 'shopping', 'recipes', 'budget']);
     const { categories, saveCategories } = useCategories();
     const [module, setModule] = useState<CategoryModule>('shopping');
-    const [rows, setRows] = useState<Array<{ original: string | null; value: string }>>(
-        () => categories.shopping.map((c) => ({ original: c, value: c }))
+    // `value` is what the field shows, which is the translated label, while
+    // `original` stays the raw name the database holds. `touched` is what keeps
+    // the two apart on save: without it every row whose label differs from its
+    // stored name would look renamed, and one save would rewrite the family's
+    // categories into whichever language happened to be selected.
+    const [rows, setRows] = useState<Array<{ original: string | null; value: string; touched: boolean }>>(
+        () => categories.shopping.map((c) => ({ original: c, value: c, touched: false }))
     );
     const [newName, setNewName] = useState('');
     const [saving, setSaving] = useState(false);
@@ -453,13 +458,14 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
 
     // Re-seed the editor whenever the module tab changes or fresh data arrives.
     useEffect(() => {
-        setRows(categories[module].map((c) => ({ original: c, value: getCategoryLabel(module, c) })));
+        setRows(categories[module].map((c) => ({ original: c, value: getCategoryLabel(module, c), touched: false })));
         setNewName('');
         setError('');
     }, [module, categories]);
 
     const dirty = rows.length !== categories[module].length
-        || rows.some((r, i) => r.original !== categories[module][i] || r.value !== getCategoryLabel(module, categories[module][i]));
+        || rows.some((r, i) => r.original !== categories[module][i])
+        || rows.some((r) => r.touched);
 
     const move = (index: number, delta: number) => {
         const target = index + delta;
@@ -478,13 +484,16 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
             setError(t('categories:errors.duplicate', { name }));
             return;
         }
-        setRows((prev) => [...prev, { original: null, value: name }]);
+        setRows((prev) => [...prev, { original: null, value: name, touched: true }]);
         setNewName('');
         setError('');
     };
 
     const save = async () => {
-        const list = rows.map((r) => r.value.trim());
+        // An untouched row keeps the name already stored, never the label it was
+        // displayed under. Sending the label would rename the category, and the
+        // server cascades renames onto every item, recipe and budget entry using it.
+        const list = rows.map((r) => (r.touched || !r.original ? r.value.trim() : r.original));
         if (list.some((v) => v.length === 0)) { setError(t('categories:errors.empty')); return; }
         if (list.length === 0) { setError(t('categories:errors.atLeastOne')); return; }
         const seen = new Set<string>();
@@ -494,7 +503,9 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
         }
         const renames: Record<string, string> = {};
         for (const row of rows) {
-            if (row.original && row.value.trim() !== row.original) renames[row.original] = row.value.trim();
+            if (row.original && row.touched && row.value.trim() !== row.original) {
+                renames[row.original] = row.value.trim();
+            }
         }
         setSaving(true);
         setError('');
@@ -510,8 +521,12 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
         }
     };
 
-    const fallbackRaw = rows.some((r) => r.value.trim() === 'Autre') ? 'Autre' : rows[0]?.value.trim() || '';
-    const fallback = getCategoryLabel(module, fallbackRaw);
+    // Purely a hint telling which category orphaned rows will move to. 'Autre' is
+    // the historical catch-all, so it is matched on the stored name: the label
+    // changes with the language and would never match. `value` is already the
+    // label, so it is shown as is.
+    const fallbackRow = rows.find((r) => (r.original ?? r.value.trim()) === 'Autre') ?? rows[0];
+    const fallback = fallbackRow?.value.trim() || '';
 
     return (
         <Card>
@@ -552,7 +567,7 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                                     <Input
                                         value={row.value}
                                         disabled={!isParent || saving}
-                                        onChange={(e) => setRows((prev) => prev.map((r, i) => (i === index ? { ...r, value: e.target.value } : r)))}
+                                        onChange={(e) => setRows((prev) => prev.map((r, i) => (i === index ? { ...r, value: e.target.value, touched: true } : r)))}
                                         className="flex-1"
                                     />
                                     <Button type="button" variant="ghost" size="sm" disabled={!isParent || saving || index === 0}
@@ -615,7 +630,7 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                                 </Button>
                                 {dirty && !saving && (
                                     <Button type="button" variant="ghost" size="sm"
-                                        onClick={() => setRows(categories[module].map((c) => ({ original: c, value: c })))}>
+                                        onClick={() => setRows(categories[module].map((c) => ({ original: c, value: getCategoryLabel(module, c), touched: false })))}>
                                         {t('categories:reset')}
                                     </Button>
                                 )}

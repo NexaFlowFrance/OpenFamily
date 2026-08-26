@@ -1,0 +1,72 @@
+{
+  "magic": {
+    "open": "Assistente de IA",
+    "title": "Assistente de IA ✨",
+    "description": "Descreva o que deseja adicionar em linguagem natural — o assistente organiza tudo.",
+    "placeholder": "ex: Comprar leite e pão para quinta, e lembrar da reunião de pais amanhã às 14h…",
+    "parse": "Analisar",
+    "parsing": "Analisando…",
+    "nothingFound": "Nenhuma ação identificada nesta nota. Tente reescrever.",
+    "back": "Voltar",
+    "reviewHint": "Revise as sugestões, desmarque o que não deseja e confirme.",
+    "confirm": "Adicionar ({{count}})",
+    "confirming": "Adicionando…",
+    "successTitle": "Concluído ✨",
+    "successDescription": "{{count}} item(ns) adicionado(s).",
+    "partialTitle": "Adicionado parcialmente",
+    "partialDescription": "{{added}} adicionado(s), {{failed}} falhou(aram).",
+    "allFailed": "Nenhum item pôde ser adicionado. Tente novamente.",
+    "types": {
+      "task": "Tarefa",
+      "appointment": "Compromisso",
+      "shopping_item": "Compras",
+      "budget_entry": "Orçamento"
+    }
+  },
+  "meals": {
+    "button": "Sugerir cardápio ✨",
+    "dialogTitle": "Sugestões para o jantar",
+    "dialogDescription": "Semana de {{start}} a {{end}} — com base no seu próprio livro de receitas.",
+    "loading": "O assistente está montando o cardápio…",
+    "empty": "Todas as refeições desta semana já estão planejadas.",
+    "confirm": "Adicionar ao planejamento ({{count}})",
+    "successTitle": "Cardápio adicionado ✨",
+    "successDescription": "{{count}} refeição(ões) planejada(s).",
+    "partialTitle": "Adicionado parcialmente",
+    "partialDescription": "{{added}} adicionada(s), {{failed}} falhou(aram)."
+  },
+  "settings": {
+    "title": "Assistente de IA",
+    "subtitle": "Conecte um modelo de IA (local ou na nuvem) para adicionar itens em linguagem natural e receber sugestões de cardápio.",
+    "provider": "Provedor de IA",
+    "providers": {
+      "ollama": "Ollama (Local / Autohospedado)",
+      "openai": "API compatível com OpenAI (OpenAI, Gemini, Groq, DeepSeek...)",
+      "anthropic": "Anthropic Claude"
+    },
+    "baseUrl": "URL do Servidor / Endpoint",
+    "apiKey": "Chave de API (API Key)",
+    "keyKept": "••• (mantida com segurança)",
+    "clearKey": "Remover chave salva",
+    "model": "Modelo (Model)",
+    "enabled": "Assistente de IA ativado",
+    "privacy": "Privacidade: a chave de API é criptografada e salva apenas no SEU próprio servidor. Com o Ollama, nada sai da sua rede local.",
+    "parentOnly": "Apenas os responsáveis podem alterar estas configurações.",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "saved": "Configurações salvas com sucesso.",
+    "test": "Testar conexão",
+    "testing": "Testando conexão…",
+    "testSuccess": "Conexão bem-sucedida! O modelo respondeu corretamente."
+  },
+  "errors": {
+    "AI_NOT_CONFIGURED": "O assistente de IA não está configurado. Acesse as Configurações.",
+    "AI_DISABLED": "O assistente de IA está desativado nas Configurações.",
+    "AI_UNREACHABLE": "Não foi possível conectar ao provedor de IA. Verifique a URL do servidor.",
+    "AI_UNAUTHORIZED": "Chave de API rejeitada. Verifique a chave nas Configurações.",
+    "AI_MODEL_NOT_FOUND": "Modelo não encontrado no provedor. Verifique o nome (ex: gemini-2.5-flash, gpt-4o-mini).",
+    "AI_INVALID_RESPONSE": "O modelo retornou uma resposta inválida. Tente novamente ou mude o modelo.",
+    "AI_PROVIDER_ERROR": "O provedor de IA retornou um erro. Tente novamente.",
+    "AI_NOT_ENOUGH_RECIPES": "Cadastre pelo menos 5 receitas para que o assistente possa sugerir um cardápio."
+  }
+}

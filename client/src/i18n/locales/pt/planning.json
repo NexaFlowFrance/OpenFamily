@@ -1,0 +1,70 @@
+{
+  "loading": "Carregando planejamento…",
+  "noMembers": {
+    "title": "Adicione os membros primeiro",
+    "subtitle": "O planejamento semanal é baseado nos perfis da família.",
+    "cta": "Ir para Família"
+  },
+  "title": "Planejamento Semanal",
+  "subtitle": "Horários de trabalho, escola e atividades recorrentes semana a semana.",
+  "newEntry": "Novo evento",
+  "thisWeek": "Esta semana",
+  "allMembers": "Todos os membros",
+  "allTypes": "Todos os tipos",
+  "types": {
+    "work": "Trabalho",
+    "school": "Escola",
+    "study": "Estudos",
+    "activity": "Atividade",
+    "other": "Outro"
+  },
+  "add": "Adicionar",
+  "nextDayShort": "+1d",
+  "dayFallback": "Dia {{n}}",
+  "dialog": {
+    "editTitle": "Editar evento",
+    "createTitle": "Novo evento",
+    "description": "Defina o evento e aplique a um ou mais dias."
+  },
+  "form": {
+    "member": "Membro",
+    "type": "Tipo",
+    "title": "Título",
+    "titlePlaceholder": "ex: Escritório / Aula de Matemática",
+    "days": "Dias aplicáveis",
+    "weekdays": "Seg-Sex",
+    "fullWeek": "Semana inteira",
+    "selectedDay": "Dia selecionado: {{day}}",
+    "selectedDays": "{{count}} dias selecionados",
+    "start": "Início",
+    "end": "Término",
+    "nextDayHint": "Termina no dia seguinte (+1 dia)",
+    "thisWeekOnlyStrong": "Apenas esta semana",
+    "thisWeekOnlyRest": ". O evento se aplica apenas à semana de {{date}}. Caso contrário, ele se repete toda semana.",
+    "replaceConflicts": "Substituir eventos conflitantes nos dias selecionados. Se houver conflito e esta opção estiver desativada, esses dias serão ignorados.",
+    "location": "Local (opcional)",
+    "locationPlaceholder": "ex: Escritório central / Escola municipal",
+    "notes": "Observações (opcional)",
+    "notesPlaceholder": "Informações úteis, sala, transporte…"
+  },
+  "submit": {
+    "applyToDays": "Aplicar aos dias selecionados"
+  },
+  "notice": {
+    "saved": "Evento salvo.",
+    "savedDays_one": "Salvo em {{count}} dia.",
+    "savedDays_other": "Salvo em {{count}} dias.",
+    "savedDaysConflicts_one": "Salvo em {{count}} dia. Conflitos detectados em: {{days}}.",
+    "savedDaysConflicts_other": "Salvo em {{count}} dias. Conflitos detectados em: {{days}}."
+  },
+  "confirmDelete": "Excluir este evento?",
+  "errors": {
+    "loadMembers": "Não foi possível carregar os membros.",
+    "loadEntries": "Não foi possível carregar o planejamento.",
+    "deleteEntry": "Não foi possível excluir este evento.",
+    "memberTitleRequired": "Membro e título são obrigatórios.",
+    "timesSame": "Os horários de início e término não podem ser idênticos.",
+    "selectDay": "Selecione pelo menos um dia.",
+    "save": "Não foi possível salvar este evento."
+  }
+}

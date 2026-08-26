@@ -1,0 +1,42 @@
+{
+  "items": {
+    "today": "Hoje",
+    "shopping": "Compras",
+    "tasks": "Tarefas",
+    "rewards": "Mesada",
+    "calendar": "Compromissos",
+    "planning": "Planejamento",
+    "recipes": "Receitas",
+    "meals": "Refeições",
+    "budget": "Orçamento",
+    "family": "Família",
+    "integrations": "Integrações",
+    "settings": "Configurações"
+  },
+  "mobile": {
+    "home": "Início",
+    "planning": "Planejamento",
+    "lists": "Listas",
+    "budget": "Orçamento",
+    "family": "Família"
+  },
+  "quickActions": {
+    "title": "Ações rápidas",
+    "addShopping": "Adicionar item de compras",
+    "addTask": "Adicionar tarefa",
+    "addAppointment": "Adicionar compromisso",
+    "addSchedule": "Adicionar horário na rotina",
+    "addRecipe": "Adicionar receita",
+    "addMeal": "Adicionar refeição",
+    "addExpense": "Adicionar despesa",
+    "addMember": "Adicionar membro"
+  },
+  "user": {
+    "profile": "Perfil",
+    "toggleTheme": "Alternar tema",
+    "logout": "Sair da conta",
+    "openMenu": "Abrir menu"
+  },
+  "offline": "Modo offline. Os dados exibidos vêm do cache local. As alterações serão salvas assim que a conexão retornar.",
+  "pageTitleFallback": "Painel Principal"
+}

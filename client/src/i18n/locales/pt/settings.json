@@ -1,0 +1,98 @@
+{
+  "title": "Configurações do Sistema",
+  "subtitle": "Gerencie seus dados e preferências.",
+  "language": {
+    "title": "Idioma da Interface",
+    "subtitle": "Escolha o idioma de exibição da aplicação."
+  },
+  "profile": {
+    "title": "Foto de perfil",
+    "subtitle": "Escolha uma foto que aparecerá no menu do aplicativo.",
+    "change": "Alterar foto",
+    "choose": "Escolher foto",
+    "remove": "Remover foto"
+  },
+  "notif": {
+    "title": "Notificações Push",
+    "subtitle": "Receba lembretes dos seus compromissos diretamente neste dispositivo, mesmo com o app fechado.",
+    "unsupported": "Notificações não são suportadas neste navegador.",
+    "denied": "Permissão negada. Permita as notificações nas configurações do seu navegador.",
+    "enable": "Ativar notificações",
+    "disable": "Desativar notificações",
+    "inProgress": "Atualizando…",
+    "active": "Notificações ativadas neste dispositivo."
+  },
+  "currency": {
+    "title": "Moeda Padrão",
+    "subtitle": "Selecione a moeda usada para exibir valores no aplicativo (ex: BRL - R$)."
+  },
+  "modules": {
+    "title": "Módulos Ativos",
+    "subtitle": "Ative ou desative seções da aplicação conforme o uso da família.",
+    "parentOnly": "Apenas os responsáveis podem alterar os módulos.",
+    "error": "Erro ao atualizar os módulos.",
+    "names": {
+      "kiosk": "Modo Quiosque",
+      "notes": "Notas no Painel",
+      "ai": "Assistente de IA"
+    },
+    "descriptions": {
+      "budget": "Controle financeiro, despesas e receitas da família.",
+      "rewards": "Pontuação e mesada para os filhos.",
+      "meals": "Planejamento das refeições da semana.",
+      "recipes": "Catálogo de receitas favoritas da casa.",
+      "planning": "Quadro semanal de horários (trabalho, escola, atividades).",
+      "integrations": "Conexão com serviços de terceiros (Mealie, Home Assistant…).",
+      "kiosk": "Exibição em tela cheia para tablets e telas compartilhadas da casa.",
+      "notes": "Recados e post-its exibidos no painel principal.",
+      "ai": "Assistente inteligente para capturar e organizar o dia a dia rapidamente."
+    }
+  },
+  "export": {
+    "title": "Exportar dados",
+    "subtitle": "Baixe todos os seus dados (orçamento, tarefas, receitas, membros, compras, compromissos, rotinas, refeições) em um arquivo JSON.",
+    "button": "Exportar",
+    "inProgress": "Exportando…"
+  },
+  "import": {
+    "title": "Importar dados",
+    "subtitle": "Restaure dados a partir de um arquivo de backup do OpenFamily. Dados existentes não são sobrescritos.",
+    "success": "Importação concluída com sucesso",
+    "itemsImported_one": "item importado",
+    "itemsImported_other": "itens importados",
+    "chooseFile": "Escolher arquivo…",
+    "button": "Importar",
+    "inProgress": "Importando…",
+    "invalidJson": "Arquivo JSON inválido."
+  },
+  "entities": {
+    "family_members": "Membros da família",
+    "tasks": "Tarefas",
+    "recipes": "Receitas",
+    "meal_plans": "Refeições planejadas",
+    "budget_entries": "Lançamentos financeiros",
+    "budget_limits": "Limites de orçamento",
+    "shopping_items": "Itens de compras",
+    "appointments": "Compromissos",
+    "schedule_entries": "Horários da rotina"
+  },
+  "errors": {
+    "notif": "Erro ao configurar notificações.",
+    "currency": "Erro ao atualizar a moeda.",
+    "avatarImage": "Por favor, escolha uma imagem.",
+    "avatarRead": "Não foi possível ler o arquivo.",
+    "avatarInvalid": "Imagem inválida.",
+    "avatarCanvas": "Recurso de imagem indisponível.",
+    "avatarUpdate": "Erro ao atualizar a foto.",
+    "avatarRemove": "Erro ao remover a foto.",
+    "export": "Erro durante a exportação.",
+    "import": "Erro durante a importação."
+  },
+  "support": {
+    "title": "Apoie o OpenFamily",
+    "subtitle": "O OpenFamily é gratuito e de código aberto, instalado no seu próprio servidor. Se ajuda sua família, você pode apoiar seu desenvolvimento.",
+    "sponsor": "Pagar um café ao criador",
+    "star": "Dar estrela no GitHub",
+    "sponsorGithub": "Apoiar no GitHub"
+  }
+}

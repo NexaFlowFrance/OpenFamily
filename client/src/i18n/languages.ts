@@ -11,11 +11,19 @@ export interface LanguageConfig {
 // folders remain the source of truth for availability; an unconfigured folder
 // still appears in the switcher with its language code as the label.
 export const LANGUAGE_CONFIG: Record<string, LanguageConfig> = {
+    fr: {
+        label: 'FR',
+    },
     en: {
         label: 'EN',
     },
-    fr: {
-        label: 'FR',
+    pt: {
+        label: 'PT-BR',
+        currencyDefault: {
+            replace: ['EUR', 'USD'],
+            with: 'BRL',
+            replaceMissing: true,
+        },
     },
     zh: {
         label: '中文',

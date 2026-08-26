@@ -1,0 +1,122 @@
+{
+  "loading": "Carregando família…",
+  "title": "Família",
+  "subtitle": "Gerencie os membros da sua família",
+  "addMember": "Adicionar membro",
+  "empty": "Nenhum membro na família. Adicione seu primeiro membro!",
+  "roles": {
+    "Parent": "Responsável",
+    "Enfant": "Filho(a)",
+    "Etudiant": "Estudante",
+    "Autre": "Outro"
+  },
+  "colors": {
+    "coral": "Coral",
+    "orange": "Laranja",
+    "yellow": "Amarelo",
+    "green": "Verde",
+    "cyan": "Ciano",
+    "blue": "Azul",
+    "indigo": "Índigo",
+    "pink": "Rosa"
+  },
+  "card": {
+    "age_one": "{{count}} ano",
+    "age_other": "{{count}} anos",
+    "health": "Saúde",
+    "allergies": "Alergias:",
+    "medications": "Medicamentos:",
+    "emergency": "Contato de emergência"
+  },
+  "shared": {
+    "title": "Contas compartilhadas",
+    "subtitle": "Compartilhe o acesso aos dados da sua família com outras contas.",
+    "you": "(você)",
+    "owner": "Proprietário",
+    "child": "🧒 Criança",
+    "parent": "👨 Responsável",
+    "none": "Nenhuma outra conta compartilha esta família ainda.",
+    "roleParent": "Responsável",
+    "roleChild": "Criança",
+    "roleTitle": "Função do membro",
+    "transferTitle": "Transferir propriedade para esta conta",
+    "kickTitle": "Remover esta conta"
+  },
+  "link": {
+    "label": "Conta vinculada",
+    "none": "Nenhuma conta vinculada",
+    "hint": "Vincule este perfil a uma conta compartilhada: a conta da criança verá seu cofrinho e metas."
+  },
+  "requests": {
+    "title": "Solicitações de acesso",
+    "accept": "Aceitar",
+    "rejectTitle": "Rejeitar"
+  },
+  "myRequest": {
+    "pendingTitle": "Solicitação pendente",
+    "sentTo": "Enviada para {{name}} ({{email}})"
+  },
+  "join": {
+    "title": "Entrar em uma família",
+    "desc": "Digite o e-mail do proprietário da família a qual deseja se juntar. Ele receberá uma solicitação para aceitar ou rejeitar.",
+    "rejected": "Sua última solicitação foi rejeitada.",
+    "emailPlaceholder": "email@exemplo.com",
+    "sending": "Enviando…",
+    "send": "Enviar solicitação",
+    "emailRequired": "Endereço de e-mail obrigatório"
+  },
+  "invite": {
+    "roleLabel": "Convidar como",
+    "generate": "Gerar link de convite",
+    "generating": "Gerando…",
+    "copyTitle": "Copiar"
+  },
+  "leave": {
+    "leaving": "Saindo…",
+    "leave": "Sair da família compartilhada"
+  },
+  "dialog": {
+    "editTitle": "Editar membro",
+    "addTitle": "Adicionar membro",
+    "description": "Preencha os detalhes do membro da família"
+  },
+  "form": {
+    "name": "Nome",
+    "namePlaceholder": "ex: Maria Silva",
+    "role": "Função",
+    "color": "Cor",
+    "birthdate": "Data de nascimento (opcional)",
+    "healthInfo": "Informações de saúde",
+    "allergies": "Alergias (separadas por vírgula)",
+    "allergiesPlaceholder": "ex: Amendoim, Lactose",
+    "medications": "Medicamentos (separados por vírgula)",
+    "medicationsPlaceholder": "ex: Aspirina, Insulina",
+    "emergencyContact": "Contato de emergência",
+    "contactName": "Nome do contato",
+    "contactNamePlaceholder": "ex: João Silva",
+    "contactPhone": "Telefone do contato",
+    "contactPhonePlaceholder": "ex: (11) 99999-9999",
+    "notes": "Observações (opcional)",
+    "notesPlaceholder": "Observações adicionais…"
+  },
+  "confirm": {
+    "kick": "Remover esta conta da família?",
+    "transfer": "Transferir a propriedade da família para {{name}}?\n\nVocê se tornará um membro comum. Todos os dados da família serão mantidos e gerenciados pelo novo proprietário. Esta ação é irreversível.",
+    "delete": "Tem certeza que deseja excluir este membro da família?",
+    "leave": "Sair da família compartilhada? Você recuperará seus próprios dados."
+  },
+  "errors": {
+    "load": "Não foi possível carregar a família.",
+    "save": "Não foi possível salvar este membro.",
+    "delete": "Não foi possível excluir este membro.",
+    "kick": "Não foi possível remover este membro.",
+    "role": "Não foi possível alterar a função.",
+    "transfer": "Não foi possível transferir a propriedade.",
+    "leave": "Não foi possível sair da família.",
+    "invite": "Não foi possível criar o link de convite.",
+    "cancelRequest": "Não foi possível cancelar a solicitação.",
+    "sendRequest": "Não foi possível enviar a solicitação.",
+    "approve": "Não foi possível aprovar a solicitação.",
+    "reject": "Não foi possível rejeitar a solicitação."
+  }
+}

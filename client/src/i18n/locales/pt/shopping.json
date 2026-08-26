@@ -1,0 +1,81 @@
+{
+  "loading": "Carregando your list…",
+  "header": {
+    "title": "Lista de compras",
+    "remaining_one": "{{count}} item restante",
+    "remaining_other": "{{count}} itens restantes"
+  },
+  "categories": {
+    "Alimentation": "Supermercado & Alimentação",
+    "Bebe": "Bebê",
+    "Menage": "Casa & Limpeza",
+    "Sante": "Saúde & Farmácia",
+    "Autre": "Outros"
+  },
+  "qty": "Qtd",
+  "storeMode": {
+    "enter": "Modo Mercadinho",
+    "title": "Modo Mercadinho",
+    "cart": "{{done}}/{{total}} no carrinho",
+    "remaining_one": "falta {{count}} item",
+    "remaining_other": "faltam {{count}} itens",
+    "emptyList": "Lista de compras vazia"
+  },
+  "add": {
+    "title": "Adicionar um item",
+    "namePlaceholder": "ex: Leite, Pão, Frutas",
+    "category": "Categoria",
+    "qtyPlaceholder": "1",
+    "pricePlaceholder": "2,50"
+  },
+  "templates": {
+    "title": "Modelos de lista",
+    "newLabel": "Novo modelo",
+    "newPlaceholder": "ex: Compras da semana",
+    "create": "Criar um modelo",
+    "existing": "Modelo existente",
+    "selectPlaceholder": "Selecione um modelo",
+    "optionItems_one": "{{count}} item",
+    "optionItems_other": "{{count}} items"
+  },
+  "list": {
+    "emptyTitle": "Sua lista está vazia",
+    "emptySubtitle": "Adicione itens ou aplique um modelo de compras.",
+    "completed_one": "Item marcado ({{count}})",
+    "completed_other": "Itens marcados ({{count}})",
+    "clean": "Limpar"
+  },
+  "footer": {
+    "estimatedTotal": "Estimativa total"
+  },
+  "dialog": {
+    "title": "Novo modelo de compras",
+    "description": "Selecione os itens para incluir neste modelo",
+    "nameLabel": "Nome do modelo",
+    "namePlaceholder": "ex: Compras da semana, Feira...",
+    "itemsSelected": "Items ({{selected}}/{{total}} selected)",
+    "selectAll": "Selecionar todos",
+    "deselectAll": "Desmarcar todos",
+    "deselect": "Desmarcar",
+    "create": "Criar modelo"
+  },
+  "errors": {
+    "loadItems": "Não foi possível carregar a lista de compras.",
+    "loadTemplates": "Não foi possível carregar os modelos.",
+    "nameRequired": "O nome do item é obrigatório.",
+    "quantityInvalid": "A quantidade deve ser um número positivo.",
+    "priceInvalid": "O preço deve ser um número válido.",
+    "addFailed": "Não foi possível adicionar este item.",
+    "toggleFailed": "Não foi possível atualizar este item.",
+    "deleteFailed": "Não foi possível excluir este item.",
+    "clearFailed": "Não foi possível limpar os itens marcados.",
+    "noItemsForTemplate": "Nenhum item na lista para criar um modelo.",
+    "templateNameRequired": "Dê um nome ao modelo.",
+    "selectAtLeastOne": "Selecione pelo menos um item para o modelo.",
+    "saveTemplateFailed": "Não foi possível salvar o modelo.",
+    "selectTemplateApply": "Selecione um modelo para aplicar.",
+    "applyTemplateFailed": "Não foi possível aplicar este modelo.",
+    "selectTemplateDelete": "Selecione um modelo para excluir.",
+    "deleteTemplateFailed": "Não foi possível excluir este modelo."
+  }
+}

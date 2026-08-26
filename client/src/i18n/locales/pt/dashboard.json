@@ -1,0 +1,36 @@
+{
+  "heading": {
+    "before": "Seu ",
+    "highlight": "dia",
+    "after": ", em um relance."
+  },
+  "budgetAlert": {
+    "title": "Alerta de orçamento",
+    "message_one": "{{count}} category has exceeded its monthly budget.",
+    "message_other": "{{count}} categories have exceeded their monthly budget.",
+    "cta": "Ver detalhes"
+  },
+  "stats": {
+    "appointments": "Compromissos",
+    "tasks": "Tarefas",
+    "shopping": "Compras",
+    "monthExpenses": "Despesas do mês"
+  },
+  "today": {
+    "title": "Hoje",
+    "viewWeek": "Ver semana",
+    "emptyTitle": "Nada planejado.",
+    "emptySubtitle": "Adicione um compromisso para exibi-lo aqui.",
+    "emptyCta": "Adicionar compromisso"
+  },
+  "aside": {
+    "shopping": "Compras",
+    "shoppingCount_one": "item a comprar",
+    "shoppingCount_other": "itens a comprar",
+    "budget": "Orçamento do mês",
+    "budgetSubtitle": "gasto este mês",
+    "tasks": "Tarefas pendentes",
+    "tasksCount_one": "tarefa a concluir",
+    "tasksCount_other": "tarefas a concluir"
+  }
+}

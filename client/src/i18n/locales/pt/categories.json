@@ -1,0 +1,25 @@
+{
+  "title": "Categorias",
+  "subtitle": "Personalize as listas de categorias usadas por Compras, Receitas e Orçamento. Renomear uma categoria atualiza seus itens existentes.",
+  "parentOnly": "Apenas os responsáveis podem editar as categorias.",
+  "modules": {
+    "shopping": "Compras",
+    "recipe": "Receitas",
+    "budget": "Orçamento"
+  },
+  "addPlaceholder": "Nova categoria…",
+  "add": "Adicionar",
+  "save": "Salvar",
+  "saved": "Categorias salvas com sucesso.",
+  "reset": "Cancelar alterações",
+  "moveUp": "Mover para cima",
+  "moveDown": "Mover para baixo",
+  "remove": "Remover",
+  "hintReassign": "Os itens de uma categoria removida serão movidos para \"{{fallback}}\".",
+  "errors": {
+    "empty": "Os nomes das categorias não podem ficar vazios.",
+    "duplicate": "Categoria duplicada: {{name}}",
+    "atLeastOne": "Mantenha pelo menos uma categoria.",
+    "save": "Não foi possível salvar as categorias."
+  }
+}

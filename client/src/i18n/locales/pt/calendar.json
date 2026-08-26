@@ -1,0 +1,60 @@
+{
+  "loading": "Carregando calendário…",
+  "title": "Calendário",
+  "subtitle": "Gerencie os compromissos da sua família",
+  "exportIcal": "Exportar (iCal)",
+  "newAppointment": "Novo compromisso",
+  "moreOthers": "+{{count}} mais",
+  "upcoming": {
+    "title": "Próximos compromissos",
+    "empty": "Nenhum compromisso agendado"
+  },
+  "dialog": {
+    "editTitle": "Editar compromisso",
+    "createTitle": "Novo compromisso",
+    "description": "Preencha os detalhes do compromisso"
+  },
+  "form": {
+    "title": "Título",
+    "titlePlaceholder": "ex: Consulta médica, Reunião escolar...",
+    "description": "Descrição (opcional)",
+    "descriptionPlaceholder": "Detalhes adicionais…",
+    "scheduling": "Agendamento",
+    "startDate": "Data de início",
+    "startTime": "Hora de início",
+    "endDate": "Data de término",
+    "endTime": "Hora de término",
+    "location": "Local (opcional)",
+    "locationPlaceholder": "ex: Consultório médico, Escola...",
+    "members": "Membros da família (opcional)",
+    "noMembersHint": "Adicione membros para atribuí-los rapidamente.",
+    "goToFamily": "Ir para Família",
+    "reminders": "Lembretes",
+    "reminder30": "30 minutos antes",
+    "reminder1h": "1 hora antes",
+    "notes": "Observações (opcional)",
+    "notesPlaceholder": "Observações adicionais…"
+  },
+  "feed": {
+    "title": "Exportar calendário (iCal / Google)",
+    "description": "Assine pelo Google Agenda, Apple Calendar ou Outlook para sincronizar seus compromissos automaticamente.",
+    "generating": "Gerando link…",
+    "subscribeLink": "Link de assinatura iCal",
+    "subscribeApple": "Assinar (Apple / Outlook / Google)",
+    "downloadIcs": "Baixar arquivo .ics",
+    "privateNote": "Este link é privado: qualquer pessoa com ele pode ver seus compromissos.",
+    "regenerate": "Regerar link"
+  },
+  "confirmDelete": "Tem certeza que deseja excluir este compromisso?",
+  "confirmRegen": "Regerar o link? As assinaturas existentes deixarão de funcionar.",
+  "errors": {
+    "loadAppointments": "Não foi possível carregar os compromissos.",
+    "loadMembers": "Não foi possível carregar os membros.",
+    "icalFetch": "Não foi possível obter o link do iCal.",
+    "icalRegen": "Não foi possível regerar o link.",
+    "startRequired": "Por favor, insira a data e hora de início.",
+    "endAfterStart": "A hora de término deve ser após a hora de início.",
+    "save": "Não foi possível salvar este compromisso.",
+    "delete": "Não foi possível excluir este compromisso."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "title": "Conectar ao seu servidor",
+  "subtitle": "O OpenFamily é autohospedado — aponte o aplicativo para o seu próprio servidor.",
+  "urlLabel": "Endereço do servidor",
+  "placeholder": "http://192.168.1.10:3001",
+  "hint": "Use o mesmo endereço que você abre no navegador (ex: http://192.168.1.10:3001), ou seu endereço HTTPS / Tailscale.",
+  "connect": "Conectar",
+  "connecting": "Conectando…",
+  "errors": {
+    "invalid": "Digite uma URL válida começando com http:// ou https://",
+    "unreachable": "Não foi possível conectar ao servidor. Verifique o endereço e se o servidor está rodando."
+  },
+  "settings": {
+    "title": "Servidor",
+    "connectedTo": "Conectado a {{url}}",
+    "change": "Alterar servidor",
+    "disconnect": "Desconectar"
+  }
+}

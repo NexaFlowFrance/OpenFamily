@@ -1,0 +1,100 @@
+{
+  "loading": "Carregando orçamento…",
+  "categories": {
+    "Logement": "Moradia & Aluguel",
+    "Alimentation": "Supermercado & Alimentação",
+    "Transport": "Transporte & Combustível",
+    "Santé": "Saúde & Farmácia",
+    "Loisirs": "Lazer & Passeios",
+    "Abonnements": "Assinaturas & Serviços",
+    "Assurance": "Seguros",
+    "Enfants": "Crianças & Escola",
+    "Maison": "Casa & Manutenção",
+    "Autre": "Outros",
+    "Prélèvements": "Débitos Recorrentes"
+  },
+  "readOnly": "Modo somente leitura. Apenas responsáveis podem alterar o orçamento.",
+  "alerts": {
+    "title": "Limites atingidos",
+    "over": " · excedido",
+    "warn": " (≥ 80%)"
+  },
+  "balance": {
+    "current": "Saldo atual",
+    "pointed_one": "{{count}} débito compensado",
+    "pointed_other": "{{count}} débitos compensados",
+    "expenses_one": "{{count}} despesa",
+    "expenses_other": "{{count}} despesas"
+  },
+  "forecast": {
+    "title": "Previsão",
+    "subtitle": "Falta compensar {{amount}} em débitos"
+  },
+  "analytics": "Análises & Limites",
+  "charts": {
+    "expensesByCategory": "Despesas por categoria",
+    "noExpenses": "Nenhuma despesa este mês",
+    "yearEvolution": "Evolução anual",
+    "income": "Receitas",
+    "expenses": "Despesas",
+    "recurring": "Débitos recorrentes"
+  },
+  "limits": {
+    "title": "Limites mensais",
+    "subtitle": "Acompanhamento de gastos por categoria",
+    "define": "Definir",
+    "none": "Nenhum limite definido"
+  },
+  "sections": {
+    "recurring": "Recorrentes",
+    "expenses": "Despesas",
+    "income": "Receitas"
+  },
+  "recurring": {
+    "empty": "Nenhum débito recorrente",
+    "addOne": "+ Adicionar débito",
+    "markOn": "Marcar como debitado",
+    "markOff": "Desmarcar",
+    "dayPrefix": "dia"
+  },
+  "empty": {
+    "expenses": "Nenhuma despesa este mês",
+    "income": "Nenhuma receita este mês"
+  },
+  "sheets": {
+    "recurringEdit": "Editar débito",
+    "recurringNew": "Novo débito",
+    "edit": "Editar",
+    "newExpense": "Nova despesa",
+    "newIncome": "Nova receita",
+    "limit": "Limite mensal"
+  },
+  "toggle": {
+    "expense": "Despesa",
+    "income": "Receita"
+  },
+  "fields": {
+    "name": "Nome do débito",
+    "namePlaceholder": "ex: Aluguel, Luz, Netflix…",
+    "amount": "Valor ({{currency}})",
+    "debitDay": "Dia de débito no mês (1 a 31)",
+    "debitDayPlaceholder": "ex: 5",
+    "description": "Descrição (opcional)",
+    "descriptionPlaceholder": "ex: Mercado, Salário…",
+    "date": "Data",
+    "category": "Categoria",
+    "limit": "Limite mensal ({{currency}})",
+    "limitHint": "Defina 0 para remover o acompanhamento desta categoria."
+  },
+  "errors": {
+    "amountInvalid": "Valor inválido.",
+    "nameRequired": "Nome é obrigatório.",
+    "debitDayInvalid": "Dia de débito inválido (1-31).",
+    "save": "Erro ao salvar.",
+    "limitInvalid": "Limite inválido."
+  },
+  "confirm": {
+    "deleteRecurring": "Tem certeza que deseja excluir este débito recorrente?",
+    "deleteEntry": "Tem certeza que deseja excluir este registro?"
+  }
+}

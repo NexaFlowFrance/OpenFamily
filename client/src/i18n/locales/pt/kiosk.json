@@ -1,0 +1,36 @@
+{
+  "exit": "Sair",
+  "fullscreen": "Tela cheia",
+  "exitFullscreen": "Sair da tela cheia",
+  "schedule": "Agenda de hoje",
+  "meals": "Refeições de hoje",
+  "tasks": "Tarefas de hoje",
+  "whereabouts": "Quem está onde hoje",
+  "shopping": "Lista de compras",
+  "allDay": "Dia inteiro",
+  "undo": "Desfazer",
+  "empty": {
+    "appointments": "Nada planejado para hoje",
+    "meals": "Nenhuma refeição planejada",
+    "tasks": "Tudo em dia ✨",
+    "whereabouts": "Ninguém agendado hoje",
+    "shopping": "Nada para comprar"
+  },
+  "displaySettings": {
+    "open": "Configurações de exibição",
+    "title": "Configurações de exibição",
+    "close": "Fechar",
+    "location": "Localização do clima",
+    "searchPlaceholder": "Buscar uma cidade…",
+    "noResults": "Nenhum resultado",
+    "noLocation": "Escolha uma localização para exibir a previsão do tempo nesta tela.",
+    "change": "Alterar",
+    "photoBackground": "Fotos de fundo",
+    "photoBackgroundHint": "Exibe fotos aleatórias da sua biblioteca como plano de fundo. Requer integração com o Immich."
+  },
+  "settings": {
+    "title": "Modo Quiosque / Tela da Casa",
+    "subtitle": "Painel interativo em tela cheia para tablets de parede ou telas da geladeira — compromissos, refeições, tarefas do dia e localização da família.",
+    "open": "Abrir modo quiosque"
+  }
+}

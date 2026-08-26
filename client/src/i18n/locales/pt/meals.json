@@ -1,0 +1,51 @@
+{
+  "loading": "Carregando planejamento…",
+  "title": "Cardápio Semanal",
+  "subtitle": "Planeje as refeições da sua família para a semana",
+  "thisWeek": "Esta semana",
+  "weekOf": "Semana de {{start}} a {{end}}",
+  "mealTypes": {
+    "Petit-déjeuner": "Café da Manhã",
+    "Déjeuner": "Almoço",
+    "Dîner": "Jantar",
+    "Snack": "Lanche"
+  },
+  "dialog": {
+    "editTitle": "Editar refeição",
+    "addTitle": "Adicionar refeição",
+    "descriptionFmt": "{{type}} — {{date}}"
+  },
+  "form": {
+    "mealType": "Tipo de refeição",
+    "recipe": "Receita do livro",
+    "noRecipe": "Sem receita",
+    "customMeal": "Ou refeição personalizada",
+    "customMealPlaceholder": "ex: Pizza caseira, Strogonoff...",
+    "notes": "Observações (opcional)",
+    "notesPlaceholder": "Observações adicionais…"
+  },
+  "shopping": {
+    "button": "Adicionar ingredientes à lista de compras",
+    "dialogTitle": "Adicionar ingredientes à lista de compras",
+    "dialogDescription": "Ingredientes das receitas planejadas entre {{start}} e {{end}}. Desmarque o que não precisar.",
+    "empty": "Nenhuma refeição com receita planejada para esta semana.",
+    "selectedCount": "{{selected}} de {{total}} ingredientes selecionados",
+    "alreadyOnList": "já está na lista",
+    "confirm_one": "Adicionar {{count}} ingrediente",
+    "confirm_other": "Adicionar {{count}} ingredientes",
+    "successTitle": "Ingredientes adicionados",
+    "successDescription_one": "{{count}} item adicionado à lista de compras.",
+    "successDescription_other": "{{count}} itens adicionados à lista de compras.",
+    "partialTitle": "Alguns ingredientes não puderam ser adicionados",
+    "partialDescription": "{{added}} adicionados, {{failed}} falharam.",
+    "errorTitle": "Não foi possível adicionar ingredientes",
+    "errorDescription": "Nenhum item foi adicionado à lista. Tente novamente."
+  },
+  "confirmDelete": "Tem certeza que deseja excluir esta refeição do planejamento?",
+  "errors": {
+    "loadPlans": "Não foi possível carregar o planejamento de refeições.",
+    "loadRecipes": "Não foi possível carregar as receitas.",
+    "save": "Não foi possível salvar esta refeição.",
+    "delete": "Não foi possível excluir esta refeição."
+  }
+}

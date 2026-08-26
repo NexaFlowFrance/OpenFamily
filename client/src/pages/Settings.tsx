@@ -433,7 +433,7 @@ const ModulesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
 // Lets a family customize the category lists used by Shopping, Recipes and Budget.
 // Renames follow the existing items; removed categories are reassigned server-side.
 const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
-    const { t } = useTranslation(['categories', 'common']);
+    const { t } = useTranslation(['categories', 'common', 'shopping', 'recipes', 'budget']);
     const { categories, saveCategories } = useCategories();
     const [module, setModule] = useState<CategoryModule>('shopping');
     const [rows, setRows] = useState<Array<{ original: string | null; value: string }>>(
@@ -444,15 +444,22 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
     const [error, setError] = useState('');
     const [saved, setSaved] = useState(false);
 
+    const getCategoryLabel = (mod: CategoryModule, name: string) => {
+        if (mod === 'shopping') return t(`shopping:categories.${name}`, { defaultValue: name });
+        if (mod === 'recipe') return t(`recipes:categories.${name}`, { defaultValue: name });
+        if (mod === 'budget') return t(`budget:categories.${name}`, { defaultValue: name });
+        return name;
+    };
+
     // Re-seed the editor whenever the module tab changes or fresh data arrives.
     useEffect(() => {
-        setRows(categories[module].map((c) => ({ original: c, value: c })));
+        setRows(categories[module].map((c) => ({ original: c, value: getCategoryLabel(module, c) })));
         setNewName('');
         setError('');
     }, [module, categories]);
 
     const dirty = rows.length !== categories[module].length
-        || rows.some((r, i) => r.original !== categories[module][i] || r.value !== r.original);
+        || rows.some((r, i) => r.original !== categories[module][i] || r.value !== getCategoryLabel(module, categories[module][i]));
 
     const move = (index: number, delta: number) => {
         const target = index + delta;
@@ -503,7 +510,8 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
         }
     };
 
-    const fallback = rows.some((r) => r.value.trim() === 'Autre') ? 'Autre' : rows[0]?.value.trim() || '';
+    const fallbackRaw = rows.some((r) => r.value.trim() === 'Autre') ? 'Autre' : rows[0]?.value.trim() || '';
+    const fallback = getCategoryLabel(module, fallbackRaw);
 
     return (
         <Card>

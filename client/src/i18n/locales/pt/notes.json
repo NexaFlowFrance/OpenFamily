@@ -1,0 +1,35 @@
+{
+  "title": "Notas da família",
+  "add": "Adicionar uma nota",
+  "addTitle": "Nova nota na geladeira",
+  "placeholder": "Não esqueça a bolsa da academia!",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "Cor",
+  "colors": {
+    "yellow": "Amarelo",
+    "pink": "Rosa",
+    "blue": "Azul",
+    "green": "Verde",
+    "orange": "Laranja"
+  },
+  "expiryLabel": "Validade",
+  "expiry": {
+    "today": "Até hoje à noite",
+    "day": "24 horas",
+    "week": "1 semana",
+    "never": "Sem validade"
+  },
+  "submit": "Colar nota na geladeira",
+  "cancel": "Cancelar",
+  "delete": "Remover esta nota",
+  "deleted": "Nota removida da geladeira",
+  "added": "Nota colada na geladeira",
+  "emptyHint": "Deixe um recadinho para a família — ele aparece aqui e na tela do Modo Quiosque.",
+  "by": "por {{name}}",
+  "age": {
+    "now": "agora mesmo",
+    "minutes": "há {{count}} min",
+    "hours": "há {{count}} h",
+    "days": "há {{count}} d"
+  }
+}

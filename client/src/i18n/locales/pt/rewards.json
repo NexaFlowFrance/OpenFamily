@@ -1,0 +1,86 @@
+{
+  "loading": "Carregando recompensas…",
+  "title": "Mesada & Recompensas",
+  "subtitle": "Incentive boas tarefas e gerencie a mesada das crianças",
+  "empty": "Nenhuma recompensa cadastrada.",
+  "streak_one": "{{count}} dia seguido",
+  "streak_other": "{{count}} dias seguidos",
+  "pendingCount_one": "{{count}} pendente de aprovação",
+  "pendingCount_other": "{{count}} pendentes de aprovação",
+  "worth": "Vale {{points}} pontos",
+  "approvals": {
+    "title_one": "{{count}} task to approve",
+    "title_other": "{{count}} tasks to approve",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "actions": {
+    "adjust": "Ajustar Saldo",
+    "redeem": "Resgatar Recompensa"
+  },
+  "types": {
+    "earn": "Ganho",
+    "adjust": "Ajuste",
+    "redeem": "Resgate"
+  },
+  "fields": {
+    "note": "Observação"
+  },
+  "adjustDialog": {
+    "title": "Ajustar Saldo de Mesada",
+    "description": "Adicione ou remova pontos/saldo da criança",
+    "points": "Quantidade de pontos",
+    "notePlaceholder": "Motivo do ajuste..."
+  },
+  "redeemDialog": {
+    "title": "Resgatar Recompensa",
+    "description": "Confirme o resgate desta recompensa",
+    "points": "Pontos necessários",
+    "amount": "Valor a resgatar",
+    "notePlaceholder": "Observação do resgate..."
+  },
+  "goals": {
+    "add": "Adicionar Meta",
+    "editTitle": "Editar Meta",
+    "progress": "Progresso: {{current}} de {{target}}",
+    "markAchieved": "Marcar como Alcançada"
+  },
+  "goalDialog": {
+    "addTitle": "Criar Meta de Economia",
+    "editTitle": "Editar Meta de Economia",
+    "description": "Defina o objetivo de economia da criança",
+    "emoji": "Ícone / Emoji",
+    "titleLabel": "Nome do objetivo",
+    "titlePlaceholder": "ex: Bicicleta nova, Brinquedo...",
+    "target": "Valor total objetivo",
+    "delete": "Excluir meta"
+  },
+  "kid": {
+    "hello": "Olá, {{name}}!",
+    "subtitle": "Acompanhe seus pontos e conquistas",
+    "reached": "Meta Alcançada! 🎉",
+    "reachedHint": "Parabéns! Você guardou o suficiente para o seu objetivo!",
+    "missing": "Faltam {{amount}} para o objetivo",
+    "editGoal": "Editar meta",
+    "noGoal": "Você ainda não definiu uma meta de economia.",
+    "addGoal": "Definir uma meta",
+    "tasksTitle": "Sua lista de tarefas",
+    "allTasks": "Ver todas as tarefas",
+    "tasksEmpty": "Você não tem nenhuma tarefa pendente no momento!",
+    "pendingBadge": "Em análise pelo responsável",
+    "historyTitle": "Histórico de pontos",
+    "notLinkedTitle": "Conta não vinculada",
+    "notLinkedMessage": "Associe este usuário a um membro da família para ver os pontos."
+  },
+  "settings": {
+    "rate": "Fator de conversão de pontos",
+    "title": "Mesada Recorrente",
+    "description": "Defina se as crianças recebem saldo automático semanal/mensal",
+    "label": "Valor da mesada",
+    "example": "ex: R$ 10,00 por semana"
+  },
+  "errors": {
+    "load": "Não foi possível carregar as recompensas.",
+    "action": "Não foi possível realizar esta ação."
+  }
+}

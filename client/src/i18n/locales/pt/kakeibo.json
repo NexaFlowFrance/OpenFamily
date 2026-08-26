@@ -1,0 +1,33 @@
+{
+  "mode": {
+    "classic": "Clássico",
+    "kakeibo": "Kakeibo"
+  },
+  "availableTitle": "Disponível para gastar",
+  "availableSub": "{{income}} em receita − {{goal}} meta de economia",
+  "spentSoFar": "Gasto: {{amount}}",
+  "householdIncome": "Renda familiar",
+  "extraIncome": "Renda extra este mês",
+  "totalIncome": "Renda total",
+  "savingsGoal": "Meta de economia",
+  "pillarsTitle": "Para onde vai o dinheiro?",
+  "pillars": {
+    "survival": "Sobrevivência",
+    "wants": "Desejos",
+    "culture": "Cultura",
+    "extra": "Extras"
+  },
+  "pillarHint": {
+    "survival": "necessidades",
+    "wants": "prazeres",
+    "culture": "crescimento pessoal",
+    "extra": "imprevistos"
+  },
+  "noExpenses": "Nenhuma despesa registrada este mês.",
+  "reviewTitle": "Balanço do fim do mês",
+  "actualSavings": "Economizado de fato",
+  "goalReached": "Meta alcançada — {{amount}} acima do objetivo!",
+  "goalMissed": "Faltaram {{amount}} para atingir sua meta.",
+  "notesLabel": "Reflexões & Anotações",
+  "notesPlaceholder": "O que foi bem? O que pode melhorar no próximo mês?"
+}

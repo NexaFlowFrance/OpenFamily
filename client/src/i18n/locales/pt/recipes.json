@@ -1,0 +1,95 @@
+{
+  "loading": "Carregando receitas…",
+  "title": "Receitas",
+  "subtitle": "O livro de receitas da sua família",
+  "newRecipe": "Nova receita",
+  "categories": {
+    "Entrée": "Entrada",
+    "Plat": "Prato Principal",
+    "Dessert": "Sobremesa",
+    "Snack": "Lanche"
+  },
+  "difficulties": {
+    "Facile": "Fácil",
+    "Moyen": "Médio",
+    "Difficile": "Difícil"
+  },
+  "durations": {
+    "under15": "≤ 15 min",
+    "under30": "≤ 30 min",
+    "under60": "≤ 1 h",
+    "over60": "> 1 h"
+  },
+  "searchPlaceholder": "Buscar receita ou ingrediente…",
+  "allCategories": "Todas as categorias",
+  "allDifficulties": "Todas as dificuldades",
+  "anyDuration": "Qualquer tempo",
+  "empty": {
+    "none": "Nenhuma receita ainda. Crie sua primeira receita!",
+    "noMatch": "Nenhuma receita corresponde à sua busca."
+  },
+  "card": {
+    "min": "{{n}} min",
+    "servings_one": "{{count}} porção",
+    "servings_other": "{{count}} porções",
+    "view": "Ver receita"
+  },
+  "dialog": {
+    "editTitle": "Editar receita",
+    "createTitle": "Nova receita",
+    "description": "Preencha os detalhes da receita"
+  },
+  "form": {
+    "name": "Nome da receita",
+    "namePlaceholder": "ex: Torta de Maçã, Lasanha...",
+    "category": "Categoria",
+    "difficulty": "Dificuldade",
+    "description": "Descrição (opcional)",
+    "descriptionPlaceholder": "Breve descrição do prato…",
+    "prep": "Preparo (min)",
+    "prepPlaceholder": "30",
+    "cook": "Cozimento (min)",
+    "cookPlaceholder": "45",
+    "servings": "Porções",
+    "servingsPlaceholder": "4",
+    "ingredients": "Ingredientes (um por linha)",
+    "ingredientsPlaceholder": "200g de farinha\n3 ovos\n100g de açúcar",
+    "instructions": "Instruções (um passo por linha)",
+    "instructionsPlaceholder": "Preaqueça o forno a 180°C\nMisture a farinha e o açúcar\nAdicione os ovos",
+    "tags": "Tags (separadas por vírgula)",
+    "tagsPlaceholder": "vegetariano, rápido, econômico",
+    "image": "URL da Imagem (opcional)",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "Importar por link",
+    "title": "Importar uma receita",
+    "description": "Cole o link de uma página de receita e preencheremos o formulário para você.",
+    "urlLabel": "URL da página de receita",
+    "urlPlaceholder": "https://...",
+    "submit": "Importar",
+    "importing": "Importando…",
+    "successTitle": "Receita importada",
+    "successDescription": "Revise os detalhes e depois salve.",
+    "errors": {
+      "notFoundTitle": "Nenhuma receita encontrada",
+      "notFound": "Esta página não contém uma receita legível.",
+      "fetchTitle": "Falha ao importar",
+      "fetch": "Não foi possível carregar a página. Verifique o link e tente novamente."
+    }
+  },
+  "detail": {
+    "prep": "Preparo:",
+    "cook": "Cozimento:",
+    "servings": "Porções:",
+    "minUnit": "min",
+    "ingredients": "Ingredientes",
+    "instructions": "Modo de Preparo"
+  },
+  "confirmDelete": "Tem certeza que deseja excluir esta receita?",
+  "errors": {
+    "load": "Não foi possível carregar as receitas.",
+    "save": "Não foi possível salvar esta receita.",
+    "delete": "Não foi possível excluir esta receita."
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "loading": "Carregando tarefas…",
+  "title": "Tarefas",
+  "subtitle": "Gerencie as tarefas da sua família e acompanhe o progresso",
+  "newTask": "Nova tarefa",
+  "priorities": {
+    "Haute": "Alta",
+    "Moyenne": "Média",
+    "Basse": "Baixa"
+  },
+  "frequencies": {
+    "Une fois": "Única vez",
+    "Quotidien": "Diária",
+    "Hebdomadaire": "Semanal",
+    "Mensuel": "Mensal",
+    "Annuel": "Anual"
+  },
+  "stats": {
+    "total": "Total",
+    "completed": "Concluídas",
+    "pending": "Pendentes",
+    "completionRate": "Taxa de conclusão"
+  },
+  "filters": {
+    "label": "Filtros:",
+    "statusAll": "Todas",
+    "statusPending": "Pendentes",
+    "statusCompleted": "Concluídas",
+    "allPriorities": "Todas as prioridades",
+    "allMembers": "Todos os membros",
+    "unassigned": "Sem responsável"
+  },
+  "empty": {
+    "none": "Nenhuma tarefa cadastrada. Crie sua primeira tarefa!",
+    "noMatch": "Nenhuma tarefa encontrada para os filtros selecionados."
+  },
+  "due": "Vence: {{date}}",
+  "dialog": {
+    "editTitle": "Editar tarefa",
+    "createTitle": "Nova tarefa",
+    "description": "Preencha os detalhes da tarefa"
+  },
+  "form": {
+    "title": "Título",
+    "titlePlaceholder": "ex: Lavar a louça, Arrumar a cama...",
+    "description": "Descrição (opcional)",
+    "descriptionPlaceholder": "Detalhes adicionais…",
+    "priority": "Prioridade",
+    "frequency": "Frequência",
+    "dueDate": "Data de vencimento (opcional)",
+    "assignTo": "Atribuir a (opcional)",
+    "noMembers": "Nenhum membro disponível",
+    "points": "Pontos a ganhar (opcional)",
+    "pointsHint": "Os membros atribuídos ganham estes pontos quando a tarefa for concluída."
+  },
+  "approval": {
+    "pendingBadge": "Aguardando aprovação",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "toastTitle": "Muito bem, tarefa concluída!",
+    "toastDescription": "Seus pontos serão adicionados assim que um responsável aprovar."
+  },
+  "confirmDelete": "Tem certeza que deseja excluir esta tarefa?",
+  "errors": {
+    "loadTasks": "Não foi possível carregar as tarefas.",
+    "loadMembers": "Não foi possível carregar os membros.",
+    "loadStats": "Não foi possível carregar as estatísticas.",
+    "saveTask": "Não foi possível salvar esta tarefa.",
+    "toggleTask": "Não foi possível atualizar esta tarefa.",
+    "deleteTask": "Não foi possível excluir esta tarefa.",
+    "approveTask": "Não foi possível aprovar esta tarefa.",
+    "rejectTask": "Não foi possível rejeitar esta tarefa."
+  }
+}

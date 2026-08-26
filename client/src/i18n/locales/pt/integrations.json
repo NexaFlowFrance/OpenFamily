@@ -1,0 +1,86 @@
+{
+  "title": "Integrações",
+  "subtitle": "Conecte seus aplicativos autohospedados para centralizar receitas, cardápios, compras e agenda.",
+  "connected": "Conectadas",
+  "available": "Disponíveis",
+  "status": {
+    "error": "Erro",
+    "connected": "Conectado"
+  },
+  "lastSync": "Sincronizado em {{date}}",
+  "syncTitle": "Sincronizar",
+  "disconnectTitle": "Desconectar",
+  "confirmDisconnect": "Desconectar esta integração?",
+  "modal": {
+    "connect": "Conectar {{name}}",
+    "test": "Testar",
+    "testing": "Testando…",
+    "connecting": "Conectando…",
+    "connectBtn": "Conectar",
+    "encrypted": "As credenciais são criptografadas com AES-256 e armazenadas apenas no seu servidor.",
+    "error": "Erro"
+  },
+  "syncs": {
+    "recipes": "Receitas",
+    "menus": "Cardápios",
+    "shopping": "Lista de compras",
+    "stock": "Estoque",
+    "calendar": "Calendário",
+    "appointments": "Compromissos",
+    "photos": "Fotos"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "Gerenciador de receitas",
+      "description": "Importe suas receitas e cardápios a partir da sua instância autohospedada do Mealie.",
+      "urlLabel": "URL da Instância",
+      "urlPlaceholder": "https://mealie.meudominio.com",
+      "keyLabel": "Chave de API",
+      "keyPlaceholder": "Obtida em Mealie > Perfil > Chaves de API"
+    },
+    "tandoor": {
+      "tagline": "Livro de receitas",
+      "description": "Importe suas receitas a partir do Tandoor, o gerenciador de código aberto.",
+      "urlLabel": "URL da Instância",
+      "urlPlaceholder": "https://tandoor.meudominio.com",
+      "keyLabel": "Token de API",
+      "keyPlaceholder": "Obtida em Tandoor > Configurações > Tokens"
+    },
+    "homeassistant": {
+      "tagline": "Casa inteligente",
+      "description": "Sincronize sua lista de compras com a lista do Home Assistant.",
+      "urlLabel": "URL da Instância",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "Token de longa duração (LLAT)",
+      "tokenPlaceholder": "eyJ… (obtido em Perfil > Segurança)",
+      "entityLabel": "Entidade Todo (opcional)",
+      "entityPlaceholder": "todo.shopping_list"
+    },
+    "grocy": {
+      "tagline": "Gerenciamento residencial",
+      "description": "Sincronize sua lista de compras e seu estoque a partir do Grocy.",
+      "urlLabel": "URL da Instância",
+      "urlPlaceholder": "https://grocy.meudominio.com",
+      "keyLabel": "Chave de API",
+      "keyPlaceholder": "Obtida em Grocy > Gerenciar > Chaves de API"
+    },
+    "nextcloud": {
+      "tagline": "Nuvem pessoal",
+      "description": "Importe os eventos do seu calendário Nextcloud para seus compromissos no OpenFamily.",
+      "urlLabel": "URL do Nextcloud",
+      "urlPlaceholder": "https://cloud.meudominio.com",
+      "userLabel": "Nome de usuário",
+      "userPlaceholder": "seu.usuario",
+      "passwordLabel": "Senha (ou senha de aplicativo)",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "Biblioteca de fotos",
+      "description": "Exiba fotos aleatórias da sua biblioteca autohospedada do Immich como plano de fundo no Modo Quiosque.",
+      "urlLabel": "URL da Instância",
+      "urlPlaceholder": "https://immich.meudominio.com",
+      "keyLabel": "Chave de API",
+      "keyPlaceholder": "Obtida em Immich > Configurações de conta > Chaves de API"
+    }
+  }
+}

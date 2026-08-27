@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db';
+import { aiCompleteWithUsage, AiError, type AiSettings } from '../services/ai';
+import { decryptCredentials } from '../utils/crypto';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
@@ -9,12 +11,120 @@ import { fetchHtmlPage, findRecipeJsonLd, normalizeJsonLdRecipe } from '../lib/r
 const router = Router();
 router.use(authMiddleware);
 
+// Refine and format recipe text using configured AI chef prompt (Ollama / OpenAI / Anthropic)
+router.post('/refine-ai', async (req: AuthRequest, res) => {
+    try {
+        const { rawText, name, category, description, ingredients, instructions } = req.body as {
+            rawText?: string;
+            name?: string;
+            category?: string;
+            description?: string;
+            ingredients?: string[] | string;
+            instructions?: string[] | string;
+        };
+
+        const settingsRow = await query(
+            'SELECT provider, base_url, encrypted_api_key, model, enabled FROM ai_settings WHERE user_id = $1',
+            [req.userId]
+        );
+
+        const row = settingsRow.rows[0];
+        if (!row || !row.enabled || !row.model) {
+            return res.status(400).json({
+                success: false,
+                error: 'AI_NOT_CONFIGURED',
+                message: 'AI assistant is disabled or not configured in Settings > AI Assistant',
+            });
+        }
+
+        let apiKey: string | null = null;
+        if (row.encrypted_api_key) {
+            try {
+                apiKey = decryptCredentials(row.encrypted_api_key).api_key ?? null;
+            } catch {}
+        }
+
+        const aiSettings: AiSettings = {
+            provider: row.provider,
+            base_url: row.base_url,
+            api_key: apiKey,
+            model: row.model,
+        };
+
+        const RECIPE_SCHEMA = {
+            type: 'object',
+            properties: {
+                name: { type: 'string' },
+                category: { type: 'string', enum: ['Entrée', 'Plat', 'Dessert', 'Snack'] },
+                description: { type: 'string' },
+                ingredients: { type: 'array', items: { type: 'string' } },
+                instructions: { type: 'array', items: { type: 'string' } },
+                prep_time: { type: 'number' },
+                cook_time: { type: 'number' },
+                servings: { type: 'number' },
+            },
+            required: ['name', 'category', 'ingredients', 'instructions'],
+            additionalProperties: false,
+        };
+
+        const contentToRefine = rawText || `
+Title: ${name || ''}
+Category: ${category || ''}
+Description: ${description || ''}
+Ingredients:
+${Array.isArray(ingredients) ? ingredients.join('\n') : (ingredients || '')}
+Instructions:
+${Array.isArray(instructions) ? instructions.join('\n') : (instructions || '')}
+        `.trim();
+
+        const { data: parsed, usage } = await aiCompleteWithUsage(aiSettings, {
+            system: `You are a professional chef and gastronomy expert for the OpenFamily application.
+Your mission is to review, organize, and structure the provided recipe IN ITS ORIGINAL LANGUAGE (French, English, Portuguese, Spanish, etc.). Do not translate the ingredients or instructions to another language: preserve the original language of the recipe.
+
+STRICT STRUCTURING AND ORGANIZATION RULES:
+1. "name": Clean, concise, and appetizing recipe title in its original language.
+2. "category": Strictly choose the best option from:
+   - "Entrée"
+   - "Plat"
+   - "Dessert"
+   - "Snack"
+3. "description": Appetizing 1 to 2 sentence summary in its original language.
+4. "ingredients":
+   - Keep each ingredient clean with its exact quantities.
+   - IF THE RECIPE HAS DISTINCT SECTIONS (e.g., Dough / Pâte / Massa, Frosting / Nappage / Cobertura, Filling / Garniture / Recheio), add the section prefix in square brackets for each item! Examples:
+     "[Dough] 4 eggs" / "[Pâte] 4 œufs" / "[Massa] 4 ovos"
+     "[Frosting] 1 cup sugar" / "[Nappage] 1 tasse de sucre" / "[Cobertura] 1 xícara de açúcar"
+5. "instructions":
+   - Organize steps in chronological order in the original language.
+   - IF THE RECIPE HAS DISTINCT SECTIONS, identify the section in square brackets!
+6. Fill prep_time, cook_time, and servings if identified.`,
+            user: `Refine the following recipe:\n\n${contentToRefine}`,
+            jsonSchema: RECIPE_SCHEMA,
+        });
+
+        res.json({
+            success: true,
+            data: parsed,
+            usage,
+            provider: row.provider,
+            model: row.model,
+        });
+    } catch (error) {
+        if (error instanceof AiError) {
+            return res.status(502).json({ success: false, error: error.code, message: error.message });
+        }
+        console.error('Refine recipe AI error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
 // Import a recipe from a public URL (schema.org/Recipe JSON-LD).
 // Parses and returns the recipe WITHOUT saving: the client prefills the
 // create form so the user reviews/edits, then saves via POST /api/recipes.
 // Error contract (the client maps these to localized toasts):
 //   400 → invalid/unsafe URL, 502 'FETCH_FAILED' → page unreachable,
 //   422 'NO_RECIPE_FOUND' → no Recipe JSON-LD on the page.
+
 router.post('/import-url', async (req: AuthRequest, res) => {
     const { url } = req.body as { url?: unknown };
     const cleanUrl = typeof url === 'string' ? url.trim() : '';

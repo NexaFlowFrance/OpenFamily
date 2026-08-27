@@ -7,12 +7,12 @@
 // No temperature/top_p: removed on recent models, sending them would 400.
 
 import Anthropic from '@anthropic-ai/sdk';
-import { AiError, AI_TIMEOUT_MS, extractJson, type AiSettings, type AiCompletionRequest } from './index';
+import { AiError, AI_TIMEOUT_MS, extractJson, type AiSettings, type AiCompletionRequest, type TokenUsage } from './index';
 
 export async function anthropicComplete(
     settings: AiSettings,
     request: AiCompletionRequest
-): Promise<Record<string, unknown>> {
+): Promise<{ data: Record<string, unknown>; usage: TokenUsage | null }> {
     if (!settings.api_key) {
         throw new AiError('AI_UNAUTHORIZED', 'Clé API Anthropic manquante');
     }
@@ -56,5 +56,14 @@ export async function anthropicComplete(
         throw new AiError('AI_INVALID_RESPONSE', 'Réponse Anthropic vide');
     }
     // Structured outputs already guarantee valid JSON, but stay defensive anyway.
-    return extractJson(textBlock.text);
+    const result = extractJson(textBlock.text);
+    const usage = message.usage
+        ? {
+              prompt_tokens: message.usage.input_tokens ?? 0,
+              completion_tokens: message.usage.output_tokens ?? 0,
+              total_tokens: (message.usage.input_tokens ?? 0) + (message.usage.output_tokens ?? 0),
+          }
+        : null;
+
+    return { data: result, usage };
 }

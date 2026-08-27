@@ -11,12 +11,13 @@ import {
     DEFAULT_BASE_URLS,
     type AiSettings,
     type AiCompletionRequest,
+    type TokenUsage,
 } from './index';
 
 export async function openaiComplete(
     settings: AiSettings,
     request: AiCompletionRequest
-): Promise<Record<string, unknown>> {
+): Promise<{ data: Record<string, unknown>; usage: TokenUsage | null }> {
     // Accept both "https://host" and "https://host/v1" forms.
     const baseUrl = (settings.base_url || DEFAULT_BASE_URLS.openai!)
         .replace(/\/+$/, '')
@@ -61,12 +62,22 @@ export async function openaiComplete(
 
     const data = (await response.json().catch(() => null)) as {
         choices?: Array<{ message?: { content?: string } }>;
+        usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
     } | null;
     const content = data?.choices?.[0]?.message?.content;
     if (typeof content !== 'string' || !content.trim()) {
         throw new AiError('AI_INVALID_RESPONSE', 'Réponse du fournisseur vide');
     }
-    return extractJson(content);
+    const result = extractJson(content);
+    const usage = data?.usage
+        ? {
+              prompt_tokens: data.usage.prompt_tokens ?? 0,
+              completion_tokens: data.usage.completion_tokens ?? 0,
+              total_tokens: data.usage.total_tokens ?? 0,
+          }
+        : null;
+
+    return { data: result, usage };
 }
 
 async function safeErrorMessage(response: Response): Promise<string> {

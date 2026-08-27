@@ -4,7 +4,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
 import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
-import { fetchHtmlPage, findRecipeJsonLd, normalizeJsonLdRecipe } from '../lib/recipeImport';
+import { fetchHtmlPage, findRecipeJsonLd, normalizeJsonLdRecipe, isInstagramUrl, formatInstagramEmbedUrl, parseInstagramRecipe, MOBILE_UA } from '../lib/recipeImport';
 
 const router = Router();
 router.use(authMiddleware);
@@ -22,12 +22,15 @@ router.post('/import-url', async (req: AuthRequest, res) => {
         return res.status(400).json({ success: false, error: 'url is required' });
     }
 
+    const isInsta = isInstagramUrl(cleanUrl);
+    const targetUrl = isInsta ? formatInstagramEmbedUrl(cleanUrl) : cleanUrl;
+
     let html: string;
     try {
-        // Unlike LAN integrations, this route fetches the public internet:
-        // private/loopback targets are ALWAYS blocked (checked on every redirect hop).
-        html = await fetchHtmlPage(cleanUrl, (target) =>
-            assertSafeIntegrationUrl(target, { blockPrivate: true })
+        html = await fetchHtmlPage(
+            targetUrl,
+            (target) => assertSafeIntegrationUrl(target, { blockPrivate: true }),
+            isInsta ? MOBILE_UA : undefined
         );
     } catch (error) {
         if (error instanceof UnsafeUrlError) {
@@ -35,6 +38,13 @@ router.post('/import-url', async (req: AuthRequest, res) => {
         }
         console.error('Recipe import fetch error:', error instanceof Error ? error.message : error);
         return res.status(502).json({ success: false, error: 'FETCH_FAILED' });
+    }
+
+    if (isInstagramUrl(cleanUrl)) {
+        const instaRecipe = parseInstagramRecipe(html);
+        if (instaRecipe) {
+            return res.json({ success: true, data: instaRecipe });
+        }
     }
 
     const node = findRecipeJsonLd(html);

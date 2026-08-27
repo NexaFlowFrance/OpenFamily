@@ -287,6 +287,8 @@ const readBodyCapped = async (response: Response): Promise<string> => {
     return html;
 };
 
+const MOBILE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
+
 /**
  * Fetches an HTML page with a 10s timeout per request, a ~2 MB body cap and
  * manual redirect handling: `assertSafe` is re-run on every redirect target so
@@ -294,7 +296,8 @@ const readBodyCapped = async (response: Response): Promise<string> => {
  */
 export async function fetchHtmlPage(
     url: string,
-    assertSafe: (target: string) => Promise<void>
+    assertSafe: (target: string) => Promise<void>,
+    customUserAgent?: string
 ): Promise<string> {
     let current = url;
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
@@ -307,9 +310,9 @@ export async function fetchHtmlPage(
                 redirect: 'manual',
                 signal: controller.signal,
                 headers: {
-                    'User-Agent': BROWSER_UA,
+                    'User-Agent': customUserAgent || BROWSER_UA,
                     'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.7',
+                    'Accept-Language': 'pt-BR,pt;q=0.9,fr;q=0.8,en;q=0.7',
                 },
             });
 
@@ -333,3 +336,135 @@ export async function fetchHtmlPage(
     }
     throw new Error('Trop de redirections');
 }
+
+// ── Instagram Recipe Parser ───────────────────────────────────────────────────
+
+export const isInstagramUrl = (url: string): boolean => {
+    return /https?:\/\/(www\.)?instagram\.com\/(p|reel|reels)\/([A-Za-z0-9_-]+)/i.test(url);
+};
+
+export const formatInstagramEmbedUrl = (url: string): string => {
+    const match = url.match(/instagram\.com\/(p|reel|reels)\/([A-Za-z0-9_-]+)/i);
+    if (!match) return url;
+    const code = match[2];
+    return `https://www.instagram.com/p/${code}/embed/captioned/`;
+};
+
+export const parseInstagramRecipe = (html: string): ImportedRecipe | null => {
+    let rawCaption = '';
+
+    // 1. Extract caption from <div class="Caption"> HTML block
+    const divMatch = html.match(/<div class="Caption"[^>]*>([\s\S]*?)<\/div>/i);
+    if (divMatch && divMatch[1]) {
+        let textHtml = divMatch[1];
+        // Remove username link <a class="CaptionUsername">...</a>
+        textHtml = textHtml.replace(/<a class="CaptionUsername"[\s\S]*?<\/a>/i, '');
+        // Remove comments link <div class="CaptionComments">...</div>
+        textHtml = textHtml.replace(/<div class="CaptionComments"[\s\S]*?<\/div>/i, '');
+        // Convert <br />, <br>, <p> to newlines
+        textHtml = textHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n');
+        // Clean remaining HTML tags and decode entities
+        rawCaption = decodeHtmlEntities(textHtml.replace(/<[^>]*>/g, '')).trim();
+    }
+
+    // Fallback: search JSON or og:description
+    if (!rawCaption) {
+        const captionMatch = html.match(/"edge_media_to_caption"\s*:\s*\{\s*"edges"\s*:\s*\[\s*\{\s*"node"\s*:\s*\{\s*"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+        if (captionMatch && captionMatch[1]) {
+            try {
+                rawCaption = JSON.parse(`"${captionMatch[1]}"`);
+            } catch {
+                rawCaption = captionMatch[1];
+            }
+        }
+    }
+
+    if (!rawCaption.trim()) return null;
+
+    // 2. Extract cover image URL from EmbeddedMediaImage or display_url or og:image
+    let imageUrl: string | null = null;
+    const imgMatch = html.match(/class=["']EmbeddedMediaImage["'][^>]*src=["']([^"']+)["']/i)
+        || html.match(/"display_url"\s*:\s*"((?:[^"\\]|\\.)*)"/)
+        || html.match(/<meta\s+property=["']og:image["']\s+content=["']([\s\S]*?)["']/i);
+    if (imgMatch && imgMatch[1]) {
+        const cleanImg = decodeHtmlEntities(imgMatch[1].replace(/\\/g, ''));
+        if (/^https?:\/\//i.test(cleanImg)) {
+            imageUrl = cleanImg;
+        }
+    }
+
+    // 3. Process caption lines into Name, Ingredients, and Instructions
+    const lines = rawCaption.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) return null;
+
+    let name = cleanText(lines[0]);
+    name = name.replace(/#\w+/g, '').replace(/https?:\/\/\S+/g, '').trim();
+    if (!name || name.length < 3) name = 'Receita do Instagram';
+
+    const ingredients: string[] = [];
+    const instructions: string[] = [];
+
+    let currentSection: 'header' | 'ingredients' | 'instructions' = 'header';
+
+    const isIngredientHeader = (l: string) => /ingrediente|massa|recheio|cobertura|gla[çc]agem/i.test(l);
+    const isInstructionHeader = (l: string) => /modo de preparo|preparo|passo a passo|como fazer|preparo:/i.test(l);
+
+    const isIngredientLine = (l: string) =>
+        /^[•\-*\u2022\u2013]\s*/.test(l) ||
+        /^\d+xic|^\d+\s*col|^\d+\s*ovos/i.test(l) ||
+        /\b(xícara|xicara|colher|col|ovos?|g|kg|ml|l|xíc|xic|pitada|fatia|dente|lata|caixinha|pacote|copo)\b/i.test(l);
+
+    const isInstructionLine = (l: string) =>
+        /^\d+[\.\)-]\s*/.test(l);
+
+    for (let i = 1; i < lines.length; i++) {
+        let line = lines[i];
+        if (!line || line.startsWith('#')) continue;
+        if (/ver todos os|view all|ver mais/i.test(line)) {
+            line = line.replace(/(ver todos os|view all|ver mais)[\s\S]*/i, '').trim();
+            if (!line) continue;
+        }
+
+        if (isInstructionHeader(line)) {
+            currentSection = 'instructions';
+            continue;
+        }
+
+        if (isIngredientHeader(line)) {
+            currentSection = 'ingredients';
+            continue;
+        }
+
+        if (isInstructionLine(line) || (currentSection === 'instructions' && !isIngredientLine(line))) {
+            const cleanedInst = line.replace(/^\d+[\.\)-]\s*/, '').trim();
+            if (cleanedInst) instructions.push(cleanedInst);
+        } else if (isIngredientLine(line) || currentSection === 'ingredients') {
+            const cleanedIng = line.replace(/^[•\-*\u2022\u2013]\s*/, '').trim();
+            if (cleanedIng) ingredients.push(cleanedIng);
+        }
+    }
+
+    if (ingredients.length === 0 && instructions.length === 0) {
+        instructions.push(...lines.slice(1));
+    }
+
+    const tags = parseKeywords(rawCaption);
+    const category = mapCategory(name, tags);
+
+    return {
+        name,
+        category,
+        description: cleanText(rawCaption.slice(0, 300)),
+        ingredients,
+        instructions,
+        prep_time: null,
+        cook_time: null,
+        servings: null,
+        difficulty: null,
+        tags,
+        image_url: imageUrl,
+    };
+};
+export { MOBILE_UA };
+
+

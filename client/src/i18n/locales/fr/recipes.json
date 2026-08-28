@@ -78,6 +78,35 @@
       "fetch": "Impossible de récupérer cette page. Vérifiez le lien et réessayez."
     }
   },
+  "shopping": {
+    "button": "Ajouter à la liste de courses",
+    "title": "Ajouter à la liste de courses",
+    "description": "Choisissez les ingrédients de « {{recipe}} » à ajouter à votre liste de courses.",
+    "selectAll": "Tout cocher",
+    "deselectAll": "Tout décocher",
+    "submit": "Ajouter à la liste",
+    "sending": "Ajout en cours…",
+    "successTitle": "Liste de courses mise à jour",
+    "successDescription_one": "{{count}} ingrédient ajouté à votre liste.",
+    "successDescription_other": "{{count}} ingrédients ajoutés à votre liste.",
+    "duplicates_one": "{{count}} y était déjà.",
+    "duplicates_other": "{{count}} y étaient déjà.",
+    "errorTitle": "Échec de l'ajout",
+    "error": "Impossible d'ajouter ces ingrédients. Réessayez.",
+    "original": "Recette : {{line}}"
+  },
+  "refine": {
+    "button": "Affiner avec l'IA",
+    "hint": "Mettre en forme le titre, les ingrédients et les instructions avec l'IA configurée",
+    "refining": "Affinage en cours…",
+    "successTitle": "Recette affinée",
+    "successDescription": "Parties et étapes réorganisées. Vérifiez, puis enregistrez.",
+    "notConfiguredTitle": "IA non configurée",
+    "notConfigured": "Activez et configurez l'assistant IA dans Réglages → Assistant IA.",
+    "errorTitle": "Échec de l'affinage",
+    "error": "L'assistant IA n'a pas répondu. Vérifiez sa configuration et réessayez.",
+    "cost": "{{total}} tokens ({{in}} entrée / {{out}} sortie)"
+  },
   "detail": {
     "prep": "Préparation :",
     "cook": "Cuisson :",

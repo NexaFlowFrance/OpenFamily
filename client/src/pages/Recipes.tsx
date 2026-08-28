@@ -8,6 +8,19 @@ import { useCategories } from '../hooks/useCategories';
 import { cn } from '../lib/utils';
 import { cleanIngredientForShopping } from '../lib/ingredientParser';
 
+/** Recipe returned by POST /api/ai/refine-recipe — a subset of ImportedRecipe:
+ *  the model reorganises what it was given, it does not invent tags or an image. */
+interface RefinedRecipe {
+    name: string;
+    category: string;
+    description: string;
+    ingredients: string[];
+    instructions: string[];
+    prep_time: number | null;
+    cook_time: number | null;
+    servings: number | null;
+}
+
 /** Parsed recipe returned by POST /api/recipes/import-url (nothing saved yet). */
 interface ImportedRecipe {
     name: string;
@@ -162,20 +175,20 @@ const Recipes: React.FC = () => {
 
             if (res.success) {
                 setShoppingDialogOpen(false);
-                let desc = `${res.addedCount} ingrediente(s) adicionado(s) à sua Lista de Compras.`;
+                let desc = t('recipes:shopping.successDescription', { count: res.addedCount });
                 if (res.duplicateCount > 0) {
-                    desc += ` (${res.duplicateCount} já estava(m) na sua lista).`;
+                    desc += ` ${t('recipes:shopping.duplicates', { count: res.duplicateCount })}`;
                 }
                 showToast({
-                    title: '🛒 Lista de Compras Atualizada!',
+                    title: t('recipes:shopping.successTitle'),
                     description: desc,
                 });
             }
         } catch (err) {
             console.error('Failed to add ingredients to shopping list:', err);
             showToast({
-                title: 'Erro ao enviar para a Lista de Compras',
-                description: err instanceof Error ? err.message : 'Tente novamente.',
+                title: t('recipes:shopping.errorTitle'),
+                description: t('recipes:shopping.error'),
             });
         } finally {
             setSendingToShopping(false);
@@ -189,23 +202,20 @@ const Recipes: React.FC = () => {
         try {
             const response = await api.post<{
                 success: boolean;
-                data: ImportedRecipe;
+                data: { recipe: RefinedRecipe };
                 usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | null;
-                provider?: string;
-                model?: string;
             }>(
-                '/api/recipes/refine-ai',
+                '/api/ai/refine-recipe',
                 {
                     name: formData.name,
-                    category: formData.category,
                     description: formData.description,
                     ingredients: formData.ingredients,
                     instructions: formData.instructions,
                 }
             );
 
-            if (response.success && response.data) {
-                const parsed = response.data;
+            if (response.success && response.data?.recipe) {
+                const parsed = response.data.recipe;
                 setFormData((prev) => ({
                     ...prev,
                     name: parsed.name || prev.name,
@@ -218,15 +228,18 @@ const Recipes: React.FC = () => {
                     servings: parsed.servings != null ? String(parsed.servings) : prev.servings,
                 }));
 
-                let usageDesc = 'Subpartes (Massa/Cobertura) e passos organizados.';
-                if (response.provider === 'ollama') {
-                    usageDesc += ' · Custo: 0 tokens (Ollama Local)';
-                } else if (response.usage && response.usage.total_tokens) {
-                    usageDesc += ` · Consumo: ${response.usage.total_tokens} tokens (${response.usage.prompt_tokens || 0} in / ${response.usage.completion_tokens || 0} out)`;
+                let usageDesc = t('recipes:refine.successDescription');
+                // A local provider reports no counters at all: absent usage means free.
+                if (response.usage && response.usage.total_tokens) {
+                    usageDesc += ` · ${t('recipes:refine.cost', {
+                        total: response.usage.total_tokens,
+                        in: response.usage.prompt_tokens || 0,
+                        out: response.usage.completion_tokens || 0,
+                    })}`;
                 }
 
                 showToast({
-                    title: '✨ Receita refinada com IA!',
+                    title: t('recipes:refine.successTitle'),
                     description: usageDesc,
                 });
             }
@@ -235,13 +248,13 @@ const Recipes: React.FC = () => {
             const msg = error instanceof Error ? error.message : '';
             if (msg === 'AI_NOT_CONFIGURED') {
                 showToast({
-                    title: 'IA não configurada',
-                    description: 'Ative e configure o Ollama local ou a OpenAI em Configurações > Assistente IA.',
+                    title: t('recipes:refine.notConfiguredTitle'),
+                    description: t('recipes:refine.notConfigured'),
                 });
             } else {
                 showToast({
-                    title: 'Erro ao comunicar com a IA',
-                    description: 'Verifique se o seu modelo de IA (Ollama/OpenAI) está rodando e acessível.',
+                    title: t('recipes:refine.errorTitle'),
+                    description: t('recipes:refine.error'),
                 });
             }
         } finally {
@@ -746,11 +759,11 @@ const Recipes: React.FC = () => {
                             variant="secondary"
                             disabled={refiningAi || (!formData.name && !formData.ingredients && !formData.instructions)}
                             onClick={handleAiRefine}
-                            title="Formatar título, ingredientes e instruções usando a IA configurada (Ollama/OpenAI)"
+                            title={t('recipes:refine.hint')}
                             className="w-full sm:w-auto whitespace-nowrap"
                         >
                             <Sparkles className="w-4 h-4 mr-2 text-amber-500 flex-shrink-0" />
-                            {refiningAi ? 'Refinando...' : 'Refinar com IA'}
+                            {refiningAi ? t('recipes:refine.refining') : t('recipes:refine.button')}
                         </Button>
                         <div className="flex gap-2 w-full sm:w-auto">
                             <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)} className="flex-1 sm:flex-none whitespace-nowrap">
@@ -895,11 +908,11 @@ const Recipes: React.FC = () => {
                             <Button
                                 variant="secondary"
                                 onClick={() => openShoppingModal(viewingRecipe)}
-                                title="Selecionar ingredientes para adicionar à Lista de Compras"
+                                title={t('recipes:shopping.button')}
                                 className="w-full sm:w-auto whitespace-nowrap"
                             >
                                 <ShoppingCart className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
-                                Adicionar à Lista de Compras
+                                {t('recipes:shopping.button')}
                             </Button>
                             <div className="flex gap-2 w-full sm:w-auto">
                                 <Button
@@ -929,8 +942,8 @@ const Recipes: React.FC = () => {
             <Dialog
                 open={shoppingDialogOpen}
                 onOpenChange={setShoppingDialogOpen}
-                title="🛒 Adicionar à Lista de Compras"
-                description={`Selecione os ingredientes de "${shoppingRecipeName}" que deseja comprar:`}
+                title={t('recipes:shopping.title')}
+                description={t('recipes:shopping.description', { recipe: shoppingRecipeName })}
             >
                 <div className="space-y-4">
                     <div className="flex justify-between items-center pb-2 border-b">
@@ -938,7 +951,7 @@ const Recipes: React.FC = () => {
                             {selectedIngredients.filter((i) => i.checked).length} de {selectedIngredients.length} selecionados
                         </span>
                         <Button type="button" variant="ghost" size="sm" onClick={toggleAllIngredients}>
-                            {selectedIngredients.every((i) => i.checked) ? 'Desmarcar todos' : 'Marcar todos'}
+                            {selectedIngredients.every((i) => i.checked) ? t('recipes:shopping.deselectAll') : t('recipes:shopping.selectAll')}
                         </Button>
                     </div>
 
@@ -976,7 +989,7 @@ const Recipes: React.FC = () => {
                                     />
                                     {item.original !== item.name && (
                                         <p className="text-label text-muted-foreground pl-1">
-                                            Receita: {item.original}
+                                            {t('recipes:shopping.original', { line: item.original })}
                                         </p>
                                     )}
                                 </div>
@@ -999,7 +1012,7 @@ const Recipes: React.FC = () => {
                             onClick={submitAddToShopping}
                         >
                             <ShoppingCart className="w-4 h-4 mr-2" />
-                            {sendingToShopping ? 'Adicionando...' : 'Adicionar à Lista'}
+                            {sendingToShopping ? t('recipes:shopping.sending') : t('recipes:shopping.submit')}
                         </Button>
                     </div>
                 </div>

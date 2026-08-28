@@ -78,6 +78,35 @@
       "fetch": "Unable to fetch this page. Check the link and try again."
     }
   },
+  "shopping": {
+    "button": "Add to shopping list",
+    "title": "Add to shopping list",
+    "description": "Pick the ingredients from \"{{recipe}}\" to add to your shopping list.",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "submit": "Add to list",
+    "sending": "Adding…",
+    "successTitle": "Shopping list updated",
+    "successDescription_one": "{{count}} ingredient added to your list.",
+    "successDescription_other": "{{count}} ingredients added to your list.",
+    "duplicates_one": "{{count}} was already there.",
+    "duplicates_other": "{{count}} were already there.",
+    "errorTitle": "Could not add",
+    "error": "These ingredients could not be added. Please try again.",
+    "original": "Recipe: {{line}}"
+  },
+  "refine": {
+    "button": "Refine with AI",
+    "hint": "Tidy up the title, ingredients and instructions with the configured AI",
+    "refining": "Refining…",
+    "successTitle": "Recipe refined",
+    "successDescription": "Sections and steps reorganised. Review, then save.",
+    "notConfiguredTitle": "AI not configured",
+    "notConfigured": "Enable and configure the AI assistant in Settings → AI Assistant.",
+    "errorTitle": "Refining failed",
+    "error": "The AI assistant did not answer. Check its configuration and try again.",
+    "cost": "{{total}} tokens ({{in}} in / {{out}} out)"
+  },
   "detail": {
     "prep": "Prep:",
     "cook": "Cook:",

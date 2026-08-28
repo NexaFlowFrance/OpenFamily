@@ -78,6 +78,35 @@
       "fetch": "Não foi possível carregar a página. Verifique o link e tente novamente."
     }
   },
+  "shopping": {
+    "button": "Adicionar à lista de compras",
+    "title": "Adicionar à lista de compras",
+    "description": "Escolha os ingredientes de \"{{recipe}}\" para adicionar à sua lista de compras.",
+    "selectAll": "Marcar todos",
+    "deselectAll": "Desmarcar todos",
+    "submit": "Adicionar à lista",
+    "sending": "Adicionando…",
+    "successTitle": "Lista de compras atualizada",
+    "successDescription_one": "{{count}} ingrediente adicionado à sua lista.",
+    "successDescription_other": "{{count}} ingredientes adicionados à sua lista.",
+    "duplicates_one": "{{count}} já estava na lista.",
+    "duplicates_other": "{{count}} já estavam na lista.",
+    "errorTitle": "Falha ao adicionar",
+    "error": "Não foi possível adicionar estes ingredientes. Tente novamente.",
+    "original": "Receita: {{line}}"
+  },
+  "refine": {
+    "button": "Refinar com IA",
+    "hint": "Formatar título, ingredientes e instruções usando a IA configurada",
+    "refining": "Refinando…",
+    "successTitle": "Receita refinada",
+    "successDescription": "Subpartes e passos reorganizados. Verifique e salve.",
+    "notConfiguredTitle": "IA não configurada",
+    "notConfigured": "Ative e configure o assistente de IA em Configurações → Assistente IA.",
+    "errorTitle": "Falha ao refinar",
+    "error": "O assistente de IA não respondeu. Verifique a configuração e tente novamente.",
+    "cost": "{{total}} tokens ({{in}} entrada / {{out}} saída)"
+  },
   "detail": {
     "prep": "Preparo:",
     "cook": "Cozimento:",

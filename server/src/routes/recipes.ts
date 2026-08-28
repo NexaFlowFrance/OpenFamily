@@ -1,20 +1,98 @@
 import { Router } from 'express';
-import { query } from '../db';
+import pool, { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
 import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
+import { getFamilyCategories } from './categories';
 import { fetchHtmlPage, findRecipeJsonLd, normalizeJsonLdRecipe } from '../lib/recipeImport';
 
 const router = Router();
 router.use(authMiddleware);
 
-// Import a recipe from a public URL (schema.org/Recipe JSON-LD).
-// Parses and returns the recipe WITHOUT saving: the client prefills the
-// create form so the user reviews/edits, then saves via POST /api/recipes.
-// Error contract (the client maps these to localized toasts):
-//   400 → invalid/unsafe URL, 502 'FETCH_FAILED' → page unreachable,
-//   422 'NO_RECIPE_FOUND' → no Recipe JSON-LD on the page.
+// POST /api/recipes/add-to-shopping — push a recipe's ingredients onto the
+// shopping list. The client sends already-cleaned product names (see
+// client/src/lib/ingredientParser.ts); nothing here is user-visible text, so
+// nothing here needs translating.
+router.post('/add-to-shopping', async (req: AuthRequest, res) => {
+    const client = await pool.connect();
+    try {
+        const { items, recipeName } = req.body as { items?: string[]; recipeName?: string };
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ success: false, error: 'items array is required' });
+        }
+
+        // Cap batch size at 50 items to prevent resource exhaustion
+        const targetItems = items.slice(0, 50);
+
+        // shopping_items.category is NOT NULL, and families rename their lists
+        // (#68): use the family's food category when they still have one, and
+        // fall back to the first category they do have rather than inventing one.
+        const familyCategories = await getFamilyCategories(req.userId!);
+        const shoppingCategories = familyCategories.shopping;
+        const targetCategory = shoppingCategories.includes('Alimentation')
+            ? 'Alimentation'
+            : shoppingCategories[0];
+
+        // Fetch existing shopping list items to detect duplicates
+        const existingRes = await client.query('SELECT name FROM shopping_items WHERE user_id = $1', [req.userId]);
+        const existingNames = new Set(
+            existingRes.rows.map((r: { name: string }) => r.name.toLowerCase().trim())
+        );
+
+        let addedCount = 0;
+        let duplicateCount = 0;
+
+        await client.query('BEGIN');
+
+        for (const rawItem of targetItems) {
+            // name is VARCHAR(255): truncate rather than let one long line
+            // roll back the whole batch.
+            const cleanItem = typeof rawItem === 'string'
+                ? rawItem.replace(/^\[[^\]]+\]\s*/, '').trim().slice(0, 255)
+                : '';
+            if (!cleanItem) continue;
+
+            const isDuplicate = existingNames.has(cleanItem.toLowerCase());
+            if (isDuplicate) {
+                duplicateCount++;
+                continue; // Do not re-insert existing duplicate items into the database
+            }
+
+            await client.query(
+                `INSERT INTO shopping_items (user_id, name, category, notes)
+                 VALUES ($1, $2, $3, $4)`,
+                [
+                    req.userId,
+                    cleanItem,
+                    targetCategory,
+                    recipeName ? recipeName.slice(0, 200) : null,
+                ]
+            );
+            existingNames.add(cleanItem.toLowerCase());
+            addedCount++;
+        }
+
+        await client.query('COMMIT');
+
+        if (addedCount > 0) {
+            broadcast(req.userId!, { type: 'update', entity: 'shopping', action: 'created' });
+        }
+
+        res.json({
+            success: true,
+            addedCount,
+            duplicateCount,
+        });
+    } catch (error) {
+        await client.query('ROLLBACK').catch(() => {});
+        console.error('Add ingredients to shopping list error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    } finally {
+        client.release();
+    }
+});
+
 router.post('/import-url', async (req: AuthRequest, res) => {
     const { url } = req.body as { url?: unknown };
     const cleanUrl = typeof url === 'string' ? url.trim() : '';

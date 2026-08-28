@@ -2,9 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
-import { Plus, Search, Edit2, Trash2, Clock, Users, ChefHat, Eye, Link2 } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Clock, Users, ChefHat, Eye, Link2, Sparkles, ShoppingCart, CheckSquare, Square, Filter, X } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, Badge, useToast } from '../components/ui';
 import { useCategories } from '../hooks/useCategories';
+import { cn } from '../lib/utils';
+import { cleanIngredientForShopping } from '../lib/ingredientParser';
+
+/** Recipe returned by POST /api/ai/refine-recipe — a subset of ImportedRecipe:
+ *  the model reorganises what it was given, it does not invent tags or an image. */
+interface RefinedRecipe {
+    name: string;
+    category: string;
+    description: string;
+    ingredients: string[];
+    instructions: string[];
+    prep_time: number | null;
+    cook_time: number | null;
+    servings: number | null;
+}
 
 /** Parsed recipe returned by POST /api/recipes/import-url (nothing saved yet). */
 interface ImportedRecipe {
@@ -34,6 +49,54 @@ interface Recipe {
     difficulty?: string;
     tags?: string[];
     image_url?: string;
+}
+
+interface SectionGroup {
+    title: string | null;
+    items: string[];
+}
+
+function groupItemsBySection(items: string[]): SectionGroup[] {
+    if (!Array.isArray(items)) return [];
+    const groups: SectionGroup[] = [];
+    let currentGroup: SectionGroup = { title: null, items: [] };
+
+    for (const rawItem of items) {
+        const item = rawItem ? rawItem.trim() : '';
+        if (!item) continue;
+
+        const match = item.match(/^\[([^\]]+)\]\s*(.*)/) || item.match(/^(?:##|###)\s*(.*)/);
+
+        if (match) {
+            const sectionTitle = match[1].trim();
+            const textContent = match[2] ? match[2].trim() : '';
+
+            if (currentGroup.title !== sectionTitle) {
+                if (currentGroup.items.length > 0) {
+                    groups.push(currentGroup);
+                }
+                currentGroup = { title: sectionTitle, items: [] };
+            }
+
+            if (textContent) {
+                currentGroup.items.push(textContent);
+            }
+        } else {
+            currentGroup.items.push(item);
+        }
+    }
+
+    if (currentGroup.items.length > 0) {
+        groups.push(currentGroup);
+    }
+
+    return groups;
+}
+
+export interface ShoppingItemDraft {
+    name: string;
+    original: string;
+    checked: boolean;
 }
 
 const Recipes: React.FC = () => {
@@ -70,11 +133,134 @@ const Recipes: React.FC = () => {
     const [filterCategory, setFilterCategory] = useState('');
     const [filterDifficulty, setFilterDifficulty] = useState('');
     const [filterDuration, setFilterDuration] = useState('');
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [error, setError] = useState('');
     const [importDialogOpen, setImportDialogOpen] = useState(false);
     const [importUrl, setImportUrl] = useState('');
     const [importing, setImporting] = useState(false);
+    const [refiningAi, setRefiningAi] = useState(false);
+    const [shoppingDialogOpen, setShoppingDialogOpen] = useState(false);
+    const [shoppingRecipeName, setShoppingRecipeName] = useState('');
+    const [selectedIngredients, setSelectedIngredients] = useState<ShoppingItemDraft[]>([]);
+    const [sendingToShopping, setSendingToShopping] = useState(false);
+
+    const openShoppingModal = (recipe: Recipe) => {
+        setShoppingRecipeName(recipe.name);
+        const list = recipe.ingredients.map((item) => {
+            const cleaned = cleanIngredientForShopping(item);
+            return {
+                name: cleaned.name,
+                original: cleaned.original,
+                checked: true,
+            };
+        });
+        setSelectedIngredients(list);
+        setShoppingDialogOpen(true);
+    };
+
+    const toggleAllIngredients = () => {
+        const allChecked = selectedIngredients.every((i) => i.checked);
+        setSelectedIngredients(selectedIngredients.map((i) => ({ ...i, checked: !allChecked })));
+    };
+
+    const submitAddToShopping = async () => {
+        const items = selectedIngredients.filter((i) => i.checked && i.name.trim()).map((i) => i.name.trim());
+        if (items.length === 0 || sendingToShopping) return;
+        setSendingToShopping(true);
+        try {
+            const res = await api.post<{ success: boolean; addedCount: number; duplicateCount: number }>(
+                '/api/recipes/add-to-shopping',
+                { items, recipeName: shoppingRecipeName }
+            );
+
+            if (res.success) {
+                setShoppingDialogOpen(false);
+                let desc = t('recipes:shopping.successDescription', { count: res.addedCount });
+                if (res.duplicateCount > 0) {
+                    desc += ` ${t('recipes:shopping.duplicates', { count: res.duplicateCount })}`;
+                }
+                showToast({
+                    title: t('recipes:shopping.successTitle'),
+                    description: desc,
+                });
+            }
+        } catch (err) {
+            console.error('Failed to add ingredients to shopping list:', err);
+            showToast({
+                title: t('recipes:shopping.errorTitle'),
+                description: t('recipes:shopping.error'),
+            });
+        } finally {
+            setSendingToShopping(false);
+        }
+    };
     const { showToast } = useToast();
+
+    const handleAiRefine = async () => {
+        if (refiningAi) return;
+        setRefiningAi(true);
+        try {
+            const response = await api.post<{
+                success: boolean;
+                data: { recipe: RefinedRecipe };
+                usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | null;
+            }>(
+                '/api/ai/refine-recipe',
+                {
+                    name: formData.name,
+                    description: formData.description,
+                    ingredients: formData.ingredients,
+                    instructions: formData.instructions,
+                }
+            );
+
+            if (response.success && response.data?.recipe) {
+                const parsed = response.data.recipe;
+                setFormData((prev) => ({
+                    ...prev,
+                    name: parsed.name || prev.name,
+                    category: parsed.category || prev.category,
+                    description: parsed.description || prev.description,
+                    ingredients: Array.isArray(parsed.ingredients) ? parsed.ingredients.join('\n') : prev.ingredients,
+                    instructions: Array.isArray(parsed.instructions) ? parsed.instructions.join('\n') : prev.instructions,
+                    prep_time: parsed.prep_time != null ? String(parsed.prep_time) : prev.prep_time,
+                    cook_time: parsed.cook_time != null ? String(parsed.cook_time) : prev.cook_time,
+                    servings: parsed.servings != null ? String(parsed.servings) : prev.servings,
+                }));
+
+                let usageDesc = t('recipes:refine.successDescription');
+                // A local provider reports no counters at all: absent usage means free.
+                if (response.usage && response.usage.total_tokens) {
+                    usageDesc += ` · ${t('recipes:refine.cost', {
+                        total: response.usage.total_tokens,
+                        in: response.usage.prompt_tokens || 0,
+                        out: response.usage.completion_tokens || 0,
+                    })}`;
+                }
+
+                showToast({
+                    title: t('recipes:refine.successTitle'),
+                    description: usageDesc,
+                });
+            }
+        } catch (error) {
+            console.error('Failed to refine recipe with AI:', error);
+            const msg = error instanceof Error ? error.message : '';
+            if (msg === 'AI_NOT_CONFIGURED') {
+                showToast({
+                    title: t('recipes:refine.notConfiguredTitle'),
+                    description: t('recipes:refine.notConfigured'),
+                });
+            } else {
+                showToast({
+                    title: t('recipes:refine.errorTitle'),
+                    description: t('recipes:refine.error'),
+                });
+            }
+        } finally {
+            setRefiningAi(false);
+        }
+    };
 
     const [formData, setFormData] = useState({
         name: '',
@@ -323,33 +509,77 @@ const Recipes: React.FC = () => {
             </div>
 
             {/* Filters */}
-            <Card>
-                <CardContent className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder={t('recipes:searchPlaceholder')}
-                                className="pl-10"
+            <Card className="overflow-hidden">
+                <CardContent className="p-3 lg:p-4">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder={t('recipes:searchPlaceholder')}
+                                    className="pl-10 h-10 text-body-sm"
+                                />
+                            </div>
+                            <Button
+                                type="button"
+                                variant={showMobileFilters || filterCategory || filterDifficulty || filterDuration ? 'primary' : 'secondary'}
+                                size="sm"
+                                onClick={() => setShowMobileFilters((prev) => !prev)}
+                                className="lg:hidden flex-shrink-0 h-10 px-3 whitespace-nowrap"
+                            >
+                                <Filter className="h-4 w-4 mr-1.5" />
+                                Filtros
+                                {(filterCategory || filterDifficulty || filterDuration) && (
+                                    <span className="ml-1.5 w-2 h-2 rounded-full bg-white inline-block" />
+                                )}
+                            </Button>
+                        </div>
+
+                        {/* Filter Selects Grid */}
+                        <div
+                            className={cn(
+                                'grid gap-3 transition-all duration-200',
+                                showMobileFilters ? 'grid-cols-1 border-t border-border/50 pt-3' : 'hidden lg:grid lg:grid-cols-3'
+                            )}
+                        >
+                            <Select
+                                value={filterCategory}
+                                onValueChange={setFilterCategory}
+                                options={[{ value: '', label: t('recipes:allCategories') }, ...CATEGORIES]}
+                            />
+                            <Select
+                                value={filterDifficulty}
+                                onValueChange={setFilterDifficulty}
+                                options={[{ value: '', label: t('recipes:allDifficulties') }, ...DIFFICULTIES]}
+                            />
+                            <Select
+                                value={filterDuration}
+                                onValueChange={setFilterDuration}
+                                options={[{ value: '', label: t('recipes:anyDuration') }, ...DURATIONS]}
                             />
                         </div>
-                        <Select
-                            value={filterCategory}
-                            onValueChange={setFilterCategory}
-                            options={[{ value: '', label: t('recipes:allCategories') }, ...CATEGORIES]}
-                        />
-                        <Select
-                            value={filterDifficulty}
-                            onValueChange={setFilterDifficulty}
-                            options={[{ value: '', label: t('recipes:allDifficulties') }, ...DIFFICULTIES]}
-                        />
-                        <Select
-                            value={filterDuration}
-                            onValueChange={setFilterDuration}
-                            options={[{ value: '', label: t('recipes:anyDuration') }, ...DURATIONS]}
-                        />
+
+                        {(filterCategory || filterDifficulty || filterDuration || searchQuery) && (
+                            <div className="flex justify-end pt-1">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setFilterCategory('');
+                                        setFilterDifficulty('');
+                                        setFilterDuration('');
+                                    }}
+                                    className="text-muted-foreground text-caption h-7 px-2"
+                                >
+                                    <X className="h-3.5 w-3.5 mr-1" />
+                                    Limpar filtros
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -523,11 +753,26 @@ const Recipes: React.FC = () => {
                         onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                         placeholder={t('recipes:form.imagePlaceholder')}
                     />
-                    <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
-                            {t('common:actions.cancel')}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 border-t">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            disabled={refiningAi || (!formData.name && !formData.ingredients && !formData.instructions)}
+                            onClick={handleAiRefine}
+                            title={t('recipes:refine.hint')}
+                            className="w-full sm:w-auto whitespace-nowrap"
+                        >
+                            <Sparkles className="w-4 h-4 mr-2 text-amber-500 flex-shrink-0" />
+                            {refiningAi ? t('recipes:refine.refining') : t('recipes:refine.button')}
                         </Button>
-                        <Button type="submit">{editingRecipe ? t('common:actions.save') : t('common:actions.create')}</Button>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)} className="flex-1 sm:flex-none whitespace-nowrap">
+                                {t('common:actions.cancel')}
+                            </Button>
+                            <Button type="submit" className="flex-1 sm:flex-none whitespace-nowrap">
+                                {editingRecipe ? t('common:actions.save') : t('common:actions.create')}
+                            </Button>
+                        </div>
                     </div>
                 </form>
             </Dialog>
@@ -615,47 +860,163 @@ const Recipes: React.FC = () => {
 
                         <div>
                             <h3 className="text-body font-semibold mb-3">{t('recipes:detail.ingredients')}</h3>
-                            <ul className="space-y-2">
-                                {viewingRecipe.ingredients.map((ingredient, index) => (
-                                    <li key={index} className="flex items-start gap-2 text-body-sm">
-                                        <span className="text-nexus-blue mt-1">•</span>
-                                        <span>{ingredient}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                            {groupItemsBySection(viewingRecipe.ingredients).map((group, groupIdx) => (
+                                <div key={groupIdx} className="mb-4 last:mb-0">
+                                    {group.title && (
+                                        <h4 className="text-body-sm font-semibold text-nexus-blue border-b border-border/40 pb-1 mb-2 flex items-center gap-1.5">
+                                            <span className="w-2 h-2 rounded-full bg-nexus-blue inline-block"></span>
+                                            {group.title}
+                                        </h4>
+                                    )}
+                                    <ul className="space-y-2">
+                                        {group.items.map((ingredient, index) => (
+                                            <li key={index} className="flex items-start gap-2 text-body-sm">
+                                                <span className="text-nexus-blue mt-1">•</span>
+                                                <span>{ingredient}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
                         </div>
 
                         <div>
                             <h3 className="text-body font-semibold mb-3">{t('recipes:detail.instructions')}</h3>
-                            <ol className="space-y-3">
-                                {viewingRecipe.instructions.map((instruction, index) => (
-                                    <li key={index} className="flex gap-3 text-body-sm">
-                                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-nexus-blue text-white flex items-center justify-center text-label font-medium">
-                                            {index + 1}
-                                        </span>
-                                        <span className="flex-1 pt-0.5">{instruction}</span>
-                                    </li>
-                                ))}
-                            </ol>
+                            {groupItemsBySection(viewingRecipe.instructions).map((group, groupIdx) => (
+                                <div key={groupIdx} className="mb-4 last:mb-0">
+                                    {group.title && (
+                                        <h4 className="text-body-sm font-semibold text-nexus-blue border-b border-border/40 pb-1 mb-2 flex items-center gap-1.5">
+                                            <span className="w-2 h-2 rounded-full bg-nexus-blue inline-block"></span>
+                                            {group.title}
+                                        </h4>
+                                    )}
+                                    <ol className="space-y-3">
+                                        {group.items.map((instruction, index) => (
+                                            <li key={index} className="flex gap-3 text-body-sm">
+                                                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-nexus-blue text-white flex items-center justify-center text-label font-medium">
+                                                    {index + 1}
+                                                </span>
+                                                <span className="flex-1 pt-0.5">{instruction}</span>
+                                            </li>
+                                        ))}
+                                    </ol>
+                                </div>
+                            ))}
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-4 border-t">
-                            <Button variant="secondary" onClick={() => setDetailDialogOpen(false)}>
-                                {t('common:actions.close')}
-                            </Button>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 border-t">
                             <Button
-                                onClick={() => {
-                                    setDetailDialogOpen(false);
-                                    handleEdit(viewingRecipe);
-                                }}
+                                variant="secondary"
+                                onClick={() => openShoppingModal(viewingRecipe)}
+                                title={t('recipes:shopping.button')}
+                                className="w-full sm:w-auto whitespace-nowrap"
                             >
-                                <Edit2 className="h-4 w-4 mr-2" />
-                                {t('common:actions.edit')}
+                                <ShoppingCart className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
+                                {t('recipes:shopping.button')}
                             </Button>
+                            <div className="flex gap-2 w-full sm:w-auto">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setDetailDialogOpen(false)}
+                                    className="flex-1 sm:flex-none whitespace-nowrap"
+                                >
+                                    {t('common:actions.close')}
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        setDetailDialogOpen(false);
+                                        handleEdit(viewingRecipe);
+                                    }}
+                                    className="flex-1 sm:flex-none whitespace-nowrap"
+                                >
+                                    <Edit2 className="h-4 w-4 mr-2 flex-shrink-0" />
+                                    {t('common:actions.edit')}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </Dialog>
             )}
+
+            {/* Shopping List Ingredient Selection Dialog */}
+            <Dialog
+                open={shoppingDialogOpen}
+                onOpenChange={setShoppingDialogOpen}
+                title={t('recipes:shopping.title')}
+                description={t('recipes:shopping.description', { recipe: shoppingRecipeName })}
+            >
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center pb-2 border-b">
+                        <span className="text-body-sm font-medium text-muted-foreground">
+                            {selectedIngredients.filter((i) => i.checked).length} de {selectedIngredients.length} selecionados
+                        </span>
+                        <Button type="button" variant="ghost" size="sm" onClick={toggleAllIngredients}>
+                            {selectedIngredients.every((i) => i.checked) ? t('recipes:shopping.deselectAll') : t('recipes:shopping.selectAll')}
+                        </Button>
+                    </div>
+
+                    <div className="max-h-72 overflow-y-auto space-y-3 pr-1">
+                        {selectedIngredients.map((item, idx) => (
+                            <div
+                                key={idx}
+                                className="flex items-center gap-3 p-2.5 rounded-lg border border-border/50 bg-card/40 hover:bg-muted/40 transition-colors"
+                            >
+                                <button
+                                    type="button"
+                                    className="focus:outline-none pt-0.5"
+                                    onClick={() => {
+                                        const updated = [...selectedIngredients];
+                                        updated[idx].checked = !updated[idx].checked;
+                                        setSelectedIngredients(updated);
+                                    }}
+                                >
+                                    {item.checked ? (
+                                        <CheckSquare className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                                    ) : (
+                                        <Square className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                                    )}
+                                </button>
+                                <div className="flex-1 space-y-1">
+                                    <Input
+                                        value={item.name}
+                                        disabled={!item.checked}
+                                        className="h-8 text-body-sm font-medium"
+                                        onChange={(e) => {
+                                            const updated = [...selectedIngredients];
+                                            updated[idx].name = e.target.value;
+                                            setSelectedIngredients(updated);
+                                        }}
+                                    />
+                                    {item.original !== item.name && (
+                                        <p className="text-label text-muted-foreground pl-1">
+                                            {t('recipes:shopping.original', { line: item.original })}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 border-t">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            disabled={sendingToShopping}
+                            onClick={() => setShoppingDialogOpen(false)}
+                        >
+                            {t('common:actions.cancel')}
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={sendingToShopping || selectedIngredients.filter((i) => i.checked).length === 0}
+                            onClick={submitAddToShopping}
+                        >
+                            <ShoppingCart className="w-4 h-4 mr-2" />
+                            {sendingToShopping ? t('recipes:shopping.sending') : t('recipes:shopping.submit')}
+                        </Button>
+                    </div>
+                </div>
+            </Dialog>
         </div>
     );
 };

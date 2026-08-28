@@ -78,6 +78,35 @@
       "fetch": "无法获取此页面，请检查链接后重试。"
     }
   },
+  "shopping": {
+    "button": "添加到购物清单",
+    "title": "添加到购物清单",
+    "description": "从“{{recipe}}”中选择要添加到购物清单的食材。",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "submit": "添加到清单",
+    "sending": "正在添加…",
+    "successTitle": "购物清单已更新",
+    "successDescription_one": "已将 {{count}} 项食材添加到清单。",
+    "successDescription_other": "已将 {{count}} 项食材添加到清单。",
+    "duplicates_one": "其中 {{count}} 项已在清单中。",
+    "duplicates_other": "其中 {{count}} 项已在清单中。",
+    "errorTitle": "添加失败",
+    "error": "无法添加这些食材，请重试。",
+    "original": "食谱：{{line}}"
+  },
+  "refine": {
+    "button": "使用 AI 优化",
+    "hint": "使用已配置的 AI 整理标题、食材和步骤",
+    "refining": "正在优化…",
+    "successTitle": "食谱已优化",
+    "successDescription": "已重新整理分区与步骤。请检查后保存。",
+    "notConfiguredTitle": "未配置 AI",
+    "notConfigured": "请在“设置 → AI 助手”中启用并配置 AI 助手。",
+    "errorTitle": "优化失败",
+    "error": "AI 助手未响应。请检查配置后重试。",
+    "cost": "{{total}} 个 token（输入 {{in}} / 输出 {{out}}）"
+  },
   "detail": {
     "prep": "准备：",
     "cook": "烹饪：",

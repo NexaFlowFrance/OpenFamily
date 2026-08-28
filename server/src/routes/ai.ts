@@ -3,7 +3,7 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
 import { encryptCredentials, decryptCredentials } from '../utils/crypto';
 import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
-import { aiComplete, AiError, DEFAULT_BASE_URLS, type AiProvider, type AiSettings } from '../services/ai';
+import { aiComplete, aiCompleteWithUsage, AiError, DEFAULT_BASE_URLS, type AiProvider, type AiSettings } from '../services/ai';
 import {
     PARSE_SCHEMA,
     MEALS_SCHEMA,
@@ -11,6 +11,9 @@ import {
     buildMealsPrompt,
     validateParsedItems,
     validateMealProposals,
+    REFINE_RECIPE_SCHEMA,
+    buildRefineRecipePrompt,
+    validateRefinedRecipe,
     type FamilyMemberRef,
     type RecipeRef,
 } from '../services/ai/assistant';
@@ -349,6 +352,52 @@ router.post('/suggest-meals', async (req: AuthRequest, res) => {
         res.json({ success: true, data: { proposals } });
     } catch (error) {
         handleAiError(res, error, 'suggest_meals');
+    }
+});
+
+// POST /api/ai/refine-recipe — any member: tidy up a rough recipe into the shape
+// the recipe form expects. Nothing is saved; the client prefills the form.
+// `usage` travels NEXT TO the recipe, never inside it: it is diagnostics, not data.
+router.post('/refine-recipe', async (req: AuthRequest, res) => {
+    try {
+        const settings = await requireConfiguredAi(req, res);
+        if (!settings) return;
+
+        const { text, name, description, ingredients, instructions } = req.body as {
+            text?: unknown; name?: unknown; description?: unknown;
+            ingredients?: unknown; instructions?: unknown;
+        };
+
+        const asLines = (value: unknown): string =>
+            Array.isArray(value) ? value.filter((v) => typeof v === 'string').join('\n')
+                : typeof value === 'string' ? value : '';
+
+        // Either a raw pasted block, or the fields currently in the form.
+        const rawText = typeof text === 'string' ? text.trim() : '';
+        const recipeText = rawText || [
+            typeof name === 'string' ? name : '',
+            typeof description === 'string' ? description : '',
+            asLines(ingredients),
+            asLines(instructions),
+        ].filter(Boolean).join('\n');
+
+        if (!recipeText.trim()) {
+            return res.status(400).json({ success: false, error: 'text est requis' });
+        }
+
+        // Offer the family's own (possibly customized) recipe categories to the model.
+        const familyCategories = await getFamilyCategories(req.userId!);
+
+        const { data: raw, usage } = await aiCompleteWithUsage(settings, {
+            system: buildRefineRecipePrompt(familyCategories.recipe),
+            user: recipeText.slice(0, 6000),
+            jsonSchema: REFINE_RECIPE_SCHEMA,
+        });
+
+        const recipe = validateRefinedRecipe(raw, familyCategories.recipe);
+        res.json({ success: true, data: { recipe }, usage });
+    } catch (error) {
+        handleAiError(res, error, 'refine_recipe');
     }
 });
 

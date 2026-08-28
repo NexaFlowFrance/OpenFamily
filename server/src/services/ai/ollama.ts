@@ -11,12 +11,13 @@ import {
     DEFAULT_BASE_URLS,
     type AiSettings,
     type AiCompletionRequest,
+    type TokenUsage,
 } from './index';
 
 export async function ollamaComplete(
     settings: AiSettings,
     request: AiCompletionRequest
-): Promise<Record<string, unknown>> {
+): Promise<{ data: Record<string, unknown>; usage: TokenUsage | null }> {
     const baseUrl = (settings.base_url || DEFAULT_BASE_URLS.ollama!).replace(/\/+$/, '');
 
     try {
@@ -56,12 +57,25 @@ export async function ollamaComplete(
         throw new AiError('AI_PROVIDER_ERROR', detail || `Ollama a répondu HTTP ${response.status}`);
     }
 
-    const data = (await response.json().catch(() => null)) as { message?: { content?: string } } | null;
+    const data = (await response.json().catch(() => null)) as {
+        message?: { content?: string };
+        prompt_eval_count?: number;
+        eval_count?: number;
+    } | null;
     const content = data?.message?.content;
     if (typeof content !== 'string' || !content.trim()) {
         throw new AiError('AI_INVALID_RESPONSE', 'Réponse Ollama vide');
     }
-    return extractJson(content);
+    const result = extractJson(content);
+    const pTokens = data?.prompt_eval_count ?? 0;
+    const cTokens = data?.eval_count ?? 0;
+    const usage = (pTokens || cTokens) ? {
+        prompt_tokens: pTokens,
+        completion_tokens: cTokens,
+        total_tokens: pTokens + cTokens,
+    } : null;
+
+    return { data: result, usage };
 }
 
 async function safeErrorText(response: Response): Promise<string> {

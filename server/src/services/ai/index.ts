@@ -98,11 +98,31 @@ export function extractJson(text: string): Record<string, unknown> {
     }
 }
 
+export interface TokenUsage {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+}
+
+export interface AiCompletionWithUsageResult {
+    data: Record<string, unknown>;
+    usage: TokenUsage | null;
+}
+
 /** Single entry point: run a JSON completion through the configured provider. */
 export async function aiComplete(
     settings: AiSettings,
     request: AiCompletionRequest
 ): Promise<Record<string, unknown>> {
+    const { data } = await aiCompleteWithUsage(settings, request);
+    return data;
+}
+
+/** Variant of aiComplete that also returns token usage metrics alongside the data object. */
+export async function aiCompleteWithUsage(
+    settings: AiSettings,
+    request: AiCompletionRequest
+): Promise<AiCompletionWithUsageResult> {
     switch (settings.provider) {
         case 'ollama':
             return ollamaComplete(settings, request);

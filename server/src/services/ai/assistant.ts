@@ -14,6 +14,7 @@ export const BUDGET_CATEGORIES = [
     'Logement', 'Alimentation', 'Transport', 'Santé', 'Loisirs',
     'Abonnements', 'Assurance', 'Enfants', 'Maison', 'Autre',
 ] as const;
+export const DEFAULT_RECIPE_CATEGORIES = ['Entrée', 'Plat', 'Dessert', 'Snack'] as const;
 
 export interface FamilyMemberRef {
     id: string;
@@ -395,4 +396,90 @@ export function validateMealProposals(
 
     // Keep the calendar order.
     return proposals.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// ── Recipe refinement ─────────────────────────────────────────────────────────
+// Cleans up a rough recipe (a pasted block, or the rough output of an import)
+// into the shape the recipe form expects. The recipe KEEPS its own language:
+// only the JSON keys and the category are ours.
+
+export const REFINE_RECIPE_SCHEMA: Record<string, unknown> = {
+    type: 'object',
+    additionalProperties: false,
+    required: ['name', 'category', 'ingredients', 'instructions'],
+    properties: {
+        name: { type: 'string' },
+        category: { type: 'string' },
+        description: { type: 'string' },
+        ingredients: { type: 'array', items: { type: 'string' } },
+        instructions: { type: 'array', items: { type: 'string' } },
+        prep_time: { type: 'number' },
+        cook_time: { type: 'number' },
+        servings: { type: 'number' },
+    },
+};
+
+export function buildRefineRecipePrompt(
+    // Families can customize their category lists (issue #68) — same rule as
+    // buildParsePrompt: offer THEIR categories, never the defaults.
+    recipeCategories: readonly string[] = DEFAULT_RECIPE_CATEGORIES,
+): string {
+    return [
+        `Tu es un chef professionnel. On te donne une recette en vrac ; réorganise-la proprement.`,
+        ``,
+        `Règle absolue : garde la recette dans SA langue d'origine (français, anglais, portugais…). Ne traduis ni les ingrédients, ni les étapes, ni le titre.`,
+        ``,
+        `- name : titre court et appétissant, dans la langue de la recette.`,
+        `- category : choisis exactement une valeur parmi ${recipeCategories.join('/')}.`,
+        `- description : 1 à 2 phrases, dans la langue de la recette.`,
+        `- ingredients : un ingrédient par entrée, avec sa quantité. Si la recette a des parties distinctes (pâte, garniture, nappage…), préfixe chaque entrée par la partie entre crochets, dans la langue de la recette : "[Pâte] 4 œufs", "[Massa] 4 ovos", "[Dough] 4 eggs".`,
+        `- instructions : les étapes dans l'ordre, une par entrée, même règle de préfixe.`,
+        `- prep_time, cook_time, servings : des nombres, uniquement si la recette les donne.`,
+        ``,
+        `N'invente rien : si la recette ne précise pas un temps ou un nombre de portions, omets le champ.`,
+        `Réponds UNIQUEMENT avec l'objet JSON, sans texte autour.`,
+    ].join('\n');
+}
+
+export interface RefinedRecipe {
+    name: string;
+    category: string;
+    description: string;
+    ingredients: string[];
+    instructions: string[];
+    prep_time: number | null;
+    cook_time: number | null;
+    servings: number | null;
+}
+
+const cleanStringList = (value: unknown, maxItems: number, maxLength: number): string[] => {
+    if (!Array.isArray(value)) return [];
+    const out: string[] = [];
+    for (const entry of value) {
+        const line = cleanString(entry, maxLength);
+        if (line) out.push(line);
+        if (out.length >= maxItems) break;
+    }
+    return out;
+};
+
+export function validateRefinedRecipe(
+    raw: Record<string, unknown>,
+    recipeCategories: readonly string[],
+): RefinedRecipe {
+    // The model is told to pick from the family's list, but nothing guarantees it
+    // does: fall back to the family's own first category rather than a hardcoded one.
+    const proposed = cleanString(raw.category, 50);
+    const category = recipeCategories.includes(proposed) ? proposed : recipeCategories[0];
+
+    return {
+        name: cleanString(raw.name, 255),
+        category,
+        description: cleanString(raw.description, 1000),
+        ingredients: cleanStringList(raw.ingredients, 100, 255),
+        instructions: cleanStringList(raw.instructions, 100, 2000),
+        prep_time: cleanPositiveNumber(raw.prep_time, 1440),
+        cook_time: cleanPositiveNumber(raw.cook_time, 1440),
+        servings: cleanPositiveNumber(raw.servings, 100),
+    };
 }

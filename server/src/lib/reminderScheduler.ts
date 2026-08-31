@@ -29,7 +29,9 @@ function buildTexts(appt: AppointmentRow, kind: '30min' | '1hour'): ReminderText
     // start_time is 'YYYY-MM-DDTHH:mm:ss' — extract HH:mm directly, no Date round-trip.
     const timeStr = appt.start_time.slice(11, 16);
     const suffix = `${timeStr}${appt.location ? ` · ${appt.location}` : ''}`;
-    const lang = appt.language === 'en' || appt.language === 'ru' || appt.language === 'zh' ? appt.language : 'fr';
+    const lang = appt.language === 'en' || appt.language === 'pt' || appt.language === 'ru' || appt.language === 'zh'
+        ? appt.language
+        : 'fr';
 
     if (lang === 'en') {
         return {
@@ -41,6 +43,12 @@ function buildTexts(appt: AppointmentRow, kind: '30min' | '1hour'): ReminderText
         return {
             title: `⏰ 提醒：${appt.title}`,
             body: `${kind === '30min' ? '30 分钟后' : '1 小时后'} — ${suffix}`,
+        };
+    }
+    if (lang === 'pt') {
+        return {
+            title: `⏰ Lembrete: ${appt.title}`,
+            body: `${kind === '30min' ? 'Em 30 minutos' : 'Em 1 hora'} — ${suffix}`,
         };
     }
     if (lang === 'ru') {

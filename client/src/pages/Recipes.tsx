@@ -530,7 +530,7 @@ const Recipes: React.FC = () => {
                                 className="lg:hidden flex-shrink-0 h-10 px-3 whitespace-nowrap"
                             >
                                 <Filter className="h-4 w-4 mr-1.5" />
-                                Filtros
+                                {t('recipes:filters.toggle')}
                                 {(filterCategory || filterDifficulty || filterDuration) && (
                                     <span className="ml-1.5 w-2 h-2 rounded-full bg-white inline-block" />
                                 )}
@@ -576,7 +576,7 @@ const Recipes: React.FC = () => {
                                     className="text-muted-foreground text-caption h-7 px-2"
                                 >
                                     <X className="h-3.5 w-3.5 mr-1" />
-                                    Limpar filtros
+                                    {t('recipes:filters.clear')}
                                 </Button>
                             </div>
                         )}
@@ -948,7 +948,10 @@ const Recipes: React.FC = () => {
                 <div className="space-y-4">
                     <div className="flex justify-between items-center pb-2 border-b">
                         <span className="text-body-sm font-medium text-muted-foreground">
-                            {selectedIngredients.filter((i) => i.checked).length} de {selectedIngredients.length} selecionados
+                            {t('recipes:shopping.selectedCount', {
+                                count: selectedIngredients.filter((i) => i.checked).length,
+                                total: selectedIngredients.length,
+                            })}
                         </span>
                         <Button type="button" variant="ghost" size="sm" onClick={toggleAllIngredients}>
                             {selectedIngredients.every((i) => i.checked) ? t('recipes:shopping.deselectAll') : t('recipes:shopping.selectAll')}

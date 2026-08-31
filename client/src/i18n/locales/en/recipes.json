@@ -24,6 +24,10 @@
   "allCategories": "All categories",
   "allDifficulties": "All difficulties",
   "anyDuration": "Any duration",
+  "filters": {
+    "toggle": "Filters",
+    "clear": "Clear filters"
+  },
   "empty": {
     "none": "No recipes yet. Create your first recipe!",
     "noMatch": "No recipe matches your search."
@@ -93,7 +97,8 @@
     "duplicates_other": "{{count}} were already there.",
     "errorTitle": "Could not add",
     "error": "These ingredients could not be added. Please try again.",
-    "original": "Recipe: {{line}}"
+    "original": "Recipe: {{line}}",
+    "selectedCount": "{{count}} of {{total}} selected"
   },
   "refine": {
     "button": "Refine with AI",

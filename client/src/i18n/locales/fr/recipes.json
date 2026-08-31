@@ -24,6 +24,10 @@
   "allCategories": "Toutes catégories",
   "allDifficulties": "Toutes difficultés",
   "anyDuration": "Toute durée",
+  "filters": {
+    "toggle": "Filtres",
+    "clear": "Effacer les filtres"
+  },
   "empty": {
     "none": "Aucune recette pour le moment. Créez votre première recette !",
     "noMatch": "Aucune recette ne correspond à votre recherche."
@@ -93,7 +97,8 @@
     "duplicates_other": "{{count}} y étaient déjà.",
     "errorTitle": "Échec de l'ajout",
     "error": "Impossible d'ajouter ces ingrédients. Réessayez.",
-    "original": "Recette : {{line}}"
+    "original": "Recette : {{line}}",
+    "selectedCount": "{{count}} sur {{total}} sélectionné(s)"
   },
   "refine": {
     "button": "Affiner avec l'IA",

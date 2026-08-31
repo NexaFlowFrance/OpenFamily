@@ -24,6 +24,10 @@
   "allCategories": "所有类别",
   "allDifficulties": "所有难度",
   "anyDuration": "不限时长",
+  "filters": {
+    "toggle": "筛选",
+    "clear": "清除筛选"
+  },
   "empty": {
     "none": "还没有食谱，创建第一份食谱吧！",
     "noMatch": "没有符合搜索条件的食谱。"
@@ -93,7 +97,8 @@
     "duplicates_other": "其中 {{count}} 项已在清单中。",
     "errorTitle": "添加失败",
     "error": "无法添加这些食材，请重试。",
-    "original": "食谱：{{line}}"
+    "original": "食谱：{{line}}",
+    "selectedCount": "已选择 {{count}}/{{total}}"
   },
   "refine": {
     "button": "使用 AI 优化",

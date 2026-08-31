@@ -33,6 +33,7 @@ const CURRENCIES = [
     { code: 'AUD', label: 'Australian Dollar ($)' },
     { code: 'JPY', label: 'Japanese Yen (¥)' },
     { code: 'CNY', label: 'Chinese Yuan (¥)' },
+    { code: 'RUB', label: 'Russian Ruble (₽)' },
     { code: 'INR', label: 'Indian Rupee (₹)' },
     { code: 'BRL', label: 'Brazilian Real (R$)' },
 ];

@@ -27,6 +27,11 @@ export const LANGUAGE_CONFIG: Record<string, LanguageConfig> = {
     },
     ru: {
         label: 'RU',
+        currencyDefault: {
+            replace: ['EUR', 'USD'],
+            with: 'RUB',
+            replaceMissing: true,
+        },
     },
     zh: {
         label: '中文',

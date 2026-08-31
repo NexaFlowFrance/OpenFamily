@@ -1,0 +1,55 @@
+{
+  "loading": "Загружаем меню…",
+  "title": "Планировщик питания",
+  "subtitle": "Планируйте питание на неделю",
+  "thisWeek": "Эта неделя",
+  "weekOf": "Неделя с {{start}} по {{end}}",
+  "mealTypes": {
+    "Petit-déjeuner": "Завтрак",
+    "Déjeuner": "Обед",
+    "Dîner": "Ужин",
+    "Snack": "Перекус"
+  },
+  "dialog": {
+    "editTitle": "Изменить приём пищи",
+    "addTitle": "Добавить приём пищи",
+    "descriptionFmt": "{{type}} — {{date}}"
+  },
+  "form": {
+    "mealType": "Тип приёма пищи",
+    "recipe": "Рецепт (необязательно)",
+    "noRecipe": "Без рецепта",
+    "customMeal": "Или своё блюдо",
+    "customMealPlaceholder": "например, домашняя пицца",
+    "notes": "Заметки (необязательно)",
+    "notesPlaceholder": "Дополнительные заметки…"
+  },
+  "shopping": {
+    "button": "Добавить ингредиенты в список покупок",
+    "dialogTitle": "Добавить ингредиенты в список покупок",
+    "dialogDescription": "Ингредиенты из рецептов, запланированных с {{start}} по {{end}}. Снимите отметки с того, что не нужно.",
+    "empty": "На этой неделе нет блюд с рецептами.",
+    "selectedCount": "Выбрано ингредиентов: {{selected}} из {{total}}",
+    "alreadyOnList": "уже есть в списке",
+    "confirm_one": "Добавить {{count}} ингредиент",
+    "confirm_few": "Добавить {{count}} ингредиента",
+    "confirm_many": "Добавить {{count}} ингредиентов",
+    "confirm_other": "Добавить {{count}} ингредиента",
+    "successTitle": "Ингредиенты добавлены",
+    "successDescription_one": "{{count}} товар добавлен в список покупок.",
+    "successDescription_few": "{{count}} товара добавлено в список покупок.",
+    "successDescription_many": "{{count}} товаров добавлено в список покупок.",
+    "successDescription_other": "{{count}} товара добавлено в список покупок.",
+    "partialTitle": "Некоторые ингредиенты добавить не удалось",
+    "partialDescription": "Добавлено: {{added}}, с ошибкой: {{failed}}.",
+    "errorTitle": "Не удалось добавить ингредиенты",
+    "errorDescription": "В список покупок ничего не добавлено. Попробуйте ещё раз."
+  },
+  "confirmDelete": "Удалить этот приём пищи?",
+  "errors": {
+    "loadPlans": "Не удалось загрузить план питания.",
+    "loadRecipes": "Не удалось загрузить рецепты.",
+    "save": "Не удалось сохранить приём пищи.",
+    "delete": "Не удалось удалить приём пищи."
+  }
+}

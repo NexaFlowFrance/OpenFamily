@@ -25,6 +25,9 @@ export const LANGUAGE_CONFIG: Record<string, LanguageConfig> = {
             replaceMissing: true,
         },
     },
+    ru: {
+        label: 'RU',
+    },
     zh: {
         label: '中文',
         currencyDefault: {

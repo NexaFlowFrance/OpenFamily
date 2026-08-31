@@ -11,7 +11,7 @@ interface AppointmentRow {
     /** Naive local timestamp string ('YYYY-MM-DDTHH:mm:ss') — see the pg type parser in db.ts */
     start_time: string;
     location?: string;
-    /** Recipient's preferred language ('fr' | 'en' | 'zh'), defaults to 'fr' */
+    /** Recipient's preferred language, defaults to 'fr' */
     language: string;
 }
 
@@ -29,7 +29,7 @@ function buildTexts(appt: AppointmentRow, kind: '30min' | '1hour'): ReminderText
     // start_time is 'YYYY-MM-DDTHH:mm:ss' — extract HH:mm directly, no Date round-trip.
     const timeStr = appt.start_time.slice(11, 16);
     const suffix = `${timeStr}${appt.location ? ` · ${appt.location}` : ''}`;
-    const lang = appt.language === 'en' || appt.language === 'zh' ? appt.language : 'fr';
+    const lang = appt.language === 'en' || appt.language === 'ru' || appt.language === 'zh' ? appt.language : 'fr';
 
     if (lang === 'en') {
         return {
@@ -41,6 +41,12 @@ function buildTexts(appt: AppointmentRow, kind: '30min' | '1hour'): ReminderText
         return {
             title: `⏰ 提醒：${appt.title}`,
             body: `${kind === '30min' ? '30 分钟后' : '1 小时后'} — ${suffix}`,
+        };
+    }
+    if (lang === 'ru') {
+        return {
+            title: `⏰ Напоминание: ${appt.title}`,
+            body: `${kind === '30min' ? 'Через 30 минут' : 'Через 1 час'} — ${suffix}`,
         };
     }
     return {

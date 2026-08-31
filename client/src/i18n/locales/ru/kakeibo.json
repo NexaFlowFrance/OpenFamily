@@ -1,0 +1,33 @@
+{
+  "mode": {
+    "classic": "Классический",
+    "kakeibo": "Какэйбо"
+  },
+  "availableTitle": "Доступно для расходов",
+  "availableSub": "доход {{income}} − цель накоплений {{goal}}",
+  "spentSoFar": "Потрачено: {{amount}}",
+  "householdIncome": "Доход семьи",
+  "extraIncome": "Дополнительный доход в этом месяце",
+  "totalIncome": "Общий доход",
+  "savingsGoal": "Цель накоплений",
+  "pillarsTitle": "Куда уходят деньги?",
+  "pillars": {
+    "survival": "Необходимое",
+    "wants": "Желания",
+    "culture": "Развитие",
+    "extra": "Непредвиденное"
+  },
+  "pillarHint": {
+    "survival": "основные нужды",
+    "wants": "удовольствия",
+    "culture": "саморазвитие",
+    "extra": "неожиданное"
+  },
+  "noExpenses": "В этом месяце расходы не записаны.",
+  "reviewTitle": "Итоги месяца",
+  "actualSavings": "Удалось накопить",
+  "goalReached": "Цель достигнута — на {{amount}} больше плана!",
+  "goalMissed": "До цели не хватает {{amount}}.",
+  "notesLabel": "Заметки для анализа",
+  "notesPlaceholder": "Что получилось хорошо? Что можно улучшить в следующем месяце?"
+}

@@ -1,0 +1,104 @@
+{
+  "loading": "Загружаем бюджет…",
+  "categories": {
+    "Logement": "Жильё",
+    "Alimentation": "Продукты",
+    "Transport": "Транспорт",
+    "Santé": "Здоровье",
+    "Loisirs": "Досуг",
+    "Abonnements": "Подписки",
+    "Assurance": "Страхование",
+    "Enfants": "Дети",
+    "Maison": "Дом",
+    "Autre": "Другое",
+    "Prélèvements": "Регулярные списания"
+  },
+  "readOnly": "Режим только для чтения. Изменять бюджет могут только родители.",
+  "alerts": {
+    "title": "Лимиты достигнуты",
+    "over": " · превышен",
+    "warn": " (≥ 80%)"
+  },
+  "balance": {
+    "current": "Текущий баланс",
+    "pointed_one": "Отмечено {{count}} списание",
+    "pointed_few": "Отмечено {{count}} списания",
+    "pointed_many": "Отмечено {{count}} списаний",
+    "pointed_other": "Отмечено {{count}} списания",
+    "expenses_one": "{{count}} расход",
+    "expenses_few": "{{count}} расхода",
+    "expenses_many": "{{count}} расходов",
+    "expenses_other": "{{count}} расхода"
+  },
+  "forecast": {
+    "title": "Прогноз",
+    "subtitle": "Осталось отметить списаний на {{amount}}"
+  },
+  "analytics": "Аналитика и лимиты",
+  "charts": {
+    "expensesByCategory": "Расходы по категориям",
+    "noExpenses": "В этом месяце расходов нет",
+    "yearEvolution": "Динамика за год",
+    "income": "Доходы",
+    "expenses": "Расходы",
+    "recurring": "Регулярные списания"
+  },
+  "limits": {
+    "title": "Месячные лимиты",
+    "subtitle": "Контроль расходов по категориям",
+    "define": "Задать",
+    "none": "Лимит не задан"
+  },
+  "sections": {
+    "recurring": "Регулярные",
+    "expenses": "Расходы",
+    "income": "Доходы"
+  },
+  "recurring": {
+    "empty": "Нет регулярных списаний",
+    "addOne": "+ Добавить списание",
+    "markOn": "Отметить списанным",
+    "markOff": "Снять отметку",
+    "dayPrefix": "день"
+  },
+  "empty": {
+    "expenses": "В этом месяце расходов нет",
+    "income": "В этом месяце доходов нет"
+  },
+  "sheets": {
+    "recurringEdit": "Изменить списание",
+    "recurringNew": "Новое списание",
+    "edit": "Изменить",
+    "newExpense": "Новый расход",
+    "newIncome": "Новый доход",
+    "limit": "Месячный лимит"
+  },
+  "toggle": {
+    "expense": "Расход",
+    "income": "Доход"
+  },
+  "fields": {
+    "name": "Название списания",
+    "namePlaceholder": "например, аренда, электричество, Netflix…",
+    "amount": "Сумма ({{currency}})",
+    "debitDay": "День списания в месяце (от 1 до 31)",
+    "debitDayPlaceholder": "например, 5",
+    "description": "Описание (необязательно)",
+    "descriptionPlaceholder": "например, продукты, зарплата…",
+    "date": "Дата",
+    "category": "Категория",
+    "limit": "Месячный лимит ({{currency}})",
+    "limitHint": "Укажите 0, чтобы отключить контроль этой категории."
+  },
+  "errors": {
+    "amountInvalid": "Некорректная сумма.",
+    "nameRequired": "Укажите название.",
+    "debitDayInvalid": "Некорректный день списания (1–31).",
+    "save": "Не удалось сохранить.",
+    "limitInvalid": "Некорректный лимит."
+  },
+  "confirm": {
+    "deleteRecurring": "Удалить это регулярное списание?",
+    "deleteEntry": "Удалить эту запись?"
+  }
+}

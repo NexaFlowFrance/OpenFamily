@@ -1,0 +1,86 @@
+{
+  "title": "Интеграции",
+  "subtitle": "Подключите свои сервисы, чтобы собрать рецепты, меню, покупки и календарь в одном месте.",
+  "connected": "Подключено",
+  "available": "Доступно",
+  "status": {
+    "error": "Ошибка",
+    "connected": "Подключено"
+  },
+  "lastSync": "Синхронизировано {{date}}",
+  "syncTitle": "Синхронизировать",
+  "disconnectTitle": "Отключить",
+  "confirmDisconnect": "Отключить эту интеграцию?",
+  "modal": {
+    "connect": "Подключить {{name}}",
+    "test": "Проверить",
+    "testing": "Проверяем…",
+    "connecting": "Подключаем…",
+    "connectBtn": "Подключить",
+    "encrypted": "Учётные данные защищены шифрованием AES-256 и хранятся только на вашем сервере.",
+    "error": "Ошибка"
+  },
+  "syncs": {
+    "recipes": "Рецепты",
+    "menus": "Меню",
+    "shopping": "Список покупок",
+    "stock": "Запасы",
+    "calendar": "Календарь",
+    "appointments": "События",
+    "photos": "Фотографии"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "Менеджер рецептов",
+      "description": "Импортируйте рецепты и меню из своего экземпляра Mealie.",
+      "urlLabel": "Адрес экземпляра",
+      "urlPlaceholder": "https://mealie.mydomain.com",
+      "keyLabel": "API-ключ",
+      "keyPlaceholder": "Mealie > Профиль > API-ключи"
+    },
+    "tandoor": {
+      "tagline": "Книга рецептов",
+      "description": "Импортируйте рецепты из открытого менеджера Tandoor.",
+      "urlLabel": "Адрес экземпляра",
+      "urlPlaceholder": "https://tandoor.mydomain.com",
+      "keyLabel": "API-токен",
+      "keyPlaceholder": "Tandoor > Настройки > Токены"
+    },
+    "homeassistant": {
+      "tagline": "Умный дом",
+      "description": "Синхронизируйте список покупок со списком Home Assistant.",
+      "urlLabel": "Адрес экземпляра",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "Долгосрочный токен",
+      "tokenPlaceholder": "eyJ… (Профиль > Безопасность)",
+      "entityLabel": "Сущность списка дел (необязательно)",
+      "entityPlaceholder": "todo.shopping_list"
+    },
+    "grocy": {
+      "tagline": "Управление хозяйством",
+      "description": "Синхронизируйте список покупок и запасы из Grocy.",
+      "urlLabel": "Адрес экземпляра",
+      "urlPlaceholder": "https://grocy.mydomain.com",
+      "keyLabel": "API-ключ",
+      "keyPlaceholder": "Grocy > Управление > API-ключи"
+    },
+    "nextcloud": {
+      "tagline": "Персональное облако",
+      "description": "Импортируйте события календаря Nextcloud в семейный календарь.",
+      "urlLabel": "Адрес Nextcloud",
+      "urlPlaceholder": "https://cloud.mydomain.com",
+      "userLabel": "Имя пользователя",
+      "userPlaceholder": "ваше.имя",
+      "passwordLabel": "Пароль или пароль приложения",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "Фотобиблиотека",
+      "description": "Показывайте случайные фотографии из своей библиотеки Immich как фон в режиме киоска.",
+      "urlLabel": "Адрес экземпляра",
+      "urlPlaceholder": "https://immich.mydomain.com",
+      "keyLabel": "API-ключ",
+      "keyPlaceholder": "Immich > Настройки аккаунта > API-ключи"
+    }
+  }
+}

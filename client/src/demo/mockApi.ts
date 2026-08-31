@@ -294,7 +294,7 @@ async function route(method: string, path: string, q: Record<string, string>, bo
         return ok({ token: 'demo-token', user: store.user });
     if (path === '/api/auth/currency') { store.user = { ...store.user, currency: body.currency }; return ok({ user: store.user }); }
     if (path === '/api/auth/language') {
-        if (body.language !== 'fr' && body.language !== 'en' && body.language !== 'zh') throw new Error('Invalid language'); // mirrors the server's 400
+        if (!['fr', 'en', 'pt', 'ru', 'zh'].includes(String(body.language))) throw new Error('Invalid language'); // mirrors the server's 400
         store.user = { ...store.user, language: body.language };
         return ok({ user: store.user });
     }

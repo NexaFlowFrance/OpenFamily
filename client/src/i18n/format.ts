@@ -1,12 +1,12 @@
 import type { Locale } from 'date-fns';
-import { enUS, fr, es, de, it, ptBR, nl, zhCN } from 'date-fns/locale';
+import { enUS, fr, es, de, it, ptBR, nl, ru, zhCN } from 'date-fns/locale';
 import i18n from './index';
 
 // date-fns locales for the languages we may ship. Adding a new app language
 // only needs an extra entry here (falls back to English otherwise).
-const DATE_LOCALES: Record<string, Locale> = { en: enUS, fr, es, de, it, pt: ptBR, nl, zh: zhCN };
+const DATE_LOCALES: Record<string, Locale> = { en: enUS, fr, es, de, it, pt: ptBR, nl, ru, zh: zhCN };
 // BCP-47 tags for Intl.* — falls back to the bare language code.
-const INTL_TAGS: Record<string, string> = { pt: 'pt-BR', en: 'en-US', fr: 'fr-FR', zh: 'zh-CN' };
+const INTL_TAGS: Record<string, string> = { pt: 'pt-BR', en: 'en-US', fr: 'fr-FR', ru: 'ru-RU', zh: 'zh-CN' };
 
 const lang = () => (i18n.language || 'en').split('-')[0];
 

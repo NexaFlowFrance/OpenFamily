@@ -48,10 +48,14 @@ const getTransporter = (): Transporter => {
     return transporter;
 };
 
-type Language = 'fr' | 'en';
+type Language = 'fr' | 'en' | 'ru';
 
-const normalizeLanguage = (language?: string | null): Language =>
-    language?.trim().toLowerCase().startsWith('en') ? 'en' : 'fr';
+const normalizeLanguage = (language?: string | null): Language => {
+    const normalized = language?.trim().toLowerCase() ?? '';
+    if (normalized.startsWith('en')) return 'en';
+    if (normalized.startsWith('ru')) return 'ru';
+    return 'fr';
+};
 
 /** Escape characters that would break out of HTML text nodes or attributes. */
 const escapeHtml = (value: string): string =>
@@ -214,7 +218,7 @@ const deliver = async (to: string, content: EmailContent, kind: string): Promise
 };
 
 const formatDate = (date: Date, lang: Language): string =>
-    new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'fr-FR', {
+    new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : lang === 'ru' ? 'ru-RU' : 'fr-FR', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
@@ -298,6 +302,44 @@ export const sendFamilyInviteEmail = async (
                 signoff: 'See you soon,',
                 team: 'The OpenFamily team',
                 footer: 'OpenFamily, your open source family organiser. You receive this email because an OpenFamily member invited this address to join their family.',
+            }),
+        };
+    } else if (lang === 'ru') {
+        const text = [
+            `${inviterName} приглашает вас присоединиться к своей семье в OpenFamily.`,
+            '',
+            'OpenFamily объединяет семейный календарь, покупки, задачи, питание и бюджет в одном общем пространстве — без рекламы и отслеживания.',
+            '',
+            `Чтобы принять приглашение, откройте ссылку и создайте аккаунт или войдите в существующий: ${joinUrl}`,
+            '',
+            `Приглашение действует до ${expires}. Если вы не знаете пользователя ${inviterName}, просто проигнорируйте это письмо.`,
+            '',
+            'До встречи,',
+            'Команда OpenFamily',
+        ].join('\n');
+        content = {
+            subject: `${inviterName} приглашает вас в свою семью в OpenFamily`,
+            text,
+            html: renderEmailHtml({
+                lang: 'ru',
+                subject: `${inviterName} приглашает вас в свою семью в OpenFamily`,
+                tagline: 'Семейная жизнь в полном порядке.',
+                preheader: 'Присоединитесь к своей семье в OpenFamily за несколько шагов.',
+                greeting: `${name} приглашает вас`,
+                intro: `${name} приглашает вас в семейное пространство OpenFamily: общий календарь, покупки, задачи, питание и бюджет в одном месте, без рекламы и отслеживания.`,
+                cta: { label: 'Присоединиться к семье', url: joinUrl },
+                stepsIntro: 'Как принять приглашение:',
+                stepsHtml: [
+                    'Нажмите кнопку «Присоединиться к семье» выше.',
+                    'Создайте аккаунт или войдите в существующий — он автоматически будет добавлен в семью.',
+                    'Готово: общие семейные данные появятся сразу.',
+                ],
+                noteText: `Приглашение действует до ${escapeHtml(expires)}. Если кнопка не работает, скопируйте эту ссылку в браузер: ${linkHtml}. Если вы не знаете пользователя ${name}, просто проигнорируйте письмо.`,
+                service: { label: 'Адрес сервиса', url: originOf(joinUrl), host },
+                supportHtml: `Остались вопросы? Напишите на <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}" style="color:#dc4a60;text-decoration:none;font-weight:600;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
+                signoff: 'До встречи,',
+                team: 'Команда OpenFamily',
+                footer: 'OpenFamily — семейный органайзер с открытым исходным кодом. Вы получили это письмо, потому что пользователь OpenFamily пригласил этот адрес присоединиться к своей семье.',
             }),
         };
     } else {
@@ -395,6 +437,39 @@ export const sendPasswordResetEmail = async (
                 signoff: 'See you soon,',
                 team: 'The OpenFamily team',
                 footer: 'OpenFamily, your open source family organiser. You receive this email because a password reset was requested for this account.',
+            }),
+        };
+    } else if (lang === 'ru') {
+        const greetingName = cleanName ? `Здравствуйте, ${cleanName}` : 'Здравствуйте';
+        const text = [
+            `${greetingName}!`,
+            '',
+            `Для вашего аккаунта OpenFamily (${email}) запрошен сброс пароля.`,
+            '',
+            `Чтобы выбрать новый пароль, откройте эту ссылку: ${resetUrl}`,
+            '',
+            'Ссылка действует 60 минут и может быть использована только один раз. Если вы не запрашивали сброс, проигнорируйте письмо — ваш пароль не изменится.',
+            '',
+            'До встречи,',
+            'Команда OpenFamily',
+        ].join('\n');
+        content = {
+            subject: 'Сброс пароля OpenFamily',
+            text,
+            html: renderEmailHtml({
+                lang: 'ru',
+                subject: 'Сброс пароля OpenFamily',
+                tagline: 'Семейная жизнь в полном порядке.',
+                preheader: 'Выберите новый пароль для аккаунта OpenFamily.',
+                greeting: escapeHtml(greetingName),
+                intro: `Для вашего аккаунта OpenFamily (<span style="font-weight:700;color:#2a2028;">${escapeHtml(email)}</span>) запрошен сброс пароля. Нажмите кнопку ниже, чтобы выбрать новый пароль.`,
+                cta: { label: 'Выбрать новый пароль', url: resetUrl },
+                noteText: `Ссылка действует 60 минут и может быть использована только один раз. Если кнопка не работает, скопируйте эту ссылку в браузер: ${linkHtml}. Если вы не запрашивали сброс, проигнорируйте письмо — ваш пароль не изменится.`,
+                service: { label: 'Адрес сервиса', url: originOf(resetUrl), host },
+                supportHtml: `Остались вопросы? Напишите на <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}" style="color:#dc4a60;text-decoration:none;font-weight:600;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
+                signoff: 'До встречи,',
+                team: 'Команда OpenFamily',
+                footer: 'OpenFamily — семейный органайзер с открытым исходным кодом. Вы получили это письмо, потому что для этого аккаунта был запрошен сброс пароля.',
             }),
         };
     } else {

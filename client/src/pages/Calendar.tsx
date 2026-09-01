@@ -31,6 +31,7 @@ interface Appointment {
     reminder_1hour: boolean;
     notes?: string;
     color?: string;
+    is_all_day?: boolean;
 }
 
 interface FamilyMember {
@@ -169,6 +170,7 @@ const Calendar: React.FC = () => {
         reminder_1hour: false,
         notes: '',
         color: '#DC4A60',
+        is_all_day: false,
         recurrence_frequency: 'none' as 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly',
         recurrence_interval: 1,
         recurrence_until: '',
@@ -294,10 +296,29 @@ const Calendar: React.FC = () => {
             return;
         }
 
-        if (formData.end_time && new Date(formData.end_time).getTime() < new Date(formData.start_time).getTime()) {
+        if (
+            !formData.is_all_day
+            && formData.end_time
+            && new Date(formData.end_time).getTime() < new Date(formData.start_time).getTime()
+        ) {
             setError(t('calendar:errors.endAfterStart'));
             return;
         }
+
+        // An all-day appointment still stores real times, spanning the day it
+        // starts on, so every existing query and the agenda views keep working.
+        // Its reminders are cleared: "30 minutes before" means nothing without a
+        // start time the user chose.
+        const day = formData.start_time.slice(0, 10);
+        const payload = formData.is_all_day
+            ? {
+                ...formData,
+                start_time: `${day}T00:00`,
+                end_time: `${day}T23:59`,
+                reminder_30min: false,
+                reminder_1hour: false,
+            }
+            : formData;
 
         try {
             if (
@@ -307,7 +328,7 @@ const Calendar: React.FC = () => {
                 setRecurrenceScopeAction({
                     mode: 'edit',
                     appointment: editingAppointment,
-                    payload: { ...formData },
+                    payload: { ...payload },
                     returnToEditor: true,
                 });
                 setDialogOpen(false);
@@ -315,9 +336,9 @@ const Calendar: React.FC = () => {
             }
 
             if (editingAppointment) {
-                await api.put(`/api/appointments/${editingAppointment.id}`, formData);
+                await api.put(`/api/appointments/${editingAppointment.id}`, payload);
             } else {
-                await api.post('/api/appointments', formData);
+                await api.post('/api/appointments', payload);
             }
 
             setDialogOpen(false);
@@ -454,6 +475,7 @@ const Calendar: React.FC = () => {
             reminder_1hour: appointment.reminder_1hour,
             notes: appointment.notes || '',
             color: appointment.color || '#DC4A60',
+            is_all_day: Boolean(appointment.is_all_day),
             recurrence_frequency: appointment.recurrence_frequency || 'none',
             recurrence_interval: appointment.recurrence_interval || 1,
             recurrence_until: appointment.recurrence_until
@@ -502,6 +524,7 @@ const Calendar: React.FC = () => {
             reminder_1hour: false,
             notes: '',
             color: '#DC4A60',
+            is_all_day: false,
             recurrence_frequency: 'none',
             recurrence_interval: 1,
             recurrence_until: '',
@@ -960,33 +983,50 @@ const Calendar: React.FC = () => {
                         </div>
                     </div>
                     <div className="rounded-input border border-border bg-surface-2/40 p-3">
-                        <p className="mb-3 text-caption font-medium text-foreground">{t('calendar:form.scheduling')}</p>
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                            <p className="text-caption font-medium text-foreground">{t('calendar:form.scheduling')}</p>
+                            <label className="flex cursor-pointer items-center gap-2 text-caption text-foreground">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-input"
+                                    checked={formData.is_all_day}
+                                    onChange={(e) => setFormData({ ...formData, is_all_day: e.target.checked })}
+                                />
+                                {t('calendar:form.allDay')}
+                            </label>
+                        </div>
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <DatePicker
                                 label={t('calendar:form.startDate')}
                                 value={selectedDate}
                                 onChange={handleDateChange}
                             />
-                            <Input
-                                label={t('calendar:form.startTime')}
-                                type="time"
-                                value={selectedStartTime}
-                                onChange={(e) => handleStartTimeChange(e.target.value)}
-                                required
-                            />
-                            <DatePicker
-                                label={t('calendar:form.endDate')}
-                                value={selectedEndDate}
-                                onChange={handleEndDateChange}
-                            />
-                            <Input
-                                label={t('calendar:form.endTime')}
-                                type="time"
-                                value={selectedEndTime}
-                                onChange={(e) => handleEndTimeChange(e.target.value)}
-                            />
+                            {/* An all-day appointment spans its whole day, so the times are
+                                computed on submit and there is nothing to ask for here. */}
+                            {!formData.is_all_day && (
+                                <>
+                                    <Input
+                                        label={t('calendar:form.startTime')}
+                                        type="time"
+                                        value={selectedStartTime}
+                                        onChange={(e) => handleStartTimeChange(e.target.value)}
+                                        required
+                                    />
+                                    <DatePicker
+                                        label={t('calendar:form.endDate')}
+                                        value={selectedEndDate}
+                                        onChange={handleEndDateChange}
+                                    />
+                                    <Input
+                                        label={t('calendar:form.endTime')}
+                                        type="time"
+                                        value={selectedEndTime}
+                                        onChange={(e) => handleEndTimeChange(e.target.value)}
+                                    />
+                                </>
+                            )}
                         </div>
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        <div className={`mt-3 flex-wrap gap-2 ${formData.is_all_day ? 'hidden' : 'flex'}`}>
                             <Button type="button" variant="ghost" size="sm" onClick={() => applyDurationPreset(30)}>
                                 +30 min
                             </Button>
@@ -1126,7 +1166,9 @@ const Calendar: React.FC = () => {
                             </div>
                         )}
                     </div>
-                    <div className="space-y-2">
+                    {/* Reminders are relative to a start time the user picked, so they
+                        have nothing to count down from on an all-day appointment. */}
+                    <div className={`space-y-2 ${formData.is_all_day ? 'hidden' : ''}`}>
                         <label className="block text-label font-medium text-foreground">{t('calendar:form.reminders')}</label>
                         <div className="flex items-center gap-4">
                             <label className="flex items-center gap-2 cursor-pointer">

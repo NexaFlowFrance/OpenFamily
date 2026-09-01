@@ -33,7 +33,20 @@
     "reminder30": "30 minutes before",
     "reminder1h": "1 hour before",
     "notes": "Notes (optional)",
-    "notesPlaceholder": "Additional notes…"
+    "notesPlaceholder": "Additional notes…",
+    "color": "Colour",
+    "repeat": "Repeat",
+    "repeatNone": "Does not repeat",
+    "repeatDaily": "Daily",
+    "repeatWeekly": "Weekly",
+    "repeatMonthly": "Monthly",
+    "repeatYearly": "Yearly",
+    "repeatUntil": "Repeat until (optional)",
+    "repeatEvery": "Every",
+    "repeatDays": "day(s)",
+    "repeatWeeks": "week(s)",
+    "repeatMonths": "month(s)",
+    "repeatYears": "year(s)"
   },
   "feed": {
     "title": "Export calendar (iCal)",
@@ -56,5 +69,26 @@
     "endAfterStart": "The end time must be after the start time.",
     "save": "Unable to save this appointment.",
     "delete": "Unable to delete this appointment."
+  },
+  "recurrenceScope": {
+    "editTitle": "Edit recurring appointment",
+    "editDescription": "Apply these changes to this occurrence only, or to the whole series?",
+    "deleteTitle": "Delete recurring appointment",
+    "deleteDescription": "Delete this occurrence only, or the whole series?",
+    "thisOccurrence": "This occurrence",
+    "allOccurrences": "The whole series"
+  },
+  "search": {
+    "placeholder": "Search appointments...",
+    "clear": "Clear search",
+    "resultCount": "{{count}} matching appointment(s)",
+    "noResults": "No appointment matches your search."
+  },
+  "dayAction": {
+    "choiceDescription": "This date already has appointments. What would you like to do?",
+    "displayDescription": "Appointments on this date",
+    "display": "Show appointments",
+    "add": "Add an appointment",
+    "back": "Back"
   }
 }

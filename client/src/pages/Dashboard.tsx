@@ -25,6 +25,7 @@ interface DashboardStats {
 
 interface Appointment {
     id: string;
+    occurrence_id?: string;
     title: string;
     description?: string;
     start_time: string;
@@ -226,7 +227,7 @@ const Dashboard: React.FC = () => {
                             )}
                             <div className="rounded-card border border-border bg-card divide-y divide-border overflow-hidden">
                                 {group.items.map((appt) => (
-                                    <div key={appt.id} className="grid grid-cols-[72px_1fr_auto] gap-4 items-center px-5 py-4">
+                                    <div key={appt.occurrence_id || appt.id} className="grid grid-cols-[72px_1fr_auto] gap-4 items-center px-5 py-4">
                                         <div className="font-serif text-body text-muted-foreground tabular-nums">
                                             {fmtTime(appt.start_time)}
                                         </div>

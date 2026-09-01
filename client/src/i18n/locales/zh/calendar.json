@@ -33,7 +33,20 @@
     "reminder30": "提前 30 分钟",
     "reminder1h": "提前 1 小时",
     "notes": "备注（可选）",
-    "notesPlaceholder": "更多备注……"
+    "notesPlaceholder": "更多备注……",
+    "color": "颜色",
+    "repeat": "重复",
+    "repeatNone": "不重复",
+    "repeatDaily": "每天",
+    "repeatWeekly": "每周",
+    "repeatMonthly": "每月",
+    "repeatYearly": "每年",
+    "repeatUntil": "重复至（可选）",
+    "repeatEvery": "每",
+    "repeatDays": "天",
+    "repeatWeeks": "周",
+    "repeatMonths": "个月",
+    "repeatYears": "年"
   },
   "feed": {
     "title": "导出日历（iCal）",
@@ -56,5 +69,26 @@
     "endAfterStart": "结束时间必须晚于开始时间。",
     "save": "无法保存此日程。",
     "delete": "无法删除此日程。"
+  },
+  "recurrenceScope": {
+    "editTitle": "修改重复日程",
+    "editDescription": "仅修改此次日程，还是修改整个系列？",
+    "deleteTitle": "删除重复日程",
+    "deleteDescription": "仅删除此次日程，还是删除整个系列？",
+    "thisOccurrence": "仅此次",
+    "allOccurrences": "整个系列"
+  },
+  "search": {
+    "placeholder": "搜索日程…",
+    "clear": "清除搜索",
+    "resultCount": "找到 {{count}} 项日程",
+    "noResults": "没有符合搜索条件的日程。"
+  },
+  "dayAction": {
+    "choiceDescription": "该日期已有日程，您想做什么？",
+    "displayDescription": "该日期的日程",
+    "display": "查看日程",
+    "add": "添加日程",
+    "back": "返回"
   }
 }

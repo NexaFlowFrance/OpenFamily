@@ -3,14 +3,23 @@ import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { apiBase } from '../lib/serverConfig';
-import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw } from 'lucide-react';
-import { Card, CardContent, Button, Dialog, Input, Textarea, Badge } from '../components/ui';
+import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw, Search, X } from 'lucide-react';
+import { Card, CardContent, Button, Dialog, Input, Textarea, Badge, Select, DatePicker } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
 import { dateLocale } from '../i18n/format';
 import { useNavigate } from 'react-router-dom';
 
 interface Appointment {
     id: string;
+    occurrence_id?: string;
+    series_id?: string;
+    occurrence_date?: string;
+    is_recurring_occurrence?: boolean;
+    series_start_time?: string;
+    series_end_time?: string;
+    recurrence_frequency?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+    recurrence_interval?: number;
+    recurrence_until?: string;
     title: string;
     description?: string;
     start_time: string;
@@ -21,6 +30,7 @@ interface Appointment {
     reminder_30min: boolean;
     reminder_1hour: boolean;
     notes?: string;
+    color?: string;
 }
 
 interface FamilyMember {
@@ -57,10 +67,85 @@ const addMinutes = (dateTime: string, minutes: number) => {
     return format(base, "yyyy-MM-dd'T'HH:mm");
 };
 
+const naiveDateTimeMs = (value?: string): number | null => {
+    if (!value) return null;
+
+    const match = value.replace(' ', 'T').match(
+        /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/
+    );
+
+    if (!match) return null;
+
+    const [, year, month, day, hour, minute, second = '0'] = match;
+
+    return Date.UTC(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second)
+    );
+};
+
+const formatNaiveDateTimeMs = (value: number): string => {
+    const date = new Date(value);
+    const pad = (part: number) => String(part).padStart(2, '0');
+
+    return [
+        date.getUTCFullYear(),
+        '-',
+        pad(date.getUTCMonth() + 1),
+        '-',
+        pad(date.getUTCDate()),
+        'T',
+        pad(date.getUTCHours()),
+        ':',
+        pad(date.getUTCMinutes()),
+    ].join('');
+};
+
+const shiftSeriesDateTime = (
+    seriesValue: string | undefined,
+    occurrenceValue: string | undefined,
+    editedValue: string
+): string => {
+    const seriesMs = naiveDateTimeMs(seriesValue);
+    const occurrenceMs = naiveDateTimeMs(occurrenceValue);
+    const editedMs = naiveDateTimeMs(editedValue);
+
+    if (seriesMs === null || occurrenceMs === null || editedMs === null) {
+        return editedValue;
+    }
+
+    return formatNaiveDateTimeMs(seriesMs + (editedMs - occurrenceMs));
+};
+
+const APPOINTMENT_COLORS = [
+    { name: 'Red', color: '#DC2626' },
+    { name: 'Orange', color: '#F97316' },
+    { name: 'Yellow', color: '#EAB308' },
+    { name: 'Lime', color: '#84CC16' },
+    { name: 'Green', color: '#22C55E' },
+    { name: 'Dark Green', color: '#166534' },
+    { name: 'Aqua', color: '#2DD4BF' },
+    { name: 'Cyan', color: '#06B6D4' },
+    { name: 'Blue', color: '#3B82F6' },
+    { name: 'Navy', color: '#1E3A8A' },
+    { name: 'Purple', color: '#7C3AED' },
+    { name: 'Violet', color: '#A855F7' },
+    { name: 'Pink', color: '#EC4899' },
+    { name: 'Magenta', color: '#C026D3' },
+    { name: 'Brown', color: '#92400E' },
+    { name: 'Black', color: '#111827' },
+] as const;
+
 const Calendar: React.FC = () => {
     const { t } = useTranslation(['calendar', 'common']);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -83,13 +168,48 @@ const Calendar: React.FC = () => {
         reminder_30min: false,
         reminder_1hour: false,
         notes: '',
+        color: '#DC4A60',
+        recurrence_frequency: 'none' as 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly',
+        recurrence_interval: 1,
+        recurrence_until: '',
     });
+
+    const [recurrenceScopeAction, setRecurrenceScopeAction] = useState<{
+        mode: 'edit' | 'delete';
+        appointment: Appointment;
+        payload?: any;
+        returnToEditor: boolean;
+    } | null>(null);
+
+    const [dayAction, setDayAction] = useState<{
+        date: Date;
+        appointments: Appointment[];
+        mode: 'choice' | 'display';
+    } | null>(null);
 
     useEffect(() => {
         loadAppointments();
+        loadAllAppointments();
         loadFamilyMembers();
     }, [currentDate]);
-    useWebSocketUpdates('appointments', () => { void loadAppointments(); });
+
+    useWebSocketUpdates('appointments', () => {
+        void loadAppointments();
+        void loadAllAppointments();
+    });
+
+    const loadAllAppointments = async () => {
+        try {
+            const response = await api.get<{ success: boolean; data: Appointment[] }>(
+                '/api/appointments'
+            );
+            if (response.success) {
+                setAllAppointments(response.data);
+            }
+        } catch (error) {
+            console.error('Failed to load Calendar Events for search:', error);
+        }
+    };
 
     const loadAppointments = async () => {
         try {
@@ -180,11 +300,26 @@ const Calendar: React.FC = () => {
         }
 
         try {
+            if (
+                editingAppointment?.is_recurring_occurrence &&
+                editingAppointment.occurrence_date
+            ) {
+                setRecurrenceScopeAction({
+                    mode: 'edit',
+                    appointment: editingAppointment,
+                    payload: { ...formData },
+                    returnToEditor: true,
+                });
+                setDialogOpen(false);
+                return;
+            }
+
             if (editingAppointment) {
                 await api.put(`/api/appointments/${editingAppointment.id}`, formData);
             } else {
                 await api.post('/api/appointments', formData);
             }
+
             setDialogOpen(false);
             resetForm();
             loadAppointments();
@@ -194,14 +329,112 @@ const Calendar: React.FC = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (
+        appointment: Appointment,
+        returnToEditor = false
+    ) => {
+        if (
+            appointment.is_recurring_occurrence &&
+            appointment.occurrence_date
+        ) {
+            setRecurrenceScopeAction({
+                mode: 'delete',
+                appointment,
+                returnToEditor,
+            });
+
+            if (returnToEditor) {
+                setDialogOpen(false);
+            }
+
+            return;
+        }
+
         if (!confirm(t('calendar:confirmDelete'))) return;
+
         try {
-            await api.delete(`/api/appointments/${id}`);
+            await api.delete(`/api/appointments/${appointment.id}`);
+            setDialogOpen(false);
+            resetForm();
             loadAppointments();
         } catch (error) {
             console.error('Failed to delete appointment:', error);
             setError(error instanceof Error ? error.message : t('calendar:errors.delete'));
+        }
+    };
+
+    const applyRecurringScope = async (scope: 'this' | 'all') => {
+        const action = recurrenceScopeAction;
+        if (!action) return;
+
+        const { appointment } = action;
+
+        try {
+            if (action.mode === 'delete') {
+                if (scope === 'this') {
+                    await api.delete(
+                        `/api/appointments/${appointment.id}/occurrences/${appointment.occurrence_date}`
+                    );
+                } else {
+                    await api.delete(`/api/appointments/${appointment.id}`);
+                }
+            } else {
+                const payload = { ...(action.payload || {}) };
+
+                if (scope === 'this') {
+                    delete payload.recurrence_frequency;
+                    delete payload.recurrence_interval;
+                    delete payload.recurrence_until;
+
+                    await api.put(
+                        `/api/appointments/${appointment.id}/occurrences/${appointment.occurrence_date}`,
+                        payload
+                    );
+                } else {
+                    if (
+                        payload.start_time &&
+                        appointment.series_start_time &&
+                        appointment.start_time
+                    ) {
+                        payload.start_time = shiftSeriesDateTime(
+                            appointment.series_start_time,
+                            appointment.start_time,
+                            payload.start_time
+                        );
+                    }
+
+                    if (
+                        payload.end_time &&
+                        appointment.series_end_time &&
+                        appointment.end_time
+                    ) {
+                        payload.end_time = shiftSeriesDateTime(
+                            appointment.series_end_time,
+                            appointment.end_time,
+                            payload.end_time
+                        );
+                    }
+
+                    await api.put(
+                        `/api/appointments/${appointment.id}`,
+                        payload
+                    );
+                }
+            }
+
+            setRecurrenceScopeAction(null);
+            setDialogOpen(false);
+            resetForm();
+            await loadAppointments();
+        } catch (error) {
+            console.error('Recurring appointment scope action failed:', error);
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : action.mode === 'delete'
+                        ? t('calendar:errors.delete')
+                        : t('calendar:errors.save')
+            );
         }
     };
 
@@ -212,17 +445,25 @@ const Calendar: React.FC = () => {
             title: appointment.title,
             description: appointment.description || '',
             start_time: appointment.start_time.slice(0, 16),
-            end_time: appointment.end_time ? appointment.end_time.slice(0, 16) : '',
+            end_time: appointment.end_time
+                ? appointment.end_time.slice(0, 16)
+                : '',
             location: appointment.location || '',
             family_member_ids: appointment.family_member_ids || [],
             reminder_30min: appointment.reminder_30min,
             reminder_1hour: appointment.reminder_1hour,
             notes: appointment.notes || '',
+            color: appointment.color || '#DC4A60',
+            recurrence_frequency: appointment.recurrence_frequency || 'none',
+            recurrence_interval: appointment.recurrence_interval || 1,
+            recurrence_until: appointment.recurrence_until
+                ? appointment.recurrence_until.slice(0, 10)
+                : '',
         });
         setDialogOpen(true);
     };
 
-    const handleDayClick = (date: Date) => {
+    const openNewEventForDate = (date: Date) => {
         // Always start from a clean slate: a previously opened edit dialog must
         // not leak its appointment or form values into a new creation.
         resetForm();
@@ -232,6 +473,19 @@ const Calendar: React.FC = () => {
             end_time: format(date, "yyyy-MM-dd'T'10:00"),
         }));
         setDialogOpen(true);
+    };
+
+    const handleCalendarDayClick = (date: Date, dayAppointments: Appointment[]) => {
+        if (dayAppointments.length === 0) {
+            openNewEventForDate(date);
+            return;
+        }
+
+        setDayAction({
+            date,
+            appointments: dayAppointments,
+            mode: 'choice',
+        });
     };
 
     const resetForm = () => {
@@ -247,6 +501,10 @@ const Calendar: React.FC = () => {
             reminder_30min: false,
             reminder_1hour: false,
             notes: '',
+            color: '#DC4A60',
+            recurrence_frequency: 'none',
+            recurrence_interval: 1,
+            recurrence_until: '',
         });
     };
 
@@ -324,8 +582,8 @@ const Calendar: React.FC = () => {
 
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
     const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
     const getAppointmentsForDay = (date: Date) => {
@@ -337,7 +595,27 @@ const Calendar: React.FC = () => {
         });
     };
 
-    const weekDays = t('common:daysShort', { returnObjects: true }) as string[];
+    const weekDaysRaw = t('common:daysShort', { returnObjects: true }) as string[];
+    const weekDays = [weekDaysRaw[6], ...weekDaysRaw.slice(0, 6)];
+
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+    const searchResults = normalizedSearchQuery
+        ? allAppointments.filter((apt) => {
+            const searchableText = [
+                apt.title,
+                apt.description,
+                apt.location,
+                apt.notes,
+                ...(apt.family_members_data || []).map((member) => member.name),
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+            return searchableText.includes(normalizedSearchQuery);
+        })
+        : [];
 
     if (loading) {
         return (
@@ -367,12 +645,95 @@ const Calendar: React.FC = () => {
                         <CalendarPlus className="w-4 h-4 mr-2" />
                         {t('calendar:exportIcal')}
                     </Button>
-                    <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+                    <Button onClick={() => openNewEventForDate(new Date())}>
                         <Plus className="w-4 h-4 mr-2" />
                         {t('calendar:newAppointment')}
                     </Button>
                 </div>
             </div>
+
+            {/* Calendar Events Search */}
+            <Card>
+                <CardContent className="p-4 sm:p-6">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                            type="search"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={t('calendar:search.placeholder')}
+                            className="input-nexus w-full pl-10 pr-10"
+                        />
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                aria-label={t('calendar:search.clear')}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    {normalizedSearchQuery && (
+                        <div className="mt-4">
+                            <p className="mb-3 text-body-sm text-muted-foreground">
+                                {t('calendar:search.resultCount', { count: searchResults.length })}
+                            </p>
+
+                            {searchResults.length === 0 ? (
+                                <p className="rounded-input bg-surface-2 p-4 text-body-sm text-muted-foreground">
+                                    {t('calendar:search.noResults')}
+                                </p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {searchResults.map((apt) => (
+                                        <button
+                                            key={apt.id}
+                                            type="button"
+                                            onClick={() => handleEdit(apt)}
+                                            className="flex w-full items-start gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:bg-nexus-background"
+                                        >
+                                            <span
+                                                className="mt-1 h-4 w-4 flex-shrink-0 rounded-full border border-border"
+                                                style={{ backgroundColor: apt.color || '#DC4A60' }}
+                                            />
+                                            <div className="min-w-0 flex-1">
+                                                <div className="font-semibold text-body">
+                                                    {apt.title}
+                                                </div>
+                                                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-body-sm text-muted-foreground">
+                                                    <span>
+                                                        {format(new Date(apt.start_time), 'dd MMM yyyy HH:mm', { locale: dateLocale() })}
+                                                    </span>
+                                                    {apt.location && (
+                                                        <span>{apt.location}</span>
+                                                    )}
+                                                </div>
+                                                {apt.description && (
+                                                    <p className="mt-1 line-clamp-2 text-body-sm text-muted-foreground">
+                                                        {apt.description}
+                                                    </p>
+                                                )}
+                                                {(apt.family_members_data || []).length > 0 && (
+                                                    <div className="mt-2 flex flex-wrap gap-1">
+                                                        {(apt.family_members_data || []).map((member) => (
+                                                            <Badge key={member.id} variant="primary">
+                                                                {member.name}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
 
             {/* Calendar Header */}
             <Card>
@@ -427,7 +788,7 @@ const Calendar: React.FC = () => {
                             return (
                                 <div
                                     key={index}
-                                    onClick={() => isCurrentMonth && handleDayClick(day)}
+                                    onClick={() => isCurrentMonth && handleCalendarDayClick(day, dayAppointments)}
                                     className={`
                                         min-h-[100px] p-2 border rounded-lg cursor-pointer transition-all
                                         ${isCurrentMonth ? 'bg-card hover:bg-nexus-background' : 'bg-surface-2 opacity-50'}
@@ -450,17 +811,15 @@ const Calendar: React.FC = () => {
                                     <div className="space-y-1">
                                         {dayAppointments.slice(0, 3).map((apt) => (
                                             <div
-                                                key={apt.id}
+                                                key={apt.occurrence_id || apt.id}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleEdit(apt);
                                                 }}
                                                 className="text-[10px] p-1 rounded truncate hover:shadow-sm transition-shadow"
                                                 style={{
-                                                    backgroundColor: apt.family_members_data?.[0]?.color
-                                                        ? `${apt.family_members_data[0].color}20`
-                                                        : 'rgb(var(--primary-soft))',
-                                                    borderLeft: `3px solid ${apt.family_members_data?.[0]?.color || 'var(--primary-base)'}`,
+                                                    backgroundColor: `${apt.color || '#DC4A60'}20`,
+                                                    borderLeft: `3px solid ${apt.color || '#DC4A60'}`,
                                                 }}
                                             >
                                                 <div className="font-medium truncate">{apt.title}</div>
@@ -493,12 +852,12 @@ const Calendar: React.FC = () => {
                             .slice(0, 5)
                             .map((apt) => (
                                 <div
-                                    key={apt.id}
+                                    key={apt.occurrence_id || apt.id}
                                     className="flex items-start gap-4 p-4 bg-nexus-background rounded-lg hover:shadow-sm transition-shadow"
                                 >
                                     <div
                                         className="w-1 h-full rounded-full"
-                                        style={{ backgroundColor: apt.family_members_data?.[0]?.color || 'var(--primary-base)' }}
+                                        style={{ backgroundColor: apt.color || '#DC4A60' }}
                                     />
                                     <div className="flex-1 min-w-0">
                                         <h4 className="font-semibold text-body mb-1 break-words">{apt.title}</h4>
@@ -536,7 +895,7 @@ const Calendar: React.FC = () => {
                                         <Button variant="ghost" size="sm" onClick={() => handleEdit(apt)}>
                                             <Edit2 className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" onClick={() => handleDelete(apt.id)}>
+                                        <Button variant="ghost" size="sm" onClick={() => { void handleDelete(apt); }}>
                                             <Trash2 className="h-4 w-4 text-red-500" />
                                         </Button>
                                     </div>
@@ -578,15 +937,35 @@ const Calendar: React.FC = () => {
                         placeholder={t('calendar:form.descriptionPlaceholder')}
                         rows={3}
                     />
+                    <div>
+                        <label className="mb-1.5 block text-label font-medium text-foreground">
+                            {t('calendar:form.color')}
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                            {APPOINTMENT_COLORS.map(({ name, color }) => (
+                                <button
+                                    key={color}
+                                    type="button"
+                                    title={name}
+                                    aria-label={name}
+                                    onClick={() => setFormData({ ...formData, color })}
+                                    className={`h-9 w-9 rounded-full border-2 transition-transform hover:scale-110 ${
+                                        formData.color === color
+                                            ? 'border-foreground ring-2 ring-offset-2 ring-foreground/30'
+                                            : 'border-border'
+                                    }`}
+                                    style={{ backgroundColor: color }}
+                                />
+                            ))}
+                        </div>
+                    </div>
                     <div className="rounded-input border border-border bg-surface-2/40 p-3">
                         <p className="mb-3 text-caption font-medium text-foreground">{t('calendar:form.scheduling')}</p>
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <Input
+                            <DatePicker
                                 label={t('calendar:form.startDate')}
-                                type="date"
                                 value={selectedDate}
-                                onChange={(e) => handleDateChange(e.target.value)}
-                                required
+                                onChange={handleDateChange}
                             />
                             <Input
                                 label={t('calendar:form.startTime')}
@@ -595,11 +974,10 @@ const Calendar: React.FC = () => {
                                 onChange={(e) => handleStartTimeChange(e.target.value)}
                                 required
                             />
-                            <Input
+                            <DatePicker
                                 label={t('calendar:form.endDate')}
-                                type="date"
                                 value={selectedEndDate}
-                                onChange={(e) => handleEndDateChange(e.target.value)}
+                                onChange={handleEndDateChange}
                             />
                             <Input
                                 label={t('calendar:form.endTime')}
@@ -618,6 +996,80 @@ const Calendar: React.FC = () => {
                             <Button type="button" variant="ghost" size="sm" onClick={() => applyDurationPreset(120)}>
                                 +2 h
                             </Button>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                                <label className="mb-1.5 block text-label font-medium text-foreground">
+                                    {t('calendar:form.repeat')}
+                                </label>
+                                <Select
+                                    value={formData.recurrence_frequency}
+                                    onValueChange={(value) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            recurrence_frequency: value as 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly',
+                                            recurrence_interval: 1,
+                                            recurrence_until: value === 'none' ? '' : prev.recurrence_until,
+                                        }))
+                                    }
+                                    options={[
+                                        { value: 'none', label: t('calendar:form.repeatNone') },
+                                        { value: 'daily', label: t('calendar:form.repeatDaily') },
+                                        { value: 'weekly', label: t('calendar:form.repeatWeekly') },
+                                        { value: 'monthly', label: t('calendar:form.repeatMonthly') },
+                                        { value: 'yearly', label: t('calendar:form.repeatYearly') },
+                                    ]}
+                                />
+                            </div>
+
+                            {formData.recurrence_frequency !== 'none' && (
+                                <>
+                                    <div>
+                                        <label className="mb-1.5 block text-label font-medium text-foreground">
+                                            {t('calendar:form.repeatEvery')}
+                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                type="number"
+                                                min={1}
+                                                max={365}
+                                                value={String(formData.recurrence_interval)}
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        recurrence_interval: Math.max(
+                                                            1,
+                                                            Math.min(365, Number(e.target.value) || 1)
+                                                        ),
+                                                    }))
+                                                }
+                                            />
+                                            <span className="whitespace-nowrap text-body-sm text-muted-foreground">
+                                                {formData.recurrence_frequency === 'daily'
+                                                    ? t('calendar:form.repeatDays')
+                                                    : formData.recurrence_frequency === 'weekly'
+                                                    ? t('calendar:form.repeatWeeks')
+                                                    : formData.recurrence_frequency === 'monthly'
+                                                    ? t('calendar:form.repeatMonths')
+                                                    : t('calendar:form.repeatYears')}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <DatePicker
+                                        label={t('calendar:form.repeatUntil')}
+                                        min={selectedDate}
+                                        value={formData.recurrence_until}
+                                        onChange={(value) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                recurrence_until: value,
+                                            }))
+                                        }
+                                    />
+                                </>
+                            )}
                         </div>
                     </div>
                     <Input
@@ -716,10 +1168,8 @@ const Calendar: React.FC = () => {
                                     variant="ghost"
                                     size="sm"
                                     className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                    onClick={async () => {
-                                        setDialogOpen(false);
-                                        await handleDelete(editingAppointment.id);
-                                        resetForm();
+                                    onClick={() => {
+                                        void handleDelete(editingAppointment, true);
                                     }}
                                 >
                                     <Trash2 className="mr-2 h-4 w-4" />
@@ -735,6 +1185,195 @@ const Calendar: React.FC = () => {
                         </div>
                     </div>
                 </form>
+            </Dialog>
+
+            {/* Calendar day Display / Add choice */}
+            <Dialog
+                open={Boolean(dayAction)}
+                onOpenChange={(open) => {
+                    if (!open) setDayAction(null);
+                }}
+                title={
+                    dayAction
+                        ? format(dayAction.date, 'EEEE, MMMM d, yyyy', { locale: dateLocale() })
+                        : ''
+                }
+                description={
+                    dayAction?.mode === 'display'
+                        ? t('calendar:dayAction.displayDescription')
+                        : t('calendar:dayAction.choiceDescription')
+                }
+            >
+                {dayAction?.mode === 'choice' ? (
+                    <div className="space-y-3">
+                        <Button
+                            type="button"
+                            className="w-full"
+                            onClick={() =>
+                                setDayAction((prev) =>
+                                    prev ? { ...prev, mode: 'display' } : prev
+                                )
+                            }
+                        >
+                            {t('calendar:dayAction.display')}
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            className="w-full"
+                            onClick={() => {
+                                const date = dayAction.date;
+                                setDayAction(null);
+                                openNewEventForDate(date);
+                            }}
+                        >
+                            {t('calendar:dayAction.add')}
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            className="w-full"
+                            onClick={() => setDayAction(null)}
+                        >
+                            {t('common:actions.cancel')}
+                        </Button>
+                    </div>
+                ) : dayAction ? (
+                    <div className="space-y-3">
+                        {dayAction.appointments
+                            .slice()
+                            .sort(
+                                (a, b) =>
+                                    new Date(a.start_time).getTime() -
+                                    new Date(b.start_time).getTime()
+                            )
+                            .map((apt) => (
+                                <button
+                                    key={apt.occurrence_id || apt.id}
+                                    type="button"
+                                    onClick={() => {
+                                        setDayAction(null);
+                                        handleEdit(apt);
+                                    }}
+                                    className="flex w-full items-start gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:bg-nexus-background"
+                                >
+                                    <span
+                                        className="mt-1 h-4 w-4 flex-shrink-0 rounded-full border border-border"
+                                        style={{ backgroundColor: apt.color || '#DC4A60' }}
+                                    />
+                                    <div className="min-w-0 flex-1">
+                                        <div className="font-semibold text-body">
+                                            {apt.title}
+                                        </div>
+                                        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-body-sm text-muted-foreground">
+                                            <span>
+                                                {format(new Date(apt.start_time), 'HH:mm')}
+                                                {apt.end_time &&
+                                                    ` - ${format(new Date(apt.end_time), 'HH:mm')}`}
+                                            </span>
+                                            {apt.location && <span>{apt.location}</span>}
+                                        </div>
+                                        {apt.description && (
+                                            <p className="mt-1 line-clamp-2 text-body-sm text-muted-foreground">
+                                                {apt.description}
+                                            </p>
+                                        )}
+                                    </div>
+                                </button>
+                            ))}
+
+                        <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                            <Button
+                                type="button"
+                                className="flex-1"
+                                onClick={() => {
+                                    const date = dayAction.date;
+                                    setDayAction(null);
+                                    openNewEventForDate(date);
+                                }}
+                            >
+                                {t('calendar:dayAction.add')}
+                            </Button>
+
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                className="flex-1"
+                                onClick={() =>
+                                    setDayAction((prev) =>
+                                        prev ? { ...prev, mode: 'choice' } : prev
+                                    )
+                                }
+                            >
+                                {t('calendar:dayAction.back')}
+                            </Button>
+                        </div>
+                    </div>
+                ) : null}
+            </Dialog>
+
+            {/* Recurring appointment scope choice */}
+            <Dialog
+                open={Boolean(recurrenceScopeAction)}
+                onOpenChange={(open) => {
+                    if (!open && recurrenceScopeAction) {
+                        const returnToEditor = recurrenceScopeAction.returnToEditor;
+                        setRecurrenceScopeAction(null);
+
+                        if (returnToEditor) {
+                            setDialogOpen(true);
+                        }
+                    }
+                }}
+                title={
+                    recurrenceScopeAction?.mode === 'delete'
+                        ? t('calendar:recurrenceScope.deleteTitle')
+                        : t('calendar:recurrenceScope.editTitle')
+                }
+                description={
+                    recurrenceScopeAction?.mode === 'delete'
+                        ? t('calendar:recurrenceScope.deleteDescription')
+                        : t('calendar:recurrenceScope.editDescription')
+                }
+            >
+                <div className="space-y-3">
+                    <Button
+                        type="button"
+                        className="w-full"
+                        onClick={() => { void applyRecurringScope('this'); }}
+                    >
+                        {t('calendar:recurrenceScope.thisOccurrence')}
+                    </Button>
+
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        className="w-full"
+                        onClick={() => { void applyRecurringScope('all'); }}
+                    >
+                        {t('calendar:recurrenceScope.allOccurrences')}
+                    </Button>
+
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full"
+                        onClick={() => {
+                            const returnToEditor =
+                                recurrenceScopeAction?.returnToEditor || false;
+
+                            setRecurrenceScopeAction(null);
+
+                            if (returnToEditor) {
+                                setDialogOpen(true);
+                            }
+                        }}
+                    >
+                        {t('common:actions.cancel')}
+                    </Button>
+                </div>
             </Dialog>
 
             {/* Dialog export iCal */}

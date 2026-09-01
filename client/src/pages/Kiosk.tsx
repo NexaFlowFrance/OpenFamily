@@ -14,7 +14,7 @@ import { cn } from '../lib/utils';
 import FamilyNotes, { type FamilyNote } from '../components/app/FamilyNotes';
 
 interface Member { id: string; name: string; color: string }
-interface Appointment { id: string; title: string; start_time: string; end_time?: string; location?: string; family_members_data?: Member[] }
+interface Appointment { id: string; occurrence_id?: string; title: string; start_time: string; end_time?: string; location?: string; family_members_data?: Member[] }
 interface Task { id: string; title: string; is_completed: boolean; priority?: string; due_date?: string; points?: number; assigned_to_members?: Member[] }
 interface MealPlan { id: string; date: string; meal_type: string; custom_meal?: string; recipe?: { name: string } }
 interface PlanningEntry { id: string; family_member_name: string; family_member_color: string; schedule_type: string; title: string; day_of_week: number; start_time: string; end_time: string; location?: string }
@@ -447,7 +447,7 @@ const Kiosk: React.FC = () => {
                     ) : (
                         <div className="divide-y divide-border">
                             {todayAppointments.map((a) => (
-                                <div key={a.id} className="grid grid-cols-[110px_1fr] items-baseline gap-4 py-4">
+                                <div key={a.occurrence_id || a.id} className="grid grid-cols-[110px_1fr] items-baseline gap-4 py-4">
                                     <div className="font-serif text-[clamp(1.4rem,2.4vw,2rem)] tabular-nums text-muted-foreground">
                                         {hhmm(a.start_time)}
                                     </div>

@@ -33,7 +33,20 @@
     "reminder30": "30 minutos antes",
     "reminder1h": "1 hora antes",
     "notes": "Observações (opcional)",
-    "notesPlaceholder": "Observações adicionais…"
+    "notesPlaceholder": "Observações adicionais…",
+    "color": "Cor",
+    "repeat": "Repetição",
+    "repeatNone": "Não se repete",
+    "repeatDaily": "Diariamente",
+    "repeatWeekly": "Semanalmente",
+    "repeatMonthly": "Mensalmente",
+    "repeatYearly": "Anualmente",
+    "repeatUntil": "Repetir até (opcional)",
+    "repeatEvery": "A cada",
+    "repeatDays": "dia(s)",
+    "repeatWeeks": "semana(s)",
+    "repeatMonths": "mês(es)",
+    "repeatYears": "ano(s)"
   },
   "feed": {
     "title": "Exportar calendário (iCal / Google)",
@@ -56,5 +69,26 @@
     "endAfterStart": "A hora de término deve ser após a hora de início.",
     "save": "Não foi possível salvar este compromisso.",
     "delete": "Não foi possível excluir este compromisso."
+  },
+  "recurrenceScope": {
+    "editTitle": "Editar compromisso recorrente",
+    "editDescription": "Aplicar estas alterações somente a esta ocorrência ou a toda a série?",
+    "deleteTitle": "Excluir compromisso recorrente",
+    "deleteDescription": "Excluir somente esta ocorrência ou toda a série?",
+    "thisOccurrence": "Somente esta ocorrência",
+    "allOccurrences": "Toda a série"
+  },
+  "search": {
+    "placeholder": "Pesquisar compromissos...",
+    "clear": "Limpar pesquisa",
+    "resultCount": "{{count}} compromisso(s) encontrado(s)",
+    "noResults": "Nenhum compromisso corresponde à sua pesquisa."
+  },
+  "dayAction": {
+    "choiceDescription": "Esta data já possui compromissos. O que deseja fazer?",
+    "displayDescription": "Compromissos desta data",
+    "display": "Ver compromissos",
+    "add": "Adicionar compromisso",
+    "back": "Voltar"
   }
 }

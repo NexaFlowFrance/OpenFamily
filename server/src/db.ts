@@ -360,6 +360,21 @@ export const runMigrations = async () => {
             created_at TIMESTAMPTZ DEFAULT now(),
             PRIMARY KEY (entry_id, excluded_date)
         )`,
+        // Migration 023: recurring calendar appointments.
+        "ALTER TABLE appointments ADD COLUMN IF NOT EXISTS recurrence_frequency VARCHAR(16) NOT NULL DEFAULT 'none'",
+        "ALTER TABLE appointments ADD COLUMN IF NOT EXISTS recurrence_interval INTEGER NOT NULL DEFAULT 1",
+        "ALTER TABLE appointments ADD COLUMN IF NOT EXISTS recurrence_until DATE",
+        `CREATE TABLE IF NOT EXISTS appointment_recurrence_exceptions (
+            appointment_id UUID NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+            occurrence_date DATE NOT NULL,
+            exception_type VARCHAR(16) NOT NULL DEFAULT 'skip',
+            override_data JSONB,
+            created_at TIMESTAMPTZ DEFAULT now(),
+            PRIMARY KEY (appointment_id, occurrence_date)
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_appointment_recurrence_exceptions_appointment ON appointment_recurrence_exceptions(appointment_id)',
+        // Migration 024: shared color for calendar appointments.
+        "ALTER TABLE appointments ADD COLUMN IF NOT EXISTS color VARCHAR(7) NOT NULL DEFAULT '#DC4A60'",
     ];
 
     for (const migration of migrations) {

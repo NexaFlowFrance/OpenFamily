@@ -33,7 +33,20 @@
     "reminder30": "30 minutes avant",
     "reminder1h": "1 heure avant",
     "notes": "Notes (facultatif)",
-    "notesPlaceholder": "Notes supplémentaires…"
+    "notesPlaceholder": "Notes supplémentaires…",
+    "color": "Couleur",
+    "repeat": "Répétition",
+    "repeatNone": "Ne se répète pas",
+    "repeatDaily": "Tous les jours",
+    "repeatWeekly": "Toutes les semaines",
+    "repeatMonthly": "Tous les mois",
+    "repeatYearly": "Tous les ans",
+    "repeatUntil": "Répéter jusqu'au (facultatif)",
+    "repeatEvery": "Tous les",
+    "repeatDays": "jour(s)",
+    "repeatWeeks": "semaine(s)",
+    "repeatMonths": "mois",
+    "repeatYears": "an(s)"
   },
   "feed": {
     "title": "Exporter le calendrier (iCal)",
@@ -56,5 +69,26 @@
     "endAfterStart": "L'heure de fin doit être après l'heure de début.",
     "save": "Impossible d'enregistrer ce rendez-vous.",
     "delete": "Impossible de supprimer ce rendez-vous."
+  },
+  "recurrenceScope": {
+    "editTitle": "Modifier le rendez-vous récurrent",
+    "editDescription": "Appliquer ces changements à cette occurrence seulement, ou à toute la série ?",
+    "deleteTitle": "Supprimer le rendez-vous récurrent",
+    "deleteDescription": "Supprimer cette occurrence seulement, ou toute la série ?",
+    "thisOccurrence": "Cette occurrence",
+    "allOccurrences": "Toute la série"
+  },
+  "search": {
+    "placeholder": "Rechercher un rendez-vous...",
+    "clear": "Effacer la recherche",
+    "resultCount": "{{count}} rendez-vous correspondant(s)",
+    "noResults": "Aucun rendez-vous ne correspond à votre recherche."
+  },
+  "dayAction": {
+    "choiceDescription": "Cette date contient déjà des rendez-vous. Que souhaitez-vous faire ?",
+    "displayDescription": "Rendez-vous de cette date",
+    "display": "Afficher les rendez-vous",
+    "add": "Ajouter un rendez-vous",
+    "back": "Retour"
   }
 }

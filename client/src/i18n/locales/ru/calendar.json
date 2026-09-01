@@ -33,7 +33,20 @@
     "reminder30": "За 30 минут",
     "reminder1h": "За 1 час",
     "notes": "Заметки (необязательно)",
-    "notesPlaceholder": "Дополнительные заметки…"
+    "notesPlaceholder": "Дополнительные заметки…",
+    "color": "Цвет",
+    "repeat": "Повтор",
+    "repeatNone": "Не повторять",
+    "repeatDaily": "Ежедневно",
+    "repeatWeekly": "Еженедельно",
+    "repeatMonthly": "Ежемесячно",
+    "repeatYearly": "Ежегодно",
+    "repeatUntil": "Повторять до (необязательно)",
+    "repeatEvery": "Каждые",
+    "repeatDays": "дн.",
+    "repeatWeeks": "нед.",
+    "repeatMonths": "мес.",
+    "repeatYears": "г."
   },
   "feed": {
     "title": "Экспорт календаря (iCal)",
@@ -56,5 +69,26 @@
     "endAfterStart": "Время окончания должно быть позже времени начала.",
     "save": "Не удалось сохранить событие.",
     "delete": "Не удалось удалить событие."
+  },
+  "recurrenceScope": {
+    "editTitle": "Изменить повторяющееся событие",
+    "editDescription": "Применить изменения только к этому повтору или ко всей серии?",
+    "deleteTitle": "Удалить повторяющееся событие",
+    "deleteDescription": "Удалить только этот повтор или всю серию?",
+    "thisOccurrence": "Только этот повтор",
+    "allOccurrences": "Всю серию"
+  },
+  "search": {
+    "placeholder": "Поиск событий…",
+    "clear": "Очистить поиск",
+    "resultCount": "{{count}} событие(й) найдено",
+    "noResults": "Событий по вашему запросу не найдено."
+  },
+  "dayAction": {
+    "choiceDescription": "На эту дату уже есть события. Что вы хотите сделать?",
+    "displayDescription": "События на эту дату",
+    "display": "Показать события",
+    "add": "Добавить событие",
+    "back": "Назад"
   }
 }

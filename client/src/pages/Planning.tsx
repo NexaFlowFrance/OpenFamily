@@ -63,6 +63,7 @@ interface PlanningEntry {
 /** An appointment shown alongside the planning, read-only. */
 interface WeekAppointment {
     id: string;
+    occurrence_id?: string;
     title: string;
     start_time: string;
     end_time?: string | null;
@@ -217,8 +218,12 @@ const Planning: React.FC = () => {
      */
     const loadAppointments = async (ws: Date) => {
         try {
-            const start = format(ws, 'yyyy-MM-dd');
-            const end = format(addDays(ws, 7), 'yyyy-MM-dd');
+            // Full timestamps, not bare dates: the server only expands a recurring
+            // appointment when it can parse both bounds as date AND time. Given a
+            // bare date it returns the series unexpanded, which would show a
+            // January event in every week from then on, at its January date.
+            const start = format(ws, "yyyy-MM-dd'T'00:00:00");
+            const end = format(addDays(ws, 6), "yyyy-MM-dd'T'23:59:59");
             const response = await api.get<{ success: boolean; data: WeekAppointment[] }>(
                 `/api/appointments?start_date=${start}&end_date=${end}`
             );
@@ -758,7 +763,7 @@ const Planning: React.FC = () => {
                                     guests; tapping one goes there. */}
                                 {dayAppointments.map((appointment) => (
                                     <button
-                                        key={appointment.id}
+                                        key={appointment.occurrence_id || appointment.id}
                                         type="button"
                                         onClick={() => navigate('/calendar')}
                                         title={t('planning:appointments.openCalendar')}

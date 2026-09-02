@@ -470,6 +470,7 @@ router.post('/', async (req: AuthRequest, res) => {
             recurrence_interval,
             recurrence_until,
             color,
+            is_all_day,
         } = req.body;
 
         const cleanedTitle = typeof title === 'string' ? title.trim() : '';
@@ -505,11 +506,12 @@ router.post('/', async (req: AuthRequest, res) => {
             `INSERT INTO appointments (
                 user_id, title, description, start_time, end_time, location,
                 family_member_ids, reminder_30min, reminder_1hour, notes,
-                recurrence_frequency, recurrence_interval, recurrence_until, color
+                recurrence_frequency, recurrence_interval, recurrence_until, color,
+                is_all_day
             )
             VALUES (
                 $1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10,
-                $11, $12, $13, $14
+                $11, $12, $13, $14, $15
             ) RETURNING *`,
             [
                 req.userId,
@@ -526,6 +528,7 @@ router.post('/', async (req: AuthRequest, res) => {
                 recurrenceInterval,
                 recurrenceUntil,
                 normalizeAppointmentColor(color),
+                Boolean(is_all_day),
             ]
         );
 
@@ -560,6 +563,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
             recurrence_interval,
             recurrence_until,
             color,
+            is_all_day,
         } = req.body;
 
         const updates: string[] = [];
@@ -617,6 +621,10 @@ router.put('/:id', async (req: AuthRequest, res) => {
 
         if (notes !== undefined) {
             pushUpdate('notes', toNullIfEmpty(notes));
+        }
+
+        if (is_all_day !== undefined) {
+            pushUpdate('is_all_day', Boolean(is_all_day));
         }
 
         if (color !== undefined) {
@@ -710,6 +718,7 @@ router.put('/:id/occurrences/:date', async (req: AuthRequest, res) => {
             'reminder_1hour',
             'notes',
             'color',
+            'is_all_day',
         ];
 
         const overrideData: Record<string, any> = {};

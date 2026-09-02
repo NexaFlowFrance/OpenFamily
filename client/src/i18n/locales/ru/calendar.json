@@ -46,7 +46,8 @@
     "repeatDays": "дн.",
     "repeatWeeks": "нед.",
     "repeatMonths": "мес.",
-    "repeatYears": "г."
+    "repeatYears": "г.",
+    "allDay": "Весь день"
   },
   "feed": {
     "title": "Экспорт календаря (iCal)",

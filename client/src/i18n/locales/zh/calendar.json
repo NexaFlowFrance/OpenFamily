@@ -46,7 +46,8 @@
     "repeatDays": "天",
     "repeatWeeks": "周",
     "repeatMonths": "个月",
-    "repeatYears": "年"
+    "repeatYears": "年",
+    "allDay": "全天"
   },
   "feed": {
     "title": "导出日历（iCal）",

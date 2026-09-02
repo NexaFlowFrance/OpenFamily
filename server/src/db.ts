@@ -375,6 +375,11 @@ export const runMigrations = async () => {
         'CREATE INDEX IF NOT EXISTS idx_appointment_recurrence_exceptions_appointment ON appointment_recurrence_exceptions(appointment_id)',
         // Migration 024: shared color for calendar appointments.
         "ALTER TABLE appointments ADD COLUMN IF NOT EXISTS color VARCHAR(7) NOT NULL DEFAULT '#DC4A60'",
+        // Migration 025: an appointment can cover a whole day rather than a time
+        // slot. The times are still stored, spanning 00:00 to 23:59, so every
+        // existing query keeps working; the flag only says how to show it and
+        // silences the reminders, which mean nothing without a start time.
+        'ALTER TABLE appointments ADD COLUMN IF NOT EXISTS is_all_day BOOLEAN NOT NULL DEFAULT false',
     ];
 
     for (const migration of migrations) {

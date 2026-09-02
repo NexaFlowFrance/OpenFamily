@@ -46,7 +46,8 @@
     "repeatDays": "dia(s)",
     "repeatWeeks": "semana(s)",
     "repeatMonths": "mês(es)",
-    "repeatYears": "ano(s)"
+    "repeatYears": "ano(s)",
+    "allDay": "Dia inteiro"
   },
   "feed": {
     "title": "Exportar calendário (iCal / Google)",

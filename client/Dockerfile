@@ -27,6 +27,10 @@ ARG VITE_API_URL=
 ARG VITE_WS_URL=
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_WS_URL=$VITE_WS_URL
+# Set to false to hide the "Sign up" link once the family is set up. Read at build
+# time by Vite, so changing it requires rebuilding the image.
+ARG VITE_REGISTRATION_ENABLED=true
+ENV VITE_REGISTRATION_ENABLED=$VITE_REGISTRATION_ENABLED
 RUN cd client && npm run build
 
 # Production stage

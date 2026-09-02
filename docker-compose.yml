@@ -37,6 +37,7 @@ services:
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
       VAPID_SUBJECT: ${VAPID_SUBJECT}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
     ports:
       - "3001:3001"
     depends_on:
@@ -60,6 +61,9 @@ services:
         # works from any device. Set these only to serve the API from a separate origin.
         VITE_API_URL: ${VITE_API_URL:-}
         VITE_WS_URL: ${VITE_WS_URL:-}
+        # Same flag as the server's REGISTRATION_ENABLED: hides the "Sign up"
+        # link so the UI matches what the API accepts.
+        VITE_REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
     container_name: openfamily-client
     restart: unless-stopped
     ports:

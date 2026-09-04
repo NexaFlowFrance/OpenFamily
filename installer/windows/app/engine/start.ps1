@@ -64,25 +64,17 @@ if (-not (Test-OFPgRunning)) {
     & $pgCtl -D "$OFPgData" -l "$pgLog" -o "-p $OFPgPort" -w start
 }
 
-# --- 4. Creer la base + le schema au premier lancement -----------------------
-$markerSchema = Join-Path $OFData '.schema_loaded'
-if (-not (Test-Path $markerSchema)) {
-    $env:PGPASSWORD = $env_map['POSTGRES_PASSWORD']
-    $dbName = $env_map['POSTGRES_DB']
-    $dbUser = $env_map['POSTGRES_USER']
-    $exists = & $psql -h 127.0.0.1 -p $OFPgPort -U $dbUser -d postgres -tAc `
-        "SELECT 1 FROM pg_database WHERE datname='$dbName'"
-    if ($exists -ne '1') {
-        Write-Host '[OpenFamily] Creation de la base de donnees...'
-        & $psql -h 127.0.0.1 -p $OFPgPort -U $dbUser -d postgres -c "CREATE DATABASE $dbName"
-    }
-    if (Test-Path $OFSchema) {
-        Write-Host '[OpenFamily] Chargement du schema...'
-        & $psql -h 127.0.0.1 -p $OFPgPort -U $dbUser -d $dbName -f "$OFSchema" *>> $srvLog
-    }
-    Set-Content -Path $markerSchema -Value (Get-Date -Format o) -Encoding Ascii
-    Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
+# --- 4. Creer la base au premier lancement (le serveur cree son propre schema) -
+$env:PGPASSWORD = $env_map['POSTGRES_PASSWORD']
+$dbName = $env_map['POSTGRES_DB']
+$dbUser = $env_map['POSTGRES_USER']
+$exists = & $psql -h 127.0.0.1 -p $OFPgPort -U $dbUser -d postgres -tAc `
+    "SELECT 1 FROM pg_database WHERE datname='$dbName'"
+if ($exists -ne '1') {
+    Write-Host '[OpenFamily] Creation de la base de donnees...'
+    & $psql -h 127.0.0.1 -p $OFPgPort -U $dbUser -d postgres -c "CREATE DATABASE $dbName"
 }
+Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
 
 # --- 5. Demarrer le serveur Node (interface + API + WebSocket) ---------------
 if (Test-OFServerRunning) {

@@ -3,7 +3,6 @@ assets/OpenFamily.ico
 assets/OpenFamily.png
 assets/wizard-large.bmp
 assets/wizard-small.bmp
-app/schema.sql
 app/server/
 app/client/
 app/runtime/

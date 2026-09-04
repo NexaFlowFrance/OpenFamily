@@ -241,11 +241,10 @@ OpenFamily/
 ├── server/                    # API backend Express
 │   ├── Dockerfile             # Image Docker du serveur
 │   ├── package.json
-│   ├── schema.sql             # Schéma complet de la base de données
 │   └── src/
 │       ├── index.ts           # Point d'entrée (HTTP + WebSocket)
 │       ├── app.ts             # Configuration Express + routes
-│       ├── db.ts              # Pool de connexions PostgreSQL
+│       ├── db.ts              # Pool de connexions PostgreSQL + schéma/migrations
 │       ├── config/
 │       │   └── loadEnv.ts     # Chargement des variables d'environnement
 │       ├── lib/

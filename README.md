@@ -132,7 +132,6 @@ npm run smoke:api
 ```bash
 npm run install:all
 psql -U postgres -c "CREATE DATABASE openfamily;"
-psql -U postgres -d openfamily -f server/schema.sql
 cp .env.example .env
 npm run dev
 ```

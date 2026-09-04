@@ -45,11 +45,10 @@ browser ──► client (nginx, port 80, the ONLY exposed entry point)
   *Upstream fix worth doing:* build the published client image with
   same-origin defaults and a proxying `client/nginx.conf`; the `sub_filter`
   lines then become harmless no-ops and can eventually be dropped.
-- **Database schema:** the server only runs *incremental* migrations at
-  startup; the base schema comes from `server/schema.sql` (applied by postgres
-  initdb on first start). Each package bootstraps it differently — Runtipi
-  ships the file, CasaOS downloads it (pinned to the `v1.2.0` tag) on first
-  init only, Unraid documents a one-time `psql` import.
+- **Database schema:** the server creates and migrates its own schema at
+  startup (`runMigrations()` in `server/src/db.ts`) — every package just
+  points it at an empty Postgres 16 database. Nothing to ship, download or
+  import.
 - **Secrets:** `JWT_SECRET` must be ≥ 32 chars and not a known placeholder
   (the server refuses to start otherwise); `POSTGRES_PASSWORD` is mandatory in
   production. Runtipi generates both (`type: random`); CasaOS ships
@@ -74,8 +73,7 @@ runtipi/apps/openfamily/
 ├── config.json               # app metadata, port 8480, form_fields (random secrets)
 ├── docker-compose.yml        # dynamic compose, x-runtipi schema_version 2
 ├── data/
-│   ├── nginx/default.conf    # same-origin proxy config (mounted over /etc/nginx/conf.d)
-│   └── db-init/01-schema.sql # base schema (mounted into /docker-entrypoint-initdb.d)
+│   └── nginx/default.conf    # same-origin proxy config (mounted over /etc/nginx/conf.d)
 └── metadata/
     ├── description.md
     └── logo.jpg              # 500×500, generated from client/public/OpenFamily.png
@@ -136,9 +134,6 @@ CasaOS specifics:
 - The client's nginx config is written inline by a `command:` override
   (CasaOS can't ship extra files); nginx runtime vars are `$$`-escaped for
   compose interpolation.
-- On first init only, the db container downloads `server/schema.sql` pinned to
-  the `v1.2.0` tag; if the download fails on a *fresh* install the container
-  exits and retries instead of initializing an empty database.
 
 ### Test locally
 
@@ -180,14 +175,13 @@ prerequisites.
 Unraid is single-container oriented, so OpenFamily ships as **two templates**
 plus an existing **PostgreSQL 16** container from CA. The linkage:
 
-1. Install a PostgreSQL 16 container from CA; create the `openfamily` DB/user.
-2. One-time schema import (Unraid terminal, adjust container name):
-   `wget -qO- https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/v1.2.0/server/schema.sql | docker exec -i postgresql16 psql -U openfamily -d openfamily`
-3. Install **OpenFamily-Server** (point `POSTGRES_HOST` at the postgres
+1. Install a PostgreSQL 16 container from CA; create the `openfamily` DB/user
+   (no schema import needed — the server creates its own tables on first start).
+2. Install **OpenFamily-Server** (point `POSTGRES_HOST` at the postgres
    container, set `POSTGRES_PASSWORD` and a generated `JWT_SECRET`).
-4. One-time download of the nginx template (also in the template Overview):
+3. One-time download of the nginx template (also in the template Overview):
    `mkdir -p /mnt/user/appdata/openfamily/nginx && wget -O /mnt/user/appdata/openfamily/nginx/default.conf.template https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/packaging/unraid/nginx/default.conf.template`
-5. Install **OpenFamily-Client**, set *Server Address* to `UNRAID-IP:3001`.
+4. Install **OpenFamily-Client**, set *Server Address* to `UNRAID-IP:3001`.
    Open `http://UNRAID-IP:8480`.
 
 The client uses the stock nginx-image envsubst mechanism
@@ -224,8 +218,6 @@ the *Template* dropdown.
 ## Updating for a new release
 
 1. Bump image tags (`1.2.0` → new version) in all three packages.
-2. Runtipi: bump `version`, increment `tipi_version`, refresh `updated_at`,
-   and refresh `data/db-init/01-schema.sql` from `server/schema.sql`.
-3. CasaOS: bump the schema download URL tag (`v1.2.0` → new tag).
-4. Unraid: bump `<Repository>` tags and the schema-import URL in the Overview.
-5. Re-test one install per store before announcing.
+2. Runtipi: bump `version`, increment `tipi_version`, refresh `updated_at`.
+3. Unraid: bump `<Repository>` tags.
+4. Re-test one install per store before announcing.

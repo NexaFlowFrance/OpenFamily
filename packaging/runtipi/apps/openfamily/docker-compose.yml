@@ -56,8 +56,6 @@ services:
       - POSTGRES_PASSWORD=${OPENFAMILY_DB_PASSWORD}
     volumes:
       - ${APP_DATA_DIR}/data/postgres:/var/lib/postgresql/data
-      # Shipped in this app's data/ folder: base schema applied on first start.
-      - ${APP_DATA_DIR}/data/db-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: pg_isready -U openfamily
       interval: 10s

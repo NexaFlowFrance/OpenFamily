@@ -8,8 +8,8 @@
 ;  L'utilisateur final ne voit qu'une fenetre graphique avec 3 boutons.
 ;
 ;  Compilation : Inno Setup 6.1+  (ISCC.exe OpenFamily.iss /DMyAppVersion=1.1.0)
-;  Les dossiers app\runtime\node, app\runtime\pgsql, app\server, app\client,
-;  app\schema.sql et les assets sont prepares par la CI avant compilation.
+;  Les dossiers app\runtime\node, app\runtime\pgsql, app\server, app\client
+;  et les assets sont prepares par la CI avant compilation.
 ; =============================================================================
 
 #ifndef MyAppVersion
@@ -75,10 +75,9 @@ french.OpenNow=Ouvrir OpenFamily maintenant
 Name: "desktopicon"; Description: "{cm:DesktopIcon}"; GroupDescription: "{cm:Shortcuts}"; Flags: checkedonce
 
 [Files]
-; Application (client + serveur compiles) et schema de base
+; Application (client + serveur compiles)
 Source: "app\OpenFamily.exe";        DestDir: "{app}"; Flags: ignoreversion
 Source: "app\OpenFamilyControl.ps1"; DestDir: "{app}"; Flags: ignoreversion
-Source: "app\schema.sql";            DestDir: "{app}"; Flags: ignoreversion
 Source: "app\engine\*";              DestDir: "{app}\engine"; Flags: ignoreversion recursesubdirs
 Source: "app\server\*";              DestDir: "{app}\server"; Flags: ignoreversion recursesubdirs
 Source: "app\client\*";              DestDir: "{app}\client"; Flags: ignoreversion recursesubdirs

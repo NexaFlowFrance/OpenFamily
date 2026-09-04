@@ -195,8 +195,6 @@ Invoke-In "$AppDir\server" {
 # Client : build statique
 Copy-Item (Join-Path $RepoRoot 'client\dist\*') "$AppDir\client" -Recurse -Force
 
-# Schema BD
-Copy-Item (Join-Path $RepoRoot 'server\schema.sql') "$AppDir\schema.sql" -Force
 Ok "Fichiers application prets."
 
 # =============================================================================

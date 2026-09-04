@@ -78,9 +78,6 @@ jobs:
           # Client : build statique
           Copy-Item client/dist/*      "$app/client" -Recurse -Force
 
-          # Schéma de base de données
-          Copy-Item server/schema.sql  "$app/schema.sql" -Force
-
       # ---------------------------------------------------------------------
       # 3. Embarquer Node.js et PostgreSQL portables
       # ---------------------------------------------------------------------

@@ -13,7 +13,6 @@ $Global:OFNode     = Join-Path $OFRoot 'runtime\node\node.exe'
 $Global:OFPgBin    = Join-Path $OFRoot 'runtime\pgsql\bin'
 $Global:OFServer   = Join-Path $OFRoot 'server\dist\index.js'
 $Global:OFClient   = Join-Path $OFRoot 'client'
-$Global:OFSchema   = Join-Path $OFRoot 'schema.sql'
 
 # Donnees & logs : dans le profil utilisateur (ecriture sans droits admin)
 $Global:OFData     = Join-Path $env:LOCALAPPDATA 'OpenFamily'

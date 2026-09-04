@@ -166,19 +166,6 @@ services:
     container_name: big-bear-openfamily-db
     image: postgres:16-alpine
     restart: unless-stopped
-    # On the very first start (empty data dir) the base schema is downloaded
-    # from the pinned v1.2.0 release and applied by the postgres init process.
-    # Later starts skip the download entirely.
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        if [ ! -s "$$PGDATA/PG_VERSION" ] && [ ! -s /docker-entrypoint-initdb.d/01-schema.sql ]; then
-          wget -q -O /docker-entrypoint-initdb.d/01-schema.sql \
-            https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/v1.2.0/server/schema.sql \
-            || { echo "OpenFamily: failed to download database schema"; exit 1; }
-        fi
-        exec docker-entrypoint.sh postgres
     environment:
       - POSTGRES_DB=openfamily
       - POSTGRES_USER=openfamily

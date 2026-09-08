@@ -47,13 +47,27 @@ can shift based on feedback — issues and discussions are welcome.
 - **Editable shopping quantities** *(v1.6)*: correct a quantity in place instead of
   deleting the line and typing it again, plus around fifty ready-made items offered
   as you type.
+- **Family posts** *(v1.7)*: a small shared feed for the household, text, photo or
+  link, where every member sees who has already read a post. The latest one is
+  shown on the dashboard. Contributed by @thecybermacgyver.
+- **Recurring, all-day and coloured appointments** *(v1.7)*: daily, weekly, monthly
+  or yearly series with a single occurrence editable or skipped on its own, whole-day
+  entries without a time slot, a colour per appointment and search in the calendar.
+  From the community set in #85.
+- **Portuguese and Russian interface** *(v1.7)*: joining English, French and
+  Simplified Chinese, with the server's emails and reminders following the same
+  choice. Contributed by @filipevieira and @streletskiy.
+- **Server-owned database schema** *(v1.7)*: the server creates and upgrades the
+  whole schema on startup, so packaging (Docker, TrueNAS, the installers) no longer
+  needs to mount an init script. Contributed by @blastik.
 
 ## Under consideration
 
-- **More languages** — the interface is currently English/French. The i18n
-  infrastructure is in place (namespaced JSON locales); the goal is to add German,
-  Spanish, Italian, Dutch and more, ideally through a community translation
-  workflow (e.g. Weblate). Contributions welcome.
+- **More languages** — the interface is available in English, French, Portuguese,
+  Russian and Simplified Chinese. The i18n infrastructure is in place (namespaced
+  JSON locales); the goal is to add German, Spanish, Italian, Dutch and more,
+  ideally through a community translation workflow (e.g. Weblate). Contributions
+  welcome.
 - **Two-way Google Calendar / CalDAV sync** (today: Nextcloud import + iCal export
   only). CalDAV two-way first (covers Nextcloud, iCloud, Fastmail), Google later
   (OAuth verification burden).

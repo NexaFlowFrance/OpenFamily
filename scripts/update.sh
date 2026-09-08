@@ -123,36 +123,6 @@ if [[ ! -f "$INSTALL_DIR/.env" ]]; then
   warn ".env restauré depuis la sauvegarde temporaire."
 fi
 
-# ─── Détection des nouvelles migrations SQL ───────────────────────────────────
-step "Vérification des migrations de base de données"
-
-MIGRATIONS_DIR="$INSTALL_DIR/server/migrations"
-if [[ -d "$MIGRATIONS_DIR" ]]; then
-  # Migrations ajoutées depuis le dernier commit
-  NEW_MIGRATIONS=$(git diff --name-only "$CURRENT_COMMIT" "$NEW_COMMIT" -- \
-    "server/migrations/" 2>/dev/null | grep "\.sql$" || true)
-
-  if [[ -n "$NEW_MIGRATIONS" ]]; then
-    info "Nouvelles migrations détectées :"
-    echo "$NEW_MIGRATIONS" | while IFS= read -r f; do echo "  → $f"; done
-
-    for MIGRATION in $NEW_MIGRATIONS; do
-      MIGRATION_PATH="$INSTALL_DIR/$MIGRATION"
-      if [[ -f "$MIGRATION_PATH" ]]; then
-        info "Application de : $MIGRATION"
-        docker compose exec -T postgres psql \
-          -U "${POSTGRES_USER:-openfamily}" \
-          -d "${POSTGRES_DB:-openfamily}" \
-          < "$MIGRATION_PATH" \
-          && log "Migration appliquée : $MIGRATION" \
-          || warn "Erreur lors de la migration $MIGRATION. Vérifiez manuellement."
-      fi
-    done
-  else
-    log "Aucune nouvelle migration."
-  fi
-fi
-
 # ─── Rebuild et redémarrage ───────────────────────────────────────────────────
 step "Rebuild des images et redémarrage des services"
 

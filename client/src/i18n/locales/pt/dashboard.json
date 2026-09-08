@@ -61,5 +61,13 @@
       "quick": "Acesso rápido (compras, orçamento, tarefas)",
       "notes": "Recados da família"
     }
+  },
+  "latestPost": {
+    "title": "Última publicação da família",
+    "viewAll": "Ver todas as publicações",
+    "seenBy": "Visto por: {{names}}",
+    "notSeen": "Ninguém viu ainda",
+    "seen": "Visto",
+    "markSeen": "Marcar como visto"
   }
 }

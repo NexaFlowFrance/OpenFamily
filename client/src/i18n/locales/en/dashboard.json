@@ -61,5 +61,13 @@
       "quick": "Quick access (shopping, budget, tasks)",
       "notes": "Family notes"
     }
+  },
+  "latestPost": {
+    "title": "Latest family post",
+    "viewAll": "View all posts",
+    "seenBy": "Seen by: {{names}}",
+    "notSeen": "Not seen by anyone yet",
+    "seen": "Seen",
+    "markSeen": "Mark seen"
   }
 }

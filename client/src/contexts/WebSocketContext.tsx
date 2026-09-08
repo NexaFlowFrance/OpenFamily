@@ -24,7 +24,8 @@ export type WsEntity =
     | 'notifications'
     | 'integrations'
     | 'rewards'
-    | 'notes';
+    | 'notes'
+    | 'posts';
 
 export type WsAction = 'created' | 'updated' | 'deleted';
 

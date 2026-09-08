@@ -586,6 +586,28 @@ export const runMigrations = async () => {
         // existing query keeps working; the flag only says how to show it and
         // silences the reminders, which mean nothing without a start time.
         'ALTER TABLE appointments ADD COLUMN IF NOT EXISTS is_all_day BOOLEAN NOT NULL DEFAULT false',
+        // Migration 026: family posts. A private feed inside the family: text, a
+        // photo carried as a data URI (the client resizes it first and the route
+        // caps it at 2 MB), or a link. Seen-status is one row per reader.
+        `CREATE TABLE IF NOT EXISTS family_posts (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            author_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            content TEXT,
+            image_url TEXT,
+            link_url TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_family_posts_user_created ON family_posts(user_id, created_at DESC)',
+        'CREATE INDEX IF NOT EXISTS idx_family_posts_author ON family_posts(author_user_id)',
+        `CREATE TABLE IF NOT EXISTS family_post_seen (
+            post_id UUID NOT NULL REFERENCES family_posts(id) ON DELETE CASCADE,
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            seen_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (post_id, user_id)
+        )`,
+        'CREATE INDEX IF NOT EXISTS idx_family_post_seen_user ON family_post_seen(user_id)',
     ];
 
     for (const migration of migrations) {

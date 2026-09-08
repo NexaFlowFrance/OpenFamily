@@ -11,7 +11,8 @@
     "budget": "Budget",
     "family": "Famille",
     "integrations": "Intégrations",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "posts": "Publications"
   },
   "mobile": {
     "home": "Accueil",
@@ -29,7 +30,8 @@
     "addRecipe": "Ajouter une recette",
     "addMeal": "Ajouter un repas",
     "addExpense": "Ajouter une dépense",
-    "addMember": "Ajouter un membre"
+    "addMember": "Ajouter un membre",
+    "addPost": "Nouvelle publication"
   },
   "user": {
     "profile": "Profil",
@@ -38,5 +40,40 @@
     "openMenu": "Ouvrir le menu"
   },
   "offline": "Mode hors ligne. Les données affichées proviennent du cache. Les modifications seront possibles au retour de la connexion.",
-  "pageTitleFallback": "Tableau de bord"
+  "pageTitleFallback": "Tableau de bord",
+  "posts": {
+    "title": "Publications familiales",
+    "subtitle": "Partagez une pensée, une photo ou un lien avec votre famille.",
+    "newPost": "Nouvelle publication",
+    "editPost": "Modifier la publication",
+    "editing": "Vous modifiez l'une de vos publications.",
+    "placeholder": "À quoi pensez-vous ?",
+    "linkPlaceholder": "Partager un lien (facultatif)",
+    "addPhoto": "Ajouter une photo",
+    "post": "Publier",
+    "saveChanges": "Enregistrer",
+    "cancel": "Annuler",
+    "photoPreview": "Aperçu de la photo",
+    "removePhoto": "Retirer la photo",
+    "sharedPhoto": "Photo partagée",
+    "empty": "Aucune publication familiale.",
+    "emptySubtitle": "Soyez le premier à partager quelque chose.",
+    "edited": "modifié",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirmDelete": "Supprimer cette publication ?",
+    "seen": "Vu",
+    "markSeen": "Marquer comme vu",
+    "seenBy": "Vu par : {{names}}",
+    "notSeen": "Pas encore vu",
+    "errors": {
+      "load": "Impossible de charger les publications.",
+      "save": "Impossible d'enregistrer la publication.",
+      "delete": "Impossible de supprimer la publication.",
+      "seen": "Impossible de marquer la publication comme vue.",
+      "empty": "Ajoutez du texte, une photo ou un lien.",
+      "image": "Cette photo ne peut pas être utilisée.",
+      "imageTooLarge": "Cette photo est encore trop volumineuse après redimensionnement."
+    }
+  }
 }

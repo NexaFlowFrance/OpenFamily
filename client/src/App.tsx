@@ -10,6 +10,7 @@ import ResetPassword from './pages/ResetPassword';
 import Kiosk from './pages/Kiosk';
 import ServerSetup from './pages/ServerSetup';
 import Dashboard from './pages/Dashboard';
+import Posts from './pages/Posts';
 import ShoppingList from './pages/ShoppingList';
 import Tasks from './pages/Tasks';
 import Rewards from './pages/Rewards';
@@ -72,6 +73,7 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/shopping" element={<ShoppingList />} />
                 <Route path="/tasks" element={<Tasks />} />
+                <Route path="/posts" element={<Posts />} />
                 <Route path="/rewards" element={moduleRoute('rewards', <Rewards />)} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/planning" element={moduleRoute('planning', <Planning />)} />

@@ -61,5 +61,13 @@
       "quick": "Accès rapides (courses, budget, tâches)",
       "notes": "Mots de la famille"
     }
+  },
+  "latestPost": {
+    "title": "Dernière publication familiale",
+    "viewAll": "Voir les publications",
+    "seenBy": "Vu par : {{names}}",
+    "notSeen": "Pas encore vu",
+    "seen": "Vu",
+    "markSeen": "Marquer comme vu"
   }
 }

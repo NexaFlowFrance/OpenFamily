@@ -61,5 +61,13 @@
       "quick": "快捷入口（购物、预算、任务）",
       "notes": "家庭留言"
     }
+  },
+  "latestPost": {
+    "title": "最新家庭动态",
+    "viewAll": "查看所有动态",
+    "seenBy": "已查看：{{names}}",
+    "notSeen": "尚无人查看",
+    "seen": "已查看",
+    "markSeen": "标记为已查看"
   }
 }

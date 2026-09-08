@@ -11,7 +11,8 @@
     "budget": "Orçamento",
     "family": "Família",
     "integrations": "Integrações",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "posts": "Publicações"
   },
   "mobile": {
     "home": "Início",
@@ -29,7 +30,8 @@
     "addRecipe": "Adicionar receita",
     "addMeal": "Adicionar refeição",
     "addExpense": "Adicionar despesa",
-    "addMember": "Adicionar membro"
+    "addMember": "Adicionar membro",
+    "addPost": "Nova publicação"
   },
   "user": {
     "profile": "Perfil",
@@ -38,5 +40,40 @@
     "openMenu": "Abrir menu"
   },
   "offline": "Modo offline. Os dados exibidos vêm do cache local. As alterações serão salvas assim que a conexão retornar.",
-  "pageTitleFallback": "Painel Principal"
+  "pageTitleFallback": "Painel Principal",
+  "posts": {
+    "title": "Publicações da família",
+    "subtitle": "Compartilhe o que está pensando, uma foto ou um link com sua família.",
+    "newPost": "Nova publicação",
+    "editPost": "Editar publicação",
+    "editing": "Você está editando uma das suas publicações.",
+    "placeholder": "No que você está pensando?",
+    "linkPlaceholder": "Compartilhe um link (opcional)",
+    "addPhoto": "Adicionar foto",
+    "post": "Publicar",
+    "saveChanges": "Salvar alterações",
+    "cancel": "Cancelar",
+    "photoPreview": "Prévia da foto",
+    "removePhoto": "Remover foto",
+    "sharedPhoto": "Foto compartilhada",
+    "empty": "Nenhuma publicação ainda.",
+    "emptySubtitle": "Seja o primeiro a compartilhar algo.",
+    "edited": "editada",
+    "edit": "Editar publicação",
+    "delete": "Excluir publicação",
+    "confirmDelete": "Excluir esta publicação?",
+    "seen": "Visto",
+    "markSeen": "Marcar como visto",
+    "seenBy": "Visto por: {{names}}",
+    "notSeen": "Ninguém viu ainda",
+    "errors": {
+      "load": "Não foi possível carregar as publicações.",
+      "save": "Não foi possível salvar a publicação.",
+      "delete": "Não foi possível excluir a publicação.",
+      "seen": "Não foi possível marcar a publicação como vista.",
+      "empty": "Adicione um texto, uma foto ou um link primeiro.",
+      "image": "Essa foto não pôde ser usada.",
+      "imageTooLarge": "Essa foto ainda é grande demais depois de redimensionada."
+    }
+  }
 }

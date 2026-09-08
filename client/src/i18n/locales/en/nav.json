@@ -11,7 +11,8 @@
     "budget": "Budget",
     "family": "Family",
     "integrations": "Integrations",
-    "settings": "Settings"
+    "settings": "Settings",
+    "posts": "Posts"
   },
   "mobile": {
     "home": "Home",
@@ -29,7 +30,8 @@
     "addRecipe": "Add a recipe",
     "addMeal": "Add a meal",
     "addExpense": "Add an expense",
-    "addMember": "Add a member"
+    "addMember": "Add a member",
+    "addPost": "New post"
   },
   "user": {
     "profile": "Profile",
@@ -38,5 +40,40 @@
     "openMenu": "Open menu"
   },
   "offline": "Offline mode. The data shown comes from the cache. Changes will be possible again once the connection is back.",
-  "pageTitleFallback": "Dashboard"
+  "pageTitleFallback": "Dashboard",
+  "posts": {
+    "title": "Family Posts",
+    "subtitle": "Share what is on your mind, a photo, or a link with your family.",
+    "newPost": "New post",
+    "editPost": "Edit post",
+    "editing": "You are editing one of your posts.",
+    "placeholder": "What's on your mind?",
+    "linkPlaceholder": "Share a link (optional)",
+    "addPhoto": "Add photo",
+    "post": "Post",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel",
+    "photoPreview": "Photo preview",
+    "removePhoto": "Remove photo",
+    "sharedPhoto": "Shared photo",
+    "empty": "No family posts yet.",
+    "emptySubtitle": "Be the first to share something.",
+    "edited": "edited",
+    "edit": "Edit post",
+    "delete": "Delete post",
+    "confirmDelete": "Delete this post?",
+    "seen": "Seen",
+    "markSeen": "Mark seen",
+    "seenBy": "Seen by: {{names}}",
+    "notSeen": "Not seen by anyone yet",
+    "errors": {
+      "load": "Could not load posts.",
+      "save": "Could not save the post.",
+      "delete": "Could not delete the post.",
+      "seen": "Could not mark the post as seen.",
+      "empty": "Add some text, a photo, or a link first.",
+      "image": "That photo could not be used.",
+      "imageTooLarge": "That photo is still too large after resizing."
+    }
+  }
 }

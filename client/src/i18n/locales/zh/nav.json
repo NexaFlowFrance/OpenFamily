@@ -11,7 +11,8 @@
     "budget": "预算",
     "family": "家庭",
     "integrations": "集成",
-    "settings": "设置"
+    "settings": "设置",
+    "posts": "家庭动态"
   },
   "mobile": {
     "home": "首页",
@@ -29,7 +30,8 @@
     "addRecipe": "添加食谱",
     "addMeal": "添加餐食",
     "addExpense": "添加支出",
-    "addMember": "添加成员"
+    "addMember": "添加成员",
+    "addPost": "新动态"
   },
   "user": {
     "profile": "个人资料",
@@ -38,5 +40,40 @@
     "openMenu": "打开菜单"
   },
   "offline": "当前处于离线模式，显示的数据来自缓存。恢复连接后即可继续更改。",
-  "pageTitleFallback": "首页"
+  "pageTitleFallback": "首页",
+  "posts": {
+    "title": "家庭动态",
+    "subtitle": "与家人分享想法、照片或链接。",
+    "newPost": "新动态",
+    "editPost": "编辑动态",
+    "editing": "您正在编辑自己的动态。",
+    "placeholder": "有什么想分享的？",
+    "linkPlaceholder": "分享链接（可选）",
+    "addPhoto": "添加照片",
+    "post": "发布",
+    "saveChanges": "保存更改",
+    "cancel": "取消",
+    "photoPreview": "照片预览",
+    "removePhoto": "移除照片",
+    "sharedPhoto": "分享的照片",
+    "empty": "还没有家庭动态。",
+    "emptySubtitle": "成为第一个分享内容的人。",
+    "edited": "已编辑",
+    "edit": "编辑",
+    "delete": "删除",
+    "confirmDelete": "删除这条动态？",
+    "seen": "已查看",
+    "markSeen": "标记为已查看",
+    "seenBy": "已查看：{{names}}",
+    "notSeen": "尚无人查看",
+    "errors": {
+      "load": "无法加载动态。",
+      "save": "无法保存动态。",
+      "delete": "无法删除动态。",
+      "seen": "无法标记为已查看。",
+      "empty": "请先添加文字、照片或链接。",
+      "image": "无法使用这张照片。",
+      "imageTooLarge": "调整大小后照片仍然过大。"
+    }
+  }
 }

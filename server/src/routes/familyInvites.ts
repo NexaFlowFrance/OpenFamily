@@ -286,6 +286,7 @@ router.put('/members/:userId/role', async (req: AuthRequest, res) => {
 // Family-scoped tables whose user_id points to the family owner.
 const FAMILY_SCOPED_TABLES = [
     'family_members',
+    'family_posts',
     'shopping_items',
     'shopping_list_templates',
     'tasks',

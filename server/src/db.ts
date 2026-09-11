@@ -458,7 +458,7 @@ export const runMigrations = async () => {
         `CREATE TABLE IF NOT EXISTS ai_settings (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            provider VARCHAR(20) NOT NULL CHECK (provider IN ('ollama', 'openai', 'anthropic')),
+            provider VARCHAR(20) NOT NULL CHECK (provider IN ('ollama', 'openai', 'anthropic', 'gemini')),
             base_url TEXT,
             encrypted_api_key TEXT,
             model VARCHAR(100) NOT NULL,
@@ -608,6 +608,23 @@ export const runMigrations = async () => {
             PRIMARY KEY (post_id, user_id)
         )`,
         'CREATE INDEX IF NOT EXISTS idx_family_post_seen_user ON family_post_seen(user_id)',
+        // Migration 027: Google Gemini as an AI provider. A fresh install gets the
+        // wider CHECK from the CREATE TABLE above; an existing one still carries
+        // the three-provider constraint, which Postgres named
+        // ai_settings_provider_check. Swap it once, only when it lacks gemini.
+        `DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM pg_constraint
+                WHERE conname = 'ai_settings_provider_check'
+                  AND pg_get_constraintdef(oid) NOT ILIKE '%gemini%'
+            ) THEN
+                ALTER TABLE ai_settings DROP CONSTRAINT ai_settings_provider_check;
+                ALTER TABLE ai_settings ADD CONSTRAINT ai_settings_provider_check
+                    CHECK (provider IN ('ollama', 'openai', 'anthropic', 'gemini'));
+            END IF;
+        END
+        $$`,
     ];
 
     for (const migration of migrations) {

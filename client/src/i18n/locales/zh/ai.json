@@ -42,7 +42,8 @@
     "providers": {
       "ollama": "Ollama（本地）",
       "openai": "OpenAI 兼容 API",
-      "anthropic": "Anthropic Claude"
+      "anthropic": "Anthropic Claude",
+      "gemini": "Google Gemini"
     },
     "baseUrl": "服务器 URL",
     "apiKey": "API 密钥",

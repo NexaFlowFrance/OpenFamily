@@ -14,7 +14,7 @@ can shift based on feedback — issues and discussions are welcome.
   flow, pocket-money page (balances, streaks, adjust/redeem), savings goals with
   progress bars and a dedicated kid view.
 - **Local-first AI assistant** *(v1.2, first slice)* — provider abstraction
-  (Ollama / OpenAI-compatible / Anthropic, bring-your-own-key, keys encrypted at
+  (Ollama / OpenAI-compatible / Anthropic / Google Gemini, bring-your-own-key, keys encrypted at
   rest): natural-language input (Ctrl+K) that turns a sentence into tasks,
   appointments, shopping items or budget entries, and automatic weekly dinner
   suggestions from the recipe library.

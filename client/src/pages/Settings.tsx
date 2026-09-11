@@ -38,18 +38,20 @@ const CURRENCIES = [
     { code: 'BRL', label: 'Brazilian Real (R$)' },
 ];
 
-type AiProvider = 'ollama' | 'openai' | 'anthropic';
+type AiProvider = 'ollama' | 'openai' | 'anthropic' | 'gemini';
 
 const AI_MODEL_PLACEHOLDERS: Record<AiProvider, string> = {
     ollama: 'llama3.1',
     openai: 'gpt-4o-mini',
     anthropic: 'claude-opus-4-8',
+    gemini: 'gemini-3.8-flash',
 };
 
 const AI_BASE_URL_PLACEHOLDERS: Record<AiProvider, string> = {
     ollama: 'http://localhost:11434',
     openai: 'https://api.openai.com',
     anthropic: '',
+    gemini: '',
 };
 
 interface AiSettingsData {
@@ -122,7 +124,7 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
             const trimmedKey = apiKey.trim();
             const response = await api.put<{ success: boolean; data: AiSettingsData }>('/api/ai/settings', {
                 provider,
-                base_url: provider === 'anthropic' ? null : baseUrl.trim() || null,
+                base_url: provider === 'anthropic' || provider === 'gemini' ? null : baseUrl.trim() || null,
                 // '' keeps the stored key, explicit null clears it.
                 api_key: trimmedKey ? trimmedKey : apiKeyCleared ? null : '',
                 model: model.trim(),
@@ -149,7 +151,7 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
         try {
             const response = await api.post<{ success: boolean; message?: string }>('/api/ai/test', {
                 provider,
-                base_url: provider === 'anthropic' ? undefined : baseUrl.trim() || undefined,
+                base_url: provider === 'anthropic' || provider === 'gemini' ? undefined : baseUrl.trim() || undefined,
                 api_key: apiKey.trim() || undefined,
                 model: model.trim() || undefined,
             });
@@ -165,6 +167,7 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
         { value: 'ollama', label: t('ai:settings.providers.ollama') },
         { value: 'openai', label: t('ai:settings.providers.openai') },
         { value: 'anthropic', label: t('ai:settings.providers.anthropic') },
+        { value: 'gemini', label: t('ai:settings.providers.gemini') },
     ];
 
     return (
@@ -209,7 +212,7 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                                     )}
                                 </div>
 
-                                {provider !== 'anthropic' && (
+                                {provider !== 'anthropic' && provider !== 'gemini' && (
                                     <Input
                                         label={t('ai:settings.baseUrl')}
                                         value={baseUrl}
@@ -229,7 +232,13 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                                                 setApiKey(e.target.value);
                                                 setTestResult(null);
                                             }}
-                                            placeholder={hasApiKey && !apiKeyCleared ? t('ai:settings.keyKept') : 'sk-…'}
+                                            placeholder={
+                                                hasApiKey && !apiKeyCleared
+                                                    ? t('ai:settings.keyKept')
+                                                    : provider === 'gemini'
+                                                        ? 'AIza…'
+                                                        : 'sk-…'
+                                            }
                                             disabled={!isParent}
                                             autoComplete="off"
                                         />

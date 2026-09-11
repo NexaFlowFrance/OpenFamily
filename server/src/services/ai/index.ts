@@ -2,20 +2,21 @@
 //
 // A single entry point, aiComplete(), takes a system prompt, a user prompt and
 // a JSON schema, dispatches to the configured provider (Ollama / OpenAI-compatible /
-// Anthropic) and returns a PARSED JSON object. The model output is never trusted:
+// Anthropic / Google Gemini) and returns a PARSED JSON object. The model output is never trusted:
 // callers must still structurally validate the result.
 
 import { ollamaComplete } from './ollama';
 import { openaiComplete } from './openai';
 import { anthropicComplete } from './anthropic';
+import { geminiComplete } from './gemini';
 
-export type AiProvider = 'ollama' | 'openai' | 'anthropic';
+export type AiProvider = 'ollama' | 'openai' | 'anthropic' | 'gemini';
 
 export interface AiSettings {
     provider: AiProvider;
-    /** Base URL (ollama / openai-compatible only — ignored for anthropic). */
+    /** Base URL (ollama / openai-compatible only — ignored for anthropic and gemini). */
     base_url: string | null;
-    /** Decrypted API key (openai / anthropic — never needed for ollama). */
+    /** Decrypted API key (openai / anthropic / gemini — never needed for ollama). */
     api_key: string | null;
     model: string;
 }
@@ -48,6 +49,7 @@ export const DEFAULT_BASE_URLS: Record<AiProvider, string | null> = {
     ollama: 'http://localhost:11434',
     openai: 'https://api.openai.com',
     anthropic: null,
+    gemini: null,
 };
 
 /**
@@ -130,6 +132,8 @@ export async function aiCompleteWithUsage(
             return openaiComplete(settings, request);
         case 'anthropic':
             return anthropicComplete(settings, request);
+        case 'gemini':
+            return geminiComplete(settings, request);
         default:
             throw new AiError('AI_PROVIDER_ERROR', `Fournisseur IA inconnu: ${settings.provider}`);
     }

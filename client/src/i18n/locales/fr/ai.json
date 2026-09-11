@@ -42,7 +42,8 @@
     "providers": {
       "ollama": "Ollama (local)",
       "openai": "API compatible OpenAI",
-      "anthropic": "Anthropic Claude"
+      "anthropic": "Anthropic Claude",
+      "gemini": "Google Gemini"
     },
     "baseUrl": "URL du serveur",
     "apiKey": "Clé API",

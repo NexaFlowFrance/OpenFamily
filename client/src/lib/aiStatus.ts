@@ -6,7 +6,7 @@ import { api } from './api';
 export interface AiStatus {
     configured: boolean;
     enabled: boolean;
-    provider?: 'ollama' | 'openai' | 'anthropic';
+    provider?: 'ollama' | 'openai' | 'anthropic' | 'gemini';
     base_url?: string | null;
     model?: string;
     has_api_key?: boolean;

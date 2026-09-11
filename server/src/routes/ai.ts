@@ -23,7 +23,7 @@ import logger from '../lib/logger';
 const router = Router();
 router.use(authMiddleware);
 
-const PROVIDERS: AiProvider[] = ['ollama', 'openai', 'anthropic'];
+const PROVIDERS: AiProvider[] = ['ollama', 'openai', 'anthropic', 'gemini'];
 
 interface AiSettingsRow {
     provider: AiProvider;
@@ -113,9 +113,9 @@ router.put('/settings', requireParent, async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'model est requis' });
         }
 
-        // Anthropic uses the official endpoint — no base URL to store.
+        // Anthropic and Gemini use their official endpoints — no base URL to store.
         let cleanedBaseUrl: string | null = null;
-        if (provider !== 'anthropic') {
+        if (provider !== 'anthropic' && provider !== 'gemini') {
             const rawUrl = typeof base_url === 'string' ? base_url.trim().replace(/\/+$/, '') : '';
             if (rawUrl) {
                 try {

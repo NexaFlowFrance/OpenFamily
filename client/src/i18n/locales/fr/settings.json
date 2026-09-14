@@ -50,13 +50,13 @@
   },
   "export": {
     "title": "Exporter les données",
-    "subtitle": "Télécharge toutes vos données (budget, tâches, recettes, membres, courses, rendez-vous, plannings, repas) dans un fichier JSON.",
+    "subtitle": "Télécharge une copie JSON portable des données de votre famille et des préférences familiales. Les identifiants d’authentification, secrets d’intégration, notifications et données de sécurité temporaires ne sont pas inclus.",
     "button": "Exporter",
     "inProgress": "Export en cours…"
   },
   "import": {
     "title": "Importer des données",
-    "subtitle": "Restaure des données depuis un fichier d'export OpenFamily. Les données existantes ne sont pas écrasées (doublons ignorés).",
+    "subtitle": "Restaure un export portable OpenFamily. Les données existantes sont conservées et les doublons ignorés ; les préférences familiales du fichier sont restaurées.",
     "success": "Import réussi",
     "itemsImported_one": "élément importé",
     "itemsImported_other": "éléments importés",
@@ -66,6 +66,8 @@
     "invalidJson": "Fichier JSON invalide."
   },
   "entities": {
+    "family_settings": "Préférences familiales",
+    "account_preferences": "Préférences des comptes",
     "family_members": "Membres de la famille",
     "tasks": "Tâches",
     "recipes": "Recettes",
@@ -73,8 +75,21 @@
     "budget_entries": "Entrées budget",
     "budget_limits": "Limites budget",
     "shopping_items": "Articles de courses",
+    "shopping_list_templates": "Modèles de courses",
     "appointments": "Rendez-vous",
-    "schedule_entries": "Plannings"
+    "appointment_recurrence_exceptions": "Exceptions de rendez-vous",
+    "schedule_entries": "Plannings",
+    "schedule_entry_members": "Participants aux plannings",
+    "schedule_entry_exceptions": "Exceptions de planning",
+    "reward_transactions": "Transactions de récompenses",
+    "reward_settings": "Réglages des récompenses",
+    "reward_goals": "Objectifs d’épargne",
+    "family_notes": "Pense-bêtes familiaux",
+    "recurring_expenses": "Dépenses récurrentes",
+    "recurring_expense_logs": "Pointages des dépenses récurrentes",
+    "kakeibo_months": "Mois Kakeibo",
+    "family_posts": "Publications familiales",
+    "family_post_seen": "État de lecture des publications"
   },
   "errors": {
     "notif": "Erreur lors de la configuration des notifications.",

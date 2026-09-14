@@ -3,15 +3,19 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
+# Every workspace manifest plus the lockfile. npm ci needs the complete
+# workspace to validate the lockfile, and without the lockfile each build
+# resolved whatever versions the registry served that day instead of the ones
+# the project tests and audits.
+COPY package.json package-lock.json ./
 COPY client/package.json ./client/
+COPY server/package.json ./server/
 COPY shared/package.json ./shared/
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
-RUN cd client && npm install --legacy-peer-deps
-RUN cd shared && npm install --legacy-peer-deps
+# --include=dev keeps typescript and vite installed even when the build
+# environment sets NODE_ENV=production, as many hosting platforms do; without
+# it the build stopped at "tsc: not found".
+RUN npm ci --include=dev --workspace=client --workspace=shared --include-workspace-root
 
 # Copy source code
 COPY shared ./shared

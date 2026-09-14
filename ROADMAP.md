@@ -60,6 +60,10 @@ can shift based on feedback — issues and discussions are welcome.
 - **Server-owned database schema** *(v1.7)*: the server creates and upgrades the
   whole schema on startup, so packaging (Docker, TrueNAS, the installers) no longer
   needs to mount an init script. Contributed by @blastik.
+- **Complete family export** *(v1.7.1)*: the export covers every module (rewards,
+  Kakeibo, recurring expenses, notes, posts, appointment exceptions) and never
+  includes passwords, tokens or credentials. A restore maps accounts by e-mail and
+  can be repeated without creating duplicates. Contributed by @thecybermacgyver.
 
 ## Under consideration
 

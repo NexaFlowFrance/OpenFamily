@@ -50,13 +50,13 @@
   },
   "export": {
     "title": "Export data",
-    "subtitle": "Download all your data (budget, tasks, recipes, members, shopping, appointments, planning, meals) as a JSON file.",
+    "subtitle": "Download a portable JSON copy of your family data and family-wide preferences. Authentication credentials, integration secrets, notifications, and temporary security data are not included.",
     "button": "Export",
     "inProgress": "Exporting…"
   },
   "import": {
     "title": "Import data",
-    "subtitle": "Restore data from an OpenFamily export file. Existing data is not overwritten (duplicates are skipped).",
+    "subtitle": "Restore an OpenFamily portable export. Existing records are kept and duplicates are skipped; family-wide preferences from the file are restored.",
     "success": "Import successful",
     "itemsImported_one": "item imported",
     "itemsImported_other": "items imported",
@@ -66,6 +66,8 @@
     "invalidJson": "Invalid JSON file."
   },
   "entities": {
+    "family_settings": "Family preferences",
+    "account_preferences": "Account preferences",
     "family_members": "Family members",
     "tasks": "Tasks",
     "recipes": "Recipes",
@@ -73,8 +75,21 @@
     "budget_entries": "Budget entries",
     "budget_limits": "Budget limits",
     "shopping_items": "Shopping items",
+    "shopping_list_templates": "Shopping templates",
     "appointments": "Appointments",
-    "schedule_entries": "Planning entries"
+    "appointment_recurrence_exceptions": "Appointment exceptions",
+    "schedule_entries": "Planning entries",
+    "schedule_entry_members": "Planning participants",
+    "schedule_entry_exceptions": "Planning exceptions",
+    "reward_transactions": "Reward transactions",
+    "reward_settings": "Reward settings",
+    "reward_goals": "Savings goals",
+    "family_notes": "Family notes",
+    "recurring_expenses": "Recurring expenses",
+    "recurring_expense_logs": "Recurring expense checks",
+    "kakeibo_months": "Kakeibo months",
+    "family_posts": "Family posts",
+    "family_post_seen": "Post read status"
   },
   "errors": {
     "notif": "Error while configuring notifications.",

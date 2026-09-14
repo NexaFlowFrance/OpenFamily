@@ -2,57 +2,10 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { broadcast } from '../lib/broadcaster';
+import { cleanContent, cleanImage, cleanLink } from '../lib/postFields';
 
 const router = Router();
 router.use(authMiddleware);
-
-const MAX_CONTENT = 5000;
-const MAX_IMAGE = 2_000_000;
-const MAX_LINK = 2000;
-
-const cleanContent = (value: unknown): string | null => {
-    if (typeof value !== 'string') return null;
-    const v = value.trim();
-    return v ? v.slice(0, MAX_CONTENT) : null;
-};
-
-const cleanImage = (value: unknown): string | null => {
-    if (typeof value !== 'string' || !value.trim()) return null;
-
-    const v = value.trim();
-
-    if (v.length > MAX_IMAGE) {
-        throw new Error('IMAGE_TOO_LARGE');
-    }
-
-    if (!/^data:image\/(?:jpeg|jpg|png|webp);base64,/i.test(v)) {
-        throw new Error('INVALID_IMAGE');
-    }
-
-    return v;
-};
-
-const cleanLink = (value: unknown): string | null => {
-    if (typeof value !== 'string' || !value.trim()) return null;
-
-    const v = value.trim();
-
-    if (v.length > MAX_LINK) {
-        throw new Error('INVALID_LINK');
-    }
-
-    try {
-        const url = new URL(v);
-
-        if (!['http:', 'https:'].includes(url.protocol)) {
-            throw new Error();
-        }
-
-        return url.toString();
-    } catch {
-        throw new Error('INVALID_LINK');
-    }
-};
 
 const loadPosts = async (
     ownerId: string,

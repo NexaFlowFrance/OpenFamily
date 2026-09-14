@@ -50,13 +50,13 @@
   },
   "export": {
     "title": "导出数据",
-    "subtitle": "将所有数据（预算、任务、食谱、成员、购物、日程、计划、餐食）下载为 JSON 文件。",
+    "subtitle": "下载家庭数据和家庭级偏好的可移植 JSON 副本。身份验证凭据、集成密钥、通知和临时安全数据不会包含在内。",
     "button": "导出",
     "inProgress": "正在导出……"
   },
   "import": {
     "title": "导入数据",
-    "subtitle": "从 OpenFamily 导出文件恢复数据。现有数据不会被覆盖（重复项会跳过）。",
+    "subtitle": "恢复 OpenFamily 可移植导出。现有记录会保留，重复项会跳过；文件中的家庭级偏好会被恢复。",
     "success": "导入成功",
     "itemsImported_one": "个项目已导入",
     "itemsImported_other": "个项目已导入",
@@ -66,6 +66,8 @@
     "invalidJson": "JSON 文件无效。"
   },
   "entities": {
+    "family_settings": "家庭偏好",
+    "account_preferences": "账户偏好",
     "family_members": "家庭成员",
     "tasks": "任务",
     "recipes": "食谱",
@@ -73,8 +75,21 @@
     "budget_entries": "预算记录",
     "budget_limits": "预算限额",
     "shopping_items": "购物项目",
+    "shopping_list_templates": "购物模板",
     "appointments": "日程",
-    "schedule_entries": "计划条目"
+    "appointment_recurrence_exceptions": "日程例外",
+    "schedule_entries": "计划条目",
+    "schedule_entry_members": "计划参与者",
+    "schedule_entry_exceptions": "计划例外",
+    "reward_transactions": "奖励交易",
+    "reward_settings": "奖励设置",
+    "reward_goals": "储蓄目标",
+    "family_notes": "家庭便签",
+    "recurring_expenses": "定期支出",
+    "recurring_expense_logs": "定期支出核对",
+    "kakeibo_months": "家计簿月份",
+    "family_posts": "家庭动态",
+    "family_post_seen": "动态阅读状态"
   },
   "errors": {
     "notif": "配置通知时出错。",

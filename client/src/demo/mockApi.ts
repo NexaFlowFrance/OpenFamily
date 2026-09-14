@@ -757,8 +757,15 @@ async function route(method: string, path: string, q: Record<string, string>, bo
     if (seg[1] === 'notifications' && last === 'read') { update('notifications', seg[2], { is_read: true }); return ok({}); }
 
     // ── Data export/import ──────────────────────────────────────────────────────
-    if (path === '/api/data/export') return ok(store);
-    if (path === '/api/data/import') return ok({ imported: {} });
+    if (path === '/api/data/export') return ok({
+        ...store,
+        format: 'openfamily-portable',
+        version: '2.0',
+        appVersion: 'demo',
+        exportedAt: new Date().toISOString(),
+        scope: 'family',
+    });
+    if (path === '/api/data/import') return ok({ format: 'openfamily-portable', version: '2.0', imported: {} });
 
     // Fallback: empty success so the UI never crashes in the demo.
     return ok([]);

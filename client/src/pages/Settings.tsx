@@ -13,6 +13,8 @@ import { refreshAiStatus } from '../lib/aiStatus';
 import { aiErrorKey } from '../components/app/MagicInput';
 
 interface ImportCounts {
+    family_settings?: number;
+    account_preferences?: number;
     family_members?: number;
     tasks?: number;
     recipes?: number;
@@ -20,8 +22,21 @@ interface ImportCounts {
     budget_entries?: number;
     budget_limits?: number;
     shopping_items?: number;
+    shopping_list_templates?: number;
     appointments?: number;
+    appointment_recurrence_exceptions?: number;
     schedule_entries?: number;
+    schedule_entry_members?: number;
+    schedule_entry_exceptions?: number;
+    reward_transactions?: number;
+    reward_settings?: number;
+    reward_goals?: number;
+    family_notes?: number;
+    recurring_expenses?: number;
+    recurring_expense_logs?: number;
+    kakeibo_months?: number;
+    family_posts?: number;
+    family_post_seen?: number;
 }
 
 const CURRENCIES = [

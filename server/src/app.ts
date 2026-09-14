@@ -110,7 +110,16 @@ app.use(cors({
 // Family posts carry a resized photo inline (up to 2 MB as a data URI), so
 // that router gets a wider body limit than the rest of the API.
 app.use('/api/posts', express.json({ limit: '3mb' }));
-app.use(express.json({ limit: '1mb' }));
+// The data import parses a whole family export with its own, much larger limit
+// inside its router, after the login and parent checks. It must not be parsed
+// here: this runs before authentication, so any anonymous request could make
+// the server buffer and parse a body of that size.
+const defaultJsonParser = express.json({ limit: '1mb' });
+app.use((req, res, next) => (
+    req.path.replace(/\/+$/, '').toLowerCase() === '/api/data/import'
+        ? next()
+        : defaultJsonParser(req, res, next)
+));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Request logging

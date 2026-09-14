@@ -87,6 +87,18 @@ docker-compose up -d --build
 
 - Frontend : http://localhost:3000 · Backend : http://localhost:3001
 
+**Vous préférez des images prêtes à l'emploi ?** Chaque version est publiée pour amd64 et arm64. Créez un `docker-compose.override.yml` à côté de `docker-compose.yml` :
+
+```yaml
+services:
+  server:
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.7.1
+  client:
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.7.1
+```
+
+puis lancez `docker compose pull server client && docker compose up -d`, sans `--build`. Les noms d'image prennent bien le suffixe `-server` / `-client`. Les options de construction comme `VITE_REGISTRATION_ENABLED` demandent toujours de construire le client vous-même.
+
 ### 🛠️ Installation manuelle
 
 ```bash

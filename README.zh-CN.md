@@ -124,6 +124,18 @@ docker-compose up -d --build
 npm run smoke:api
 ```
 
+**想直接使用现成镜像？** 每个版本都会发布 amd64 和 arm64 镜像。在 `docker-compose.yml` 旁边创建 `docker-compose.override.yml`：
+
+```yaml
+services:
+  server:
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.7.1
+  client:
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.7.1
+```
+
+然后运行 `docker compose pull server client && docker compose up -d`（不要加 `--build`）。镜像名必须带 `-server` / `-client` 后缀。`VITE_REGISTRATION_ENABLED` 等构建期选项仍需自行构建客户端。
+
 ### 🛠️ 手动安装
 
 ```bash

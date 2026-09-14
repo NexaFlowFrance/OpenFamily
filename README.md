@@ -127,6 +127,18 @@ Verify the stack end-to-end:
 npm run smoke:api
 ```
 
+**Prefer ready-made images?** Every release is published for amd64 and arm64. Create a `docker-compose.override.yml` next to `docker-compose.yml`:
+
+```yaml
+services:
+  server:
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.7.1
+  client:
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.7.1
+```
+
+then run `docker compose pull server client && docker compose up -d`, without `--build`. The image names need their `-server` / `-client` suffix. Build-time options such as `VITE_REGISTRATION_ENABLED` still require building the client yourself.
+
 ### 🛠️ Manual install
 
 ```bash

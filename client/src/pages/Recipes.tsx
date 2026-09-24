@@ -598,10 +598,20 @@ const Recipes: React.FC = () => {
                 </Card>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredRecipes.map((recipe) => (
+                    {filteredRecipes.map((recipe: Recipe) => (
                         <Card key={recipe.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                             <div className="h-40 bg-gradient-to-br from-nexus-blue/10 to-nexus-amber/10 flex items-center justify-center">
-                                <ChefHat className="h-16 w-16 text-nexus-blue/30" />
+                                {
+                                    recipe.image_url ? (
+                                        <img
+                                            src={recipe.image_url}
+                                            alt={recipe.name}
+                                            className="w-full h-full object-cover object-center"
+                                        />
+                                    ) : (
+                                        <ChefHat className="h-16 w-16 text-nexus-blue/30" />
+                                    )
+                                }
                             </div>
                             <CardContent className="p-4">
                                 <div className="flex items-start justify-between mb-2">

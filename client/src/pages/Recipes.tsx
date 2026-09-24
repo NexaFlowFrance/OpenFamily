@@ -99,6 +99,28 @@ export interface ShoppingItemDraft {
     checked: boolean;
 }
 
+// Card preview: the recipe photo when there is one and it loads, the chef hat
+// otherwise. image_url is free text (typed by hand or picked from a site's
+// JSON-LD), so a dead link, a 404 or a photo blocked as mixed content would
+// otherwise leave the browser's broken-image icon in the card. The parent keys
+// this on the URL so a changed photo gets a fresh attempt.
+const RecipeImage: React.FC<{ src?: string | null; alt: string }> = ({ src, alt }) => {
+    const [failed, setFailed] = useState(false);
+    if (!src || failed) {
+        return <ChefHat className="h-16 w-16 text-nexus-blue/30" />;
+    }
+    return (
+        <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => setFailed(true)}
+            className="w-full h-full object-cover object-center"
+        />
+    );
+};
+
 const Recipes: React.FC = () => {
     const { t } = useTranslation(['recipes', 'common']);
     // Family-customizable list (Settings → Categories); defaults are translated,
@@ -601,17 +623,7 @@ const Recipes: React.FC = () => {
                     {filteredRecipes.map((recipe: Recipe) => (
                         <Card key={recipe.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                             <div className="h-40 bg-gradient-to-br from-nexus-blue/10 to-nexus-amber/10 flex items-center justify-center">
-                                {
-                                    recipe.image_url ? (
-                                        <img
-                                            src={recipe.image_url}
-                                            alt={recipe.name}
-                                            className="w-full h-full object-cover object-center"
-                                        />
-                                    ) : (
-                                        <ChefHat className="h-16 w-16 text-nexus-blue/30" />
-                                    )
-                                }
+                                <RecipeImage key={recipe.image_url ?? ''} src={recipe.image_url} alt={recipe.name} />
                             </div>
                             <CardContent className="p-4">
                                 <div className="flex items-start justify-between mb-2">

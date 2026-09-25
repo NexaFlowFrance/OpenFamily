@@ -21,14 +21,15 @@
   },
   "balance": {
     "current": "Current balance",
-    "pointed_one": "{{count}} debit marked",
-    "pointed_other": "{{count}} debits marked",
+    "pointed_one": "{{count}} recurring item reconciled",
+    "pointed_other": "{{count}} recurring items reconciled",
     "expenses_one": "{{count}} expense",
-    "expenses_other": "{{count}} expenses"
+    "expenses_other": "{{count}} expenses",
+    "opening": "Opening balance: {{amount}}"
   },
   "forecast": {
     "title": "Forecast",
-    "subtitle": "Still {{amount}} of debits to mark"
+    "subtitle": "Upcoming recurring: +{{income}} income · -{{expenses}} expenses"
   },
   "analytics": "Analytics & limits",
   "charts": {
@@ -36,8 +37,7 @@
     "noExpenses": "No expenses this month",
     "yearEvolution": "Yearly trend",
     "income": "Income",
-    "expenses": "Expenses",
-    "recurring": "Recurring debits"
+    "expenses": "Expenses"
   },
   "limits": {
     "title": "Monthly limits",
@@ -46,27 +46,40 @@
     "none": "No limit set"
   },
   "sections": {
-    "recurring": "Recurring",
+    "recurring": "Recurring entries",
     "expenses": "Expenses",
     "income": "Income"
   },
   "recurring": {
-    "empty": "No recurring debit",
-    "addOne": "+ Add a debit",
-    "markOn": "Mark as debited",
+    "empty": "No recurring entries this month",
+    "markOn": "Mark as reconciled",
     "markOff": "Unmark",
-    "dayPrefix": "day"
+    "dayPrefix": "day",
+    "frequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "none": "Does not repeat"
+    },
+    "units": {
+      "daily_one": "day",
+      "daily_other": "days",
+      "weekly_one": "week",
+      "weekly_other": "weeks",
+      "monthly_one": "month",
+      "monthly_other": "months",
+      "yearly_one": "year",
+      "yearly_other": "years"
+    }
   },
   "empty": {
     "expenses": "No expenses this month",
     "income": "No income this month"
   },
   "sheets": {
-    "recurringEdit": "Edit debit",
-    "recurringNew": "New debit",
-    "edit": "Edit",
-    "newExpense": "New expense",
-    "newIncome": "New income",
+    "new": "Add entry",
+    "edit": "Edit entry",
     "limit": "Monthly limit"
   },
   "toggle": {
@@ -74,27 +87,33 @@
     "income": "Income"
   },
   "fields": {
-    "name": "Debit name",
-    "namePlaceholder": "e.g. Rent, electricity, Netflix…",
     "amount": "Amount ({{currency}})",
-    "debitDay": "Debit day of the month (1 to 31)",
-    "debitDayPlaceholder": "e.g. 5",
     "description": "Description (optional)",
-    "descriptionPlaceholder": "e.g. Groceries, salary…",
+    "descriptionPlaceholder": "e.g. Groceries, paycheque, investment deposit…",
     "date": "Date",
     "category": "Category",
     "limit": "Monthly limit ({{currency}})",
-    "limitHint": "Set 0 to remove tracking for this category."
+    "limitHint": "Set 0 to remove tracking for this category.",
+    "startDate": "Start date",
+    "repeat": "Repeat",
+    "every": "Every",
+    "repeatUntil": "Repeat until (optional)",
+    "addToCalendar": "Add to Calendar",
+    "addToCalendarHint": "Creates an all-day Calendar Event with the same date and recurrence.",
+    "type": "Type"
   },
   "errors": {
     "amountInvalid": "Invalid amount.",
-    "nameRequired": "Name required.",
-    "debitDayInvalid": "Invalid debit day (1-31).",
     "save": "Error while saving.",
-    "limitInvalid": "Invalid limit."
+    "limitInvalid": "Invalid limit.",
+    "startDateRequired": "Start date required.",
+    "intervalInvalid": "Repeat interval must be between 1 and 365.",
+    "repeatUntilInvalid": "Repeat-until date cannot be before the start date.",
+    "editRecurrenceType": "To switch between one-time and recurring, delete this entry and add it again."
   },
   "confirm": {
-    "deleteRecurring": "Delete this recurring debit?",
+    "deleteRecurring": "Delete this recurring entry?",
     "deleteEntry": "Delete this entry?"
-  }
+  },
+  "classic": "Classic"
 }

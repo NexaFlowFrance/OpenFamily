@@ -6,7 +6,7 @@ import { formatCurrency } from '../lib/utils';
 import {
     Plus, ChevronLeft, ChevronRight, Check, RefreshCw,
     Trash2, Edit2, TrendingUp, TrendingDown, Wallet, Eye,
-    X, Calendar, BarChart3, AlertTriangle, Lock
+    X, Calendar, AlertTriangle, Lock
 } from 'lucide-react';
 import {
     PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -17,19 +17,27 @@ import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../i18n/format';
 import { useCategories } from '../hooks/useCategories';
-import KakeiboView from './budget/KakeiboView';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface RecurringExpense {
+interface RecurringTransaction {
     id: string;
+    series_id?: string;
+    occurrence_id?: string;
+    occurrence_date?: string;
     label: string;
     amount: number;
     category: string;
     debit_day: number;
+    start_date: string;
+    recurrence_frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    recurrence_interval: number;
+    recurrence_until?: string | null;
     is_active: boolean;
+    is_expense: boolean;
     is_pointed: boolean;
-    pointed_at?: string;
+    pointed_at?: string | null;
+    linked_calendar_event_id?: string | null;
 }
 
 interface BudgetEntry {
@@ -39,13 +47,17 @@ interface BudgetEntry {
     description?: string;
     date: string;
     is_expense: boolean;
+    linked_calendar_event_id?: string | null;
 }
 
 interface Forecast {
-    income: number;
+    openingBalance: number;
+    oneTimeIncome: number;
     oneTimeExpenses: number;
-    pointedRecurring: number;
-    unpointedRecurring: number;
+    dueRecurringIncome: number;
+    dueRecurringExpenses: number;
+    upcomingRecurringIncome: number;
+    upcomingRecurringExpenses: number;
     currentBalance: number;
     forecastBalance: number;
 }
@@ -66,7 +78,8 @@ interface MonthlyStat {
     month: number;
     totalExpenses: number;
     totalIncome: number;
-    totalRecurring: number;
+    recurringExpenses?: number;
+    recurringIncome?: number;
     balance: number;
 }
 
@@ -124,8 +137,9 @@ const Field: React.FC<{
     placeholder?: string;
     required?: boolean;
     min?: string;
+    max?: string;
     step?: string;
-}> = ({ label, type = 'text', value, onChange, placeholder, required, min, step }) => (
+}> = ({ label, type = 'text', value, onChange, placeholder, required, min, max, step }) => (
     <div>
         <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
         <input
@@ -135,6 +149,7 @@ const Field: React.FC<{
             placeholder={placeholder}
             required={required}
             min={min}
+            max={max}
             step={step}
             className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface-1 text-foreground text-base
                        focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
@@ -169,17 +184,17 @@ const CategorySelect: React.FC<{ value: string; onChange: (v: string) => void }>
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const Budget: React.FC = () => {
-    const { t } = useTranslation(['budget', 'kakeibo', 'common']);
+    const { t } = useTranslation(['budget', 'common']);
     const categoryLabel = (v: string) => t(`budget:categories.${v}`, { defaultValue: v });
     const { user } = useAuth();
     const currency = user?.currency || 'EUR';
     const canEdit = Boolean(user?.is_owner) || (user?.role ?? '').toLowerCase() !== 'enfant';
 
-    // Classic budget vs kakeibo mode. Persisted per browser so the choice sticks.
-    const [mode, setMode] = useState<'classic' | 'kakeibo'>(
-        () => (localStorage.getItem('openfamily.budgetMode') === 'kakeibo' ? 'kakeibo' : 'classic')
+    // Classic budget vs analytics mode. Persisted per browser so the choice sticks.
+    const [mode, setMode] = useState<'classic' | 'analytics'>(
+        () => (localStorage.getItem('openfamily.budgetMode') === 'analytics' ? 'analytics' : 'classic')
     );
-    const switchMode = (next: 'classic' | 'kakeibo') => {
+    const switchMode = (next: 'classic' | 'analytics') => {
         setMode(next);
         localStorage.setItem('openfamily.budgetMode', next);
     };
@@ -188,28 +203,32 @@ const Budget: React.FC = () => {
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
     const [forecast, setForecast] = useState<Forecast | null>(null);
-    const [recurring, setRecurring] = useState<RecurringExpense[]>([]);
+    const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
     const [entries, setEntries] = useState<BudgetEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [stats, setStats] = useState<BudgetStatistics | null>(null);
     const [monthly, setMonthly] = useState<MonthlyStat[]>([]);
     const [limits, setLimits] = useState<BudgetLimit[]>([]);
-    const [showAnalytics, setShowAnalytics] = useState(false);
 
-    const [sheetRecurring, setSheetRecurring] = useState(false);
-    const [sheetEntry, setSheetEntry] = useState(false);
+    const [sheetTransaction, setSheetTransaction] = useState(false);
     const [sheetLimit, setSheetLimit] = useState(false);
-    const [editingRecurring, setEditingRecurring] = useState<RecurringExpense | null>(null);
+    const [editingRecurring, setEditingRecurring] = useState<RecurringTransaction | null>(null);
     const [editingEntry, setEditingEntry] = useState<BudgetEntry | null>(null);
 
-    const [recurringForm, setRecurringForm] = useState({ label: '', amount: '', category: 'Maison', debit_day: '1' });
-    const [entryForm, setEntryForm] = useState({
-        description: '', amount: '', category: 'Alimentation',
-        date: format(new Date(), 'yyyy-MM-dd'), is_expense: true,
+    const [transactionForm, setTransactionForm] = useState({
+        description: '',
+        amount: '',
+        category: 'Autre',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        is_expense: true,
+        recurrence_frequency: 'none' as 'none' | RecurringTransaction['recurrence_frequency'],
+        recurrence_interval: '1',
+        recurrence_until: '',
     });
     const [limitForm, setLimitForm] = useState({ category: 'Alimentation', monthly_limit: '' });
     const [formError, setFormError] = useState('');
+    const [transactionAddToCalendar, setTransactionAddToCalendar] = useState(false);
 
     // Local-date formatting: toISOString() shifts to UTC and can drop the first
     // or last day of the month depending on the user's timezone.
@@ -226,9 +245,9 @@ const Budget: React.FC = () => {
         try {
             const [forecastRes, recurringRes, entriesRes, statsRes, monthlyRes, limitsRes] = await Promise.all([
                 api.get<{ success: boolean; data: Forecast }>(
-                    `/api/budget/forecast?month=${currentMonth}&year=${currentYear}`
+                    `/api/budget/forecast?month=${currentMonth}&year=${currentYear}&as_of=${format(new Date(), 'yyyy-MM-dd')}`
                 ),
-                api.get<{ success: boolean; data: RecurringExpense[] }>(
+                api.get<{ success: boolean; data: RecurringTransaction[] }>(
                     `/api/budget/recurring?month=${currentMonth}&year=${currentYear}`
                 ),
                 api.get<{ success: boolean; data: BudgetEntry[] }>(
@@ -249,6 +268,7 @@ const Budget: React.FC = () => {
                 ...r,
                 amount: toNumber(r.amount),
                 debit_day: toNumber(r.debit_day),
+                recurrence_interval: toNumber(r.recurrence_interval) || 1,
             })));
             if (entriesRes.success) setEntries(entriesRes.data.map((e) => ({
                 ...e,
@@ -276,75 +296,165 @@ const Budget: React.FC = () => {
         setCurrentYear(y);
     };
 
-    const handleTogglePoint = async (r: RecurringExpense) => {
+    const handleTogglePoint = async (r: RecurringTransaction) => {
+        if (!r.occurrence_date) return;
+
         const newValue = !r.is_pointed;
-        setRecurring((prev) => prev.map((x) => x.id === r.id ? { ...x, is_pointed: newValue } : x));
-        setForecast((prev) => {
-            if (!prev) return prev;
-            const delta = r.amount;
-            if (newValue) {
-                return {
-                    ...prev,
-                    pointedRecurring: prev.pointedRecurring + delta,
-                    unpointedRecurring: prev.unpointedRecurring - delta,
-                    currentBalance: prev.currentBalance - delta,
-                };
-            } else {
-                return {
-                    ...prev,
-                    pointedRecurring: prev.pointedRecurring - delta,
-                    unpointedRecurring: prev.unpointedRecurring + delta,
-                    currentBalance: prev.currentBalance + delta,
-                };
-            }
-        });
+        setRecurring((prev) => prev.map((x) => {
+            const sameOccurrence = x.occurrence_id && r.occurrence_id
+                ? x.occurrence_id === r.occurrence_id
+                : x.id === r.id && x.occurrence_date === r.occurrence_date;
+
+            return sameOccurrence ? { ...x, is_pointed: newValue } : x;
+        }));
+
         try {
-            await api.post(`/api/budget/recurring/${r.id}/point`, {
-                month: currentMonth, year: currentYear, is_pointed: newValue,
+            await api.post(`/api/budget/recurring/${r.series_id ?? r.id}/point`, {
+                occurrence_date: r.occurrence_date,
+                is_pointed: newValue,
             });
         } catch {
             void loadAll();
         }
     };
 
-    const openNewRecurring = () => {
+    const openNewTransaction = () => {
         setEditingRecurring(null);
-        setRecurringForm({ label: '', amount: '', category: 'Maison', debit_day: '1' });
-        setFormError('');
-        setSheetRecurring(true);
-    };
-
-    const openEditRecurring = (r: RecurringExpense) => {
-        setEditingRecurring(r);
-        setRecurringForm({
-            label: r.label,
-            amount: r.amount.toString(),
-            category: r.category,
-            debit_day: r.debit_day.toString(),
+        setEditingEntry(null);
+        setTransactionAddToCalendar(false);
+        setTransactionForm({
+            description: '',
+            amount: '',
+            category: 'Autre',
+            date: format(new Date(), 'yyyy-MM-dd'),
+            is_expense: true,
+            recurrence_frequency: 'none',
+            recurrence_interval: '1',
+            recurrence_until: '',
         });
         setFormError('');
-        setSheetRecurring(true);
+        setSheetTransaction(true);
     };
 
-    const handleSaveRecurring = async (e: React.FormEvent) => {
+    const openEditRecurring = (r: RecurringTransaction) => {
+        setEditingRecurring(r);
+        setEditingEntry(null);
+        setTransactionAddToCalendar(Boolean(r.linked_calendar_event_id));
+        setTransactionForm({
+            description: r.label,
+            amount: r.amount.toString(),
+            category: r.category,
+            date: r.start_date,
+            is_expense: r.is_expense,
+            recurrence_frequency: r.recurrence_frequency,
+            recurrence_interval: r.recurrence_interval.toString(),
+            recurrence_until: r.recurrence_until ?? '',
+        });
+        setFormError('');
+        setSheetTransaction(true);
+    };
+
+    const openEditEntry = (entry: BudgetEntry) => {
+        setEditingRecurring(null);
+        setEditingEntry(entry);
+        setTransactionAddToCalendar(Boolean(entry.linked_calendar_event_id));
+        setTransactionForm({
+            description: entry.description || '',
+            amount: entry.amount.toString(),
+            category: entry.category,
+            date: entry.date.split('T')[0],
+            is_expense: entry.is_expense,
+            recurrence_frequency: 'none',
+            recurrence_interval: '1',
+            recurrence_until: '',
+        });
+        setFormError('');
+        setSheetTransaction(true);
+    };
+
+    const handleSaveTransaction = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormError('');
-        const amount = parseFloat(recurringForm.amount.replace(',', '.'));
-        const day = parseInt(recurringForm.debit_day, 10);
-        if (!isFinite(amount) || amount <= 0) { setFormError(t('budget:errors.amountInvalid')); return; }
-        if (!recurringForm.label.trim()) { setFormError(t('budget:errors.nameRequired')); return; }
-        if (day < 1 || day > 31) { setFormError(t('budget:errors.debitDayInvalid')); return; }
+
+        const amount = parseFloat(transactionForm.amount.replace(',', '.'));
+        if (!isFinite(amount) || amount <= 0) {
+            setFormError(t('budget:errors.amountInvalid'));
+            return;
+        }
+
+        if (!transactionForm.date) {
+            setFormError(t('budget:errors.startDateRequired'));
+            return;
+        }
+
+        const isRecurring = transactionForm.recurrence_frequency !== 'none';
+        const interval = parseInt(transactionForm.recurrence_interval, 10);
+
+        if (isRecurring && (!Number.isInteger(interval) || interval < 1 || interval > 365)) {
+            setFormError(t('budget:errors.intervalInvalid'));
+            return;
+        }
+
+        if (
+            isRecurring &&
+            transactionForm.recurrence_until &&
+            transactionForm.recurrence_until < transactionForm.date
+        ) {
+            setFormError(t('budget:errors.repeatUntilInvalid'));
+            return;
+        }
+
+        // Existing one-time and recurring rows stay in their current storage model.
+        // New entries can choose either model from the same form.
+        if (editingEntry && isRecurring) {
+            setFormError(t('budget:errors.editRecurrenceType'));
+            return;
+        }
+        if (editingRecurring && !isRecurring) {
+            setFormError(t('budget:errors.editRecurrenceType'));
+            return;
+        }
+
         try {
-            if (editingRecurring) {
-                await api.put(`/api/budget/recurring/${editingRecurring.id}`, {
-                    label: recurringForm.label.trim(), amount, category: recurringForm.category, debit_day: day,
-                });
+            if (isRecurring) {
+                const payload = {
+                    label: transactionForm.description.trim() || transactionForm.category,
+                    amount,
+                    category: transactionForm.category,
+                    start_date: transactionForm.date,
+                    recurrence_frequency: transactionForm.recurrence_frequency,
+                    recurrence_interval: interval,
+                    recurrence_until: transactionForm.recurrence_until || null,
+                    is_expense: transactionForm.is_expense,
+                    add_to_calendar: transactionAddToCalendar,
+                };
+
+                if (editingRecurring) {
+                    await api.put(
+                        `/api/budget/recurring/${editingRecurring.series_id ?? editingRecurring.id}`,
+                        payload
+                    );
+                } else {
+                    await api.post('/api/budget/recurring', payload);
+                }
             } else {
-                await api.post('/api/budget/recurring', {
-                    label: recurringForm.label.trim(), amount, category: recurringForm.category, debit_day: day,
-                });
+                const payload = {
+                    category: transactionForm.category,
+                    amount,
+                    description: transactionForm.description,
+                    date: transactionForm.date,
+                    is_expense: transactionForm.is_expense,
+                    add_to_calendar: transactionAddToCalendar,
+                };
+
+                if (editingEntry) {
+                    await api.put(`/api/budget/entries/${editingEntry.id}`, payload);
+                } else {
+                    await api.post('/api/budget/entries', payload);
+                }
             }
-            setSheetRecurring(false);
+
+            setSheetTransaction(false);
             void loadAll();
         } catch (err) {
             setFormError(err instanceof Error ? err.message : t('budget:errors.save'));
@@ -354,52 +464,6 @@ const Budget: React.FC = () => {
     const handleDeleteRecurring = async (id: string) => {
         if (!confirm(t('budget:confirm.deleteRecurring'))) return;
         try { await api.delete(`/api/budget/recurring/${id}`); void loadAll(); } catch { /* ignore */ }
-    };
-
-    const openNewEntry = (isExpense: boolean) => {
-        setEditingEntry(null);
-        setEntryForm({
-            description: '', amount: '',
-            category: isExpense ? 'Alimentation' : 'Logement',
-            date: format(new Date(), 'yyyy-MM-dd'),
-            is_expense: isExpense,
-        });
-        setFormError('');
-        setSheetEntry(true);
-    };
-
-    const openEditEntry = (entry: BudgetEntry) => {
-        setEditingEntry(entry);
-        setEntryForm({
-            description: entry.description || '', amount: entry.amount.toString(),
-            category: entry.category, date: entry.date.split('T')[0], is_expense: entry.is_expense,
-        });
-        setFormError('');
-        setSheetEntry(true);
-    };
-
-    const handleSaveEntry = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setFormError('');
-        const amount = parseFloat(entryForm.amount.replace(',', '.'));
-        if (!isFinite(amount) || amount <= 0) { setFormError(t('budget:errors.amountInvalid')); return; }
-        try {
-            if (editingEntry) {
-                await api.put(`/api/budget/entries/${editingEntry.id}`, {
-                    category: entryForm.category, amount, description: entryForm.description,
-                    date: entryForm.date, is_expense: entryForm.is_expense,
-                });
-            } else {
-                await api.post('/api/budget/entries', {
-                    category: entryForm.category, amount, description: entryForm.description,
-                    date: entryForm.date, is_expense: entryForm.is_expense,
-                });
-            }
-            setSheetEntry(false);
-            void loadAll();
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : t('budget:errors.save'));
-        }
     };
 
     const handleDeleteEntry = async (id: string) => {
@@ -436,14 +500,17 @@ const Budget: React.FC = () => {
         }
     };
 
-    // Spending per category this month (expenses only), used for limit progress.
+    // Spending per category this month, including recurring expense occurrences.
     const spentByCategory = React.useMemo(() => {
         const map: Record<string, number> = {};
         for (const e of entries) {
             if (e.is_expense) map[e.category] = (map[e.category] || 0) + e.amount;
         }
+        for (const r of recurring) {
+            if (r.is_expense) map[r.category] = (map[r.category] || 0) + r.amount;
+        }
         return map;
-    }, [entries]);
+    }, [entries, recurring]);
 
     const limitAlerts = limits
         .map((l) => ({ ...l, spent: spentByCategory[l.category] || 0 }))
@@ -489,111 +556,45 @@ const Budget: React.FC = () => {
                 </button>
             </div>
 
-            {/* Mode switch: classic budget vs kakeibo */}
+            {/* Budget view switch: classic budget vs analytics */}
             <div className="px-4 pt-4">
                 <div className="flex gap-1 rounded-input border border-border bg-surface-2 p-1">
-                    {(['classic', 'kakeibo'] as const).map((m) => (
-                        <button
-                            key={m}
-                            type="button"
-                            onClick={() => switchMode(m)}
-                            className={`flex-1 rounded-input px-3 py-1.5 text-sm font-medium transition ${
-                                mode === m ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                            }`}
-                        >
-                            {t(`kakeibo:mode.${m}`)}
-                        </button>
-                    ))}
+                    <button
+                        type="button"
+                        onClick={() => switchMode('classic')}
+                        className={`flex-1 rounded-input px-3 py-1.5 text-sm font-medium transition ${
+                            mode === 'classic' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        {t('budget:classic')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => switchMode('analytics')}
+                        className={`flex-1 rounded-input px-3 py-1.5 text-sm font-medium transition ${
+                            mode === 'analytics' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        {t('budget:analytics')}
+                    </button>
                 </div>
             </div>
 
-            {mode === 'kakeibo' && (
-                <div className="px-4 pt-3">
-                    <KakeiboView
-                        month={currentMonth}
-                        year={currentYear}
-                        canEdit={canEdit}
-                        currency={currency}
-                        categoryLabel={categoryLabel}
-                        reloadKey={entries.length + recurring.length}
-                    />
+            {mode === 'classic' && canEdit && (
+                <div className="px-4 pt-4 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={openNewTransaction}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white active:scale-95 transition-transform"
+                    >
+                        <Plus className="w-4 h-4" />
+                        {t('common:actions.add')}
+                    </button>
                 </div>
             )}
 
-            <div className="px-4 pt-4 space-y-3" style={{ display: mode === 'classic' ? undefined : 'none' }}>
-
-                {/* Bannière lecture seule (enfant) */}
-                {!canEdit && (
-                    <div className="rounded-card bg-warning/10 border border-warning/30 p-3 flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-warning flex-shrink-0" />
-                        <p className="text-sm text-warning">
-                            {t('budget:readOnly')}
-                        </p>
-                    </div>
-                )}
-
-                {/* Alertes de plafond */}
-                {limitAlerts.length > 0 && (
-                    <div className="rounded-card bg-danger/10 border border-danger/20 p-3 space-y-1.5">
-                        <div className="flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4 text-danger flex-shrink-0" />
-                            <p className="text-sm font-medium text-danger">{t('budget:alerts.title')}</p>
-                        </div>
-                        {limitAlerts.map((l) => (
-                            <p key={l.id} className="text-xs text-danger/80 pl-6">
-                                {categoryLabel(l.category)} : {formatCurrency(l.spent, currency)} / {formatCurrency(l.monthly_limit, currency)}
-                                {l.spent >= l.monthly_limit ? t('budget:alerts.over') : t('budget:alerts.warn')}
-                            </p>
-                        ))}
-                    </div>
-                )}
-
-
-                <div className={`rounded-card p-5 ${balancePositive ? 'bg-success/10' : 'bg-danger/10'}`}>
-                    <div className="flex items-center gap-2 mb-1">
-                        <Wallet className={`w-4 h-4 ${balancePositive ? 'text-success' : 'text-danger'}`} />
-                        <span className="text-sm font-medium text-muted-foreground">{t('budget:balance.current')}</span>
-                    </div>
-                    <p className={`text-4xl font-bold tracking-tight ${balancePositive ? 'text-success' : 'text-danger'}`}>
-                        {formatCurrency(forecast?.currentBalance ?? 0, currency)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                        {t('budget:balance.pointed', { count: pointedCount })}
-                        {' '}· {t('budget:balance.expenses', { count: expenses.length })}
-                    </p>
-                </div>
-
-                {/* Prévisionnel */}
-                {forecast && forecast.unpointedRecurring > 0 && (
-                    <div className={`rounded-card p-4 border-2 ${forecastPositive ? 'border-info/20 bg-info/5' : 'border-peach/20 bg-peach/5'}`}>
-                        <div className="flex items-center gap-2 mb-1">
-                            <Eye className={`w-4 h-4 ${forecastPositive ? 'text-info' : 'text-peach'}`} />
-                            <span className="text-sm font-medium text-muted-foreground">{t('budget:forecast.title')}</span>
-                        </div>
-                        <p className={`text-3xl font-bold ${forecastPositive ? 'text-info' : 'text-peach'}`}>
-                            {formatCurrency(forecast.forecastBalance, currency)}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            {t('budget:forecast.subtitle', { amount: formatCurrency(forecast.unpointedRecurring, currency) })}
-                        </p>
-                    </div>
-                )}
-
-                {/* Analyse & plafonds */}
-                <section className="pt-1">
-                    <button
-                        onClick={() => setShowAnalytics((v) => !v)}
-                        className="w-full flex items-center justify-between rounded-card bg-surface-1 border border-border p-4 active:scale-[0.99] transition-transform"
-                    >
-                        <span className="flex items-center gap-2 font-semibold text-base">
-                            <BarChart3 className="w-4 h-4 text-primary" />
-                            {t('budget:analytics')}
-                        </span>
-                        <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${showAnalytics ? 'rotate-90' : ''}`} />
-                    </button>
-
-                    {showAnalytics && (
-                        <div className="space-y-3 mt-3">
+            {mode === 'analytics' && (
+                <div className="px-4 pt-4 space-y-3">
                             {/* Répartition par catégorie */}
                             <ChartCard
                                 title={t('budget:charts.expensesByCategory')}
@@ -630,7 +631,6 @@ const Budget: React.FC = () => {
                                         month: format(new Date(currentYear, m.month - 1), 'MMM', { locale: dateLocale() }),
                                         expenses: m.totalExpenses,
                                         income: m.totalIncome,
-                                        recurring: m.totalRecurring ?? 0,
                                     }))}>
                                         <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                                         <YAxis tick={{ fontSize: 11 }} width={40} />
@@ -638,7 +638,6 @@ const Budget: React.FC = () => {
                                         <Legend wrapperStyle={{ fontSize: 12 }} />
                                         <Bar dataKey="income" name={t('budget:charts.income')} fill="#10b981" radius={[4, 4, 0, 0]} />
                                         <Bar dataKey="expenses" name={t('budget:charts.expenses')} fill="#ef4444" radius={[4, 4, 0, 0]} />
-                                        <Bar dataKey="recurring" name={t('budget:charts.recurring')} fill="#f59e0b" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </ChartCard>
@@ -692,9 +691,78 @@ const Budget: React.FC = () => {
                                     </div>
                                 )}
                             </ChartCard>
+                </div>
+            )}
+
+            <div className="px-4 pt-4 space-y-3" style={{ display: mode === 'classic' ? undefined : 'none' }}>
+
+                {/* Bannière lecture seule (enfant) */}
+                {!canEdit && (
+                    <div className="rounded-card bg-warning/10 border border-warning/30 p-3 flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-warning flex-shrink-0" />
+                        <p className="text-sm text-warning">
+                            {t('budget:readOnly')}
+                        </p>
+                    </div>
+                )}
+
+                {/* Alertes de plafond */}
+                {limitAlerts.length > 0 && (
+                    <div className="rounded-card bg-danger/10 border border-danger/20 p-3 space-y-1.5">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-danger flex-shrink-0" />
+                            <p className="text-sm font-medium text-danger">{t('budget:alerts.title')}</p>
                         </div>
-                    )}
-                </section>
+                        {limitAlerts.map((l) => (
+                            <p key={l.id} className="text-xs text-danger/80 pl-6">
+                                {categoryLabel(l.category)} : {formatCurrency(l.spent, currency)} / {formatCurrency(l.monthly_limit, currency)}
+                                {l.spent >= l.monthly_limit ? t('budget:alerts.over') : t('budget:alerts.warn')}
+                            </p>
+                        ))}
+                    </div>
+                )}
+
+
+                <div className={`rounded-card p-5 ${balancePositive ? 'bg-success/10' : 'bg-danger/10'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                        <Wallet className={`w-4 h-4 ${balancePositive ? 'text-success' : 'text-danger'}`} />
+                        <span className="text-sm font-medium text-muted-foreground">{t('budget:balance.current')}</span>
+                    </div>
+                    <p className={`text-4xl font-bold tracking-tight ${balancePositive ? 'text-success' : 'text-danger'}`}>
+                        {formatCurrency(forecast?.currentBalance ?? 0, currency)}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        {t('budget:balance.opening', {
+                            amount: formatCurrency(forecast?.openingBalance ?? 0, currency),
+                        })}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                        {t('budget:balance.pointed', { count: pointedCount })}
+                        {' '}· {t('budget:balance.expenses', { count: expenses.length })}
+                    </p>
+                </div>
+
+                {/* Prévisionnel */}
+                {forecast && (
+                    forecast.upcomingRecurringExpenses > 0 ||
+                    forecast.upcomingRecurringIncome > 0
+                ) && (
+                    <div className={`rounded-card p-4 border-2 ${forecastPositive ? 'border-info/20 bg-info/5' : 'border-peach/20 bg-peach/5'}`}>
+                        <div className="flex items-center gap-2 mb-1">
+                            <Eye className={`w-4 h-4 ${forecastPositive ? 'text-info' : 'text-peach'}`} />
+                            <span className="text-sm font-medium text-muted-foreground">{t('budget:forecast.title')}</span>
+                        </div>
+                        <p className={`text-3xl font-bold ${forecastPositive ? 'text-info' : 'text-peach'}`}>
+                            {formatCurrency(forecast.forecastBalance, currency)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            {t('budget:forecast.subtitle', {
+                                income: formatCurrency(forecast.upcomingRecurringIncome, currency),
+                                expenses: formatCurrency(forecast.upcomingRecurringExpenses, currency),
+                            })}
+                        </p>
+                    </div>
+                )}
 
                 {/* Prélèvements récurrents */}
                 <section>
@@ -708,31 +776,18 @@ const Budget: React.FC = () => {
                                 </span>
                             )}
                         </div>
-                        <button
-                            onClick={openNewRecurring}
-                            disabled={!canEdit}
-                            className="flex items-center gap-1.5 text-sm font-medium text-primary active:scale-95 transition-transform disabled:opacity-40 disabled:pointer-events-none"
-                        >
-                            <Plus className="w-4 h-4" />
-                            {t('common:actions.add')}
-                        </button>
                     </div>
 
                     {recurring.length === 0 ? (
                         <div className="rounded-card border border-dashed border-border p-6 text-center">
                             <RefreshCw className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
                             <p className="text-sm text-muted-foreground">{t('budget:recurring.empty')}</p>
-                            {canEdit && (
-                                <button onClick={openNewRecurring} className="mt-2 text-sm text-primary font-medium">
-                                    {t('budget:recurring.addOne')}
-                                </button>
-                            )}
                         </div>
                     ) : (
                         <div className="space-y-2">
                             {recurring.map((r) => (
                                 <div
-                                    key={r.id}
+                                    key={r.occurrence_id ?? `${r.id}:${r.occurrence_date ?? r.debit_day}`}
                                     className={`flex items-center gap-3 rounded-card p-4 transition-all
                                         ${r.is_pointed ? 'bg-surface-1 opacity-60' : 'bg-surface-1 border border-border shadow-sm'}`}
                                 >
@@ -756,13 +811,28 @@ const Budget: React.FC = () => {
                                             <span className="text-xs text-muted-foreground">·</span>
                                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                 <Calendar className="w-3 h-3" />
-                                                {t('budget:recurring.dayPrefix')} {r.debit_day}
+                                                {r.occurrence_date
+                                                    ? new Date(`${r.occurrence_date}T00:00:00`).toLocaleDateString(undefined, {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                    })
+                                                    : `${t('budget:recurring.dayPrefix')} ${r.debit_day}`}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">·</span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {t(`budget:recurring.frequency.${r.recurrence_frequency}`)}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <span className={`text-base font-bold flex-shrink-0 ${r.is_pointed ? 'text-muted-foreground' : 'text-danger'}`}>
-                                        -{formatCurrency(r.amount, currency)}
+                                    <span className={`text-base font-bold flex-shrink-0 ${
+                                        r.is_pointed
+                                            ? 'text-muted-foreground'
+                                            : r.is_expense
+                                                ? 'text-danger'
+                                                : 'text-success'
+                                    }`}>
+                                        {r.is_expense ? '-' : '+'}{formatCurrency(r.amount, currency)}
                                     </span>
 
                                     <div className="flex items-center gap-1 flex-shrink-0">
@@ -775,7 +845,7 @@ const Budget: React.FC = () => {
                                                     <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDeleteRecurring(r.id)}
+                                                    onClick={() => handleDeleteRecurring(r.series_id ?? r.id)}
                                                     className="p-1.5 rounded-lg hover:bg-danger/10 transition-colors"
                                                 >
                                                     <Trash2 className="w-3.5 h-3.5 text-danger/60" />
@@ -801,14 +871,6 @@ const Budget: React.FC = () => {
                                 </span>
                             )}
                         </div>
-                        <button
-                            onClick={() => openNewEntry(true)}
-                            disabled={!canEdit}
-                            className="flex items-center gap-1.5 text-sm font-medium text-primary active:scale-95 transition-transform disabled:opacity-40 disabled:pointer-events-none"
-                        >
-                            <Plus className="w-4 h-4" />
-                            {t('common:actions.add')}
-                        </button>
                     </div>
 
                     {expenses.length === 0 ? (
@@ -843,14 +905,6 @@ const Budget: React.FC = () => {
                                 </span>
                             )}
                         </div>
-                        <button
-                            onClick={() => openNewEntry(false)}
-                            disabled={!canEdit}
-                            className="flex items-center gap-1.5 text-sm font-medium text-primary active:scale-95 transition-transform disabled:opacity-40 disabled:pointer-events-none"
-                        >
-                            <Plus className="w-4 h-4" />
-                            {t('common:actions.add')}
-                        </button>
                     </div>
 
                     {incomes.length === 0 ? (
@@ -875,127 +929,178 @@ const Budget: React.FC = () => {
 
             </div>
 
-            {/* Sheet : prélèvement récurrent */}
+            {/* Unified Budget entry sheet */}
             <Sheet
-                open={sheetRecurring}
-                onClose={() => setSheetRecurring(false)}
-                title={editingRecurring ? t('budget:sheets.recurringEdit') : t('budget:sheets.recurringNew')}
+                open={sheetTransaction}
+                onClose={() => setSheetTransaction(false)}
+                title={
+                    editingRecurring || editingEntry
+                        ? t('budget:sheets.edit')
+                        : t('budget:sheets.new')
+                }
             >
-                <form onSubmit={handleSaveRecurring} className="space-y-4">
+                <form onSubmit={handleSaveTransaction} className="space-y-4">
                     {formError && (
                         <div className="rounded-xl bg-danger/10 border border-danger/20 px-3 py-2 text-sm text-danger">
                             {formError}
                         </div>
                     )}
-                    <Field
-                        label={t('budget:fields.name')}
-                        value={recurringForm.label}
-                        onChange={(v) => setRecurringForm((f) => ({ ...f, label: v }))}
-                        placeholder={t('budget:fields.namePlaceholder')}
-                        required
-                    />
-                    <Field
-                        label={t('budget:fields.amount', { currency })}
-                        type="number"
-                        value={recurringForm.amount}
-                        onChange={(v) => setRecurringForm((f) => ({ ...f, amount: v }))}
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0.01"
-                        required
-                    />
-                    <Field
-                        label={t('budget:fields.debitDay')}
-                        type="number"
-                        value={recurringForm.debit_day}
-                        onChange={(v) => setRecurringForm((f) => ({ ...f, debit_day: v }))}
-                        placeholder={t('budget:fields.debitDayPlaceholder')}
-                        min="1"
-                        required
-                    />
-                    <CategorySelect
-                        value={recurringForm.category}
-                        onChange={(v) => setRecurringForm((f) => ({ ...f, category: v }))}
-                    />
-                    <div className="flex gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={() => setSheetRecurring(false)}
-                            className="flex-1 py-3 rounded-xl border border-border text-foreground font-medium active:scale-95 transition-transform"
-                        >
-                            {t('common:actions.cancel')}
-                        </button>
-                        <button
-                            type="submit"
-                            className="flex-1 py-3 rounded-xl bg-primary text-white font-medium active:scale-95 transition-transform"
-                        >
-                            {editingRecurring ? t('common:actions.save') : t('common:actions.add')}
-                        </button>
-                    </div>
-                </form>
-            </Sheet>
 
-            {/* Sheet : dépense / revenu */}
-            <Sheet
-                open={sheetEntry}
-                onClose={() => setSheetEntry(false)}
-                title={editingEntry ? t('budget:sheets.edit') : entryForm.is_expense ? t('budget:sheets.newExpense') : t('budget:sheets.newIncome')}
-            >
-                <form onSubmit={handleSaveEntry} className="space-y-4">
-                    {formError && (
-                        <div className="rounded-xl bg-danger/10 border border-danger/20 px-3 py-2 text-sm text-danger">
-                            {formError}
-                        </div>
-                    )}
-                    {!editingEntry && (
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-1">
+                            {t('budget:fields.type')}
+                        </label>
                         <div className="flex rounded-xl overflow-hidden border border-border">
                             <button
                                 type="button"
-                                onClick={() => setEntryForm((f) => ({ ...f, is_expense: true }))}
-                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${entryForm.is_expense ? 'bg-danger/100 text-white' : 'bg-surface-1 text-muted-foreground'}`}
+                                onClick={() => setTransactionForm((f) => ({ ...f, is_expense: true }))}
+                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                                    transactionForm.is_expense
+                                        ? 'bg-danger/100 text-white'
+                                        : 'bg-surface-1 text-muted-foreground'
+                                }`}
                             >
                                 {t('budget:toggle.expense')}
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setEntryForm((f) => ({ ...f, is_expense: false }))}
-                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${!entryForm.is_expense ? 'bg-success/100 text-white' : 'bg-surface-1 text-muted-foreground'}`}
+                                onClick={() => setTransactionForm((f) => ({ ...f, is_expense: false }))}
+                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                                    !transactionForm.is_expense
+                                        ? 'bg-success/100 text-white'
+                                        : 'bg-surface-1 text-muted-foreground'
+                                }`}
                             >
                                 {t('budget:toggle.income')}
                             </button>
                         </div>
-                    )}
+                    </div>
+
                     <Field
                         label={t('budget:fields.description')}
-                        value={entryForm.description}
-                        onChange={(v) => setEntryForm((f) => ({ ...f, description: v }))}
+                        value={transactionForm.description}
+                        onChange={(v) => setTransactionForm((f) => ({ ...f, description: v }))}
                         placeholder={t('budget:fields.descriptionPlaceholder')}
                     />
+
                     <Field
                         label={t('budget:fields.amount', { currency })}
                         type="number"
-                        value={entryForm.amount}
-                        onChange={(v) => setEntryForm((f) => ({ ...f, amount: v }))}
+                        value={transactionForm.amount}
+                        onChange={(v) => setTransactionForm((f) => ({ ...f, amount: v }))}
                         placeholder="0.00"
                         step="0.01"
                         min="0.01"
                         required
                     />
+
+                    <CategorySelect
+                        value={transactionForm.category}
+                        onChange={(v) => setTransactionForm((f) => ({ ...f, category: v }))}
+                    />
+
                     <Field
-                        label={t('budget:fields.date')}
+                        label={
+                            transactionForm.recurrence_frequency === 'none'
+                                ? t('budget:fields.date')
+                                : t('budget:fields.startDate')
+                        }
                         type="date"
-                        value={entryForm.date}
-                        onChange={(v) => setEntryForm((f) => ({ ...f, date: v }))}
+                        value={transactionForm.date}
+                        onChange={(v) => setTransactionForm((f) => ({ ...f, date: v }))}
                         required
                     />
-                    <CategorySelect
-                        value={entryForm.category}
-                        onChange={(v) => setEntryForm((f) => ({ ...f, category: v }))}
-                    />
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-1">
+                            {t('budget:fields.repeat')}
+                        </label>
+                        <select
+                            value={transactionForm.recurrence_frequency}
+                            onChange={(e) => setTransactionForm((f) => ({
+                                ...f,
+                                recurrence_frequency: e.target.value as typeof f.recurrence_frequency,
+                            }))}
+                            className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface-1 text-foreground text-base
+                                       focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+                        >
+                            {!editingRecurring && (
+                                <option value="none">{t('budget:recurring.frequency.none')}</option>
+                            )}
+                            {!editingEntry && (
+                                <>
+                                    <option value="daily">{t('budget:recurring.frequency.daily')}</option>
+                                    <option value="weekly">{t('budget:recurring.frequency.weekly')}</option>
+                                    <option value="monthly">{t('budget:recurring.frequency.monthly')}</option>
+                                    <option value="yearly">{t('budget:recurring.frequency.yearly')}</option>
+                                </>
+                            )}
+                        </select>
+                    </div>
+
+                    {transactionForm.recurrence_frequency !== 'none' && (
+                        <>
+                            <div>
+                                <label className="block text-sm font-medium text-foreground mb-1">
+                                    {t('budget:fields.every')}
+                                </label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="number"
+                                        value={transactionForm.recurrence_interval}
+                                        onChange={(e) => setTransactionForm((f) => ({
+                                            ...f,
+                                            recurrence_interval: e.target.value,
+                                        }))}
+                                        min="1"
+                                        max="365"
+                                        step="1"
+                                        required
+                                        className="w-24 px-3 py-2.5 rounded-xl border border-border bg-surface-1 text-foreground text-base
+                                                   focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+                                    />
+                                    <span className="text-sm text-muted-foreground">
+                                        {t(`budget:recurring.units.${transactionForm.recurrence_frequency}`, {
+                                            count: parseInt(transactionForm.recurrence_interval, 10) || 1,
+                                        })}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <Field
+                                label={t('budget:fields.repeatUntil')}
+                                type="date"
+                                value={transactionForm.recurrence_until}
+                                onChange={(v) => setTransactionForm((f) => ({
+                                    ...f,
+                                    recurrence_until: v,
+                                }))}
+                                min={transactionForm.date}
+                            />
+                        </>
+                    )}
+
+                    <label className="flex cursor-pointer items-start gap-2 rounded-xl border border-border bg-surface-2/40 p-3">
+                        <input
+                            type="checkbox"
+                            checked={transactionAddToCalendar}
+                            onChange={(e) => setTransactionAddToCalendar(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                        />
+                        <span>
+                            <span className="block text-sm font-medium">
+                                {t('budget:fields.addToCalendar')}
+                            </span>
+                            <span className="block text-xs text-muted-foreground">
+                                {t('budget:fields.addToCalendarHint')}
+                            </span>
+                        </span>
+                    </label>
+
                     <div className="flex gap-3 pt-2">
                         <button
                             type="button"
-                            onClick={() => setSheetEntry(false)}
+                            onClick={() => setSheetTransaction(false)}
                             className="flex-1 py-3 rounded-xl border border-border text-foreground font-medium active:scale-95 transition-transform"
                         >
                             {t('common:actions.cancel')}
@@ -1004,7 +1109,9 @@ const Budget: React.FC = () => {
                             type="submit"
                             className="flex-1 py-3 rounded-xl bg-primary text-white font-medium active:scale-95 transition-transform"
                         >
-                            {editingEntry ? t('common:actions.save') : t('common:actions.add')}
+                            {editingRecurring || editingEntry
+                                ? t('common:actions.save')
+                                : t('common:actions.add')}
                         </button>
                     </div>
                 </form>

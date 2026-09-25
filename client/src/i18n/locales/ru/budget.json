@@ -28,7 +28,8 @@
     "expenses_one": "{{count}} расход",
     "expenses_few": "{{count}} расхода",
     "expenses_many": "{{count}} расходов",
-    "expenses_other": "{{count}} расхода"
+    "expenses_other": "{{count}} расхода",
+    "opening": "Начальный баланс: {{amount}}"
   },
   "forecast": {
     "title": "Прогноз",
@@ -40,8 +41,7 @@
     "noExpenses": "В этом месяце расходов нет",
     "yearEvolution": "Динамика за год",
     "income": "Доходы",
-    "expenses": "Расходы",
-    "recurring": "Регулярные списания"
+    "expenses": "Расходы"
   },
   "limits": {
     "title": "Месячные лимиты",
@@ -56,49 +56,76 @@
   },
   "recurring": {
     "empty": "Нет регулярных списаний",
-    "addOne": "+ Добавить списание",
     "markOn": "Отметить списанным",
     "markOff": "Снять отметку",
-    "dayPrefix": "день"
+    "dayPrefix": "день",
+    "frequency": {
+      "daily": "Ежедневно",
+      "weekly": "Еженедельно",
+      "monthly": "Ежемесячно",
+      "yearly": "Ежегодно",
+      "none": "Не повторяется"
+    },
+    "units": {
+      "daily_one": "день",
+      "daily_few": "дня",
+      "daily_many": "дней",
+      "daily_other": "дня",
+      "weekly_one": "неделю",
+      "weekly_few": "недели",
+      "weekly_many": "недель",
+      "weekly_other": "недели",
+      "monthly_one": "месяц",
+      "monthly_few": "месяца",
+      "monthly_many": "месяцев",
+      "monthly_other": "месяца",
+      "yearly_one": "год",
+      "yearly_few": "года",
+      "yearly_many": "лет",
+      "yearly_other": "года"
+    }
   },
   "empty": {
     "expenses": "В этом месяце расходов нет",
     "income": "В этом месяце доходов нет"
   },
   "sheets": {
-    "recurringEdit": "Изменить списание",
-    "recurringNew": "Новое списание",
     "edit": "Изменить",
-    "newExpense": "Новый расход",
-    "newIncome": "Новый доход",
-    "limit": "Месячный лимит"
+    "limit": "Месячный лимит",
+    "new": "Добавить запись"
   },
   "toggle": {
     "expense": "Расход",
     "income": "Доход"
   },
   "fields": {
-    "name": "Название списания",
-    "namePlaceholder": "например, аренда, электричество, Netflix…",
     "amount": "Сумма ({{currency}})",
-    "debitDay": "День списания в месяце (от 1 до 31)",
-    "debitDayPlaceholder": "например, 5",
     "description": "Описание (необязательно)",
     "descriptionPlaceholder": "например, продукты, зарплата…",
     "date": "Дата",
     "category": "Категория",
     "limit": "Месячный лимит ({{currency}})",
-    "limitHint": "Укажите 0, чтобы отключить контроль этой категории."
+    "limitHint": "Укажите 0, чтобы отключить контроль этой категории.",
+    "startDate": "Дата начала",
+    "repeat": "Повторение",
+    "every": "Каждые",
+    "repeatUntil": "Повторять до (необязательно)",
+    "addToCalendar": "Добавить в календарь",
+    "addToCalendarHint": "Создаёт событие на весь день в календаре с той же датой и повторением.",
+    "type": "Тип"
   },
   "errors": {
     "amountInvalid": "Некорректная сумма.",
-    "nameRequired": "Укажите название.",
-    "debitDayInvalid": "Некорректный день списания (1–31).",
     "save": "Не удалось сохранить.",
-    "limitInvalid": "Некорректный лимит."
+    "limitInvalid": "Некорректный лимит.",
+    "startDateRequired": "Укажите дату начала.",
+    "intervalInvalid": "Интервал повторения должен быть от 1 до 365.",
+    "repeatUntilInvalid": "Дата окончания не может быть раньше даты начала.",
+    "editRecurrenceType": "Чтобы сделать запись разовой или повторяющейся, удалите её и добавьте заново."
   },
   "confirm": {
     "deleteRecurring": "Удалить это регулярное списание?",
     "deleteEntry": "Удалить эту запись?"
-  }
+  },
+  "classic": "Классический"
 }

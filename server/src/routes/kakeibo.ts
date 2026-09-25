@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
+import { expandRecurringTransactions } from '../lib/budgetRecurrence';
 import { broadcast } from '../lib/broadcaster';
 import { getFamilyCategories } from './categories';
 
@@ -95,13 +96,25 @@ router.get('/', async (req: AuthRequest, res) => {
        GROUP BY category`,
             [req.userId, month, year]
         );
-        const recurringByCat = await query(
-            `SELECT category, SUM(amount) AS total FROM recurring_expenses
-       WHERE user_id = $1 AND is_active = true
-         AND created_at < make_date($3, $2, 1) + interval '1 month'
-       GROUP BY category`,
-            [req.userId, month, year]
+        // Recurring expenses count once per occurrence in the month: a weekly
+        // item four or five times, a yearly one only in its month.
+        const monthStart = `${year}-${String(month).padStart(2, '0')}-01`;
+        const monthEnd = `${year}-${String(month).padStart(2, '0')}-${String(new Date(Date.UTC(year, month, 0)).getUTCDate()).padStart(2, '0')}`;
+        const recurringSeries = await query(
+            `SELECT * FROM recurring_expenses
+             WHERE user_id = $1 AND is_active = true AND is_expense = true
+               AND start_date <= $3::date
+               AND (recurrence_until IS NULL OR recurrence_until >= $2::date)`,
+            [req.userId, monthStart, monthEnd]
         );
+        const recurringTotals = new Map<string, number>();
+        for (const occurrence of expandRecurringTransactions(recurringSeries.rows, monthStart, monthEnd)) {
+            const amount = parseFloat(String(occurrence.amount)) || 0;
+            recurringTotals.set(occurrence.category, (recurringTotals.get(occurrence.category) ?? 0) + amount);
+        }
+        const recurringByCat = {
+            rows: [...recurringTotals].map(([category, total]) => ({ category, total })),
+        };
 
         const spentByCategory = new Map<string, number>();
         for (const row of [...entryByCat.rows, ...recurringByCat.rows]) {

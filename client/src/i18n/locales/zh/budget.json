@@ -21,14 +21,15 @@
   },
   "balance": {
     "current": "当前余额",
-    "pointed_one": "已标记 {{count}} 笔扣款",
-    "pointed_other": "已标记 {{count}} 笔扣款",
+    "pointed_one": "已核对 {{count}} 笔定期项目",
+    "pointed_other": "已核对 {{count}} 笔定期项目",
     "expenses_one": "{{count}} 笔支出",
-    "expenses_other": "{{count}} 笔支出"
+    "expenses_other": "{{count}} 笔支出",
+    "opening": "期初结转余额：{{amount}}"
   },
   "forecast": {
     "title": "预测",
-    "subtitle": "还有 {{amount}} 的扣款待标记"
+    "subtitle": "即将发生的定期项目：+{{income}} 收入 · -{{expenses}} 支出"
   },
   "analytics": "分析与限额",
   "charts": {
@@ -36,8 +37,7 @@
     "noExpenses": "本月暂无支出",
     "yearEvolution": "年度趋势",
     "income": "收入",
-    "expenses": "支出",
-    "recurring": "定期扣款"
+    "expenses": "支出"
   },
   "limits": {
     "title": "每月限额",
@@ -46,27 +46,36 @@
     "none": "未设置限额"
   },
   "sections": {
-    "recurring": "定期扣款",
+    "recurring": "定期收支",
     "expenses": "支出",
     "income": "收入"
   },
   "recurring": {
-    "empty": "暂无定期扣款",
-    "addOne": "+ 添加扣款",
-    "markOn": "标记为已扣款",
+    "empty": "本月没有定期收支",
+    "markOn": "标记为已核对",
     "markOff": "取消标记",
-    "dayPrefix": "每月"
+    "dayPrefix": "每月",
+    "frequency": {
+      "daily": "每天",
+      "weekly": "每周",
+      "monthly": "每月",
+      "yearly": "每年",
+      "none": "不重复"
+    },
+    "units": {
+      "daily": "天",
+      "weekly": "周",
+      "monthly": "个月",
+      "yearly": "年"
+    }
   },
   "empty": {
     "expenses": "本月暂无支出",
     "income": "本月暂无收入"
   },
   "sheets": {
-    "recurringEdit": "编辑扣款",
-    "recurringNew": "新建扣款",
-    "edit": "编辑",
-    "newExpense": "新增支出",
-    "newIncome": "新增收入",
+    "new": "添加记录",
+    "edit": "编辑记录",
     "limit": "每月限额"
   },
   "toggle": {
@@ -74,27 +83,33 @@
     "income": "收入"
   },
   "fields": {
-    "name": "扣款名称",
-    "namePlaceholder": "例如：房租、电费、Netflix……",
     "amount": "金额（{{currency}}）",
-    "debitDay": "每月扣款日（1 至 31）",
-    "debitDayPlaceholder": "例如：5",
     "description": "说明（可选）",
-    "descriptionPlaceholder": "例如：食品杂货、工资……",
+    "descriptionPlaceholder": "例如：杂货、工资、投资存款……",
     "date": "日期",
     "category": "类别",
     "limit": "每月限额（{{currency}}）",
-    "limitHint": "设为 0 可取消对此类别的跟踪。"
+    "limitHint": "设为 0 可取消对此类别的跟踪。",
+    "startDate": "开始日期",
+    "repeat": "重复",
+    "every": "每隔",
+    "repeatUntil": "重复至（可选）",
+    "addToCalendar": "添加到日历",
+    "addToCalendarHint": "使用相同日期和重复规则创建全天日历事件。",
+    "type": "类型"
   },
   "errors": {
     "amountInvalid": "金额无效。",
-    "nameRequired": "必须填写名称。",
-    "debitDayInvalid": "扣款日无效（1-31）。",
     "save": "保存时出错。",
-    "limitInvalid": "限额无效。"
+    "limitInvalid": "限额无效。",
+    "startDateRequired": "必须填写开始日期。",
+    "intervalInvalid": "重复间隔必须在 1 到 365 之间。",
+    "repeatUntilInvalid": "结束日期不能早于开始日期。",
+    "editRecurrenceType": "如需在一次性和定期记录之间切换，请删除此记录后重新添加。"
   },
   "confirm": {
-    "deleteRecurring": "删除这笔定期扣款？",
+    "deleteRecurring": "删除这条定期记录？",
     "deleteEntry": "删除这条记录？"
-  }
+  },
+  "classic": "经典"
 }

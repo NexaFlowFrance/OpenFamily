@@ -47,7 +47,12 @@
     "repeatWeeks": "semaine(s)",
     "repeatMonths": "mois",
     "repeatYears": "an(s)",
-    "allDay": "Toute la journée"
+    "allDay": "Toute la journée",
+    "addToBudget": "Ajouter au budget",
+    "addToBudgetHint": "Crée une écriture budgétaire avec la même date et la même récurrence.",
+    "budgetAmount": "Montant ({{currency}})",
+    "budgetCategory": "Catégorie du budget",
+    "budgetLinked": "Lié au budget : les changements de date et de récurrence y sont reportés. Supprimer cet événement conserve l’écriture budgétaire."
   },
   "feed": {
     "title": "Exporter le calendrier (iCal)",
@@ -69,7 +74,8 @@
     "startRequired": "Veuillez renseigner une date et une heure de début.",
     "endAfterStart": "L'heure de fin doit être après l'heure de début.",
     "save": "Impossible d'enregistrer ce rendez-vous.",
-    "delete": "Impossible de supprimer ce rendez-vous."
+    "delete": "Impossible de supprimer ce rendez-vous.",
+    "budgetAmountInvalid": "Saisissez un montant valide."
   },
   "recurrenceScope": {
     "editTitle": "Modifier le rendez-vous récurrent",

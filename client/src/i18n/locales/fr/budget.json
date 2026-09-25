@@ -21,14 +21,15 @@
   },
   "balance": {
     "current": "Solde actuel",
-    "pointed_one": "{{count}} prélèvement pointé",
-    "pointed_other": "{{count}} prélèvements pointés",
+    "pointed_one": "{{count}} écriture récurrente rapprochée",
+    "pointed_other": "{{count}} écritures récurrentes rapprochées",
     "expenses_one": "{{count}} dépense",
-    "expenses_other": "{{count}} dépenses"
+    "expenses_other": "{{count}} dépenses",
+    "opening": "Solde reporté : {{amount}}"
   },
   "forecast": {
     "title": "Prévisionnel",
-    "subtitle": "Encore {{amount}} de prélèvements à pointer"
+    "subtitle": "Récurrences à venir : +{{income}} revenus · -{{expenses}} dépenses"
   },
   "analytics": "Analyse & plafonds",
   "charts": {
@@ -36,8 +37,7 @@
     "noExpenses": "Aucune dépense ce mois",
     "yearEvolution": "Évolution sur l'année",
     "income": "Revenus",
-    "expenses": "Dépenses",
-    "recurring": "Prélèvements"
+    "expenses": "Dépenses"
   },
   "limits": {
     "title": "Plafonds mensuels",
@@ -46,27 +46,40 @@
     "none": "Aucun plafond défini"
   },
   "sections": {
-    "recurring": "Prélèvements",
+    "recurring": "Écritures récurrentes",
     "expenses": "Dépenses",
     "income": "Revenus"
   },
   "recurring": {
-    "empty": "Aucun prélèvement récurrent",
-    "addOne": "+ Ajouter un prélèvement",
-    "markOn": "Marquer comme débité",
+    "empty": "Aucune écriture récurrente ce mois",
+    "markOn": "Marquer comme rapproché",
     "markOff": "Dépointer",
-    "dayPrefix": "j."
+    "dayPrefix": "j.",
+    "frequency": {
+      "daily": "Quotidien",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "none": "Ne se répète pas"
+    },
+    "units": {
+      "daily_one": "jour",
+      "daily_other": "jours",
+      "weekly_one": "semaine",
+      "weekly_other": "semaines",
+      "monthly_one": "mois",
+      "monthly_other": "mois",
+      "yearly_one": "an",
+      "yearly_other": "ans"
+    }
   },
   "empty": {
     "expenses": "Aucune dépense ce mois",
     "income": "Aucun revenu ce mois"
   },
   "sheets": {
-    "recurringEdit": "Modifier le prélèvement",
-    "recurringNew": "Nouveau prélèvement",
-    "edit": "Modifier",
-    "newExpense": "Nouvelle dépense",
-    "newIncome": "Nouveau revenu",
+    "new": "Ajouter une écriture",
+    "edit": "Modifier l’écriture",
     "limit": "Plafond mensuel"
   },
   "toggle": {
@@ -74,27 +87,33 @@
     "income": "Revenu"
   },
   "fields": {
-    "name": "Nom du prélèvement",
-    "namePlaceholder": "Ex : Loyer, EDF, Netflix…",
     "amount": "Montant ({{currency}})",
-    "debitDay": "Jour de débit dans le mois (1 à 31)",
-    "debitDayPlaceholder": "Ex : 5",
     "description": "Description (facultatif)",
-    "descriptionPlaceholder": "Ex : Courses Leclerc, Salaire…",
+    "descriptionPlaceholder": "Ex. : Courses, paie, dépôt de placement…",
     "date": "Date",
     "category": "Catégorie",
     "limit": "Plafond mensuel ({{currency}})",
-    "limitHint": "Définir 0 pour retirer le suivi de cette catégorie."
+    "limitHint": "Définir 0 pour retirer le suivi de cette catégorie.",
+    "startDate": "Date de début",
+    "repeat": "Répétition",
+    "every": "Tous les",
+    "repeatUntil": "Répéter jusqu’au (facultatif)",
+    "addToCalendar": "Ajouter au calendrier",
+    "addToCalendarHint": "Crée un événement de calendrier sur toute la journée avec la même date et la même récurrence.",
+    "type": "Type"
   },
   "errors": {
     "amountInvalid": "Montant invalide.",
-    "nameRequired": "Nom requis.",
-    "debitDayInvalid": "Jour de débit invalide (1-31).",
     "save": "Erreur lors de l'enregistrement.",
-    "limitInvalid": "Plafond invalide."
+    "limitInvalid": "Plafond invalide.",
+    "startDateRequired": "Date de début requise.",
+    "intervalInvalid": "L’intervalle doit être compris entre 1 et 365.",
+    "repeatUntilInvalid": "La date de fin ne peut pas précéder la date de début.",
+    "editRecurrenceType": "Pour passer d’une écriture ponctuelle à récurrente (ou inversement), supprimez-la puis ajoutez-la de nouveau."
   },
   "confirm": {
-    "deleteRecurring": "Supprimer ce prélèvement récurrent ?",
+    "deleteRecurring": "Supprimer cette écriture récurrente ?",
     "deleteEntry": "Supprimer cette entrée ?"
-  }
+  },
+  "classic": "Classique"
 }

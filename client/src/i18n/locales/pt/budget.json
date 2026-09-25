@@ -21,14 +21,15 @@
   },
   "balance": {
     "current": "Saldo atual",
-    "pointed_one": "{{count}} débito compensado",
-    "pointed_other": "{{count}} débitos compensados",
+    "pointed_one": "{{count}} lançamento recorrente conciliado",
+    "pointed_other": "{{count}} lançamentos recorrentes conciliados",
     "expenses_one": "{{count}} despesa",
-    "expenses_other": "{{count}} despesas"
+    "expenses_other": "{{count}} despesas",
+    "opening": "Saldo transportado: {{amount}}"
   },
   "forecast": {
     "title": "Previsão",
-    "subtitle": "Falta compensar {{amount}} em débitos"
+    "subtitle": "Recorrentes futuros: +{{income}} receitas · -{{expenses}} despesas"
   },
   "analytics": "Análises & Limites",
   "charts": {
@@ -36,8 +37,7 @@
     "noExpenses": "Nenhuma despesa este mês",
     "yearEvolution": "Evolução anual",
     "income": "Receitas",
-    "expenses": "Despesas",
-    "recurring": "Débitos recorrentes"
+    "expenses": "Despesas"
   },
   "limits": {
     "title": "Limites mensais",
@@ -46,27 +46,40 @@
     "none": "Nenhum limite definido"
   },
   "sections": {
-    "recurring": "Recorrentes",
+    "recurring": "Lançamentos recorrentes",
     "expenses": "Despesas",
     "income": "Receitas"
   },
   "recurring": {
-    "empty": "Nenhum débito recorrente",
-    "addOne": "+ Adicionar débito",
-    "markOn": "Marcar como debitado",
+    "empty": "Nenhum lançamento recorrente neste mês",
+    "markOn": "Marcar como conciliado",
     "markOff": "Desmarcar",
-    "dayPrefix": "dia"
+    "dayPrefix": "dia",
+    "frequency": {
+      "daily": "Diário",
+      "weekly": "Semanal",
+      "monthly": "Mensal",
+      "yearly": "Anual",
+      "none": "Não se repete"
+    },
+    "units": {
+      "daily_one": "dia",
+      "daily_other": "dias",
+      "weekly_one": "semana",
+      "weekly_other": "semanas",
+      "monthly_one": "mês",
+      "monthly_other": "meses",
+      "yearly_one": "ano",
+      "yearly_other": "anos"
+    }
   },
   "empty": {
     "expenses": "Nenhuma despesa este mês",
     "income": "Nenhuma receita este mês"
   },
   "sheets": {
-    "recurringEdit": "Editar débito",
-    "recurringNew": "Novo débito",
-    "edit": "Editar",
-    "newExpense": "Nova despesa",
-    "newIncome": "Nova receita",
+    "new": "Adicionar lançamento",
+    "edit": "Editar lançamento",
     "limit": "Limite mensal"
   },
   "toggle": {
@@ -74,27 +87,33 @@
     "income": "Receita"
   },
   "fields": {
-    "name": "Nome do débito",
-    "namePlaceholder": "ex: Aluguel, Luz, Netflix…",
     "amount": "Valor ({{currency}})",
-    "debitDay": "Dia de débito no mês (1 a 31)",
-    "debitDayPlaceholder": "ex: 5",
     "description": "Descrição (opcional)",
-    "descriptionPlaceholder": "ex: Mercado, Salário…",
+    "descriptionPlaceholder": "Ex.: supermercado, pagamento, depósito de investimento…",
     "date": "Data",
     "category": "Categoria",
     "limit": "Limite mensal ({{currency}})",
-    "limitHint": "Defina 0 para remover o acompanhamento desta categoria."
+    "limitHint": "Defina 0 para remover o acompanhamento desta categoria.",
+    "startDate": "Data inicial",
+    "repeat": "Repetir",
+    "every": "A cada",
+    "repeatUntil": "Repetir até (opcional)",
+    "addToCalendar": "Adicionar ao calendário",
+    "addToCalendarHint": "Cria um evento de dia inteiro com a mesma data e recorrência.",
+    "type": "Tipo"
   },
   "errors": {
     "amountInvalid": "Valor inválido.",
-    "nameRequired": "Nome é obrigatório.",
-    "debitDayInvalid": "Dia de débito inválido (1-31).",
     "save": "Erro ao salvar.",
-    "limitInvalid": "Limite inválido."
+    "limitInvalid": "Limite inválido.",
+    "startDateRequired": "Data inicial obrigatória.",
+    "intervalInvalid": "O intervalo deve estar entre 1 e 365.",
+    "repeatUntilInvalid": "A data final não pode ser anterior à data inicial.",
+    "editRecurrenceType": "Para alternar entre lançamento único e recorrente, exclua este lançamento e adicione-o novamente."
   },
   "confirm": {
-    "deleteRecurring": "Tem certeza que deseja excluir este débito recorrente?",
+    "deleteRecurring": "Excluir este lançamento recorrente?",
     "deleteEntry": "Tem certeza que deseja excluir este registro?"
-  }
+  },
+  "classic": "Clássico"
 }

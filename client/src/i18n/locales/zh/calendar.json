@@ -47,7 +47,12 @@
     "repeatWeeks": "周",
     "repeatMonths": "个月",
     "repeatYears": "年",
-    "allDay": "全天"
+    "allDay": "全天",
+    "addToBudget": "添加到预算",
+    "addToBudgetHint": "使用相同日期和重复规则创建一笔预算记录。",
+    "budgetAmount": "金额（{{currency}}）",
+    "budgetCategory": "预算类别",
+    "budgetLinked": "已关联到预算：日期和重复规则的更改会同步到预算。删除此日程不会删除预算记录。"
   },
   "feed": {
     "title": "导出日历（iCal）",
@@ -69,7 +74,8 @@
     "startRequired": "请输入开始日期和时间。",
     "endAfterStart": "结束时间必须晚于开始时间。",
     "save": "无法保存此日程。",
-    "delete": "无法删除此日程。"
+    "delete": "无法删除此日程。",
+    "budgetAmountInvalid": "请输入有效的金额。"
   },
   "recurrenceScope": {
     "editTitle": "修改重复日程",

@@ -47,7 +47,12 @@
     "repeatWeeks": "semana(s)",
     "repeatMonths": "mês(es)",
     "repeatYears": "ano(s)",
-    "allDay": "Dia inteiro"
+    "allDay": "Dia inteiro",
+    "addToBudget": "Adicionar ao orçamento",
+    "addToBudgetHint": "Cria um lançamento no orçamento com a mesma data e recorrência.",
+    "budgetAmount": "Valor ({{currency}})",
+    "budgetCategory": "Categoria do orçamento",
+    "budgetLinked": "Vinculado ao orçamento: mudanças de data e recorrência são aplicadas lá também. Excluir este evento mantém o lançamento."
   },
   "feed": {
     "title": "Exportar calendário (iCal / Google)",
@@ -69,7 +74,8 @@
     "startRequired": "Por favor, insira a data e hora de início.",
     "endAfterStart": "A hora de término deve ser após a hora de início.",
     "save": "Não foi possível salvar este compromisso.",
-    "delete": "Não foi possível excluir este compromisso."
+    "delete": "Não foi possível excluir este compromisso.",
+    "budgetAmountInvalid": "Insira um valor válido."
   },
   "recurrenceScope": {
     "editTitle": "Editar compromisso recorrente",

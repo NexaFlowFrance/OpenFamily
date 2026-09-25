@@ -8,6 +8,8 @@ import { Card, CardContent, Button, Dialog, Input, Textarea, Badge, Select, Date
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
 import { dateLocale } from '../i18n/format';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useCategories } from '../hooks/useCategories';
 
 interface Appointment {
     id: string;
@@ -32,6 +34,8 @@ interface Appointment {
     notes?: string;
     color?: string;
     is_all_day?: boolean;
+    linked_budget_entry_id?: string | null;
+    linked_recurring_expense_id?: string | null;
 }
 
 interface FamilyMember {
@@ -141,8 +145,20 @@ const APPOINTMENT_COLORS = [
     { name: 'Black', color: '#111827' },
 ] as const;
 
+const isLinkedToBudget = (appointment: Appointment) =>
+    Boolean(appointment.linked_budget_entry_id || appointment.linked_recurring_expense_id);
+
 const Calendar: React.FC = () => {
-    const { t } = useTranslation(['calendar', 'common']);
+    const { t } = useTranslation(['calendar', 'budget', 'common']);
+    const { user } = useAuth();
+    const { categories } = useCategories();
+    // Budget writes are parent-only on the server; children never see the option.
+    const canBudgetEdit = Boolean(user?.is_owner) || (user?.role ?? '').toLowerCase() !== 'enfant';
+    const currency = user?.currency || 'EUR';
+    const [addToBudget, setAddToBudget] = useState(false);
+    const [budgetAmount, setBudgetAmount] = useState('');
+    const [budgetCategory, setBudgetCategory] = useState('Maison');
+    const [budgetIsExpense, setBudgetIsExpense] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
@@ -309,6 +325,14 @@ const Calendar: React.FC = () => {
         // starts on, so every existing query and the agenda views keep working.
         // Its reminders are cleared: "30 minutes before" means nothing without a
         // start time the user chose.
+        if (!editingAppointment && addToBudget) {
+            const amount = parseFloat(budgetAmount.replace(',', '.'));
+            if (!Number.isFinite(amount) || amount <= 0) {
+                setError(t('calendar:errors.budgetAmountInvalid'));
+                return;
+            }
+        }
+
         const day = formData.start_time.slice(0, 10);
         const payload = formData.is_all_day
             ? {
@@ -337,8 +361,22 @@ const Calendar: React.FC = () => {
 
             if (editingAppointment) {
                 await api.put(`/api/appointments/${editingAppointment.id}`, payload);
+                // A linked budget item follows the event's new date and recurrence.
+                if (canBudgetEdit && isLinkedToBudget(editingAppointment)) {
+                    await api.post(`/api/budget/from-appointment/${editingAppointment.id}`, {});
+                }
             } else {
-                await api.post('/api/appointments', payload);
+                const created = await api.post<{ success: boolean; data: Appointment }>(
+                    '/api/appointments',
+                    payload
+                );
+                if (addToBudget && canBudgetEdit && created.success && created.data?.id) {
+                    await api.post(`/api/budget/from-appointment/${created.data.id}`, {
+                        amount: parseFloat(budgetAmount.replace(',', '.')),
+                        category: budgetCategory,
+                        is_expense: budgetIsExpense,
+                    });
+                }
             }
 
             setDialogOpen(false);
@@ -440,6 +478,9 @@ const Calendar: React.FC = () => {
                         `/api/appointments/${appointment.id}`,
                         payload
                     );
+                    if (canBudgetEdit && isLinkedToBudget(appointment)) {
+                        await api.post(`/api/budget/from-appointment/${appointment.id}`, {});
+                    }
                 }
             }
 
@@ -513,6 +554,10 @@ const Calendar: React.FC = () => {
     const resetForm = () => {
         setEditingAppointment(null);
         setEndManuallySet(false);
+        setAddToBudget(false);
+        setBudgetAmount('');
+        setBudgetCategory('Maison');
+        setBudgetIsExpense(true);
         setFormData({
             title: '',
             description: '',
@@ -1112,6 +1157,85 @@ const Calendar: React.FC = () => {
                             )}
                         </div>
                     </div>
+                    {canBudgetEdit && !editingAppointment && (
+                        <div className="rounded-input border border-border bg-surface-2/40 p-3">
+                            <label className="flex cursor-pointer items-start gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={addToBudget}
+                                    onChange={(e) => setAddToBudget(e.target.checked)}
+                                    className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                />
+                                <span>
+                                    <span className="block text-body-sm font-medium">
+                                        {t('calendar:form.addToBudget')}
+                                    </span>
+                                    <span className="block text-micro text-muted-foreground">
+                                        {t('calendar:form.addToBudgetHint')}
+                                    </span>
+                                </span>
+                            </label>
+
+                            {addToBudget && (
+                                <div className="mt-3 space-y-3">
+                                    <div className="flex rounded-input overflow-hidden border border-border">
+                                        <button
+                                            type="button"
+                                            onClick={() => setBudgetIsExpense(true)}
+                                            className={`flex-1 py-2.5 text-body-sm font-medium transition-colors ${
+                                                budgetIsExpense ? 'bg-danger/100 text-white' : 'bg-surface-1 text-muted-foreground'
+                                            }`}
+                                        >
+                                            {t('budget:toggle.expense')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setBudgetIsExpense(false)}
+                                            className={`flex-1 py-2.5 text-body-sm font-medium transition-colors ${
+                                                !budgetIsExpense ? 'bg-success/100 text-white' : 'bg-surface-1 text-muted-foreground'
+                                            }`}
+                                        >
+                                            {t('budget:toggle.income')}
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                        <Input
+                                            label={t('calendar:form.budgetAmount', { currency })}
+                                            type="number"
+                                            min={0.01}
+                                            step={0.01}
+                                            value={budgetAmount}
+                                            onChange={(e) => setBudgetAmount(e.target.value)}
+                                            required
+                                        />
+                                        <div>
+                                            <label className="mb-1.5 block text-label font-medium text-foreground">
+                                                {t('calendar:form.budgetCategory')}
+                                            </label>
+                                            <select
+                                                value={budgetCategory}
+                                                onChange={(e) => setBudgetCategory(e.target.value)}
+                                                className="input-nexus w-full"
+                                            >
+                                                {categories.budget.map((category) => (
+                                                    <option key={category} value={category}>
+                                                        {t(`budget:categories.${category}`, { defaultValue: category })}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {editingAppointment && isLinkedToBudget(editingAppointment) && (
+                        <div className="rounded-input border border-success/30 bg-success/10 px-3 py-2 text-body-sm text-success">
+                            {t('calendar:form.budgetLinked')}
+                        </div>
+                    )}
+
                     <Input
                         label={t('calendar:form.location')}
                         value={formData.location}

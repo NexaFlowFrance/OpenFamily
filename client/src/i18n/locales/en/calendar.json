@@ -47,7 +47,12 @@
     "repeatWeeks": "week(s)",
     "repeatMonths": "month(s)",
     "repeatYears": "year(s)",
-    "allDay": "All day"
+    "allDay": "All day",
+    "addToBudget": "Add to budget",
+    "addToBudgetHint": "Creates a budget item with the same date and recurrence.",
+    "budgetAmount": "Budget amount ({{currency}})",
+    "budgetCategory": "Budget category",
+    "budgetLinked": "Linked to the budget: changes to the date and recurrence are applied there too. Deleting this event keeps the budget item."
   },
   "feed": {
     "title": "Export calendar (iCal)",
@@ -69,7 +74,8 @@
     "startRequired": "Please enter a start date and time.",
     "endAfterStart": "The end time must be after the start time.",
     "save": "Unable to save this appointment.",
-    "delete": "Unable to delete this appointment."
+    "delete": "Unable to delete this appointment.",
+    "budgetAmountInvalid": "Enter a valid budget amount."
   },
   "recurrenceScope": {
     "editTitle": "Edit recurring appointment",

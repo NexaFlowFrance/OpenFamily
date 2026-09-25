@@ -341,7 +341,11 @@ const Recipes: React.FC = () => {
             loadRecipes();
         } catch (error) {
             console.error('Failed to save recipe:', error);
-            setError(error instanceof Error ? error.message : t('recipes:errors.save'));
+            setError(
+                error instanceof Error && error.message === 'INVALID_IMAGE_URL'
+                    ? t('recipes:errors.invalidImage')
+                    : error instanceof Error ? error.message : t('recipes:errors.save')
+            );
         }
     };
 
@@ -357,6 +361,7 @@ const Recipes: React.FC = () => {
     };
 
     const handleEdit = (recipe: Recipe) => {
+        setError('');
         setEditingRecipe(recipe);
         setFormData({
             name: recipe.name,
@@ -432,6 +437,7 @@ const Recipes: React.FC = () => {
     };
 
     const resetForm = () => {
+        setError('');
         setEditingRecipe(null);
         setFormData({
             name: '',
@@ -775,6 +781,12 @@ const Recipes: React.FC = () => {
                         onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                         placeholder={t('recipes:form.imagePlaceholder')}
                     />
+                    {/* The page banner sits behind this dialog: repeat the save error here. */}
+                    {error && (
+                        <div role="alert" className="rounded-input border border-danger/30 bg-danger/10 px-3 py-2 text-caption text-danger">
+                            {error}
+                        </div>
+                    )}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 border-t">
                         <Button
                             type="button"

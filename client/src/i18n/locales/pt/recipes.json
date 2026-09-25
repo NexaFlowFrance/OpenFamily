@@ -124,6 +124,7 @@
   "errors": {
     "load": "Não foi possível carregar as receitas.",
     "save": "Não foi possível salvar esta receita.",
-    "delete": "Não foi possível excluir esta receita."
+    "delete": "Não foi possível excluir esta receita.",
+    "invalidImage": "Este link de imagem não é válido. Use um endereço web que comece com https:// ou deixe o campo vazio."
   }
 }

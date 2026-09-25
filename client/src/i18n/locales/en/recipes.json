@@ -124,6 +124,7 @@
   "errors": {
     "load": "Unable to load recipes.",
     "save": "Unable to save this recipe.",
-    "delete": "Unable to delete this recipe."
+    "delete": "Unable to delete this recipe.",
+    "invalidImage": "This image link is not valid. Use a web address starting with https:// or leave the field empty."
   }
 }

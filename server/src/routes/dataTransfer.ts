@@ -4,6 +4,7 @@ import { getClient, query } from '../db';
 import { authMiddleware, requireParent, AuthRequest } from '../middleware/auth';
 import { OPENFAMILY_VERSION } from '../version';
 import { cleanContent, cleanImage, cleanLink } from '../lib/postFields';
+import { cleanImageUrl } from '../lib/recipeImage';
 
 const PORTABLE_FORMAT = 'openfamily-portable';
 const PORTABLE_VERSION = '2.0';
@@ -679,7 +680,11 @@ router.post('/import', requireParent, importBodyParser, async (req: AuthRequest,
 
         const familyMemberIds = await loadOwnedIds(client, 'family_members', userId);
 
-        await importRows('recipes', importData.recipes);
+        await importRows('recipes', importData.recipes, (row) => {
+            // Same rule as the recipe routes; an unusable photo is dropped, not the recipe.
+            row.image_url = cleanImageUrl(row.image_url) ?? null;
+            return row;
+        });
         const recipeIds = await loadOwnedIds(client, 'recipes', userId);
 
         await importRows('tasks', importData.tasks, (row) => {

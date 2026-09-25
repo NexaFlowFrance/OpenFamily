@@ -2,6 +2,7 @@ import { Router } from 'express';
 import pool, { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
+import { cleanImageUrl } from '../lib/recipeImage';
 import { broadcast } from '../lib/broadcaster';
 import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
 import { getFamilyCategories } from './categories';
@@ -188,6 +189,11 @@ router.post('/', async (req: AuthRequest, res) => {
             });
         }
 
+        const cleanedImageUrl = cleanImageUrl(image_url);
+        if (cleanedImageUrl === undefined) {
+            return res.status(400).json({ success: false, error: 'INVALID_IMAGE_URL' });
+        }
+
         const result = await query(
             `INSERT INTO recipes (user_id, name, category, description, ingredients, instructions, prep_time, cook_time, servings, difficulty, tags, image_url)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
@@ -203,7 +209,7 @@ router.post('/', async (req: AuthRequest, res) => {
                 toOptionalNumber(servings),
                 toNullIfEmpty(difficulty),
                 JSON.stringify(Array.isArray(tags) ? tags.filter(Boolean) : []),
-                toNullIfEmpty(image_url),
+                cleanedImageUrl,
             ]
         );
 
@@ -230,6 +236,14 @@ router.put('/:id', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: 'Invalid numeric value' });
         }
 
+        // Absent: keep the photo. Empty or null: remove it (COALESCE alone kept
+        // the old photo, so clearing the field in the form did nothing).
+        const imageProvided = image_url !== undefined;
+        const cleanedImageUrl = imageProvided ? cleanImageUrl(image_url) : null;
+        if (cleanedImageUrl === undefined) {
+            return res.status(400).json({ success: false, error: 'INVALID_IMAGE_URL' });
+        }
+
         const result = await query(
             `UPDATE recipes 
        SET name = COALESCE($1, name),
@@ -242,7 +256,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
            servings = COALESCE($8, servings),
            difficulty = COALESCE($9, difficulty),
            tags = COALESCE($10, tags),
-           image_url = COALESCE($11, image_url)
+           image_url = CASE WHEN $14::boolean THEN $11 ELSE image_url END
        WHERE id = $12 AND user_id = $13 RETURNING *`,
             [
                 toNullIfEmpty(name),
@@ -255,9 +269,10 @@ router.put('/:id', async (req: AuthRequest, res) => {
                 parsedServings,
                 toNullIfEmpty(difficulty),
                 tags !== undefined ? JSON.stringify(Array.isArray(tags) ? tags.filter(Boolean) : []) : null,
-                toNullIfEmpty(image_url),
+                cleanedImageUrl,
                 id,
                 req.userId,
+                imageProvided,
             ]
         );
 

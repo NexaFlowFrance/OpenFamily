@@ -313,6 +313,13 @@ async function route(method: string, path: string, q: Record<string, string>, bo
         store.user = { ...store.user, language: body.language };
         return ok({ user: store.user });
     }
+    if (path === '/api/auth/regional-preferences') {
+        const raw = body.week_start_day;
+        const day = raw === null || raw === '' || raw === undefined ? null : Number(raw);
+        if (day !== null && (!Number.isInteger(day) || day < 1 || day > 7)) throw new Error('Invalid week_start_day'); // mirrors the server's 400
+        store.user = { ...store.user, week_start_day: day };
+        return ok({ user: store.user });
+    }
     if (path === '/api/auth/profile') { store.user = { ...store.user, ...body }; return ok({ user: store.user }); }
     if (path === '/api/auth/modules') {
         if (method === 'PUT') {

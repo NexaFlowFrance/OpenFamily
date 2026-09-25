@@ -15,7 +15,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     try {
         // Use actualUserId so members see their own profile, not the owner's
         const result = await query(
-            'SELECT id, email, name, role, currency, language, avatar_url, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
+            'SELECT id, email, name, role, currency, language, week_start_day, avatar_url, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
             [req.actualUserId]
         );
         if (result.rows.length === 0) {
@@ -92,7 +92,7 @@ router.post('/register', async (req, res) => {
 
         // Create user
         const result = await query(
-            'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name, role, currency, language, avatar_url',
+            'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name, role, currency, language, week_start_day, avatar_url',
             [normalizedEmail, password_hash, cleanedName, cleanedRole]
         );
 
@@ -161,7 +161,7 @@ router.post('/login', async (req, res) => {
         res.json({
             success: true,
             data: {
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', avatar_url: user.avatar_url ?? null, disabled_modules },
+                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', week_start_day: user.week_start_day ?? null, avatar_url: user.avatar_url ?? null, disabled_modules },
                 token
             }
         });
@@ -290,7 +290,7 @@ router.post('/password/reset', passwordResetRateLimiter, async (req, res) => {
 router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const result = await query(
-            'SELECT id, email, name, role, currency, language, avatar_url, disabled_modules, family_owner_id FROM users WHERE id = $1',
+            'SELECT id, email, name, role, currency, language, week_start_day, avatar_url, disabled_modules, family_owner_id FROM users WHERE id = $1',
             [req.actualUserId]
         );
         if (result.rows.length === 0) {
@@ -311,7 +311,7 @@ router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
             success: true,
             data: {
                 token,
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', avatar_url: user.avatar_url ?? null, disabled_modules },
+                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', week_start_day: user.week_start_day ?? null, avatar_url: user.avatar_url ?? null, disabled_modules },
             },
         });
     } catch (error) {
@@ -330,7 +330,7 @@ router.put('/currency', authMiddleware, async (req: AuthRequest, res) => {
         }
 
         const result = await query(
-            'UPDATE users SET currency = $1 WHERE id = $2 RETURNING id, email, name, role, currency, language, avatar_url',
+            'UPDATE users SET currency = $1 WHERE id = $2 RETURNING id, email, name, role, currency, language, week_start_day, avatar_url',
             [currency.toUpperCase(), req.actualUserId]
         );
 
@@ -385,7 +385,7 @@ router.put('/profile', authMiddleware, async (req: AuthRequest, res) => {
 
         values.push(req.actualUserId);
         const result = await query(
-            `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING id, email, name, role, currency, language, avatar_url`,
+            `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING id, email, name, role, currency, language, week_start_day, avatar_url`,
             values
         );
 

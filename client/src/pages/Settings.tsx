@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid, Server, Tags, ArrowUp, ArrowDown, Plus, Heart, Star } from 'lucide-react';
 import { Card, CardContent, Button, Input, Select } from '../components/ui';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+import RegionalPreferences from '../components/app/RegionalPreferences';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
 import { isNative, getServerUrl, clearServerUrl } from '../lib/serverConfig';
@@ -852,6 +853,9 @@ const Settings: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* First day of the week */}
+            <RegionalPreferences />
 
             {/* Server (native app only) */}
             {isNative() && (

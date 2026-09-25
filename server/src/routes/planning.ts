@@ -443,8 +443,16 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             const isSourceDay = sourceEntry && dayOfWeek === Number(sourceEntry.day_of_week);
             const excludeId = isSourceDay ? sourceEntry.id : undefined;
 
+            // The visible week may start on any day (each member picks theirs):
+            // take the date within [week_start, week_start + 7) that falls on this
+            // ISO weekday, instead of assuming week_start is a Monday.
             const specificDate = week_start
-                ? (() => { const d = new Date(week_start); d.setDate(d.getDate() + dayOfWeek - 1); return d.toISOString().slice(0, 10); })()
+                ? (() => {
+                    const d = new Date(`${String(week_start).slice(0, 10)}T00:00:00Z`);
+                    const startIso = d.getUTCDay() || 7;
+                    d.setUTCDate(d.getUTCDate() + ((dayOfWeek - startIso + 7) % 7));
+                    return d.toISOString().slice(0, 10);
+                })()
                 : null;
 
             const overlapIds = await findOverlaps(dayOfWeek, specificDate, excludeId);

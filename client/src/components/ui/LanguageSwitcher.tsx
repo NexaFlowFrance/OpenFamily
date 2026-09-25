@@ -5,7 +5,6 @@ import { SUPPORTED_LANGUAGES } from '../../i18n';
 import { LANGUAGE_CONFIG } from '../../i18n/languages';
 import { changeAppLanguage } from '../../lib/language';
 import { useToast } from './Toast';
-import { useAuth } from '../../contexts/AuthContext';
 
 interface LanguageSwitcherProps {
     className?: string;
@@ -14,28 +13,12 @@ interface LanguageSwitcherProps {
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
     const { i18n, t } = useTranslation('common');
     const { showToast } = useToast();
-    const { user, updateCurrency } = useAuth();
     const current = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0];
 
     const handleChange = (lng: string) => {
         void (async () => {
             const synced = await changeAppLanguage(lng);
             if (!synced) showToast({ title: t('language.syncError') });
-
-            const currencyDefault = LANGUAGE_CONFIG[lng]?.currencyDefault;
-            if (user && currencyDefault) {
-                const shouldApplyCurrencyDefault = user.currency
-                    ? currencyDefault.replace.includes(user.currency)
-                    : currencyDefault.replaceMissing;
-
-                if (shouldApplyCurrencyDefault) {
-                    try {
-                        await updateCurrency(currencyDefault.with);
-                    } catch {
-                        showToast({ title: t('language.currencySyncError') });
-                    }
-                }
-            }
         })();
     };
 

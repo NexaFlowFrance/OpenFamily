@@ -278,7 +278,7 @@ router.get('/export', requireParent, async (req: AuthRequest, res) => {
             // ownership state and other authorization material are excluded.
             query(
                 `SELECT id, email, (id = $1) AS is_owner,
-                        language, avatar_url, dashboard_prefs
+                        language, week_start_day, avatar_url, dashboard_prefs
                  FROM users
                  WHERE id = $1 OR family_owner_id = $1
                  ORDER BY (id = $1) DESC, email`,
@@ -509,6 +509,11 @@ router.post('/import', requireParent, importBodyParser, async (req: AuthRequest,
             if (ref.avatar_url === null || typeof ref.avatar_url === 'string') {
                 values.push(ref.avatar_url);
                 assignments.push(`avatar_url = $${values.length}`);
+            }
+            if (ref.week_start_day === null
+                || (Number.isInteger(ref.week_start_day) && Number(ref.week_start_day) >= 1 && Number(ref.week_start_day) <= 7)) {
+                values.push(ref.week_start_day);
+                assignments.push(`week_start_day = $${values.length}`);
             }
             if (ref.dashboard_prefs === null || typeof ref.dashboard_prefs === 'string') {
                 values.push(ref.dashboard_prefs);

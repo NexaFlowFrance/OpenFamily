@@ -1,10 +1,5 @@
 export interface LanguageConfig {
     label: string;
-    currencyDefault?: {
-        replace: readonly string[];
-        with: string;
-        replaceMissing?: boolean;
-    };
 }
 
 // UI metadata and optional locale defaults for configured languages. Locale
@@ -19,27 +14,12 @@ export const LANGUAGE_CONFIG: Record<string, LanguageConfig> = {
     },
     pt: {
         label: 'PT-BR',
-        currencyDefault: {
-            replace: ['EUR', 'USD'],
-            with: 'BRL',
-            replaceMissing: true,
-        },
     },
     ru: {
         label: 'RU',
-        currencyDefault: {
-            replace: ['EUR', 'USD'],
-            with: 'RUB',
-            replaceMissing: true,
-        },
     },
     zh: {
         label: '中文',
-        currencyDefault: {
-            replace: ['EUR'],
-            with: 'CNY',
-            replaceMissing: true,
-        },
     },
 };
 

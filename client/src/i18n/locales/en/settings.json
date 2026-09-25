@@ -109,5 +109,22 @@
     "sponsor": "Buy me a coffee",
     "star": "Star on GitHub",
     "sponsorGithub": "Sponsor on GitHub"
+  },
+  "regional": {
+    "title": "Week",
+    "subtitle": "Choose which day your weeks start on, in the calendar, the planning, meals and the dashboard. This setting is yours alone.",
+    "weekStart": "First day of the week",
+    "weekStartHelp": "Automatic follows the conventions of your language and region.",
+    "automatic": "Automatic ({{day}})",
+    "saveError": "Could not save your preference.",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    }
   }
 }

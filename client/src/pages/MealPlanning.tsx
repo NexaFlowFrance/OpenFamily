@@ -5,7 +5,7 @@ import { api } from '../lib/api';
 import { Plus, ChevronLeft, ChevronRight, Edit2, Trash2, ShoppingCart, Sparkles, Loader2, UtensilsCrossed } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, useToast } from '../components/ui';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks } from 'date-fns';
-import { dateLocale } from '../i18n/format';
+import { dateLocale, weekStartsOn } from '../i18n/format';
 import { useAiEnabled } from '../lib/aiStatus';
 import { useAuth } from '../contexts/AuthContext';
 import { aiErrorKey } from '../components/app/MagicInput';
@@ -90,8 +90,8 @@ const MealPlanning: React.FC = () => {
 
     const loadMealPlans = async () => {
         try {
-            const start = startOfWeek(currentWeek, { weekStartsOn: 1 });
-            const end = endOfWeek(currentWeek, { weekStartsOn: 1 });
+            const start = startOfWeek(currentWeek, { weekStartsOn: weekStartsOn() });
+            const end = endOfWeek(currentWeek, { weekStartsOn: weekStartsOn() });
             const response = await api.get<{ success: boolean; data: MealPlan[] }>(
                 `/api/meal-plans?start_date=${format(start, 'yyyy-MM-dd')}&end_date=${format(end, 'yyyy-MM-dd')}`
             );
@@ -304,7 +304,7 @@ const MealPlanning: React.FC = () => {
         setSelectedProposals(new Set());
         setAiDialogOpen(true);
         try {
-            const start = startOfWeek(currentWeek, { weekStartsOn: 1 });
+            const start = startOfWeek(currentWeek, { weekStartsOn: weekStartsOn() });
             const response = await api.post<{ success: boolean; data: { proposals: MealProposal[] } }>(
                 '/api/ai/suggest-meals',
                 { week_start: format(start, 'yyyy-MM-dd') }
@@ -364,8 +364,8 @@ const MealPlanning: React.FC = () => {
         }
     };
 
-    const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
+    const weekStart = startOfWeek(currentWeek, { weekStartsOn: weekStartsOn() });
+    const weekEnd = endOfWeek(currentWeek, { weekStartsOn: weekStartsOn() });
     const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
     const getMealForSlot = (date: Date, mealType: string) => {

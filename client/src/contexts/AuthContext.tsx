@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api } from '../lib/api';
 import { applyServerLanguage } from '../lib/language';
+import { applyRegionalPreferences } from '../i18n/format';
 
 interface User {
     id: string;
@@ -11,6 +12,8 @@ interface User {
     currency?: string;
     avatar_url?: string | null;
     language?: string;
+    /** ISO first day of the week (Monday = 1), null = automatic. */
+    week_start_day?: number | null;
     /** Family-wide list of optional modules the family has hidden. */
     disabled_modules?: string[];
 }
@@ -42,6 +45,7 @@ interface AuthContextType {
     logout: () => void;
     isAuthenticated: boolean;
     updateCurrency: (currency: string) => Promise<void>;
+    updateRegionalPreferences: (prefs: { week_start_day: number | null }) => Promise<void>;
     updateProfile: (data: { name?: string; avatar_url?: string | null }) => Promise<void>;
     /** This member's dashboard layout (null until loaded). */
     dashboardPrefs: DashboardPrefs | null;
@@ -102,6 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     localStorage.setItem('user', JSON.stringify(response.data.user));
                     // Once per session load: reconcile UI language with the account.
                     applyServerLanguage(response.data.user.language);
+                    applyRegionalPreferences(response.data.user.week_start_day);
                 } else {
                     clearSession();
                 }
@@ -131,6 +136,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             localStorage.setItem('user', JSON.stringify(response.user));
             // Once per login: reconcile UI language with the account.
             applyServerLanguage(response.user.language);
+            applyRegionalPreferences(response.user.week_start_day);
         }
     };
 
@@ -140,6 +146,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setUser(response.user);
             localStorage.setItem('user', JSON.stringify(response.user));
             applyServerLanguage(response.user.language);
+            applyRegionalPreferences(response.user.week_start_day);
         }
     };
 
@@ -170,6 +177,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const logout = () => {
         api.logout();
         setUser(null);
+        applyRegionalPreferences(null);
         localStorage.removeItem('user');
     };
 
@@ -178,6 +186,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (response.success && response.data?.user) {
             setUser(response.data.user);
             localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+    };
+
+    const updateRegionalPreferences = async (prefs: { week_start_day: number | null }) => {
+        const response = await api.put<{ success: boolean; data: { user: User } }>(
+            '/api/auth/regional-preferences',
+            prefs
+        );
+        if (response.success && response.data?.user) {
+            const next = { ...user, ...response.data.user } as User;
+            setUser(next);
+            applyRegionalPreferences(next.week_start_day);
+            localStorage.setItem('user', JSON.stringify(next));
         }
     };
 
@@ -254,6 +275,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 logout,
                 isAuthenticated: !!user,
                 updateCurrency,
+                updateRegionalPreferences,
                 updateProfile,
                 dashboardPrefs,
                 updateDashboardPrefs,

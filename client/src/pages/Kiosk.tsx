@@ -9,7 +9,7 @@ import {
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { useAuth } from '../contexts/AuthContext';
-import { intlLocale } from '../i18n/format';
+import { intlLocale, weekStartsOn } from '../i18n/format';
 import { cn } from '../lib/utils';
 import FamilyNotes, { type FamilyNote } from '../components/app/FamilyNotes';
 
@@ -162,7 +162,7 @@ const Kiosk: React.FC = () => {
         const start = `${ymd(today)}T00:00:00`;
         const end = `${ymd(today)}T23:59:59`;
         const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+        weekStart.setDate(today.getDate() - ((today.getDay() - weekStartsOn() + 7) % 7));
         try {
             const [apptRes, taskRes, mealRes, planRes, shopRes, notesRes] = await Promise.all([
                 api.get<{ success: boolean; data: Appointment[] }>(`/api/appointments?start_date=${start}&end_date=${end}`),

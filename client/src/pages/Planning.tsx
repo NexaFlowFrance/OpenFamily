@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { addDays, addWeeks, format, startOfWeek, subWeeks } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { dateLocale } from '../i18n/format';
+import { dateLocale, offsetForIsoWeekday, orderIsoWeekdays, weekStartsOn } from '../i18n/format';
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { Button, Card, CardContent, CardHeader, CardTitle, Dialog, Input, Select, Textarea } from '../components/ui';
@@ -142,7 +142,10 @@ const Planning: React.FC = () => {
         notes: '',
     });
 
-    const weekStart = useMemo(() => startOfWeek(weekAnchor, { weekStartsOn: 1 }), [weekAnchor]);
+    const firstDay = weekStartsOn();
+    const weekStart = useMemo(() => startOfWeek(weekAnchor, { weekStartsOn: firstDay }), [weekAnchor, firstDay]);
+    // Columns follow the visible first day; day values stay ISO (Monday = 1).
+    const orderedDays = useMemo(() => orderIsoWeekdays(DAYS), [DAYS, firstDay]);
 
     useEffect(() => {
         const bootstrap = async () => {
@@ -406,7 +409,7 @@ const Planning: React.FC = () => {
         try {
             if (selectedDays.length === 1) {
                 const specificDate = thisWeekOnly
-                    ? format(addDays(weekStart, selectedDays[0] - 1), 'yyyy-MM-dd')
+                    ? format(addDays(weekStart, offsetForIsoWeekday(selectedDays[0])), 'yyyy-MM-dd')
                     : null;
                 const payload = {
                     ...basePayload,
@@ -623,7 +626,7 @@ const Planning: React.FC = () => {
             </Card>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-7">
-                {DAYS.map((day, index) => {
+                {orderedDays.map((day, index) => {
                     const dateForHeader = addDays(weekStart, index);
                     const dayEntries = visibleEntries.filter((entry) => entry.day_of_week === day.value);
                     // The concrete date this column stands for, used to tell a

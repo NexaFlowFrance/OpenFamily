@@ -109,5 +109,22 @@
     "sponsor": "请我喝杯咖啡",
     "star": "在 GitHub 上加星",
     "sponsorGithub": "在 GitHub 上赞助"
+  },
+  "regional": {
+    "title": "周",
+    "subtitle": "选择您的一周从哪一天开始，适用于日历、日程、餐食和首页。此设置仅对您本人生效。",
+    "weekStart": "每周的第一天",
+    "weekStartHelp": "自动：遵循您的语言和地区习惯。",
+    "automatic": "自动（{{day}}）",
+    "saveError": "无法保存您的偏好设置。",
+    "days": {
+      "monday": "星期一",
+      "tuesday": "星期二",
+      "wednesday": "星期三",
+      "thursday": "星期四",
+      "friday": "星期五",
+      "saturday": "星期六",
+      "sunday": "星期日"
+    }
   }
 }

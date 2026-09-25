@@ -81,4 +81,13 @@ export const coreMigrations: readonly Migration[] = [
             'CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_linked_recurring_expense ON appointments(linked_recurring_expense_id) WHERE linked_recurring_expense_id IS NOT NULL',
         ],
     },
+    {
+        // Each member chooses the first day of their week (ISO numbering,
+        // Monday = 1 ... Sunday = 7). NULL means automatic: it follows the
+        // regional conventions of the member's language and browser.
+        id: 'core/0003-week-start',
+        statements: [
+            'ALTER TABLE users ADD COLUMN IF NOT EXISTS week_start_day SMALLINT CHECK (week_start_day BETWEEN 1 AND 7)',
+        ],
+    },
 ];

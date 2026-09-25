@@ -6,7 +6,7 @@ import { apiBase } from '../lib/serverConfig';
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw, Search, X } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge, Select, DatePicker } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
-import { dateLocale } from '../i18n/format';
+import { dateLocale, orderIsoWeekdays, weekStartsOn } from '../i18n/format';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCategories } from '../hooks/useCategories';
@@ -650,8 +650,8 @@ const Calendar: React.FC = () => {
 
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
-    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: weekStartsOn() });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: weekStartsOn() });
     const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
     const getAppointmentsForDay = (date: Date) => {
@@ -664,7 +664,7 @@ const Calendar: React.FC = () => {
     };
 
     const weekDaysRaw = t('common:daysShort', { returnObjects: true }) as string[];
-    const weekDays = [weekDaysRaw[6], ...weekDaysRaw.slice(0, 6)];
+    const weekDays = orderIsoWeekdays(weekDaysRaw);
 
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 

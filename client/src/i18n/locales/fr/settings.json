@@ -109,5 +109,22 @@
     "sponsor": "Offrir un café",
     "star": "Mettre une étoile sur GitHub",
     "sponsorGithub": "Sponsoriser sur GitHub"
+  },
+  "regional": {
+    "title": "Semaine",
+    "subtitle": "Choisissez le jour qui commence vos semaines dans l’agenda, le planning, les repas et le tableau de bord. Ce réglage n’appartient qu’à vous.",
+    "weekStart": "Premier jour de la semaine",
+    "weekStartHelp": "Automatique suit les usages de votre langue et de votre région.",
+    "automatic": "Automatique ({{day}})",
+    "saveError": "Impossible d’enregistrer votre préférence.",
+    "days": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche"
+    }
   }
 }

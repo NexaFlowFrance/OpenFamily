@@ -93,7 +93,7 @@ router.put('/language', authMiddleware, async (req: AuthRequest, res) => {
 
         // actualUserId: the preference belongs to the logged-in member, not the family owner.
         const result = await query(
-            'UPDATE users SET language = $1 WHERE id = $2 RETURNING id, email, name, role, currency, language, avatar_url',
+            'UPDATE users SET language = $1 WHERE id = $2 RETURNING id, email, name, role, currency, language, week_start_day, avatar_url',
             [language, req.actualUserId]
         );
 
@@ -104,6 +104,33 @@ router.put('/language', authMiddleware, async (req: AuthRequest, res) => {
         return res.json({ success: true, data: { user: result.rows[0] } });
     } catch (error) {
         console.error('Update language error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Update the authenticated member's regional display preferences.
+// week_start_day uses ISO numbering (Monday = 1 ... Sunday = 7); null = automatic.
+// PUT /api/auth/regional-preferences - body: { "week_start_day": 1..7 | null }
+router.put('/regional-preferences', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const raw = (req.body ?? {}).week_start_day;
+        const weekStartDay = raw === null || raw === '' || raw === undefined ? null : Number(raw);
+        if (weekStartDay !== null && (!Number.isInteger(weekStartDay) || weekStartDay < 1 || weekStartDay > 7)) {
+            return res.status(400).json({ success: false, error: 'Invalid week_start_day. Use 1-7 or null.' });
+        }
+
+        // actualUserId: a display preference belongs to the member, not the family.
+        const result = await query(
+            `UPDATE users SET week_start_day = $1 WHERE id = $2
+             RETURNING id, email, name, role, currency, language, week_start_day, avatar_url`,
+            [weekStartDay, req.actualUserId]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        return res.json({ success: true, data: { user: result.rows[0] } });
+    } catch (error) {
+        console.error('Update regional preferences error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });

@@ -4,7 +4,7 @@ import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { useAuth, DEFAULT_DASHBOARD_PREFS, type DashboardPrefs, type DashboardWidget } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
-import { intlLocale, dateLocale } from '../i18n/format';
+import { intlLocale, dateLocale, isoWeekdayAtOffset, weekStartsOn } from '../i18n/format';
 import {
     ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, ChevronRight, Clock,
     SlidersHorizontal, Eye, EyeOff, ArrowUp, ArrowDown, CalendarDays,
@@ -80,8 +80,9 @@ const Dashboard: React.FC = () => {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     }).format(new Date());
 
-    // Monday-based week, matching the Planning page.
-    const weekStart = useMemo(() => startOfWeek(new Date(), { weekStartsOn: 1 }), []);
+    // Same first day as the Planning page: the member's choice, or regional.
+    const firstDay = weekStartsOn();
+    const weekStart = useMemo(() => startOfWeek(new Date(), { weekStartsOn: firstDay }), [firstDay]);
 
     useEffect(() => { void loadAll(); }, [agendaView]);
     useWebSocketUpdates('tasks', () => { void loadAll(); });
@@ -392,7 +393,7 @@ const Dashboard: React.FC = () => {
     const renderPlanning = () => {
         const days = Array.from({ length: 7 }, (_, i) => ({
             date: addDays(weekStart, i),
-            dayOfWeek: i + 1,
+            dayOfWeek: isoWeekdayAtOffset(i),
         })).map((day) => ({
             ...day,
             items: planning.filter((entry) => entry.day_of_week === day.dayOfWeek),

@@ -1,6 +1,8 @@
 import { Pool, types } from 'pg';
 import { loadEnv } from './config/loadEnv';
 import logger from './lib/logger';
+import { runVersionedMigrations } from './migrations/runner';
+import { coreMigrations } from './migrations/registry';
 
 loadEnv();
 
@@ -92,8 +94,13 @@ export const getClient = async () => {
     return client;
 };
 
+// Serialises schema changes between server instances starting at the same time.
+const MIGRATION_LOCK = "hashtext('openfamily.migrations')";
+
 export const runMigrations = async () => {
-    // Keep migrations idempotent so startup works on existing installations.
+    // The historical list below is idempotent and runs on every start, as it
+    // always has. It is closed: do not add to it. New schema changes go into
+    // migrations/registry.ts, where each runs once and is recorded.
     logger.info('db.migrations_start');
 
     const migrations = [
@@ -625,13 +632,33 @@ export const runMigrations = async () => {
             END IF;
         END
         $$`,
+        // End of the historical list. New migrations: migrations/registry.ts.
     ];
 
-    for (const migration of migrations) {
-        await pool.query(migration);
+    const client = await pool.connect();
+    try {
+        await client.query(`SELECT pg_advisory_lock(${MIGRATION_LOCK})`);
+        try {
+            for (const migration of migrations) {
+                await client.query(migration);
+            }
+            const report = await runVersionedMigrations(client, coreMigrations);
+            if (report.unknown.length > 0) {
+                // A newer OpenFamily ran against this database before this one.
+                // Its tables are still there; say so rather than refuse to start.
+                logger.warn('db.migrations_unknown', { ids: report.unknown });
+            }
+            logger.info('db.migrations_complete', {
+                historical: migrations.length,
+                applied: report.applied,
+                alreadyApplied: report.alreadyApplied,
+            });
+        } finally {
+            await client.query(`SELECT pg_advisory_unlock(${MIGRATION_LOCK})`).catch(() => {});
+        }
+    } finally {
+        client.release();
     }
-
-    logger.info('db.migrations_complete', { count: migrations.length });
 };
 
 export default pool;

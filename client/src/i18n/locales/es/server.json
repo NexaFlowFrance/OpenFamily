@@ -1,0 +1,19 @@
+{
+  "title": "Conecta con tu servidor",
+  "subtitle": "OpenFamily es autoalojado: conecta la aplicación con tu propio servidor.",
+  "urlLabel": "Dirección del servidor",
+  "placeholder": "http://192.168.1.10:3001",
+  "hint": "Usa la misma dirección que abres en el navegador, por ejemplo http://192.168.1.10:3001, o tu dirección HTTPS / Tailscale.",
+  "connect": "Conectar",
+  "connecting": "Conectando…",
+  "errors": {
+    "invalid": "Introduce una URL válida que empiece por http:// o https://",
+    "unreachable": "No se pudo contactar con este servidor. Comprueba la dirección y que el servidor esté funcionando."
+  },
+  "settings": {
+    "title": "Servidor",
+    "connectedTo": "Conectado a {{url}}",
+    "change": "Cambiar servidor",
+    "disconnect": "Desconectar"
+  }
+}

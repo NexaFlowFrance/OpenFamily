@@ -4,7 +4,7 @@ import rateLimit from 'express-rate-limit';
 import { query, getClient } from '../db';
 import { authMiddleware, AuthRequest, generateToken } from '../middleware/auth';
 import { broadcast } from '../lib/broadcaster';
-import { createNotification } from '../lib/notifications';
+import { createLocalizedNotification } from '../lib/notifications';
 import { normalizeEmail } from '../lib/normalize';
 import { isMailEnabled, sendFamilyInviteEmail } from '../lib/mailer';
 import { resolveAppBaseUrl } from '../lib/appUrl';
@@ -366,10 +366,16 @@ router.post('/transfer-ownership', async (req: AuthRequest, res) => {
 
     broadcast(newOwnerId, { type: 'update', entity: 'family', action: 'updated' });
     broadcast(oldOwnerId, { type: 'update', entity: 'family', action: 'updated' });
-    await createNotification({
+    await createLocalizedNotification({
         userId: newOwnerId,
-        title: '👑 Vous êtes propriétaire',
-        message: 'La propriété de la famille vous a été transférée.',
+        texts: {
+            fr: { title: '👑 Vous êtes propriétaire', message: 'La propriété de la famille vous a été transférée.' },
+            en: { title: '👑 You are now the owner', message: 'Ownership of the family has been transferred to you.' },
+            pt: { title: '👑 Você é o proprietário', message: 'A propriedade da família foi transferida para você.' },
+            ru: { title: '👑 Вы теперь владелец', message: 'Права владельца семьи переданы вам.' },
+            es: { title: '👑 Eres el propietario', message: 'La propiedad de la familia se ha transferido a tu cuenta.' },
+            zh: { title: '👑 您现在是家庭所有者', message: '家庭所有权已转移给您。' },
+        },
         type: 'family_ownership_transferred',
         url: '/family',
     });
@@ -448,10 +454,17 @@ router.post('/requests', async (req: AuthRequest, res) => {
     const requester = requesterRes.rows[0] as { name: string; email: string };
 
     broadcast(ownerId, { type: 'update', entity: 'family', action: 'created' });
-    await createNotification({
+    const who = `${requester.name} (${requester.email})`;
+    await createLocalizedNotification({
         userId: ownerId,
-        title: '👪 Nouvelle demande d\'accès',
-        message: `${requester.name} (${requester.email}) souhaite rejoindre votre famille.`,
+        texts: {
+            fr: { title: '👪 Nouvelle demande d\'accès', message: `${who} souhaite rejoindre votre famille.` },
+            en: { title: '👪 New request to join', message: `${who} would like to join your family.` },
+            pt: { title: '👪 Nova solicitação de acesso', message: `${who} quer entrar na sua família.` },
+            ru: { title: '👪 Новый запрос на вступление', message: `${who} хочет присоединиться к вашей семье.` },
+            es: { title: '👪 Nueva solicitud de acceso', message: `${who} quiere unirse a tu familia.` },
+            zh: { title: '👪 新的加入请求', message: `${who} 希望加入您的家庭。` },
+        },
         type: 'family_join_request',
         url: '/family',
     });
@@ -536,10 +549,16 @@ router.post('/requests/:id/approve', async (req: AuthRequest, res) => {
     // Notify both sides so their UI refreshes
     broadcast(request.requester_id, { type: 'update', entity: 'family', action: 'updated' });
     broadcast(req.userId!, { type: 'update', entity: 'family', action: 'updated' });
-    await createNotification({
+    await createLocalizedNotification({
         userId: request.requester_id,
-        title: '✅ Demande acceptée',
-        message: 'Votre demande d\'accès à la famille a été acceptée.',
+        texts: {
+            fr: { title: '✅ Demande acceptée', message: 'Votre demande d\'accès à la famille a été acceptée.' },
+            en: { title: '✅ Request accepted', message: 'Your request to join the family has been accepted.' },
+            pt: { title: '✅ Solicitação aceita', message: 'Sua solicitação para entrar na família foi aceita.' },
+            ru: { title: '✅ Запрос принят', message: 'Ваш запрос на вступление в семью принят.' },
+            es: { title: '✅ Solicitud aceptada', message: 'Tu solicitud para unirte a la familia ha sido aceptada.' },
+            zh: { title: '✅ 请求已接受', message: '您的家庭加入请求已被接受。' },
+        },
         type: 'family_join_approved',
         url: '/family',
     });
@@ -565,10 +584,16 @@ router.post('/requests/:id/reject', async (req: AuthRequest, res) => {
     await query("UPDATE family_join_requests SET status = 'rejected', responded_at = NOW() WHERE id = $1", [request.id]);
 
     broadcast(request.requester_id, { type: 'update', entity: 'family', action: 'updated' });
-    await createNotification({
+    await createLocalizedNotification({
         userId: request.requester_id,
-        title: 'Demande refusée',
-        message: 'Votre demande d\'accès à la famille a été refusée.',
+        texts: {
+            fr: { title: 'Demande refusée', message: 'Votre demande d\'accès à la famille a été refusée.' },
+            en: { title: 'Request declined', message: 'Your request to join the family has been declined.' },
+            pt: { title: 'Solicitação recusada', message: 'Sua solicitação para entrar na família foi recusada.' },
+            ru: { title: 'Запрос отклонён', message: 'Ваш запрос на вступление в семью отклонён.' },
+            es: { title: 'Solicitud rechazada', message: 'Tu solicitud para unirte a la familia ha sido rechazada.' },
+            zh: { title: '请求已拒绝', message: '您的家庭加入请求已被拒绝。' },
+        },
         type: 'family_join_rejected',
         url: '/family',
     });

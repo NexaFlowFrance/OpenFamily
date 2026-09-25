@@ -1,0 +1,108 @@
+{
+  "appName": "OpenFamily",
+  "demo": {
+    "notice": "Modo demo: los cambios no se guardan y se restablecen al recargar.",
+    "reset": "Restablecer",
+    "star": "Dar una estrella en GitHub"
+  },
+  "language": {
+    "syncError": "No se pudo guardar tu preferencia de idioma.",
+    "currencySyncError": "No se pudo actualizar la moneda predeterminada."
+  },
+  "actions": {
+    "add": "Añadir",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saveChanges": "Guardar cambios",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "back": "Atrás",
+    "today": "Hoy",
+    "retry": "Reintentar",
+    "apply": "Aplicar",
+    "reset": "Restablecer",
+    "export": "Exportar",
+    "import": "Importar",
+    "clear": "Limpiar",
+    "send": "Enviar",
+    "loadMore": "Cargar más"
+  },
+  "states": {
+    "loading": "Cargando…",
+    "saving": "Guardando…",
+    "empty": "Todavía no hay nada",
+    "error": "Se produjo un error"
+  },
+  "labels": {
+    "name": "Nombre",
+    "fullName": "Nombre completo",
+    "description": "Descripción",
+    "date": "Fecha",
+    "time": "Hora",
+    "startTime": "Hora de inicio",
+    "endTime": "Hora de fin",
+    "location": "Ubicación",
+    "notes": "Notas",
+    "category": "Categoría",
+    "quantity": "Cantidad",
+    "price": "Precio",
+    "amount": "Importe",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "optional": "opcional",
+    "all": "Todos",
+    "none": "Ninguno"
+  },
+  "days": [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo"
+  ],
+  "daysShort": [
+    "Lun",
+    "Mar",
+    "Mié",
+    "Jue",
+    "Vie",
+    "Sáb",
+    "Dom"
+  ],
+  "months": [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre"
+  ],
+  "monthsShort": [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic"
+  ]
+}

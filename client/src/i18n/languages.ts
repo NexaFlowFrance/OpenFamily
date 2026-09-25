@@ -21,6 +21,9 @@ export const LANGUAGE_CONFIG: Record<string, LanguageConfig> = {
     zh: {
         label: '中文',
     },
+    es: {
+        label: 'ES',
+    },
 };
 
 export const CONFIGURED_LANGUAGE_ORDER = Object.keys(LANGUAGE_CONFIG);

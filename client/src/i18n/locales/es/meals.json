@@ -1,0 +1,51 @@
+{
+  "loading": "Cargando planificador…",
+  "title": "Planificador de comidas",
+  "subtitle": "Planifica las comidas de la semana",
+  "thisWeek": "Esta semana",
+  "weekOf": "Semana del {{start}} al {{end}}",
+  "mealTypes": {
+    "Petit-déjeuner": "Desayuno",
+    "Déjeuner": "Almuerzo",
+    "Dîner": "Cena",
+    "Snack": "Tentempié"
+  },
+  "dialog": {
+    "editTitle": "Editar comida",
+    "addTitle": "Añadir comida",
+    "descriptionFmt": "{{type}} · {{date}}"
+  },
+  "form": {
+    "mealType": "Tipo de comida",
+    "recipe": "Receta (opcional)",
+    "noRecipe": "Sin receta",
+    "customMeal": "O comida personalizada",
+    "customMealPlaceholder": "p. ej. Pizza casera",
+    "notes": "Notas (opcional)",
+    "notesPlaceholder": "Notas adicionales…"
+  },
+  "shopping": {
+    "button": "Añadir ingredientes a la lista de compras",
+    "dialogTitle": "Añadir ingredientes a la lista de compras",
+    "dialogDescription": "Ingredientes de las recetas planificadas entre {{start}} y {{end}}. Desmarca lo que no necesites.",
+    "empty": "No hay comidas con receta planificadas esta semana.",
+    "selectedCount": "{{selected}} de {{total}} ingredientes seleccionados",
+    "alreadyOnList": "ya está en la lista",
+    "confirm_one": "Añadir {{count}} ingrediente",
+    "confirm_other": "Añadir {{count}} ingredientes",
+    "successTitle": "Ingredientes añadidos",
+    "successDescription_one": "{{count}} artículo añadido a la lista de compras.",
+    "successDescription_other": "{{count}} artículos añadidos a la lista de compras.",
+    "partialTitle": "No se pudieron añadir algunos ingredientes",
+    "partialDescription": "{{added}} añadidos, {{failed}} fallidos.",
+    "errorTitle": "No se pueden añadir los ingredientes",
+    "errorDescription": "No se añadió nada a la lista de compras. Inténtalo de nuevo."
+  },
+  "confirmDelete": "¿Seguro que quieres eliminar esta comida?",
+  "errors": {
+    "loadPlans": "No se puede cargar el planificador.",
+    "loadRecipes": "No se pueden cargar las recetas.",
+    "save": "No se puede guardar esta comida.",
+    "delete": "No se puede eliminar esta comida."
+  }
+}

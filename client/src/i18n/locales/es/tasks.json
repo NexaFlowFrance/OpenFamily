@@ -1,0 +1,74 @@
+{
+  "loading": "Cargando tareas…",
+  "title": "Tareas",
+  "subtitle": "Gestiona las tareas familiares y sigue su progreso",
+  "newTask": "Nueva tarea",
+  "priorities": {
+    "Haute": "Alta",
+    "Moyenne": "Media",
+    "Basse": "Baja"
+  },
+  "frequencies": {
+    "Une fois": "Una vez",
+    "Quotidien": "Diaria",
+    "Hebdomadaire": "Semanal",
+    "Mensuel": "Mensual",
+    "Annuel": "Anual"
+  },
+  "stats": {
+    "total": "Total",
+    "completed": "Completadas",
+    "pending": "Pendientes",
+    "completionRate": "Tasa de finalización"
+  },
+  "filters": {
+    "label": "Filtros:",
+    "statusAll": "Todas",
+    "statusPending": "Pendientes",
+    "statusCompleted": "Completadas",
+    "allPriorities": "Todas las prioridades",
+    "allMembers": "Todos los miembros",
+    "unassigned": "Sin asignar"
+  },
+  "empty": {
+    "none": "Todavía no hay tareas. ¡Crea la primera!",
+    "noMatch": "Ninguna tarea coincide con los filtros seleccionados."
+  },
+  "due": "Vence: {{date}}",
+  "dialog": {
+    "editTitle": "Editar tarea",
+    "createTitle": "Nueva tarea",
+    "description": "Completa los detalles de la tarea"
+  },
+  "form": {
+    "title": "Título",
+    "titlePlaceholder": "p. ej. Hacer la compra",
+    "description": "Descripción (opcional)",
+    "descriptionPlaceholder": "Detalles adicionales…",
+    "priority": "Prioridad",
+    "frequency": "Frecuencia",
+    "dueDate": "Fecha límite (opcional)",
+    "assignTo": "Asignar a (opcional)",
+    "noMembers": "No hay miembros disponibles",
+    "points": "Puntos por ganar (opcional)",
+    "pointsHint": "Los miembros asignados ganan estos puntos cuando se completa la tarea."
+  },
+  "approval": {
+    "pendingBadge": "Esperando aprobación",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "toastTitle": "¡Muy bien, tarea completada!",
+    "toastDescription": "Tus puntos se añadirán cuando un padre o madre lo apruebe."
+  },
+  "confirmDelete": "¿Seguro que quieres eliminar esta tarea?",
+  "errors": {
+    "loadTasks": "No se pueden cargar las tareas.",
+    "loadMembers": "No se pueden cargar los miembros.",
+    "loadStats": "No se pueden cargar las estadísticas.",
+    "saveTask": "No se puede guardar esta tarea.",
+    "toggleTask": "No se puede actualizar esta tarea.",
+    "deleteTask": "No se puede eliminar esta tarea.",
+    "approveTask": "No se puede aprobar esta tarea.",
+    "rejectTask": "No se puede rechazar esta tarea."
+  }
+}

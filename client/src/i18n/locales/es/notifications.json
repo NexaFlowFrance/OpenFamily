@@ -1,0 +1,17 @@
+{
+  "title": "Notificaciones",
+  "markAll": "Marcar todo como leído",
+  "empty": "Sin notificaciones",
+  "manage": "Gestionar notificaciones →",
+  "timeAgo": {
+    "justNow": "ahora mismo",
+    "minutes": "hace {{count}} min",
+    "hours": "hace {{count}} h",
+    "days": "hace {{count}} d"
+  },
+  "push": {
+    "unsupported": "Las notificaciones push no son compatibles con este navegador",
+    "denied": "Permiso denegado",
+    "noVapid": "Clave VAPID no disponible"
+  }
+}

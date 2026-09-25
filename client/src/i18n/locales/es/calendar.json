@@ -1,0 +1,101 @@
+{
+  "loading": "Cargando calendario…",
+  "title": "Calendario",
+  "subtitle": "Gestiona los eventos del calendario familiar",
+  "exportIcal": "Exportar (iCal)",
+  "newAppointment": "Nuevo evento",
+  "moreOthers": "+{{count}} más",
+  "upcoming": {
+    "title": "Próximos eventos",
+    "empty": "No hay próximos eventos"
+  },
+  "dialog": {
+    "editTitle": "Editar evento",
+    "createTitle": "Nuevo evento",
+    "description": "Completa los detalles del evento"
+  },
+  "form": {
+    "title": "Título",
+    "titlePlaceholder": "p. ej. Cita médica",
+    "description": "Descripción (opcional)",
+    "color": "Color",
+    "descriptionPlaceholder": "Detalles adicionales…",
+    "scheduling": "Programación",
+    "startDate": "Fecha de inicio",
+    "startTime": "Hora de inicio",
+    "endDate": "Fecha de fin",
+    "endTime": "Hora de fin",
+    "repeat": "Repetir",
+    "repeatNone": "No se repite",
+    "repeatDaily": "Diario",
+    "repeatWeekly": "Semanal",
+    "repeatMonthly": "Mensual",
+    "repeatYearly": "Anual",
+    "repeatUntil": "Repetir hasta (opcional)",
+    "repeatEvery": "Cada",
+    "repeatDays": "día(s)",
+    "repeatWeeks": "semana(s)",
+    "repeatMonths": "mes(es)",
+    "repeatYears": "año(s)",
+    "location": "Ubicación (opcional)",
+    "locationPlaceholder": "p. ej. Consulta médica",
+    "members": "Miembros de la familia (opcional)",
+    "noMembersHint": "Añade un miembro para asignarlo rápidamente.",
+    "goToFamily": "Ir a Familia",
+    "reminders": "Recordatorios",
+    "reminder30": "30 minutos antes",
+    "reminder1h": "1 hora antes",
+    "notes": "Notas (opcional)",
+    "notesPlaceholder": "Notas adicionales…",
+    "allDay": "Todo el día",
+    "addToBudget": "Añadir al presupuesto",
+    "addToBudgetHint": "Crea un movimiento de presupuesto con la misma fecha y recurrencia.",
+    "budgetAmount": "Importe del presupuesto ({{currency}})",
+    "budgetCategory": "Categoría del presupuesto",
+    "budgetLinked": "Vinculado al presupuesto: los cambios de fecha y recurrencia se aplican también allí. Eliminar este evento conserva el movimiento del presupuesto."
+  },
+  "feed": {
+    "title": "Exportar calendario (iCal)",
+    "description": "Suscríbete desde Apple Calendar, Google Calendar u Outlook para sincronizar tus eventos automáticamente.",
+    "generating": "Generando enlace…",
+    "subscribeLink": "Enlace de suscripción",
+    "subscribeApple": "Suscribirse (Apple / Outlook)",
+    "downloadIcs": "Descargar archivo .ics",
+    "privateNote": "Este enlace es privado: cualquiera que lo tenga puede ver tus eventos.",
+    "regenerate": "Regenerar enlace"
+  },
+  "confirmDelete": "¿Seguro que quieres eliminar este evento?",
+  "confirmRegen": "¿Regenerar el enlace? Las suscripciones existentes dejarán de funcionar.",
+  "errors": {
+    "loadAppointments": "No se pueden cargar los eventos.",
+    "loadMembers": "No se pueden cargar los miembros.",
+    "icalFetch": "No se puede obtener el enlace iCal.",
+    "icalRegen": "No se puede regenerar el enlace.",
+    "startRequired": "Introduce una fecha y hora de inicio.",
+    "endAfterStart": "La hora de fin debe ser posterior a la de inicio.",
+    "save": "No se puede guardar este evento.",
+    "delete": "No se puede eliminar este evento.",
+    "budgetAmountInvalid": "Introduce un importe de presupuesto válido."
+  },
+  "recurrenceScope": {
+    "editTitle": "Editar evento recurrente",
+    "editDescription": "¿Aplicar estos cambios solo a esta aparición o a toda la serie?",
+    "deleteTitle": "Eliminar evento recurrente",
+    "deleteDescription": "¿Eliminar solo esta aparición o toda la serie?",
+    "thisOccurrence": "Esta aparición",
+    "allOccurrences": "Todas las apariciones"
+  },
+  "search": {
+    "placeholder": "Buscar eventos…",
+    "clear": "Limpiar búsqueda",
+    "resultCount": "{{count}} evento(s) coincidente(s)",
+    "noResults": "Ningún evento coincide con tu búsqueda."
+  },
+  "dayAction": {
+    "choiceDescription": "Esta fecha ya tiene eventos. ¿Qué quieres hacer?",
+    "displayDescription": "Eventos de esta fecha",
+    "display": "Mostrar eventos",
+    "add": "Añadir evento",
+    "back": "Atrás"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "title": "Notas familiares",
+  "add": "Añadir nota",
+  "addTitle": "Nueva nota para la nevera",
+  "placeholder": "¡No olvides la bolsa del gimnasio!",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "Color",
+  "colors": {
+    "yellow": "Amarillo",
+    "pink": "Rosa",
+    "blue": "Azul",
+    "green": "Verde",
+    "orange": "Naranja"
+  },
+  "expiryLabel": "Caducidad",
+  "expiry": {
+    "today": "Hasta esta noche",
+    "day": "24 horas",
+    "week": "1 semana",
+    "never": "Sin caducidad"
+  },
+  "submit": "Pegar la nota",
+  "cancel": "Cancelar",
+  "delete": "Eliminar esta nota",
+  "deleted": "Nota eliminada de la nevera",
+  "added": "Nota pegada en la nevera",
+  "emptyHint": "Deja una nota para la familia: aparecerá aquí y en la pantalla quiosco.",
+  "by": "por {{name}}",
+  "age": {
+    "now": "ahora mismo",
+    "minutes": "hace {{count}} min",
+    "hours": "hace {{count}} h",
+    "days": "hace {{count}} d"
+  }
+}

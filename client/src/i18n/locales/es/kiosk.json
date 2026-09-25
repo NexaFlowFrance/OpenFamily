@@ -1,0 +1,36 @@
+{
+  "exit": "Salir",
+  "fullscreen": "Pantalla completa",
+  "exitFullscreen": "Salir de pantalla completa",
+  "schedule": "Plan de hoy",
+  "meals": "Comidas de hoy",
+  "tasks": "Tareas de hoy",
+  "whereabouts": "Dónde está cada uno hoy",
+  "shopping": "Lista de compras",
+  "allDay": "Todo el día",
+  "undo": "Deshacer",
+  "empty": {
+    "appointments": "Nada planificado hoy",
+    "meals": "No hay comidas planificadas",
+    "tasks": "Todo al día ✨",
+    "whereabouts": "Nadie tiene horario hoy",
+    "shopping": "Nada por comprar"
+  },
+  "displaySettings": {
+    "open": "Ajustes de pantalla",
+    "title": "Ajustes de pantalla",
+    "close": "Cerrar",
+    "location": "Ubicación del tiempo",
+    "searchPlaceholder": "Buscar una ciudad…",
+    "noResults": "Sin resultados",
+    "noLocation": "Elige una ubicación para mostrar el tiempo en esta pantalla.",
+    "change": "Cambiar",
+    "photoBackground": "Fondo con fotos",
+    "photoBackgroundHint": "Muestra fotos aleatorias de tu biblioteca como fondo. Requiere una integración con Immich."
+  },
+  "settings": {
+    "title": "Pantalla quiosco",
+    "subtitle": "Una pantalla completa y de solo lectura para una tableta de pared o pantalla de cocina: calendario, comidas, tareas y ubicaciones de hoy.",
+    "open": "Abrir pantalla quiosco"
+  }
+}

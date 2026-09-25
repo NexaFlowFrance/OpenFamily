@@ -23,7 +23,8 @@
     "docker:down": "docker-compose down",
     "docker:build": "docker-compose build",
     "smoke:api": "bash ./scripts/smoke-api.sh",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ../shared && npm install"
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ../shared && npm install",
+    "check:i18n": "cd client && npm run check:i18n"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

@@ -1,0 +1,25 @@
+{
+  "title": "Categorías",
+  "subtitle": "Personaliza las listas de categorías usadas por Compras, Recetas y Presupuesto. Cambiar el nombre de una categoría actualiza tus elementos existentes.",
+  "parentOnly": "Solo los padres pueden editar las categorías.",
+  "modules": {
+    "shopping": "Compras",
+    "recipe": "Recetas",
+    "budget": "Presupuesto"
+  },
+  "addPlaceholder": "Nueva categoría…",
+  "add": "Añadir",
+  "save": "Guardar",
+  "saved": "Categorías guardadas.",
+  "reset": "Cancelar cambios",
+  "moveUp": "Subir",
+  "moveDown": "Bajar",
+  "remove": "Eliminar",
+  "hintReassign": "Los elementos de una categoría eliminada se mueven a \"{{fallback}}\".",
+  "errors": {
+    "empty": "Los nombres de categoría no pueden estar vacíos.",
+    "duplicate": "Categoría duplicada: {{name}}",
+    "atLeastOne": "Mantén al menos una categoría.",
+    "save": "No se pudieron guardar las categorías."
+  }
+}

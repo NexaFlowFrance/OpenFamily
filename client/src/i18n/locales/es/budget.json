@@ -1,0 +1,119 @@
+{
+  "loading": "Cargando presupuesto…",
+  "categories": {
+    "Logement": "Vivienda",
+    "Alimentation": "Alimentación",
+    "Transport": "Transporte",
+    "Santé": "Salud",
+    "Loisirs": "Ocio",
+    "Abonnements": "Suscripciones",
+    "Assurance": "Seguros",
+    "Enfants": "Niños",
+    "Maison": "Hogar",
+    "Autre": "Otros",
+    "Prélèvements": "Cargos recurrentes"
+  },
+  "readOnly": "Modo de solo lectura. Solo los padres pueden editar el presupuesto.",
+  "alerts": {
+    "title": "Límites alcanzados",
+    "over": " · superado",
+    "warn": " (≥ 80%)"
+  },
+  "balance": {
+    "current": "Saldo actual",
+    "pointed_one": "{{count}} elemento recurrente conciliado",
+    "pointed_other": "{{count}} elementos recurrentes conciliados",
+    "expenses_one": "{{count}} gasto",
+    "expenses_other": "{{count}} gastos",
+    "opening": "Saldo inicial: {{amount}}"
+  },
+  "forecast": {
+    "title": "Previsión",
+    "subtitle": "Próximos recurrentes: +{{income}} ingresos · -{{expenses}} gastos"
+  },
+  "analytics": "Análisis y límites",
+  "charts": {
+    "expensesByCategory": "Gastos por categoría",
+    "noExpenses": "Sin gastos este mes",
+    "yearEvolution": "Evolución anual",
+    "income": "Ingresos",
+    "expenses": "Gastos"
+  },
+  "limits": {
+    "title": "Límites mensuales",
+    "subtitle": "Seguimiento del gasto por categoría",
+    "define": "Definir",
+    "none": "Sin límite definido"
+  },
+  "sections": {
+    "recurring": "Movimientos recurrentes",
+    "expenses": "Gastos",
+    "income": "Ingresos"
+  },
+  "recurring": {
+    "empty": "No hay movimientos recurrentes este mes",
+    "markOn": "Marcar como conciliado",
+    "markOff": "Desmarcar",
+    "dayPrefix": "día",
+    "frequency": {
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "yearly": "Anual",
+      "none": "No se repite"
+    },
+    "units": {
+      "daily_one": "día",
+      "daily_other": "días",
+      "weekly_one": "semana",
+      "weekly_other": "semanas",
+      "monthly_one": "mes",
+      "monthly_other": "meses",
+      "yearly_one": "año",
+      "yearly_other": "años"
+    }
+  },
+  "empty": {
+    "expenses": "Sin gastos este mes",
+    "income": "Sin ingresos este mes"
+  },
+  "sheets": {
+    "new": "Añadir movimiento",
+    "edit": "Editar movimiento",
+    "limit": "Límite mensual"
+  },
+  "toggle": {
+    "expense": "Gasto",
+    "income": "Ingreso"
+  },
+  "fields": {
+    "amount": "Importe ({{currency}})",
+    "description": "Descripción (opcional)",
+    "descriptionPlaceholder": "p. ej. Compra, nómina, aportación de inversión…",
+    "date": "Fecha",
+    "category": "Categoría",
+    "limit": "Límite mensual ({{currency}})",
+    "limitHint": "Pon 0 para eliminar el seguimiento de esta categoría.",
+    "startDate": "Fecha de inicio",
+    "repeat": "Repetir",
+    "every": "Cada",
+    "repeatUntil": "Repetir hasta (opcional)",
+    "addToCalendar": "Añadir al calendario",
+    "addToCalendarHint": "Crea un evento de día completo con la misma fecha y recurrencia.",
+    "type": "Tipo"
+  },
+  "errors": {
+    "amountInvalid": "Importe no válido.",
+    "save": "Error al guardar.",
+    "limitInvalid": "Límite no válido.",
+    "startDateRequired": "La fecha de inicio es obligatoria.",
+    "intervalInvalid": "El intervalo de repetición debe estar entre 1 y 365.",
+    "repeatUntilInvalid": "La fecha final no puede ser anterior a la fecha de inicio.",
+    "editRecurrenceType": "Para cambiar entre único y recurrente, elimina este movimiento y vuelve a añadirlo."
+  },
+  "confirm": {
+    "deleteRecurring": "¿Eliminar este movimiento recurrente?",
+    "deleteEntry": "¿Eliminar este movimiento?"
+  },
+  "classic": "Clásico"
+}

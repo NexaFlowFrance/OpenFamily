@@ -1,0 +1,86 @@
+{
+  "loading": "Cargando dinero de bolsillo…",
+  "title": "Dinero de bolsillo",
+  "subtitle": "Las tareas dan puntos y los puntos se convierten en dinero de bolsillo",
+  "empty": "Todavía no hay recompensas. ¡Añade estrellas a una tarea para empezar!",
+  "streak_one": "{{count}} día seguido",
+  "streak_other": "{{count}} días seguidos",
+  "pendingCount_one": "{{count}} pendiente",
+  "pendingCount_other": "{{count}} pendientes",
+  "worth": "vale {{amount}}",
+  "approvals": {
+    "title_one": "{{count}} tarea por aprobar",
+    "title_other": "{{count}} tareas por aprobar",
+    "approve": "Aprobar",
+    "reject": "Rechazar"
+  },
+  "actions": {
+    "adjust": "Ajustar",
+    "redeem": "Pagar"
+  },
+  "types": {
+    "earn": "Puntos ganados",
+    "adjust": "Ajuste",
+    "redeem": "Dinero de bolsillo pagado"
+  },
+  "fields": {
+    "note": "Nota (opcional)"
+  },
+  "adjustDialog": {
+    "title": "Ajustar los puntos de {{name}}",
+    "description": "Añade una bonificación o quita puntos con un valor negativo",
+    "points": "Puntos (+ o −)",
+    "notePlaceholder": "p. ej. Ayudó a guardar la compra"
+  },
+  "redeemDialog": {
+    "title": "Pagar dinero de bolsillo a {{name}}",
+    "description": "Saldo disponible: {{balance}} puntos",
+    "points": "Puntos a convertir",
+    "amount": "Importe a pagar: {{amount}}",
+    "notePlaceholder": "p. ej. Hucha, salida al cine…"
+  },
+  "goals": {
+    "add": "Añadir objetivo",
+    "editTitle": "Editar objetivo",
+    "progress": "{{current}} / {{target}}",
+    "markAchieved": "Objetivo conseguido 🎉"
+  },
+  "goalDialog": {
+    "addTitle": "Nuevo objetivo para {{name}}",
+    "editTitle": "Editar el objetivo de {{name}}",
+    "description": "Un objetivo de ahorro para alcanzar con puntos",
+    "emoji": "Emoji",
+    "titleLabel": "Título",
+    "titlePlaceholder": "p. ej. Videojuego",
+    "target": "Importe a alcanzar ({{currency}})",
+    "delete": "Eliminar"
+  },
+  "kid": {
+    "hello": "¡Hola {{name}}!",
+    "subtitle": "Aquí tienes tu hucha",
+    "reached": "¡Muy bien, lo conseguiste! 🎉",
+    "reachedHint": "Pide a un padre o madre que confirme tu objetivo.",
+    "missing": "Todavía te faltan {{amount}}",
+    "editGoal": "Editar mi objetivo",
+    "noGoal": "Todavía no tienes un objetivo. ¡Elige un sueño que quieras alcanzar!",
+    "addGoal": "Elegir mi objetivo",
+    "tasksTitle": "Tus misiones",
+    "allTasks": "Ver todas",
+    "tasksEmpty": "No hay misiones ahora mismo, ¡muy bien! 🎉",
+    "pendingBadge": "Esperando aprobación",
+    "historyTitle": "Tu actividad reciente",
+    "notLinkedTitle": "¡Tu hucha te está esperando!",
+    "notLinkedMessage": "Pide a un padre o madre que vincule tu cuenta con tu perfil desde la página Familia para ver tus puntos y objetivos."
+  },
+  "settings": {
+    "rate": "1 punto = {{value}}",
+    "title": "Valor de un punto",
+    "description": "Define el valor monetario de un punto",
+    "label": "Valor de un punto",
+    "example": "Ejemplo: {{points}} puntos = {{amount}}"
+  },
+  "errors": {
+    "load": "No se puede cargar el dinero de bolsillo.",
+    "action": "No se puede realizar esta acción."
+  }
+}

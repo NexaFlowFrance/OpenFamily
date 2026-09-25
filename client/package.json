@@ -4,13 +4,14 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build",
+        "build": "npm run check:i18n && tsc && vite build",
         "build:native": "tsc && vite build --mode native",
         "preview": "vite preview",
         "android:add": "cap add android",
         "cap:sync": "npm run build:native && cap sync android",
         "android:open": "cap open android",
-        "android:run": "npm run build:native && cap sync android && cap run android"
+        "android:run": "npm run build:native && cap sync android && cap run android",
+        "check:i18n": "node scripts/check-i18n.mjs"
     },
     "dependencies": {
         "@capacitor/android": "^8.4.1",

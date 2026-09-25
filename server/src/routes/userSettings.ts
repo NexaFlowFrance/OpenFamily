@@ -4,7 +4,7 @@ import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
 
 const router = Router();
 
-const SUPPORTED_LANGUAGES = ['fr', 'en', 'pt', 'ru', 'zh'] as const;
+const SUPPORTED_LANGUAGES = ['fr', 'en', 'pt', 'ru', 'zh', 'es'] as const;
 
 // Single source of truth for the optional modules a family may hide.
 // Always-on modules (dashboard, shopping, tasks, calendar, family, settings)

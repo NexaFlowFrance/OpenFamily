@@ -1,0 +1,73 @@
+{
+  "heading": {
+    "before": "Tu ",
+    "highlight": "día",
+    "after": ", de un vistazo."
+  },
+  "budgetAlert": {
+    "title": "Aviso de presupuesto",
+    "message_one": "{{count}} categoría ha superado su presupuesto mensual.",
+    "message_other": "{{count}} categorías han superado su presupuesto mensual.",
+    "cta": "Ver detalles"
+  },
+  "stats": {
+    "appointments": "Eventos",
+    "tasks": "Tareas",
+    "shopping": "Compras",
+    "monthExpenses": "Gastos de este mes"
+  },
+  "today": {
+    "title": "Hoy",
+    "viewWeek": "Semana",
+    "emptyTitle": "Nada planificado.",
+    "emptySubtitle": "Añade un evento para verlo aquí.",
+    "emptyCta": "Añadir un evento",
+    "weekTitle": "Esta semana",
+    "viewDay": "Día",
+    "emptyWeekSubtitle": "No hay eventos esta semana."
+  },
+  "aside": {
+    "shopping": "Compras",
+    "shoppingCount_one": "artículo por comprar",
+    "shoppingCount_other": "artículos por comprar",
+    "budget": "Presupuesto de este mes",
+    "budgetSubtitle": "gastado este mes",
+    "tasks": "Tareas pendientes",
+    "tasksCount_one": "tarea por completar",
+    "tasksCount_other": "tareas por completar"
+  },
+  "planning": {
+    "title": "Horarios de esta semana",
+    "viewAll": "Ver planificación",
+    "empty": "No hay planificación guardada para esta semana."
+  },
+  "customize": {
+    "button": "Personalizar",
+    "title": "Personaliza tu página de inicio",
+    "description": "Elige qué aparece en tu página de inicio y en qué orden. Este ajuste es específico de tu cuenta.",
+    "agendaViewLabel": "Vista de agenda",
+    "widgetsLabel": "Bloques mostrados",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "reset": "Restablecer",
+    "allHidden": "Todos los bloques están ocultos. Personaliza tu página de inicio para volver a mostrar alguno.",
+    "moduleDisabled": "(módulo desactivado)",
+    "widgets": {
+      "stats": "Cifras clave",
+      "agenda": "Agenda (eventos)",
+      "planning": "Horarios de esta semana",
+      "quick": "Acceso rápido (compras, presupuesto, tareas)",
+      "notes": "Notas familiares"
+    }
+  },
+  "latestPost": {
+    "title": "Última publicación familiar",
+    "viewAll": "Ver todas las publicaciones",
+    "seenBy": "Visto por: {{names}}",
+    "notSeen": "Todavía no lo ha visto nadie",
+    "seen": "Visto",
+    "markSeen": "Marcar como visto"
+  }
+}

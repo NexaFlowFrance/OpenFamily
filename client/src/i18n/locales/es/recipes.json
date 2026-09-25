@@ -1,0 +1,130 @@
+{
+  "loading": "Cargando recetas…",
+  "title": "Recetas",
+  "subtitle": "Biblioteca de recetas de tu familia",
+  "newRecipe": "Nueva receta",
+  "categories": {
+    "Entrée": "Entrante",
+    "Plat": "Plato principal",
+    "Dessert": "Postre",
+    "Snack": "Tentempié"
+  },
+  "difficulties": {
+    "Facile": "Fácil",
+    "Moyen": "Media",
+    "Difficile": "Difícil"
+  },
+  "durations": {
+    "under15": "≤ 15 min",
+    "under30": "≤ 30 min",
+    "under60": "≤ 1 h",
+    "over60": "> 1 h"
+  },
+  "searchPlaceholder": "Buscar una receta…",
+  "allCategories": "Todas las categorías",
+  "allDifficulties": "Todas las dificultades",
+  "anyDuration": "Cualquier duración",
+  "empty": {
+    "none": "Todavía no hay recetas. ¡Crea la primera!",
+    "noMatch": "Ninguna receta coincide con tu búsqueda."
+  },
+  "card": {
+    "min": "{{n}} min",
+    "servings_one": "{{count}} ración",
+    "servings_other": "{{count}} raciones",
+    "view": "Ver"
+  },
+  "dialog": {
+    "editTitle": "Editar receta",
+    "createTitle": "Nueva receta",
+    "description": "Completa los detalles de la receta"
+  },
+  "form": {
+    "name": "Nombre de la receta",
+    "namePlaceholder": "p. ej. Tarta de manzana",
+    "category": "Categoría",
+    "difficulty": "Dificultad",
+    "description": "Descripción (opcional)",
+    "descriptionPlaceholder": "Breve descripción de la receta…",
+    "prep": "Preparación (min)",
+    "prepPlaceholder": "30",
+    "cook": "Cocción (min)",
+    "cookPlaceholder": "45",
+    "servings": "Raciones",
+    "servingsPlaceholder": "4",
+    "ingredients": "Ingredientes (uno por línea)",
+    "ingredientsPlaceholder": "200 g de harina\n3 huevos\n100 g de azúcar",
+    "instructions": "Instrucciones (un paso por línea)",
+    "instructionsPlaceholder": "Precalienta el horno a 180 °C\nMezcla la harina y el azúcar\nAñade los huevos",
+    "tags": "Etiquetas (separadas por comas)",
+    "tagsPlaceholder": "vegetariano, rápido, económico",
+    "image": "URL de imagen (opcional)",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "Importar desde enlace",
+    "title": "Importar una receta",
+    "description": "Pega el enlace de una página de recetas y rellenaremos el formulario por ti.",
+    "urlLabel": "URL de la receta",
+    "urlPlaceholder": "https://ejemplo.com/receta/…",
+    "submit": "Importar",
+    "importing": "Importando…",
+    "successTitle": "Receta importada",
+    "successDescription": "Revisa los detalles y luego guarda.",
+    "errors": {
+      "notFoundTitle": "No se encontró ninguna receta",
+      "notFound": "Esta página no contiene una receta legible.",
+      "fetchTitle": "Error de importación",
+      "fetch": "No se puede obtener esta página. Comprueba el enlace e inténtalo de nuevo."
+    }
+  },
+  "shopping": {
+    "button": "Añadir a la lista de compras",
+    "title": "Añadir a la lista de compras",
+    "description": "Elige los ingredientes de \"{{recipe}}\" que quieres añadir a tu lista.",
+    "selectAll": "Seleccionar todo",
+    "deselectAll": "Deseleccionar todo",
+    "submit": "Añadir a la lista",
+    "sending": "Añadiendo…",
+    "successTitle": "Lista de compras actualizada",
+    "successDescription_one": "{{count}} ingrediente añadido a tu lista.",
+    "successDescription_other": "{{count}} ingredientes añadidos a tu lista.",
+    "duplicates_one": "{{count}} ya estaba en la lista.",
+    "duplicates_other": "{{count}} ya estaban en la lista.",
+    "errorTitle": "No se pudo añadir",
+    "error": "No se pudieron añadir estos ingredientes. Inténtalo de nuevo.",
+    "original": "Receta: {{line}}",
+    "selectedCount": "{{count}} de {{total}} seleccionados"
+  },
+  "refine": {
+    "button": "Mejorar con IA",
+    "hint": "Ordena el título, los ingredientes y las instrucciones con la IA configurada",
+    "refining": "Mejorando…",
+    "successTitle": "Receta mejorada",
+    "successDescription": "Secciones y pasos reorganizados. Revisa y luego guarda.",
+    "notConfiguredTitle": "IA no configurada",
+    "notConfigured": "Activa y configura el asistente de IA en Ajustes → Asistente de IA.",
+    "errorTitle": "Error al mejorar",
+    "error": "El asistente de IA no respondió. Comprueba su configuración e inténtalo de nuevo.",
+    "cost": "{{total}} tokens ({{in}} entrada / {{out}} salida)"
+  },
+  "detail": {
+    "prep": "Preparación:",
+    "cook": "Cocción:",
+    "servings": "Raciones:",
+    "minUnit": "min",
+    "ingredients": "Ingredientes",
+    "instructions": "Instrucciones"
+  },
+  "confirmDelete": "¿Seguro que quieres eliminar esta receta?",
+  "errors": {
+    "load": "No se pueden cargar las recetas.",
+    "save": "No se puede guardar esta receta.",
+    "delete": "No se puede eliminar esta receta.",
+    "invalidImage": "Este enlace de imagen no es válido. Usa una dirección web que empiece por https:// o deja el campo vacío."
+  },
+  "filters": {
+    "toggle": "Filtros",
+    "clear": "Borrar filtros"
+  }
+}

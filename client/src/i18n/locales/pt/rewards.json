@@ -7,7 +7,7 @@
   "streak_other": "{{count}} dias seguidos",
   "pendingCount_one": "{{count}} pendente de aprovação",
   "pendingCount_other": "{{count}} pendentes de aprovação",
-  "worth": "Vale {{points}} pontos",
+  "worth": "vale {{amount}}",
   "approvals": {
     "title_one": "{{count}} task to approve",
     "title_other": "{{count}} tasks to approve",
@@ -27,16 +27,16 @@
     "note": "Observação"
   },
   "adjustDialog": {
-    "title": "Ajustar Saldo de Mesada",
+    "title": "Ajustar os pontos de {{name}}",
     "description": "Adicione ou remova pontos/saldo da criança",
     "points": "Quantidade de pontos",
     "notePlaceholder": "Motivo do ajuste..."
   },
   "redeemDialog": {
-    "title": "Resgatar Recompensa",
-    "description": "Confirme o resgate desta recompensa",
+    "title": "Pagar a mesada de {{name}}",
+    "description": "Saldo disponível: {{balance}} pontos",
     "points": "Pontos necessários",
-    "amount": "Valor a resgatar",
+    "amount": "Valor a pagar: {{amount}}",
     "notePlaceholder": "Observação do resgate..."
   },
   "goals": {
@@ -46,13 +46,13 @@
     "markAchieved": "Marcar como Alcançada"
   },
   "goalDialog": {
-    "addTitle": "Criar Meta de Economia",
-    "editTitle": "Editar Meta de Economia",
+    "addTitle": "Nova meta para {{name}}",
+    "editTitle": "Editar a meta de {{name}}",
     "description": "Defina o objetivo de economia da criança",
     "emoji": "Ícone / Emoji",
     "titleLabel": "Nome do objetivo",
     "titlePlaceholder": "ex: Bicicleta nova, Brinquedo...",
-    "target": "Valor total objetivo",
+    "target": "Valor a atingir ({{currency}})",
     "delete": "Excluir meta"
   },
   "kid": {
@@ -73,11 +73,11 @@
     "notLinkedMessage": "Associe este usuário a um membro da família para ver os pontos."
   },
   "settings": {
-    "rate": "Fator de conversão de pontos",
+    "rate": "1 ponto = {{value}}",
     "title": "Mesada Recorrente",
     "description": "Defina se as crianças recebem saldo automático semanal/mensal",
     "label": "Valor da mesada",
-    "example": "ex: R$ 10,00 por semana"
+    "example": "Exemplo: {{points}} pontos = {{amount}}"
   },
   "errors": {
     "load": "Não foi possível carregar as recompensas.",

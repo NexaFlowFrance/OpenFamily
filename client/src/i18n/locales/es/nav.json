@@ -1,0 +1,79 @@
+{
+  "items": {
+    "today": "Hoy",
+    "shopping": "Compras",
+    "tasks": "Tareas",
+    "rewards": "Dinero de bolsillo",
+    "calendar": "Eventos",
+    "planning": "Planificación",
+    "recipes": "Recetas",
+    "meals": "Comidas",
+    "budget": "Presupuesto",
+    "family": "Familia",
+    "integrations": "Integraciones",
+    "settings": "Ajustes",
+    "posts": "Publicaciones"
+  },
+  "mobile": {
+    "home": "Inicio",
+    "planning": "Planificación",
+    "lists": "Listas",
+    "budget": "Presupuesto",
+    "family": "Familia"
+  },
+  "quickActions": {
+    "title": "Acciones rápidas",
+    "addShopping": "Añadir artículo de compra",
+    "addTask": "Añadir tarea",
+    "addAppointment": "Añadir evento",
+    "addSchedule": "Añadir horario",
+    "addRecipe": "Añadir receta",
+    "addMeal": "Añadir comida",
+    "addExpense": "Añadir gasto",
+    "addMember": "Añadir miembro",
+    "addPost": "Nueva publicación"
+  },
+  "user": {
+    "profile": "Perfil",
+    "toggleTheme": "Cambiar tema",
+    "logout": "Cerrar sesión",
+    "openMenu": "Abrir menú"
+  },
+  "offline": "Modo sin conexión. Los datos mostrados proceden de la caché. Podrás volver a hacer cambios cuando se recupere la conexión.",
+  "pageTitleFallback": "Panel",
+  "posts": {
+    "title": "Publicaciones familiares",
+    "subtitle": "Comparte con tu familia lo que piensas, una foto o un enlace.",
+    "newPost": "Nueva publicación",
+    "editPost": "Editar publicación",
+    "editing": "Estás editando una de tus publicaciones.",
+    "placeholder": "¿Qué estás pensando?",
+    "linkPlaceholder": "Compartir un enlace (opcional)",
+    "addPhoto": "Añadir foto",
+    "post": "Publicar",
+    "saveChanges": "Guardar cambios",
+    "cancel": "Cancelar",
+    "photoPreview": "Vista previa de la foto",
+    "removePhoto": "Eliminar foto",
+    "sharedPhoto": "Foto compartida",
+    "empty": "Todavía no hay publicaciones familiares.",
+    "emptySubtitle": "Sé el primero en compartir algo.",
+    "edited": "editado",
+    "edit": "Editar publicación",
+    "delete": "Eliminar publicación",
+    "confirmDelete": "¿Eliminar esta publicación?",
+    "seen": "Visto",
+    "markSeen": "Marcar como visto",
+    "seenBy": "Visto por: {{names}}",
+    "notSeen": "Todavía no lo ha visto nadie",
+    "errors": {
+      "load": "No se pudieron cargar las publicaciones.",
+      "save": "No se pudo guardar la publicación.",
+      "delete": "No se pudo eliminar la publicación.",
+      "seen": "No se pudo marcar la publicación como vista.",
+      "empty": "Añade primero texto, una foto o un enlace.",
+      "image": "No se pudo usar esa foto.",
+      "imageTooLarge": "La foto sigue siendo demasiado grande después de redimensionarla."
+    }
+  }
+}

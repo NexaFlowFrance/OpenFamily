@@ -1,0 +1,73 @@
+{
+  "magic": {
+    "open": "Asistente de IA",
+    "title": "Asistente de IA ✨",
+    "description": "Describe lo que quieres añadir y el asistente se encarga del resto.",
+    "placeholder": "Añade lasaña el jueves por la noche y recuérdale a Mia su bolsa del gimnasio…",
+    "parse": "Analizar",
+    "parsing": "Analizando…",
+    "nothingFound": "No se encontraron elementos accionables en esta nota. Prueba a reformularla.",
+    "back": "Atrás",
+    "reviewHint": "Revisa las propuestas, desmarca lo que no quieras y luego confirma.",
+    "confirm": "Añadir ({{count}})",
+    "confirming": "Añadiendo…",
+    "successTitle": "Hecho ✨",
+    "successDescription": "{{count}} elemento(s) añadido(s).",
+    "partialTitle": "Añadido parcialmente",
+    "partialDescription": "{{added}} añadidos, {{failed}} fallidos.",
+    "allFailed": "No se pudo añadir ningún elemento. Inténtalo de nuevo.",
+    "types": {
+      "task": "Tarea",
+      "appointment": "Evento",
+      "shopping_item": "Compra",
+      "budget_entry": "Presupuesto"
+    }
+  },
+  "meals": {
+    "button": "Sugerir un menú ✨",
+    "dialogTitle": "Sugerencias para la cena",
+    "dialogDescription": "Semana del {{start}} al {{end}}, basada en tus propias recetas.",
+    "loading": "El asistente está preparando el menú…",
+    "empty": "Todas las cenas de esta semana ya están planificadas.",
+    "confirm": "Añadir al plan ({{count}})",
+    "successTitle": "Menú añadido ✨",
+    "successDescription": "{{count}} cena(s) planificada(s).",
+    "partialTitle": "Añadido parcialmente",
+    "partialDescription": "{{added}} añadidas, {{failed}} fallidas."
+  },
+  "settings": {
+    "title": "Asistente de IA",
+    "subtitle": "Conecta un modelo de IA local o en la nube para añadir elementos con lenguaje natural y obtener sugerencias de menú.",
+    "provider": "Proveedor",
+    "providers": {
+      "ollama": "Ollama (local)",
+      "openai": "API compatible con OpenAI",
+      "anthropic": "Anthropic Claude",
+      "gemini": "Google Gemini"
+    },
+    "baseUrl": "URL del servidor",
+    "apiKey": "Clave API",
+    "keyKept": "••• (conservada)",
+    "clearKey": "Borrar la clave guardada",
+    "model": "Modelo",
+    "enabled": "Asistente activado",
+    "privacy": "Privacidad: la clave API se cifra y se guarda solo en TU servidor. Con Ollama nada sale de casa: las notas se procesan localmente.",
+    "parentOnly": "Solo los padres pueden cambiar estos ajustes.",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "saved": "Ajustes guardados.",
+    "test": "Probar conexión",
+    "testing": "Probando…",
+    "testSuccess": "Conexión correcta: el modelo responde correctamente."
+  },
+  "errors": {
+    "AI_NOT_CONFIGURED": "El asistente de IA no está configurado. Ve a Ajustes.",
+    "AI_DISABLED": "El asistente de IA está desactivado en Ajustes.",
+    "AI_UNREACHABLE": "No se puede contactar con el proveedor de IA. Comprueba la URL y que el servicio esté funcionando.",
+    "AI_UNAUTHORIZED": "La clave API fue rechazada. Compruébala en Ajustes.",
+    "AI_MODEL_NOT_FOUND": "El proveedor no encontró el modelo. Comprueba su nombre, por ejemplo llama3.1.",
+    "AI_INVALID_RESPONSE": "El modelo devolvió una respuesta no válida. Inténtalo de nuevo o cambia de modelo.",
+    "AI_PROVIDER_ERROR": "El proveedor de IA devolvió un error. Inténtalo de nuevo.",
+    "AI_NOT_ENOUGH_RECIPES": "Añade al menos 5 recetas para que el asistente pueda preparar un menú."
+  }
+}

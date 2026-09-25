@@ -1,0 +1,130 @@
+{
+  "loading": "Cargando familia…",
+  "title": "Familia",
+  "subtitle": "Gestiona los miembros de tu familia",
+  "addMember": "Añadir miembro",
+  "empty": "No hay miembros. ¡Añade el primero!",
+  "roles": {
+    "Parent": "Padre/madre",
+    "Enfant": "Hijo/a",
+    "Etudiant": "Estudiante",
+    "Autre": "Otro"
+  },
+  "colors": {
+    "coral": "Coral",
+    "orange": "Naranja",
+    "yellow": "Amarillo",
+    "green": "Verde",
+    "cyan": "Cian",
+    "blue": "Azul",
+    "indigo": "Índigo",
+    "pink": "Rosa"
+  },
+  "card": {
+    "age_one": "{{count}} año",
+    "age_other": "{{count}} años",
+    "health": "Salud",
+    "allergies": "Alergias:",
+    "medications": "Medicamentos:",
+    "emergency": "Contacto de emergencia"
+  },
+  "shared": {
+    "title": "Cuentas compartidas",
+    "subtitle": "Comparte el acceso a los datos de tu familia con otras cuentas.",
+    "you": "(tú)",
+    "owner": "Propietario",
+    "child": "🧒 Hijo/a",
+    "parent": "👨 Padre/madre",
+    "none": "Ninguna otra cuenta comparte esta familia todavía.",
+    "roleParent": "Padre/madre",
+    "roleChild": "Hijo/a",
+    "roleTitle": "Rol del miembro",
+    "transferTitle": "Transferir la propiedad a esta cuenta",
+    "kickTitle": "Eliminar esta cuenta"
+  },
+  "link": {
+    "label": "Cuenta vinculada",
+    "none": "Sin cuenta vinculada",
+    "hint": "Vincula este perfil a una cuenta compartida: una cuenta infantil verá su hucha y sus objetivos."
+  },
+  "requests": {
+    "title": "Solicitudes de acceso",
+    "accept": "Aceptar",
+    "rejectTitle": "Rechazar"
+  },
+  "myRequest": {
+    "pendingTitle": "Solicitud pendiente",
+    "sentTo": "Enviada a {{name}} ({{email}})"
+  },
+  "join": {
+    "title": "Unirse a una familia",
+    "desc": "Introduce el correo del propietario de la familia a la que quieres unirte. Recibirá una solicitud para aceptarla o rechazarla.",
+    "rejected": "Tu última solicitud fue rechazada.",
+    "emailPlaceholder": "correo@ejemplo.com",
+    "sending": "Enviando…",
+    "send": "Enviar solicitud",
+    "emailRequired": "Correo electrónico obligatorio"
+  },
+  "invite": {
+    "roleLabel": "Invitar como",
+    "generate": "Generar enlace de invitación",
+    "generating": "Generando…",
+    "copyTitle": "Copiar",
+    "title": "Invitar a un miembro",
+    "desc": "Envía la invitación por correo o comparte tú mismo el enlace. La persona invitada crea su cuenta desde este enlace y se une a tu familia sin pagar una suscripción adicional.",
+    "emailLabel": "Correo electrónico (opcional)",
+    "emailPlaceholder": "miembro@ejemplo.com",
+    "send": "Enviar invitación",
+    "sent": "Invitación enviada a {{email}}.",
+    "sendFailed": "No se pudo enviar el correo. Comparte manualmente el enlace de abajo.",
+    "linkHint": "Este enlace es válido durante 7 días. La persona invitada debe crear su cuenta desde este enlace para unirse a tu familia."
+  },
+  "leave": {
+    "leaving": "Saliendo…",
+    "leave": "Salir de la familia compartida"
+  },
+  "dialog": {
+    "editTitle": "Editar miembro",
+    "addTitle": "Añadir miembro",
+    "description": "Completa los datos del miembro"
+  },
+  "form": {
+    "name": "Nombre",
+    "namePlaceholder": "p. ej. María García",
+    "role": "Rol",
+    "color": "Color",
+    "birthdate": "Fecha de nacimiento (opcional)",
+    "healthInfo": "Información de salud",
+    "allergies": "Alergias (separadas por comas)",
+    "allergiesPlaceholder": "p. ej. Cacahuetes, lactosa",
+    "medications": "Medicamentos (separados por comas)",
+    "medicationsPlaceholder": "p. ej. Aspirina, insulina",
+    "emergencyContact": "Contacto de emergencia",
+    "contactName": "Nombre del contacto",
+    "contactNamePlaceholder": "p. ej. Juan García",
+    "contactPhone": "Teléfono de contacto",
+    "contactPhonePlaceholder": "p. ej. +34 600 123 456",
+    "notes": "Notas (opcional)",
+    "notesPlaceholder": "Notas adicionales…"
+  },
+  "confirm": {
+    "kick": "¿Eliminar esta cuenta de la familia?",
+    "transfer": "¿Transferir la propiedad de la familia a {{name}}?\n\nPasarás a ser un miembro normal. Se conservarán todos los datos familiares y los gestionará el nuevo propietario. Esta acción es irreversible.",
+    "delete": "¿Seguro que quieres eliminar este miembro?",
+    "leave": "¿Salir de la familia compartida? Recuperarás tus propios datos."
+  },
+  "errors": {
+    "load": "No se puede cargar la familia.",
+    "save": "No se puede guardar este miembro.",
+    "delete": "No se puede eliminar este miembro.",
+    "kick": "No se puede eliminar este miembro.",
+    "role": "No se puede cambiar el rol.",
+    "transfer": "No se puede transferir la propiedad.",
+    "leave": "No se puede salir de la familia.",
+    "invite": "No se puede crear el enlace de invitación.",
+    "cancelRequest": "No se puede cancelar la solicitud.",
+    "sendRequest": "No se puede enviar la solicitud.",
+    "approve": "No se puede aprobar la solicitud.",
+    "reject": "No se puede rechazar la solicitud."
+  }
+}

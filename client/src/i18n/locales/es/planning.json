@@ -1,0 +1,84 @@
+{
+  "loading": "Cargando planificación…",
+  "noMembers": {
+    "title": "Añade primero a tus miembros",
+    "subtitle": "La planificación semanal se basa en los perfiles familiares.",
+    "cta": "Ir a Familia"
+  },
+  "title": "Planificación semanal",
+  "subtitle": "Horarios recurrentes de trabajo y escuela, semana a semana.",
+  "newEntry": "Nueva entrada",
+  "thisWeek": "Esta semana",
+  "allMembers": "Todos los miembros",
+  "allTypes": "Todos los tipos",
+  "types": {
+    "work": "Trabajo",
+    "school": "Escuela",
+    "study": "Estudios",
+    "activity": "Actividad",
+    "other": "Otro"
+  },
+  "add": "Añadir",
+  "nextDayShort": "+1d",
+  "dayFallback": "Día {{n}}",
+  "dialog": {
+    "editTitle": "Editar una entrada",
+    "createTitle": "Nueva entrada",
+    "description": "Define una entrada y aplícala a uno o varios días."
+  },
+  "form": {
+    "member": "Miembro",
+    "type": "Tipo",
+    "title": "Título",
+    "titlePlaceholder": "p. ej. Oficina · Equipo de producto / Matemáticas",
+    "days": "Días afectados",
+    "weekdays": "Lun-Vie",
+    "fullWeek": "Semana completa",
+    "selectedDay": "Día seleccionado: {{day}}",
+    "selectedDays": "{{count}} días seleccionados",
+    "start": "Inicio",
+    "end": "Fin",
+    "nextDayHint": "Termina al día siguiente (+1 día)",
+    "thisWeekOnlyStrong": "Solo esta semana",
+    "thisWeekOnlyRest": ". La entrada solo se aplica a la semana del {{date}}. De lo contrario, se repite cada semana.",
+    "replaceConflicts": "Sustituye las entradas en conflicto en los días seleccionados. Si hay conflictos y esta opción está desactivada, esos días se omitirán.",
+    "location": "Ubicación (opcional)",
+    "locationPlaceholder": "p. ej. Oficina de Madrid / Colegio Central",
+    "notes": "Notas (opcional)",
+    "notesPlaceholder": "Información útil, aula, asignatura, transporte…",
+    "participants": "Participantes",
+    "participantsHint": "Elige una o más personas. La primera da color a la actividad."
+  },
+  "submit": {
+    "applyToDays": "Aplicar a los días seleccionados"
+  },
+  "notice": {
+    "saved": "Entrada guardada.",
+    "savedDays_one": "Guardado en {{count}} día.",
+    "savedDays_other": "Guardado en {{count}} días.",
+    "savedDaysConflicts_one": "Guardado en {{count}} día. Conflictos detectados en: {{days}}.",
+    "savedDaysConflicts_other": "Guardado en {{count}} días. Conflictos detectados en: {{days}}.",
+    "skipped": "Omitido para esa fecha",
+    "restored": "Restaurado"
+  },
+  "confirmDelete": "¿Eliminar esta entrada?",
+  "errors": {
+    "loadMembers": "No se pueden cargar los miembros.",
+    "loadEntries": "No se puede cargar la planificación.",
+    "deleteEntry": "No se puede eliminar esta entrada.",
+    "memberTitleRequired": "El miembro y el título son obligatorios.",
+    "timesSame": "Las horas de inicio y fin no pueden ser iguales.",
+    "selectDay": "Selecciona al menos un día.",
+    "save": "No se puede guardar esta entrada.",
+    "skipOccurrence": "No se pudo cambiar esta aparición",
+    "skipUnsupported": "Tu servidor todavía no admite omitir una aparición. Actualízalo."
+  },
+  "occurrence": {
+    "skip": "Omitir esta",
+    "restore": "Restaurar esta"
+  },
+  "appointments": {
+    "badge": "EVENTO",
+    "openCalendar": "Abrir en el calendario"
+  }
+}

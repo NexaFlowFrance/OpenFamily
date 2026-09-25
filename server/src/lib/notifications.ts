@@ -14,6 +14,29 @@ export interface CreateNotificationInput {
     url?: string;
 }
 
+export type NotificationLanguage = 'fr' | 'en' | 'pt' | 'ru' | 'es' | 'zh';
+export type LocalizedTexts = Record<NotificationLanguage, { title: string; message: string }>;
+
+/**
+ * Same as createNotification, with the title and message picked in the
+ * recipient's own language (French when unset or unknown), so a member who
+ * reads the app in Spanish is not notified in French.
+ */
+export async function createLocalizedNotification(
+    input: Omit<CreateNotificationInput, 'title' | 'message'> & { texts: LocalizedTexts }
+): Promise<void> {
+    let lang: NotificationLanguage = 'fr';
+    try {
+        const result = await query('SELECT language FROM users WHERE id = $1', [input.userId]);
+        const saved = String(result.rows[0]?.language ?? '').toLowerCase().split(/[-_]/)[0];
+        if (saved in input.texts) lang = saved as NotificationLanguage;
+    } catch {
+        // Fall back to French; delivery matters more than the language.
+    }
+    const { texts, ...rest } = input;
+    await createNotification({ ...rest, ...texts[lang] });
+}
+
 /**
  * Persist an in-app notification, broadcast a WebSocket refresh and send a web-push
  * message (best effort). Never throws — notification delivery must not break the

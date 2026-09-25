@@ -8,6 +8,7 @@ import {
     Trash2, Edit2, TrendingUp, TrendingDown, Wallet, Eye,
     X, Calendar, AlertTriangle, Lock
 } from 'lucide-react';
+import KakeiboView from './budget/KakeiboView';
 import {
     PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip,
     ResponsiveContainer, Legend,
@@ -184,17 +185,19 @@ const CategorySelect: React.FC<{ value: string; onChange: (v: string) => void }>
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const Budget: React.FC = () => {
-    const { t } = useTranslation(['budget', 'common']);
+    const { t } = useTranslation(['budget', 'kakeibo', 'common']);
     const categoryLabel = (v: string) => t(`budget:categories.${v}`, { defaultValue: v });
     const { user } = useAuth();
     const currency = user?.currency || 'EUR';
     const canEdit = Boolean(user?.is_owner) || (user?.role ?? '').toLowerCase() !== 'enfant';
 
-    // Classic budget vs analytics mode. Persisted per browser so the choice sticks.
-    const [mode, setMode] = useState<'classic' | 'analytics'>(
-        () => (localStorage.getItem('openfamily.budgetMode') === 'analytics' ? 'analytics' : 'classic')
-    );
-    const switchMode = (next: 'classic' | 'analytics') => {
+    // Classic budget, analytics, or kakeibo. Persisted per browser so the choice sticks.
+    type BudgetMode = 'classic' | 'analytics' | 'kakeibo';
+    const [mode, setMode] = useState<BudgetMode>(() => {
+        const saved = localStorage.getItem('openfamily.budgetMode');
+        return saved === 'analytics' || saved === 'kakeibo' ? saved : 'classic';
+    });
+    const switchMode = (next: BudgetMode) => {
         setMode(next);
         localStorage.setItem('openfamily.budgetMode', next);
     };
@@ -556,7 +559,7 @@ const Budget: React.FC = () => {
                 </button>
             </div>
 
-            {/* Budget view switch: classic budget vs analytics */}
+            {/* Budget view switch: classic, analytics, kakeibo */}
             <div className="px-4 pt-4">
                 <div className="flex gap-1 rounded-input border border-border bg-surface-2 p-1">
                     <button
@@ -577,8 +580,30 @@ const Budget: React.FC = () => {
                     >
                         {t('budget:analytics')}
                     </button>
+                    <button
+                        type="button"
+                        onClick={() => switchMode('kakeibo')}
+                        className={`flex-1 rounded-input px-3 py-1.5 text-sm font-medium transition ${
+                            mode === 'kakeibo' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        {t('kakeibo:mode.kakeibo')}
+                    </button>
                 </div>
             </div>
+
+            {mode === 'kakeibo' && (
+                <div className="px-4 pt-3">
+                    <KakeiboView
+                        month={currentMonth}
+                        year={currentYear}
+                        canEdit={canEdit}
+                        currency={currency}
+                        categoryLabel={categoryLabel}
+                        reloadKey={entries.length + recurring.length}
+                    />
+                </div>
+            )}
 
             {mode === 'classic' && canEdit && (
                 <div className="px-4 pt-4 flex justify-end">

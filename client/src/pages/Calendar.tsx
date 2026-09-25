@@ -709,13 +709,18 @@ const Calendar: React.FC = () => {
                     <p className="text-muted-foreground text-body">{t('calendar:subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="secondary" onClick={openFeedDialog}>
-                        <CalendarPlus className="w-4 h-4 mr-2" />
-                        {t('calendar:exportIcal')}
+                    <Button
+                        variant="secondary"
+                        onClick={openFeedDialog}
+                        title={t('calendar:exportIcal')}
+                        aria-label={t('calendar:exportIcal')}
+                    >
+                        <CalendarPlus className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">{t('calendar:exportIcal')}</span>
                     </Button>
-                    <Button onClick={() => openNewEventForDate(new Date())}>
+                    <Button className="flex-1 sm:flex-none" onClick={() => openNewEventForDate(new Date())}>
                         <Plus className="w-4 h-4 mr-2" />
-                        {t('calendar:newAppointment')}
+                        <span className="whitespace-nowrap">{t('calendar:newAppointment')}</span>
                     </Button>
                 </div>
             </div>
@@ -805,12 +810,12 @@ const Calendar: React.FC = () => {
 
             {/* Calendar Header */}
             <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-h2 font-semibold capitalize">
+                <CardContent className="p-3 sm:p-6">
+                    <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
+                        <h2 className="min-w-0 text-h2 font-semibold capitalize">
                             {format(currentDate, 'MMMM yyyy', { locale: dateLocale() })}
                         </h2>
-                        <div className="flex gap-2">
+                        <div className="flex flex-shrink-0 gap-2">
                             <Button
                                 variant="secondary"
                                 size="sm"
@@ -821,6 +826,7 @@ const Calendar: React.FC = () => {
                             <Button
                                 variant="secondary"
                                 size="sm"
+                                className="whitespace-nowrap"
                                 onClick={() => setCurrentDate(new Date())}
                             >
                                 {t('common:actions.today')}
@@ -836,12 +842,12 @@ const Calendar: React.FC = () => {
                     </div>
 
                     {/* Calendar Grid */}
-                    <div className="grid grid-cols-7 gap-2">
+                    <div className="grid grid-cols-7 gap-1 sm:gap-2">
                         {/* Week day headers */}
                         {weekDays.map((day) => (
                             <div
                                 key={day}
-                                className="text-center text-label font-semibold text-muted-foreground py-2"
+                                className="truncate text-center text-micro sm:text-label font-semibold text-muted-foreground py-1 sm:py-2"
                             >
                                 {day}
                             </div>
@@ -858,13 +864,13 @@ const Calendar: React.FC = () => {
                                     key={index}
                                     onClick={() => isCurrentMonth && handleCalendarDayClick(day, dayAppointments)}
                                     className={`
-                                        min-h-[100px] p-2 border rounded-lg cursor-pointer transition-all
+                                        min-h-[52px] sm:min-h-[100px] p-1 sm:p-2 border rounded-lg cursor-pointer transition-all
                                         ${isCurrentMonth ? 'bg-card hover:bg-nexus-background' : 'bg-surface-2 opacity-50'}
                                         ${isTodayDate ? 'border-nexus-blue border-2' : 'border-border'}
                                         ${!isCurrentMonth && 'cursor-default'}
                                     `}
                                 >
-                                    <div className="flex items-center justify-between mb-1">
+                                    <div className="flex items-center justify-center sm:justify-between mb-1">
                                         <span
                                             className={`text-body-sm font-medium ${isTodayDate
                                                 ? 'bg-nexus-blue text-white w-6 h-6 rounded-full flex items-center justify-center'
@@ -876,7 +882,23 @@ const Calendar: React.FC = () => {
                                             {format(day, 'd')}
                                         </span>
                                     </div>
-                                    <div className="space-y-1">
+                                    {/* On a phone a cell is 50px wide: coloured dots, and a tap
+                                        on the day lists its events. */}
+                                    {dayAppointments.length > 0 && (
+                                        <div className="flex flex-wrap items-center justify-center gap-0.5 sm:hidden" aria-hidden>
+                                            {dayAppointments.slice(0, 4).map((apt) => (
+                                                <span
+                                                    key={apt.occurrence_id || apt.id}
+                                                    className="h-1.5 w-1.5 rounded-full"
+                                                    style={{ backgroundColor: apt.color || '#DC4A60' }}
+                                                />
+                                            ))}
+                                            {dayAppointments.length > 4 && (
+                                                <span className="text-[9px] leading-none text-muted-foreground">+{dayAppointments.length - 4}</span>
+                                            )}
+                                        </div>
+                                    )}
+                                    <div className="hidden space-y-1 sm:block">
                                         {dayAppointments.slice(0, 3).map((apt) => (
                                             <div
                                                 key={apt.occurrence_id || apt.id}

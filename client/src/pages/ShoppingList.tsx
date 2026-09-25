@@ -4,6 +4,7 @@ import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
+import { intlLocale } from '../i18n/format';
 import { Plus, Trash2, Check, ShoppingBag, Save, ListChecks, Store, ChevronLeft, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -11,6 +12,10 @@ import { Input } from '../components/ui/Input';
 import { Dialog } from '../components/ui';
 import { useCategories } from '../hooks/useCategories';
 import { SHOPPING_CATALOG } from '../lib/shoppingCatalog';
+
+// Quantities come back from the database as "2.00": show 2, 1,5, 0,25.
+const formatQty = (q: number | string) =>
+    new Intl.NumberFormat(intlLocale(), { maximumFractionDigits: 2 }).format(Number(q));
 
 interface ShoppingItem {
     id: string;
@@ -479,7 +484,7 @@ const ShoppingList: React.FC = () => {
                                             </span>
                                             {(item.quantity || item.price) && (
                                                 <span className="mt-0.5 flex items-center gap-2 text-micro text-muted-foreground">
-                                                    {item.quantity ? <span>{t('shopping:qty')}: {item.quantity}{item.unit ? ` ${item.unit}` : ''}</span> : null}
+                                                    {item.quantity ? <span>{t('shopping:qty')}: {formatQty(item.quantity)}{item.unit ? ` ${item.unit}` : ''}</span> : null}
                                                     {item.price ? <span>{formatCurrency(Number(item.price), currency)}</span> : null}
                                                 </span>
                                             )}
@@ -523,8 +528,8 @@ const ShoppingList: React.FC = () => {
                     <CardTitle>{t('shopping:add.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={addItem} className="grid grid-cols-1 gap-4 md:grid-cols-8">
-                        <div className="md:col-span-3">
+                    <form onSubmit={addItem} className="grid grid-cols-2 gap-3 md:grid-cols-8 md:gap-4">
+                        <div className="col-span-2 md:col-span-3">
                             <Input
                                 label={t('common:labels.name')}
                                 type="text"
@@ -535,7 +540,7 @@ const ShoppingList: React.FC = () => {
                         </div>
 
                         {suggestions.length > 0 && (
-                            <div className="md:col-span-8">
+                            <div className="col-span-2 md:col-span-8">
                                 <p className="mb-1.5 text-micro font-medium uppercase tracking-wide text-muted-foreground">
                                     {t('shopping:add.suggestions')}
                                 </p>
@@ -545,7 +550,7 @@ const ShoppingList: React.FC = () => {
                                             key={key}
                                             type="button"
                                             onClick={() => applySuggestion(label, category)}
-                                            className="rounded-pill border border-border bg-card px-3 py-1 text-caption text-foreground transition-colors hover:border-primary hover:bg-primary-soft hover:text-primary"
+                                            className="min-h-8 rounded-pill border border-border bg-card px-3 py-1 text-caption text-foreground transition-colors hover:border-primary hover:bg-primary-soft hover:text-primary"
                                         >
                                             {label}
                                         </button>
@@ -553,7 +558,7 @@ const ShoppingList: React.FC = () => {
                                 </div>
                             </div>
                         )}
-                        <div className="md:col-span-2">
+                        <div className="col-span-2 md:col-span-2">
                             <label className="mb-1.5 block text-caption font-medium text-foreground">{t('shopping:add.category')}</label>
                             <select
                                 value={newItem.category}
@@ -589,8 +594,8 @@ const ShoppingList: React.FC = () => {
                                 placeholder={t('shopping:add.pricePlaceholder')}
                             />
                         </div>
-                        <div className="md:col-span-8 flex justify-end">
-                            <Button type="submit">
+                        <div className="col-span-2 flex justify-end md:col-span-8">
+                            <Button type="submit" className="w-full md:w-auto">
                                 <Plus className="mr-1 h-4 w-4" />
                                 {t('common:actions.add')}
                             </Button>
@@ -598,6 +603,144 @@ const ShoppingList: React.FC = () => {
                     </form>
                 </CardContent>
             </Card>
+
+            <div className="space-y-3">
+                {pendingItems.length === 0 && completedItems.length === 0 ? (
+                    <div className="rounded-card border border-dashed border-border bg-card py-16 text-center">
+                        <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
+                        <h3 className="text-body font-semibold text-foreground">{t('shopping:list.emptyTitle')}</h3>
+                        <p className="text-caption text-muted-foreground">{t('shopping:list.emptySubtitle')}</p>
+                    </div>
+                ) : (
+                    <>
+                        {pendingItems.map((item) => (
+                            <div
+                                key={item.id}
+                                className="group flex items-center gap-4 rounded-card border border-border bg-card p-4 shadow-surface transition-all duration-fast ease-soft hover:border-border-strong"
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => toggleItem(item)}
+                                    className="-m-1 flex h-8 w-8 flex-shrink-0 items-center justify-center"
+                                >
+                                    <span className="flex h-6 w-6 items-center justify-center rounded-md border-2 border-input">
+                                        {item.is_checked ? <Check className="h-3.5 w-3.5 text-primary" /> : null}
+                                    </span>
+                                </button>
+
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-body font-medium text-foreground">{item.name}</p>
+                                    <div className="mt-1 flex flex-wrap items-center gap-2 text-micro">
+                                        <span className="rounded-pill bg-primary-soft px-2 py-0.5 text-primary">{categoryLabel(item.category)}</span>
+
+                                        {editingQuantityId === item.id ? (
+                                            <span className="flex items-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    aria-label={t('shopping:quantity.decrease')}
+                                                    // Keeps the input focused so the blur-save is not
+                                                    // triggered by pressing the stepper itself.
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onClick={() => stepDraft(-1)}
+                                                    className="flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-primary hover:text-primary"
+                                                >
+                                                    <Minus className="h-3 w-3" />
+                                                </button>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.1"
+                                                    autoFocus
+                                                    value={quantityDraft}
+                                                    onChange={(e) => setQuantityDraft(e.target.value)}
+                                                    onBlur={() => {
+                                                        void setItemQuantity(item, quantityDraft);
+                                                        setEditingQuantityId(null);
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.currentTarget.blur();
+                                                        }
+                                                        if (e.key === 'Escape') {
+                                                            setEditingQuantityId(null);
+                                                        }
+                                                    }}
+                                                    className="h-8 w-16 rounded-md border border-border bg-card px-2 py-0.5 text-center text-caption text-foreground"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    aria-label={t('shopping:quantity.increase')}
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onClick={() => stepDraft(1)}
+                                                    className="flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-primary hover:text-primary"
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                </button>
+                                                {item.unit ? <span className="text-muted-foreground">{item.unit}</span> : null}
+                                            </span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                title={t('shopping:quantity.edit')}
+                                                onClick={() => {
+                                                    setEditingQuantityId(item.id);
+                                                    setQuantityDraft(item.quantity ? String(Number(item.quantity)) : '');
+                                                }}
+                                                className="min-h-8 rounded-pill border border-dashed border-border px-2.5 py-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                                            >
+                                                {item.quantity
+                                                    ? `${t('shopping:qty')}: ${formatQty(item.quantity)}${item.unit ? ` ${item.unit}` : ''}`
+                                                    : t('shopping:quantity.unset')}
+                                            </button>
+                                        )}
+
+                                        {item.price ? <span className="text-muted-foreground">{formatCurrency(Number(item.price), currency)}</span> : null}
+                                    </div>
+                                </div>
+
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteItem(item.id)}
+                                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ))}
+
+                        {completedItems.length > 0 ? (
+                            <div className="rounded-card border border-dashed border-border bg-muted/20 p-4">
+                                <div className="mb-3 flex items-center justify-between">
+                                    <p className="text-caption font-medium text-muted-foreground">{t('shopping:list.completed', { count: completedItems.length })}</p>
+                                    <Button variant="ghost" size="sm" onClick={clearCheckedItems}>
+                                        {t('shopping:list.clean')}
+                                    </Button>
+                                </div>
+                                <div className="space-y-2">
+                                    {completedItems.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="flex items-center gap-3 rounded-input border border-border bg-card px-3 py-2"
+                                        >
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleItem(item)}
+                                                className="-m-1.5 flex h-8 w-8 flex-shrink-0 items-center justify-center"
+                                            >
+                                                <span className="flex h-5 w-5 items-center justify-center rounded border border-primary bg-primary">
+                                                    <Check className="h-3 w-3 text-white" />
+                                                </span>
+                                            </button>
+                                            <p className="line-through text-caption text-muted-foreground">{item.name}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
+                    </>
+                )}
+            </div>
 
             <Card>
                 <CardHeader>
@@ -649,140 +792,6 @@ const ShoppingList: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
-
-            <div className="space-y-3">
-                {pendingItems.length === 0 && completedItems.length === 0 ? (
-                    <div className="rounded-card border border-dashed border-border bg-card py-16 text-center">
-                        <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
-                        <h3 className="text-body font-semibold text-foreground">{t('shopping:list.emptyTitle')}</h3>
-                        <p className="text-caption text-muted-foreground">{t('shopping:list.emptySubtitle')}</p>
-                    </div>
-                ) : (
-                    <>
-                        {pendingItems.map((item) => (
-                            <div
-                                key={item.id}
-                                className="group flex items-center gap-4 rounded-card border border-border bg-card p-4 shadow-surface transition-all duration-fast ease-soft hover:border-border-strong"
-                            >
-                                <button
-                                    type="button"
-                                    onClick={() => toggleItem(item)}
-                                    className="flex h-6 w-6 items-center justify-center rounded-md border-2 border-input"
-                                >
-                                    {item.is_checked ? <Check className="h-3.5 w-3.5 text-primary" /> : null}
-                                </button>
-
-                                <div className="min-w-0 flex-1">
-                                    <p className="truncate text-body font-medium text-foreground">{item.name}</p>
-                                    <div className="mt-1 flex flex-wrap items-center gap-2 text-micro">
-                                        <span className="rounded-pill bg-primary-soft px-2 py-0.5 text-primary">{categoryLabel(item.category)}</span>
-
-                                        {editingQuantityId === item.id ? (
-                                            <span className="flex items-center gap-1">
-                                                <button
-                                                    type="button"
-                                                    aria-label={t('shopping:quantity.decrease')}
-                                                    // Keeps the input focused so the blur-save is not
-                                                    // triggered by pressing the stepper itself.
-                                                    onMouseDown={(e) => e.preventDefault()}
-                                                    onClick={() => stepDraft(-1)}
-                                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-primary hover:text-primary"
-                                                >
-                                                    <Minus className="h-3 w-3" />
-                                                </button>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.1"
-                                                    autoFocus
-                                                    value={quantityDraft}
-                                                    onChange={(e) => setQuantityDraft(e.target.value)}
-                                                    onBlur={() => {
-                                                        void setItemQuantity(item, quantityDraft);
-                                                        setEditingQuantityId(null);
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            e.currentTarget.blur();
-                                                        }
-                                                        if (e.key === 'Escape') {
-                                                            setEditingQuantityId(null);
-                                                        }
-                                                    }}
-                                                    className="w-16 rounded-md border border-border bg-card px-2 py-0.5 text-center text-micro text-foreground"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    aria-label={t('shopping:quantity.increase')}
-                                                    onMouseDown={(e) => e.preventDefault()}
-                                                    onClick={() => stepDraft(1)}
-                                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-primary hover:text-primary"
-                                                >
-                                                    <Plus className="h-3 w-3" />
-                                                </button>
-                                                {item.unit ? <span className="text-muted-foreground">{item.unit}</span> : null}
-                                            </span>
-                                        ) : (
-                                            <button
-                                                type="button"
-                                                title={t('shopping:quantity.edit')}
-                                                onClick={() => {
-                                                    setEditingQuantityId(item.id);
-                                                    setQuantityDraft(item.quantity ? String(item.quantity) : '');
-                                                }}
-                                                className="rounded-pill border border-dashed border-border px-2 py-0.5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                                            >
-                                                {item.quantity
-                                                    ? `${t('shopping:qty')}: ${item.quantity}${item.unit ? ` ${item.unit}` : ''}`
-                                                    : t('shopping:quantity.unset')}
-                                            </button>
-                                        )}
-
-                                        {item.price ? <span className="text-muted-foreground">{formatCurrency(Number(item.price), currency)}</span> : null}
-                                    </div>
-                                </div>
-
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => deleteItem(item.id)}
-                                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        ))}
-
-                        {completedItems.length > 0 ? (
-                            <div className="rounded-card border border-dashed border-border bg-muted/20 p-4">
-                                <div className="mb-3 flex items-center justify-between">
-                                    <p className="text-caption font-medium text-muted-foreground">{t('shopping:list.completed', { count: completedItems.length })}</p>
-                                    <Button variant="ghost" size="sm" onClick={clearCheckedItems}>
-                                        {t('shopping:list.clean')}
-                                    </Button>
-                                </div>
-                                <div className="space-y-2">
-                                    {completedItems.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="flex items-center gap-3 rounded-input border border-border bg-card px-3 py-2"
-                                        >
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleItem(item)}
-                                                className="flex h-5 w-5 items-center justify-center rounded border border-primary bg-primary"
-                                            >
-                                                <Check className="h-3 w-3 text-white" />
-                                            </button>
-                                            <p className="line-through text-caption text-muted-foreground">{item.name}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : null}
-                    </>
-                )}
-            </div>
 
             <div className="sticky bottom-20 z-20 rounded-card border border-border bg-card px-4 py-3 shadow-surface lg:bottom-4">
                 <div className="flex items-center justify-between text-caption">
@@ -862,7 +871,7 @@ const ShoppingList: React.FC = () => {
                                                     />
                                                     <span className={`text-body-sm ${item.is_checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                                                         {item.name}
-                                                        {item.quantity ? ` · ${item.quantity}${item.unit ? ' ' + item.unit : ''}` : ''}
+                                                        {item.quantity ? ` · ${formatQty(item.quantity)}${item.unit ? ' ' + item.unit : ''}` : ''}
                                                     </span>
                                                 </label>
                                             ))}

@@ -16,7 +16,7 @@ import {
 import ChartCard from '../components/app/ChartCard';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { dateLocale } from '../i18n/format';
+import { dateLocale, intlLocale } from '../i18n/format';
 import { useCategories } from '../hooks/useCategories';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -813,13 +813,13 @@ const Budget: React.FC = () => {
                             {recurring.map((r) => (
                                 <div
                                     key={r.occurrence_id ?? `${r.id}:${r.occurrence_date ?? r.debit_day}`}
-                                    className={`flex items-center gap-3 rounded-card p-4 transition-all
+                                    className={`flex items-start gap-3 rounded-card p-4 transition-all
                                         ${r.is_pointed ? 'bg-surface-1 opacity-60' : 'bg-surface-1 border border-border shadow-sm'}`}
                                 >
                                     <button
                                         onClick={() => handleTogglePoint(r)}
                                         disabled={!canEdit}
-                                        className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center
+                                        className={`mt-0.5 flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center
                                             transition-all active:scale-90 disabled:opacity-50
                                             ${r.is_pointed ? 'bg-success/100 border-success' : 'border-border hover:border-success/50'}`}
                                         title={r.is_pointed ? t('budget:recurring.markOff') : t('budget:recurring.markOn')}
@@ -827,56 +827,64 @@ const Budget: React.FC = () => {
                                         {r.is_pointed && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
                                     </button>
 
+                                    {/* Two lines at every width: what and how much, then
+                                        when and how often with the actions. Side by side,
+                                        the details were squeezed into one-letter columns
+                                        on a phone. */}
                                     <div className="flex-1 min-w-0">
-                                        <p className={`font-medium text-base truncate ${r.is_pointed ? 'line-through text-muted-foreground' : ''}`}>
-                                            {r.label}
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-xs text-muted-foreground">{categoryLabel(r.category)}</span>
-                                            <span className="text-xs text-muted-foreground">·</span>
-                                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                                <Calendar className="w-3 h-3" />
-                                                {r.occurrence_date
-                                                    ? new Date(`${r.occurrence_date}T00:00:00`).toLocaleDateString(undefined, {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                    })
-                                                    : `${t('budget:recurring.dayPrefix')} ${r.debit_day}`}
-                                            </span>
-                                            <span className="text-xs text-muted-foreground">·</span>
-                                            <span className="text-xs text-muted-foreground">
-                                                {t(`budget:recurring.frequency.${r.recurrence_frequency}`)}
+                                        <div className="flex items-start justify-between gap-3">
+                                            <p className={`min-w-0 break-words font-medium text-base ${r.is_pointed ? 'line-through text-muted-foreground' : ''}`}>
+                                                {r.label}
+                                            </p>
+                                            <span className={`whitespace-nowrap text-base font-bold ${
+                                                r.is_pointed
+                                                    ? 'text-muted-foreground'
+                                                    : r.is_expense
+                                                        ? 'text-danger'
+                                                        : 'text-success'
+                                            }`}>
+                                                {r.is_expense ? '-' : '+'}{formatCurrency(r.amount, currency)}
                                             </span>
                                         </div>
-                                    </div>
-
-                                    <span className={`text-base font-bold flex-shrink-0 ${
-                                        r.is_pointed
-                                            ? 'text-muted-foreground'
-                                            : r.is_expense
-                                                ? 'text-danger'
-                                                : 'text-success'
-                                    }`}>
-                                        {r.is_expense ? '-' : '+'}{formatCurrency(r.amount, currency)}
-                                    </span>
-
-                                    <div className="flex items-center gap-1 flex-shrink-0">
-                                        {canEdit && (
-                                            <>
-                                                <button
-                                                    onClick={() => openEditRecurring(r)}
-                                                    className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors"
-                                                >
-                                                    <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteRecurring(r.series_id ?? r.id)}
-                                                    className="p-1.5 rounded-lg hover:bg-danger/10 transition-colors"
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5 text-danger/60" />
-                                                </button>
-                                            </>
-                                        )}
+                                        <div className="mt-1 flex items-center justify-between gap-2">
+                                            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                                                <span className="whitespace-nowrap">{categoryLabel(r.category)}</span>
+                                                <span aria-hidden>·</span>
+                                                <span className="flex items-center gap-1 whitespace-nowrap">
+                                                    <Calendar className="w-3 h-3" />
+                                                    {r.occurrence_date
+                                                        ? new Date(`${r.occurrence_date}T00:00:00`).toLocaleDateString(intlLocale(), {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                        })
+                                                        : `${t('budget:recurring.dayPrefix')} ${r.debit_day}`}
+                                                </span>
+                                                <span aria-hidden>·</span>
+                                                <span className="whitespace-nowrap">
+                                                    {t(`budget:recurring.frequency.${r.recurrence_frequency}`)}
+                                                </span>
+                                            </div>
+                                            {canEdit && (
+                                                <div className="-mr-1.5 flex flex-shrink-0 items-center">
+                                                    <button
+                                                        onClick={() => openEditRecurring(r)}
+                                                        title={t('common:actions.edit')}
+                                                        aria-label={t('common:actions.edit')}
+                                                        className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-2 transition-colors"
+                                                    >
+                                                        <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteRecurring(r.series_id ?? r.id)}
+                                                        title={t('common:actions.delete')}
+                                                        aria-label={t('common:actions.delete')}
+                                                        className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-danger/10 transition-colors"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5 text-danger/60" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

@@ -369,7 +369,7 @@ const Dashboard: React.FC = () => {
                             key={card.title}
                             onClick={() => navigate(card.href)}
                             className={[
-                                'group flex flex-col items-start gap-3 p-5 text-left transition-colors hover:bg-surface-2',
+                                'group flex min-w-0 flex-col items-start gap-3 p-4 text-left transition-colors hover:bg-surface-2 sm:p-5',
                                 i < 2 ? 'border-b lg:border-b-0' : '',
                                 i % 2 === 0 ? 'border-r border-border' : '',
                                 i < visible.length - 1 ? 'lg:border-r lg:border-border' : '',
@@ -380,7 +380,9 @@ const Dashboard: React.FC = () => {
                                 <Icon className="h-4 w-4" />
                                 {card.title}
                             </span>
-                            <span className={`font-serif text-4xl leading-none tracking-tight ${(card as { flag?: boolean }).flag ? 'text-primary' : 'text-foreground'}`}>
+                            {/* An amount is twice as long as a count: smaller on a phone so
+                                "229,40 €" stays on one line in a half-width tile. */}
+                            <span className={`whitespace-nowrap font-serif leading-none tracking-tight ${typeof card.value === 'string' ? 'text-2xl sm:text-4xl' : 'text-4xl'} ${(card as { flag?: boolean }).flag ? 'text-primary' : 'text-foreground'}`}>
                                 {card.value}
                             </span>
                         </button>

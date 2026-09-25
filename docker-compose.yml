@@ -37,6 +37,20 @@ services:
       VAPID_SUBJECT: ${VAPID_SUBJECT}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
+      # Optional features documented in .env.example. A variable set in .env
+      # only reaches the server if it is listed here; without these lines,
+      # invitation and password-reset e-mails could never be sent from a
+      # Docker install, however .env was filled. Empty = feature off.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-}
+      ANDROID_CERT_SHA256: ${ANDROID_CERT_SHA256:-}
+      ANDROID_PACKAGE_NAME: ${ANDROID_PACKAGE_NAME:-}
     ports:
       - "3001:3001"
     depends_on:

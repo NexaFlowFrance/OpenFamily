@@ -40,7 +40,7 @@
 | Application | Type | Ce qui est synchronisé |
 |---|---|---|
 | **Mealie** | 🍲 Recettes | Import automatique des recettes (API v1 & v2) |
-| **Tandoor** | 🌿 Recettes | Import via l'API Django REST |
+| **Tandoor** | 🌿 Recettes, planning des repas | Import via l'API Django REST (planning : bouton « Importer depuis Tandoor » du planning des repas) |
 | **Home Assistant** | 🏠 Courses | Sync liste de courses via WebSocket |
 | **Grocy** | 🥦 Courses & stock | Synchronisation liste de courses et stock |
 | **Nextcloud** | ☁️ Calendrier | Import CalDAV avec découverte automatique |

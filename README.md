@@ -66,7 +66,7 @@ Connect OpenFamily to your self-hosted ecosystem in one click — no config file
 | App | Type | What is synced |
 |---|---|---|
 | **Mealie** | 🍲 Recipes | Automatic import of all recipes (pagination, API v1 & v2) |
-| **Tandoor** | 🌿 Recipes | Import via the Django REST API |
+| **Tandoor** | 🌿 Recipes, meal plan | Import via the Django REST API (meal plan: "Import from Tandoor" button on the meal planning page) |
 | **Home Assistant** | 🏠 Shopping | Shopping-list sync over WebSocket (modern `todo` entities + legacy) |
 | **Grocy** | 🥦 Shopping & stock | Shopping list and stock synchronization |
 | **Nextcloud** | ☁️ Calendar | CalDAV import with auto-discovery and per-UID deduplication |

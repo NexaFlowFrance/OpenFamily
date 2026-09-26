@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import { PoolClient } from 'pg';
 import { getClient, query } from '../db';
 import { authMiddleware, requireParent, AuthRequest } from '../middleware/auth';
+import { normalizeReminderMinutes, applyLegacyReminderFlags } from '../lib/reminders';
 import { OPENFAMILY_VERSION } from '../version';
 import { cleanContent, cleanImage, cleanLink } from '../lib/postFields';
 import { cleanImageUrl } from '../lib/recipeImage';
@@ -64,7 +65,7 @@ const IMPORT_COLUMNS: Record<string, ReadonlySet<string>> = {
     ]),
     appointments: new Set([
         'id', 'title', 'description', 'start_time', 'end_time', 'location',
-        'family_member_ids', 'reminder_30min', 'reminder_1hour', 'notes',
+        'family_member_ids', 'reminder_30min', 'reminder_1hour', 'reminder_minutes', 'notes',
         'caldav_uid', 'recurrence_frequency', 'recurrence_interval',
         'recurrence_until', 'color', 'is_all_day', 'created_at', 'updated_at',
     ]),
@@ -292,12 +293,14 @@ router.get('/export', requireParent, async (req: AuthRequest, res) => {
             query('SELECT * FROM budget_limits WHERE user_id = $1', [userId]),
             query('SELECT * FROM shopping_items WHERE user_id = $1', [userId]),
             query('SELECT * FROM shopping_list_templates WHERE user_id = $1', [userId]),
-            query('SELECT * FROM appointments WHERE user_id = $1', [userId]),
+            // Events of a followed calendar (Google, Outlook...) are left out:
+            // they belong to their source and come back once it is followed again.
+            query('SELECT * FROM appointments WHERE user_id = $1 AND subscription_id IS NULL', [userId]),
             query(
                 `SELECT are.*
                  FROM appointment_recurrence_exceptions are
                  JOIN appointments a ON a.id = are.appointment_id
-                 WHERE a.user_id = $1`,
+                 WHERE a.user_id = $1 AND a.subscription_id IS NULL`,
                 [userId]
             ),
             query('SELECT * FROM schedule_entries WHERE user_id = $1', [userId]),
@@ -715,6 +718,10 @@ router.post('/import', requireParent, importBodyParser, async (req: AuthRequest,
                 row.family_member_ids,
                 familyMemberIds
             );
+            // Files from before free reminders only carry the two flags.
+            row.reminder_minutes = row.reminder_minutes !== undefined
+                ? normalizeReminderMinutes(row.reminder_minutes)
+                : applyLegacyReminderFlags([], row.reminder_30min, row.reminder_1hour);
             return row;
         });
         await importAppointmentExceptions();

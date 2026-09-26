@@ -6,6 +6,7 @@ import pool, { runMigrations } from './db';
 import logger from './lib/logger';
 import { clients, broadcast } from './lib/broadcaster';
 import { startReminderScheduler } from './lib/reminderScheduler';
+import { startCalendarSubscriptionScheduler } from './lib/calendarSources';
 import { getJwtSecret } from './config/loadEnv';
 
 export { broadcast };
@@ -79,6 +80,7 @@ const startServer = async () => {
         logger.info('server.database_connected');
 
         startReminderScheduler();
+        startCalendarSubscriptionScheduler();
 
         server.listen(PORT, () => {
             logger.info('server.started', {

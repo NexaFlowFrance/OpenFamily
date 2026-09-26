@@ -101,6 +101,16 @@ class ApiClient {
         });
     }
 
+    /** Sends a file's text as the raw body (an .ics calendar, for instance). */
+    async postText<T>(endpoint: string, text: string, contentType: string): Promise<T> {
+        if (IS_DEMO) throw new Error('DEMO_UNAVAILABLE');
+        return this.request<T>(endpoint, {
+            method: 'POST',
+            body: text,
+            headers: { 'Content-Type': contentType },
+        });
+    }
+
     async put<T>(endpoint: string, body: any): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'PUT',

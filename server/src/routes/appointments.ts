@@ -3,34 +3,26 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
+import {
+    RecurrenceFrequency,
+    normalizeRecurrenceFrequency,
+    normalizeRecurrenceInterval,
+    parseNaiveDateTime,
+    formatNaiveDateTime,
+    formatDateOnly,
+    expandRecurringAppointments,
+} from '../lib/appointmentRecurrence';
+import { normalizeReminderMinutes, applyLegacyReminderFlags, legacyReminderFlags } from '../lib/reminders';
+
+// Events copied from a followed calendar (Google, Outlook...) are refreshed
+// from their source: only who takes part, the reminders and the notes are
+// kept locally. Any other change would be overwritten at the next refresh.
+const SUBSCRIBED_EDITABLE_FIELDS = ['family_member_ids', 'reminder_minutes', 'reminder_30min', 'reminder_1hour', 'notes'];
+const subscribedEventRefusal = { success: false, error: 'SUBSCRIBED_EVENT' };
+
 
 const router = Router();
 router.use(authMiddleware);
-
-type RecurrenceFrequency = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-
-const VALID_RECURRENCE_FREQUENCIES = new Set<RecurrenceFrequency>([
-    'none',
-    'daily',
-    'weekly',
-    'monthly',
-    'yearly',
-]);
-
-const normalizeRecurrenceFrequency = (value: unknown): RecurrenceFrequency => {
-    if (typeof value !== 'string') return 'none';
-
-    const normalized = value.trim().toLowerCase() as RecurrenceFrequency;
-    return VALID_RECURRENCE_FREQUENCIES.has(normalized) ? normalized : 'none';
-};
-
-const normalizeRecurrenceInterval = (value: unknown): number => {
-    const interval = Number(value);
-    if (!Number.isInteger(interval) || interval < 1 || interval > 365) {
-        return 1;
-    }
-    return interval;
-};
 
 const normalizeAppointmentColor = (value: unknown): string => {
     if (typeof value !== 'string') return '#DC4A60';
@@ -58,293 +50,22 @@ const enrichAppointmentsWithMembers = async (appointments: any[], userId: string
         [userId]
     );
     const membersById = new Map(membersResult.rows.map((m: any) => [m.id, m]));
+    const subscriptionNames = new Map<string, string>();
+    if (appointments.some((apt) => apt.subscription_id)) {
+        const subs = await query('SELECT id, name FROM calendar_subscriptions WHERE user_id = $1', [userId]);
+        for (const sub of subs.rows) subscriptionNames.set(String(sub.id), sub.name);
+    }
     return appointments.map((apt) => {
         const familyMemberIds: string[] = Array.isArray(apt.family_member_ids) ? apt.family_member_ids : [];
+        const { external_hash: _hash, ...rest } = apt;
         return {
-            ...apt,
+            ...rest,
+            reminder_minutes: normalizeReminderMinutes(apt.reminder_minutes),
+            subscription_name: apt.subscription_id ? subscriptionNames.get(String(apt.subscription_id)) ?? null : null,
             family_member_ids: familyMemberIds,
             family_members_data: familyMemberIds.map((id) => membersById.get(id)).filter(Boolean),
         };
     });
-};
-
-const parseNaiveDateTime = (value: string): Date | null => {
-    const match = value.match(
-        /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/
-    );
-    if (!match) return null;
-
-    const [, year, month, day, hour, minute, second = '0'] = match;
-    const date = new Date(Date.UTC(
-        Number(year),
-        Number(month) - 1,
-        Number(day),
-        Number(hour),
-        Number(minute),
-        Number(second)
-    ));
-
-    return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const formatNaiveDateTime = (date: Date): string => {
-    const pad = (value: number) => String(value).padStart(2, '0');
-
-    return [
-        date.getUTCFullYear(),
-        '-',
-        pad(date.getUTCMonth() + 1),
-        '-',
-        pad(date.getUTCDate()),
-        'T',
-        pad(date.getUTCHours()),
-        ':',
-        pad(date.getUTCMinutes()),
-        ':',
-        pad(date.getUTCSeconds()),
-    ].join('');
-};
-
-const formatDateOnly = (date: Date): string => {
-    return formatNaiveDateTime(date).slice(0, 10);
-};
-
-const getOccurrenceDate = (
-    base: Date,
-    frequency: RecurrenceFrequency,
-    interval: number,
-    occurrenceIndex: number
-): Date | null => {
-    if (occurrenceIndex === 0) {
-        return new Date(base.getTime());
-    }
-
-    if (frequency === 'daily') {
-        const date = new Date(base.getTime());
-        date.setUTCDate(date.getUTCDate() + occurrenceIndex * interval);
-        return date;
-    }
-
-    if (frequency === 'weekly') {
-        const date = new Date(base.getTime());
-        date.setUTCDate(date.getUTCDate() + occurrenceIndex * interval * 7);
-        return date;
-    }
-
-    if (frequency === 'monthly') {
-        const baseMonth = base.getUTCFullYear() * 12 + base.getUTCMonth();
-        const targetMonth = baseMonth + occurrenceIndex * interval;
-        const year = Math.floor(targetMonth / 12);
-        const month = targetMonth % 12;
-        const day = base.getUTCDate();
-
-        const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-
-        // A monthly event on the 29th, 30th or 31st skips months that
-        // do not contain that calendar date rather than silently moving it.
-        if (day > daysInMonth) {
-            return null;
-        }
-
-        return new Date(Date.UTC(
-            year,
-            month,
-            day,
-            base.getUTCHours(),
-            base.getUTCMinutes(),
-            base.getUTCSeconds()
-        ));
-    }
-
-    if (frequency === 'yearly') {
-        const year = base.getUTCFullYear() + occurrenceIndex * interval;
-        const month = base.getUTCMonth();
-        const day = base.getUTCDate();
-
-        const date = new Date(Date.UTC(
-            year,
-            month,
-            day,
-            base.getUTCHours(),
-            base.getUTCMinutes(),
-            base.getUTCSeconds()
-        ));
-
-        // Feb 29 yearly events occur only in leap years.
-        if (date.getUTCMonth() !== month || date.getUTCDate() !== day) {
-            return null;
-        }
-
-        return date;
-    }
-
-    return null;
-};
-
-const estimateOccurrenceIndex = (
-    base: Date,
-    target: Date,
-    frequency: RecurrenceFrequency,
-    interval: number
-): number => {
-    if (target.getTime() <= base.getTime()) return 0;
-
-    if (frequency === 'daily' || frequency === 'weekly') {
-        const days = Math.floor((target.getTime() - base.getTime()) / 86400000);
-        const stepDays = frequency === 'weekly' ? interval * 7 : interval;
-        return Math.max(0, Math.floor(days / stepDays) - 1);
-    }
-
-    if (frequency === 'monthly') {
-        const months =
-            (target.getUTCFullYear() - base.getUTCFullYear()) * 12 +
-            (target.getUTCMonth() - base.getUTCMonth());
-
-        return Math.max(0, Math.floor(months / interval) - 1);
-    }
-
-    if (frequency === 'yearly') {
-        const years = target.getUTCFullYear() - base.getUTCFullYear();
-        return Math.max(0, Math.floor(years / interval) - 1);
-    }
-
-    return 0;
-};
-
-const expandRecurringAppointments = (
-    appointments: any[],
-    rangeStartValue: string,
-    rangeEndValue: string,
-    exceptionsByAppointment: Map<string, Map<string, any>>
-): any[] => {
-    const rangeStart = parseNaiveDateTime(rangeStartValue);
-    const rangeEnd = parseNaiveDateTime(rangeEndValue);
-
-    if (!rangeStart || !rangeEnd) {
-        return appointments;
-    }
-
-    const expanded: any[] = [];
-
-    for (const appointment of appointments) {
-        const frequency = normalizeRecurrenceFrequency(appointment.recurrence_frequency);
-
-        if (frequency === 'none') {
-            expanded.push(appointment);
-            continue;
-        }
-
-        const baseStart = parseNaiveDateTime(String(appointment.start_time));
-        if (!baseStart) {
-            expanded.push(appointment);
-            continue;
-        }
-
-        const baseEnd = appointment.end_time
-            ? parseNaiveDateTime(String(appointment.end_time))
-            : null;
-
-        const durationMs = baseEnd
-            ? Math.max(0, baseEnd.getTime() - baseStart.getTime())
-            : 0;
-
-        const interval = normalizeRecurrenceInterval(appointment.recurrence_interval);
-        const recurrenceUntil = appointment.recurrence_until
-            ? String(appointment.recurrence_until).slice(0, 10)
-            : null;
-
-        // Look back by the event duration so an occurrence beginning before
-        // the requested range but ending inside it is still included.
-        const searchStart = new Date(rangeStart.getTime() - durationMs);
-        let occurrenceIndex = estimateOccurrenceIndex(
-            baseStart,
-            searchStart,
-            frequency,
-            interval
-        );
-
-        // The estimate places us close to the requested range, avoiding a
-        // potentially huge loop for old daily/weekly recurring events.
-        for (let safety = 0; safety < 10000; safety++, occurrenceIndex++) {
-            const occurrenceStart = getOccurrenceDate(
-                baseStart,
-                frequency,
-                interval,
-                occurrenceIndex
-            );
-
-            // Invalid monthly/yearly dates are intentionally skipped.
-            if (!occurrenceStart) {
-                continue;
-            }
-
-            if (occurrenceStart.getTime() > rangeEnd.getTime()) {
-                break;
-            }
-
-            const occurrenceDate = formatDateOnly(occurrenceStart);
-
-            if (recurrenceUntil && occurrenceDate > recurrenceUntil) {
-                break;
-            }
-
-            const exception =
-                exceptionsByAppointment
-                    .get(String(appointment.id))
-                    ?.get(occurrenceDate);
-
-            if (exception?.exception_type === 'skip') {
-                continue;
-            }
-
-            const occurrenceEnd = new Date(
-                occurrenceStart.getTime() + durationMs
-            );
-
-            if (
-                occurrenceEnd.getTime() < rangeStart.getTime() ||
-                occurrenceStart.getTime() > rangeEnd.getTime()
-            ) {
-                continue;
-            }
-
-            const overrideData =
-                exception?.override_data &&
-                typeof exception.override_data === 'object' &&
-                !Array.isArray(exception.override_data)
-                    ? exception.override_data
-                    : {};
-
-            expanded.push({
-                ...appointment,
-                ...overrideData,
-
-                id: appointment.id,
-                series_id: appointment.id,
-                occurrence_id: `${appointment.id}:${occurrenceDate}`,
-                occurrence_date: occurrenceDate,
-                is_recurring_occurrence: true,
-                series_start_time: appointment.start_time,
-                series_end_time: appointment.end_time,
-
-                start_time:
-                    typeof overrideData.start_time === 'string'
-                        ? overrideData.start_time
-                        : formatNaiveDateTime(occurrenceStart),
-
-                end_time:
-                    overrideData.end_time !== undefined
-                        ? overrideData.end_time
-                        : appointment.end_time
-                            ? formatNaiveDateTime(occurrenceEnd)
-                            : null,
-            });
-        }
-    }
-
-    return expanded.sort((a, b) =>
-        String(a.start_time).localeCompare(String(b.start_time))
-    );
 };
 
 // Get all appointments
@@ -463,6 +184,7 @@ router.post('/', async (req: AuthRequest, res) => {
             end_time,
             location,
             family_member_ids,
+            reminder_minutes,
             reminder_30min,
             reminder_1hour,
             notes,
@@ -472,6 +194,11 @@ router.post('/', async (req: AuthRequest, res) => {
             color,
             is_all_day,
         } = req.body;
+
+        const reminderMinutes = reminder_minutes !== undefined
+            ? normalizeReminderMinutes(reminder_minutes)
+            : applyLegacyReminderFlags([], reminder_30min, reminder_1hour);
+        const reminderFlags = legacyReminderFlags(reminderMinutes);
 
         const cleanedTitle = typeof title === 'string' ? title.trim() : '';
         const startTime = toNullIfEmpty(start_time);
@@ -507,11 +234,11 @@ router.post('/', async (req: AuthRequest, res) => {
                 user_id, title, description, start_time, end_time, location,
                 family_member_ids, reminder_30min, reminder_1hour, notes,
                 recurrence_frequency, recurrence_interval, recurrence_until, color,
-                is_all_day
+                is_all_day, reminder_minutes
             )
             VALUES (
                 $1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10,
-                $11, $12, $13, $14, $15
+                $11, $12, $13, $14, $15, $16::integer[]
             ) RETURNING *`,
             [
                 req.userId,
@@ -521,14 +248,15 @@ router.post('/', async (req: AuthRequest, res) => {
                 toNullIfEmpty(end_time),
                 toNullIfEmpty(location),
                 JSON.stringify(memberIds),
-                Boolean(reminder_30min),
-                Boolean(reminder_1hour),
+                reminderFlags.reminder_30min,
+                reminderFlags.reminder_1hour,
                 toNullIfEmpty(notes),
                 recurrenceFrequency,
                 recurrenceInterval,
                 recurrenceUntil,
                 normalizeAppointmentColor(color),
                 Boolean(is_all_day),
+                reminderMinutes,
             ]
         );
 
@@ -549,6 +277,17 @@ router.post('/', async (req: AuthRequest, res) => {
 router.put('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
+        const currentResult = await query(
+            'SELECT subscription_id, reminder_minutes FROM appointments WHERE id = $1 AND user_id = $2',
+            [id, req.userId]
+        );
+        if (currentResult.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Appointment not found' });
+        }
+        const current = currentResult.rows[0];
+        const body: Record<string, any> = current.subscription_id
+            ? Object.fromEntries(Object.entries(req.body ?? {}).filter(([key]) => SUBSCRIBED_EDITABLE_FIELDS.includes(key)))
+            : req.body ?? {};
         const {
             title,
             description,
@@ -556,6 +295,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
             end_time,
             location,
             family_member_ids,
+            reminder_minutes,
             reminder_30min,
             reminder_1hour,
             notes,
@@ -564,7 +304,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
             recurrence_until,
             color,
             is_all_day,
-        } = req.body;
+        } = body;
 
         const updates: string[] = [];
         const values: any[] = [];
@@ -611,12 +351,15 @@ router.put('/:id', async (req: AuthRequest, res) => {
             updates.push(`family_member_ids = $${values.length}::jsonb`);
         }
 
-        if (reminder_30min !== undefined) {
-            pushUpdate('reminder_30min', Boolean(reminder_30min));
-        }
-
-        if (reminder_1hour !== undefined) {
-            pushUpdate('reminder_1hour', Boolean(reminder_1hour));
+        if (reminder_minutes !== undefined || reminder_30min !== undefined || reminder_1hour !== undefined) {
+            const minutes = reminder_minutes !== undefined
+                ? normalizeReminderMinutes(reminder_minutes)
+                : applyLegacyReminderFlags(normalizeReminderMinutes(current.reminder_minutes), reminder_30min, reminder_1hour);
+            const flags = legacyReminderFlags(minutes);
+            values.push(minutes);
+            updates.push(`reminder_minutes = $${values.length}::integer[]`);
+            pushUpdate('reminder_30min', flags.reminder_30min);
+            pushUpdate('reminder_1hour', flags.reminder_1hour);
         }
 
         if (notes !== undefined) {
@@ -700,6 +443,10 @@ router.put('/:id/occurrences/:date', async (req: AuthRequest, res) => {
 
         const appointment = appointmentResult.rows[0];
 
+        if (appointment.subscription_id) {
+            return res.status(409).json(subscribedEventRefusal);
+        }
+
         if (appointment.recurrence_frequency === 'none') {
             return res.status(400).json({
                 success: false,
@@ -716,6 +463,7 @@ router.put('/:id/occurrences/:date', async (req: AuthRequest, res) => {
             'family_member_ids',
             'reminder_30min',
             'reminder_1hour',
+            'reminder_minutes',
             'notes',
             'color',
             'is_all_day',
@@ -727,6 +475,9 @@ router.put('/:id/occurrences/:date', async (req: AuthRequest, res) => {
             if (req.body[field] !== undefined) {
                 overrideData[field] = req.body[field];
             }
+        }
+        if (overrideData.reminder_minutes !== undefined) {
+            overrideData.reminder_minutes = normalizeReminderMinutes(overrideData.reminder_minutes);
         }
 
         if (overrideData.title !== undefined) {
@@ -808,7 +559,7 @@ router.delete('/:id/occurrences/:date', async (req: AuthRequest, res) => {
         }
 
         const appointmentResult = await query(
-            `SELECT id, recurrence_frequency
+            `SELECT id, recurrence_frequency, subscription_id
              FROM appointments
              WHERE id = $1 AND user_id = $2`,
             [id, req.userId]
@@ -816,6 +567,10 @@ router.delete('/:id/occurrences/:date', async (req: AuthRequest, res) => {
 
         if (appointmentResult.rows.length === 0) {
             return res.status(404).json({ success: false, error: 'Appointment not found' });
+        }
+
+        if (appointmentResult.rows[0].subscription_id) {
+            return res.status(409).json(subscribedEventRefusal);
         }
 
         if (appointmentResult.rows[0].recurrence_frequency === 'none') {
@@ -856,6 +611,14 @@ router.delete('/:id/occurrences/:date', async (req: AuthRequest, res) => {
 router.delete('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
+
+        const subscribed = await query(
+            'SELECT 1 FROM appointments WHERE id = $1 AND user_id = $2 AND subscription_id IS NOT NULL',
+            [id, req.userId]
+        );
+        if (subscribed.rows.length > 0) {
+            return res.status(409).json(subscribedEventRefusal);
+        }
 
         const result = await query(
             'DELETE FROM appointments WHERE id = $1 AND user_id = $2 RETURNING id',

@@ -10,6 +10,8 @@ import { dateLocale, orderIsoWeekdays, weekStartsOn } from '../i18n/format';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCategories } from '../hooks/useCategories';
+import ReminderPicker, { reminderMinutesOf } from '../components/app/ReminderPicker';
+import ExternalCalendars from '../components/app/ExternalCalendars';
 
 interface Appointment {
     id: string;
@@ -29,13 +31,17 @@ interface Appointment {
     location?: string;
     family_member_ids?: string[];
     family_members_data?: Array<{ id: string; name: string; color: string }>;
-    reminder_30min: boolean;
-    reminder_1hour: boolean;
+    reminder_30min?: boolean;
+    reminder_1hour?: boolean;
+    reminder_minutes?: number[];
     notes?: string;
     color?: string;
     is_all_day?: boolean;
     linked_budget_entry_id?: string | null;
     linked_recurring_expense_id?: string | null;
+    /** Set on events copied from a followed calendar (Google, Outlook...). */
+    subscription_id?: string | null;
+    subscription_name?: string | null;
 }
 
 interface FamilyMember {
@@ -182,8 +188,7 @@ const Calendar: React.FC = () => {
         end_time: '',
         location: '',
         family_member_ids: [] as string[],
-        reminder_30min: false,
-        reminder_1hour: false,
+        reminder_minutes: [] as number[],
         notes: '',
         color: '#DC4A60',
         is_all_day: false,
@@ -339,12 +344,22 @@ const Calendar: React.FC = () => {
                 ...formData,
                 start_time: `${day}T00:00`,
                 end_time: `${day}T23:59`,
-                reminder_30min: false,
-                reminder_1hour: false,
             }
             : formData;
 
         try {
+            if (editingAppointment?.subscription_id) {
+                await api.put(`/api/appointments/${editingAppointment.id}`, {
+                    family_member_ids: formData.family_member_ids,
+                    reminder_minutes: formData.reminder_minutes,
+                    notes: formData.notes,
+                });
+                setDialogOpen(false);
+                resetForm();
+                loadAppointments();
+                return;
+            }
+
             if (
                 editingAppointment?.is_recurring_occurrence &&
                 editingAppointment.occurrence_date
@@ -512,8 +527,7 @@ const Calendar: React.FC = () => {
                 : '',
             location: appointment.location || '',
             family_member_ids: appointment.family_member_ids || [],
-            reminder_30min: appointment.reminder_30min,
-            reminder_1hour: appointment.reminder_1hour,
+            reminder_minutes: reminderMinutesOf(appointment),
             notes: appointment.notes || '',
             color: appointment.color || '#DC4A60',
             is_all_day: Boolean(appointment.is_all_day),
@@ -565,8 +579,7 @@ const Calendar: React.FC = () => {
             end_time: '',
             location: '',
             family_member_ids: [],
-            reminder_30min: false,
-            reminder_1hour: false,
+            reminder_minutes: [],
             notes: '',
             color: '#DC4A60',
             is_all_day: false,
@@ -576,6 +589,7 @@ const Calendar: React.FC = () => {
         });
     };
 
+    const isSubscribedEvent = Boolean(editingAppointment?.subscription_id);
     const startParts = splitDateTime(formData.start_time);
     const endParts = splitDateTime(formData.end_time);
     const selectedDate = startParts.date || format(new Date(), 'yyyy-MM-dd');
@@ -712,11 +726,11 @@ const Calendar: React.FC = () => {
                     <Button
                         variant="secondary"
                         onClick={openFeedDialog}
-                        title={t('calendar:exportIcal')}
-                        aria-label={t('calendar:exportIcal')}
+                        title={t('calendar:external.button')}
+                        aria-label={t('calendar:external.button')}
                     >
                         <CalendarPlus className="w-4 h-4 sm:mr-2" />
-                        <span className="hidden sm:inline">{t('calendar:exportIcal')}</span>
+                        <span className="hidden sm:inline">{t('calendar:external.button')}</span>
                     </Button>
                     <Button className="flex-1 sm:flex-none" onClick={() => openNewEventForDate(new Date())}>
                         <Plus className="w-4 h-4 mr-2" />
@@ -985,9 +999,11 @@ const Calendar: React.FC = () => {
                                         <Button variant="ghost" size="sm" onClick={() => handleEdit(apt)}>
                                             <Edit2 className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" onClick={() => { void handleDelete(apt); }}>
-                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                        </Button>
+                                        {!apt.subscription_id && (
+                                            <Button variant="ghost" size="sm" onClick={() => { void handleDelete(apt); }}>
+                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -1013,6 +1029,14 @@ const Calendar: React.FC = () => {
                 description={t('calendar:dialog.description')}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {isSubscribedEvent && (
+                        <div className="rounded-input border border-primary/30 bg-primary-soft px-3 py-2 text-body-sm text-primary">
+                            {t('calendar:external.readOnlyNotice', { name: editingAppointment?.subscription_name || t('calendar:external.followedCalendar') })}
+                        </div>
+                    )}
+                    {/* A followed calendar's event comes from its source: what, when
+                        and where are locked; who, reminders and notes stay editable. */}
+                    <fieldset disabled={isSubscribedEvent} className="min-w-0 space-y-4 disabled:pointer-events-none disabled:opacity-60">
                     <Input
                         label={t('calendar:form.title')}
                         value={formData.title}
@@ -1264,6 +1288,7 @@ const Calendar: React.FC = () => {
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         placeholder={t('calendar:form.locationPlaceholder')}
                     />
+                    </fieldset>
                     <div>
                         <label className="block text-label font-medium text-foreground mb-1.5">
                             {t('calendar:form.members')}
@@ -1312,35 +1337,11 @@ const Calendar: React.FC = () => {
                             </div>
                         )}
                     </div>
-                    {/* Reminders are relative to a start time the user picked, so they
-                        have nothing to count down from on an all-day appointment. */}
-                    <div className={`space-y-2 ${formData.is_all_day ? 'hidden' : ''}`}>
-                        <label className="block text-label font-medium text-foreground">{t('calendar:form.reminders')}</label>
-                        <div className="flex items-center gap-4">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.reminder_30min}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, reminder_30min: e.target.checked })
-                                    }
-                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                                />
-                                <span className="text-body-sm">{t('calendar:form.reminder30')}</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.reminder_1hour}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, reminder_1hour: e.target.checked })
-                                    }
-                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                                />
-                                <span className="text-body-sm">{t('calendar:form.reminder1h')}</span>
-                            </label>
-                        </div>
-                    </div>
+                    <ReminderPicker
+                        value={formData.reminder_minutes}
+                        onChange={(reminder_minutes) => setFormData((prev) => ({ ...prev, reminder_minutes }))}
+                        allDay={formData.is_all_day}
+                    />
                     <Textarea
                         label={t('calendar:form.notes')}
                         value={formData.notes}
@@ -1350,7 +1351,7 @@ const Calendar: React.FC = () => {
                     />
                     <div className="flex items-center justify-between gap-3 pt-4">
                         <div>
-                            {editingAppointment && (
+                            {editingAppointment && !isSubscribedEvent && (
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -1568,10 +1569,19 @@ const Calendar: React.FC = () => {
             <Dialog
                 open={feedDialogOpen}
                 onOpenChange={setFeedDialogOpen}
-                title={t('calendar:feed.title')}
-                description={t('calendar:feed.description')}
+                title={t('calendar:external.title')}
+                description={t('calendar:external.description')}
             >
                 <div className="space-y-4">
+                    <ExternalCalendars
+                        members={familyMembers}
+                        canManage={canBudgetEdit}
+                        onEventsChanged={() => loadAppointments()}
+                    />
+                    <div className="border-t border-border pt-4">
+                        <h3 className="text-body font-semibold text-foreground">{t('calendar:feed.title')}</h3>
+                        <p className="text-caption text-muted-foreground">{t('calendar:feed.description')}</p>
+                    </div>
                     {!feedToken ? (
                         <p className="text-body-sm text-muted-foreground py-4 text-center">{t('calendar:feed.generating')}</p>
                     ) : (

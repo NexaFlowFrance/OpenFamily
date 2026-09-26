@@ -90,4 +90,62 @@ export const coreMigrations: readonly Migration[] = [
             'ALTER TABLE users ADD COLUMN IF NOT EXISTS week_start_day SMALLINT CHECK (week_start_day BETWEEN 1 AND 7)',
         ],
     },
+    {
+        // Reminders at any offset before an appointment (in minutes, up to four
+        // weeks), several per appointment, instead of the two fixed "30 minutes"
+        // and "1 hour" flags. The flags stay, kept in step, for older clients.
+        // Each reminder sent is logged per occurrence, so a recurring event
+        // reminds before every occurrence and never twice for the same one.
+        id: 'core/0004-appointment-reminders',
+        statements: [
+            "ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_minutes INTEGER[] NOT NULL DEFAULT '{}'",
+            `UPDATE appointments
+             SET reminder_minutes = array_remove(ARRAY[
+                 CASE WHEN reminder_30min THEN 30 END,
+                 CASE WHEN reminder_1hour THEN 60 END
+             ], NULL)
+             WHERE reminder_30min OR reminder_1hour`,
+            `CREATE TABLE IF NOT EXISTS appointment_reminder_log (
+                appointment_id UUID NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+                occurrence_start TIMESTAMP NOT NULL,
+                minutes_before INTEGER NOT NULL,
+                sent_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                PRIMARY KEY (appointment_id, occurrence_start, minutes_before)
+            )`,
+            'CREATE INDEX IF NOT EXISTS idx_appointment_reminder_log_sent_at ON appointment_reminder_log(sent_at)',
+        ],
+    },
+    {
+        // Calendars followed by address (Google Calendar's secret iCal address,
+        // Outlook, Apple, Proton, a school's public calendar...). Their events
+        // are copied into appointments and refreshed on a schedule; external_uid
+        // and external_hash let a refresh update or remove exactly what changed.
+        // A one-off .ics file import uses the same columns without a
+        // subscription, so importing the same file twice updates, not doubles.
+        id: 'core/0005-calendar-subscriptions',
+        statements: [
+            `CREATE TABLE IF NOT EXISTS calendar_subscriptions (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                name VARCHAR(100) NOT NULL,
+                encrypted_url TEXT NOT NULL,
+                url_host VARCHAR(255) NOT NULL,
+                color VARCHAR(7) NOT NULL DEFAULT '#3B82F6',
+                family_member_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+                last_synced_at TIMESTAMPTZ,
+                last_error TEXT,
+                event_count INTEGER NOT NULL DEFAULT 0,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            )`,
+            'CREATE INDEX IF NOT EXISTS idx_calendar_subscriptions_user ON calendar_subscriptions(user_id)',
+            'ALTER TABLE appointments ADD COLUMN IF NOT EXISTS subscription_id UUID REFERENCES calendar_subscriptions(id) ON DELETE CASCADE',
+            'ALTER TABLE appointments ADD COLUMN IF NOT EXISTS external_uid TEXT',
+            'ALTER TABLE appointments ADD COLUMN IF NOT EXISTS external_hash TEXT',
+            `CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_external_uid
+             ON appointments(user_id, (COALESCE(subscription_id, '00000000-0000-0000-0000-000000000000'::uuid)), external_uid)
+             WHERE external_uid IS NOT NULL`,
+            'CREATE INDEX IF NOT EXISTS idx_appointments_subscription ON appointments(subscription_id) WHERE subscription_id IS NOT NULL',
+        ],
+    },
 ];

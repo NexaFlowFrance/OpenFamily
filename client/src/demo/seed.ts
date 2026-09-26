@@ -93,9 +93,9 @@ export function createSeed(): DemoStore {
             { id: 'tk5', title: 'Tidy up the bedroom', is_completed: true, frequency: 'Hebdomadaire', priority: 'Moyenne', assigned_to: ['m-kid2'], assigned_to_members: [kid2], completed_at: atTime(now, 10, 30), created_at: atTime(addDays(now, -1), 9), points: 8, pending_approval: true },
         ],
         appointments: [
-            { id: 'a1', title: 'Dentist — Mia', start_time: atTime(dayInMonth(now.getDate()), 15), end_time: atTime(dayInMonth(now.getDate()), 16), location: 'City Dental', family_member_ids: ['m-kid1'], family_members_data: [kid1], reminder_30min: true, reminder_1hour: false },
-            { id: 'a2', title: 'Football practice', start_time: atTime(addDays(now, 2), 18), end_time: atTime(addDays(now, 2), 19, 30), location: 'Stadium', family_member_ids: ['m-kid2'], family_members_data: [kid2], reminder_30min: false, reminder_1hour: true },
-            { id: 'a3', title: 'Family dinner', start_time: atTime(addDays(now, 5), 20), location: 'Home', family_member_ids: ['m-dad', 'm-mom', 'm-kid1', 'm-kid2'], family_members_data: [dad, mom, kid1, kid2], reminder_30min: false, reminder_1hour: false },
+            { id: 'a1', title: 'Dentist — Mia', start_time: atTime(dayInMonth(now.getDate()), 15), end_time: atTime(dayInMonth(now.getDate()), 16), location: 'City Dental', family_member_ids: ['m-kid1'], family_members_data: [kid1], reminder_30min: true, reminder_1hour: false, reminder_minutes: [30] },
+            { id: 'a2', title: 'Football practice', start_time: atTime(addDays(now, 2), 18), end_time: atTime(addDays(now, 2), 19, 30), location: 'Stadium', family_member_ids: ['m-kid2'], family_members_data: [kid2], reminder_30min: false, reminder_1hour: true, reminder_minutes: [60, 1440] },
+            { id: 'a3', title: 'Family dinner', start_time: atTime(addDays(now, 5), 20), location: 'Home', family_member_ids: ['m-dad', 'm-mom', 'm-kid1', 'm-kid2'], family_members_data: [dad, mom, kid1, kid2], reminder_30min: false, reminder_1hour: false, reminder_minutes: [] },
         ],
         planning: [
             { id: 'p1', family_member_id: 'm-dad', family_member_name: 'Alex', family_member_color: '#2563EB', family_member_role: 'Parent', schedule_type: 'work', title: 'Office', day_of_week: 1, start_time: '09:00', end_time: '17:30' },

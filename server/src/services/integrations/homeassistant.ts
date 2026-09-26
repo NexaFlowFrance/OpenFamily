@@ -36,7 +36,7 @@ function getTodoItemsViaWebSocket(baseUrl: string, token: string, entityId: stri
 
         ws.on('message', (raw) => {
             try {
-                const msg = JSON.parse(raw.toString()) as { type: string; id?: number; success?: boolean; result?: Record<string, { items: HATodoItem[] }>; error?: { message: string } };
+                const msg = JSON.parse(raw.toString()) as { type: string; id?: number; success?: boolean; result?: { items?: HATodoItem[] }; error?: { message: string } };
 
                 if (msg.type === 'auth_required') {
                     ws.send(JSON.stringify({ type: 'auth', access_token: token }));
@@ -51,7 +51,9 @@ function getTodoItemsViaWebSocket(baseUrl: string, token: string, entityId: stri
                     clearTimeout(timeout);
                     ws.terminate();
                     if (msg.success && msg.result) {
-                        const items = msg.result[entityId]?.items || [];
+                        // `todo/item/list` answers { items: [...] } for the requested entity
+                        // (it is not keyed by entity_id, unlike `todo.get_items`).
+                        const items = msg.result.items || [];
                         resolve(items);
                     } else {
                         reject(new Error(msg.error?.message || `Entité "${entityId}" introuvable dans Home Assistant`));

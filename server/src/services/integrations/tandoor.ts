@@ -30,7 +30,7 @@ interface TandoorRecipe {
 export async function testTandoorConnection(baseUrl: string, apiKey: string): Promise<{ success: boolean; message: string }> {
     try {
         const resp = await safeFetch(`${baseUrl}/api/user-preferences/`, {
-            headers: { 'Authorization': `Token ${apiKey}` },
+            headers: { 'Authorization': `Bearer ${apiKey}` },
             timeoutMs: TANDOOR_TIMEOUT_MS,
         });
         if (resp.ok) return { success: true, message: 'Connecté a Tandoor' };
@@ -51,7 +51,7 @@ export async function syncTandoor(
     const apiKey = creds.apiKey;
     if (!apiKey) throw new Error('Token API manquant');
 
-    const headers = { 'Authorization': `Token ${apiKey}`, 'Content-Type': 'application/json' };
+    const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
 
     let imported = 0;
     let errors = 0;

@@ -80,6 +80,8 @@ l'adresse de votre serveur (ex. `http://192.168.1.10:3001`, ou votre adresse HTT
 
 ### 🐳 Docker (recommandé pour serveur)
 
+> 📘 **Une vraie installation sur serveur ?** Suivez le **[guide serveur pas à pas](INSTALLATION.fr.md)** : secrets à définir, HTTPS avec un domaine ou Tailscale, mises à jour et sauvegardes.
+
 ```bash
 cp .env.example .env   # éditez vos paramètres
 docker-compose up -d --build

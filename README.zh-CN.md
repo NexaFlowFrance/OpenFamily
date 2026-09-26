@@ -110,6 +110,8 @@ OpenFamily 还提供原生 **Android 应用**——它是一个连接到**你自
 
 ### 🐳 Docker（推荐用于服务器）
 
+> 📘 **正式部署到服务器？** 请按照分步 **[服务器指南（英文）](INSTALLATION.md)** 操作：需要设置的密钥、通过域名或 Tailscale 启用 HTTPS、更新与备份。
+
 ```bash
 cp .env.example .env   # 编辑配置
 docker-compose up -d --build

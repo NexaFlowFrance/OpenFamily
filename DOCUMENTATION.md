@@ -277,7 +277,8 @@ OpenFamily/
 │   └── smoke-api.sh           # Script de test bout-en-bout de l'API
 ├── docker-compose.yml         # Orchestration des services
 ├── package.json               # Package racine (workspaces npm)
-└── INSTALLATION.md            # Guide d'installation
+├── INSTALLATION.md            # Server installation guide (English)
+└── INSTALLATION.fr.md         # Guide d'installation serveur (français)
 ```
 
 ---

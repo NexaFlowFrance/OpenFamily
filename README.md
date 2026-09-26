@@ -113,6 +113,8 @@ your server URL (e.g. `http://192.168.1.10:3001`, or your HTTPS / Tailscale addr
 
 ### 🐳 Docker (recommended for a server)
 
+> 📘 **Installing on a server for real?** Follow the step-by-step **[server guide](INSTALLATION.md)**: secrets to set, HTTPS with a domain or Tailscale, updates and backups.
+
 ```bash
 cp .env.example .env   # edit your settings
 docker-compose up -d --build

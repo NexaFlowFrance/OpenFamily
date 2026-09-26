@@ -37,6 +37,9 @@ services:
       VAPID_SUBJECT: ${VAPID_SUBJECT}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
+      # The family's time zone. Appointments are stored in local time; without
+      # it the container runs in UTC and reminders arrive one or two hours late.
+      TZ: ${TZ:-Europe/Paris}
       # Optional features documented in .env.example. A variable set in .env
       # only reaches the server if it is listed here; without these lines,
       # invitation and password-reset e-mails could never be sent from a

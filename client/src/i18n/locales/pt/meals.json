@@ -22,7 +22,8 @@
     "customMeal": "Ou refeição personalizada",
     "customMealPlaceholder": "ex: Pizza caseira, Strogonoff...",
     "notes": "Observações (opcional)",
-    "notesPlaceholder": "Observações adicionais…"
+    "notesPlaceholder": "Observações adicionais…",
+    "recipeSearch": "Pesquisar receitas…"
   },
   "shopping": {
     "button": "Adicionar ingredientes à lista de compras",

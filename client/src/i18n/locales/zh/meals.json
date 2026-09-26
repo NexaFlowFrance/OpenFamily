@@ -22,7 +22,8 @@
     "customMeal": "或自定义餐食",
     "customMealPlaceholder": "例如：自制披萨",
     "notes": "备注（可选）",
-    "notesPlaceholder": "更多备注……"
+    "notesPlaceholder": "更多备注……",
+    "recipeSearch": "搜索食谱…"
   },
   "shopping": {
     "button": "将食材添加到购物清单",

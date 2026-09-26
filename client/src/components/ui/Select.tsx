@@ -1,6 +1,6 @@
 import React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface SelectProps {
@@ -19,13 +19,16 @@ const fromInternalValue = (value: string) => (value === EMPTY_SELECT_VALUE ? '' 
 export const Select: React.FC<SelectProps> = ({
     value,
     onValueChange,
-    placeholder = 'Selectionner...',
+    placeholder = '',
     options,
     className,
 }) => {
+    // An empty value that no option carries shows the placeholder (an action
+    // menu such as "Add a reminder"); an option can still stand for "".
+    const emptyIsOption = options.some((option) => option.value === '');
     return (
         <SelectPrimitive.Root
-            value={toInternalValue(value)}
+            value={value === '' && !emptyIsOption ? '' : toInternalValue(value)}
             onValueChange={(nextValue) => onValueChange(fromInternalValue(nextValue))}
         >
             <SelectPrimitive.Trigger
@@ -40,12 +43,20 @@ export const Select: React.FC<SelectProps> = ({
                 </SelectPrimitive.Icon>
             </SelectPrimitive.Trigger>
             <SelectPrimitive.Portal>
+                {/* A popper has no height limit of its own: with a long list
+                    (forty recipes) it ran off the screen and could not scroll.
+                    Capped to the room left on screen and to 20rem, the
+                    viewport scrolls with the wheel, touch and the arrows. */}
                 <SelectPrimitive.Content
-                    className="z-50 overflow-hidden rounded-card border border-border bg-popover shadow-surface-hover animate-fade-in"
+                    className="z-50 max-h-[min(20rem,var(--radix-select-content-available-height))] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-card border border-border bg-popover shadow-surface-hover animate-fade-in"
                     position="popper"
                     sideOffset={6}
+                    collisionPadding={8}
                 >
-                    <SelectPrimitive.Viewport className="p-1">
+                    <SelectPrimitive.ScrollUpButton className="flex h-6 cursor-default items-center justify-center text-muted-foreground">
+                        <ChevronUp className="h-4 w-4" />
+                    </SelectPrimitive.ScrollUpButton>
+                    <SelectPrimitive.Viewport className="overscroll-contain p-1">
                         {options.map((option) => (
                             <SelectPrimitive.Item
                                 key={`${option.value}-${option.label}`}
@@ -65,6 +76,9 @@ export const Select: React.FC<SelectProps> = ({
                             </SelectPrimitive.Item>
                         ))}
                     </SelectPrimitive.Viewport>
+                    <SelectPrimitive.ScrollDownButton className="flex h-6 cursor-default items-center justify-center text-muted-foreground">
+                        <ChevronDown className="h-4 w-4" />
+                    </SelectPrimitive.ScrollDownButton>
                 </SelectPrimitive.Content>
             </SelectPrimitive.Portal>
         </SelectPrimitive.Root>

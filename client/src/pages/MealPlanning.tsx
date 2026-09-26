@@ -6,6 +6,7 @@ import { Plus, ChevronLeft, ChevronRight, Edit2, Trash2, ShoppingCart, Sparkles,
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, useToast } from '../components/ui';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isToday } from 'date-fns';
 import { dateLocale, weekStartsOn } from '../i18n/format';
+import { foldText } from '../lib/textSearch';
 import { useAiEnabled } from '../lib/aiStatus';
 import { useAuth } from '../contexts/AuthContext';
 import { aiErrorKey } from '../components/app/MagicInput';
@@ -54,6 +55,8 @@ const MealPlanning: React.FC = () => {
     const [currentWeek, setCurrentWeek] = useState(new Date());
     const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
     const [recipes, setRecipes] = useState<Recipe[]>([]);
+    // Typed filter over the recipe menu, shown once the list is long.
+    const [recipeQuery, setRecipeQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingMeal, setEditingMeal] = useState<MealPlan | null>(null);
@@ -168,6 +171,7 @@ const MealPlanning: React.FC = () => {
             custom_meal: meal.custom_meal || '',
             notes: meal.notes || '',
         });
+        setRecipeQuery('');
         setDialogOpen(true);
     };
 
@@ -181,6 +185,7 @@ const MealPlanning: React.FC = () => {
             custom_meal: '',
             notes: '',
         });
+        setRecipeQuery('');
         setError('');
         setDialogOpen(true);
     };
@@ -625,6 +630,16 @@ const MealPlanning: React.FC = () => {
                         <label className="block text-label font-medium text-foreground mb-1.5">
                             {t('meals:form.recipe')}
                         </label>
+                        {recipes.length > 8 && (
+                            <Input
+                                type="search"
+                                value={recipeQuery}
+                                onChange={(e) => setRecipeQuery(e.target.value)}
+                                placeholder={t('meals:form.recipeSearch')}
+                                aria-label={t('meals:form.recipeSearch')}
+                                className="mb-2"
+                            />
+                        )}
                         <Select
                             value={formData.recipe_id}
                             onValueChange={(value) =>
@@ -632,10 +647,17 @@ const MealPlanning: React.FC = () => {
                             }
                             options={[
                                 { value: '', label: t('meals:form.noRecipe') },
-                                ...recipes.map((recipe) => ({
-                                    value: recipe.id,
-                                    label: `${recipe.name} (${recipeCategoryLabel(recipe.category)})`,
-                                })),
+                                ...recipes
+                                    // The chosen recipe stays in the menu even when the
+                                    // search no longer matches it, so the field keeps its label.
+                                    .filter((recipe) => recipe.id === formData.recipe_id
+                                        || !recipeQuery.trim()
+                                        || foldText(`${recipe.name} ${recipeCategoryLabel(recipe.category)}`).includes(foldText(recipeQuery)))
+                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                    .map((recipe) => ({
+                                        value: recipe.id,
+                                        label: `${recipe.name} (${recipeCategoryLabel(recipe.category)})`,
+                                    })),
                             ]}
                         />
                     </div>

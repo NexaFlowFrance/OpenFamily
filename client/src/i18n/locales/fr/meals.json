@@ -22,7 +22,8 @@
     "customMeal": "Ou repas personnalisé",
     "customMealPlaceholder": "Ex : Pizza maison",
     "notes": "Notes (facultatif)",
-    "notesPlaceholder": "Notes supplémentaires…"
+    "notesPlaceholder": "Notes supplémentaires…",
+    "recipeSearch": "Rechercher une recette…"
   },
   "shopping": {
     "button": "Ajouter les ingrédients aux courses",

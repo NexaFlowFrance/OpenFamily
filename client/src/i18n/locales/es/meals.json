@@ -22,7 +22,8 @@
     "customMeal": "O comida personalizada",
     "customMealPlaceholder": "p. ej. Pizza casera",
     "notes": "Notas (opcional)",
-    "notesPlaceholder": "Notas adicionales…"
+    "notesPlaceholder": "Notas adicionales…",
+    "recipeSearch": "Buscar una receta…"
   },
   "shopping": {
     "button": "Añadir ingredientes a la lista de compras",

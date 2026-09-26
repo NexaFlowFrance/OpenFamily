@@ -22,7 +22,8 @@
     "customMeal": "Or custom meal",
     "customMealPlaceholder": "e.g. Homemade pizza",
     "notes": "Notes (optional)",
-    "notesPlaceholder": "Additional notes…"
+    "notesPlaceholder": "Additional notes…",
+    "recipeSearch": "Search recipes…"
   },
   "shopping": {
     "button": "Add ingredients to shopping list",

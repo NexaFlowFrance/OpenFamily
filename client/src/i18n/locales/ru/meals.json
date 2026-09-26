@@ -22,7 +22,8 @@
     "customMeal": "Или своё блюдо",
     "customMealPlaceholder": "например, домашняя пицца",
     "notes": "Заметки (необязательно)",
-    "notesPlaceholder": "Дополнительные заметки…"
+    "notesPlaceholder": "Дополнительные заметки…",
+    "recipeSearch": "Найти рецепт…"
   },
   "shopping": {
     "button": "Добавить ингредиенты в список покупок",

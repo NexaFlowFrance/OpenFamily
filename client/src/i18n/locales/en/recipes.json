@@ -26,7 +26,11 @@
   "anyDuration": "Any duration",
   "filters": {
     "toggle": "Filters",
-    "clear": "Clear filters"
+    "clear": "Clear filters",
+    "ingredientsPlaceholder": "I have… (an ingredient, then Enter)",
+    "ingredientsMore": "Add an ingredient",
+    "ingredientsHelp": "Only recipes that contain all of these ingredients are shown.",
+    "removeIngredient": "Remove {{name}}"
   },
   "empty": {
     "none": "No recipes yet. Create your first recipe!",

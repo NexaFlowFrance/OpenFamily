@@ -26,7 +26,11 @@
   "anyDuration": "不限时长",
   "filters": {
     "toggle": "筛选",
-    "clear": "清除筛选"
+    "clear": "清除筛选",
+    "ingredientsPlaceholder": "我有……（输入食材后按回车）",
+    "ingredientsMore": "再添加一种食材",
+    "ingredientsHelp": "只显示包含以上所有食材的食谱。",
+    "removeIngredient": "移除 {{name}}"
   },
   "empty": {
     "none": "还没有食谱，创建第一份食谱吧！",

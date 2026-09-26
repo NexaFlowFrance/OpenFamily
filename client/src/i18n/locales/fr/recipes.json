@@ -26,7 +26,11 @@
   "anyDuration": "Toute durée",
   "filters": {
     "toggle": "Filtres",
-    "clear": "Effacer les filtres"
+    "clear": "Effacer les filtres",
+    "ingredientsPlaceholder": "J'ai… (un ingrédient, puis Entrée)",
+    "ingredientsMore": "Ajouter un ingrédient",
+    "ingredientsHelp": "Seules les recettes qui contiennent tous ces ingrédients sont affichées.",
+    "removeIngredient": "Retirer {{name}}"
   },
   "empty": {
     "none": "Aucune recette pour le moment. Créez votre première recette !",

@@ -26,7 +26,11 @@
   "anyDuration": "Любая длительность",
   "filters": {
     "toggle": "Фильтры",
-    "clear": "Сбросить фильтры"
+    "clear": "Сбросить фильтры",
+    "ingredientsPlaceholder": "У меня есть… (ингредиент и Enter)",
+    "ingredientsMore": "Добавить ингредиент",
+    "ingredientsHelp": "Показаны только рецепты, в которых есть все эти ингредиенты.",
+    "removeIngredient": "Убрать {{name}}"
   },
   "empty": {
     "none": "Рецептов пока нет. Создайте первый!",

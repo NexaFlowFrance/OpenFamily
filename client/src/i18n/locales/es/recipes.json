@@ -125,6 +125,10 @@
   },
   "filters": {
     "toggle": "Filtros",
-    "clear": "Borrar filtros"
+    "clear": "Borrar filtros",
+    "ingredientsPlaceholder": "Tengo… (un ingrediente y Intro)",
+    "ingredientsMore": "Añadir un ingrediente",
+    "ingredientsHelp": "Solo se muestran las recetas que contienen todos estos ingredientes.",
+    "removeIngredient": "Quitar {{name}}"
   }
 }

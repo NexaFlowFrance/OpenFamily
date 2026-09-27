@@ -37,6 +37,11 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The action's default list asks for the legacy "tools" package, which
+          # recent command-line tools no longer provide: sdkmanager then fails
+          # (it broke the v1.8.0 build). Gradle fetches the platform it needs.
+          packages: platform-tools
 
       - name: Install dependencies
         run: npm run install:all

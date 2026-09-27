@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
-import { Plus, ChevronLeft, ChevronRight, Edit2, Trash2, ShoppingCart, Sparkles, Loader2, UtensilsCrossed } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Edit2, Trash2, ShoppingCart, Sparkles, Loader2, UtensilsCrossed, Download } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, useToast } from '../components/ui';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isToday } from 'date-fns';
 import { dateLocale, weekStartsOn } from '../i18n/format';
@@ -41,6 +41,28 @@ interface IngredientLine {
 
 const MEAL_TYPES = ['Petit-déjeuner', 'Déjeuner', 'Dîner', 'Snack'];
 
+// One Tandoor meal plan entry, as returned by GET /api/integrations/tandoor/meal-plan.
+interface TandoorMealEntry {
+    id: number;
+    date: string;
+    meal_type: string;
+    recipe_name: string | null;
+    title: string | null;
+    note: string | null;
+}
+
+// Best guess of the OpenFamily meal matching a Tandoor meal type name, which is
+// free text in Tandoor ("Lunch", "Midi", "Almuerzo"…). '' = not imported; the
+// user can change every guess in the import dialog.
+const guessMealType = (tandoorType: string): string => {
+    const name = foldText(tandoorType);
+    if (/(petit|breakfast|brunch|matin|morning|desayuno|cafe da manha|pequeno almoco|завтрак|早)/.test(name)) return 'Petit-déjeuner';
+    if (/(gouter|snack|collation|encas|merienda|lanche|перекус|点心|加餐|零食)/.test(name)) return 'Snack';
+    if (/(midi|lunch|dejeuner|almuerzo|comida|almoco|обед|午)/.test(name)) return 'Déjeuner';
+    if (/(soir|diner|dinner|supper|souper|cena|jantar|ужин|晚)/.test(name)) return 'Dîner';
+    return '';
+};
+
 interface MealProposal {
     date: string;
     meal_type: 'Dîner';
@@ -69,13 +91,23 @@ const MealPlanning: React.FC = () => {
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
     const [addingIngredients, setAddingIngredients] = useState(false);
     const aiEnabled = useAiEnabled();
-    const { isModuleEnabled } = useAuth();
+    const { isModuleEnabled, user } = useAuth();
     const [aiDialogOpen, setAiDialogOpen] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState('');
     const [aiProposals, setAiProposals] = useState<MealProposal[]>([]);
     const [selectedProposals, setSelectedProposals] = useState<Set<string>>(new Set());
     const [creatingMeals, setCreatingMeals] = useState(false);
+    // Tandoor meal plan import (parents only, when a Tandoor integration exists)
+    const [tandoorAvailable, setTandoorAvailable] = useState(false);
+    const [tandoorDialogOpen, setTandoorDialogOpen] = useState(false);
+    const [tandoorLoading, setTandoorLoading] = useState(false);
+    const [tandoorError, setTandoorError] = useState('');
+    const [tandoorEntries, setTandoorEntries] = useState<TandoorMealEntry[]>([]);
+    const [tandoorMapping, setTandoorMapping] = useState<Record<string, string>>({});
+    const [tandoorOverwrite, setTandoorOverwrite] = useState(false);
+    const [tandoorImporting, setTandoorImporting] = useState(false);
+    const canImportTandoor = tandoorAvailable && user?.role !== 'enfant';
 
     const [formData, setFormData] = useState({
         meal_type: 'Déjeuner',
@@ -88,6 +120,12 @@ const MealPlanning: React.FC = () => {
         loadMealPlans();
         loadRecipes();
     }, [currentWeek]);
+    useEffect(() => {
+        // The import button only makes sense once Tandoor is connected.
+        api.get<{ success: boolean; data: Array<{ type: string }> }>('/api/integrations')
+            .then((response) => setTandoorAvailable(Boolean(response.success && response.data.some((i) => i.type === 'tandoor'))))
+            .catch(() => setTandoorAvailable(false));
+    }, []);
     useWebSocketUpdates('meal-plans', () => { void loadMealPlans(); });
     useWebSocketUpdates('recipes', () => { void loadRecipes(); });
 
@@ -369,6 +407,88 @@ const MealPlanning: React.FC = () => {
         }
     };
 
+    // ── Tandoor meal plan import ("Importer depuis Tandoor") ─────────────────
+    const tandoorRange = () => ({
+        start_date: format(startOfWeek(currentWeek, { weekStartsOn: weekStartsOn() }), 'yyyy-MM-dd'),
+        end_date: format(endOfWeek(currentWeek, { weekStartsOn: weekStartsOn() }), 'yyyy-MM-dd'),
+    });
+
+    const openTandoorDialog = async () => {
+        setTandoorLoading(true);
+        setTandoorError('');
+        setTandoorEntries([]);
+        setTandoorOverwrite(false);
+        setTandoorDialogOpen(true);
+        try {
+            const range = tandoorRange();
+            const response = await api.get<{ success: boolean; data: { entries: TandoorMealEntry[]; meal_types: string[] } }>(
+                `/api/integrations/tandoor/meal-plan?start_date=${range.start_date}&end_date=${range.end_date}`
+            );
+            if (response.success) {
+                setTandoorEntries(response.data.entries);
+                setTandoorMapping(Object.fromEntries(response.data.meal_types.map((type) => [type, guessMealType(type)])));
+            }
+        } catch (error) {
+            setTandoorError(error instanceof Error && error.message ? error.message : t('meals:tandoor.error'));
+        } finally {
+            setTandoorLoading(false);
+        }
+    };
+
+    // Preview of what the import will do, slot by slot (same rules as the server:
+    // one OpenFamily meal per day and meal type, several Tandoor entries merged).
+    const tandoorPreview = (() => {
+        const slots = new Map<string, { date: string; mealType: string; names: string[]; existing?: MealPlan }>();
+        const skipped: TandoorMealEntry[] = [];
+        for (const entry of tandoorEntries) {
+            const mealType = tandoorMapping[entry.meal_type];
+            if (!mealType) {
+                skipped.push(entry);
+                continue;
+            }
+            const key = `${entry.date}|${mealType}`;
+            const slot = slots.get(key) || {
+                date: entry.date,
+                mealType,
+                names: [],
+                existing: mealPlans.find((meal) => meal.date === entry.date && meal.meal_type === mealType),
+            };
+            slot.names.push(entry.recipe_name || entry.title || 'Tandoor');
+            slots.set(key, slot);
+        }
+        const list = Array.from(slots.values()).sort(
+            (a, b) => a.date.localeCompare(b.date) || MEAL_TYPES.indexOf(a.mealType) - MEAL_TYPES.indexOf(b.mealType)
+        );
+        const toWrite = list.filter((slot) => !slot.existing || tandoorOverwrite).length;
+        return { list, skipped, toWrite };
+    })();
+
+    const handleConfirmTandoorImport = async () => {
+        setTandoorImporting(true);
+        try {
+            const response = await api.post<{ success: boolean; data: { imported: number; skipped: number; unmapped: number } }>(
+                '/api/integrations/tandoor/meal-plan/import',
+                { ...tandoorRange(), mapping: tandoorMapping, overwrite: tandoorOverwrite }
+            );
+            setTandoorDialogOpen(false);
+            void loadMealPlans();
+            if (response.success) {
+                const { imported, skipped } = response.data;
+                showToast({
+                    title: t('meals:tandoor.successTitle'),
+                    description: [
+                        t('meals:tandoor.successDescription', { count: imported }),
+                        skipped > 0 ? t('meals:tandoor.keptDescription', { count: skipped }) : '',
+                    ].filter(Boolean).join(' '),
+                });
+            }
+        } catch (error) {
+            setTandoorError(error instanceof Error && error.message ? error.message : t('meals:tandoor.error'));
+        } finally {
+            setTandoorImporting(false);
+        }
+    };
+
     const weekStart = startOfWeek(currentWeek, { weekStartsOn: weekStartsOn() });
     const weekEnd = endOfWeek(currentWeek, { weekStartsOn: weekStartsOn() });
     const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
@@ -442,6 +562,12 @@ const MealPlanning: React.FC = () => {
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         {t('meals:shopping.button')}
                     </Button>
+                    {canImportTandoor && (
+                        <Button size="sm" variant="secondary" onClick={() => void openTandoorDialog()}>
+                            <Download className="w-4 h-4 mr-2" />
+                            {t('meals:tandoor.button')}
+                        </Button>
+                    )}
                     {aiEnabled && isModuleEnabled('ai') && (
                         <Button size="sm" variant="secondary" onClick={() => void handleSuggestMeals()}>
                             <Sparkles className="w-4 h-4 mr-2 text-primary" />
@@ -820,6 +946,115 @@ const MealPlanning: React.FC = () => {
                                 <Sparkles className="w-4 h-4 mr-2" />
                             )}
                             {t('ai:meals.confirm', { count: selectedProposals.size })}
+                        </Button>
+                    )}
+                </div>
+            </Dialog>
+            {/* Tandoor meal plan import dialog */}
+            <Dialog
+                open={tandoorDialogOpen}
+                onOpenChange={setTandoorDialogOpen}
+                title={t('meals:tandoor.dialogTitle')}
+                description={t('meals:tandoor.dialogDescription', {
+                    start: format(weekStart, 'dd MMM', { locale: dateLocale() }),
+                    end: format(weekEnd, 'dd MMM', { locale: dateLocale() }),
+                })}
+            >
+                {tandoorLoading ? (
+                    <div className="flex items-center justify-center gap-3 py-10 text-muted-foreground">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span className="text-caption">{t('meals:tandoor.loading')}</span>
+                    </div>
+                ) : tandoorError ? (
+                    <div className="rounded-input border border-danger/30 bg-danger/10 px-4 py-3 text-caption text-danger">
+                        {tandoorError}
+                    </div>
+                ) : tandoorEntries.length === 0 ? (
+                    <div className="py-8 text-center">
+                        <UtensilsCrossed className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
+                        <p className="text-body-sm text-muted-foreground">{t('meals:tandoor.empty')}</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <p className="text-label font-medium text-foreground">{t('meals:tandoor.mappingTitle')}</p>
+                            <p className="text-micro text-muted-foreground">{t('meals:tandoor.mappingHelp')}</p>
+                            {Object.keys(tandoorMapping).map((tandoorType) => (
+                                <div key={tandoorType} className="flex items-center gap-3">
+                                    <span className="w-1/3 min-w-0 truncate text-body-sm font-medium text-foreground" title={tandoorType}>
+                                        {tandoorType}
+                                    </span>
+                                    <span className="text-muted-foreground">→</span>
+                                    <Select
+                                        className="flex-1"
+                                        value={tandoorMapping[tandoorType]}
+                                        onValueChange={(value) => setTandoorMapping({ ...tandoorMapping, [tandoorType]: value })}
+                                        options={[
+                                            ...MEAL_TYPES.map((type) => ({ value: type, label: mealTypeLabel(type) })),
+                                            { value: '', label: t('meals:tandoor.skipType') },
+                                        ]}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        <div>
+                            <p className="mb-2 text-label font-medium text-foreground">{t('meals:tandoor.previewTitle')}</p>
+                            <div className="max-h-64 space-y-1 overflow-y-auto rounded-input border border-border p-3">
+                                {tandoorPreview.list.map((slot) => (
+                                    <div key={`${slot.date}|${slot.mealType}`} className="rounded px-1 py-1">
+                                        <span className="block text-body-sm font-medium capitalize text-foreground">
+                                            {format(new Date(`${slot.date}T12:00:00`), 'EEEE dd MMM', { locale: dateLocale() })}
+                                            <span className="font-normal normal-case text-muted-foreground"> · {mealTypeLabel(slot.mealType)}</span>
+                                        </span>
+                                        <span className="block text-micro text-muted-foreground">
+                                            {slot.names.join(' + ')}
+                                            {slot.existing && (
+                                                <span className="italic">
+                                                    {' · '}
+                                                    {tandoorOverwrite
+                                                        ? t('meals:tandoor.replaces', { name: slot.existing.recipe?.name || slot.existing.custom_meal || '' })
+                                                        : t('meals:tandoor.keeps', { name: slot.existing.recipe?.name || slot.existing.custom_meal || '' })}
+                                                </span>
+                                            )}
+                                        </span>
+                                    </div>
+                                ))}
+                                {tandoorPreview.skipped.length > 0 && (
+                                    <p className="px-1 pt-1 text-micro italic text-muted-foreground">
+                                        {t('meals:tandoor.notImported', { count: tandoorPreview.skipped.length })}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        {tandoorPreview.list.some((slot) => slot.existing) && (
+                            <label className="flex cursor-pointer items-center gap-2 text-body-sm text-foreground">
+                                <input
+                                    type="checkbox"
+                                    checked={tandoorOverwrite}
+                                    onChange={(e) => setTandoorOverwrite(e.target.checked)}
+                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                />
+                                {t('meals:tandoor.overwrite')}
+                            </label>
+                        )}
+                    </div>
+                )}
+                <div className="flex justify-end gap-3 pt-4">
+                    <Button type="button" variant="secondary" onClick={() => setTandoorDialogOpen(false)}>
+                        {t('common:actions.cancel')}
+                    </Button>
+                    {!tandoorLoading && !tandoorError && tandoorEntries.length > 0 && (
+                        <Button
+                            type="button"
+                            onClick={() => void handleConfirmTandoorImport()}
+                            disabled={tandoorImporting || tandoorPreview.toWrite === 0}
+                        >
+                            {tandoorImporting ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                                <Download className="w-4 h-4 mr-2" />
+                            )}
+                            {t('meals:tandoor.confirm', { count: tandoorPreview.toWrite })}
                         </Button>
                     )}
                 </div>

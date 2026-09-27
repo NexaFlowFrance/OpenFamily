@@ -4,7 +4,7 @@ import { authMiddleware, requireParent, AuthRequest } from '../middleware/auth';
 import { encryptCredentials, decryptCredentials } from '../utils/crypto';
 import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
 import { testMealieConnection, syncMealie } from '../services/integrations/mealie';
-import { testTandoorConnection, syncTandoor } from '../services/integrations/tandoor';
+import { testTandoorConnection, syncTandoor, fetchTandoorMealPlan, TandoorMealPlanEntry } from '../services/integrations/tandoor';
 import { testHomeAssistantConnection, syncHomeAssistant } from '../services/integrations/homeassistant';
 import { testGrocyConnection, syncGrocy } from '../services/integrations/grocy';
 import { testNextcloudConnection, syncNextcloud } from '../services/integrations/nextcloud';
@@ -54,6 +54,152 @@ router.get('/immich/photo', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: e.message });
         }
         res.status(502).json({ success: false, error: 'Immich indisponible' });
+    }
+});
+
+// ── Tandoor meal plan import ──────────────────────────────────────────────────
+// The Tandoor sync imports recipes only. These two routes let a parent pull the
+// Tandoor meal plan of a given week into OpenFamily's meal planning, after
+// choosing which OpenFamily meal each Tandoor meal type ("Lunch", "Midi"…) maps to.
+
+// Meal slots used by the meal planning page (stored as-is in meal_plans.meal_type).
+const OPENFAMILY_MEAL_TYPES = ['Petit-déjeuner', 'Déjeuner', 'Dîner', 'Snack'];
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_IMPORT_RANGE_DAYS = 31;
+
+const parseImportRange = (start: unknown, end: unknown): { start: string; end: string } | null => {
+    if (typeof start !== 'string' || typeof end !== 'string' || !ISO_DAY.test(start) || !ISO_DAY.test(end)) return null;
+    const span = (Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86_400_000;
+    if (!Number.isFinite(span) || span < 0 || span > MAX_IMPORT_RANGE_DAYS) return null;
+    return { start, end };
+};
+
+const loadTandoorIntegration = async (familyId: string) => {
+    const result = await query(
+        `SELECT base_url, encrypted_credentials FROM integrations
+         WHERE family_id = $1 AND type = 'tandoor'`,
+        [familyId]
+    );
+    return result.rows[0] as { base_url: string; encrypted_credentials: string | null } | undefined;
+};
+
+// GET /api/integrations/tandoor/meal-plan?start_date=yyyy-MM-dd&end_date=yyyy-MM-dd
+// Preview: the Tandoor entries of the range and the Tandoor meal types they use.
+router.get('/tandoor/meal-plan', requireParent, async (req: AuthRequest, res) => {
+    const range = parseImportRange(req.query.start_date, req.query.end_date);
+    if (!range) {
+        return res.status(400).json({ success: false, error: 'start_date et end_date (yyyy-MM-dd, 31 jours max) sont requis' });
+    }
+    try {
+        const integ = await loadTandoorIntegration(req.userId!);
+        if (!integ || !integ.encrypted_credentials) {
+            return res.status(404).json({ success: false, error: 'Aucune integration Tandoor configuree' });
+        }
+        await assertSafeIntegrationUrl(integ.base_url);
+        const entries = await fetchTandoorMealPlan(integ.base_url, integ.encrypted_credentials, range.start, range.end);
+        const mealTypes = Array.from(new Set(entries.map((e) => e.meal_type)));
+        res.json({ success: true, data: { entries, meal_types: mealTypes } });
+    } catch (e) {
+        if (e instanceof UnsafeUrlError) {
+            return res.status(400).json({ success: false, error: e.message });
+        }
+        res.status(502).json({ success: false, error: e instanceof Error ? e.message : 'Tandoor indisponible' });
+    }
+});
+
+// POST /api/integrations/tandoor/meal-plan/import
+// Body: { start_date, end_date, mapping: { [tandoorMealType]: openFamilyMealType | '' }, overwrite?: boolean }
+// The entries are fetched again server-side: the client only sends its choices.
+router.post('/tandoor/meal-plan/import', requireParent, async (req: AuthRequest, res) => {
+    const body = req.body as { start_date?: unknown; end_date?: unknown; mapping?: unknown; overwrite?: unknown };
+    const range = parseImportRange(body.start_date, body.end_date);
+    if (!range) {
+        return res.status(400).json({ success: false, error: 'start_date et end_date (yyyy-MM-dd, 31 jours max) sont requis' });
+    }
+    const mapping = new Map<string, string>();
+    if (body.mapping && typeof body.mapping === 'object') {
+        for (const [tandoorType, slot] of Object.entries(body.mapping as Record<string, unknown>)) {
+            if (typeof slot === 'string' && OPENFAMILY_MEAL_TYPES.includes(slot)) mapping.set(tandoorType, slot);
+        }
+    }
+    const overwrite = body.overwrite === true;
+
+    try {
+        const integ = await loadTandoorIntegration(req.userId!);
+        if (!integ || !integ.encrypted_credentials) {
+            return res.status(404).json({ success: false, error: 'Aucune integration Tandoor configuree' });
+        }
+        await assertSafeIntegrationUrl(integ.base_url);
+        const entries = await fetchTandoorMealPlan(integ.base_url, integ.encrypted_credentials, range.start, range.end);
+
+        // Several Tandoor entries can land on the same OpenFamily slot (one slot per
+        // day and meal type): they are merged into a single meal.
+        const slots = new Map<string, { date: string; mealType: string; entries: TandoorMealPlanEntry[] }>();
+        let unmapped = 0;
+        for (const entry of entries) {
+            const mealType = mapping.get(entry.meal_type);
+            if (!mealType) {
+                unmapped += 1;
+                continue;
+            }
+            const key = `${entry.date}|${mealType}`;
+            const slot = slots.get(key) || { date: entry.date, mealType, entries: [] };
+            slot.entries.push(entry);
+            slots.set(key, slot);
+        }
+
+        const recipeRows = await query('SELECT id, name FROM recipes WHERE user_id = $1', [req.userId]);
+        const recipeByName = new Map<string, string>();
+        for (const row of recipeRows.rows as Array<{ id: string; name: string }>) {
+            const key = row.name.trim().toLowerCase();
+            if (!recipeByName.has(key)) recipeByName.set(key, row.id);
+        }
+
+        const existingRows = await query(
+            `SELECT to_char(date, 'YYYY-MM-DD') AS date, meal_type FROM meal_plans
+             WHERE user_id = $1 AND date >= $2 AND date <= $3`,
+            [req.userId, range.start, range.end]
+        );
+        const occupied = new Set((existingRows.rows as Array<{ date: string; meal_type: string }>).map((r) => `${r.date}|${r.meal_type}`));
+
+        let imported = 0;
+        let skipped = 0;
+        for (const [key, slot] of slots) {
+            if (occupied.has(key) && !overwrite) {
+                skipped += 1;
+                continue;
+            }
+            const names = slot.entries
+                .map((e) => e.recipe_name || e.title)
+                .filter((name): name is string => Boolean(name));
+            const single = slot.entries.length === 1 ? slot.entries[0] : null;
+            // One entry whose recipe exists locally (e.g. imported by the Tandoor sync)
+            // is linked to that recipe; anything else becomes a custom meal.
+            const recipeId = single?.recipe_name ? recipeByName.get(single.recipe_name.toLowerCase()) ?? null : null;
+            const customMeal = recipeId ? null : (names.join(' + ') || 'Tandoor');
+            const notes = slot.entries.map((e) => e.note).filter(Boolean).join('\n') || null;
+
+            await query(
+                `INSERT INTO meal_plans (user_id, date, meal_type, recipe_id, custom_meal, notes)
+                 VALUES ($1, $2, $3, $4, $5, $6)
+                 ON CONFLICT (user_id, date, meal_type)
+                 DO UPDATE SET recipe_id = EXCLUDED.recipe_id,
+                               custom_meal = EXCLUDED.custom_meal,
+                               notes = EXCLUDED.notes`,
+                [req.userId, slot.date, slot.mealType, recipeId, customMeal, notes]
+            );
+            imported += 1;
+        }
+
+        if (imported > 0) {
+            broadcast(req.userId!, { type: 'update', entity: 'meal-plans', action: 'created' });
+        }
+        res.json({ success: true, data: { imported, skipped, unmapped, total: entries.length } });
+    } catch (e) {
+        if (e instanceof UnsafeUrlError) {
+            return res.status(400).json({ success: false, error: e.message });
+        }
+        res.status(502).json({ success: false, error: e instanceof Error ? e.message : 'Tandoor indisponible' });
     }
 });
 

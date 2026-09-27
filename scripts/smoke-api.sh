@@ -92,6 +92,15 @@ APPOINTMENT_ID=$(echo "$apt" | jq -r '.data.id')
 request PUT "/api/appointments/$APPOINTMENT_ID" '{"location":"Cabinet Centre"}' >/dev/null
 request GET "/api/appointments?start_date=2026-03-01T00:00:00.000Z&end_date=2026-03-31T23:59:59.000Z" >/dev/null
 
+# The iCal feed is read by Google, Apple and Outlook without a session: it must
+# answer with the calendar, not 401 (1.8.0 broke it).
+FEED_TOKEN=$(request GET "/api/calendar/token" | jq -r '.data.token')
+feed_status=$(curl -sS -o /tmp/openfamily-feed.ics -w '%{http_code}' "$API_BASE/api/calendar/$FEED_TOKEN/openfamily.ics")
+if [ "$feed_status" != "200" ] || ! grep -q "SUMMARY:Dentiste" /tmp/openfamily-feed.ics; then
+  echo "[FAIL] iCal feed answered $feed_status without the appointment" >&2
+  exit 1
+fi
+
 echo "[7/12] Planning"
 planning=$(request POST "/api/planning" "{\"family_member_id\":\"$FAMILY_ID\",\"schedule_type\":\"work\",\"title\":\"Bureau\",\"day_of_week\":1,\"start_time\":\"09:00\",\"end_time\":\"17:00\"}")
 assert_success "$planning"

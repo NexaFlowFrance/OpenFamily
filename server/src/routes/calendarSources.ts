@@ -16,7 +16,11 @@ import {
 } from '../lib/calendarSources';
 
 const router = Router();
-router.use(authMiddleware);
+// This router shares /api/calendar with the public iCal feed
+// (/api/calendar/:token/openfamily.ics, read by Google, Apple and Outlook
+// without a session). A router.use(authMiddleware) here would run for every
+// /api/calendar request and answer 401 to the feed, as it did in 1.8.0: each
+// route checks the login itself.
 
 const normalizeColor = (value: unknown, fallback: string): string => {
     const color = typeof value === 'string' ? value.trim().toUpperCase() : '';
@@ -67,6 +71,7 @@ const userLanguage = async (req: AuthRequest) => {
 // and parent checks, with its own size limit.
 router.post(
     '/import',
+    authMiddleware,
     requireParent,
     express.text({ type: () => true, limit: MAX_ICS_BYTES }),
     async (req: AuthRequest, res) => {
@@ -103,7 +108,7 @@ router.post(
 );
 
 // ─── followed calendars ─────────────────────────────────────────────────────
-router.get('/subscriptions', async (req: AuthRequest, res) => {
+router.get('/subscriptions', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const result = await query(
             'SELECT * FROM calendar_subscriptions WHERE user_id = $1 ORDER BY created_at ASC',
@@ -115,7 +120,7 @@ router.get('/subscriptions', async (req: AuthRequest, res) => {
     }
 });
 
-router.post('/subscriptions', requireParent, async (req: AuthRequest, res) => {
+router.post('/subscriptions', authMiddleware, requireParent, async (req: AuthRequest, res) => {
     try {
         const count = await query('SELECT COUNT(*)::int AS n FROM calendar_subscriptions WHERE user_id = $1', [req.userId]);
         if (count.rows[0].n >= MAX_SUBSCRIPTIONS) {
@@ -166,7 +171,7 @@ router.post('/subscriptions', requireParent, async (req: AuthRequest, res) => {
 });
 
 // Name, colour and members; the colour and members apply to its events too.
-router.put('/subscriptions/:id', requireParent, async (req: AuthRequest, res) => {
+router.put('/subscriptions/:id', authMiddleware, requireParent, async (req: AuthRequest, res) => {
     try {
         const current = await query(
             'SELECT * FROM calendar_subscriptions WHERE id = $1 AND user_id = $2',
@@ -199,7 +204,7 @@ router.put('/subscriptions/:id', requireParent, async (req: AuthRequest, res) =>
     }
 });
 
-router.post('/subscriptions/:id/sync', requireParent, async (req: AuthRequest, res) => {
+router.post('/subscriptions/:id/sync', authMiddleware, requireParent, async (req: AuthRequest, res) => {
     try {
         const owned = await query('SELECT 1 FROM calendar_subscriptions WHERE id = $1 AND user_id = $2', [req.params.id, req.userId]);
         if (owned.rows.length === 0) return res.status(404).json({ success: false, error: 'Not found' });
@@ -212,7 +217,7 @@ router.post('/subscriptions/:id/sync', requireParent, async (req: AuthRequest, r
 });
 
 // Unfollowing removes its events (they belong to the source).
-router.delete('/subscriptions/:id', requireParent, async (req: AuthRequest, res) => {
+router.delete('/subscriptions/:id', authMiddleware, requireParent, async (req: AuthRequest, res) => {
     try {
         const removed = await query(
             'DELETE FROM calendar_subscriptions WHERE id = $1 AND user_id = $2 RETURNING id',

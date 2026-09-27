@@ -77,9 +77,9 @@ Leave these **empty** unless you know you need them: `VITE_API_URL`, `VITE_WS_UR
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:1.8.0
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.8.1
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:1.8.0
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.8.1
 ```
 
 ```bash

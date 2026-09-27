@@ -94,9 +94,9 @@ docker-compose up -d --build
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:1.7.1
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.8.0
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:1.7.1
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.8.0
 ```
 
 puis lancez `docker compose pull server client && docker compose up -d`, sans `--build`. Les noms d'image prennent bien le suffixe `-server` / `-client`. Les options de construction comme `VITE_REGISTRATION_ENABLED` demandent toujours de construire le client vous-même.

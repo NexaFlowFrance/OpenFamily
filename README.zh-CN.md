@@ -131,9 +131,9 @@ npm run smoke:api
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:1.7.1
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.8.0
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:1.7.1
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.8.0
 ```
 
 然后运行 `docker compose pull server client && docker compose up -d`（不要加 `--build`）。镜像名必须带 `-server` / `-client` 后缀。`VITE_REGISTRATION_ENABLED` 等构建期选项仍需自行构建客户端。

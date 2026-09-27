@@ -1,6 +1,7 @@
 import { query } from '../../db';
 import { decryptCredentials } from '../../utils/crypto';
 import { safeFetch } from '../../lib/safeFetch';
+import { ingredientLine, instructionLine } from '../../lib/recipeLines';
 
 // Outbound Tandoor calls go through safeFetch: redirects are re-validated on every
 // hop (no SSRF bypass via a 302 to an internal/metadata address) and each request
@@ -73,17 +74,18 @@ export async function syncTandoor(
                 );
                 if (existing.rows.length > 0) continue;
 
+                // Lines of text, as every recipe in OpenFamily ("250 g pâtes").
                 const ingredients = (recipe.steps || []).flatMap((step) =>
-                    (step.ingredients || []).map((ing) => ({
+                    (step.ingredients || []).map((ing) => ingredientLine({
                         name: [ing.food?.name, ing.note].filter(Boolean).join(' '),
                         quantity: ing.amount ? String(ing.amount) : '',
                         unit: ing.unit?.name || '',
                     }))
-                );
+                ).filter(Boolean);
 
                 const instructions = (recipe.steps || [])
-                    .filter((s) => s.instruction)
-                    .map((s, i) => ({ step: i + 1, text: s.instruction! }));
+                    .map((s) => instructionLine(s.instruction))
+                    .filter(Boolean);
 
                 const category = recipe.keywords?.[0]?.name || 'Autre';
 

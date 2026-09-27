@@ -148,4 +148,45 @@ export const coreMigrations: readonly Migration[] = [
             'CREATE INDEX IF NOT EXISTS idx_appointments_subscription ON appointments(subscription_id) WHERE subscription_id IS NOT NULL',
         ],
     },
+    {
+        // Recipes synced from Tandoor or Mealie stored their ingredients as
+        // { name, quantity, unit } and their steps as { step, text }, where the
+        // app expects lines of text: such recipes could not be opened, edited
+        // or sent to the shopping list. They become lines ("250 g pâtes"); a
+        // Mealie name already starts with its quantity and is kept as is.
+        id: 'core/0006-recipe-text-lines',
+        statements: [
+            `UPDATE recipes
+             SET ingredients = COALESCE((
+                 SELECT jsonb_agg(line) FROM (
+                     SELECT CASE
+                         WHEN jsonb_typeof(e) <> 'object' THEN e
+                         WHEN COALESCE(e->>'quantity', '') = ''
+                              OR position(e->>'quantity' IN COALESCE(e->>'name', '')) = 1
+                             THEN to_jsonb(trim(COALESCE(e->>'name', '')))
+                         ELSE to_jsonb(trim(concat_ws(' ', e->>'quantity', NULLIF(e->>'unit', ''), NULLIF(e->>'name', ''))))
+                     END AS line
+                     FROM jsonb_array_elements(ingredients) WITH ORDINALITY AS t(e, n)
+                     ORDER BY n
+                 ) lines
+                 WHERE line <> '""'::jsonb
+             ), '[]'::jsonb)
+             WHERE jsonb_typeof(ingredients) = 'array'
+               AND EXISTS (SELECT 1 FROM jsonb_array_elements(ingredients) e WHERE jsonb_typeof(e) = 'object')`,
+            `UPDATE recipes
+             SET instructions = COALESCE((
+                 SELECT jsonb_agg(line) FROM (
+                     SELECT CASE
+                         WHEN jsonb_typeof(e) = 'object' THEN to_jsonb(trim(COALESCE(e->>'text', '')))
+                         ELSE e
+                     END AS line
+                     FROM jsonb_array_elements(instructions) WITH ORDINALITY AS t(e, n)
+                     ORDER BY n
+                 ) lines
+                 WHERE line <> '""'::jsonb
+             ), '[]'::jsonb)
+             WHERE jsonb_typeof(instructions) = 'array'
+               AND EXISTS (SELECT 1 FROM jsonb_array_elements(instructions) e WHERE jsonb_typeof(e) = 'object')`,
+        ],
+    },
 ];

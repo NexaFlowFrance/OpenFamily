@@ -3,6 +3,7 @@ import { PoolClient } from 'pg';
 import { getClient, query } from '../db';
 import { authMiddleware, requireParent, AuthRequest } from '../middleware/auth';
 import { normalizeReminderMinutes, applyLegacyReminderFlags } from '../lib/reminders';
+import { withTextLines } from '../lib/recipeLines';
 import { OPENFAMILY_VERSION } from '../version';
 import { cleanContent, cleanImage, cleanLink } from '../lib/postFields';
 import { cleanImageUrl } from '../lib/recipeImage';
@@ -691,7 +692,8 @@ router.post('/import', requireParent, importBodyParser, async (req: AuthRequest,
         await importRows('recipes', importData.recipes, (row) => {
             // Same rule as the recipe routes; an unusable photo is dropped, not the recipe.
             row.image_url = cleanImageUrl(row.image_url) ?? null;
-            return row;
+            // Files from older synced recipes may hold objects: store lines of text.
+            return withTextLines(row);
         });
         const recipeIds = await loadOwnedIds(client, 'recipes', userId);
 

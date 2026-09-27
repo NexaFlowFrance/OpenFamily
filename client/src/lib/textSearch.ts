@@ -3,7 +3,7 @@
  * count, so "brocoli", "Brocolis" and "BROCOLI" meet, and "oeuf" finds "Œufs".
  */
 export const foldText = (value: string): string =>
-    value
+    String(value ?? '')
         .normalize('NFD')
         .replace(/\p{Diacritic}/gu, '')
         .replace(/œ/gi, 'oe')

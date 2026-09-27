@@ -470,6 +470,8 @@ const Recipes: React.FC = () => {
         const byKey = new Map<string, string>();
         for (const recipe of recipes) {
             for (const line of recipe.ingredients ?? []) {
+                // The server sends lines of text; anything else is skipped, never fatal.
+                if (typeof line !== 'string') continue;
                 const name = cleanIngredientForShopping(line).name.trim();
                 if (name && name.length <= 40 && !byKey.has(foldText(name))) byKey.set(foldText(name), name);
             }

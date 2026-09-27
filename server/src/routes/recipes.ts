@@ -3,6 +3,7 @@ import pool, { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty, toOptionalNumber } from '../lib/normalize';
 import { cleanImageUrl } from '../lib/recipeImage';
+import { withTextLines } from '../lib/recipeLines';
 import { broadcast } from '../lib/broadcaster';
 import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
 import { getFamilyCategories } from './categories';
@@ -145,7 +146,7 @@ router.get('/', async (req: AuthRequest, res) => {
         queryText += ' ORDER BY name ASC';
 
         const result = await query(queryText, params);
-        res.json({ success: true, data: result.rows });
+        res.json({ success: true, data: result.rows.map(withTextLines) });
     } catch (error) {
         console.error('Get recipes error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -166,7 +167,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ success: false, error: 'Recipe not found' });
         }
 
-        res.json({ success: true, data: result.rows[0] });
+        res.json({ success: true, data: withTextLines(result.rows[0]) });
     } catch (error) {
         console.error('Get recipe error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });

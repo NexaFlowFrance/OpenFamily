@@ -1,6 +1,7 @@
 import { query } from '../../db';
 import { decryptCredentials } from '../../utils/crypto';
 import { safeFetch } from '../../lib/safeFetch';
+import { instructionLine } from '../../lib/recipeLines';
 
 // Outbound Mealie calls go through safeFetch: redirects are re-validated on every
 // hop (no SSRF bypass via a 302 to an internal/metadata address) and each request
@@ -101,13 +102,13 @@ export async function syncMealie(
                     if (ing.unit?.name) parts.push(ing.unit.name);
                     if (ing.food?.name) parts.push(ing.food.name);
                     else if (ing.note) parts.push(ing.note);
-                    return { name: parts.join(' '), quantity: ing.quantity ? String(ing.quantity) : '', unit: ing.unit?.name || '' };
-                });
+                    // Lines of text, as every recipe in OpenFamily ("2 cup flour").
+                    return parts.join(' ');
+                }).filter(Boolean);
 
-                const instructions = (recipe.recipeInstructions || []).map((step, i) => ({
-                    step: i + 1,
-                    text: step.text,
-                }));
+                const instructions = (recipe.recipeInstructions || [])
+                    .map((step) => instructionLine(step.text))
+                    .filter(Boolean);
 
                 const category = recipe.recipeCategory?.[0]?.name || recipe.tags?.[0]?.name || 'Autre';
                 const imageUrl = recipe.image ? `${baseUrl}/api/media/recipes/${recipe.slug}/images/min-original.webp` : null;

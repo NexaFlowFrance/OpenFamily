@@ -3,6 +3,13 @@ name: Docker Publish
 on:
   push:
     tags: ['v*']
+  # Republish the images of an existing release (e.g. after a build fix):
+  # builds the selected branch and tags the images with the given version.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version for the image tags, without the v (e.g. 1.8.2)'
+        required: true
 
 permissions:
   contents: read
@@ -30,7 +37,14 @@ jobs:
 
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then
+            echo "VERSION=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up QEMU (arm64 emulation)
         uses: docker/setup-qemu-action@v3

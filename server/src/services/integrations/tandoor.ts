@@ -1,7 +1,7 @@
-import { query } from '../../db';
 import { decryptCredentials } from '../../utils/crypto';
 import { safeFetch } from '../../lib/safeFetch';
 import { ingredientLine, instructionLine } from '../../lib/recipeLines';
+import { forEachLimited, saveSyncedRecipe } from '../../lib/recipeSync';
 
 // Outbound Tandoor calls go through safeFetch: redirects are re-validated on every
 // hop (no SSRF bypass via a 302 to an internal/metadata address) and each request
@@ -18,14 +18,18 @@ interface TandoorRecipe {
     keywords?: { name: string }[];
     steps?: {
         ingredients?: {
-            food?: { name: string };
-            unit?: { name: string };
-            amount?: number;
-            note?: string;
+            food?: { name: string } | null;
+            unit?: { name: string } | null;
+            amount?: number | null;
+            note?: string | null;
+            /** A section title ("For the sauce"), not an ingredient. */
+            is_header?: boolean;
+            /** "Salt to taste": the amount means nothing. */
+            no_amount?: boolean;
         }[];
-        instruction?: string;
+        instruction?: string | null;
     }[];
-    image?: string;
+    image?: string | null;
 }
 
 export async function testTandoorConnection(baseUrl: string, apiKey: string): Promise<{ success: boolean; message: string }> {
@@ -58,6 +62,8 @@ export async function syncTandoor(
     let errors = 0;
     let page = 1;
 
+    // The list (/api/recipe/) gives an overview without steps: the ingredients
+    // and instructions come from each recipe's own endpoint.
     while (true) {
         const resp = await safeFetch(`${baseUrl}/api/recipe/?format=json&page=${page}&page_size=50`, { headers, timeoutMs: TANDOOR_TIMEOUT_MS });
         if (!resp.ok) throw new Error(`Tandoor API error ${resp.status}`);
@@ -65,40 +71,43 @@ export async function syncTandoor(
         const data = await resp.json() as { results: TandoorRecipe[]; next?: string };
         if (!data.results || data.results.length === 0) break;
 
-        for (const recipe of data.results) {
+        await forEachLimited(data.results, 4, async (summary) => {
             try {
-                // Deduplication: skip if name already exists for this user
-                const existing = await query(
-                    'SELECT id FROM recipes WHERE user_id = $1 AND name = $2',
-                    [userId, recipe.name]
-                );
-                if (existing.rows.length > 0) continue;
+                const detailResp = await safeFetch(`${baseUrl}/api/recipe/${summary.id}/?format=json`, { headers, timeoutMs: TANDOOR_TIMEOUT_MS });
+                if (!detailResp.ok) throw new Error(`Tandoor API error ${detailResp.status}`);
+                const recipe = { ...summary, ...(await detailResp.json() as TandoorRecipe) };
 
                 // Lines of text, as every recipe in OpenFamily ("250 g pâtes").
                 const ingredients = (recipe.steps || []).flatMap((step) =>
-                    (step.ingredients || []).map((ing) => ingredientLine({
-                        name: [ing.food?.name, ing.note].filter(Boolean).join(' '),
-                        quantity: ing.amount ? String(ing.amount) : '',
-                        unit: ing.unit?.name || '',
-                    }))
+                    (step.ingredients || [])
+                        .filter((ing) => !ing.is_header)
+                        .map((ing) => ingredientLine({
+                            name: [ing.food?.name, ing.note].filter(Boolean).join(' '),
+                            quantity: ing.amount && !ing.no_amount ? String(ing.amount) : '',
+                            unit: ing.no_amount ? '' : ing.unit?.name || '',
+                        }))
                 ).filter(Boolean);
 
                 const instructions = (recipe.steps || [])
                     .map((s) => instructionLine(s.instruction))
                     .filter(Boolean);
 
-                const category = recipe.keywords?.[0]?.name || 'Autre';
-
-                await query(
-                    `INSERT INTO recipes (user_id, name, category, description, ingredients, instructions, prep_time, cook_time, servings, image_url)
-                     VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10)`,
-                    [userId, recipe.name, category, recipe.description || null, JSON.stringify(ingredients), JSON.stringify(instructions), recipe.working_time || null, recipe.waiting_time || null, recipe.servings || null, recipe.image || null]
-                );
-                imported++;
+                const outcome = await saveSyncedRecipe(userId, {
+                    name: recipe.name,
+                    category: recipe.keywords?.[0]?.name || 'Autre',
+                    description: recipe.description || null,
+                    ingredients,
+                    instructions,
+                    prepTime: recipe.working_time || null,
+                    cookTime: recipe.waiting_time || null,
+                    servings: recipe.servings || null,
+                    imageUrl: recipe.image || null,
+                });
+                if (outcome !== 'skipped') imported++;
             } catch {
                 errors++;
             }
-        }
+        });
 
         if (!data.next) break;
         page++;

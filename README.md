@@ -134,9 +134,9 @@ npm run smoke:api
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:1.8.1
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.8.2
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:1.8.1
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.8.2
 ```
 
 then run `docker compose pull server client && docker compose up -d`, without `--build`. The image names need their `-server` / `-client` suffix. Build-time options such as `VITE_REGISTRATION_ENABLED` still require building the client yourself.

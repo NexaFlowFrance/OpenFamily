@@ -139,7 +139,7 @@ services:
     image: ghcr.io/nexaflowfrance/openfamily-client:1.8.2
 ```
 
-then run `docker compose pull server client && docker compose up -d`, without `--build`. The image names need their `-server` / `-client` suffix. Build-time options such as `VITE_REGISTRATION_ENABLED` still require building the client yourself.
+then run `docker compose pull server client && docker compose up -d`, without `--build`. The image names need their `-server` / `-client` suffix. Settings such as `REGISTRATION_ENABLED` are read by the server at startup, so the published images need no rebuild.
 
 ### 🛠️ Manual install
 

@@ -33,14 +33,30 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     }
 });
 
+const registrationOpen = (): boolean => process.env.REGISTRATION_ENABLED !== 'false';
+
+// Whether anyone can create an account, read by the login page to show or hide
+// "Sign up". No session: it is the first thing an unauthenticated app asks.
+// Invitations work either way (see the register route), so a closed server is
+// an invitation-only server.
+router.get('/registration', (_req, res) => {
+    res.json({ success: true, data: { open: registrationOpen() } });
+});
+
 // Register
 router.post('/register', async (req, res) => {
-    if (process.env.REGISTRATION_ENABLED === 'false') {
+    const { email, password, name, inviteToken } = req.body ?? {};
+    const hasInvite = typeof inviteToken === 'string' && inviteToken.length > 0;
+
+    // Closed sign-ups (REGISTRATION_ENABLED=false) still let an invited person
+    // in: the invitation was created by a parent of the family, is random, dated
+    // and may be bound to an e-mail, which is all the authorisation a self-hosted
+    // server needs. Without one, the request is refused before any lookup.
+    if (!registrationOpen() && !hasInvite) {
         return res.status(403).json({ success: false, error: 'Registration is disabled' });
     }
 
     try {
-        const { email, password, name, inviteToken } = req.body;
         const normalizedEmail = typeof email === 'string' ? normalizeEmail(email) : '';
         const cleanedName = typeof name === 'string' ? name.trim() : '';
 
@@ -63,7 +79,7 @@ router.post('/register', async (req, res) => {
         // Validate the invite BEFORE creating the account so an invalid token never leaves an orphan user.
         // Without a token the user becomes their own family owner (standalone account).
         let invite: { id: string; owner_id: string; role: string } | null = null;
-        if (typeof inviteToken === 'string' && inviteToken.length > 0) {
+        if (hasInvite) {
             const inviteResult = await query(
                 `SELECT id, owner_id, invitee_email, role FROM family_invites
                  WHERE token = $1 AND status = 'pending' AND expires_at > NOW()`,

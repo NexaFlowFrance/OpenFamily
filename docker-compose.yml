@@ -77,8 +77,8 @@ services:
         # works from any device. Set these only to serve the API from a separate origin.
         VITE_API_URL: ${VITE_API_URL:-}
         VITE_WS_URL: ${VITE_WS_URL:-}
-        # Same flag as the server's REGISTRATION_ENABLED: hides the "Sign up"
-        # link so the UI matches what the API accepts.
+        # The login page asks the server whether sign-ups are open; this only
+        # sets what it shows until the server has answered.
         VITE_REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
     container_name: openfamily-client
     restart: unless-stopped

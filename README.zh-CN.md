@@ -136,7 +136,7 @@ services:
     image: ghcr.io/nexaflowfrance/openfamily-client:1.8.2
 ```
 
-然后运行 `docker compose pull server client && docker compose up -d`（不要加 `--build`）。镜像名必须带 `-server` / `-client` 后缀。`VITE_REGISTRATION_ENABLED` 等构建期选项仍需自行构建客户端。
+然后运行 `docker compose pull server client && docker compose up -d`（不要加 `--build`）。镜像名必须带 `-server` / `-client` 后缀。`REGISTRATION_ENABLED` 等设置由服务器在启动时读取，已发布的镜像无需重新构建。
 
 ### 🛠️ 手动安装
 

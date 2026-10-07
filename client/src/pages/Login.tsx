@@ -14,7 +14,12 @@ const Login: React.FC = () => {
     const { t } = useTranslation(['auth', 'common', 'nav']);
     const { login, register } = useAuth();
     const { actualTheme, setTheme } = useTheme();
-    const registrationEnabled = import.meta.env.VITE_REGISTRATION_ENABLED !== 'false';
+    // Whether this server lets anyone sign up. Asked at runtime, so the ready-made
+    // images and the Android app follow the server's setting; the build-time flag
+    // only decides what to show until the server has answered (or when it cannot).
+    const [registrationEnabled, setRegistrationEnabled] = useState(
+        import.meta.env.VITE_REGISTRATION_ENABLED !== 'false'
+    );
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -38,6 +43,16 @@ const Login: React.FC = () => {
             setInviteToken(invite);
             setIsLogin(false);
         }
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        api.get<{ success: boolean; data?: { open?: boolean } }>('/api/auth/registration')
+            .then((res) => {
+                if (!cancelled && typeof res?.data?.open === 'boolean') setRegistrationEnabled(res.data.open);
+            })
+            .catch(() => { /* older server or offline: keep the build-time default */ });
+        return () => { cancelled = true; };
     }, []);
 
     const handleForgotSubmit = async (e: React.FormEvent) => {
@@ -243,7 +258,9 @@ const Login: React.FC = () => {
                         </div>
                     )}
 
-                    {registrationEnabled && (
+                    {/* With sign-ups closed, the link only shows on an invitation: the
+                        invited person may already have an account to sign in with. */}
+                    {(registrationEnabled || inviteToken) && (
                         <div className="mt-8 text-center pt-2 border-t border-border">
                             <button
                                 onClick={() => {

@@ -66,7 +66,7 @@ Facultatif, mais utile :
 |---|---|
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Notifications push (rappels, activité de la famille). Générez les clés avec `docker run --rm node:20-alpine npx -y web-push generate-vapid-keys` ; `VAPID_SUBJECT` vaut `mailto:` suivi de votre e-mail. Le push demande aussi le HTTPS (étape 6). |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | E-mails d'invitation et de réinitialisation du mot de passe. Sans eux, les invitations marchent quand même en partageant leur lien. |
-| `REGISTRATION_ENABLED` | `false` empêche toute création de compte (voir l'étape 5). |
+| `REGISTRATION_ENABLED` | `false` ferme les inscriptions : seules les personnes que vous invitez peuvent créer un compte (voir l'étape 5). |
 
 Laissez **vides**, sauf besoin précis : `VITE_API_URL`, `VITE_WS_URL` (l'application parle à sa propre adresse et transmet elle-même `/api`), `CORS_ORIGINS` (seulement pour une application web servie depuis un autre domaine), `APP_PUBLIC_URL` (seulement si les liens des e-mails montrent une mauvaise adresse derrière votre proxy).
 
@@ -116,7 +116,7 @@ OpenFamily répond sur `http://<adresse-du-serveur>:3000`. Seul le port **3000**
 
 1. Ouvrez OpenFamily et créez votre compte : il devient propriétaire d'une nouvelle famille.
 2. Dans **Famille**, ajoutez chaque personne (avec ou sans compte) et invitez les adultes qui veulent leur propre connexion.
-3. Quand tous ceux qui ont besoin d'un compte l'ont créé, vous pouvez fermer les inscriptions : mettez `REGISTRATION_ENABLED=false` dans `.env`, puis `docker compose up -d`. Chaque nouveau compte crée ou rejoint une famille, et une fois les inscriptions fermées plus personne ne peut créer de compte, même avec une invitation : rouvrez-les un moment quand quelqu'un arrive.
+3. Une fois votre propre compte créé, fermez les inscriptions : mettez `REGISTRATION_ENABLED=false` dans `.env`, puis `docker compose up -d`. Dès lors, plus personne ne peut créer de compte de lui-même, mais toute personne que vous invitez depuis **Famille** (par lien ou par e-mail) le peut toujours : l'invitation est son billet d'entrée. Une invitation dure de 1 à 30 jours et peut être réservée à une adresse e-mail.
 
 ## 6. Y accéder hors de chez vous, en HTTPS
 
@@ -198,7 +198,7 @@ Il crée un conteneur Debian avec Docker, génère les secrets et démarre OpenF
 | `password authentication failed for user "openfamily"` | Le volume de la base a été créé avec un autre `POSTGRES_PASSWORD`. Remettez l'ancien mot de passe, ou, sur une installation neuve seulement, supprimez le volume avec `docker compose down -v` (cela efface les données). |
 | `port is already allocated` | Un autre programme utilise 3000, 3001 ou le port PostgreSQL. Changez `POSTGRES_PORT` dans `.env`, ou publiez l'application sur un autre port (par exemple `"8080:80"` pour `client`). |
 | Les rappels arrivent avec une ou deux heures de retard | `TZ` manque : ajoutez-le dans `.env` puis `docker compose up -d`. |
-| L'inscription est refusée | `REGISTRATION_ENABLED=false` : repassez-le à `true` un moment. |
+| « Créer un compte » absent ou refusé | `REGISTRATION_ENABLED=false` : invitez la personne depuis **Famille**, ou repassez-le à `true`. |
 | Pas de notifications push | Il faut le HTTPS et les trois valeurs `VAPID_*`, et les autoriser sur chaque appareil. |
 | La page s'affiche mais rien ne se met à jour en direct derrière un proxy | Les WebSockets ne passent pas : activez-les dans le proxy. |
 | « 413 Request Entity Too Large » pendant un import | Votre propre proxy limite les envois : augmentez sa limite (`client_max_body_size 256m` dans nginx). |

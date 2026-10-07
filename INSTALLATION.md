@@ -66,7 +66,7 @@ Optional, but worth it:
 |---|---|
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Push notifications (reminders, family activity). Generate the keys with `docker run --rm node:20-alpine npx -y web-push generate-vapid-keys`; `VAPID_SUBJECT` is `mailto:` followed by your e-mail. Push also needs HTTPS (step 6). |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Invitation e-mails and password reset. Without them, invitations still work by sharing their link. |
-| `REGISTRATION_ENABLED` | `false` stops anyone from creating an account (see step 5). |
+| `REGISTRATION_ENABLED` | `false` closes sign-ups: only people you invite can create an account (see step 5). |
 
 Leave these **empty** unless you know you need them: `VITE_API_URL`, `VITE_WS_URL` (the web app talks to its own address and forwards `/api` itself), `CORS_ORIGINS` (only for a web app served from another domain), `APP_PUBLIC_URL` (only if e-mail links show the wrong address behind your proxy).
 
@@ -116,7 +116,7 @@ OpenFamily is at `http://<server-address>:3000`. Only port **3000** is needed: i
 
 1. Open OpenFamily and create your account: it becomes the owner of a new family.
 2. In **Family**, add each person (with or without an account) and invite the adults who want their own login.
-3. Once everyone who needs an account has created it, you can close sign-ups: set `REGISTRATION_ENABLED=false` in `.env`, then `docker compose up -d`. Each new account creates or joins a family, and with sign-ups closed nobody can create an account, not even with an invitation, so reopen it for a moment when someone new joins.
+3. Once your own account exists, close sign-ups: set `REGISTRATION_ENABLED=false` in `.env`, then `docker compose up -d`. From then on nobody can create an account on their own, but anyone you invite from **Family** (by link or by e-mail) still can: the invitation is their ticket in. An invitation lasts 1 to 30 days and can be reserved for one e-mail address.
 
 ## 6. Reach it from outside your home, over HTTPS
 
@@ -198,7 +198,7 @@ It creates a Debian container with Docker, generates the secrets and starts Open
 | `password authentication failed for user "openfamily"` | The database volume was created with another `POSTGRES_PASSWORD`. Put the old password back, or, on a new install only, delete the volume with `docker compose down -v` (this erases the data). |
 | `port is already allocated` | Another program uses 3000, 3001 or the PostgreSQL port. Change `POSTGRES_PORT` in `.env`, or map another port for the app (for example `"8080:80"` for `client`). |
 | Reminders arrive one or two hours late | `TZ` is missing: set it in `.env` and run `docker compose up -d`. |
-| "Sign up" is refused | `REGISTRATION_ENABLED=false`: set it to `true` for a moment. |
+| "Sign up" is missing or refused | `REGISTRATION_ENABLED=false`: invite the person from **Family** instead, or set it to `true`. |
 | No push notifications | They need HTTPS and the three `VAPID_*` values, and must be allowed on each device. |
 | The page loads but nothing updates live behind a proxy | WebSockets are not forwarded: turn on WebSocket support in the proxy. |
 | "413 Request Entity Too Large" when importing | Your own proxy limits uploads: raise its limit (`client_max_body_size 256m` in nginx). |

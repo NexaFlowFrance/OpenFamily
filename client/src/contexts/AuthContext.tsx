@@ -112,7 +112,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             } catch (error) {
                 console.error('Failed to restore session:', error);
-                clearSession();
+                // A network failure (offline, flaky Wi-Fi, a reload while the check
+                // was in flight) or a server error says nothing about the session:
+                // keep the account that was signed in. A rejected token has already
+                // cleared everything through AUTH_EXPIRED_EVENT, which also drops
+                // the token, so this falls through to clearSession() then.
+                let cached: User | null = null;
+                try {
+                    cached = JSON.parse(localStorage.getItem('user') || 'null') as User | null;
+                } catch {
+                    cached = null;
+                }
+                if (api.getToken() && cached?.id) {
+                    if (mounted) {
+                        setUser(cached);
+                    }
+                } else {
+                    clearSession();
+                }
             } finally {
                 if (mounted) {
                     setLoading(false);

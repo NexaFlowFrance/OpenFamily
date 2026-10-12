@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { useAuth } from '../contexts/AuthContext';
@@ -28,6 +28,36 @@ interface FamilyMember {
     id: string;
     name: string;
     color: string;
+    /** Login account this member profile belongs to, set on the Family page. */
+    linked_user_id?: string | null;
+}
+
+interface TaskFilters {
+    priority: string;
+    status: string;
+    member: string;
+}
+
+const DEFAULT_FILTERS: TaskFilters = { priority: '', status: 'all', member: '' };
+
+// Each account keeps its own filters on this device, so a child signed in on the
+// family tablet finds "my tasks" again instead of everyone's after every visit.
+const filtersKey = (userId: string) => `openfamily.tasks.filters.${userId}`;
+
+function readSavedFilters(userId: string | undefined): TaskFilters | null {
+    if (!userId) return null;
+    try {
+        const raw = localStorage.getItem(filtersKey(userId));
+        if (!raw) return null;
+        const saved = JSON.parse(raw) as Partial<TaskFilters>;
+        return {
+            priority: typeof saved.priority === 'string' ? saved.priority : '',
+            status: ['all', 'pending', 'completed'].includes(saved.status as string) ? saved.status as string : 'all',
+            member: typeof saved.member === 'string' ? saved.member : '',
+        };
+    } catch {
+        return null;
+    }
 }
 
 interface TaskStats {
@@ -68,9 +98,12 @@ const Tasks: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
-    const [filterPriority, setFilterPriority] = useState<string>('');
-    const [filterStatus, setFilterStatus] = useState<string>('all');
-    const [filterMember, setFilterMember] = useState<string>('');
+    const savedFilters = useRef(readSavedFilters(user?.id)).current;
+    const [filterPriority, setFilterPriority] = useState<string>(savedFilters?.priority ?? DEFAULT_FILTERS.priority);
+    const [filterStatus, setFilterStatus] = useState<string>(savedFilters?.status ?? DEFAULT_FILTERS.status);
+    const [filterMember, setFilterMember] = useState<string>(savedFilters?.member ?? DEFAULT_FILTERS.member);
+    // A child account with no saved choice yet starts on its own member profile.
+    const memberDefaulted = useRef(savedFilters !== null);
     const [error, setError] = useState('');
 
     // Form state
@@ -236,6 +269,32 @@ const Tasks: React.FC = () => {
             points: '',
         });
     };
+
+    useEffect(() => {
+        if (!user?.id) return;
+        try {
+            localStorage.setItem(filtersKey(user.id), JSON.stringify({
+                priority: filterPriority,
+                status: filterStatus,
+                member: filterMember,
+            }));
+        } catch {
+            /* private mode or storage full: filters simply reset next time */
+        }
+    }, [user?.id, filterPriority, filterStatus, filterMember]);
+
+    useEffect(() => {
+        if (memberDefaulted.current || isParent || !user?.id || familyMembers.length === 0) return;
+        memberDefaulted.current = true;
+        const own = familyMembers.find((member) => member.linked_user_id === user.id);
+        if (own) setFilterMember(own.id);
+    }, [familyMembers, isParent, user?.id]);
+
+    // A saved member that no longer exists would hide every task.
+    useEffect(() => {
+        if (familyMembers.length === 0 || !filterMember || filterMember === '__unassigned__') return;
+        if (!familyMembers.some((member) => member.id === filterMember)) setFilterMember('');
+    }, [familyMembers, filterMember]);
 
     const filteredTasks = tasks.filter((task) => {
         if (filterPriority && task.priority !== filterPriority) return false;

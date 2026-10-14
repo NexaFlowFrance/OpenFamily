@@ -189,4 +189,93 @@ export const coreMigrations: readonly Migration[] = [
                AND EXISTS (SELECT 1 FROM jsonb_array_elements(instructions) e WHERE jsonb_typeof(e) = 'object')`,
         ],
     },
+{
+    id: 'core/0006-integration-calendars',
+    statements: [
+        `CREATE TABLE IF NOT EXISTS integration_calendars (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+            user_id UUID NOT NULL
+                REFERENCES users(id)
+                ON DELETE CASCADE,
+
+            integration_id UUID NOT NULL
+                REFERENCES integrations(id)
+                ON DELETE CASCADE,
+
+            calendar_href TEXT NOT NULL,
+
+            calendar_name VARCHAR(255) NOT NULL,
+
+            color VARCHAR(7)
+                NOT NULL
+                DEFAULT '#3B82F6',
+
+            family_member_ids JSONB
+                NOT NULL
+                DEFAULT '[]'::jsonb,
+
+            enabled BOOLEAN
+                NOT NULL
+                DEFAULT true,
+
+            discovered BOOLEAN
+                NOT NULL
+                DEFAULT true,
+
+            last_synced_at TIMESTAMPTZ,
+
+            last_error TEXT,
+
+            event_count INTEGER
+                NOT NULL
+                DEFAULT 0,
+
+            created_at TIMESTAMPTZ
+                NOT NULL
+                DEFAULT now(),
+
+            updated_at TIMESTAMPTZ
+                NOT NULL
+                DEFAULT now(),
+
+            UNIQUE(
+                integration_id,
+                calendar_href
+            )
+        )`,
+
+        `CREATE INDEX IF NOT EXISTS
+            idx_integration_calendars_user
+         ON integration_calendars(user_id)`,
+
+        `CREATE INDEX IF NOT EXISTS
+            idx_integration_calendars_integration
+         ON integration_calendars(integration_id)`,
+
+        `ALTER TABLE appointments
+         ADD COLUMN IF NOT EXISTS
+            source_integration_id UUID
+            REFERENCES integrations(id)
+            ON DELETE CASCADE`,
+
+        `ALTER TABLE appointments
+         ADD COLUMN IF NOT EXISTS
+            source_calendar_id UUID
+            REFERENCES integration_calendars(id)
+            ON DELETE CASCADE`,
+
+        `CREATE INDEX IF NOT EXISTS
+            idx_appointments_source_connector
+         ON appointments(
+            source_integration_id
+         )`,
+
+        `CREATE INDEX IF NOT EXISTS
+            idx_appointments_source_calendar
+         ON appointments(
+            source_calendar_id
+         )`,
+    ],
+},
 ];

@@ -83,7 +83,10 @@ interface Appointment {
     start_time: string;
     end_time?: string;
     location?: string;
+    family_member_ids?: string[];
     family_members_data?: Member[];
+    source_integration_id?: string;
+    source_calendar_id?: string;
 }
 
 interface PlanningEntry {

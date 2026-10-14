@@ -19,6 +19,7 @@ import notificationsRoutes from './routes/notifications';
 import familyInvitesRoutes from './routes/familyInvites';
 import calendarRoutes from './routes/calendar';
 import calendarSourcesRoutes from './routes/calendarSources';
+import integrationCalendarsRoutes from './routes/integrationCalendars';
 import integrationsRoutes from './routes/integrations';
 import rewardsRoutes from './routes/rewards';
 import notesRoutes from './routes/notes';
@@ -195,6 +196,10 @@ app.use('/api/invites', familyInvitesRoutes);
 // Outside calendars (.ics import, followed addresses) before the public feed routes.
 app.use('/api/calendar', calendarSourcesRoutes);
 app.use('/api/calendar', calendarRoutes);
+app.use(
+    '/api/integration-calendars',
+    integrationCalendarsRoutes
+);
 app.use('/api/integrations', integrationsRoutes);
 app.use('/api/rewards', rewardsRoutes);
 app.use('/api/notes', notesRoutes);

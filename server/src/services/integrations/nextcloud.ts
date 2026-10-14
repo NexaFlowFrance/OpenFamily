@@ -1,4 +1,5 @@
-import { query } from '../../db';
+import { getClient, query } from '../../db';
+import { parseForStorage } from '../../lib/calendarSources';
 import { decryptCredentials } from '../../utils/crypto';
 import { safeFetch } from '../../lib/safeFetch';
 
@@ -138,18 +139,12 @@ export async function syncNextcloud(
         ? discovered
         : [`/remote.php/dav/calendars/${encodeURIComponent(username)}/${(config.calendar_name as string) || 'personal'}/`];
 
-    const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-    const now = new Date();
-    const startStr = fmt(now);
-    const endStr = fmt(new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()));
-
     const reportBody = `<?xml version="1.0" encoding="utf-8"?>
 <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
   <D:prop><D:getetag/><C:calendar-data/></D:prop>
   <C:filter>
     <C:comp-filter name="VCALENDAR">
       <C:comp-filter name="VEVENT">
-        <C:time-range start="${startStr}" end="${endStr}"/>
       </C:comp-filter>
     </C:comp-filter>
   </C:filter>
@@ -158,43 +153,242 @@ export async function syncNextcloud(
     let imported = 0;
     let errors = 0;
 
+    const seenUids = new Set<string>();
+
     for (const href of calendarHrefs) {
         const calUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
+
         try {
             const resp = await safeFetch(calUrl, {
                 method: 'REPORT',
-                headers: { 'Authorization': authHeader, 'Depth': '1', 'Content-Type': 'application/xml' },
+                headers: {
+                    'Authorization': authHeader,
+                    'Depth': '1',
+                    'Content-Type': 'application/xml',
+                },
                 body: reportBody,
                 timeoutMs: NEXTCLOUD_TIMEOUT_MS,
             });
-            if (!resp.ok && resp.status !== 207) continue;
+
+            if (!resp.ok && resp.status !== 207) {
+                errors++;
+                continue;
+            }
 
             const xml = await resp.text();
-            const icsBlocks = xml.match(/BEGIN:VCALENDAR[\s\S]*?END:VCALENDAR/g) || [];
+            const icsBlocks =
+                xml.match(/BEGIN:VCALENDAR[\s\S]*?END:VCALENDAR/g) || [];
 
             for (const ics of icsBlocks) {
-                for (const ev of parseICS(ics)) {
-                    try {
-                        // Primary deduplication by caldav_uid (reliable across renames)
-                        const existing = await query(
-                            'SELECT id FROM appointments WHERE user_id = $1 AND caldav_uid = $2',
-                            [userId, ev.uid]
-                        );
-                        if (existing.rows.length > 0) continue;
+                const client = await getClient();
 
-                        await query(
-                            `INSERT INTO appointments (user_id, title, description, start_time, end_time, location, color, caldav_uid)
-                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-                            [userId, ev.title, ev.description, ev.startTime, ev.endTime, ev.location, ev.color || '#3B82F6', ev.uid]
+                try {
+                    const parsed = parseForStorage(ics, null, true);
+
+                    await client.query('BEGIN');
+
+                    for (const event of parsed.events) {
+
+                        seenUids.add(event.uid);
+
+                        const existing = await client.query(
+                            `SELECT id
+                             FROM appointments
+                             WHERE user_id = $1
+                               AND caldav_uid = $2`,
+                            [userId, event.uid]
                         );
+
+                        const recurrence = event.recurrence;
+                        let appointmentId: string;
+
+                        const values = [
+                            event.title,
+                            event.description,
+                            event.start,
+                            event.end,
+                            event.location,
+                            event.allDay,
+                            recurrence?.frequency ?? 'none',
+                            recurrence?.interval ?? 1,
+                            recurrence?.until ?? null,
+                            '#3B82F6',
+                            event.uid,
+                        ];
+
+                        if (existing.rows.length > 0) {
+                            appointmentId = existing.rows[0].id;
+
+                            await client.query(
+                                `UPDATE appointments
+                                 SET title = $1,
+                                     description = $2,
+                                     start_time = $3,
+                                     end_time = $4,
+                                     location = $5,
+                                     is_all_day = $6,
+                                     recurrence_frequency = $7,
+                                     recurrence_interval = $8,
+                                     recurrence_until = $9,
+                                     color = $10,
+                                     external_uid = $11,
+                                     updated_at = CURRENT_TIMESTAMP
+                                 WHERE id = $12`,
+                                [...values, appointmentId]
+                            );
+
+                            await client.query(
+                                `DELETE FROM appointment_recurrence_exceptions
+                                 WHERE appointment_id = $1`,
+                                [appointmentId]
+                            );
+                        } else {
+                            const inserted = await client.query(
+                                `INSERT INTO appointments (
+                                     user_id,
+                                     title,
+                                     description,
+                                     start_time,
+                                     end_time,
+                                     location,
+                                     is_all_day,
+                                     recurrence_frequency,
+                                     recurrence_interval,
+                                     recurrence_until,
+                                     color,
+                                     caldav_uid,
+                                     external_uid
+                                 )
+                                 VALUES (
+                                     $1, $2, $3, $4, $5, $6, $7,
+                                     $8, $9, $10, $11, $12, $13
+                                 )
+                                 RETURNING id`,
+                                [
+                                    userId,
+                                    event.title,
+                                    event.description,
+                                    event.start,
+                                    event.end,
+                                    event.location,
+                                    event.allDay,
+                                    recurrence?.frequency ?? 'none',
+                                    recurrence?.interval ?? 1,
+                                    recurrence?.until ?? null,
+                                    '#3B82F6',
+                                    event.uid,
+                                    event.uid,
+                                ]
+                            );
+
+                            appointmentId = inserted.rows[0].id;
+                        }
+
+                        if (recurrence) {
+                            for (const exception of event.exceptions) {
+                                await client.query(
+                                    `INSERT INTO appointment_recurrence_exceptions (
+                                         appointment_id,
+                                         occurrence_date,
+                                         exception_type,
+                                         override_data
+                                     )
+                                     VALUES ($1, $2::date, $3, $4::jsonb)
+                                     ON CONFLICT (
+                                         appointment_id,
+                                         occurrence_date
+                                     )
+                                     DO UPDATE SET
+                                         exception_type =
+                                             EXCLUDED.exception_type,
+                                         override_data =
+                                             EXCLUDED.override_data`,
+                                    [
+                                        appointmentId,
+                                        exception.date,
+                                        exception.type,
+                                        exception.data
+                                            ? JSON.stringify(exception.data)
+                                            : null,
+                                    ]
+                                );
+                            }
+                        }
+
                         imported++;
-                    } catch {
-                        errors++;
                     }
+
+                    await client.query('COMMIT');
+                } catch (error) {
+                    await client.query('ROLLBACK');
+                    console.error(
+                        'Nextcloud calendar event import failed:',
+                        error
+                    );
+                    errors++;
+                } finally {
+                    client.release();
                 }
             }
-        } catch {
+        } catch (error) {
+            console.error('Nextcloud calendar fetch failed:', error);
             errors++;
+        }
+    }
+
+    if (errors === 0 && seenUids.size > 0) {
+        console.info(
+            `Nextcloud sync completed with ${seenUids.size} UID(s)`
+        );
+    }
+
+    if (errors === 0 && seenUids.size > 0) {
+        const client = await getClient();
+
+        try {
+            const currentUids = Array.from(seenUids);
+
+            await client.query('BEGIN');
+
+            await client.query(
+                `DELETE FROM appointment_recurrence_exceptions
+                 WHERE appointment_id IN (
+                     SELECT id
+                     FROM appointments
+                     WHERE user_id = $1
+                       AND caldav_uid IS NOT NULL
+                       AND NOT (caldav_uid = ANY($2::text[]))
+                 )`,
+                [userId, currentUids]
+            );
+
+            const deleted = await client.query(
+                `DELETE FROM appointments
+                 WHERE user_id = $1
+                   AND caldav_uid IS NOT NULL
+                   AND NOT (caldav_uid = ANY($2::text[]))
+                 RETURNING id`,
+                [userId, currentUids]
+            );
+
+            await client.query('COMMIT');
+
+            if (deleted.rowCount && deleted.rowCount > 0) {
+                console.info(
+                    `Removed ${deleted.rowCount} deleted Nextcloud event(s)`
+                );
+            }
+        } catch (error) {
+            await client.query('ROLLBACK');
+
+            console.error(
+                'Removing deleted Nextcloud events failed:',
+                error
+            );
+
+            errors++;
+        } finally {
+            client.release();
         }
     }
 

@@ -7,10 +7,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-openfamily}
       POSTGRES_USER: ${POSTGRES_USER:-openfamily}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - /data/openfamily/postgres:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-openfamily}" ]
       interval: 10s
@@ -39,7 +37,7 @@ services:
       REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
       # The family's time zone. Appointments are stored in local time; without
       # it the container runs in UTC and reminders arrive one or two hours late.
-      TZ: ${TZ:-Europe/Paris}
+      TZ: ${TZ:-Europe/Vienna}
       # Optional features documented in .env.example. A variable set in .env
       # only reaches the server if it is listed here; without these lines,
       # invitation and password-reset e-mails could never be sent from a
@@ -54,8 +52,6 @@ services:
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-}
       ANDROID_CERT_SHA256: ${ANDROID_CERT_SHA256:-}
       ANDROID_PACKAGE_NAME: ${ANDROID_PACKAGE_NAME:-}
-    ports:
-      - "3001:3001"
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,7 +62,7 @@ services:
       retries: 5
       start_period: 10s
     volumes:
-      - ./server/uploads:/app/uploads
+      - /data/openfamily/uploads:/app/uploads
 
   client:
     build:
@@ -83,7 +79,7 @@ services:
     container_name: openfamily-client
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "3010:80"
     depends_on:
       server:
         condition: service_healthy

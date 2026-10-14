@@ -1,734 +1,1405 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import {
-    Calendar, UtensilsCrossed, CheckSquare, Users, Maximize2, Minimize2, X, MapPin,
-    Settings as SettingsIcon, ShoppingCart, Check, Undo2, Search, StickyNote,
-    Sun, Moon, CloudSun, CloudMoon, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning,
-} from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Calendar, MapPin } from 'lucide-react';
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
-import { useAuth } from '../contexts/AuthContext';
-import { intlLocale, weekStartsOn } from '../i18n/format';
 import { cn } from '../lib/utils';
-import FamilyNotes, { type FamilyNote } from '../components/app/FamilyNotes';
 
-interface Member { id: string; name: string; color: string }
-interface Appointment { id: string; occurrence_id?: string; title: string; start_time: string; end_time?: string; location?: string; family_members_data?: Member[] }
-interface Task { id: string; title: string; is_completed: boolean; priority?: string; due_date?: string; points?: number; assigned_to_members?: Member[] }
-interface MealPlan { id: string; date: string; meal_type: string; custom_meal?: string; recipe?: { name: string } }
-interface PlanningEntry { id: string; family_member_name: string; family_member_color: string; schedule_type: string; title: string; day_of_week: number; start_time: string; end_time: string; location?: string }
-interface ShoppingItem { id: string; name: string; quantity?: number; unit?: string; is_checked: boolean }
+// OPENFAMILY_KIOSK_WEATHER_START
 
-const MEAL_ORDER = ['Petit-déjeuner', 'Déjeuner', 'Dîner', 'Snack'];
+interface WeatherDay {
+    date: string;
+    weatherCode: number;
+    temperatureMax: number;
+    temperatureMin: number;
+    apparentTemperatureMax: number;
+    apparentTemperatureMin: number;
+    precipitationProbability: number;
+    precipitationSum: number;
+    rainSum: number;
+    snowfallSum: number;
+    windSpeedMax: number;
+    windGustMax: number;
+    uvIndexMax: number;
+    sunrise: string;
+    sunset: string;
+}
 
-const isoDay = (d: Date) => ((d.getDay() + 6) % 7) + 1; // Mon=1 … Sun=7
-const pad = (n: number) => String(n).padStart(2, '0');
-const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const hhmm = (iso: string) => new Intl.DateTimeFormat(intlLocale(), { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+interface WeatherHour {
+    time: string;
+    temperature: number;
+    precipitationProbability: number;
+    precipitation: number;
+    rain: number;
+    weatherCode: number;
+    windSpeed: number;
+}
 
-// ── Per-device kiosk settings (localStorage — the right scope for a wall display) ──
-
-interface KioskLocation { name: string; lat: number; lon: number }
-interface KioskSettings { location: KioskLocation | null; photoBackground: boolean }
-
-const SETTINGS_KEY = 'openfamily.kioskSettings';
-
-const loadKioskSettings = (): KioskSettings => {
-    try {
-        const raw = localStorage.getItem(SETTINGS_KEY);
-        if (raw) {
-            const parsed = JSON.parse(raw) as Partial<KioskSettings>;
-            const loc = parsed.location;
-            return {
-                location: loc && typeof loc.lat === 'number' && typeof loc.lon === 'number' && typeof loc.name === 'string' ? loc : null,
-                photoBackground: Boolean(parsed.photoBackground),
-            };
-        }
-    } catch { /* corrupted settings → defaults */ }
-    return { location: null, photoBackground: false };
-};
-
-// ── Weather (Open-Meteo, no API key, public CORS — also works in the static demo) ──
-
-interface WeatherHour { time: string; temp: number; code: number }
-interface WeatherState { temp: number; code: number; isDay: boolean; min: number; max: number; hours: WeatherHour[] }
-
-// WMO weather codes → lucide icon
-const weatherIcon = (code: number, isDay: boolean, className: string): React.ReactElement => {
-    if (code === 0) return isDay ? <Sun className={className} /> : <Moon className={className} />;
-    if (code === 1 || code === 2) return isDay ? <CloudSun className={className} /> : <CloudMoon className={className} />;
-    if (code === 45 || code === 48) return <CloudFog className={className} />;
-    if (code >= 51 && code <= 57) return <CloudDrizzle className={className} />;
-    if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return <CloudRain className={className} />;
-    if ((code >= 71 && code <= 77) || code === 85 || code === 86) return <CloudSnow className={className} />;
-    if (code >= 95) return <CloudLightning className={className} />;
-    return <Cloud className={className} />;
-};
-
-const fetchWeather = async (loc: KioskLocation): Promise<WeatherState> => {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
-        + '&current=temperature_2m,weather_code,is_day'
-        + '&hourly=temperature_2m,weather_code'
-        + '&daily=temperature_2m_max,temperature_2m_min'
-        + '&forecast_days=2&timezone=auto';
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const d = await resp.json() as {
-        current: { temperature_2m: number; weather_code: number; is_day: number };
-        hourly: { time: string[]; temperature_2m: number[]; weather_code: number[] };
-        daily: { temperature_2m_max: number[]; temperature_2m_min: number[] };
+interface OpenMeteoResponse {
+    daily?: {
+        time?: string[];
+        weather_code?: number[];
+        temperature_2m_max?: number[];
+        temperature_2m_min?: number[];
+        apparent_temperature_max?: number[];
+        apparent_temperature_min?: number[];
+        precipitation_probability_max?: number[];
+        precipitation_sum?: number[];
+        rain_sum?: number[];
+        snowfall_sum?: number[];
+        wind_speed_10m_max?: number[];
+        wind_gusts_10m_max?: number[];
+        uv_index_max?: number[];
+        sunrise?: string[];
+        sunset?: string[];
     };
-    // hourly.time is local to the location (timezone=auto) — a kiosk lives in the
-    // same timezone as its location, so comparing against the device clock is fine.
-    const now = new Date();
-    const hours: WeatherHour[] = [];
-    for (let i = 0; i < d.hourly.time.length && hours.length < 4; i++) {
-        if (new Date(d.hourly.time[i]) > now) {
-            hours.push({ time: d.hourly.time[i], temp: d.hourly.temperature_2m[i], code: d.hourly.weather_code[i] });
-        }
-    }
-    return {
-        temp: d.current.temperature_2m,
-        code: d.current.weather_code,
-        isDay: d.current.is_day === 1,
-        min: d.daily.temperature_2m_min[0],
-        max: d.daily.temperature_2m_max[0],
-        hours,
+    hourly?: {
+        time?: string[];
+        temperature_2m?: number[];
+        precipitation_probability?: number[];
+        precipitation?: number[];
+        rain?: number[];
+        weather_code?: number[];
+        wind_speed_10m?: number[];
     };
+}
+
+type ViewMode = 'week' | 'month';
+type MonthDisplayMode = 'rolling' | 'calendar';
+
+interface Member {
+    id: string;
+    name: string;
+    color: string;
+    role?: string;
+}
+
+interface Appointment {
+    id: string;
+    occurrence_id?: string;
+    title: string;
+    description?: string;
+    notes?: string;
+    color?: string;
+    start_time: string;
+    end_time?: string;
+    location?: string;
+    family_members_data?: Member[];
+}
+
+interface PlanningEntry {
+    id: string;
+    family_member_name: string;
+    family_member_color: string;
+    schedule_type: string;
+    title: string;
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    location?: string;
+    specific_date?: string | null;
+    excluded_dates?: string[];
+    participants?: Member[];
+    participant_ids?: string[];
+}
+
+interface ApiResponse<T> {
+    success: boolean;
+    data: T;
+}
+
+interface TouchPoint {
+    x: number;
+    y: number;
+}
+
+const LOCALE = 'de-AT';
+const DATA_REFRESH_MS = 30_000;
+const PAGE_RELOAD_MS = 6 * 60 * 60 * 1000;
+const SWIPE_THRESHOLD_PX = 60;
+
+const pad = (value: number): string => String(value).padStart(2, '0');
+
+const toDateKey = (date: Date): string =>
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+const atMidnight = (date: Date): Date =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const addDays = (date: Date, days: number): Date => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
 };
 
-interface GeoResult { id: number; name: string; latitude: number; longitude: number; admin1?: string; country?: string }
+const mondayOfWeek = (date: Date): Date => {
+    const result = atMidnight(date);
+    result.setDate(result.getDate() - ((result.getDay() + 6) % 7));
+    return result;
+};
 
-// ── Photo background layer (gentle crossfade on mount) ──
+const isWeekend = (date: Date): boolean =>
+    date.getDay() === 0 || date.getDay() === 6;
 
-const PhotoLayer: React.FC<{ url: string }> = ({ url }) => {
-    const [visible, setVisible] = useState(false);
-    useEffect(() => {
-        // Double rAF so the opacity-0 frame is painted before the transition starts.
-        let raf2 = 0;
-        const raf1 = requestAnimationFrame(() => { raf2 = requestAnimationFrame(() => setVisible(true)); });
-        return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
-    }, []);
-    return (
-        <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out"
-            style={{ backgroundImage: `url(${url})`, opacity: visible ? 1 : 0 }}
-        />
+const isSameDay = (left: Date, right: Date): boolean =>
+    toDateKey(left) === toDateKey(right);
+
+const planningDayNumber = (date: Date): number =>
+    ((date.getDay() + 6) % 7) + 1;
+
+const isoWeekNumber = (date: Date): number => {
+    const utcDate = new Date(Date.UTC(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+    ));
+    const weekday = utcDate.getUTCDay() || 7;
+    utcDate.setUTCDate(utcDate.getUTCDate() + 4 - weekday);
+    const yearStart = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 1));
+
+    return Math.ceil(
+        (((utcDate.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7
     );
+};
+
+const formatTime = (value: Date | string): string =>
+    new Intl.DateTimeFormat(LOCALE, {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    }).format(typeof value === 'string' ? new Date(value) : value);
+
+const formatCurrentDate = (date: Date): string =>
+    new Intl.DateTimeFormat(LOCALE, {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+    }).format(date);
+
+const formatDayHeader = (date: Date): string => {
+    const weekday = new Intl.DateTimeFormat(LOCALE, { weekday: 'short' })
+        .format(date)
+        .replace('.', '')
+        .toUpperCase();
+
+    return `${weekday} ${pad(date.getDate())}.${pad(date.getMonth() + 1)}`;
+};
+
+const formatRange = (start: Date, end: Date): string =>
+    `${pad(start.getDate())}.${pad(start.getMonth() + 1)} – ` +
+    `${pad(end.getDate())}.${pad(end.getMonth() + 1)}.${end.getFullYear()}`;
+
+const WEATHER_REFRESH_MS = 60 * 60 * 1000;
+const WEATHER_CACHE_KEY = 'openfamily-kiosk-weather-v3';
+
+const WEATHER_URL =
+    'https://api.open-meteo.com/v1/forecast' +
+    '?latitude=48.18333' +
+    '&longitude=15.81667' +
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min,' +
+    'apparent_temperature_max,apparent_temperature_min,' +
+    'precipitation_probability_max,precipitation_sum,rain_sum,' +
+    'snowfall_sum,wind_speed_10m_max,wind_gusts_10m_max,' +
+    'uv_index_max,sunrise,sunset' +
+    '&hourly=temperature_2m,precipitation_probability,precipitation,' +
+    'rain,weather_code,wind_speed_10m' +
+    '&timezone=Europe%2FVienna' +
+    '&forecast_days=14' +
+    '&temperature_unit=celsius' +
+    '&wind_speed_unit=kmh' +
+    '&precipitation_unit=mm';
+
+const weatherSymbol = (code: number): string => {
+    if (code === 0) return '☀️';
+    if (code === 1 || code === 2) return '🌤️';
+    if (code === 3) return '☁️';
+    if (code === 45 || code === 48) return '🌫️';
+    if (code >= 51 && code <= 57) return '🌦️';
+    if (code >= 61 && code <= 67) return '🌧️';
+    if (code >= 71 && code <= 77) return '🌨️';
+    if (code >= 80 && code <= 82) return '🌦️';
+    if (code >= 85 && code <= 86) return '🌨️';
+    if (code >= 95) return '⛈️';
+    return '🌤️';
+};
+
+const formatWeatherDay = (
+    dateString: string,
+    index: number
+): string => {
+    if (index === 0) return 'HEUTE';
+
+    return new Intl.DateTimeFormat(LOCALE, {
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit',
+    })
+        .format(new Date(`${dateString}T12:00:00`))
+        .replace('.', '')
+        .toUpperCase();
+};
+
+// OPENFAMILY_KIOSK_WEATHER_CONTRAST_V2
+const rainCellClass = (hour: WeatherHour): string => {
+    const probability = hour.precipitationProbability;
+    const amount = Math.max(hour.rain, hour.precipitation);
+
+    if (amount >= 2 || probability >= 80) {
+        return 'border-sky-800 bg-sky-300 !text-slate-950 shadow-sm';
+    }
+    if (amount >= 0.5 || probability >= 60) {
+        return 'border-sky-700 bg-sky-200 !text-slate-950';
+    }
+    if (amount > 0 || probability >= 30) {
+        return 'border-sky-600 bg-sky-100 !text-slate-950';
+    }
+    if (probability >= 15) {
+        return 'border-sky-500 bg-sky-50 !text-slate-900';
+    }
+    return 'border-border/70 bg-background/70 !text-foreground';
 };
 
 const Kiosk: React.FC = () => {
-    const { t, i18n } = useTranslation(['kiosk', 'meals', 'notes', 'common']);
-    const { isModuleEnabled } = useAuth();
-    const [now, setNow] = useState(new Date());
+    const [now, setNow] = useState<Date>(() => new Date());
+    const [weekOffset, setWeekOffset] = useState<number>(0);
+    const [viewMode, setViewMode] = useState<ViewMode>('week');
+    const [monthOffset, setMonthOffset] = useState<number>(0);
+    const [monthDisplayMode, setMonthDisplayMode] = useState<MonthDisplayMode>('rolling');
     const [appointments, setAppointments] = useState<Appointment[]>([]);
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [meals, setMeals] = useState<MealPlan[]>([]);
-    const [planning, setPlanning] = useState<PlanningEntry[]>([]);
-    const [shopping, setShopping] = useState<ShoppingItem[]>([]);
-    const [notes, setNotes] = useState<FamilyNote[]>([]);
-    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [planningByWeek, setPlanningByWeek] = useState<
+        Record<string, PlanningEntry[]>
+    >({});
+    const [loading, setLoading] = useState<boolean>(true);
+    const [selectedAppointment, setSelectedAppointment] =
+        useState<Appointment | null>(null);
+    const [weatherDetailsOpen, setWeatherDetailsOpen] =
+        useState<boolean>(false);
+    const touchStart = useRef<TouchPoint | null>(null);
+    const lastTapRef = useRef<number>(0);
 
-    // Per-device settings + weather + photo background
-    const [settings, setSettings] = useState<KioskSettings>(loadKioskSettings);
-    const [settingsOpen, setSettingsOpen] = useState(false);
-    const [weather, setWeather] = useState<WeatherState | null>(null);
-    const [photos, setPhotos] = useState<{ id: number; url: string }[]>([]);
-    const photosRef = useRef(photos);
-    photosRef.current = photos;
+    const todayKey = toDateKey(now);
 
-    // City search (settings overlay)
-    const [citySearch, setCitySearch] = useState('');
-    const [cityResults, setCityResults] = useState<GeoResult[]>([]);
-    const [searchingCity, setSearchingCity] = useState(false);
+    const today = useMemo<Date>(() => {
+        const [year, month, day] = todayKey.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    }, [todayKey]);
 
-    // Tap-to-complete confirmations ("✓ done — undo", visible ~5s)
-    const [doneTasks, setDoneTasks] = useState<{ id: string; title: string }[]>([]);
-    const [doneShopping, setDoneShopping] = useState<{ id: string; name: string }[]>([]);
-    const [dismissedNotes, setDismissedNotes] = useState<{ id: string; content: string }[]>([]);
-    const noteTimers = useRef(new Map<string, number>());
+    const selectedMonday = useMemo<Date>(
+        () => addDays(mondayOfWeek(today), weekOffset * 7),
+        [today, weekOffset]
+    );
 
-    // Live clock (updates every 15s — enough to flip the minute)
-    useEffect(() => {
-        const id = setInterval(() => setNow(new Date()), 15_000);
-        return () => clearInterval(id);
-    }, []);
+    const displayedWeekStart = useMemo<Date>(() => {
+        if (weekOffset === 0 && isWeekend(today)) {
+            return today;
+        }
+        return selectedMonday;
+    }, [weekOffset, today, selectedMonday]);
 
-    const loadAll = async () => {
-        const today = new Date();
-        // Naive local bounds — appointment times are stored as local
-        // "YYYY-MM-DDTHH:mm:ss" strings, so the window must not be UTC.
-        const start = `${ymd(today)}T00:00:00`;
-        const end = `${ymd(today)}T23:59:59`;
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - ((today.getDay() - weekStartsOn() + 7) % 7));
+    const displayedWeekEnd = useMemo<Date>(
+        () => addDays(displayedWeekStart, 6),
+        [displayedWeekStart]
+    );
+
+    const monthPreviewStart = useMemo<Date>(() => {
+        if (monthDisplayMode === 'rolling') {
+            return today;
+        }
+        return new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+    }, [today, monthOffset, monthDisplayMode]);
+
+    const monthPreviewEnd = useMemo<Date>(() => {
+        if (monthDisplayMode === 'rolling') {
+            return addDays(monthPreviewStart, 30);
+        }
+        return new Date(
+            monthPreviewStart.getFullYear(),
+            monthPreviewStart.getMonth() + 1,
+            0
+        );
+    }, [monthPreviewStart, monthDisplayMode]);
+
+    const monthPreviewDayCount = monthDisplayMode === 'rolling'
+        ? 31
+        : monthPreviewEnd.getDate();
+
+    const queryStart = useMemo<Date>(() => {
+        if (viewMode === 'month') {
+            return monthPreviewStart;
+        }
+        return displayedWeekStart;
+    }, [viewMode, monthPreviewStart, displayedWeekStart]);
+
+    const queryEnd = useMemo<Date>(() => {
+        if (viewMode === 'month') {
+            return monthPreviewEnd;
+        }
+        return displayedWeekEnd;
+    }, [viewMode, monthPreviewEnd, displayedWeekEnd]);
+
+    const loadCalendarData = useCallback(async (): Promise<void> => {
+        setLoading(true);
+
         try {
-            const [apptRes, taskRes, mealRes, planRes, shopRes, notesRes] = await Promise.all([
-                api.get<{ success: boolean; data: Appointment[] }>(`/api/appointments?start_date=${start}&end_date=${end}`),
-                api.get<{ success: boolean; data: Task[] }>('/api/tasks'),
-                api.get<{ success: boolean; data: MealPlan[] }>(`/api/meal-plans?start_date=${ymd(today)}&end_date=${ymd(today)}`),
-                api.get<{ success: boolean; data: PlanningEntry[] }>(`/api/planning?week_start=${ymd(weekStart)}`),
-                api.get<{ success: boolean; data: ShoppingItem[] }>('/api/shopping'),
-                api.get<{ success: boolean; data: FamilyNote[] }>('/api/notes'),
+            const cacheBuster = Date.now();
+            const start = `${toDateKey(queryStart)}T00:00:00`;
+            const end = `${toDateKey(queryEnd)}T23:59:59`;
+
+            const mondays: Date[] = [];
+            let cursor = mondayOfWeek(queryStart);
+            const finalMonday = mondayOfWeek(queryEnd);
+
+            while (cursor.getTime() <= finalMonday.getTime()) {
+                mondays.push(new Date(cursor));
+                cursor = addDays(cursor, 7);
+            }
+
+            const [appointmentResponse, planningResponses] = await Promise.all([
+                api.get<ApiResponse<Appointment[]>>(
+                    `/api/appointments?start_date=${encodeURIComponent(start)}` +
+                    `&end_date=${encodeURIComponent(end)}&_=${cacheBuster}`
+                ),
+                Promise.all(
+                    mondays.map(async (monday) => {
+                        const weekKey = toDateKey(monday);
+                        const response = await api.get<ApiResponse<PlanningEntry[]>>(
+                            `/api/planning?week_start=${encodeURIComponent(weekKey)}` +
+                            `&_=${cacheBuster}`
+                        );
+                        return {
+                            weekKey,
+                            entries: response.success ? response.data : [],
+                        };
+                    })
+                ),
             ]);
-            if (apptRes.success) setAppointments(apptRes.data);
-            if (taskRes.success) setTasks(taskRes.data);
-            if (mealRes.success) setMeals(mealRes.data);
-            if (planRes.success) setPlanning(planRes.data);
-            if (shopRes.success) setShopping(shopRes.data);
-            if (notesRes.success) setNotes(notesRes.data);
-        } catch (e) {
-            console.error('Kiosk load error:', e);
+
+            if (appointmentResponse.success) {
+                setAppointments(appointmentResponse.data);
+            }
+
+            const nextPlanningByWeek: Record<string, PlanningEntry[]> = {};
+            planningResponses.forEach(({ weekKey, entries }) => {
+                nextPlanningByWeek[weekKey] = entries;
+            });
+            setPlanningByWeek(nextPlanningByWeek);
+        } catch (error) {
+            console.error('Kiosk calendar load error:', error);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [queryStart, queryEnd]);
 
     useEffect(() => {
-        void loadAll();
-        const id = setInterval(() => void loadAll(), 60_000); // refresh every minute
-        return () => clearInterval(id);
+        void loadCalendarData();
+        const refreshId = window.setInterval(
+            () => void loadCalendarData(),
+            DATA_REFRESH_MS
+        );
+        return () => window.clearInterval(refreshId);
+    }, [loadCalendarData]);
+
+    useEffect(() => {
+        const clockId = window.setInterval(() => setNow(new Date()), 15_000);
+        return () => window.clearInterval(clockId);
     }, []);
-    useWebSocketUpdates('appointments', () => void loadAll());
-    useWebSocketUpdates('tasks', () => void loadAll());
-    useWebSocketUpdates('meal-plans', () => void loadAll());
-    useWebSocketUpdates('planning', () => void loadAll());
-    useWebSocketUpdates('shopping', () => void loadAll());
-    useWebSocketUpdates('notes', () => void loadAll());
 
-    // Persist per-device settings
     useEffect(() => {
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    }, [settings]);
+        const reloadId = window.setInterval(
+            () => window.location.reload(),
+            PAGE_RELOAD_MS
+        );
+        return () => window.clearInterval(reloadId);
+    }, []);
 
-    // Weather — refresh every 30 min; on failure hide the card, retry next cycle
     useEffect(() => {
-        const loc = settings.location;
-        if (!loc) { setWeather(null); return; }
-        const load = () => { fetchWeather(loc).then(setWeather).catch(() => setWeather(null)); };
-        load();
-        const id = setInterval(load, 30 * 60_000);
-        return () => clearInterval(id);
-    }, [settings.location]);
-
-    // Immich photo background — new photo every ~2 min, crossfaded.
-    // Errors (no integration, demo mode, server down) silently keep the plain background.
-    useEffect(() => {
-        if (!settings.photoBackground) {
-            setPhotos((prev) => { prev.forEach((p) => URL.revokeObjectURL(p.url)); return []; });
-            return;
-        }
-        const loadPhoto = async () => {
-            try {
-                const blob = await api.getBlob('/api/integrations/immich/photo');
-                const url = URL.createObjectURL(blob);
-                setPhotos((prev) => {
-                    const next = [...prev, { id: Date.now(), url }];
-                    while (next.length > 2) URL.revokeObjectURL(next.shift()!.url);
-                    return next;
-                });
-            } catch { /* graceful fallback to the plain background */ }
+        const enterFullscreen = (): void => {
+            if (!document.fullscreenElement) {
+                void document.documentElement.requestFullscreen().catch(() => undefined);
+            }
         };
-        void loadPhoto();
-        const id = setInterval(() => void loadPhoto(), 120_000);
-        return () => clearInterval(id);
-    }, [settings.photoBackground]);
 
-    // Revoke any remaining object URLs on unmount
-    useEffect(() => () => { photosRef.current.forEach((p) => URL.revokeObjectURL(p.url)); }, []);
+        enterFullscreen();
+        document.addEventListener('pointerdown', enterFullscreen, {
+            once: true,
+            passive: true,
+        });
+        document.addEventListener('touchstart', enterFullscreen, {
+            once: true,
+            passive: true,
+        });
+        document.addEventListener('keydown', enterFullscreen, { once: true });
 
-    // City search — debounced geocoding lookup (Open-Meteo, no API key)
-    useEffect(() => {
-        if (!settingsOpen) return;
-        const q = citySearch.trim();
-        if (q.length < 2) { setCityResults([]); return; }
-        const lang = (i18n.language || 'en').slice(0, 2);
-        const id = setTimeout(() => {
-            setSearchingCity(true);
-            fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=${lang}&format=json`)
-                .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-                .then((d: { results?: GeoResult[] }) => setCityResults(d.results || []))
-                .catch(() => setCityResults([]))
-                .finally(() => setSearchingCity(false));
-        }, 350);
-        return () => clearTimeout(id);
-    }, [citySearch, settingsOpen, i18n.language]);
-
-    // ── Touch interactions (optimistic, with a ~5s undo affordance) ──
-
-    const completeTask = (task: Task) => {
-        setTasks((prev) => prev.map((x) => (x.id === task.id ? { ...x, is_completed: true } : x)));
-        setDoneTasks((prev) => [...prev.filter((d) => d.id !== task.id), { id: task.id, title: task.title }]);
-        window.setTimeout(() => setDoneTasks((prev) => prev.filter((d) => d.id !== task.id)), 5_000);
-        api.put(`/api/tasks/${task.id}`, { is_completed: true }).catch(() => void loadAll());
-    };
-
-    const undoTask = (id: string) => {
-        setDoneTasks((prev) => prev.filter((d) => d.id !== id));
-        setTasks((prev) => prev.map((x) => (x.id === id ? { ...x, is_completed: false } : x)));
-        api.put(`/api/tasks/${id}`, { is_completed: false }).catch(() => void loadAll());
-    };
-
-    const checkShoppingItem = (item: ShoppingItem) => {
-        setShopping((prev) => prev.map((x) => (x.id === item.id ? { ...x, is_checked: true } : x)));
-        setDoneShopping((prev) => [...prev.filter((d) => d.id !== item.id), { id: item.id, name: item.name }]);
-        window.setTimeout(() => setDoneShopping((prev) => prev.filter((d) => d.id !== item.id)), 5_000);
-        api.put(`/api/shopping/${item.id}`, { is_checked: true }).catch(() => void loadAll());
-    };
-
-    const undoShoppingItem = (id: string) => {
-        setDoneShopping((prev) => prev.filter((d) => d.id !== id));
-        setShopping((prev) => prev.map((x) => (x.id === id ? { ...x, is_checked: false } : x)));
-        api.put(`/api/shopping/${id}`, { is_checked: false }).catch(() => void loadAll());
-    };
-
-    // Notes: a delete can't be re-posted, so the DELETE only fires AFTER the
-    // 5s undo window — "undo" simply cancels the pending removal.
-    const dismissNote = (note: FamilyNote) => {
-        setDismissedNotes((prev) => [...prev.filter((d) => d.id !== note.id), { id: note.id, content: note.content }]);
-        const timer = window.setTimeout(() => {
-            noteTimers.current.delete(note.id);
-            setDismissedNotes((prev) => prev.filter((d) => d.id !== note.id));
-            setNotes((prev) => prev.filter((x) => x.id !== note.id)); // no flash while the DELETE lands
-            api.delete(`/api/notes/${note.id}`).catch(() => void loadAll());
-        }, 5_000);
-        noteTimers.current.set(note.id, timer);
-    };
-
-    const undoNote = (id: string) => {
-        const timer = noteTimers.current.get(id);
-        if (timer !== undefined) {
-            window.clearTimeout(timer);
-            noteTimers.current.delete(id);
-        }
-        setDismissedNotes((prev) => prev.filter((d) => d.id !== id));
-    };
-
-    useEffect(() => {
-        const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
-        document.addEventListener('fullscreenchange', onChange);
-        return () => document.removeEventListener('fullscreenchange', onChange);
+        return () => {
+            document.removeEventListener('pointerdown', enterFullscreen);
+            document.removeEventListener('touchstart', enterFullscreen);
+            document.removeEventListener('keydown', enterFullscreen);
+        };
     }, []);
 
-    const toggleFullscreen = () => {
-        if (document.fullscreenElement) void document.exitFullscreen();
-        else void document.documentElement.requestFullscreen().catch(() => {});
+    useWebSocketUpdates('appointments', () => void loadCalendarData());
+    useWebSocketUpdates('planning', () => void loadCalendarData());
+
+    const appointmentsByDay = useMemo<Map<string, Appointment[]>>(() => {
+        const grouped = new Map<string, Appointment[]>();
+
+        appointments.forEach((appointment) => {
+            const key = appointment.start_time.slice(0, 10);
+            grouped.set(key, [...(grouped.get(key) ?? []), appointment]);
+        });
+
+        grouped.forEach((entries) => {
+            entries.sort((left, right) =>
+                left.start_time.localeCompare(right.start_time)
+            );
+        });
+
+        return grouped;
+    }, [appointments]);
+
+    const getPlanningForDay = (day: Date): PlanningEntry[] => {
+        const dayKey = toDateKey(day);
+        const weekKey = toDateKey(mondayOfWeek(day));
+        const weekPlanning = planningByWeek[weekKey] ?? [];
+
+        return weekPlanning
+            .filter((entry) => {
+                if ((entry.excluded_dates ?? []).includes(dayKey)) {
+                    return false;
+                }
+                if (entry.specific_date) {
+                    return entry.specific_date.slice(0, 10) === dayKey;
+                }
+                return entry.day_of_week === planningDayNumber(day);
+            })
+            .sort((left, right) =>
+                left.start_time.localeCompare(right.start_time)
+            );
     };
 
-    const todayAppointments = useMemo(
-        () => [...appointments].sort((a, b) => a.start_time.localeCompare(b.start_time)),
-        [appointments]
-    );
-    const pendingTasks = useMemo(() => tasks.filter((t) => !t.is_completed).slice(0, 8), [tasks]);
-    const pendingShopping = useMemo(() => shopping.filter((s) => !s.is_checked).slice(0, 6), [shopping]);
-    const todayMeals = useMemo(
-        () => [...meals].sort((a, b) => MEAL_ORDER.indexOf(a.meal_type) - MEAL_ORDER.indexOf(b.meal_type)),
-        [meals]
-    );
-    const todayPlanning = useMemo(() => {
-        const day = isoDay(new Date());
-        return planning
-            .filter((p) => p.day_of_week === day)
-            .sort((a, b) => a.start_time.localeCompare(b.start_time));
-    }, [planning]);
-    // Keep the fridge glanceable: hide pending-dismissed notes, cap at the 6 most recent
-    const visibleNotes = useMemo(
-        () => notes.filter((n) => !dismissedNotes.some((d) => d.id === n.id)).slice(0, 6),
-        [notes, dismissedNotes]
-    );
+    const getPlanningParticipants = (entry: PlanningEntry): Member[] => {
+        if (entry.participants && entry.participants.length > 0) {
+            return entry.participants;
+        }
 
-    const clock = new Intl.DateTimeFormat(intlLocale(), { hour: '2-digit', minute: '2-digit' }).format(now);
-    const dateLabel = new Intl.DateTimeFormat(intlLocale(), { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
+        return [{
+            id: `primary-${entry.id}`,
+            name: entry.family_member_name,
+            color: entry.family_member_color,
+        }];
+    };
 
-    const mealLabel = (v: string) => t(`meals:mealTypes.${v}`, { defaultValue: v });
-
-    const photoActive = settings.photoBackground && photos.length > 0;
-    // Panels become translucent + blurred over the photo so they stay readable.
-    const panelClass = cn(
-        'rounded-card border p-6',
-        photoActive ? 'border-white/10 bg-card/80 backdrop-blur-md' : 'border-border bg-card'
-    );
-    const topButtonClass = cn(
-        'rounded-input border p-2.5 transition-colors',
-        photoActive
-            ? 'border-white/20 bg-black/30 text-white/80 backdrop-blur-md hover:text-white'
-            : 'border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong'
+    const renderParticipants = (
+        members: Member[],
+        fallbackColor?: string
+    ): React.ReactNode => (
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+            {members.map((member) => (
+                <span
+                    key={member.id}
+                    className="inline-flex items-center gap-2 text-[clamp(1rem,1.25vw,1.35rem)] font-semibold leading-tight text-foreground/90"
+                >
+                    <span
+                        className="h-3.5 w-3.5 shrink-0 rounded-full"
+                        style={{
+                            backgroundColor:
+                                member.color || fallbackColor || 'var(--primary)',
+                        }}
+                    />
+                    {member.name}
+                </span>
+            ))}
+        </div>
     );
 
-    return (
-        <div className="relative min-h-screen bg-background text-foreground">
-            {/* Immich photo background (soft, dimmed, behind everything) */}
-            {photoActive && (
-                <div className="fixed inset-0 z-0" aria-hidden="true">
-                    {photos.map((p) => <PhotoLayer key={p.id} url={p.url} />)}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
-                </div>
-            )}
+    const [weather, setWeather] = useState<WeatherDay[]>([]);
+    const [weatherHours, setWeatherHours] =
+        useState<WeatherHour[]>([]);
+    const [weatherLoading, setWeatherLoading] =
+        useState(true);
+    const [weatherError, setWeatherError] =
+        useState(false);
 
-            <div className="relative z-10">
-            {/* Top bar */}
-            <header className="flex flex-wrap items-end justify-between gap-4 px-6 pt-6 lg:px-12 lg:pt-10">
-                <div>
-                    <div className={cn(
-                        'font-serif text-[clamp(3rem,9vw,7rem)] font-semibold leading-none tracking-tight tabular-nums',
-                        photoActive && 'text-white drop-shadow-md'
-                    )}>
-                        {clock}
-                    </div>
-                    <p className={cn(
-                        'mt-2 text-[clamp(1rem,2.2vw,1.6rem)] capitalize',
-                        photoActive ? 'text-white/85' : 'text-muted-foreground'
-                    )}>{dateLabel}</p>
-                </div>
+    const loadWeather = useCallback(async (): Promise<void> => {
+        try {
+            const response = await fetch(
+                `${WEATHER_URL}&_=${Date.now()}`,
+                {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                }
+            );
 
-                {/* Weather — only when a location is configured and the API answered */}
-                {weather && settings.location && (
-                    <div className={cn(panelClass, 'hidden items-center gap-4 px-5 py-3 sm:flex')}>
-                        {weatherIcon(weather.code, weather.isDay, 'h-10 w-10 shrink-0 text-primary')}
-                        <div>
-                            <div className="font-serif text-[clamp(1.6rem,3vw,2.4rem)] font-semibold leading-none tabular-nums">
-                                {Math.round(weather.temp)}°
-                            </div>
-                            <p className="mt-1 whitespace-nowrap text-caption text-muted-foreground">
-                                {settings.location.name} · ↑ {Math.round(weather.max)}° ↓ {Math.round(weather.min)}°
-                            </p>
-                        </div>
-                        {weather.hours.length > 0 && (
-                            <div className={cn('hidden items-center gap-4 border-l pl-4 xl:flex', photoActive ? 'border-white/10' : 'border-border')}>
-                                {weather.hours.map((h) => (
-                                    <div key={h.time} className="flex flex-col items-center gap-1">
-                                        <span className="whitespace-nowrap text-micro text-muted-foreground">
-                                            {new Intl.DateTimeFormat(intlLocale(), { hour: 'numeric' }).format(new Date(h.time))}
-                                        </span>
-                                        {weatherIcon(h.code, true, 'h-4 w-4 text-muted-foreground')}
-                                        <span className="text-caption tabular-nums">{Math.round(h.temp)}°</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+            if (!response.ok) {
+                throw new Error(
+                    `Open-Meteo HTTP ${response.status}`
+                );
+            }
 
-                <div className="flex items-center gap-2">
-                    <img src={`${import.meta.env.BASE_URL}OpenFamily.png`} alt="OpenFamily" className="hidden h-10 w-10 object-contain sm:block" />
-                    <button
-                        type="button"
-                        onClick={() => setSettingsOpen(true)}
-                        aria-label={t('kiosk:displaySettings.open')}
-                        className={topButtonClass}
-                    >
-                        <SettingsIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                        type="button"
-                        onClick={toggleFullscreen}
-                        aria-label={isFullscreen ? t('kiosk:exitFullscreen') : t('kiosk:fullscreen')}
-                        className={topButtonClass}
-                    >
-                        {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
-                    </button>
-                    <Link
-                        to="/"
-                        aria-label={t('kiosk:exit')}
-                        className={topButtonClass}
-                    >
-                        <X className="h-5 w-5" />
-                    </Link>
-                </div>
-            </header>
+            const data =
+                (await response.json()) as OpenMeteoResponse;
 
-            <main className="grid grid-cols-1 gap-5 px-6 pb-10 pt-6 lg:grid-cols-3 lg:gap-6 lg:px-12">
-                {/* Schedule — wide column */}
-                <section className={cn(panelClass, 'lg:col-span-2 lg:p-8')}>
-                    <h2 className="mb-5 flex items-center gap-3 font-serif text-h1">
-                        <Calendar className="h-7 w-7 text-primary" /> {t('kiosk:schedule')}
-                    </h2>
-                    {todayAppointments.length === 0 ? (
-                        <p className="py-10 text-center text-h2 text-muted-foreground">{t('kiosk:empty.appointments')}</p>
-                    ) : (
-                        <div className="divide-y divide-border">
-                            {todayAppointments.map((a) => (
-                                <div key={a.occurrence_id || a.id} className="grid grid-cols-[110px_1fr] items-baseline gap-4 py-4">
-                                    <div className="font-serif text-[clamp(1.4rem,2.4vw,2rem)] tabular-nums text-muted-foreground">
-                                        {hhmm(a.start_time)}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="truncate text-[clamp(1.2rem,2.2vw,1.9rem)] font-semibold">{a.title}</p>
-                                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-body text-muted-foreground">
-                                            {a.location && (
-                                                <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" />{a.location}</span>
-                                            )}
-                                            {(a.family_members_data || []).map((m) => (
-                                                <span key={m.id} className="inline-flex items-center gap-1.5">
-                                                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: m.color }} />
-                                                    {m.name}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </section>
+            const daily = data.daily;
+            const hourly = data.hourly;
 
-                {/* Right column */}
-                <div className="flex flex-col gap-5 lg:gap-6">
-                    {/* Meals */}
-                    <section className={panelClass}>
-                        <h2 className="mb-4 flex items-center gap-2.5 font-serif text-h2">
-                            <UtensilsCrossed className="h-6 w-6 text-primary" /> {t('kiosk:meals')}
-                        </h2>
-                        {todayMeals.length === 0 ? (
-                            <p className="py-4 text-center text-body text-muted-foreground">{t('kiosk:empty.meals')}</p>
-                        ) : (
-                            <ul className="space-y-2.5">
-                                {todayMeals.map((m) => (
-                                    <li key={m.id} className="flex items-baseline justify-between gap-3">
-                                        <span className="text-caption uppercase tracking-wide text-muted-foreground">{mealLabel(m.meal_type)}</span>
-                                        <span className="min-w-0 flex-1 truncate text-right text-body font-medium">{m.recipe?.name || m.custom_meal}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </section>
+            if (
+                !daily?.time ||
+                !daily.weather_code ||
+                !daily.temperature_2m_max ||
+                !daily.temperature_2m_min ||
+                !hourly?.time
+            ) {
+                throw new Error(
+                    'Unvollständige Open-Meteo-Daten'
+                );
+            }
 
-                    {/* Who's where */}
-                    <section className={panelClass}>
-                        <h2 className="mb-4 flex items-center gap-2.5 font-serif text-h2">
-                            <Users className="h-6 w-6 text-primary" /> {t('kiosk:whereabouts')}
-                        </h2>
-                        {todayPlanning.length === 0 ? (
-                            <p className="py-4 text-center text-body text-muted-foreground">{t('kiosk:empty.whereabouts')}</p>
-                        ) : (
-                            <ul className="space-y-2.5">
-                                {todayPlanning.map((p) => (
-                                    <li key={p.id} className="flex items-center gap-3">
-                                        <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: p.family_member_color }} />
-                                        <span className="font-medium">{p.family_member_name}</span>
-                                        <span className="min-w-0 flex-1 truncate text-muted-foreground">{p.title}</span>
-                                        <span className="shrink-0 tabular-nums text-muted-foreground">{p.start_time.slice(0, 5)}–{p.end_time.slice(0, 5)}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </section>
+            const nextWeather: WeatherDay[] =
+                daily.time
+                    .slice(0, 14)
+                    .map((date, index) => ({
+                        date,
+                        weatherCode:
+                            daily.weather_code?.[index] ?? 0,
+                        temperatureMax:
+                            daily.temperature_2m_max?.[index] ?? 0,
+                        temperatureMin:
+                            daily.temperature_2m_min?.[index] ?? 0,
+                        apparentTemperatureMax:
+                            daily.apparent_temperature_max?.[index] ?? 0,
+                        apparentTemperatureMin:
+                            daily.apparent_temperature_min?.[index] ?? 0,
+                        precipitationProbability:
+                            daily.precipitation_probability_max?.[index] ?? 0,
+                        precipitationSum:
+                            daily.precipitation_sum?.[index] ?? 0,
+                        rainSum:
+                            daily.rain_sum?.[index] ?? 0,
+                        snowfallSum:
+                            daily.snowfall_sum?.[index] ?? 0,
+                        windSpeedMax:
+                            daily.wind_speed_10m_max?.[index] ?? 0,
+                        windGustMax:
+                            daily.wind_gusts_10m_max?.[index] ?? 0,
+                        uvIndexMax:
+                            daily.uv_index_max?.[index] ?? 0,
+                        sunrise:
+                            daily.sunrise?.[index] ?? '',
+                        sunset:
+                            daily.sunset?.[index] ?? '',
+                    }));
 
-                    {/* Tasks — tap to complete (large hit areas, no hover needed) */}
-                    <section className={panelClass}>
-                        <h2 className="mb-3 flex items-center gap-2.5 font-serif text-h2">
-                            <CheckSquare className="h-6 w-6 text-primary" /> {t('kiosk:tasks')}
-                        </h2>
-                        {pendingTasks.length === 0 && doneTasks.length === 0 ? (
-                            <p className="py-4 text-center text-body text-muted-foreground">{t('kiosk:empty.tasks')}</p>
-                        ) : (
-                            <ul className="space-y-1">
-                                {doneTasks.map((d) => (
-                                    <li key={`done-${d.id}`} className="flex items-center gap-3 rounded-input bg-success/10 px-3 py-2.5 text-success">
-                                        <Check className="h-5 w-5 shrink-0" />
-                                        <span className="min-w-0 flex-1 truncate line-through">{d.title}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => undoTask(d.id)}
-                                            className="flex shrink-0 items-center gap-1.5 rounded-input px-2.5 py-1.5 text-caption font-medium underline-offset-2 active:underline"
-                                        >
-                                            <Undo2 className="h-4 w-4" /> {t('kiosk:undo')}
-                                        </button>
-                                    </li>
-                                ))}
-                                {pendingTasks.map((task) => (
-                                    <li key={task.id}>
-                                        <button
-                                            type="button"
-                                            onClick={() => completeTask(task)}
-                                            className="flex w-full items-center gap-3 rounded-input px-3 py-2.5 text-left transition-colors active:bg-surface-2"
-                                        >
-                                            <span className="h-5 w-5 shrink-0 rounded-full border-2 border-muted-foreground/50" />
-                                            <span className="min-w-0 flex-1 truncate">{task.title}</span>
-                                            {(task.points ?? 0) > 0 && (
-                                                <span className="shrink-0 text-caption text-amber-500">⭐ {task.points}</span>
-                                            )}
-                                            {(task.assigned_to_members || []).slice(0, 1).map((m) => (
-                                                <span key={m.id} className="shrink-0 text-caption text-muted-foreground">{m.name}</span>
-                                            ))}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </section>
+            const nextHours: WeatherHour[] =
+                hourly.time.map((time, index) => ({
+                    time,
+                    temperature:
+                        hourly.temperature_2m?.[index] ?? 0,
+                    precipitationProbability:
+                        hourly
+                            .precipitation_probability
+                            ?.[index] ?? 0,
+                    precipitation:
+                        hourly.precipitation?.[index] ?? 0,
+                    rain:
+                        hourly.rain?.[index] ?? 0,
+                    weatherCode:
+                        hourly.weather_code?.[index] ?? 0,
+                    windSpeed:
+                        hourly.wind_speed_10m?.[index] ?? 0,
+                }));
 
-                    {/* Shopping — top unchecked items, tap to check off */}
-                    <section className={panelClass}>
-                        <h2 className="mb-3 flex items-center gap-2.5 font-serif text-h2">
-                            <ShoppingCart className="h-6 w-6 text-primary" /> {t('kiosk:shopping')}
-                        </h2>
-                        {pendingShopping.length === 0 && doneShopping.length === 0 ? (
-                            <p className="py-4 text-center text-body text-muted-foreground">{t('kiosk:empty.shopping')}</p>
-                        ) : (
-                            <ul className="space-y-1">
-                                {doneShopping.map((d) => (
-                                    <li key={`done-${d.id}`} className="flex items-center gap-3 rounded-input bg-success/10 px-3 py-2.5 text-success">
-                                        <Check className="h-5 w-5 shrink-0" />
-                                        <span className="min-w-0 flex-1 truncate line-through">{d.name}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => undoShoppingItem(d.id)}
-                                            className="flex shrink-0 items-center gap-1.5 rounded-input px-2.5 py-1.5 text-caption font-medium underline-offset-2 active:underline"
-                                        >
-                                            <Undo2 className="h-4 w-4" /> {t('kiosk:undo')}
-                                        </button>
-                                    </li>
-                                ))}
-                                {pendingShopping.map((item) => (
-                                    <li key={item.id}>
-                                        <button
-                                            type="button"
-                                            onClick={() => checkShoppingItem(item)}
-                                            className="flex w-full items-center gap-3 rounded-input px-3 py-2.5 text-left transition-colors active:bg-surface-2"
-                                        >
-                                            <span className="h-5 w-5 shrink-0 rounded-[6px] border-2 border-muted-foreground/50" />
-                                            <span className="min-w-0 flex-1 truncate">{item.name}</span>
-                                            {item.quantity ? (
-                                                <span className="shrink-0 text-caption text-muted-foreground">
-                                                    {item.quantity}{item.unit ? ` ${item.unit}` : ''}
-                                                </span>
-                                            ) : null}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </section>
-                </div>
+            setWeather(nextWeather);
+            setWeatherHours(nextHours);
+            setWeatherError(false);
 
-                {/* Family notes — post-its, shown only when there's something on the fridge */}
-                {isModuleEnabled('notes') && (visibleNotes.length > 0 || dismissedNotes.length > 0) && (
-                    <section className={cn(panelClass, 'lg:col-span-3')}>
-                        <h2 className="mb-5 flex items-center gap-3 font-serif text-h1">
-                            <StickyNote className="h-7 w-7 text-primary" /> {t('notes:title')}
-                        </h2>
-                        {dismissedNotes.map((d) => (
-                            <div key={`done-${d.id}`} className="mb-3 flex items-center gap-3 rounded-input bg-success/10 px-3 py-2.5 text-success">
-                                <Check className="h-5 w-5 shrink-0" />
-                                <span className="min-w-0 flex-1 truncate line-through">{d.content}</span>
-                                <button
-                                    type="button"
-                                    onClick={() => undoNote(d.id)}
-                                    className="flex shrink-0 items-center gap-1.5 rounded-input px-2.5 py-1.5 text-caption font-medium underline-offset-2 active:underline"
-                                >
-                                    <Undo2 className="h-4 w-4" /> {t('kiosk:undo')}
-                                </button>
-                            </div>
-                        ))}
-                        <FamilyNotes notes={visibleNotes} variant="kiosk" onDismiss={dismissNote} />
-                    </section>
-                )}
-            </main>
+            localStorage.setItem(
+                WEATHER_CACHE_KEY,
+                JSON.stringify({
+                    daily: nextWeather,
+                    hourly: nextHours,
+                })
+            );
+        } catch (error) {
+            console.error(
+                'Kiosk weather load error:',
+                error
+            );
+
+            setWeatherError(true);
+
+            try {
+                const cached =
+                    localStorage.getItem(
+                        WEATHER_CACHE_KEY
+                    );
+
+                if (cached) {
+                    const parsed =
+                        JSON.parse(cached) as {
+                            daily?: WeatherDay[];
+                            hourly?: WeatherHour[];
+                        };
+
+                    setWeather(parsed.daily ?? []);
+                    setWeatherHours(parsed.hourly ?? []);
+                }
+            } catch {
+                // Ungültigen lokalen Wetter-Cache ignorieren.
+            }
+        } finally {
+            setWeatherLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        void loadWeather();
+
+        const weatherRefreshId =
+            window.setInterval(
+                () => void loadWeather(),
+                WEATHER_REFRESH_MS
+            );
+
+        return () =>
+            window.clearInterval(weatherRefreshId);
+    }, [loadWeather]);
+
+    const hourlyWeatherByDay = useMemo(() => {
+        const todayDate =
+            `${now.getFullYear()}-` +
+            `${pad(now.getMonth() + 1)}-` +
+            `${pad(now.getDate())}`;
+
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const tomorrowDate =
+            `${tomorrow.getFullYear()}-` +
+            `${pad(tomorrow.getMonth() + 1)}-` +
+            `${pad(tomorrow.getDate())}`;
+
+        const isVisibleHour = (hourNumber: number): boolean =>
+            hourNumber >= 6 && hourNumber <= 20;
+
+        return {
+            today: weatherHours.filter((hour) => {
+                const date = hour.time.slice(0, 10);
+                const hourNumber = Number(hour.time.slice(11, 13));
+                return date === todayDate && isVisibleHour(hourNumber);
+            }),
+            tomorrow: weatherHours.filter((hour) => {
+                const date = hour.time.slice(0, 10);
+                const hourNumber = Number(hour.time.slice(11, 13));
+                return date === tomorrowDate && isVisibleHour(hourNumber);
+            }),
+        };
+    }, [weatherHours, now]);
+
+    const renderRainRow = (
+        label: string,
+        hours: WeatherHour[]
+    ): React.ReactNode => (
+        <div className="grid grid-cols-[62px_minmax(0,1fr)] items-stretch gap-1.5">
+            <div className="flex flex-col justify-center">
+                <span className="text-[0.55rem] font-bold uppercase tracking-wider text-muted-foreground">
+                    Regen
+                </span>
+
+                <span className="text-[0.7rem] font-bold text-foreground">
+                    {label}
+                </span>
             </div>
 
-            {/* Settings overlay (per-device) */}
-            {settingsOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSettingsOpen(false)} />
-                    <div className="relative w-full max-w-md rounded-card border border-border bg-card p-6 shadow-lg">
-                        <div className="mb-5 flex items-center justify-between gap-3">
-                            <h2 className="font-serif text-h2">{t('kiosk:displaySettings.title')}</h2>
-                            <button
-                                type="button"
-                                onClick={() => setSettingsOpen(false)}
-                                aria-label={t('kiosk:displaySettings.close')}
-                                className="rounded-input p-2 text-muted-foreground active:bg-surface-2"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
+            {hours.length === 0 ? (
+                <div className="flex items-center text-[0.65rem] text-muted-foreground">
+                    Keine Stundenwerte verfügbar
+                </div>
+            ) : (
+                <div
+                    className="grid min-w-0 gap-0.5"
+                    style={{
+                        gridTemplateColumns:
+                            `repeat(${hours.length}, minmax(44px, 1fr))`,
+                    }}
+                >
+                    {hours.map((hour) => {
+                        const hourLabel =
+                            hour.time.slice(11, 13);
 
-                        {/* Weather location */}
-                        <div className="space-y-2">
-                            <p className="text-caption font-medium">{t('kiosk:displaySettings.location')}</p>
-                            {settings.location ? (
-                                <div className="flex items-center justify-between gap-3 rounded-input border border-border bg-surface-2 px-3 py-2.5">
-                                    <span className="inline-flex min-w-0 items-center gap-2">
-                                        <MapPin className="h-4 w-4 shrink-0 text-primary" />
-                                        <span className="truncate font-medium">{settings.location.name}</span>
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => setSettings((s) => ({ ...s, location: null }))}
-                                        className="shrink-0 rounded-input px-2 py-1 text-caption text-muted-foreground underline-offset-2 active:underline"
+                        const wet =
+                            hour.precipitationProbability >= 20 ||
+                            hour.precipitation > 0 ||
+                            hour.rain > 0;
+
+                        return (
+                            <div
+                                key={hour.time}
+                                className={cn(
+                                    'flex min-w-0 flex-col items-center justify-center rounded-sm border px-0.5 py-0.5',
+                                    rainCellClass(hour)
+                                )}
+                                title={
+                                    `${hourLabel}:00 Uhr, ` +
+                                    `${Math.round(
+                                        hour.precipitationProbability
+                                    )} % Regen, ` +
+                                    `${hour.precipitation.toFixed(1)} mm, ` +
+                                    `${Math.round(
+                                        hour.temperature
+                                    )} °C`
+                                }
+                            >
+                                <span style={{ color: '#020617' }} className="text-[0.82rem] font-bold tabular-nums">
+                                    {hourLabel}
+                                </span>
+
+                                <span style={{ color: '#020617' }} className="text-[0.5rem] font-semibold tabular-nums">
+                                    {wet
+                                        ? `${Math.round(
+                                            hour
+                                                .precipitationProbability
+                                        )}%`
+                                        : '·'}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+
+    const renderWeatherView =
+        (): React.ReactNode => (
+            <section
+                className="min-w-0 cursor-pointer rounded-card border border-border bg-card/85 px-2.5 py-1.5 transition-colors hover:border-primary/60 active:bg-primary/10"
+                aria-label="14-Tage-Wettervorhersage für Kirchstetten öffnen"
+                role="button"
+                tabIndex={0}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    setWeatherDetailsOpen(true);
+                }}
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setWeatherDetailsOpen(true);
+                    }
+                }}
+            >
+                {weatherLoading &&
+                weather.length === 0 ? (
+                    <div className="flex min-h-[90px] items-center justify-center text-sm text-muted-foreground">
+                        Wetter wird geladen …
+                    </div>
+                ) : weather.length === 0 ? (
+                    <div className="flex min-h-[90px] items-center justify-center text-sm text-muted-foreground">
+                        Wetter nicht verfügbar
+                    </div>
+                ) : (
+                    <div className="space-y-1">
+                        <div className="flex min-w-0 items-center gap-1 border-b border-border/70 pb-1">
+                            <span className="mr-1 shrink-0 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-primary">
+                                Wetter
+                            </span>
+
+                            {weather.slice(0, 3).map(
+                                (day, index) => (
+                                    <div
+                                        key={day.date}
+                                        className="flex min-w-0 flex-1 items-center justify-center gap-1 border-l border-border/60 px-1 first:border-l-0"
                                     >
-                                        {t('kiosk:displaySettings.change')}
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                        <input
-                                            value={citySearch}
-                                            onChange={(e) => setCitySearch(e.target.value)}
-                                            placeholder={t('kiosk:displaySettings.searchPlaceholder')}
-                                            className="w-full rounded-input border border-border bg-background py-2.5 pl-9 pr-3 text-body outline-none focus:border-border-strong"
-                                        />
+                                        <span
+                                            className="text-base"
+                                            aria-hidden="true"
+                                        >
+                                            {weatherSymbol(
+                                                day.weatherCode
+                                            )}
+                                        </span>
+
+                                        <span
+                                            className={cn(
+                                                'text-[0.62rem] font-bold',
+                                                index === 0
+                                                    ? 'text-primary'
+                                                    : 'text-foreground'
+                                            )}
+                                        >
+                                            {formatWeatherDay(
+                                                day.date,
+                                                index
+                                            )}
+                                        </span>
+
+                                        <span className="font-serif text-[0.72rem] font-bold tabular-nums">
+                                            {Math.round(
+                                                day.temperatureMax
+                                            )}°
+                                        </span>
+
+                                        <span className="text-[0.54rem] font-semibold text-muted-foreground">
+                                            /{' '}
+                                            {Math.round(
+                                                day.temperatureMin
+                                            )}°
+                                        </span>
+
+                                        <span
+                                            className="text-[0.65rem]"
+                                            aria-hidden="true"
+                                        >
+                                            🌧
+                                        </span>
+
+                                        <span className="text-[0.54rem] font-semibold text-muted-foreground">
+                                            {Math.round(
+                                                day
+                                                    .precipitationProbability
+                                            )}%
+                                        </span>
+
+                                        <span
+                                            className="text-[0.65rem]"
+                                            aria-hidden="true"
+                                        >
+                                            💨
+                                        </span>
+
+                                        <span className="text-[0.54rem] font-semibold text-muted-foreground">
+                                            {Math.round(
+                                                day.windSpeedMax
+                                            )}
+                                        </span>
                                     </div>
-                                    {citySearch.trim().length >= 2 && !searchingCity && (
-                                        cityResults.length === 0 ? (
-                                            <p className="px-1 text-caption text-muted-foreground">{t('kiosk:displaySettings.noResults')}</p>
-                                        ) : (
-                                            <div className="divide-y divide-border overflow-hidden rounded-input border border-border">
-                                                {cityResults.map((r) => (
-                                                    <button
-                                                        key={r.id}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSettings((s) => ({ ...s, location: { name: r.name, lat: r.latitude, lon: r.longitude } }));
-                                                            setCitySearch('');
-                                                            setCityResults([]);
-                                                        }}
-                                                        className="flex w-full items-baseline gap-2 px-3 py-2.5 text-left active:bg-surface-2"
-                                                    >
-                                                        <span className="font-medium">{r.name}</span>
-                                                        <span className="min-w-0 flex-1 truncate text-caption text-muted-foreground">
-                                                            {[r.admin1, r.country].filter(Boolean).join(', ')}
-                                                        </span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )
-                                    )}
-                                    <p className="text-caption text-muted-foreground">{t('kiosk:displaySettings.noLocation')}</p>
-                                </>
+                                )
+                            )}
+
+                            {weatherError && (
+                                <span className="shrink-0 text-[0.5rem] text-amber-500">
+                                    letzter Stand
+                                </span>
                             )}
                         </div>
 
-                        {/* Photo background toggle */}
-                        <div className="mt-6 flex items-start justify-between gap-4">
-                            <div>
-                                <p className="text-caption font-medium">{t('kiosk:displaySettings.photoBackground')}</p>
-                                <p className="mt-0.5 text-micro text-muted-foreground">{t('kiosk:displaySettings.photoBackgroundHint')}</p>
+                        {renderRainRow(
+                            'Heute',
+                            hourlyWeatherByDay.today
+                        )}
+
+                        {renderRainRow(
+                            'Morgen',
+                            hourlyWeatherByDay.tomorrow
+                        )}
+                    </div>
+                )}
+            </section>
+        );
+
+    // OPENFAMILY_KIOSK_FULL_FEATURES_START
+    useEffect(() => {
+        const closeOnEscape = (event: KeyboardEvent): void => {
+            if (event.key !== 'Escape') return;
+            setSelectedAppointment(null);
+            setWeatherDetailsOpen(false);
+        };
+        document.addEventListener('keydown', closeOnEscape);
+        return () => document.removeEventListener('keydown', closeOnEscape);
+    }, []);
+
+    const formatAppointmentDateTime = (value: string): string =>
+        new Intl.DateTimeFormat(LOCALE, {
+            weekday: 'long',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        }).format(new Date(value));
+
+    const renderAppointmentDetails = (): React.ReactNode => {
+        if (!selectedAppointment) return null;
+        const members = selectedAppointment.family_members_data ?? [];
+        return (
+            <div
+                className="fixed inset-0 z-[250] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Termindetails: ${selectedAppointment.title}`}
+                onClick={() => setSelectedAppointment(null)}
+            >
+                <section
+                    className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-card border border-border bg-card p-5 shadow-2xl lg:p-7"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    <header className="mb-5 flex items-start justify-between gap-4 border-b border-border pb-4">
+                        <div className="min-w-0">
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Kalendereintrag</p>
+                            <h2 className="mt-1 break-words font-serif text-[clamp(1.8rem,4vw,3rem)] font-bold">
+                                {selectedAppointment.title}
+                            </h2>
+                        </div>
+                        <button
+                            type="button"
+                            className="shrink-0 rounded-input border border-border bg-background px-4 py-2 font-bold hover:border-primary hover:text-primary"
+                            onClick={() => setSelectedAppointment(null)}
+                        >
+                            Schließen
+                        </button>
+                    </header>
+                    <div className="grid gap-4 text-lg sm:grid-cols-2">
+                        <div className="rounded-input bg-surface-2 p-4">
+                            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Beginn</p>
+                            <p className="mt-1 font-semibold capitalize">{formatAppointmentDateTime(selectedAppointment.start_time)}</p>
+                        </div>
+                        {selectedAppointment.end_time && (
+                            <div className="rounded-input bg-surface-2 p-4">
+                                <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Ende</p>
+                                <p className="mt-1 font-semibold capitalize">{formatAppointmentDateTime(selectedAppointment.end_time)}</p>
                             </div>
-                            <button
-                                type="button"
-                                role="switch"
-                                aria-checked={settings.photoBackground}
-                                aria-label={t('kiosk:displaySettings.photoBackground')}
-                                onClick={() => setSettings((s) => ({ ...s, photoBackground: !s.photoBackground }))}
+                        )}
+                        {selectedAppointment.location && (
+                            <div className="rounded-input bg-surface-2 p-4 sm:col-span-2">
+                                <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Ort</p>
+                                <p className="mt-1 whitespace-pre-wrap font-semibold">{selectedAppointment.location}</p>
+                            </div>
+                        )}
+                        {members.length > 0 && (
+                            <div className="rounded-input bg-surface-2 p-4 sm:col-span-2">
+                                <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Teilnehmer</p>
+                                <div className="mt-2 flex flex-wrap gap-3">
+                                    {members.map((member) => (
+                                        <span key={member.id} className="inline-flex items-center gap-2 font-semibold">
+                                            <span className="h-3 w-3 rounded-full" style={{ backgroundColor: member.color || 'var(--primary)' }} />
+                                            {member.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {(selectedAppointment.description || selectedAppointment.notes) && (
+                            <div className="rounded-input bg-surface-2 p-4 sm:col-span-2">
+                                <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Details</p>
+                                <p className="mt-2 whitespace-pre-wrap break-words leading-relaxed">
+                                    {selectedAppointment.description || selectedAppointment.notes}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+            </div>
+        );
+    };
+
+    const renderWeatherDetails = (): React.ReactNode => {
+        if (!weatherDetailsOpen) return null;
+        return (
+            <div
+                className="fixed inset-0 z-[200] overflow-y-auto bg-background/95 p-4 backdrop-blur-md lg:p-8"
+                role="dialog"
+                aria-modal="true"
+                aria-label="14-Tage-Wettervorhersage"
+                onClick={() => setWeatherDetailsOpen(false)}
+            >
+                <section
+                    className="mx-auto max-w-[1700px] rounded-card border border-border bg-card p-4 shadow-2xl lg:p-6"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    <header className="mb-5 flex items-center justify-between gap-4 border-b border-border pb-4">
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Wetter · Kirchstetten</p>
+                            <h2 className="mt-1 font-serif text-[clamp(1.8rem,3vw,3rem)] font-bold">14-Tage-Vorhersage</h2>
+                            <p className="mt-1 text-sm text-muted-foreground">Nach links wischen oder außerhalb tippen zum Schließen</p>
+                        </div>
+                        <button
+                            type="button"
+                            className="min-h-12 rounded-input border border-border bg-background px-5 py-2 text-base font-bold hover:border-primary hover:text-primary"
+                            onClick={() => setWeatherDetailsOpen(false)}
+                        >
+                            Schließen
+                        </button>
+                    </header>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
+                        {weather.map((day, index) => {
+                            const date = new Date(`${day.date}T12:00:00`);
+                            const dayLabel = index === 0 ? 'Heute' : new Intl.DateTimeFormat(LOCALE, { weekday: 'long' }).format(date);
+                            const dateLabel = new Intl.DateTimeFormat(LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+                            const sunrise = day.sunrise ? day.sunrise.slice(11, 16) : '–';
+                            const sunset = day.sunset ? day.sunset.slice(11, 16) : '–';
+                            return (
+                                <article
+                                    key={day.date}
+                                    className={cn(
+                                        'rounded-card border p-4',
+                                        index === 0 ? 'border-primary bg-primary/10 ring-2 ring-primary/20' : 'border-border bg-background/60'
+                                    )}
+                                >
+                                    <header className="mb-3 flex items-start justify-between gap-3 border-b border-border pb-3">
+                                        <div>
+                                            <p className={cn('font-serif text-xl font-bold capitalize', index === 0 && 'text-primary')}>{dayLabel}</p>
+                                            <p className="text-sm font-semibold text-muted-foreground">{dateLabel}</p>
+                                        </div>
+                                        <span className="text-4xl" aria-hidden="true">{weatherSymbol(day.weatherCode)}</span>
+                                    </header>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Temperatur</p>
+                                            <p className="font-serif text-2xl font-bold tabular-nums">
+                                                {Math.round(day.temperatureMax)}°
+                                                <span className="ml-2 text-base text-muted-foreground">/ {Math.round(day.temperatureMin)}°</span>
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">Gefühlt {Math.round(day.apparentTemperatureMax)}° / {Math.round(day.apparentTemperatureMin)}°</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="rounded-input bg-surface-2 p-2">
+                                                <p className="text-[0.65rem] font-bold uppercase text-muted-foreground">Regen</p>
+                                                <p className="mt-1 font-bold tabular-nums">{Math.round(day.precipitationProbability)}%</p>
+                                                <p className="text-xs text-muted-foreground">{day.precipitationSum.toFixed(1)} mm</p>
+                                            </div>
+                                            <div className="rounded-input bg-surface-2 p-2">
+                                                <p className="text-[0.65rem] font-bold uppercase text-muted-foreground">Wind</p>
+                                                <p className="mt-1 font-bold tabular-nums">{Math.round(day.windSpeedMax)} km/h</p>
+                                                <p className="text-xs text-muted-foreground">Böen {Math.round(day.windGustMax)} km/h</p>
+                                            </div>
+                                            <div className="rounded-input bg-surface-2 p-2">
+                                                <p className="text-[0.65rem] font-bold uppercase text-muted-foreground">UV-Index</p>
+                                                <p className="mt-1 font-bold tabular-nums">{day.uvIndexMax.toFixed(1)}</p>
+                                            </div>
+                                            <div className="rounded-input bg-surface-2 p-2">
+                                                <p className="text-[0.65rem] font-bold uppercase text-muted-foreground">Sonne</p>
+                                                <p className="mt-1 text-sm font-bold tabular-nums">↑ {sunrise}</p>
+                                                <p className="text-sm font-bold tabular-nums">↓ {sunset}</p>
+                                            </div>
+                                        </div>
+                                        {day.snowfallSum > 0 && (
+                                            <p className="rounded-input bg-sky-500/10 px-2 py-1 text-sm font-semibold text-sky-300">
+                                                Schnee: {day.snowfallSum.toFixed(1)} cm
+                                            </p>
+                                        )}
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    </div>
+                    <footer className="mt-5 border-t border-border pt-3 text-center text-xs text-muted-foreground">
+                        Wetterdaten von Open-Meteo · automatische Aktualisierung
+                    </footer>
+                </section>
+            </div>
+        );
+    };
+    // OPENFAMILY_KIOSK_FULL_FEATURES_END
+
+
+    const renderWeekView = (): React.ReactNode => (
+        <>
+            <header className="grid grid-cols-[minmax(400px,32%)_minmax(0,1fr)] items-center gap-3 px-4 pb-3 pt-3 lg:px-8">
+                <div className="flex min-w-0 items-baseline gap-4 font-serif font-semibold">
+                    <span className="shrink-0 text-[clamp(2rem,4vw,3.6rem)] tabular-nums">
+                        {formatTime(now)}
+                    </span>
+
+                    <span className="min-w-0 truncate text-[clamp(1rem,1.65vw,1.6rem)] capitalize text-muted-foreground">
+                        {formatCurrentDate(now)}
+                    </span>
+                </div>
+
+                {renderWeatherView()}
+            </header>
+
+            <section className="mx-4 rounded-card border border-border bg-card p-4 lg:mx-8 lg:p-5">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <Calendar className="h-7 w-7 shrink-0 text-primary" />
+                        <span className="font-serif text-[clamp(1.4rem,2vw,2rem)] font-bold">
+                            KW {isoWeekNumber(displayedWeekStart)}
+                        </span>
+                    </div>
+                    <span className="text-[clamp(1rem,1.35vw,1.3rem)] font-semibold tabular-nums text-muted-foreground">
+                        {formatRange(displayedWeekStart, displayedWeekEnd)}
+                    </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-7">
+                    {Array.from({ length: 7 }, (_, index) => {
+                        const day = addDays(displayedWeekStart, index);
+                        const dayKey = toDateKey(day);
+                        const dayAppointments = appointmentsByDay.get(dayKey) ?? [];
+                        const dayPlanning = getPlanningForDay(day);
+                        const todayMarker = isSameDay(day, now);
+
+                        return (
+                            <article
+                                key={dayKey}
                                 className={cn(
-                                    'relative h-7 w-12 shrink-0 rounded-full transition-colors',
-                                    settings.photoBackground ? 'bg-primary' : 'border border-border bg-surface-2'
+                                    'min-h-52 rounded-input border p-3',
+                                    todayMarker
+                                        ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
+                                        : 'border-border bg-background/70'
                                 )}
                             >
-                                <span className={cn(
-                                    'absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all',
-                                    settings.photoBackground ? 'left-6' : 'left-1'
-                                )} />
-                            </button>
-                        </div>
-                    </div>
+                                <header className="mb-3 border-b border-border pb-3">
+                                    <div
+                                        className={cn(
+                                            'font-serif text-[clamp(1.5rem,2vw,2rem)] font-bold leading-none tabular-nums',
+                                            todayMarker ? 'text-primary' : 'text-foreground'
+                                        )}
+                                    >
+                                        {formatDayHeader(day)}{todayMarker && ' · HEUTE'}
+                                    </div>
+                                </header>
+
+                                {dayAppointments.length === 0 && dayPlanning.length === 0 ? (
+                                    <p className="py-8 text-center text-lg font-medium text-muted-foreground">
+                                        Keine Termine
+                                    </p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {dayAppointments.map((appointment) => (
+                                            <div
+                                                key={appointment.occurrence_id || appointment.id}
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={(event) => { event.stopPropagation(); setSelectedAppointment(appointment); }}
+                                                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedAppointment(appointment); } }}
+                                                className="cursor-pointer rounded-input border-l-4 border-primary bg-surface-2 px-3 py-3 transition-colors hover:bg-primary/10 active:bg-primary/15"
+                                            >
+                                                <div className="font-serif text-[clamp(1.45rem,1.9vw,1.95rem)] font-bold leading-none tabular-nums text-primary">
+                                                    {formatTime(appointment.start_time)}
+                                                </div>
+                                                <p className="mt-2 break-words font-serif text-[clamp(1.45rem,1.9vw,1.95rem)] font-bold uppercase leading-tight">
+                                                    {appointment.title}
+                                                </p>
+                                                {appointment.location && (
+                                                    <p className="mt-2 flex items-center gap-2 text-base font-medium text-muted-foreground">
+                                                        <MapPin className="h-4 w-4 shrink-0" />
+                                                        <span className="truncate">{appointment.location}</span>
+                                                    </p>
+                                                )}
+                                                {renderParticipants(
+                                                    appointment.family_members_data ?? []
+                                                )}
+                                            </div>
+                                        ))}
+
+                                        {dayPlanning.map((entry) => (
+                                            <div
+                                                key={`planning-${dayKey}-${entry.id}`}
+                                                className="rounded-input border-l-4 bg-surface-2 px-3 py-3"
+                                                style={{
+                                                    borderLeftColor:
+                                                        entry.family_member_color || 'var(--primary)',
+                                                }}
+                                            >
+                                                <div className="font-serif text-[clamp(1.45rem,1.9vw,1.95rem)] font-bold leading-none tabular-nums">
+                                                    {entry.start_time.slice(0, 5)} – {entry.end_time.slice(0, 5)}
+                                                </div>
+                                                <p className="mt-2 break-words font-serif text-[clamp(1.45rem,1.9vw,1.95rem)] font-bold uppercase leading-tight">
+                                                    {entry.title}
+                                                </p>
+                                                {entry.location && (
+                                                    <p className="mt-2 flex items-center gap-2 text-base font-medium text-muted-foreground">
+                                                        <MapPin className="h-4 w-4 shrink-0" />
+                                                        <span className="truncate">{entry.location}</span>
+                                                    </p>
+                                                )}
+                                                {renderParticipants(
+                                                    getPlanningParticipants(entry),
+                                                    entry.family_member_color
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </article>
+                        );
+                    })}
                 </div>
+            </section>
+        </>
+    );
+
+    const renderMonthView = (): React.ReactNode => {
+        const rollingStartMonth = monthPreviewStart.getMonth();
+
+        return (
+            <section className="m-4 rounded-card border border-border bg-card p-4 lg:m-8 lg:p-5">
+                <div className="mb-3 flex flex-wrap gap-3 font-semibold">
+                    <span className="rounded-full bg-primary/15 px-3 py-1 text-primary">
+                        {new Intl.DateTimeFormat(LOCALE, { month: 'long' })
+                            .format(monthPreviewStart)}
+                    </span>
+                    {monthPreviewStart.getMonth() !== monthPreviewEnd.getMonth() && (
+                        <span className="rounded-full bg-amber-500/15 px-3 py-1 text-amber-600">
+                            {new Intl.DateTimeFormat(LOCALE, { month: 'long' })
+                                .format(monthPreviewEnd)}
+                        </span>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-7 xl:grid-cols-8">
+                    {Array.from(
+                        { length: monthPreviewDayCount },
+                        (_, index) => {
+                            const day = addDays(monthPreviewStart, index);
+                            const dayKey = toDateKey(day);
+                            const dayAppointments = appointmentsByDay.get(dayKey) ?? [];
+                            const dayPlanning = getPlanningForDay(day);
+                            const todayMarker = isSameDay(day, now);
+
+                            return (
+                                <article
+                                    key={dayKey}
+                                    className={cn(
+                                        'min-h-32 rounded-input border p-2.5',
+                                        monthDisplayMode === 'rolling' &&
+                                        day.getMonth() !== rollingStartMonth
+                                            ? 'border-amber-500/35 bg-amber-500/10'
+                                            : 'border-primary/35 bg-primary/10',
+                                        todayMarker && 'ring-2 ring-primary'
+                                    )}
+                                >
+                                    <div className="mb-2 font-serif text-lg font-bold">
+                                        {formatDayHeader(day)}{todayMarker && ' · HEUTE'}
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        {dayAppointments.map((appointment) => (
+                                            <div
+                                                key={appointment.occurrence_id || appointment.id}
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={(event) => { event.stopPropagation(); setSelectedAppointment(appointment); }}
+                                                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedAppointment(appointment); } }}
+                                                className="cursor-pointer rounded bg-surface-2 px-2 py-1.5 transition-colors hover:bg-primary/10 active:bg-primary/15"
+                                            >
+                                                <p className="truncate text-base font-bold uppercase">
+                                                    {appointment.title}
+                                                </p>
+                                                <p className="truncate text-sm font-semibold text-muted-foreground">
+                                                    {(appointment.family_members_data ?? [])
+                                                        .map((member) => member.name)
+                                                        .join(', ')}
+                                                </p>
+                                            </div>
+                                        ))}
+
+                                        {dayPlanning.map((entry) => (
+                                            <div
+                                                key={`month-planning-${dayKey}-${entry.id}`}
+                                                className="cursor-pointer rounded bg-surface-2 px-2 py-1.5 transition-colors hover:bg-primary/10 active:bg-primary/15"
+                                            >
+                                                <p className="truncate text-base font-bold uppercase">
+                                                    {entry.title}
+                                                </p>
+                                                <p className="truncate text-sm font-semibold text-muted-foreground">
+                                                    {getPlanningParticipants(entry)
+                                                        .map((member) => member.name)
+                                                        .join(', ')}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </article>
+                            );
+                        }
+                    )}
+                </div>
+            </section>
+        );
+    };
+
+    const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>): void => {
+        const touch = event.touches[0];
+        touchStart.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>): void => {
+        if (!touchStart.current) return;
+
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - touchStart.current.x;
+        const deltaY = touch.clientY - touchStart.current.y;
+        touchStart.current = null;
+
+        if (Math.abs(deltaX) < 12 && Math.abs(deltaY) < 12) {
+            const currentTap = Date.now();
+            const elapsed = currentTap - lastTapRef.current;
+            if (elapsed > 0 && elapsed < 450) {
+                lastTapRef.current = 0;
+                window.location.reload();
+                return;
+            }
+            lastTapRef.current = currentTap;
+        }
+
+        const horizontal = Math.abs(deltaX) > Math.abs(deltaY);
+
+        if (
+            weatherDetailsOpen &&
+            horizontal &&
+            deltaX <= -SWIPE_THRESHOLD_PX
+        ) {
+            setWeatherDetailsOpen(false);
+            return;
+        }
+
+        if (horizontal && Math.abs(deltaX) >= SWIPE_THRESHOLD_PX) {
+            if (viewMode === 'month') {
+                if (monthDisplayMode === 'rolling') {
+                    setMonthDisplayMode('calendar');
+                    setMonthOffset(deltaX < 0 ? 1 : -1);
+                } else {
+                    setMonthOffset((current) => current + (deltaX < 0 ? 1 : -1));
+                }
+            } else {
+                setWeekOffset((current) => current + (deltaX < 0 ? 1 : -1));
+            }
+            return;
+        }
+
+        if (!horizontal && deltaY <= -SWIPE_THRESHOLD_PX && viewMode === 'week') {
+            setMonthOffset(0);
+            setMonthDisplayMode('rolling');
+            setViewMode('month');
+            return;
+        }
+
+        if (!horizontal && deltaY >= SWIPE_THRESHOLD_PX && viewMode === 'month') {
+            setViewMode('week');
+            setWeekOffset(0);
+        }
+    };
+
+    return (
+        <div
+            className="min-h-screen touch-pan-y bg-background text-foreground"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onDoubleClick={() => window.location.reload()}
+        >
+            {renderAppointmentDetails()}
+            {renderWeatherDetails()}
+            {loading &&
+            appointments.length === 0 &&
+            Object.keys(planningByWeek).length === 0 ? (
+                <div className="m-4 rounded-card border border-border bg-card p-12 text-center text-h2 text-muted-foreground lg:m-8">
+                    Kalender wird geladen …
+                </div>
+            ) : viewMode === 'month' ? (
+                renderMonthView()
+            ) : (
+                renderWeekView()
             )}
         </div>
     );
 };
 
 export default Kiosk;
+
+// OPENFAMILY_KIOSK_WEATHER_END
+// OPENFAMILY_KIOSK_FULL_PATCH_APPLIED

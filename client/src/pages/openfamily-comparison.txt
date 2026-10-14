@@ -1,0 +1,79 @@
+=== COMMITS ===
+< 40d4b10 fix(auth): a network failure at startup no longer signs the user out
+< cf315e5 fix(tasks): filters are kept per account, and a child starts on their own tasks
+
+=== STATUS ===
+ D Budget.tsx
+ D Calendar.tsx
+ D Dashboard.tsx
+ D Family.tsx
+ D Integrations.tsx
+ D Join.tsx
+ M Kiosk.tsx
+ D Login.tsx
+ D MealPlanning.tsx
+ D Planning.tsx
+ D Posts.tsx
+ D Recipes.tsx
+ D ResetPassword.tsx
+ D Rewards.tsx
+ D ServerSetup.tsx
+ D Settings.tsx
+ D ShoppingList.tsx
+ D Tasks.tsx
+ M ../../../docker-compose.yml
+ M ../../../server/src/services/integrations/nextcloud.ts
+?? openfamily-comparison.txt
+?? openfamily-local-vs-upstream.patch
+?? ../../../docs/kiosk.md
+
+=== DATEIEN ===
+M	client/src/contexts/AuthContext.tsx
+D	client/src/pages/Budget.tsx
+D	client/src/pages/Calendar.tsx
+D	client/src/pages/Dashboard.tsx
+D	client/src/pages/Family.tsx
+D	client/src/pages/Integrations.tsx
+D	client/src/pages/Join.tsx
+M	client/src/pages/Kiosk.tsx
+D	client/src/pages/Login.tsx
+D	client/src/pages/MealPlanning.tsx
+D	client/src/pages/Planning.tsx
+D	client/src/pages/Posts.tsx
+D	client/src/pages/Recipes.tsx
+D	client/src/pages/ResetPassword.tsx
+D	client/src/pages/Rewards.tsx
+D	client/src/pages/ServerSetup.tsx
+D	client/src/pages/Settings.tsx
+D	client/src/pages/ShoppingList.tsx
+D	client/src/pages/Tasks.tsx
+M	docker-compose.yml
+M	server/src/services/integrations/nextcloud.ts
+
+=== STATISTIK ===
+ client/src/contexts/AuthContext.tsx           |   19 +-
+ client/src/pages/Budget.tsx                   | 1257 ----------------
+ client/src/pages/Calendar.tsx                 | 1636 --------------------
+ client/src/pages/Dashboard.tsx                |  822 ----------
+ client/src/pages/Family.tsx                   |  938 ------------
+ client/src/pages/Integrations.tsx             |  463 ------
+ client/src/pages/Join.tsx                     |  207 ---
+ client/src/pages/Kiosk.tsx                    | 1981 +++++++++++++++++--------
+ client/src/pages/Login.tsx                    |  290 ----
+ client/src/pages/MealPlanning.tsx             | 1066 -------------
+ client/src/pages/Planning.tsx                 | 1001 -------------
+ client/src/pages/Posts.tsx                    |  630 --------
+ client/src/pages/Recipes.tsx                  | 1147 --------------
+ client/src/pages/ResetPassword.tsx            |  138 --
+ client/src/pages/Rewards.tsx                  |  918 ------------
+ client/src/pages/ServerSetup.tsx              |   80 -
+ client/src/pages/Settings.tsx                 | 1243 ----------------
+ client/src/pages/ShoppingList.tsx             |  899 -----------
+ client/src/pages/Tasks.tsx                    |  689 ---------
+ docker-compose.yml                            |   12 +-
+ server/src/services/integrations/nextcloud.ts |  244 ++-
+ 21 files changed, 1550 insertions(+), 14130 deletions(-)
+
+=== UNVERSIONIERTE DATEIEN ===
+openfamily-comparison.txt
+openfamily-local-vs-upstream.patch

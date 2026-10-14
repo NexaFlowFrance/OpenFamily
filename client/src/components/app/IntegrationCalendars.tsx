@@ -5,12 +5,13 @@ import { Button, Input } from '../ui';
 import { api } from '../../lib/api';
 import { intlLocale } from '../../i18n/format';
 
-export interface CalendarSubscription {
+export interface IntegrationCalendar {
     id: string;
-    name: string;
-    url_host: string;
+    calendar_name: string;
     color: string;
     family_member_ids: string[];
+    enabled: boolean;
+    discovered: boolean;
     last_synced_at: string | null;
     last_error: string | null;
     event_count: number;
@@ -96,7 +97,7 @@ const MemberChoice: React.FC<{ members: Member[]; value: string[]; onChange: (id
 
 export const ExternalCalendars: React.FC<ExternalCalendarsProps> = ({ members, canManage, onEventsChanged }) => {
     const { t } = useTranslation(['calendar', 'common']);
-    const [subscriptions, setSubscriptions] = useState<CalendarSubscription[]>([]);
+    const [calendars, setCalendars] = useState<IntegrationCalendar[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Add or edit form
@@ -124,10 +125,10 @@ export const ExternalCalendars: React.FC<ExternalCalendarsProps> = ({ members, c
 
     const load = useCallback(async () => {
         try {
-            const res = await api.get<{ success: boolean; data: CalendarSubscription[] }>('/api/calendar/subscriptions');
-            setSubscriptions(Array.isArray(res.data) ? res.data : []);
+            const res = await api.get<{ success: boolean; data: IntegrationCalendar[] }>('/api/calendar/integration-calendars');
+            setCalendars(Array.isArray(res.data) ? res.data : []);
         } catch {
-            setSubscriptions([]);
+            setCalendars([]);
         } finally {
             setLoading(false);
         }

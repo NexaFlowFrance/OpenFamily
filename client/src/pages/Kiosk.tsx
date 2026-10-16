@@ -105,6 +105,32 @@ interface PlanningEntry {
     participant_ids?: string[];
 }
 
+type TimelineEntry =
+    | {
+        kind: 'appointment';
+        key: string;
+        startMinutes: number;
+        endMinutes: number;
+        appointment: Appointment;
+    }
+    | {
+        kind: 'planning';
+        key: string;
+        startMinutes: number;
+        endMinutes: number;
+        planning: PlanningEntry;
+    };
+
+interface TimelineColumnEntry {
+    entry: TimelineEntry;
+    column: number;
+}
+
+interface TimelineGroup {
+    entries: TimelineColumnEntry[];
+    columns: number;
+}
+
 interface ApiResponse<T> {
     success: boolean;
     data: T;
@@ -262,6 +288,119 @@ const rainCellClass = (hour: WeatherHour): string => {
     return 'border-border/70 bg-background/70 !text-foreground';
 };
 
+const clockValueToMinutes = (value: string): number => {
+    const time = value.includes('T') ? value.slice(11, 16) : value.slice(0, 5);
+    const [hours, minutes] = time.split(':').map(Number);
+    return (Number.isFinite(hours) ? hours : 0) * 60 +
+        (Number.isFinite(minutes) ? minutes : 0);
+};
+
+const buildTimelineGroups = (
+    dayKey: string,
+    appointments: Appointment[],
+    planning: PlanningEntry[]
+): TimelineGroup[] => {
+    const entries: TimelineEntry[] = [
+        ...appointments.map((appointment) => {
+            const startMinutes = clockValueToMinutes(appointment.start_time);
+            const rawEnd = appointment.end_time
+                ? clockValueToMinutes(appointment.end_time)
+                : startMinutes + 30;
+            return {
+                kind: 'appointment' as const,
+                key: appointment.occurrence_id || appointment.id,
+                startMinutes,
+                endMinutes: rawEnd > startMinutes ? rawEnd : startMinutes + 30,
+                appointment,
+            };
+        }),
+        ...planning.map((entry) => {
+            const startMinutes = clockValueToMinutes(entry.start_time);
+            const rawEnd = clockValueToMinutes(entry.end_time);
+            return {
+                kind: 'planning' as const,
+                key: `planning-${dayKey}-${entry.id}`,
+                startMinutes,
+                endMinutes: rawEnd > startMinutes ? rawEnd : startMinutes + 30,
+                planning: entry,
+            };
+        }),
+    ].sort((left, right) =>
+        left.startMinutes - right.startMinutes ||
+        left.endMinutes - right.endMinutes ||
+        left.key.localeCompare(right.key)
+    );
+
+    // OPENFAMILY_TAGDIENST_FULL_ROW
+    const titleOf = (entry: TimelineEntry): string =>
+        entry.kind === 'appointment'
+            ? entry.appointment.title
+            : entry.planning.title;
+
+    // Tagdienst blockiert weiterhin den Zeitraum, soll aber nicht alle anderen
+    // Termine des Tages in schmale Spalten zwingen. Er bekommt eine eigene,
+    // volle Zeile und die restlichen Eintraege werden separat gruppiert.
+    const isFullRowEntry = (entry: TimelineEntry): boolean =>
+        titleOf(entry).trim().toLocaleLowerCase('de-AT') === 'tagdienst';
+
+    const grouped: TimelineEntry[][] = [];
+    let activeGroup: TimelineEntry[] = [];
+    let activeEnd = -1;
+
+    const flushActiveGroup = (): void => {
+        if (activeGroup.length === 0) return;
+        grouped.push(activeGroup);
+        activeGroup = [];
+        activeEnd = -1;
+    };
+
+    entries.forEach((entry) => {
+        if (isFullRowEntry(entry)) {
+            flushActiveGroup();
+            grouped.push([entry]);
+            return;
+        }
+
+        if (activeGroup.length === 0 || entry.startMinutes < activeEnd) {
+            activeGroup.push(entry);
+            activeEnd = Math.max(activeEnd, entry.endMinutes);
+            return;
+        }
+
+        flushActiveGroup();
+        activeGroup = [entry];
+        activeEnd = entry.endMinutes;
+    });
+    flushActiveGroup();
+
+    return grouped.map((groupEntries) => {
+        if (groupEntries.length === 1 && isFullRowEntry(groupEntries[0])) {
+            return {
+                entries: [{ entry: groupEntries[0], column: 0 }],
+                columns: 1,
+            };
+        }
+
+        const columnEnds: number[] = [];
+        const positioned = groupEntries.map((entry) => {
+            let column = columnEnds.findIndex(
+                (end) => entry.startMinutes >= end
+            );
+            if (column < 0) {
+                column = columnEnds.length;
+                columnEnds.push(entry.endMinutes);
+            } else {
+                columnEnds[column] = entry.endMinutes;
+            }
+            return { entry, column };
+        });
+        return {
+            entries: positioned,
+            columns: Math.max(1, columnEnds.length),
+        };
+    });
+};
+
 const Kiosk: React.FC = () => {
     const [now, setNow] = useState<Date>(() => new Date());
     const [weekOffset, setWeekOffset] = useState<number>(0);
@@ -269,6 +408,8 @@ const Kiosk: React.FC = () => {
     const [monthOffset, setMonthOffset] = useState<number>(0);
     const [monthDisplayMode, setMonthDisplayMode] = useState<MonthDisplayMode>('rolling');
     const [appointments, setAppointments] = useState<Appointment[]>([]);
+    // OPENFAMILY_KIOSK_FAMILY_LEGEND_DOTS
+    const [familyMembers, setFamilyMembers] = useState<Member[]>([]);
     const [planningByWeek, setPlanningByWeek] = useState<
         Record<string, PlanningEntry[]>
     >({});
@@ -279,6 +420,36 @@ const Kiosk: React.FC = () => {
         useState<boolean>(false);
     const touchStart = useRef<TouchPoint | null>(null);
     const lastTapRef = useRef<number>(0);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadFamilyMembers = async (): Promise<void> => {
+            try {
+                const response = await api.get<ApiResponse<Member[]>>('/api/family');
+                if (!cancelled && Array.isArray(response.data)) {
+                    setFamilyMembers(
+                        response.data
+                            .filter((member) => member?.id && member?.name)
+                            .map((member) => ({
+                                id: String(member.id),
+                                name: String(member.name),
+                                color: String(member.color || '#64748B'),
+                                role: member.role,
+                            }))
+                    );
+                }
+            } catch (error) {
+                console.error('Kiosk family legend could not be loaded:', error);
+            }
+        };
+
+        void loadFamilyMembers();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const todayKey = toDateKey(now);
 
@@ -491,29 +662,6 @@ const Kiosk: React.FC = () => {
             color: entry.family_member_color,
         }];
     };
-
-    const renderParticipants = (
-        members: Member[],
-        fallbackColor?: string
-    ): React.ReactNode => (
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-            {members.map((member) => (
-                <span
-                    key={member.id}
-                    className="inline-flex items-center gap-2 text-[clamp(1rem,1.25vw,1.35rem)] font-semibold leading-tight text-foreground/90"
-                >
-                    <span
-                        className="h-3.5 w-3.5 shrink-0 rounded-full"
-                        style={{
-                            backgroundColor:
-                                member.color || fallbackColor || 'var(--primary)',
-                        }}
-                    />
-                    {member.name}
-                </span>
-            ))}
-        </div>
-    );
 
     const [weather, setWeather] = useState<WeatherDay[]>([]);
     const [weatherHours, setWeatherHours] =
@@ -1098,6 +1246,34 @@ const Kiosk: React.FC = () => {
     // OPENFAMILY_KIOSK_FULL_FEATURES_END
 
 
+    const renderParticipantDots = (
+        members: Member[],
+        fallbackColor?: string
+    ): React.ReactNode => {
+        const colors = members.length > 0
+            ? members.map((member) => member.color || fallbackColor || '#64748B')
+            : fallbackColor
+              ? [fallbackColor]
+              : [];
+
+        if (colors.length === 0) return null;
+
+        return (
+            <div
+                className="mt-2 flex flex-wrap items-center gap-1.5"
+                aria-label={`${colors.length} zugeordnete Familienmitglieder`}
+            >
+                {colors.map((color, index) => (
+                    <span
+                        key={`${color}-${index}`}
+                        className="h-3 w-3 rounded-full ring-1 ring-black/10"
+                        style={{ backgroundColor: color }}
+                    />
+                ))}
+            </div>
+        );
+    };
+
     const renderWeekView = (): React.ReactNode => (
         <>
             <header className="grid grid-cols-[minmax(400px,32%)_minmax(0,1fr)] items-center gap-3 px-4 pb-3 pt-3 lg:px-8">
@@ -1105,12 +1281,10 @@ const Kiosk: React.FC = () => {
                     <span className="shrink-0 text-[clamp(2rem,4vw,3.6rem)] tabular-nums">
                         {formatTime(now)}
                     </span>
-
                     <span className="min-w-0 truncate text-[clamp(1rem,1.65vw,1.6rem)] capitalize text-muted-foreground">
                         {formatCurrentDate(now)}
                     </span>
                 </div>
-
                 {renderWeatherView()}
             </header>
 
@@ -1121,6 +1295,48 @@ const Kiosk: React.FC = () => {
                         <span className="font-serif text-[clamp(1.4rem,2vw,2rem)] font-bold">
                             KW {isoWeekNumber(displayedWeekStart)}
                         </span>
+                        <button type="button"
+                                onClick={() => setViewMode('month')}
+                                className="rounded-input border border-border bg-surface-2 px-3 py-1 text-sm font-semibold transition-colors hover:bg-primary hover:text-white"
+                                >
+                                Monat
+                        </button>
+
+                                    {/* OPENFAMILY_HORIZONTAL_FAMILY_LEGEND */}
+                                    <div
+                                        className="ml-1 grid min-w-0 flex-1 items-center gap-x-2 border-l border-border pl-3"
+                                        style={{
+                                            gridTemplateColumns: `repeat(${Math.max(
+                                                1,
+                                                familyMembers.length
+                                            )}, minmax(0, 1fr))`,
+                                        }}
+                                        aria-label="Familienlegende"
+                                    >
+                                        {familyMembers.map((member) => {
+                                            const dynamicSize = Math.max(
+                                                0.68,
+                                                Math.min(
+                                                    1.05,
+                                                    1.22 - familyMembers.length * 0.07
+                                                )
+                                            );
+
+                                            return (
+                                                <span
+                                                    key={member.id}
+                                                    className="min-w-0 truncate text-center font-extrabold leading-none"
+                                                    style={{
+                                                        color: member.color,
+                                                        fontSize: `clamp(0.68rem, ${dynamicSize}vw, 1.05rem)`,
+                                                    }}
+                                                    title={member.name}
+                                                >
+                                                    {member.name}
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
                     </div>
                     <span className="text-[clamp(1rem,1.35vw,1.3rem)] font-semibold tabular-nums text-muted-foreground">
                         {formatRange(displayedWeekStart, displayedWeekEnd)}
@@ -1133,6 +1349,11 @@ const Kiosk: React.FC = () => {
                         const dayKey = toDateKey(day);
                         const dayAppointments = appointmentsByDay.get(dayKey) ?? [];
                         const dayPlanning = getPlanningForDay(day);
+                        const timelineGroups = buildTimelineGroups(
+                            dayKey,
+                            dayAppointments,
+                            dayPlanning
+                        );
                         const todayMarker = isSameDay(day, now);
 
                         return (
@@ -1156,64 +1377,155 @@ const Kiosk: React.FC = () => {
                                     </div>
                                 </header>
 
-                                {dayAppointments.length === 0 && dayPlanning.length === 0 ? (
+                                {timelineGroups.length === 0 ? (
                                     <p className="py-8 text-center text-lg font-medium text-muted-foreground">
                                         Keine Termine
                                     </p>
                                 ) : (
                                     <div className="space-y-3">
-                                        {dayAppointments.map((appointment) => (
+                                        {timelineGroups.map((group, groupIndex) => (
                                             <div
-                                                key={appointment.occurrence_id || appointment.id}
-                                                role="button"
-                                                tabIndex={0}
-                                                onClick={(event) => { event.stopPropagation(); setSelectedAppointment(appointment); }}
-                                                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedAppointment(appointment); } }}
-                                                className="cursor-pointer rounded-input border-l-4 border-primary bg-surface-2 px-3 py-3 transition-colors hover:bg-primary/10 active:bg-primary/15"
-                                            >
-                                                <div className="font-serif text-[clamp(1.45rem,1.9vw,1.95rem)] font-bold leading-none tabular-nums text-primary">
-                                                    {formatTime(appointment.start_time)}
-                                                </div>
-                                                <p className="mt-2 break-words font-serif text-[clamp(1.45rem,1.9vw,1.95rem)] font-bold uppercase leading-tight">
-                                                    {appointment.title}
-                                                </p>
-                                                {appointment.location && (
-                                                    <p className="mt-2 flex items-center gap-2 text-base font-medium text-muted-foreground">
-                                                        <MapPin className="h-4 w-4 shrink-0" />
-                                                        <span className="truncate">{appointment.location}</span>
-                                                    </p>
-                                                )}
-                                                {renderParticipants(
-                                                    appointment.family_members_data ?? []
-                                                )}
-                                            </div>
-                                        ))}
-
-                                        {dayPlanning.map((entry) => (
-                                            <div
-                                                key={`planning-${dayKey}-${entry.id}`}
-                                                className="rounded-input border-l-4 bg-surface-2 px-3 py-3"
+                                                key={`${dayKey}-timeline-${groupIndex}`}
+                                                className="grid items-stretch gap-1.5"
                                                 style={{
-                                                    borderLeftColor:
-                                                        entry.family_member_color || 'var(--primary)',
+                                                    gridTemplateColumns: `repeat(${group.columns}, minmax(0, 1fr))`,
                                                 }}
                                             >
-                                                <div className="font-serif text-[clamp(1.45rem,1.9vw,1.95rem)] font-bold leading-none tabular-nums">
-                                                    {entry.start_time.slice(0, 5)} – {entry.end_time.slice(0, 5)}
-                                                </div>
-                                                <p className="mt-2 break-words font-serif text-[clamp(1.45rem,1.9vw,1.95rem)] font-bold uppercase leading-tight">
-                                                    {entry.title}
-                                                </p>
-                                                {entry.location && (
-                                                    <p className="mt-2 flex items-center gap-2 text-base font-medium text-muted-foreground">
-                                                        <MapPin className="h-4 w-4 shrink-0" />
-                                                        <span className="truncate">{entry.location}</span>
-                                                    </p>
-                                                )}
-                                                {renderParticipants(
-                                                    getPlanningParticipants(entry),
-                                                    entry.family_member_color
-                                                )}
+                                                {group.entries.map(({ entry, column }) => {
+                                                    const compact = group.columns >= 2;
+                                                    const verticalTitle = group.columns >= 3;
+
+                                                    if (entry.kind === 'appointment') {
+                                                        const appointment = entry.appointment;
+                                                        const accentColor =
+                                                            appointment.family_members_data?.[0]?.color ||
+                                                            appointment.color ||
+                                                            'var(--primary)';
+                                                        return (
+                                                            <div
+                                                                key={entry.key}
+                                                                role="button"
+                                                                tabIndex={0}
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    setSelectedAppointment(appointment);
+                                                                }}
+                                                                onKeyDown={(event) => {
+                                                                    if (event.key === 'Enter' || event.key === ' ') {
+                                                                        event.preventDefault();
+                                                                        setSelectedAppointment(appointment);
+                                                                    }
+                                                                }}
+                                                                className={cn(
+                                                                    'min-w-0 cursor-pointer rounded-input border-l-4 bg-surface-2 transition-colors hover:bg-primary/10 active:bg-primary/15',
+                                                                    compact ? 'px-1.5 py-2' : 'px-3 py-3'
+                                                                )}
+                                                                style={{
+                                                                    borderLeftColor: accentColor,
+                                                                    gridColumnStart: column + 1,
+                                                                }}
+                                                            >
+                                                                <div
+                                                                    className={cn(
+                                                                        'whitespace-nowrap font-serif font-bold leading-none tabular-nums',
+                                                                        compact
+                                                                            ? 'text-[clamp(0.72rem,0.8vw,0.95rem)]'
+                                                                            : 'text-[clamp(1.05rem,1.35vw,1.55rem)]'
+                                                                    )}
+                                                                    style={{ color: accentColor }}
+                                                                >
+                                                                    {formatTime(appointment.start_time)}
+                                                                    {appointment.end_time &&
+                                                                        ` – ${formatTime(appointment.end_time)}`}
+                                                                </div>
+                                                                <p
+                                                                    className={cn(
+                                                                        'break-words font-serif font-bold uppercase leading-tight',
+                                                                        compact
+                                                                            ? 'mt-1 text-[clamp(0.78rem,0.85vw,1rem)]'
+                                                                            : 'mt-2 text-[clamp(1rem,1.25vw,1.45rem)]',
+                                                                        verticalTitle && 'mx-auto min-h-28'
+                                                                    )}
+                                                                    style={
+                                                                        verticalTitle
+                                                                            ? {
+                                                                                writingMode: 'vertical-rl',
+                                                                                textOrientation: 'mixed',
+                                                                            }
+                                                                            : undefined
+                                                                    }
+                                                                >
+                                                                    {appointment.title}
+                                                                </p>
+                                                                {!compact && appointment.location && (
+                                                                    <p className="mt-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                                                                        <MapPin className="h-4 w-4 shrink-0" />
+                                                                        <span className="truncate">{appointment.location}</span>
+                                                                    </p>
+                                                                )}
+                                                                {!verticalTitle && renderParticipantDots(appointment.family_members_data ?? [])}
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    const planning = entry.planning;
+                                                    const planningMembers = getPlanningParticipants(planning);
+                                                    const accentColor =
+                                                        planning.family_member_color ||
+                                                        planningMembers[0]?.color ||
+                                                        'var(--primary)';
+                                                    return (
+                                                        <div
+                                                            key={entry.key}
+                                                            className={cn(
+                                                                'min-w-0 rounded-input border-l-4 bg-surface-2',
+                                                                compact ? 'px-1.5 py-2' : 'px-3 py-3'
+                                                            )}
+                                                            style={{
+                                                                borderLeftColor: accentColor,
+                                                                gridColumnStart: column + 1,
+                                                            }}
+                                                        >
+                                                            <div
+                                                                className={cn(
+                                                                    'whitespace-nowrap font-serif font-bold leading-none tabular-nums',
+                                                                    compact
+                                                                        ? 'text-[clamp(0.72rem,0.8vw,0.95rem)]'
+                                                                        : 'text-[clamp(1.05rem,1.35vw,1.55rem)]'
+                                                                )}
+                                                                style={{ color: accentColor }}
+                                                            >
+                                                                {planning.start_time.slice(0, 5)} – {planning.end_time.slice(0, 5)}
+                                                            </div>
+                                                            <p
+                                                                className={cn(
+                                                                    'break-words font-serif font-bold uppercase leading-tight',
+                                                                    compact
+                                                                        ? 'mt-1 text-[clamp(0.78rem,0.85vw,1rem)]'
+                                                                        : 'mt-2 text-[clamp(1rem,1.25vw,1.45rem)]',
+                                                                    verticalTitle && 'mx-auto min-h-28'
+                                                                )}
+                                                                style={
+                                                                    verticalTitle
+                                                                        ? {
+                                                                            writingMode: 'vertical-rl',
+                                                                            textOrientation: 'mixed',
+                                                                        }
+                                                                        : undefined
+                                                                }
+                                                            >
+                                                                {planning.title}
+                                                            </p>
+                                                            {!compact && planning.location && (
+                                                                <p className="mt-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                                                                    <MapPin className="h-4 w-4 shrink-0" />
+                                                                    <span className="truncate">{planning.location}</span>
+                                                                </p>
+                                                            )}
+                                                            {!verticalTitle && renderParticipantDots(planningMembers, planning.family_member_color)}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         ))}
                                     </div>
@@ -1324,9 +1636,11 @@ const Kiosk: React.FC = () => {
     const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>): void => {
         if (!touchStart.current) return;
 
+        const startPoint = touchStart.current;
         const touch = event.changedTouches[0];
-        const deltaX = touch.clientX - touchStart.current.x;
-        const deltaY = touch.clientY - touchStart.current.y;
+        const deltaX = touch.clientX - startPoint.x;
+        const deltaY = touch.clientY - startPoint.y;
+        const startedInNavigationZone = startPoint.y <= 350;
         touchStart.current = null;
 
         if (Math.abs(deltaX) < 12 && Math.abs(deltaY) < 12) {
@@ -1365,14 +1679,24 @@ const Kiosk: React.FC = () => {
             return;
         }
 
-        if (!horizontal && deltaY <= -SWIPE_THRESHOLD_PX && viewMode === 'week') {
+        if (
+            startedInNavigationZone &&
+            !horizontal &&
+            deltaY <= -SWIPE_THRESHOLD_PX &&
+            viewMode === 'week'
+        ) {
             setMonthOffset(0);
             setMonthDisplayMode('rolling');
             setViewMode('month');
             return;
         }
 
-        if (!horizontal && deltaY >= SWIPE_THRESHOLD_PX && viewMode === 'month') {
+        if (
+            startedInNavigationZone &&
+            !horizontal &&
+            deltaY >= SWIPE_THRESHOLD_PX &&
+            viewMode === 'month'
+        ) {
             setViewMode('week');
             setWeekOffset(0);
         }

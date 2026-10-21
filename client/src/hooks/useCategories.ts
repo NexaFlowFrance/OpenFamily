@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../lib/api';
 
-export const CATEGORY_MODULES = ['shopping', 'recipe', 'budget'] as const;
+export const CATEGORY_MODULES = ['shopping', 'recipe', 'budget', 'task'] as const;
 export type CategoryModule = (typeof CATEGORY_MODULES)[number];
 export type FamilyCategories = Record<CategoryModule, string[]>;
 
@@ -20,6 +20,7 @@ export const DEFAULT_CATEGORIES: FamilyCategories = {
         'Logement', 'Alimentation', 'Transport', 'Santé', 'Loisirs',
         'Abonnements', 'Assurance', 'Enfants', 'Maison', 'Autre',
     ],
+    task: ['Cuisine', 'Chambre', 'Salle de bain', 'Salon', 'Extérieur', 'École', 'Administratif', 'Autre'],
 };
 
 type CategoriesResponse = { success: boolean; data?: { categories: FamilyCategories } };

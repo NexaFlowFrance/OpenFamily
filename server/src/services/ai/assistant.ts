@@ -8,7 +8,7 @@
 //    the same schema behaves identically on Ollama, OpenAI-compatible and Anthropic.
 
 export const TASK_PRIORITIES = ['Haute', 'Moyenne', 'Basse'] as const;
-export const TASK_FREQUENCIES = ['Une fois', 'Quotidien', 'Hebdomadaire', 'Mensuel', 'Annuel'] as const;
+export const TASK_FREQUENCIES = ['Une fois', 'Quotidien', 'Hebdomadaire', 'Mensuel', 'Trimestriel', 'Quadrimestriel', 'Annuel'] as const;
 export const SHOPPING_CATEGORIES = ['Alimentation', 'Bebe', 'Menage', 'Sante', 'Autre'] as const;
 export const BUDGET_CATEGORIES = [
     'Logement', 'Alimentation', 'Transport', 'Santé', 'Loisirs',

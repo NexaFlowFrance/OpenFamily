@@ -13,6 +13,8 @@
     "Quotidien": "每天",
     "Hebdomadaire": "每周",
     "Mensuel": "每月",
+    "Trimestriel": "每季度",
+    "Quadrimestriel": "每4个月",
     "Annuel": "每年"
   },
   "stats": {
@@ -28,7 +30,10 @@
     "statusCompleted": "已完成",
     "allPriorities": "所有优先级",
     "allMembers": "所有成员",
-    "unassigned": "未指派"
+    "unassigned": "未指派",
+    "allFrequencies": "所有频率",
+    "allCategories": "所有分类",
+    "noCategory": "无分类"
   },
   "empty": {
     "none": "还没有任务，创建第一项任务吧！",
@@ -51,7 +56,9 @@
     "assignTo": "指派给（可选）",
     "noMembers": "没有可用成员",
     "points": "可获得积分（可选）",
-    "pointsHint": "任务完成后，被指派的成员将获得这些积分。"
+    "pointsHint": "任务完成后，被指派的成员将获得这些积分。",
+    "category": "分类（可选）",
+    "noCategory": "无"
   },
   "approval": {
     "pendingBadge": "等待批准",
@@ -70,5 +77,15 @@
     "deleteTask": "无法删除此任务。",
     "approveTask": "无法批准此任务。",
     "rejectTask": "无法拒绝此任务。"
+  },
+  "categories": {
+    "Cuisine": "厨房",
+    "Chambre": "卧室",
+    "Salle de bain": "浴室",
+    "Salon": "客厅",
+    "Extérieur": "户外",
+    "École": "学校",
+    "Administratif": "事务",
+    "Autre": "其他"
   }
 }

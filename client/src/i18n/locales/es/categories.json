@@ -1,11 +1,12 @@
 {
   "title": "Categorías",
-  "subtitle": "Personaliza las listas de categorías usadas por Compras, Recetas y Presupuesto. Cambiar el nombre de una categoría actualiza tus elementos existentes.",
+  "subtitle": "Personaliza las listas de categorías usadas por Compras, Recetas, Presupuesto y Tareas. Cambiar el nombre de una categoría actualiza tus elementos existentes.",
   "parentOnly": "Solo los padres pueden editar las categorías.",
   "modules": {
     "shopping": "Compras",
     "recipe": "Recetas",
-    "budget": "Presupuesto"
+    "budget": "Presupuesto",
+    "task": "Tareas"
   },
   "addPlaceholder": "Nueva categoría…",
   "add": "Añadir",

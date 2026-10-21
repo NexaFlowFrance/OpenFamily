@@ -14,7 +14,7 @@ import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
 // (the client fallback) — these are the historical hard-coded lists, so existing
 // installs see zero change until they customize.
 
-export const CATEGORY_MODULES = ['shopping', 'recipe', 'budget'] as const;
+export const CATEGORY_MODULES = ['shopping', 'recipe', 'budget', 'task'] as const;
 export type CategoryModule = (typeof CATEGORY_MODULES)[number];
 export type FamilyCategories = Record<CategoryModule, string[]>;
 
@@ -25,6 +25,7 @@ export const DEFAULT_CATEGORIES: FamilyCategories = {
         'Logement', 'Alimentation', 'Transport', 'Santé', 'Loisirs',
         'Abonnements', 'Assurance', 'Enfants', 'Maison', 'Autre',
     ],
+    task: ['Cuisine', 'Chambre', 'Salle de bain', 'Salon', 'Extérieur', 'École', 'Administratif', 'Autre'],
 };
 
 const MAX_CATEGORIES = 30;
@@ -36,6 +37,7 @@ const MODULE_TABLES: Record<CategoryModule, string[]> = {
     shopping: ['shopping_items'],
     recipe: ['recipes'],
     budget: ['budget_entries', 'recurring_expenses'],
+    task: ['tasks'],
 };
 
 /** Parse users.custom_categories, falling back to the defaults per module. */
@@ -44,6 +46,7 @@ export const parseCustomCategories = (raw: unknown): FamilyCategories => {
         shopping: [...DEFAULT_CATEGORIES.shopping],
         recipe: [...DEFAULT_CATEGORIES.recipe],
         budget: [...DEFAULT_CATEGORIES.budget],
+        task: [...DEFAULT_CATEGORIES.task],
     };
     if (typeof raw !== 'string' || raw.trim() === '') return result;
     try {

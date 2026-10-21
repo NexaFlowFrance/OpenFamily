@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { useAuth } from '../contexts/AuthContext';
+import { useCategories } from '../hooks/useCategories';
 import { api } from '../lib/api';
 import { Plus, CheckSquare, Square, Trash2, Edit2, Filter, TrendingUp, Star, Hourglass, Check, X } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, DatePicker, Badge, useToast } from '../components/ui';
@@ -16,6 +17,8 @@ interface Task {
     due_date?: string;
     frequency?: string;
     priority?: string;
+    /** One of the family's task categories (Settings), or none. */
+    category?: string | null;
     assigned_to?: string[];
     assigned_to_members?: Array<{ id: string; name: string; color: string }>;
     points?: number;
@@ -36,9 +39,13 @@ interface TaskFilters {
     priority: string;
     status: string;
     member: string;
+    frequency: string;
+    category: string;
 }
 
-const DEFAULT_FILTERS: TaskFilters = { priority: '', status: 'all', member: '' };
+const DEFAULT_FILTERS: TaskFilters = { priority: '', status: 'all', member: '', frequency: '', category: '' };
+/** Filter value for tasks without a category. */
+const NO_CATEGORY = '__none__';
 
 // Each account keeps its own filters on this device, so a child signed in on the
 // family tablet finds "my tasks" again instead of everyone's after every visit.
@@ -54,6 +61,8 @@ function readSavedFilters(userId: string | undefined): TaskFilters | null {
             priority: typeof saved.priority === 'string' ? saved.priority : '',
             status: ['all', 'pending', 'completed'].includes(saved.status as string) ? saved.status as string : 'all',
             member: typeof saved.member === 'string' ? saved.member : '',
+            frequency: typeof saved.frequency === 'string' ? saved.frequency : '',
+            category: typeof saved.category === 'string' ? saved.category : '',
         };
     } catch {
         return null;
@@ -75,6 +84,7 @@ interface TaskStats {
 const Tasks: React.FC = () => {
     const { t } = useTranslation(['tasks', 'common']);
     const { user } = useAuth();
+    const { categories } = useCategories();
     const { showToast } = useToast();
     // Child accounts cannot grant points or approve chores.
     const isParent = Boolean(user?.is_owner) || user?.role !== 'enfant';
@@ -88,8 +98,15 @@ const Tasks: React.FC = () => {
         { value: 'Quotidien', label: t('tasks:frequencies.Quotidien') },
         { value: 'Hebdomadaire', label: t('tasks:frequencies.Hebdomadaire') },
         { value: 'Mensuel', label: t('tasks:frequencies.Mensuel') },
+        { value: 'Trimestriel', label: t('tasks:frequencies.Trimestriel') },
+        { value: 'Quadrimestriel', label: t('tasks:frequencies.Quadrimestriel') },
         { value: 'Annuel', label: t('tasks:frequencies.Annuel') },
     ];
+    const TASK_CATEGORIES = categories.task.map((name) => ({
+        value: name,
+        label: t(`tasks:categories.${name}`, { defaultValue: name }),
+    }));
+    const categoryLabel = (v?: string | null) => (v ? t(`tasks:categories.${v}`, { defaultValue: v }) : '');
     const priorityLabel = (v?: string) => (v ? t(`tasks:priorities.${v}`, { defaultValue: v }) : '');
     const frequencyLabel = (v?: string) => (v ? t(`tasks:frequencies.${v}`, { defaultValue: v }) : '');
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -102,6 +119,8 @@ const Tasks: React.FC = () => {
     const [filterPriority, setFilterPriority] = useState<string>(savedFilters?.priority ?? DEFAULT_FILTERS.priority);
     const [filterStatus, setFilterStatus] = useState<string>(savedFilters?.status ?? DEFAULT_FILTERS.status);
     const [filterMember, setFilterMember] = useState<string>(savedFilters?.member ?? DEFAULT_FILTERS.member);
+    const [filterFrequency, setFilterFrequency] = useState<string>(savedFilters?.frequency ?? DEFAULT_FILTERS.frequency);
+    const [filterCategory, setFilterCategory] = useState<string>(savedFilters?.category ?? DEFAULT_FILTERS.category);
     // A child account with no saved choice yet starts on its own member profile.
     const memberDefaulted = useRef(savedFilters !== null);
     const [error, setError] = useState('');
@@ -113,6 +132,7 @@ const Tasks: React.FC = () => {
         due_date: '',
         frequency: 'Une fois',
         priority: 'Moyenne',
+        category: '',
         assigned_to: [] as string[],
         points: '',
     });
@@ -251,6 +271,7 @@ const Tasks: React.FC = () => {
             due_date: task.due_date ? task.due_date.slice(0, 10) : '',
             frequency: task.frequency || 'Une fois',
             priority: task.priority || 'Moyenne',
+            category: task.category || '',
             assigned_to: task.assigned_to || [],
             points: task.points ? String(task.points) : '',
         });
@@ -265,6 +286,7 @@ const Tasks: React.FC = () => {
             due_date: '',
             frequency: 'Une fois',
             priority: 'Moyenne',
+            category: '',
             assigned_to: [],
             points: '',
         });
@@ -277,11 +299,13 @@ const Tasks: React.FC = () => {
                 priority: filterPriority,
                 status: filterStatus,
                 member: filterMember,
+                frequency: filterFrequency,
+                category: filterCategory,
             }));
         } catch {
             /* private mode or storage full: filters simply reset next time */
         }
-    }, [user?.id, filterPriority, filterStatus, filterMember]);
+    }, [user?.id, filterPriority, filterStatus, filterMember, filterFrequency, filterCategory]);
 
     useEffect(() => {
         if (memberDefaulted.current || isParent || !user?.id || familyMembers.length === 0) return;
@@ -296,8 +320,17 @@ const Tasks: React.FC = () => {
         if (!familyMembers.some((member) => member.id === filterMember)) setFilterMember('');
     }, [familyMembers, filterMember]);
 
+    // A saved category the family has since removed would hide every task.
+    useEffect(() => {
+        if (!filterCategory || filterCategory === NO_CATEGORY) return;
+        if (!categories.task.includes(filterCategory)) setFilterCategory('');
+    }, [categories.task, filterCategory]);
+
     const filteredTasks = tasks.filter((task) => {
         if (filterPriority && task.priority !== filterPriority) return false;
+        if (filterFrequency && (task.frequency || 'Une fois') !== filterFrequency) return false;
+        if (filterCategory === NO_CATEGORY && task.category) return false;
+        if (filterCategory && filterCategory !== NO_CATEGORY && task.category !== filterCategory) return false;
         if (filterStatus === 'completed' && !task.is_completed) return false;
         if (filterStatus === 'pending' && task.is_completed) return false;
         if (filterMember === '__unassigned__' && task.assigned_to && task.assigned_to.length > 0) return false;
@@ -417,7 +450,26 @@ const Tasks: React.FC = () => {
                             ]}
                             className="w-48"
                         />
-                        {(filterPriority || filterStatus !== 'all' || filterMember) && (
+                        <Select
+                            value={filterFrequency}
+                            onValueChange={setFilterFrequency}
+                            options={[
+                                { value: '', label: t('tasks:filters.allFrequencies') },
+                                ...FREQUENCIES,
+                            ]}
+                            className="w-48"
+                        />
+                        <Select
+                            value={filterCategory}
+                            onValueChange={setFilterCategory}
+                            options={[
+                                { value: '', label: t('tasks:filters.allCategories') },
+                                { value: NO_CATEGORY, label: t('tasks:filters.noCategory') },
+                                ...TASK_CATEGORIES,
+                            ]}
+                            className="w-48"
+                        />
+                        {(filterPriority || filterStatus !== 'all' || filterMember || filterFrequency || filterCategory) && (
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -425,6 +477,8 @@ const Tasks: React.FC = () => {
                                     setFilterPriority('');
                                     setFilterStatus('all');
                                     setFilterMember('');
+                                    setFilterFrequency('');
+                                    setFilterCategory('');
                                 }}
                             >
                                 {t('common:actions.reset')}
@@ -501,6 +555,9 @@ const Tasks: React.FC = () => {
                                                     )}
                                                     {task.frequency && task.frequency !== 'Une fois' && (
                                                         <Badge variant="secondary">{frequencyLabel(task.frequency)}</Badge>
+                                                    )}
+                                                    {task.category && (
+                                                        <Badge variant="secondary">{categoryLabel(task.category)}</Badge>
                                                     )}
                                                     {task.due_date && (
                                                         <Badge variant="default">
@@ -612,6 +669,16 @@ const Tasks: React.FC = () => {
                                 options={FREQUENCIES}
                             />
                         </div>
+                    </div>
+                    <div>
+                        <label className="block text-label font-medium text-foreground mb-1.5">
+                            {t('tasks:form.category')}
+                        </label>
+                        <Select
+                            value={formData.category}
+                            onValueChange={(value) => setFormData({ ...formData, category: value })}
+                            options={[{ value: '', label: t('tasks:form.noCategory') }, ...TASK_CATEGORIES]}
+                        />
                     </div>
                     <DatePicker
                         label={t('tasks:form.dueDate')}

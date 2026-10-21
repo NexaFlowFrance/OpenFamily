@@ -1,11 +1,12 @@
 {
   "title": "Categorias",
-  "subtitle": "Personalize as listas de categorias usadas por Compras, Receitas e Orçamento. Renomear uma categoria atualiza seus itens existentes.",
+  "subtitle": "Personalize as listas de categorias usadas por Compras, Receitas, Orçamento e Tarefas. Renomear uma categoria atualiza seus itens existentes.",
   "parentOnly": "Apenas os responsáveis podem editar as categorias.",
   "modules": {
     "shopping": "Compras",
     "recipe": "Receitas",
-    "budget": "Orçamento"
+    "budget": "Orçamento",
+    "task": "Tarefas"
   },
   "addPlaceholder": "Nova categoria…",
   "add": "Adicionar",

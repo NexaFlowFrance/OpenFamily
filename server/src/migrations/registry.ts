@@ -189,4 +189,13 @@ export const coreMigrations: readonly Migration[] = [
                AND EXISTS (SELECT 1 FROM jsonb_array_elements(instructions) e WHERE jsonb_typeof(e) = 'object')`,
         ],
     },
+    {
+        // A task can carry a category (a room, a kind of chore...), from the
+        // list each family defines for itself like the shopping, recipe and
+        // budget categories. Optional: existing tasks have none.
+        id: 'core/0007-task-categories',
+        statements: [
+            'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS category VARCHAR(50)',
+        ],
+    },
 ];

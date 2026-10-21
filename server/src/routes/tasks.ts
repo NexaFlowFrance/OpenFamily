@@ -3,6 +3,19 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest, isParentAccount, requireParent } from '../middleware/auth';
 import { toNullIfEmpty } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
+import { getFamilyCategories } from './categories';
+
+/**
+ * A task's category: empty means none; anything else must be one of the
+ * family's task categories (Settings), so a typo or a stale client cannot
+ * store a category nobody can filter on.
+ */
+const resolveTaskCategory = async (value: unknown, ownerId: string): Promise<string | null | undefined> => {
+    const name = typeof value === 'string' ? value.trim() : '';
+    if (!name) return null;
+    const allowed = (await getFamilyCategories(ownerId)).task;
+    return allowed.includes(name) ? name : undefined;
+};
 
 const router = Router();
 router.use(authMiddleware);
@@ -74,11 +87,16 @@ router.get('/', async (req: AuthRequest, res) => {
 // Create task
 router.post('/', async (req: AuthRequest, res) => {
     try {
-        const { title, description, due_date, frequency, priority, assigned_to, points } = req.body;
+        const { title, description, due_date, frequency, priority, assigned_to, points, category } = req.body;
 
         const cleanedTitle = typeof title === 'string' ? title.trim() : '';
         if (!cleanedTitle) {
             return res.status(400).json({ success: false, error: 'Title is required' });
+        }
+
+        const taskCategory = await resolveTaskCategory(category, req.userId!);
+        if (taskCategory === undefined) {
+            return res.status(400).json({ success: false, error: 'Unknown category' });
         }
 
         const assignedTo: string[] = Array.isArray(assigned_to)
@@ -92,8 +110,8 @@ router.post('/', async (req: AuthRequest, res) => {
             : 0;
 
         const result = await query(
-            `INSERT INTO tasks (user_id, title, description, due_date, frequency, priority, assigned_to, points)
-       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8) RETURNING *`,
+            `INSERT INTO tasks (user_id, title, description, due_date, frequency, priority, assigned_to, points, category)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9) RETURNING *`,
             [
                 req.userId,
                 cleanedTitle,
@@ -103,6 +121,7 @@ router.post('/', async (req: AuthRequest, res) => {
                 toNullIfEmpty(priority),
                 JSON.stringify(assignedTo),
                 taskPoints,
+                taskCategory,
             ]
         );
 
@@ -123,7 +142,7 @@ router.post('/', async (req: AuthRequest, res) => {
 router.put('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
-        const { title, description, is_completed, due_date, frequency, priority, assigned_to, points } = req.body;
+        const { title, description, is_completed, due_date, frequency, priority, assigned_to, points, category } = req.body;
 
         // The previous state drives the reward logic (false→true transition only).
         const existingResult = await query(
@@ -162,6 +181,14 @@ router.put('/:id', async (req: AuthRequest, res) => {
 
         if (frequency !== undefined) {
             pushUpdate('frequency', toNullIfEmpty(frequency));
+        }
+
+        if (category !== undefined) {
+            const taskCategory = await resolveTaskCategory(category, req.userId!);
+            if (taskCategory === undefined) {
+                return res.status(400).json({ success: false, error: 'Unknown category' });
+            }
+            pushUpdate('category', taskCategory);
         }
 
         if (priority !== undefined) {

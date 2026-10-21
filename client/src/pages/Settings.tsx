@@ -459,7 +459,7 @@ const ModulesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
 // Lets a family customize the category lists used by Shopping, Recipes and Budget.
 // Renames follow the existing items; removed categories are reassigned server-side.
 const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
-    const { t } = useTranslation(['categories', 'common', 'shopping', 'recipes', 'budget']);
+    const { t } = useTranslation(['categories', 'common', 'shopping', 'recipes', 'budget', 'tasks']);
     const { categories, saveCategories } = useCategories();
     const [module, setModule] = useState<CategoryModule>('shopping');
     // `value` is what the field shows, which is the translated label, while
@@ -479,6 +479,7 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
         if (mod === 'shopping') return t(`shopping:categories.${name}`, { defaultValue: name });
         if (mod === 'recipe') return t(`recipes:categories.${name}`, { defaultValue: name });
         if (mod === 'budget') return t(`budget:categories.${name}`, { defaultValue: name });
+        if (mod === 'task') return t(`tasks:categories.${name}`, { defaultValue: name });
         return name;
     };
 

@@ -7,13 +7,14 @@ let store: DemoStore = createSeed();
 
 // Family-customizable category lists (mirrors /api/categories). Reset on reload,
 // like everything else in the demo. Keep in sync with hooks/useCategories.ts.
-let demoCategories: Record<'shopping' | 'recipe' | 'budget', string[]> = {
+let demoCategories: Record<'shopping' | 'recipe' | 'budget' | 'task', string[]> = {
     shopping: ['Alimentation', 'Bebe', 'Menage', 'Sante', 'Autre'],
     recipe: ['Entrée', 'Plat', 'Dessert', 'Snack'],
     budget: [
         'Logement', 'Alimentation', 'Transport', 'Santé', 'Loisirs',
         'Abonnements', 'Assurance', 'Enfants', 'Maison', 'Autre',
     ],
+    task: ['Cuisine', 'Chambre', 'Salle de bain', 'Salon', 'Extérieur', 'École', 'Administratif', 'Autre'],
 };
 
 type Json = Record<string, unknown>;
@@ -336,7 +337,7 @@ async function route(method: string, path: string, q: Record<string, string>, bo
         if (method === 'PUT') {
             const mod = body.module as string;
             const list = Array.isArray(body.categories) ? (body.categories as string[]) : [];
-            if ((mod === 'shopping' || mod === 'recipe' || mod === 'budget') && list.length > 0) {
+            if ((mod === 'shopping' || mod === 'recipe' || mod === 'budget' || mod === 'task') && list.length > 0) {
                 demoCategories = { ...demoCategories, [mod]: list.map((c) => String(c).trim()).filter(Boolean) };
             }
         }

@@ -13,6 +13,8 @@
     "Quotidien": "Quotidien",
     "Hebdomadaire": "Hebdomadaire",
     "Mensuel": "Mensuel",
+    "Trimestriel": "Trimestriel",
+    "Quadrimestriel": "Tous les 4 mois",
     "Annuel": "Annuel"
   },
   "stats": {
@@ -28,7 +30,10 @@
     "statusCompleted": "Complétées",
     "allPriorities": "Toutes priorités",
     "allMembers": "Tous les membres",
-    "unassigned": "Non assignées"
+    "unassigned": "Non assignées",
+    "allFrequencies": "Toutes fréquences",
+    "allCategories": "Toutes catégories",
+    "noCategory": "Sans catégorie"
   },
   "empty": {
     "none": "Aucune tâche pour le moment. Créez votre première tâche !",
@@ -51,7 +56,9 @@
     "assignTo": "Assigner à (facultatif)",
     "noMembers": "Aucun membre disponible",
     "points": "Points à gagner (facultatif)",
-    "pointsHint": "Les membres assignés gagnent ces points quand la tâche est terminée."
+    "pointsHint": "Les membres assignés gagnent ces points quand la tâche est terminée.",
+    "category": "Catégorie (facultatif)",
+    "noCategory": "Aucune"
   },
   "approval": {
     "pendingBadge": "En attente de validation",
@@ -70,5 +77,15 @@
     "deleteTask": "Impossible de supprimer cette tâche.",
     "approveTask": "Impossible de valider cette tâche.",
     "rejectTask": "Impossible de refuser cette tâche."
+  },
+  "categories": {
+    "Cuisine": "Cuisine",
+    "Chambre": "Chambre",
+    "Salle de bain": "Salle de bain",
+    "Salon": "Salon",
+    "Extérieur": "Extérieur",
+    "École": "École",
+    "Administratif": "Administratif",
+    "Autre": "Autre"
   }
 }

@@ -37,7 +37,7 @@ const IMPORT_COLUMNS: Record<string, ReadonlySet<string>> = {
     ]),
     tasks: new Set([
         'id', 'title', 'description', 'is_completed', 'due_date', 'frequency',
-        'priority', 'assigned_to', 'completed_at', 'points', 'pending_approval',
+        'priority', 'assigned_to', 'completed_at', 'points', 'pending_approval', 'category',
         'created_at', 'updated_at',
     ]),
     recipes: new Set([

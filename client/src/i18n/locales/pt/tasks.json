@@ -13,6 +13,8 @@
     "Quotidien": "Diária",
     "Hebdomadaire": "Semanal",
     "Mensuel": "Mensal",
+    "Trimestriel": "Trimestral",
+    "Quadrimestriel": "A cada 4 meses",
     "Annuel": "Anual"
   },
   "stats": {
@@ -28,7 +30,10 @@
     "statusCompleted": "Concluídas",
     "allPriorities": "Todas as prioridades",
     "allMembers": "Todos os membros",
-    "unassigned": "Sem responsável"
+    "unassigned": "Sem responsável",
+    "allFrequencies": "Todas as frequências",
+    "allCategories": "Todas as categorias",
+    "noCategory": "Sem categoria"
   },
   "empty": {
     "none": "Nenhuma tarefa cadastrada. Crie sua primeira tarefa!",
@@ -51,7 +56,9 @@
     "assignTo": "Atribuir a (opcional)",
     "noMembers": "Nenhum membro disponível",
     "points": "Pontos a ganhar (opcional)",
-    "pointsHint": "Os membros atribuídos ganham estes pontos quando a tarefa for concluída."
+    "pointsHint": "Os membros atribuídos ganham estes pontos quando a tarefa for concluída.",
+    "category": "Categoria (opcional)",
+    "noCategory": "Nenhuma"
   },
   "approval": {
     "pendingBadge": "Aguardando aprovação",
@@ -70,5 +77,15 @@
     "deleteTask": "Não foi possível excluir esta tarefa.",
     "approveTask": "Não foi possível aprovar esta tarefa.",
     "rejectTask": "Não foi possível rejeitar esta tarefa."
+  },
+  "categories": {
+    "Cuisine": "Cozinha",
+    "Chambre": "Quarto",
+    "Salle de bain": "Banheiro",
+    "Salon": "Sala",
+    "Extérieur": "Área externa",
+    "École": "Escola",
+    "Administratif": "Burocracia",
+    "Autre": "Outro"
   }
 }

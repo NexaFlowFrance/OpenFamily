@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { intlLocale } from '../i18n/format';
+import { intlLocale, formatTime as formatClockTime } from '../i18n/format';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -16,11 +16,7 @@ export function formatDate(date: Date | string): string {
 }
 
 export function formatTime(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleTimeString(intlLocale(), {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    return formatClockTime(date);
 }
 
 export function formatCurrency(amount: number, currency: string = 'EUR'): string {

@@ -9,7 +9,7 @@ import {
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { useAuth } from '../contexts/AuthContext';
-import { intlLocale, weekStartsOn } from '../i18n/format';
+import { formatTime, intlLocale, weekStartsOn } from '../i18n/format';
 import { cn } from '../lib/utils';
 import FamilyNotes, { type FamilyNote } from '../components/app/FamilyNotes';
 
@@ -25,7 +25,7 @@ const MEAL_ORDER = ['Petit-déjeuner', 'Déjeuner', 'Dîner', 'Snack'];
 const isoDay = (d: Date) => ((d.getDay() + 6) % 7) + 1; // Mon=1 … Sun=7
 const pad = (n: number) => String(n).padStart(2, '0');
 const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const hhmm = (iso: string) => new Intl.DateTimeFormat(intlLocale(), { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+const hhmm = (iso: string) => formatTime(iso);
 
 // ── Per-device kiosk settings (localStorage — the right scope for a wall display) ──
 
@@ -336,7 +336,7 @@ const Kiosk: React.FC = () => {
         [notes, dismissedNotes]
     );
 
-    const clock = new Intl.DateTimeFormat(intlLocale(), { hour: '2-digit', minute: '2-digit' }).format(now);
+    const clock = formatTime(now);
     const dateLabel = new Intl.DateTimeFormat(intlLocale(), { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
 
     const mealLabel = (v: string) => t(`meals:mealTypes.${v}`, { defaultValue: v });
@@ -506,7 +506,7 @@ const Kiosk: React.FC = () => {
                                         <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: p.family_member_color }} />
                                         <span className="font-medium">{p.family_member_name}</span>
                                         <span className="min-w-0 flex-1 truncate text-muted-foreground">{p.title}</span>
-                                        <span className="shrink-0 tabular-nums text-muted-foreground">{p.start_time.slice(0, 5)}–{p.end_time.slice(0, 5)}</span>
+                                        <span className="shrink-0 tabular-nums text-muted-foreground">{formatTime(p.start_time)}–{formatTime(p.end_time)}</span>
                                     </li>
                                 ))}
                             </ul>

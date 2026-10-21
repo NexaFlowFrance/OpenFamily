@@ -4,7 +4,7 @@ import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { useAuth, DEFAULT_DASHBOARD_PREFS, type DashboardPrefs, type DashboardWidget } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
-import { intlLocale, dateLocale, isoWeekdayAtOffset, weekStartsOn } from '../i18n/format';
+import { dateLocale, formatDateTime, formatTime, intlLocale, isoWeekdayAtOffset, weekStartsOn } from '../i18n/format';
 import {
     ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, ChevronRight, Clock,
     SlidersHorizontal, Eye, EyeOff, ArrowUp, ArrowDown, CalendarDays,
@@ -191,8 +191,7 @@ const Dashboard: React.FC = () => {
         );
     }
 
-    const fmtTime = (iso: string) =>
-        new Intl.DateTimeFormat(intlLocale(), { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+    const fmtTime = (iso: string) => formatTime(iso);
 
     const statCards = [
         { title: t('dashboard:stats.appointments'), value: stats?.upcomingAppointments ?? 0, icon: Calendar,      href: '/calendar' },
@@ -435,7 +434,7 @@ const Dashboard: React.FC = () => {
                                             <div className="min-w-0">
                                                 <p className="text-caption font-medium text-foreground truncate">{entry.title}</p>
                                                 <p className="text-micro text-muted-foreground">
-                                                    {entry.start_time.slice(0, 5)} - {entry.end_time.slice(0, 5)} · {entry.family_member_name}
+                                                    {formatTime(entry.start_time)} - {formatTime(entry.end_time)} · {entry.family_member_name}
                                                 </p>
                                             </div>
                                         </li>
@@ -509,17 +508,7 @@ const Dashboard: React.FC = () => {
                             </p>
 
                             <p className="text-micro text-muted-foreground">
-                                {new Intl.DateTimeFormat(
-                                    undefined,
-                                    {
-                                        dateStyle: 'medium',
-                                        timeStyle: 'short',
-                                    }
-                                ).format(
-                                    new Date(
-                                        latestPost.created_at
-                                    )
-                                )}
+                                {formatDateTime(latestPost.created_at)}
                             </p>
 
                             {latestPost.content && (

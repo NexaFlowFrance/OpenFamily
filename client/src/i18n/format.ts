@@ -84,6 +84,35 @@ export function orderIsoWeekdays<T>(values: readonly T[]): T[] {
     return [...values.slice(start), ...values.slice(0, start)];
 }
 
+/**
+ * A clock time the way the member's region writes it: "14:30" in France,
+ * "2:30 PM" in the US, "14.30" in Finland. Every screen goes through here,
+ * so an appointment and a planning entry never show two different styles
+ * side by side (issue #120). Accepts a Date, a naive local datetime string
+ * ("2026-10-21T14:30:00") or a bare "HH:mm[:ss]" as the planning stores it.
+ */
+export function formatTime(value: Date | string | null | undefined): string {
+    if (value === null || value === undefined || value === '') return '';
+    let date: Date;
+    if (value instanceof Date) {
+        date = value;
+    } else if (/^\d{1,2}:\d{2}/.test(value)) {
+        const [hours, minutes] = value.split(':').map(Number);
+        date = new Date(2000, 0, 1, hours, minutes);
+    } else {
+        date = new Date(value);
+    }
+    if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value.slice(0, 5) : '';
+    return new Intl.DateTimeFormat(intlLocale(), { hour: 'numeric', minute: '2-digit' }).format(date);
+}
+
+/** Date and time together, in the member's language and region ("21 Oct 2026, 2:30 PM"). */
+export function formatDateTime(value: Date | string, dateStyle: 'short' | 'medium' | 'long' = 'medium'): string {
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value : '';
+    return new Intl.DateTimeFormat(intlLocale(), { dateStyle, timeStyle: 'short' }).format(date);
+}
+
 export function formatNumber(value: number, options?: Intl.NumberFormatOptions): string {
     return new Intl.NumberFormat(intlLocale(), options).format(value);
 }

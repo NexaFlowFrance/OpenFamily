@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { addDays, addWeeks, format, startOfWeek, subWeeks } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { dateLocale, offsetForIsoWeekday, orderIsoWeekdays, weekStartsOn } from '../i18n/format';
+import { dateLocale, formatTime, offsetForIsoWeekday, orderIsoWeekdays, weekStartsOn } from '../i18n/format';
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { Button, Card, CardContent, CardHeader, CardTitle, Dialog, Input, Select, Textarea } from '../components/ui';
@@ -82,8 +82,6 @@ const WEEKDAYS = [1, 2, 3, 4, 5];
 const FULL_WEEK = [1, 2, 3, 4, 5, 6, 7];
 
 const sortDays = (values: number[]) => [...values].sort((a, b) => a - b);
-
-const formatTime = (raw: string) => raw.slice(0, 5);
 
 const defaultTypeFromRole = (role?: string) => {
     const normalized = (role || '').toLowerCase();
@@ -780,7 +778,7 @@ const Planning: React.FC = () => {
                                         <div className="flex items-center gap-1">
                                             <CalendarClock className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
                                             <p className="text-micro font-semibold leading-tight text-foreground">
-                                                {format(new Date(appointment.start_time), 'HH:mm')}
+                                                {formatTime(appointment.start_time)}
                                             </p>
                                             <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground">
                                                 {t('planning:appointments.badge')}

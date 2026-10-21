@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
+import { formatDateTime } from '../i18n/format';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 
 interface SeenPerson {
@@ -284,11 +285,7 @@ const Posts: React.FC = () => {
         }
     };
 
-    const formatWhen = (value: string) =>
-        new Intl.DateTimeFormat(undefined, {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-        }).format(new Date(value));
+    const formatWhen = (value: string) => formatDateTime(value);
 
     if (loading) {
         return (

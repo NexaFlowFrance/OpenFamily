@@ -77,7 +77,14 @@ function getTodoItemsViaWebSocket(baseUrl: string, token: string, entityId: stri
     });
 }
 
-export async function testHomeAssistantConnection(baseUrl: string, token: string): Promise<{ success: boolean; message: string }> {
+// The todo entity the user typed in the form, if any. When set, it is the list to sync:
+// the legacy shopping_list integration is still loaded on many installs (HA sets it up
+// during onboarding) and must not take precedence over an explicit choice.
+function configuredEntityId(value: unknown): string {
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+export async function testHomeAssistantConnection(baseUrl: string, token: string, haEntityId?: string): Promise<{ success: boolean; message: string }> {
     try {
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
         const resp = await safeFetch(`${baseUrl}/api/`, { headers, timeoutMs: HA_TIMEOUT_MS });
@@ -85,6 +92,16 @@ export async function testHomeAssistantConnection(baseUrl: string, token: string
         if (!resp.ok) {
             if (resp.status === 401) return { success: false, message: 'Token invalide ou expiré' };
             return { success: false, message: `Erreur HTTP ${resp.status}` };
+        }
+
+        const entityId = configuredEntityId(haEntityId);
+        if (entityId) {
+            try {
+                const items = await getTodoItemsViaWebSocket(baseUrl, token, entityId);
+                return { success: true, message: `Connecté a Home Assistant (${entityId}, ${items.length} element${items.length > 1 ? 's' : ''})` };
+            } catch (e) {
+                return { success: false, message: e instanceof Error ? e.message : `Entité "${entityId}" introuvable dans Home Assistant` };
+            }
         }
 
         // Check which shopping API is available and warn accordingly
@@ -124,11 +141,14 @@ export async function syncHomeAssistant(
     let errors = 0;
 
     // Resolve entity_id from config (user can override) or fall back to default
-    const entityId = (config.ha_entity_id as string) || 'todo.shopping_list';
+    const configuredEntity = configuredEntityId(config.ha_entity_id);
+    const entityId = configuredEntity || 'todo.shopping_list';
 
-    // Strategy 1: legacy REST shopping_list endpoint
-    const slResp = await safeFetch(`${baseUrl}/api/shopping_list`, { headers, timeoutMs: HA_TIMEOUT_MS });
-    if (slResp.ok) {
+    // Strategy 1: legacy REST shopping_list endpoint, only when no entity was configured
+    const slResp = configuredEntity
+        ? null
+        : await safeFetch(`${baseUrl}/api/shopping_list`, { headers, timeoutMs: HA_TIMEOUT_MS });
+    if (slResp?.ok) {
         const items = await slResp.json() as HAShoppingItem[];
         for (const item of items) {
             if (item.complete) continue;

@@ -205,7 +205,7 @@ router.post('/tandoor/meal-plan/import', requireParent, async (req: AuthRequest,
 
 // POST /api/integrations/test - test without saving
 router.post('/test', requireParent, async (req: AuthRequest, res) => {
-    const { type, base_url, apiKey, token } = req.body as Record<string, string>;
+    const { type, base_url, apiKey, token, ha_entity_id } = req.body as Record<string, string>;
     const cleanUrl = (base_url || '').replace(/\/$/, '');
 
     try {
@@ -215,7 +215,7 @@ router.post('/test', requireParent, async (req: AuthRequest, res) => {
         switch (type) {
             case 'mealie':        result = await testMealieConnection(cleanUrl, apiKey); break;
             case 'tandoor':       result = await testTandoorConnection(cleanUrl, apiKey); break;
-            case 'homeassistant': result = await testHomeAssistantConnection(cleanUrl, token); break;
+            case 'homeassistant': result = await testHomeAssistantConnection(cleanUrl, token, ha_entity_id); break;
             case 'grocy':         result = await testGrocyConnection(cleanUrl, apiKey); break;
             case 'nextcloud':     result = await testNextcloudConnection(cleanUrl, (req.body as Record<string, string>).username, (req.body as Record<string, string>).password); break;
             case 'immich':        result = await testImmichConnection(cleanUrl, apiKey); break;

@@ -1,0 +1,119 @@
+{
+  "loading": "Budget wird geladen…",
+  "categories": {
+    "Logement": "Wohnen",
+    "Alimentation": "Lebensmittel",
+    "Transport": "Mobilität",
+    "Santé": "Gesundheit",
+    "Loisirs": "Freizeit",
+    "Abonnements": "Abos",
+    "Assurance": "Versicherung",
+    "Enfants": "Kinder",
+    "Maison": "Haushalt",
+    "Autre": "Sonstiges",
+    "Prélèvements": "Lastschriften"
+  },
+  "readOnly": "Schreibgeschützter Modus. Nur Eltern können das Budget bearbeiten.",
+  "alerts": {
+    "title": "Limits erreicht",
+    "over": " · überschritten",
+    "warn": " (≥ 80 %)"
+  },
+  "balance": {
+    "current": "Aktueller Kontostand",
+    "pointed_one": "{{count}} wiederkehrender Posten abgehakt",
+    "pointed_other": "{{count}} wiederkehrende Posten abgehakt",
+    "expenses_one": "{{count}} Ausgabe",
+    "expenses_other": "{{count}} Ausgaben",
+    "opening": "Anfangsstand: {{amount}}"
+  },
+  "forecast": {
+    "title": "Prognose",
+    "subtitle": "Anstehend, wiederkehrend: +{{income}} Einnahmen · -{{expenses}} Ausgaben"
+  },
+  "analytics": "Auswertung & Limits",
+  "charts": {
+    "expensesByCategory": "Ausgaben nach Kategorie",
+    "noExpenses": "Keine Ausgaben diesen Monat",
+    "yearEvolution": "Jahresverlauf",
+    "income": "Einnahmen",
+    "expenses": "Ausgaben"
+  },
+  "limits": {
+    "title": "Monatliche Limits",
+    "subtitle": "Ausgabenübersicht pro Kategorie",
+    "define": "Festlegen",
+    "none": "Kein Limit festgelegt"
+  },
+  "sections": {
+    "recurring": "Wiederkehrende Posten",
+    "expenses": "Ausgaben",
+    "income": "Einnahmen"
+  },
+  "recurring": {
+    "empty": "Keine wiederkehrenden Posten diesen Monat",
+    "markOn": "Als abgehakt markieren",
+    "markOff": "Haken entfernen",
+    "dayPrefix": "Tag",
+    "frequency": {
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich",
+      "yearly": "Jährlich",
+      "none": "Keine Wiederholung"
+    },
+    "units": {
+      "daily_one": "Tag",
+      "daily_other": "Tage",
+      "weekly_one": "Woche",
+      "weekly_other": "Wochen",
+      "monthly_one": "Monat",
+      "monthly_other": "Monate",
+      "yearly_one": "Jahr",
+      "yearly_other": "Jahre"
+    }
+  },
+  "empty": {
+    "expenses": "Keine Ausgaben diesen Monat",
+    "income": "Keine Einnahmen diesen Monat"
+  },
+  "sheets": {
+    "new": "Posten hinzufügen",
+    "edit": "Posten bearbeiten",
+    "limit": "Monatliches Limit"
+  },
+  "toggle": {
+    "expense": "Ausgabe",
+    "income": "Einnahme"
+  },
+  "fields": {
+    "amount": "Betrag ({{currency}})",
+    "description": "Beschreibung (optional)",
+    "descriptionPlaceholder": "z. B. Lebensmittel, Gehalt, Sparplan…",
+    "date": "Datum",
+    "category": "Kategorie",
+    "limit": "Monatliches Limit ({{currency}})",
+    "limitHint": "Gib 0 ein, um diese Kategorie nicht mehr zu überwachen.",
+    "startDate": "Startdatum",
+    "repeat": "Wiederholen",
+    "every": "Alle",
+    "repeatUntil": "Wiederholen bis (optional)",
+    "addToCalendar": "Zum Kalender hinzufügen",
+    "addToCalendarHint": "Erstellt einen ganztägigen Kalendertermin mit demselben Datum und derselben Wiederholung.",
+    "type": "Art"
+  },
+  "errors": {
+    "amountInvalid": "Ungültiger Betrag.",
+    "save": "Fehler beim Speichern.",
+    "limitInvalid": "Ungültiges Limit.",
+    "startDateRequired": "Startdatum erforderlich.",
+    "intervalInvalid": "Das Wiederholungsintervall muss zwischen 1 und 365 liegen.",
+    "repeatUntilInvalid": "Das Enddatum der Wiederholung darf nicht vor dem Startdatum liegen.",
+    "editRecurrenceType": "Um zwischen einmalig und wiederkehrend zu wechseln, lösche diesen Posten und füge ihn neu hinzu."
+  },
+  "confirm": {
+    "deleteRecurring": "Diesen wiederkehrenden Posten löschen?",
+    "deleteEntry": "Diesen Posten löschen?"
+  },
+  "classic": "Klassisch"
+}

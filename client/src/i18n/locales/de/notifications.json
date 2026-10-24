@@ -1,0 +1,17 @@
+{
+  "title": "Benachrichtigungen",
+  "markAll": "Alle als gelesen markieren",
+  "empty": "Keine Benachrichtigungen",
+  "manage": "Benachrichtigungen verwalten →",
+  "timeAgo": {
+    "justNow": "gerade eben",
+    "minutes": "vor {{count}} Min.",
+    "hours": "vor {{count}} Std.",
+    "days": "vor {{count}} T."
+  },
+  "push": {
+    "unsupported": "Push wird von diesem Browser nicht unterstützt",
+    "denied": "Berechtigung verweigert",
+    "noVapid": "VAPID-Schlüssel nicht verfügbar"
+  }
+}

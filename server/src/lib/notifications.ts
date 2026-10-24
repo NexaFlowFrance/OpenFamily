@@ -14,7 +14,7 @@ export interface CreateNotificationInput {
     url?: string;
 }
 
-export type NotificationLanguage = 'fr' | 'en' | 'pt' | 'ru' | 'es' | 'zh';
+export type NotificationLanguage = 'fr' | 'en' | 'pt' | 'ru' | 'es' | 'zh' | 'de';
 export type LocalizedTexts = Record<NotificationLanguage, { title: string; message: string }>;
 
 /**

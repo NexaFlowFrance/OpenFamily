@@ -11,7 +11,7 @@ import { cleanImageUrl } from '../lib/recipeImage';
 const PORTABLE_FORMAT = 'openfamily-portable';
 const PORTABLE_VERSION = '2.0';
 const SUPPORTED_IMPORT_VERSIONS = new Set(['1.0', PORTABLE_VERSION]);
-const SUPPORTED_LANGUAGES = new Set(['fr', 'en', 'pt', 'ru', 'zh']);
+const SUPPORTED_LANGUAGES = new Set(['fr', 'en', 'pt', 'ru', 'zh', 'es', 'de']);
 
 const PORTABLE_EXCLUSIONS = [
     'password_hashes_and_authentication_tokens',

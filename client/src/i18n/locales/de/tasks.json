@@ -1,0 +1,91 @@
+{
+  "loading": "Aufgaben werden geladen…",
+  "title": "Aufgaben",
+  "subtitle": "Verwalte die Aufgaben deiner Familie und verfolge ihren Fortschritt",
+  "newTask": "Neue Aufgabe",
+  "priorities": {
+    "Haute": "Hoch",
+    "Moyenne": "Mittel",
+    "Basse": "Niedrig"
+  },
+  "frequencies": {
+    "Une fois": "Einmalig",
+    "Quotidien": "Täglich",
+    "Hebdomadaire": "Wöchentlich",
+    "Mensuel": "Monatlich",
+    "Trimestriel": "Vierteljährlich",
+    "Quadrimestriel": "Alle 4 Monate",
+    "Annuel": "Jährlich"
+  },
+  "stats": {
+    "total": "Gesamt",
+    "completed": "Erledigt",
+    "pending": "Offen",
+    "completionRate": "Erledigungsquote"
+  },
+  "filters": {
+    "label": "Filter:",
+    "statusAll": "Alle",
+    "statusPending": "Offen",
+    "statusCompleted": "Erledigt",
+    "allPriorities": "Alle Prioritäten",
+    "allMembers": "Alle Mitglieder",
+    "unassigned": "Nicht zugewiesen",
+    "allFrequencies": "Alle Häufigkeiten",
+    "allCategories": "Alle Kategorien",
+    "noCategory": "Ohne Kategorie"
+  },
+  "empty": {
+    "none": "Noch keine Aufgaben. Erstelle deine erste Aufgabe!",
+    "noMatch": "Keine Aufgabe passt zu den gewählten Filtern."
+  },
+  "due": "Fällig: {{date}}",
+  "dialog": {
+    "editTitle": "Aufgabe bearbeiten",
+    "createTitle": "Neue Aufgabe",
+    "description": "Gib die Details der Aufgabe ein"
+  },
+  "form": {
+    "title": "Titel",
+    "titlePlaceholder": "z. B. Einkaufen gehen",
+    "description": "Beschreibung (optional)",
+    "descriptionPlaceholder": "Weitere Details…",
+    "priority": "Priorität",
+    "frequency": "Häufigkeit",
+    "dueDate": "Fälligkeitsdatum (optional)",
+    "assignTo": "Zuweisen an (optional)",
+    "noMembers": "Keine Mitglieder verfügbar",
+    "points": "Zu verdienende Punkte (optional)",
+    "pointsHint": "Zugewiesene Mitglieder erhalten diese Punkte, wenn die Aufgabe erledigt ist.",
+    "category": "Kategorie (optional)",
+    "noCategory": "Keine"
+  },
+  "approval": {
+    "pendingBadge": "Wartet auf Bestätigung",
+    "approve": "Bestätigen",
+    "reject": "Ablehnen",
+    "toastTitle": "Super, Aufgabe erledigt!",
+    "toastDescription": "Deine Punkte werden gutgeschrieben, sobald ein Elternteil bestätigt."
+  },
+  "confirmDelete": "Möchtest du diese Aufgabe wirklich löschen?",
+  "errors": {
+    "loadTasks": "Die Aufgaben konnten nicht geladen werden.",
+    "loadMembers": "Die Mitglieder konnten nicht geladen werden.",
+    "loadStats": "Die Statistiken konnten nicht geladen werden.",
+    "saveTask": "Diese Aufgabe konnte nicht gespeichert werden.",
+    "toggleTask": "Diese Aufgabe konnte nicht aktualisiert werden.",
+    "deleteTask": "Diese Aufgabe konnte nicht gelöscht werden.",
+    "approveTask": "Diese Aufgabe konnte nicht bestätigt werden.",
+    "rejectTask": "Diese Aufgabe konnte nicht abgelehnt werden."
+  },
+  "categories": {
+    "Cuisine": "Küche",
+    "Chambre": "Schlafzimmer",
+    "Salle de bain": "Badezimmer",
+    "Salon": "Wohnzimmer",
+    "Extérieur": "Draußen",
+    "École": "Schule",
+    "Administratif": "Papierkram",
+    "Autre": "Sonstiges"
+  }
+}

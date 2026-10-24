@@ -46,7 +46,7 @@ all in one place, on **your** server, with **your** data.
 | 🔔 **Notifications** | Appointment reminders, task alerts (Web Push VAPID) + in-app |
 | 👥 **Shared accounts** | Invite by link, **access requests**, **ownership transfer** |
 | 🛡️ **Roles & permissions** | **Parent / child** accounts — read-only budget for children |
-| 🌍 **Multilingual** | **English / French / Simplified Chinese** interface with automatic detection |
+| 🌍 **Multilingual** | **English / French / German / Portuguese / Russian / Spanish / Simplified Chinese** interface with automatic detection |
 | 📴 **Offline mode** | Browse cached data without a connection (PWA) |
 
 ## 📸 Screenshots

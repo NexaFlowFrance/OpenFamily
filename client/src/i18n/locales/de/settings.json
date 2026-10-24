@@ -1,0 +1,130 @@
+{
+  "title": "Einstellungen",
+  "subtitle": "Verwalte deine Daten und Einstellungen.",
+  "language": {
+    "title": "Sprache",
+    "subtitle": "Wähle die Sprache der App-Oberfläche."
+  },
+  "profile": {
+    "title": "Profilfoto",
+    "subtitle": "Wähle ein Foto, das im App-Menü angezeigt wird.",
+    "change": "Foto ändern",
+    "choose": "Foto auswählen",
+    "remove": "Entfernen"
+  },
+  "notif": {
+    "title": "Push-Benachrichtigungen",
+    "subtitle": "Erhalte Erinnerungen an deine Termine direkt auf diesem Gerät, auch wenn die App geschlossen ist.",
+    "unsupported": "Benachrichtigungen werden von diesem Browser nicht unterstützt.",
+    "denied": "Berechtigung verweigert. Erlaube Benachrichtigungen in den Einstellungen deines Browsers.",
+    "enable": "Benachrichtigungen aktivieren",
+    "disable": "Benachrichtigungen deaktivieren",
+    "inProgress": "Wird bearbeitet…",
+    "active": "Benachrichtigungen sind auf diesem Gerät aktiviert."
+  },
+  "currency": {
+    "title": "Währung",
+    "subtitle": "Wähle die Währung, in der Beträge in der App angezeigt werden."
+  },
+  "modules": {
+    "title": "Module",
+    "subtitle": "Aktiviere oder verstecke optionale Module, damit nur die bleiben, die deine Familie nutzt.",
+    "parentOnly": "Nur Eltern können die Module ändern.",
+    "error": "Fehler beim Aktualisieren der Module.",
+    "names": {
+      "kiosk": "Kiosk-Modus",
+      "notes": "Notizen auf der Startseite",
+      "ai": "KI-Assistent"
+    },
+    "descriptions": {
+      "budget": "Familienbudget mit Ausgaben und Einnahmen.",
+      "rewards": "Taschengeld und Belohnungen für Kinder.",
+      "meals": "Wöchentlicher Essensplan.",
+      "recipes": "Das Rezeptbuch der Familie.",
+      "planning": "Wochenpläne (Arbeit, Schule, Aktivitäten).",
+      "integrations": "Verbindungen zu Diensten von Drittanbietern (Mealie, Home Assistant…).",
+      "kiosk": "Vollbildanzeige für einen gemeinsamen Bildschirm zu Hause.",
+      "notes": "Haftnotizen auf der Startseite.",
+      "ai": "Intelligenter Assistent, um schnell etwas zu erfassen und zu organisieren."
+    }
+  },
+  "export": {
+    "title": "Daten exportieren",
+    "subtitle": "Lade eine portable JSON-Kopie deiner Familiendaten und familienweiten Einstellungen herunter. Anmeldedaten, Zugangsschlüssel von Integrationen, Benachrichtigungen und temporäre Sicherheitsdaten sind nicht enthalten.",
+    "button": "Exportieren",
+    "inProgress": "Wird exportiert…"
+  },
+  "import": {
+    "title": "Daten importieren",
+    "subtitle": "Stelle einen portablen OpenFamily-Export wieder her. Vorhandene Einträge bleiben erhalten, Duplikate werden übersprungen; familienweite Einstellungen aus der Datei werden wiederhergestellt.",
+    "success": "Import erfolgreich",
+    "itemsImported_one": "Eintrag importiert",
+    "itemsImported_other": "Einträge importiert",
+    "chooseFile": "Datei auswählen…",
+    "button": "Importieren",
+    "inProgress": "Wird importiert…",
+    "invalidJson": "Ungültige JSON-Datei."
+  },
+  "entities": {
+    "family_settings": "Familieneinstellungen",
+    "account_preferences": "Kontoeinstellungen",
+    "family_members": "Familienmitglieder",
+    "tasks": "Aufgaben",
+    "recipes": "Rezepte",
+    "meal_plans": "Geplante Mahlzeiten",
+    "budget_entries": "Budgetposten",
+    "budget_limits": "Budgetlimits",
+    "shopping_items": "Einkaufsartikel",
+    "shopping_list_templates": "Einkaufsvorlagen",
+    "appointments": "Termine",
+    "appointment_recurrence_exceptions": "Terminausnahmen",
+    "schedule_entries": "Einträge im Wochenplan",
+    "schedule_entry_members": "Teilnehmende im Wochenplan",
+    "schedule_entry_exceptions": "Ausnahmen im Wochenplan",
+    "reward_transactions": "Belohnungsbuchungen",
+    "reward_settings": "Belohnungseinstellungen",
+    "reward_goals": "Sparziele",
+    "family_notes": "Familiennotizen",
+    "recurring_expenses": "Wiederkehrende Ausgaben",
+    "recurring_expense_logs": "Abgehakte wiederkehrende Ausgaben",
+    "kakeibo_months": "Kakeibo-Monate",
+    "family_posts": "Familienbeiträge",
+    "family_post_seen": "Lesestatus der Beiträge"
+  },
+  "errors": {
+    "notif": "Fehler beim Einrichten der Benachrichtigungen.",
+    "currency": "Fehler beim Aktualisieren der Währung.",
+    "avatarImage": "Bitte wähle ein Bild aus.",
+    "avatarRead": "Die Datei konnte nicht gelesen werden.",
+    "avatarInvalid": "Ungültiges Bild.",
+    "avatarCanvas": "Canvas nicht verfügbar.",
+    "avatarUpdate": "Fehler beim Aktualisieren des Fotos.",
+    "avatarRemove": "Fehler beim Entfernen des Fotos.",
+    "export": "Fehler beim Export.",
+    "import": "Fehler beim Import."
+  },
+  "support": {
+    "title": "OpenFamily unterstützen",
+    "subtitle": "OpenFamily ist kostenlos und Open Source und läuft selbst gehostet auf deinem eigenen Server. Wenn es deiner Familie hilft, kannst du die Entwicklung unterstützen – kostenlos bleibt es so oder so.",
+    "sponsor": "Spendiere mir einen Kaffee",
+    "star": "Auf GitHub mit Stern markieren",
+    "sponsorGithub": "Auf GitHub sponsern"
+  },
+  "regional": {
+    "title": "Woche",
+    "subtitle": "Wähle, mit welchem Tag deine Wochen im Kalender, im Wochenplan, bei den Mahlzeiten und auf der Startseite beginnen. Diese Einstellung gilt nur für dich.",
+    "weekStart": "Erster Tag der Woche",
+    "weekStartHelp": "Automatisch richtet sich nach den Gepflogenheiten deiner Sprache und Region.",
+    "automatic": "Automatisch ({{day}})",
+    "saveError": "Deine Einstellung konnte nicht gespeichert werden.",
+    "days": {
+      "monday": "Montag",
+      "tuesday": "Dienstag",
+      "wednesday": "Mittwoch",
+      "thursday": "Donnerstag",
+      "friday": "Freitag",
+      "saturday": "Samstag",
+      "sunday": "Sonntag"
+    }
+  }
+}

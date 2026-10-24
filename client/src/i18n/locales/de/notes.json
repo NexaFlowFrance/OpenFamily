@@ -1,0 +1,35 @@
+{
+  "title": "Familiennotizen",
+  "add": "Notiz hinzufügen",
+  "addTitle": "Neue Kühlschranknotiz",
+  "placeholder": "Vergiss deine Sporttasche nicht!",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "Farbe",
+  "colors": {
+    "yellow": "Gelb",
+    "pink": "Rosa",
+    "blue": "Blau",
+    "green": "Grün",
+    "orange": "Orange"
+  },
+  "expiryLabel": "Gültigkeit",
+  "expiry": {
+    "today": "Bis heute Abend",
+    "day": "24 Stunden",
+    "week": "1 Woche",
+    "never": "Unbegrenzt"
+  },
+  "submit": "Notiz anheften",
+  "cancel": "Abbrechen",
+  "delete": "Diese Notiz entfernen",
+  "deleted": "Notiz vom Kühlschrank entfernt",
+  "added": "Notiz an den Kühlschrank geheftet",
+  "emptyHint": "Hinterlasse der Familie eine kleine Notiz – sie erscheint hier und auf der Kiosk-Anzeige.",
+  "by": "von {{name}}",
+  "age": {
+    "now": "gerade eben",
+    "minutes": "vor {{count}} Min.",
+    "hours": "vor {{count}} Std.",
+    "days": "vor {{count}} T."
+  }
+}

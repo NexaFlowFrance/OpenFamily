@@ -24,6 +24,9 @@ export const LANGUAGE_CONFIG: Record<string, LanguageConfig> = {
     es: {
         label: 'ES',
     },
+    de: {
+        label: 'DE',
+    },
 };
 
 export const CONFIGURED_LANGUAGE_ORDER = Object.keys(LANGUAGE_CONFIG);

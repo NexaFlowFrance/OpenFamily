@@ -1,0 +1,86 @@
+{
+  "title": "Integrationen",
+  "subtitle": "Verbinde deine selbst gehosteten Apps, um Rezepte, Menüs, Einkäufe und Kalender zu bündeln.",
+  "connected": "Verbunden",
+  "available": "Verfügbar",
+  "status": {
+    "error": "Fehler",
+    "connected": "Verbunden"
+  },
+  "lastSync": "Synchronisiert {{date}}",
+  "syncTitle": "Synchronisieren",
+  "disconnectTitle": "Trennen",
+  "confirmDisconnect": "Diese Integration trennen?",
+  "modal": {
+    "connect": "{{name}} verbinden",
+    "test": "Testen",
+    "testing": "Wird getestet…",
+    "connecting": "Verbinde…",
+    "connectBtn": "Verbinden",
+    "encrypted": "Zugangsdaten werden mit AES-256 verschlüsselt und nur auf deinem Server gespeichert.",
+    "error": "Fehler"
+  },
+  "syncs": {
+    "recipes": "Rezepte",
+    "menus": "Menüs",
+    "shopping": "Einkaufsliste",
+    "stock": "Vorrat",
+    "calendar": "Kalender",
+    "appointments": "Termine",
+    "photos": "Fotos"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "Rezeptverwaltung",
+      "description": "Importiere deine Rezepte und Menüs aus deiner selbst gehosteten Mealie-Instanz.",
+      "urlLabel": "Instanz-URL",
+      "urlPlaceholder": "https://mealie.meinedomain.de",
+      "keyLabel": "API-Schlüssel",
+      "keyPlaceholder": "Aus Mealie > Profil > API-Schlüssel"
+    },
+    "tandoor": {
+      "tagline": "Rezeptbuch",
+      "description": "Importiere deine Rezepte aus Tandoor, der Open-Source-Rezeptverwaltung.",
+      "urlLabel": "Instanz-URL",
+      "urlPlaceholder": "https://tandoor.meinedomain.de",
+      "keyLabel": "API-Token",
+      "keyPlaceholder": "Aus Tandoor > Einstellungen > Tokens"
+    },
+    "homeassistant": {
+      "tagline": "Smart Home",
+      "description": "Synchronisiere deine Einkaufsliste mit der Liste in Home Assistant.",
+      "urlLabel": "Instanz-URL",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "Langlebiges Zugriffstoken",
+      "tokenPlaceholder": "eyJ… (aus Profil > Sicherheit)",
+      "entityLabel": "To-do-Entität (optional)",
+      "entityPlaceholder": "todo.shopping_list"
+    },
+    "grocy": {
+      "tagline": "Haushaltsverwaltung",
+      "description": "Synchronisiere deine Einkaufsliste und deinen Vorrat aus Grocy.",
+      "urlLabel": "Instanz-URL",
+      "urlPlaceholder": "https://grocy.meinedomain.de",
+      "keyLabel": "API-Schlüssel",
+      "keyPlaceholder": "Aus Grocy > Verwalten > API-Schlüssel"
+    },
+    "nextcloud": {
+      "tagline": "Persönliche Cloud",
+      "description": "Importiere die Termine aus deinem Nextcloud-Kalender in deine Termine.",
+      "urlLabel": "Nextcloud-URL",
+      "urlPlaceholder": "https://cloud.meinedomain.de",
+      "userLabel": "Benutzername",
+      "userPlaceholder": "dein.benutzername",
+      "passwordLabel": "Passwort (oder App-Passwort)",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "Fotobibliothek",
+      "description": "Zeige zufällige Fotos aus deiner selbst gehosteten Immich-Bibliothek als Hintergrund der Kiosk-Anzeige.",
+      "urlLabel": "Instanz-URL",
+      "urlPlaceholder": "https://immich.meinedomain.de",
+      "keyLabel": "API-Schlüssel",
+      "keyPlaceholder": "Aus Immich > Kontoeinstellungen > API-Schlüssel"
+    }
+  }
+}

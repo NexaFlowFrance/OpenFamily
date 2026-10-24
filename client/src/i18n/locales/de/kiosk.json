@@ -1,0 +1,36 @@
+{
+  "exit": "Beenden",
+  "fullscreen": "Vollbild",
+  "exitFullscreen": "Vollbild beenden",
+  "schedule": "Heutiger Ablauf",
+  "meals": "Heutige Mahlzeiten",
+  "tasks": "Heute zu erledigen",
+  "whereabouts": "Wer ist heute wo",
+  "shopping": "Einkaufsliste",
+  "allDay": "Ganztägig",
+  "undo": "Rückgängig",
+  "empty": {
+    "appointments": "Heute nichts geplant",
+    "meals": "Keine Mahlzeiten geplant",
+    "tasks": "Alles erledigt ✨",
+    "whereabouts": "Heute niemand eingeplant",
+    "shopping": "Nichts zu kaufen"
+  },
+  "displaySettings": {
+    "open": "Anzeigeeinstellungen",
+    "title": "Anzeigeeinstellungen",
+    "close": "Schließen",
+    "location": "Wetterort",
+    "searchPlaceholder": "Stadt suchen…",
+    "noResults": "Keine Ergebnisse",
+    "noLocation": "Wähle einen Ort, um auf dieser Anzeige das Wetter zu sehen.",
+    "change": "Ändern",
+    "photoBackground": "Fotohintergrund",
+    "photoBackgroundHint": "Zeigt zufällige Fotos aus deiner Bibliothek als Hintergrund. Erfordert eine verbundene Immich-Integration."
+  },
+  "settings": {
+    "title": "Kiosk-Anzeige",
+    "subtitle": "Eine schreibgeschützte Vollbildanzeige für ein Wand-Tablet oder einen Kühlschrank-Bildschirm – heutige Termine, Mahlzeiten, Aufgaben und wer wo ist.",
+    "open": "Kiosk-Anzeige öffnen"
+  }
+}

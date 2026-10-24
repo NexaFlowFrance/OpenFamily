@@ -1,0 +1,134 @@
+{
+  "loading": "Rezepte werden geladen…",
+  "title": "Rezepte",
+  "subtitle": "Die Rezeptsammlung deiner Familie",
+  "newRecipe": "Neues Rezept",
+  "categories": {
+    "Entrée": "Vorspeise",
+    "Plat": "Hauptgericht",
+    "Dessert": "Dessert",
+    "Snack": "Snack"
+  },
+  "difficulties": {
+    "Facile": "Einfach",
+    "Moyen": "Mittel",
+    "Difficile": "Schwer"
+  },
+  "durations": {
+    "under15": "≤ 15 Min.",
+    "under30": "≤ 30 Min.",
+    "under60": "≤ 1 Std.",
+    "over60": "> 1 Std."
+  },
+  "searchPlaceholder": "Rezept suchen…",
+  "allCategories": "Alle Kategorien",
+  "allDifficulties": "Alle Schwierigkeitsgrade",
+  "anyDuration": "Beliebige Dauer",
+  "filters": {
+    "toggle": "Filter",
+    "clear": "Filter zurücksetzen",
+    "ingredientsPlaceholder": "Ich habe… (eine Zutat, dann Enter)",
+    "ingredientsMore": "Zutat hinzufügen",
+    "ingredientsHelp": "Es werden nur Rezepte angezeigt, die alle diese Zutaten enthalten.",
+    "removeIngredient": "{{name}} entfernen"
+  },
+  "empty": {
+    "none": "Noch keine Rezepte. Erstelle dein erstes Rezept!",
+    "noMatch": "Kein Rezept passt zu deiner Suche."
+  },
+  "card": {
+    "min": "{{n}} Min.",
+    "servings_one": "{{count}} Portion",
+    "servings_other": "{{count}} Portionen",
+    "view": "Ansehen"
+  },
+  "dialog": {
+    "editTitle": "Rezept bearbeiten",
+    "createTitle": "Neues Rezept",
+    "description": "Gib die Details des Rezepts ein"
+  },
+  "form": {
+    "name": "Name des Rezepts",
+    "namePlaceholder": "z. B. Apfelkuchen",
+    "category": "Kategorie",
+    "difficulty": "Schwierigkeit",
+    "description": "Beschreibung (optional)",
+    "descriptionPlaceholder": "Kurze Beschreibung des Rezepts…",
+    "prep": "Vorbereitung (Min.)",
+    "prepPlaceholder": "30",
+    "cook": "Garzeit (Min.)",
+    "cookPlaceholder": "45",
+    "servings": "Portionen",
+    "servingsPlaceholder": "4",
+    "ingredients": "Zutaten (eine pro Zeile)",
+    "ingredientsPlaceholder": "200 g Mehl\n3 Eier\n100 g Zucker",
+    "instructions": "Zubereitung (ein Schritt pro Zeile)",
+    "instructionsPlaceholder": "Backofen auf 180 °C vorheizen\nMehl und Zucker vermischen\nEier hinzufügen",
+    "tags": "Schlagwörter (durch Kommas getrennt)",
+    "tagsPlaceholder": "vegetarisch, schnell, günstig",
+    "image": "Bild-URL (optional)",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "Über Link importieren",
+    "title": "Rezept importieren",
+    "description": "Füge den Link zu einer Rezeptseite ein (Chefkoch, ein Blog…) und wir füllen das Formular für dich aus.",
+    "urlLabel": "URL der Rezeptseite",
+    "urlPlaceholder": "https://www.chefkoch.de/rezepte/…",
+    "submit": "Importieren",
+    "importing": "Wird importiert…",
+    "successTitle": "Rezept importiert",
+    "successDescription": "Prüfe die Angaben und speichere dann.",
+    "errors": {
+      "notFoundTitle": "Kein Rezept gefunden",
+      "notFound": "Diese Seite enthält kein lesbares Rezept.",
+      "fetchTitle": "Import fehlgeschlagen",
+      "fetch": "Diese Seite konnte nicht abgerufen werden. Prüfe den Link und versuche es erneut."
+    }
+  },
+  "shopping": {
+    "button": "Zur Einkaufsliste hinzufügen",
+    "title": "Zur Einkaufsliste hinzufügen",
+    "description": "Wähle die Zutaten aus „{{recipe}}“, die auf deine Einkaufsliste sollen.",
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Auswahl aufheben",
+    "submit": "Zur Liste hinzufügen",
+    "sending": "Wird hinzugefügt…",
+    "successTitle": "Einkaufsliste aktualisiert",
+    "successDescription_one": "{{count}} Zutat zu deiner Liste hinzugefügt.",
+    "successDescription_other": "{{count}} Zutaten zu deiner Liste hinzugefügt.",
+    "duplicates_one": "{{count}} war schon vorhanden.",
+    "duplicates_other": "{{count}} waren schon vorhanden.",
+    "errorTitle": "Hinzufügen fehlgeschlagen",
+    "error": "Diese Zutaten konnten nicht hinzugefügt werden. Bitte versuche es erneut.",
+    "original": "Rezept: {{line}}",
+    "selectedCount": "{{count}} von {{total}} ausgewählt"
+  },
+  "refine": {
+    "button": "Mit KI verfeinern",
+    "hint": "Titel, Zutaten und Zubereitung mit der eingerichteten KI aufräumen",
+    "refining": "Wird verfeinert…",
+    "successTitle": "Rezept verfeinert",
+    "successDescription": "Abschnitte und Schritte neu geordnet. Prüfe sie und speichere dann.",
+    "notConfiguredTitle": "KI nicht eingerichtet",
+    "notConfigured": "Aktiviere und richte den KI-Assistenten unter Einstellungen → KI-Assistent ein.",
+    "errorTitle": "Verfeinern fehlgeschlagen",
+    "error": "Der KI-Assistent hat nicht geantwortet. Prüfe seine Einrichtung und versuche es erneut.",
+    "cost": "{{total}} Tokens ({{in}} Eingabe / {{out}} Ausgabe)"
+  },
+  "detail": {
+    "prep": "Vorbereitung:",
+    "cook": "Garzeit:",
+    "servings": "Portionen:",
+    "minUnit": "Min.",
+    "ingredients": "Zutaten",
+    "instructions": "Zubereitung"
+  },
+  "confirmDelete": "Möchtest du dieses Rezept wirklich löschen?",
+  "errors": {
+    "load": "Die Rezepte konnten nicht geladen werden.",
+    "save": "Dieses Rezept konnte nicht gespeichert werden.",
+    "delete": "Dieses Rezept konnte nicht gelöscht werden.",
+    "invalidImage": "Dieser Bildlink ist ungültig. Verwende eine Webadresse, die mit https:// beginnt, oder lass das Feld leer."
+  }
+}

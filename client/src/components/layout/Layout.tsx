@@ -222,7 +222,44 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
             </aside>
 
-            <div className="lg:pl-72">
+            {/* Medium windows (a tablet held upright, the inner screen of a folding
+                phone, half of a large screen in split view): too wide for a bottom
+                bar, too narrow for the full sidebar. A rail keeps every section one
+                tap away and leaves the width to the content. */}
+            <nav
+                aria-label={t('rail.label')}
+                className="fixed left-0 top-0 z-30 hidden h-full w-20 flex-col border-r border-border bg-card md:flex lg:hidden"
+            >
+                <Link to="/" className="flex h-16 shrink-0 items-center justify-center border-b border-border" aria-label="OpenFamily">
+                    <img src={`${import.meta.env.BASE_URL}OpenFamily.png`} alt="" className="h-8 w-8 object-contain" />
+                </Link>
+                <div className="flex-1 space-y-1 overflow-y-auto px-2 py-3 scrollbar-hide">
+                    {visibleNavigation.map((item) => {
+                        const Icon = item.icon;
+                        const active = isRouteActive(location.pathname, item.href);
+                        return (
+                            <Link
+                                key={item.labelKey}
+                                to={item.href}
+                                className={cn(
+                                    'flex flex-col items-center justify-center gap-1 rounded-input px-0.5 py-2',
+                                    'transition-colors duration-fast ease-soft',
+                                    active
+                                        ? 'bg-primary-soft text-primary'
+                                        : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground'
+                                )}
+                            >
+                                <Icon className="h-5 w-5 shrink-0" />
+                                <span className="max-h-[2.4em] w-full overflow-hidden break-words text-center text-[9px] font-medium leading-tight tracking-tight">
+                                    {t(item.labelKey)}
+                                </span>
+                            </Link>
+                        );
+                    })}
+                </div>
+            </nav>
+
+            <div className="md:pl-20 lg:pl-72">
                 <DemoBanner />
                 <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
                     <div className="container flex h-16 max-w-[1200px] items-center justify-between px-4 lg:px-6">
@@ -273,7 +310,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                 </header>
 
-                <main className="container max-w-[1200px] px-4 pb-28 pt-6 lg:px-6 lg:pb-10 lg:pt-8">
+                <main className="container max-w-[1200px] px-4 pb-28 pt-6 md:pb-10 lg:px-6 lg:pt-8">
                     {isOffline && (
                         <div className="mb-4 flex items-center gap-2 rounded-card border border-amber-300 bg-amber-50 px-4 py-2.5 text-caption text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400">
                             <WifiOff className="h-4 w-4 flex-shrink-0" />
@@ -290,7 +327,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     setSidebarOpen(false);
                     setQuickActionsOpen((open) => !open);
                 }}
-                className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98] lg:hidden"
+                className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98] md:bottom-6 lg:hidden"
                 aria-label={t('quickActions.title')}
             >
                 <Plus className="h-6 w-6" />
@@ -298,7 +335,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             <div
                 className={cn(
-                    'fixed inset-x-4 bottom-44 z-50 rounded-card border border-border bg-card p-4 shadow-surface-hover',
+                    'fixed inset-x-4 bottom-44 z-50 rounded-card border border-border bg-card p-4 shadow-surface-hover md:inset-x-auto md:bottom-24 md:right-4 md:w-72',
                     'transition-all duration-base ease-soft lg:hidden',
                     quickActionsOpen
                         ? 'pointer-events-auto translate-y-0 opacity-100'
@@ -324,7 +361,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
             </div>
 
-            <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur lg:hidden">
+            <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur md:hidden">
                 <div
                     className="grid gap-1 px-2 py-2"
                     style={{ gridTemplateColumns: `repeat(${visibleMobileTabs.length}, minmax(0, 1fr))` }}

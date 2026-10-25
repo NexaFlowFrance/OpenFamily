@@ -6,7 +6,7 @@ import logger from './logger';
 import { expandRecurringAppointments } from './appointmentRecurrence';
 import { ALL_DAY_REMINDER_HOUR, MAX_REMINDER_MINUTES, normalizeReminderMinutes } from './reminders';
 
-type ReminderLanguage = 'fr' | 'en' | 'pt' | 'ru' | 'es' | 'zh';
+type ReminderLanguage = 'fr' | 'en' | 'pt' | 'ru' | 'es' | 'zh' | 'de';
 
 interface Occurrence {
     id: string;
@@ -31,7 +31,7 @@ const fromLocalNaive = (value: string): Date => new Date(value.slice(0, 19));
 // still sent if it is less than this late; older ones are dropped, not spammed.
 const GRACE_MS = 15 * 60 * 1000;
 
-const LANGUAGES: ReminderLanguage[] = ['fr', 'en', 'pt', 'ru', 'es', 'zh'];
+const LANGUAGES: ReminderLanguage[] = ['fr', 'en', 'pt', 'ru', 'es', 'zh', 'de'];
 const TITLE_PREFIX: Record<ReminderLanguage, string> = {
     fr: '⏰ Rappel : ',
     en: '⏰ Reminder: ',
@@ -39,6 +39,7 @@ const TITLE_PREFIX: Record<ReminderLanguage, string> = {
     ru: '⏰ Напоминание: ',
     es: '⏰ Recordatorio: ',
     zh: '⏰ 提醒：',
+    de: '⏰ Erinnerung: ',
 };
 const NOW_TEXT: Record<ReminderLanguage, string> = {
     fr: 'Maintenant',
@@ -47,9 +48,10 @@ const NOW_TEXT: Record<ReminderLanguage, string> = {
     ru: 'Сейчас',
     es: 'Ahora',
     zh: '现在',
+    de: 'Jetzt',
 };
 const LOCALE: Record<ReminderLanguage, string> = {
-    fr: 'fr-FR', en: 'en-GB', pt: 'pt-BR', ru: 'ru-RU', es: 'es-ES', zh: 'zh-CN',
+    fr: 'fr-FR', en: 'en-GB', pt: 'pt-BR', ru: 'ru-RU', es: 'es-ES', zh: 'zh-CN', de: 'de-DE',
 };
 
 const capitalize = (text: string) => text.charAt(0).toLocaleUpperCase() + text.slice(1);

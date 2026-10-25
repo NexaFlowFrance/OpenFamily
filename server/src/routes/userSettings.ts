@@ -4,7 +4,7 @@ import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
 
 const router = Router();
 
-const SUPPORTED_LANGUAGES = ['fr', 'en', 'pt', 'ru', 'zh', 'es'] as const;
+const SUPPORTED_LANGUAGES = ['fr', 'en', 'pt', 'ru', 'zh', 'es', 'de'] as const;
 
 // Single source of truth for the optional modules a family may hide.
 // Always-on modules (dashboard, shopping, tasks, calendar, family, settings)
@@ -82,13 +82,13 @@ export const parseDisabledModules = (raw: unknown): string[] => {
 
 // Update the authenticated user's preferred language (used for the UI and for
 // server-generated notifications such as appointment reminders).
-// PUT /api/auth/language - body: { "language": "fr" | "en" | "pt" | "ru" | "zh" }
+// PUT /api/auth/language - body: { "language": "fr" | "en" | "pt" | "ru" | "zh" | "es" | "de" }
 router.put('/language', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { language } = req.body as { language?: unknown };
 
         if (typeof language !== 'string' || !SUPPORTED_LANGUAGES.includes(language as typeof SUPPORTED_LANGUAGES[number])) {
-            return res.status(400).json({ success: false, error: 'Invalid language. Supported values: fr, en, pt, ru, zh' });
+            return res.status(400).json({ success: false, error: `Invalid language. Supported values: ${SUPPORTED_LANGUAGES.join(', ')}` });
         }
 
         // actualUserId: the preference belongs to the logged-in member, not the family owner.

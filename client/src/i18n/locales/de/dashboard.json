@@ -1,0 +1,73 @@
+{
+  "heading": {
+    "before": "Dein ",
+    "highlight": "Tag",
+    "after": " auf einen Blick."
+  },
+  "budgetAlert": {
+    "title": "Budgetwarnung",
+    "message_one": "{{count}} Kategorie hat ihr Monatsbudget überschritten.",
+    "message_other": "{{count}} Kategorien haben ihr Monatsbudget überschritten.",
+    "cta": "Details ansehen"
+  },
+  "stats": {
+    "appointments": "Termine",
+    "tasks": "Aufgaben",
+    "shopping": "Einkäufe",
+    "monthExpenses": "Ausgaben diesen Monat"
+  },
+  "today": {
+    "title": "Heute",
+    "viewWeek": "Woche",
+    "emptyTitle": "Nichts geplant.",
+    "emptySubtitle": "Füge einen Termin hinzu, damit er hier erscheint.",
+    "emptyCta": "Termin hinzufügen",
+    "weekTitle": "Diese Woche",
+    "viewDay": "Tag",
+    "emptyWeekSubtitle": "Keine Termine diese Woche."
+  },
+  "aside": {
+    "shopping": "Einkaufen",
+    "shoppingCount_one": "Artikel zu kaufen",
+    "shoppingCount_other": "Artikel zu kaufen",
+    "budget": "Budget diesen Monat",
+    "budgetSubtitle": "diesen Monat ausgegeben",
+    "tasks": "Offene Aufgaben",
+    "tasksCount_one": "Aufgabe zu erledigen",
+    "tasksCount_other": "Aufgaben zu erledigen"
+  },
+  "planning": {
+    "title": "Pläne dieser Woche",
+    "viewAll": "Wochenplan ansehen",
+    "empty": "Für diese Woche ist kein Wochenplan gespeichert."
+  },
+  "customize": {
+    "button": "Anpassen",
+    "title": "Startseite anpassen",
+    "description": "Wähle, was auf deiner Startseite erscheint und in welcher Reihenfolge. Diese Einstellung gilt nur für dein Konto.",
+    "agendaViewLabel": "Kalenderansicht",
+    "widgetsLabel": "Angezeigte Blöcke",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "show": "Anzeigen",
+    "hide": "Ausblenden",
+    "reset": "Zurücksetzen",
+    "allHidden": "Alle Blöcke sind ausgeblendet. Passe deine Startseite an, um wieder welche anzuzeigen.",
+    "moduleDisabled": "(Modul deaktiviert)",
+    "widgets": {
+      "stats": "Kennzahlen",
+      "agenda": "Kalender (Termine)",
+      "planning": "Pläne dieser Woche",
+      "quick": "Schnellzugriff (Einkaufen, Budget, Aufgaben)",
+      "notes": "Familiennotizen"
+    }
+  },
+  "latestPost": {
+    "title": "Neuester Familienbeitrag",
+    "viewAll": "Alle Beiträge ansehen",
+    "seenBy": "Gesehen von: {{names}}",
+    "notSeen": "Noch von niemandem gesehen",
+    "seen": "Gesehen",
+    "markSeen": "Als gesehen markieren"
+  }
+}

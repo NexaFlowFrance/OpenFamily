@@ -1,0 +1,86 @@
+{
+  "loading": "Taschengeld wird geladen…",
+  "title": "Taschengeld",
+  "subtitle": "Für Aufgaben gibt es Punkte, Punkte werden zu Taschengeld",
+  "empty": "Noch keine Belohnungen. Gib einer Aufgabe Sterne, um loszulegen!",
+  "streak_one": "{{count}} Tag in Folge",
+  "streak_other": "{{count}} Tage in Folge",
+  "pendingCount_one": "{{count}} ausstehend",
+  "pendingCount_other": "{{count}} ausstehend",
+  "worth": "im Wert von {{amount}}",
+  "approvals": {
+    "title_one": "{{count}} Aufgabe zu bestätigen",
+    "title_other": "{{count}} Aufgaben zu bestätigen",
+    "approve": "Bestätigen",
+    "reject": "Ablehnen"
+  },
+  "actions": {
+    "adjust": "Anpassen",
+    "redeem": "Auszahlen"
+  },
+  "types": {
+    "earn": "Verdiente Punkte",
+    "adjust": "Anpassung",
+    "redeem": "Ausgezahltes Taschengeld"
+  },
+  "fields": {
+    "note": "Notiz (optional)"
+  },
+  "adjustDialog": {
+    "title": "Punkte von {{name}} anpassen",
+    "description": "Bonus hinzufügen oder Punkte abziehen (negativer Wert)",
+    "points": "Punkte (+ oder −)",
+    "notePlaceholder": "z. B. Beim Einräumen der Einkäufe geholfen"
+  },
+  "redeemDialog": {
+    "title": "Taschengeld an {{name}} auszahlen",
+    "description": "Verfügbares Guthaben: {{balance}} Punkte",
+    "points": "Umzuwandelnde Punkte",
+    "amount": "Auszuzahlender Betrag: {{amount}}",
+    "notePlaceholder": "z. B. Sparschwein, Kinobesuch…"
+  },
+  "goals": {
+    "add": "Ziel hinzufügen",
+    "editTitle": "Ziel bearbeiten",
+    "progress": "{{current}} / {{target}}",
+    "markAchieved": "Ziel erreicht 🎉"
+  },
+  "goalDialog": {
+    "addTitle": "Neues Ziel für {{name}}",
+    "editTitle": "Ziel von {{name}} bearbeiten",
+    "description": "Ein Sparziel, das mit Punkten erreicht wird",
+    "emoji": "Emoji",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "z. B. Videospiel",
+    "target": "Zu erreichender Betrag ({{currency}})",
+    "delete": "Löschen"
+  },
+  "kid": {
+    "hello": "Hallo {{name}}!",
+    "subtitle": "Hier ist dein Sparschwein",
+    "reached": "Super, du hast es geschafft! 🎉",
+    "reachedHint": "Bitte ein Elternteil, dein Ziel zu bestätigen.",
+    "missing": "Dir fehlen noch {{amount}}",
+    "editGoal": "Mein Ziel bearbeiten",
+    "noGoal": "Du hast noch kein Ziel. Such dir einen Traum aus, den du erreichen willst!",
+    "addGoal": "Mein Ziel wählen",
+    "tasksTitle": "Deine Missionen",
+    "allTasks": "Alle ansehen",
+    "tasksEmpty": "Gerade keine Missionen, gut gemacht! 🎉",
+    "pendingBadge": "Wartet auf Bestätigung",
+    "historyTitle": "Deine letzten Aktivitäten",
+    "notLinkedTitle": "Dein Sparschwein wartet auf dich!",
+    "notLinkedMessage": "Bitte ein Elternteil, dein Konto auf der Familienseite mit deinem Profil zu verknüpfen, damit du deine Punkte und Ziele siehst."
+  },
+  "settings": {
+    "rate": "1 Punkt = {{value}}",
+    "title": "Wert eines Punktes",
+    "description": "Lege fest, wie viel Geld ein Punkt wert ist",
+    "label": "Wert eines Punktes",
+    "example": "Beispiel: {{points}} Punkte = {{amount}}"
+  },
+  "errors": {
+    "load": "Das Taschengeld konnte nicht geladen werden.",
+    "action": "Diese Aktion konnte nicht ausgeführt werden."
+  }
+}

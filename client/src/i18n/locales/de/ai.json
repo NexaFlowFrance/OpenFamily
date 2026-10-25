@@ -1,0 +1,73 @@
+{
+  "magic": {
+    "open": "KI-Assistent",
+    "title": "KI-Assistent ✨",
+    "description": "Beschreibe, was du hinzufügen möchtest – der Assistent erledigt den Rest.",
+    "placeholder": "Lasagne am Donnerstagabend eintragen und Mia an ihre Sporttasche erinnern…",
+    "parse": "Analysieren",
+    "parsing": "Wird analysiert…",
+    "nothingFound": "In dieser Notiz wurde nichts Umsetzbares gefunden. Versuche es mit einer anderen Formulierung.",
+    "back": "Zurück",
+    "reviewHint": "Prüfe die Vorschläge, entferne den Haken bei allem, was du nicht möchtest, und bestätige dann.",
+    "confirm": "Hinzufügen ({{count}})",
+    "confirming": "Wird hinzugefügt…",
+    "successTitle": "Erledigt ✨",
+    "successDescription": "{{count}} Eintrag/Einträge hinzugefügt.",
+    "partialTitle": "Teilweise hinzugefügt",
+    "partialDescription": "{{added}} hinzugefügt, {{failed}} fehlgeschlagen.",
+    "allFailed": "Es konnte kein Eintrag hinzugefügt werden. Bitte versuche es erneut.",
+    "types": {
+      "task": "Aufgabe",
+      "appointment": "Termin",
+      "shopping_item": "Einkauf",
+      "budget_entry": "Budget"
+    }
+  },
+  "meals": {
+    "button": "Menü vorschlagen ✨",
+    "dialogTitle": "Vorschläge fürs Abendessen",
+    "dialogDescription": "Woche vom {{start}} bis {{end}} – auf Basis deiner eigenen Rezepte.",
+    "loading": "Der Assistent stellt das Menü zusammen…",
+    "empty": "Alle Abendessen dieser Woche sind bereits geplant.",
+    "confirm": "Zum Plan hinzufügen ({{count}})",
+    "successTitle": "Menü hinzugefügt ✨",
+    "successDescription": "{{count}} Abendessen geplant.",
+    "partialTitle": "Teilweise hinzugefügt",
+    "partialDescription": "{{added}} hinzugefügt, {{failed}} fehlgeschlagen."
+  },
+  "settings": {
+    "title": "KI-Assistent",
+    "subtitle": "Verbinde ein KI-Modell (lokal oder in der Cloud), um Einträge in natürlicher Sprache hinzuzufügen und Menüvorschläge zu erhalten.",
+    "provider": "Anbieter",
+    "providers": {
+      "ollama": "Ollama (lokal)",
+      "openai": "OpenAI-kompatible API",
+      "anthropic": "Anthropic Claude",
+      "gemini": "Google Gemini"
+    },
+    "baseUrl": "Server-URL",
+    "apiKey": "API-Schlüssel",
+    "keyKept": "••• (beibehalten)",
+    "clearKey": "Gespeicherten Schlüssel löschen",
+    "model": "Modell",
+    "enabled": "Assistent aktiviert",
+    "privacy": "Datenschutz: Der API-Schlüssel wird verschlüsselt und nur auf DEINEM Server gespeichert. Mit Ollama verlässt nichts das Haus – Notizen werden lokal verarbeitet.",
+    "parentOnly": "Nur Eltern können diese Einstellungen ändern.",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Einstellungen gespeichert.",
+    "test": "Verbindung testen",
+    "testing": "Wird getestet…",
+    "testSuccess": "Verbindung erfolgreich – das Modell antwortet korrekt."
+  },
+  "errors": {
+    "AI_NOT_CONFIGURED": "Der KI-Assistent ist nicht eingerichtet. Gehe zu den Einstellungen.",
+    "AI_DISABLED": "Der KI-Assistent ist in den Einstellungen deaktiviert.",
+    "AI_UNREACHABLE": "Der KI-Anbieter ist nicht erreichbar. Prüfe die URL und ob der Dienst läuft.",
+    "AI_UNAUTHORIZED": "API-Schlüssel abgelehnt. Prüfe ihn in den Einstellungen.",
+    "AI_MODEL_NOT_FOUND": "Modell beim Anbieter nicht gefunden. Prüfe den Namen (z. B. llama3.1).",
+    "AI_INVALID_RESPONSE": "Das Modell hat eine ungültige Antwort geliefert. Versuche es erneut oder wechsle das Modell.",
+    "AI_PROVIDER_ERROR": "Der KI-Anbieter hat einen Fehler gemeldet. Bitte versuche es erneut.",
+    "AI_NOT_ENOUGH_RECIPES": "Füge mindestens 5 Rezepte hinzu, damit der Assistent ein Menü zusammenstellen kann."
+  }
+}

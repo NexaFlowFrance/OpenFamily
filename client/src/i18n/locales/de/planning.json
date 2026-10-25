@@ -1,0 +1,84 @@
+{
+  "loading": "Wochenplan wird geladen…",
+  "noMembers": {
+    "title": "Füge zuerst Mitglieder hinzu",
+    "subtitle": "Der Wochenplan basiert auf den Familienprofilen.",
+    "cta": "Zur Familie"
+  },
+  "title": "Wochenplan",
+  "subtitle": "Regelmäßige Arbeitszeiten und Stundenpläne, Woche für Woche.",
+  "newEntry": "Neuer Eintrag",
+  "thisWeek": "Diese Woche",
+  "allMembers": "Alle Mitglieder",
+  "allTypes": "Alle Arten",
+  "types": {
+    "work": "Arbeit",
+    "school": "Schule",
+    "study": "Studium",
+    "activity": "Aktivität",
+    "other": "Sonstiges"
+  },
+  "add": "Hinzufügen",
+  "nextDayShort": "+1 T.",
+  "dayFallback": "Tag {{n}}",
+  "dialog": {
+    "editTitle": "Eintrag bearbeiten",
+    "createTitle": "Neuer Eintrag",
+    "description": "Lege einen Eintrag an und wende ihn auf einen oder mehrere Tage an."
+  },
+  "form": {
+    "member": "Mitglied",
+    "type": "Art",
+    "title": "Titel",
+    "titlePlaceholder": "z. B. Büro – Produktteam / Mathematik",
+    "days": "Betroffene Tage",
+    "weekdays": "Mo–Fr",
+    "fullWeek": "Ganze Woche",
+    "selectedDay": "Ausgewählter Tag: {{day}}",
+    "selectedDays": "{{count}} Tage ausgewählt",
+    "start": "Beginn",
+    "end": "Ende",
+    "nextDayHint": "Endet am nächsten Tag (+1 Tag)",
+    "thisWeekOnlyStrong": "Nur diese Woche",
+    "thisWeekOnlyRest": ". Der Eintrag gilt nur für die Woche vom {{date}}. Andernfalls wiederholt er sich jede Woche.",
+    "replaceConflicts": "Kollidierende Einträge an den ausgewählten Tagen ersetzen. Gibt es Konflikte und ist diese Option aus, werden diese Tage übersprungen.",
+    "location": "Ort (optional)",
+    "locationPlaceholder": "z. B. Büro München / Goethe-Gymnasium",
+    "notes": "Notizen (optional)",
+    "notesPlaceholder": "Nützliche Infos, Raum, Fach, Anfahrt…",
+    "participants": "Teilnehmende",
+    "participantsHint": "Wähle eine oder mehrere Personen. Die erste bestimmt die Farbe der Aktivität."
+  },
+  "submit": {
+    "applyToDays": "Auf ausgewählte Tage anwenden"
+  },
+  "notice": {
+    "saved": "Eintrag gespeichert.",
+    "savedDays_one": "An {{count}} Tag gespeichert.",
+    "savedDays_other": "An {{count}} Tagen gespeichert.",
+    "savedDaysConflicts_one": "An {{count}} Tag gespeichert. Konflikte erkannt am: {{days}}.",
+    "savedDaysConflicts_other": "An {{count}} Tagen gespeichert. Konflikte erkannt am: {{days}}.",
+    "skipped": "Für dieses Datum ausgelassen",
+    "restored": "Wiederhergestellt"
+  },
+  "confirmDelete": "Diesen Eintrag löschen?",
+  "errors": {
+    "loadMembers": "Die Mitglieder konnten nicht geladen werden.",
+    "loadEntries": "Der Wochenplan konnte nicht geladen werden.",
+    "deleteEntry": "Dieser Eintrag konnte nicht gelöscht werden.",
+    "memberTitleRequired": "Mitglied und Titel sind erforderlich.",
+    "timesSame": "Beginn und Ende dürfen nicht gleich sein.",
+    "selectDay": "Wähle mindestens einen Tag aus.",
+    "save": "Dieser Eintrag konnte nicht gespeichert werden.",
+    "skipOccurrence": "Dieser Eintrag konnte für dieses Datum nicht geändert werden",
+    "skipUnsupported": "Dein Server unterstützt das Auslassen einzelner Termine noch nicht. Aktualisiere ihn."
+  },
+  "occurrence": {
+    "skip": "Dieses Mal auslassen",
+    "restore": "Dieses Mal wiederherstellen"
+  },
+  "appointments": {
+    "badge": "TERMIN",
+    "openCalendar": "Im Kalender öffnen"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "loading": "Essensplan wird geladen…",
+  "title": "Essensplan",
+  "subtitle": "Plane deine Mahlzeiten für die Woche",
+  "thisWeek": "Diese Woche",
+  "weekOf": "Woche vom {{start}} bis {{end}}",
+  "mealTypes": {
+    "Petit-déjeuner": "Frühstück",
+    "Déjeuner": "Mittagessen",
+    "Dîner": "Abendessen",
+    "Snack": "Snack"
+  },
+  "dialog": {
+    "editTitle": "Mahlzeit bearbeiten",
+    "addTitle": "Mahlzeit hinzufügen",
+    "descriptionFmt": "{{type}} – {{date}}"
+  },
+  "form": {
+    "mealType": "Art der Mahlzeit",
+    "recipe": "Rezept (optional)",
+    "noRecipe": "Kein Rezept",
+    "customMeal": "Oder eigene Mahlzeit",
+    "customMealPlaceholder": "z. B. Selbstgemachte Pizza",
+    "notes": "Notizen (optional)",
+    "notesPlaceholder": "Weitere Notizen…",
+    "recipeSearch": "Rezepte suchen…"
+  },
+  "shopping": {
+    "button": "Zutaten zur Einkaufsliste hinzufügen",
+    "dialogTitle": "Zutaten zur Einkaufsliste hinzufügen",
+    "dialogDescription": "Zutaten aus den Rezepten, die zwischen {{start}} und {{end}} geplant sind. Entferne den Haken bei allem, was du nicht brauchst.",
+    "empty": "Für diese Woche ist keine Mahlzeit mit Rezept geplant.",
+    "selectedCount": "{{selected}} von {{total}} Zutaten ausgewählt",
+    "alreadyOnList": "schon auf der Liste",
+    "confirm_one": "{{count}} Zutat hinzufügen",
+    "confirm_other": "{{count}} Zutaten hinzufügen",
+    "successTitle": "Zutaten hinzugefügt",
+    "successDescription_one": "{{count}} Artikel zur Einkaufsliste hinzugefügt.",
+    "successDescription_other": "{{count}} Artikel zur Einkaufsliste hinzugefügt.",
+    "partialTitle": "Einige Zutaten konnten nicht hinzugefügt werden",
+    "partialDescription": "{{added}} hinzugefügt, {{failed}} fehlgeschlagen.",
+    "errorTitle": "Zutaten konnten nicht hinzugefügt werden",
+    "errorDescription": "Es wurde nichts zur Einkaufsliste hinzugefügt. Bitte versuche es erneut."
+  },
+  "tandoor": {
+    "button": "Aus Tandoor importieren",
+    "dialogTitle": "Tandoor-Essensplan importieren",
+    "dialogDescription": "In Tandoor geplante Mahlzeiten vom {{start}} bis {{end}}.",
+    "loading": "Tandoor-Essensplan wird gelesen…",
+    "empty": "In Tandoor ist für diese Woche keine Mahlzeit geplant.",
+    "error": "Der Tandoor-Essensplan konnte nicht gelesen werden.",
+    "mappingTitle": "Zuordnung der Mahlzeiten",
+    "mappingHelp": "Wähle, welcher OpenFamily-Mahlzeit jede Tandoor-Mahlzeitart entspricht.",
+    "skipType": "Nicht importieren",
+    "previewTitle": "Vorschau",
+    "replaces": "ersetzt „{{name}}“",
+    "keeps": "„{{name}}“ ist bereits geplant und bleibt erhalten",
+    "notImported_one": "{{count}} Tandoor-Mahlzeit wird nicht importiert (keine passende Art).",
+    "notImported_other": "{{count}} Tandoor-Mahlzeiten werden nicht importiert (keine passenden Arten).",
+    "overwrite": "Bereits geplante Mahlzeiten ersetzen",
+    "confirm_one": "{{count}} Mahlzeit importieren",
+    "confirm_other": "{{count}} Mahlzeiten importieren",
+    "successTitle": "Essensplan importiert",
+    "successDescription_one": "{{count}} Mahlzeit aus Tandoor importiert.",
+    "successDescription_other": "{{count}} Mahlzeiten aus Tandoor importiert.",
+    "keptDescription_one": "{{count}} bereits geplante Mahlzeit wurde beibehalten.",
+    "keptDescription_other": "{{count}} bereits geplante Mahlzeiten wurden beibehalten."
+  },
+  "confirmDelete": "Möchtest du diese Mahlzeit wirklich löschen?",
+  "errors": {
+    "loadPlans": "Der Essensplan konnte nicht geladen werden.",
+    "loadRecipes": "Die Rezepte konnten nicht geladen werden.",
+    "save": "Diese Mahlzeit konnte nicht gespeichert werden.",
+    "delete": "Diese Mahlzeit konnte nicht gelöscht werden."
+  }
+}

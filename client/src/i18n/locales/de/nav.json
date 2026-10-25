@@ -1,0 +1,79 @@
+{
+  "items": {
+    "today": "Heute",
+    "shopping": "Einkaufen",
+    "tasks": "Aufgaben",
+    "rewards": "Taschengeld",
+    "calendar": "Termine",
+    "planning": "Wochenplan",
+    "recipes": "Rezepte",
+    "meals": "Mahlzeiten",
+    "budget": "Budget",
+    "family": "Familie",
+    "integrations": "Integrationen",
+    "settings": "Einstellungen",
+    "posts": "Beiträge"
+  },
+  "mobile": {
+    "home": "Start",
+    "planning": "Wochenplan",
+    "lists": "Listen",
+    "budget": "Budget",
+    "family": "Familie"
+  },
+  "quickActions": {
+    "title": "Schnellaktionen",
+    "addShopping": "Einkaufsartikel hinzufügen",
+    "addTask": "Aufgabe hinzufügen",
+    "addAppointment": "Termin hinzufügen",
+    "addSchedule": "Eintrag im Wochenplan hinzufügen",
+    "addRecipe": "Rezept hinzufügen",
+    "addMeal": "Mahlzeit hinzufügen",
+    "addExpense": "Ausgabe hinzufügen",
+    "addMember": "Mitglied hinzufügen",
+    "addPost": "Neuer Beitrag"
+  },
+  "user": {
+    "profile": "Profil",
+    "toggleTheme": "Design wechseln",
+    "logout": "Abmelden",
+    "openMenu": "Menü öffnen"
+  },
+  "offline": "Offline-Modus. Die angezeigten Daten stammen aus dem Cache. Änderungen sind wieder möglich, sobald die Verbindung zurück ist.",
+  "pageTitleFallback": "Startseite",
+  "posts": {
+    "title": "Familienbeiträge",
+    "subtitle": "Teile mit deiner Familie, was dich beschäftigt, ein Foto oder einen Link.",
+    "newPost": "Neuer Beitrag",
+    "editPost": "Beitrag bearbeiten",
+    "editing": "Du bearbeitest einen deiner Beiträge.",
+    "placeholder": "Was gibt's Neues?",
+    "linkPlaceholder": "Link teilen (optional)",
+    "addPhoto": "Foto hinzufügen",
+    "post": "Veröffentlichen",
+    "saveChanges": "Änderungen speichern",
+    "cancel": "Abbrechen",
+    "photoPreview": "Fotovorschau",
+    "removePhoto": "Foto entfernen",
+    "sharedPhoto": "Geteiltes Foto",
+    "empty": "Noch keine Familienbeiträge.",
+    "emptySubtitle": "Teile als Erstes etwas.",
+    "edited": "bearbeitet",
+    "edit": "Beitrag bearbeiten",
+    "delete": "Beitrag löschen",
+    "confirmDelete": "Diesen Beitrag löschen?",
+    "seen": "Gesehen",
+    "markSeen": "Als gesehen markieren",
+    "seenBy": "Gesehen von: {{names}}",
+    "notSeen": "Noch von niemandem gesehen",
+    "errors": {
+      "load": "Beiträge konnten nicht geladen werden.",
+      "save": "Der Beitrag konnte nicht gespeichert werden.",
+      "delete": "Der Beitrag konnte nicht gelöscht werden.",
+      "seen": "Der Beitrag konnte nicht als gesehen markiert werden.",
+      "empty": "Füge zuerst Text, ein Foto oder einen Link hinzu.",
+      "image": "Dieses Foto kann nicht verwendet werden.",
+      "imageTooLarge": "Dieses Foto ist auch nach dem Verkleinern noch zu groß."
+    }
+  }
+}

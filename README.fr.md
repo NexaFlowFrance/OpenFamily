@@ -32,7 +32,7 @@
 | 🔔 **Notifications** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) + in-app |
 | 👥 **Comptes partagés** | Invitations par lien, demandes d'accès, transfert de propriété |
 | 🛡️ **Rôles & permissions** | Comptes **parent / enfant** — budget en lecture seule pour les enfants |
-| 🌍 **Multilingue** | Interface **français / anglais / chinois simplifié** avec détection automatique |
+| 🌍 **Multilingue** | Interface **français / anglais / allemand / portugais / russe / espagnol / chinois simplifié** avec détection automatique |
 | 📴 **Mode hors ligne** | Consultation des données en cache sans connexion (PWA) |
 
 ## 🔗 Intégrations tierces

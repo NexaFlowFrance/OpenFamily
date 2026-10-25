@@ -81,9 +81,9 @@ can shift based on feedback — issues and discussions are welcome.
 
 ## Under consideration
 
-- **More languages** — the interface is available in English, French, Portuguese,
-  Russian, Spanish and Simplified Chinese. The i18n infrastructure is in place (namespaced
-  JSON locales); the goal is to add German, Italian, Dutch and more,
+- **More languages** — the interface is available in English, French, German,
+  Portuguese, Russian, Spanish and Simplified Chinese. The i18n infrastructure is in place
+  (namespaced JSON locales); the goal is to add Italian, Dutch and more,
   ideally through a community translation workflow (e.g. Weblate). Contributions
   welcome.
 - **Two-way Google Calendar / CalDAV sync** (today: one-way from Nextcloud or any

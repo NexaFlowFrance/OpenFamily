@@ -1,0 +1,66 @@
+{
+  "appName": "OpenFamily",
+  "demo": {
+    "notice": "Demo-Modus – deine Änderungen werden nicht gespeichert und beim Neuladen zurückgesetzt.",
+    "reset": "Zurücksetzen",
+    "star": "Auf GitHub mit Stern markieren"
+  },
+  "language": {
+    "syncError": "Deine Spracheinstellung konnte nicht gespeichert werden.",
+    "currencySyncError": "Die Standardwährung konnte nicht aktualisiert werden."
+  },
+  "actions": {
+    "add": "Hinzufügen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saveChanges": "Änderungen speichern",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "create": "Erstellen",
+    "update": "Aktualisieren",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "back": "Zurück",
+    "today": "Heute",
+    "retry": "Erneut versuchen",
+    "apply": "Anwenden",
+    "reset": "Zurücksetzen",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "clear": "Leeren",
+    "send": "Senden",
+    "loadMore": "Mehr laden"
+  },
+  "states": {
+    "loading": "Wird geladen…",
+    "saving": "Wird gespeichert…",
+    "empty": "Hier ist noch nichts",
+    "error": "Ein Fehler ist aufgetreten"
+  },
+  "labels": {
+    "name": "Name",
+    "fullName": "Vollständiger Name",
+    "description": "Beschreibung",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "startTime": "Beginn",
+    "endTime": "Ende",
+    "location": "Ort",
+    "notes": "Notizen",
+    "category": "Kategorie",
+    "quantity": "Menge",
+    "price": "Preis",
+    "amount": "Betrag",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "optional": "optional",
+    "all": "Alle",
+    "none": "Keine"
+  },
+  "days": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"],
+  "daysShort": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+  "months": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+  "monthsShort": ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
+}

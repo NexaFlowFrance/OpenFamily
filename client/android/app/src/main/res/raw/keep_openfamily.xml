@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources looked up by name at runtime, which the resource shrinker cannot
+     see in its reference graph. The Cordova runtime embedded by Capacitor reads
+     config.xml through Resources.getIdentifier("config", "xml", ...). This file
+     is read by the build and never packaged into the app. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@xml/config" />

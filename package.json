@@ -30,7 +30,7 @@
     "concurrently": "^8.2.2"
   },
   "overrides": {
-    "serialize-javascript": "7.0.5",
+    "serialize-javascript": "7.1.4",
     "@babel/core": "^7.29.6",
     "esbuild": "^0.28.1",
     "body-parser": "^1.20.6",

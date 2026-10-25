@@ -94,9 +94,9 @@ docker-compose up -d --build
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:1.8.2
+    image: ghcr.io/nexaflowfrance/openfamily-server:1.9.0
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:1.8.2
+    image: ghcr.io/nexaflowfrance/openfamily-client:1.9.0
 ```
 
 puis lancez `docker compose pull server client && docker compose up -d`, sans `--build`. Les noms d'image prennent bien le suffixe `-server` / `-client`. Les réglages comme `REGISTRATION_ENABLED` sont lus par le serveur au démarrage : les images publiées n'ont pas besoin d'être reconstruites.

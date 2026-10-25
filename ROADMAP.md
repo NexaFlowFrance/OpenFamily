@@ -79,6 +79,21 @@ can shift based on feedback — issues and discussions are welcome.
   use what you have at home, and import the week's Tandoor meal plan (contributed by
   @foulek57).
 
+- **German interface** *(v1.9)*: the seventh language, including the e-mails,
+  reminders and notifications the server sends. Contributed by @sawmans.
+- **Invitation-only servers** *(v1.9)*: with sign-ups closed, an invitation from
+  the Family page still lets someone in, and the login page follows the server's
+  setting without a rebuild.
+- **Task categories and filters** *(v1.9)*: categories each family defines for
+  itself (by room, by kind of chore), quarterly and four-monthly frequencies,
+  filters by frequency and category kept per account, and a child signed in on a
+  shared tablet starts on their own tasks.
+- **One clock style per region** *(v1.9)*: every screen shows times the way the
+  member's region writes them, 12-hour or 24-hour, never both on one page.
+- **Home Assistant to-do lists** *(v1.9)*: the configured list is synced even
+  when Home Assistant's legacy shopping list is still around. Contributed by
+  @sawmans.
+
 ## Under consideration
 
 - **More languages** — the interface is available in English, French, German,

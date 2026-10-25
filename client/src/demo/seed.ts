@@ -41,6 +41,7 @@ export interface DemoStore {
     budgetLimits: Record<string, unknown>[];
     notifications: Record<string, unknown>[];
     notes: Record<string, unknown>[];
+    posts: Record<string, unknown>[];
     integrations: Record<string, unknown>[];
     rewardTransactions: Record<string, unknown>[];
     rewardSettings: Record<string, unknown>;
@@ -145,6 +146,12 @@ export function createSeed(): DemoStore {
         notes: [
             { id: 'fn1', author_name: 'Alex', content: 'Papi & Mamie arrivent samedi midi', color: 'yellow', expires_at: null, created_at: atTime(now, 8, 5) },
             { id: 'fn2', author_name: 'Sam', content: 'Pensez au sac de piscine pour mercredi 🏊', color: 'pink', expires_at: null, created_at: atTime(addDays(now, -1), 18, 40) },
+        ],
+        // Family wall, newest first like the server. Sam's post is unread, so
+        // the dashboard shows it; Alex's is the member's own.
+        posts: [
+            { id: 'fp1', user_id: 'demo-user', author_user_id: 'u-sam', author_name: 'Sam', author_avatar: null, content: "Sunday hike photos are in the shared album 📷 Noah made it to the top!", image_url: null, link_url: null, created_at: atTime(addDays(now, -1), 20, 10), updated_at: atTime(addDays(now, -1), 20, 10), seen_by: [], is_seen: false, is_own: false },
+            { id: 'fp2', user_id: 'demo-user', author_user_id: 'demo-user', author_name: 'Alex', author_avatar: null, content: 'Dentist for Mia on Thursday at 17:30, I will take her.', image_url: null, link_url: null, created_at: atTime(addDays(now, -3), 12, 45), updated_at: atTime(addDays(now, -3), 12, 45), seen_by: [{ id: 'u-sam', name: 'Sam', seen_at: atTime(addDays(now, -3), 13, 2) }], is_seen: true, is_own: true },
         ],
         integrations: [],
         // Pocket-money ledger: Mia has a streak going, Noah just started.

@@ -18,6 +18,12 @@ let demoCategories: Record<'shopping' | 'recipe' | 'budget' | 'task', string[]> 
 };
 
 type Json = Record<string, unknown>;
+
+// The member's dashboard layout (mirrors /api/auth/dashboard-prefs). Reset on
+// reload, like everything else. Without this route the fallback below answered
+// an empty array and the dashboard crashed on `prefs.order`.
+let demoDashboardPrefs: Json = { order: ['stats', 'agenda', 'planning', 'quick', 'notes'], hidden: [], agendaView: 'day' };
+
 const ok = <T,>(data: T) => ({ success: true, data });
 const uid = () =>
     (typeof crypto !== 'undefined' && crypto.randomUUID
@@ -330,6 +336,10 @@ async function route(method: string, path: string, q: Record<string, string>, bo
             return ok({ disabled_modules: cleaned });
         }
         return ok({ disabled_modules: (store.user.disabled_modules as string[]) ?? [] });
+    }
+    if (path === '/api/auth/dashboard-prefs') {
+        if (method === 'PUT') demoDashboardPrefs = { ...demoDashboardPrefs, ...body };
+        return ok(demoDashboardPrefs);
     }
 
     // ── Categories (family-customizable lists) ───────────────────────────────
@@ -751,6 +761,29 @@ async function route(method: string, path: string, q: Record<string, string>, bo
     if (seg[1] === 'invites') return ok({});
 
     // ── Family notes (fridge post-its) ──────────────────────────────────────────
+    // ── Family wall (posts) ───────────────────────────────────────────────────
+    if (path === '/api/posts/latest') return ok((store.posts as Json[])[0] ?? null);
+    if (path === '/api/posts' && method === 'GET') return ok(store.posts);
+    if (path === '/api/posts' && method === 'POST') {
+        return ok(create('posts', {
+            user_id: store.user.id, author_user_id: store.user.id, author_name: store.user.name, author_avatar: null,
+            content: String(body.content || '').trim(), image_url: body.image_url ?? null, link_url: body.link_url ?? null,
+            updated_at: new Date().toISOString(), seen_by: [], is_seen: true, is_own: true,
+        }));
+    }
+    if (seg[1] === 'posts' && seg[2] && last === 'seen' && method === 'POST') {
+        const post = (store.posts as Json[]).find((p) => p.id === seg[2]);
+        if (post && !post.is_seen) {
+            post.is_seen = true;
+            post.seen_by = [...(post.seen_by as Json[]), { id: store.user.id, name: store.user.name, seen_at: new Date().toISOString() }];
+        }
+        return ok({});
+    }
+    if (seg[1] === 'posts' && seg[2]) {
+        if (method === 'PUT') return ok(update('posts', seg[2], { ...body, updated_at: new Date().toISOString() }));
+        if (method === 'DELETE') { remove('posts', seg[2]); return ok({}); }
+    }
+
     if (path === '/api/notes' && method === 'GET') {
         // Like the server: drop expired notes, newest first (naive local strings
         // compare correctly as plain strings).

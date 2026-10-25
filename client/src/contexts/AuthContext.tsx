@@ -34,6 +34,27 @@ export const DEFAULT_DASHBOARD_PREFS: DashboardPrefs = {
     agendaView: 'day',
 };
 
+const isWidget = (value: unknown): value is DashboardWidget =>
+    typeof value === 'string' && (DASHBOARD_WIDGETS as readonly string[]).includes(value);
+
+/**
+ * A layout as a server returns it, made safe for the dashboard: unknown
+ * widgets are dropped, widgets the server does not know yet (an older server
+ * behind a newer client) are appended, and a missing or malformed part falls
+ * back to the default. The dashboard indexes `order` and `hidden` directly,
+ * so a surprising shape must never reach it.
+ */
+export function normalizeDashboardPrefs(raw: unknown): DashboardPrefs {
+    const src = raw && typeof raw === 'object' && !Array.isArray(raw)
+        ? (raw as Partial<Record<keyof DashboardPrefs, unknown>>)
+        : {};
+    const order = Array.isArray(src.order) ? src.order.filter(isWidget) : [];
+    for (const widget of DASHBOARD_WIDGETS) if (!order.includes(widget)) order.push(widget);
+    const hidden = Array.isArray(src.hidden) ? src.hidden.filter(isWidget) : [];
+    const agendaView = src.agendaView === 'week' ? 'week' : 'day';
+    return { order, hidden, agendaView };
+}
+
 interface AuthContextType {
     user: User | null;
     loading: boolean;
@@ -239,7 +260,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         let active = true;
         api.get<{ success: boolean; data: DashboardPrefs }>('/api/auth/dashboard-prefs')
             .then((res) => {
-                if (active && res.success && res.data) setDashboardPrefs(res.data);
+                if (active && res.success) setDashboardPrefs(normalizeDashboardPrefs(res.data));
             })
             .catch(() => {
                 if (active) setDashboardPrefs(DEFAULT_DASHBOARD_PREFS);
@@ -255,8 +276,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             '/api/auth/dashboard-prefs',
             prefs
         );
-        if (response.success && response.data) {
-            setDashboardPrefs(response.data);
+        if (response.success) {
+            setDashboardPrefs(normalizeDashboardPrefs(response.data));
         }
     };
 

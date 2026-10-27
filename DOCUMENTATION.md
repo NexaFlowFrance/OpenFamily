@@ -364,7 +364,7 @@ npm run smoke:api
 
 ### Installation manuelle (développement)
 
-Prérequis : Node.js 20+, PostgreSQL 16+, npm 10+.
+Prérequis : Node.js 22+ (26 recommandé), PostgreSQL 16+, npm 10+.
 
 ```bash
 npm run install:all     # Installe toutes les dépendances

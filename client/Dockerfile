@@ -2,7 +2,7 @@
 # its output is static HTML/JS, the same for every architecture. Emulating it
 # for arm64 (QEMU) was slow and, from October 2026, crashed with "Illegal
 # instruction" in npm ci and hung the release build.
-FROM --platform=$BUILDPLATFORM node:20-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:26-alpine AS builder
 
 WORKDIR /app
 

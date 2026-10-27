@@ -248,7 +248,7 @@ log "Dépôt cloné"
 step "Génération des clés VAPID (notifications push)"
 
 VAPID_KEYS=$(pct exec "$CT_ID" -- bash -c "
-  docker run --rm node:20-alpine sh -c \
+  docker run --rm node:26-alpine sh -c \
     'npm install -g web-push --quiet 2>/dev/null && npx web-push generate-vapid-keys --json' \
     2>/dev/null || echo '{\"publicKey\":\"\",\"privateKey\":\"\"}'
 ") || VAPID_KEYS='{"publicKey":"","privateKey":""}'

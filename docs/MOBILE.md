@@ -33,7 +33,7 @@ https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily
 ```
 
 ### Locally
-Prerequisites: Node 20+, JDK 21, Android SDK (Android Studio).
+Prerequisites: Node 22+ (26 recommended), JDK 21, Android SDK (Android Studio).
 
 ```bash
 npm run install:all

@@ -219,8 +219,8 @@ export const coreMigrations: readonly Migration[] = [
                 issuer TEXT NOT NULL,
                 subject TEXT NOT NULL,
                 email VARCHAR(255),
-                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                last_login_at TIMESTAMP,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                last_login_at TIMESTAMPTZ,
                 CONSTRAINT user_identities_issuer_subject_key UNIQUE (issuer, subject),
                 CONSTRAINT user_identities_user_issuer_key UNIQUE (user_id, issuer)
             )`,
@@ -235,7 +235,7 @@ export const coreMigrations: readonly Migration[] = [
                 invite_token VARCHAR(255),
                 claims JSONB,
                 handoff_hash VARCHAR(64) UNIQUE,
-                expires_at TIMESTAMP NOT NULL
+                expires_at TIMESTAMPTZ NOT NULL
             )`,
             'CREATE INDEX idx_oidc_flows_expires_at ON oidc_flows(expires_at)',
         ],

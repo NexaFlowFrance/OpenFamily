@@ -56,12 +56,23 @@ const Login: React.FC = () => {
 
     useEffect(() => {
         let cancelled = false;
-        api.getAuthConfig()
-            .then((config) => {
-                if (!cancelled) setAuthConfig(config);
-            })
-            .catch(() => { /* offline: keep the build-time default */ });
-        return () => { cancelled = true; };
+        let retryTimer: ReturnType<typeof setTimeout> | undefined;
+        // A brief outage or rate limit retries a few times; until then (or if
+        // offline) the build-time default stays.
+        const load = (attempt: number) => {
+            api.getAuthConfig()
+                .then((config) => {
+                    if (!cancelled) setAuthConfig(config);
+                })
+                .catch(() => {
+                    if (!cancelled && attempt < 3) retryTimer = setTimeout(() => load(attempt + 1), attempt * 3000);
+                });
+        };
+        load(1);
+        return () => {
+            cancelled = true;
+            clearTimeout(retryTimer);
+        };
     }, []);
 
     const handleForgotSubmit = async (e: React.FormEvent) => {

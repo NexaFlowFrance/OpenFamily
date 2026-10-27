@@ -11,7 +11,7 @@ export { app, query };
 export const idp = new FakeIdp();
 
 const SSO_ENV = ['OIDC_ISSUER_URL', 'OIDC_CLIENT_ID', 'OIDC_CLIENT_SECRET', 'OIDC_ALLOW_INSECURE_HTTP', 'OIDC_PROVIDER_NAME',
-    'OIDC_LINK_BY_EMAIL', 'OIDC_REGISTRATION_ENABLED', 'REGISTRATION_ENABLED', 'PASSWORD_LOGIN_ENABLED', 'OIDC_REDIRECT_URI'];
+    'OIDC_REGISTRATION_ENABLED', 'REGISTRATION_ENABLED', 'PASSWORD_LOGIN_ENABLED', 'OIDC_REDIRECT_URI'];
 
 /** Applies a sign-in configuration (unset variables fall back to their defaults). */
 export const configure = (env: Record<string, string | undefined> = {}): void => {

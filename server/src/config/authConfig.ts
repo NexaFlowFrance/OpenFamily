@@ -23,7 +23,6 @@ export interface OidcSettings {
     redirectUri: string;
     providerName: string;
     scopes: string;
-    linkByEmail: boolean;
     allowInsecureHttp: boolean;
 }
 
@@ -79,7 +78,6 @@ const readOidcSettings = (): OidcSettings | null => {
         redirectUri,
         providerName: trimmed(process.env.OIDC_PROVIDER_NAME) || 'SSO',
         scopes: trimmed(process.env.OIDC_SCOPES) || 'openid email profile',
-        linkByEmail: flag(process.env.OIDC_LINK_BY_EMAIL, true),
         allowInsecureHttp: flag(process.env.OIDC_ALLOW_INSECURE_HTTP, false),
     };
 };
@@ -111,7 +109,6 @@ const computeAuthConfig = (): AuthConfig => {
         oidc: Boolean(oidc),
         issuer: oidc?.issuerUrl,
         oidcSignup: config.oidcSignup,
-        linkByEmail: oidc?.linkByEmail,
     });
     return config;
 };

@@ -34,21 +34,24 @@ import logger from '../lib/logger';
 
 const router = Router();
 
-const FLOW_TTL_MS = 10 * 60 * 1000;
-const HANDOFF_TTL_MS = 60 * 1000;
+const FLOW_TTL_SECONDS = 10 * 60;
+const HANDOFF_TTL_SECONDS = 60;
 const CHALLENGE_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 const HANDOFF_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 
-// The callback is reached by the provider's redirect, often several times while
-// someone retries, and skipSuccessfulRequests would never count it (it always
-// answers with a redirect): a separate, per-IP limit.
-const callbackRateLimitMax = Number.parseInt(process.env.OIDC_CALLBACK_RATE_LIMIT_MAX || '60', 10);
-const callbackRateLimiter = rateLimit({
+// /start and /callback each write a row, and the general auth limiter never
+// counts them (it skips successful requests, and the callback always answers
+// with a redirect): a separate per-IP limit for each, counting every request.
+const flowRateLimitMax = Number.parseInt(process.env.OIDC_FLOW_RATE_LIMIT_MAX || '60', 10);
+const flowRateLimiter = () => rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: Number.isNaN(callbackRateLimitMax) ? 60 : callbackRateLimitMax,
+    max: Number.isNaN(flowRateLimitMax) ? 60 : flowRateLimitMax,
     standardHeaders: true,
     legacyHeaders: false,
+    message: { success: false, error: 'Too many authentication attempts. Please try again later.' },
 });
+const startRateLimiter = flowRateLimiter();
+const callbackRateLimiter = flowRateLimiter();
 
 const bearerToken = (req: Request): string => {
     const header = req.headers.authorization;
@@ -64,7 +67,7 @@ const KNOWN_PROVIDER_ERRORS = new Set([
     'request_not_supported', 'request_uri_not_supported', 'registration_not_supported',
 ]);
 
-router.post('/start', async (req: Request, res: Response) => {
+router.post('/start', startRateLimiter, async (req: Request, res: Response) => {
     const { clientChallenge, inviteToken, link } = (req.body ?? {}) as {
         clientChallenge?: unknown; inviteToken?: unknown; link?: unknown;
     };
@@ -91,11 +94,12 @@ router.post('/start', async (req: Request, res: Response) => {
         const codeChallenge = await client.calculatePKCECodeChallenge(codeVerifier);
 
         await query('DELETE FROM oidc_flows WHERE expires_at < NOW()');
+        // Expiry times are computed by the database, the same clock that checks them.
         await query(
             `INSERT INTO oidc_flows (state_hash, code_verifier, nonce, client_challenge, mode, link_user_id, invite_token, expires_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW() + make_interval(secs => $8))`,
             [sha256Hex(state), codeVerifier, nonce, clientChallenge, linkUserId ? 'link' : 'login', linkUserId,
-                linkUserId ? null : invite, new Date(Date.now() + FLOW_TTL_MS).toISOString()],
+                linkUserId ? null : invite, FLOW_TTL_SECONDS],
         );
 
         const authorizationUrl = client.buildAuthorizationUrl(config, {
@@ -188,8 +192,8 @@ router.get('/callback', callbackRateLimiter, async (req: Request, res: Response)
 
         const handoff = crypto.randomBytes(32).toString('base64url');
         await query(
-            'UPDATE oidc_flows SET claims = $1, handoff_hash = $2, expires_at = $3 WHERE id = $4',
-            [JSON.stringify(claims), sha256Hex(handoff), new Date(Date.now() + HANDOFF_TTL_MS).toISOString(), flow.id],
+            'UPDATE oidc_flows SET claims = $1, handoff_hash = $2, expires_at = NOW() + make_interval(secs => $3) WHERE id = $4',
+            [JSON.stringify(claims), sha256Hex(handoff), HANDOFF_TTL_SECONDS, flow.id],
         );
         return backToApp(`code=${handoff}`);
     } catch (error) {
@@ -205,6 +209,10 @@ router.post('/exchange', async (req: Request, res: Response) => {
     if (typeof code !== 'string' || !HANDOFF_PATTERN.test(code) || typeof clientVerifier !== 'string' || clientVerifier.length > 128) {
         return res.status(400).json({ success: false, error: 'invalid_code' });
     }
+
+    // Abandoned sign-ins hold the claims (email, name) of their callback: they
+    // go here as well as on /start.
+    await query('DELETE FROM oidc_flows WHERE expires_at < NOW()');
 
     // Burn the code before anything else: of two concurrent exchanges only one
     // gets the row, and a failed exchange cannot be retried.
@@ -225,7 +233,11 @@ router.post('/exchange', async (req: Request, res: Response) => {
         let sessionUserId: string;
         try {
             sessionUserId = (await verifyAccessToken(bearerToken(req))).userId;
-        } catch {
+        } catch (error) {
+            // A database outage is not a bad session: answering 401 would sign the app out.
+            if (!(error instanceof InvalidTokenError)) {
+                return res.status(503).json({ success: false, error: 'Service unavailable' });
+            }
             return res.status(401).json({ success: false, error: 'session_mismatch' });
         }
         if (sessionUserId !== flow.link_user_id) {

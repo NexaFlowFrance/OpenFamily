@@ -39,6 +39,13 @@ wss.on('connection', (ws: WebSocket) => {
                     }
                     clients.get(userId)!.add(ws);
 
+                    // A revocation committed during the first check closed only
+                    // the sockets registered at the time. Now that this one is
+                    // registered, any later revocation closes it too, and a
+                    // second check catches one that came in between.
+                    await verifyAccessToken(data.token);
+                    if (ws.readyState !== WebSocket.OPEN) return;
+
                     logger.info('ws.authenticated', { userId });
                     ws.send(JSON.stringify({ type: 'auth', success: true }));
                 } catch {

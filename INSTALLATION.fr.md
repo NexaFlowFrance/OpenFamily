@@ -199,8 +199,8 @@ Vos proches peuvent se connecter avec un fournisseur OpenID Connect que vous uti
 Le serveur doit joindre le fournisseur en HTTPS. Gardez le secret du client uniquement dans `.env` ; pour le changer, créez le nouveau chez le fournisseur, mettez `.env` à jour, lancez `docker compose up -d`, puis révoquez l'ancien.
 
 **Qui peut entrer.** À la première connexion par SSO :
-- si un compte utilise déjà la même adresse e-mail et que le fournisseur la déclare vérifiée (`email_verified`), les deux sont liés et la personne retrouve son compte. Si vos utilisateurs peuvent changer leur adresse chez le fournisseur sans qu'elle soit vérifiée, mettez `OIDC_LINK_BY_EMAIL=false` : ils lieront alors eux-mêmes le SSO dans **Paramètres → Connexion**, après s'être connectés avec leur mot de passe ;
-- sinon, un nouveau compte est créé, seulement si le fournisseur a vérifié l'adresse, et seulement si l'inscription par SSO est ouverte (`OIDC_REGISTRATION_ENABLED`, qui suit `REGISTRATION_ENABLED` si elle n'est pas définie) ou si la personne vient d'une invitation. Dans Keycloak, les utilisateurs créés par un administrateur ont « Email vérifié » désactivé tant que vous ne le cochez pas.
+- si un compte utilise déjà la même adresse e-mail, le SSO ne l'ouvre pas : la personne se connecte avec son mot de passe et lie le SSO dans **Paramètres → Connexion**, une seule fois. Une adresse seule ne prouve jamais à qui appartient un compte (l'inscription par mot de passe ne la vérifie pas, et certains fournisseurs laissent saisir n'importe quelle adresse) : ensuite, le compte est reconnu par son lien avec le fournisseur, pas par son adresse ;
+- si aucun compte n'utilise l'adresse, un nouveau compte est créé, seulement si le fournisseur a vérifié l'adresse, et seulement si l'inscription par SSO est ouverte (`OIDC_REGISTRATION_ENABLED`, qui suit `REGISTRATION_ENABLED` si elle n'est pas définie) ou si la personne vient d'une invitation. Dans Keycloak, les utilisateurs créés par un administrateur ont « Email vérifié » désactivé tant que vous ne le cochez pas.
 
 | Objectif | `PASSWORD_LOGIN_ENABLED` | `REGISTRATION_ENABLED` | `OIDC_REGISTRATION_ENABLED` |
 |---|---|---|---|
@@ -209,7 +209,7 @@ Le serveur doit joindre le fournisseur en HTTPS. Gardez le secret du client uniq
 | Sur invitation uniquement, des deux façons | `true` | `false` | (non définie) |
 | SSO uniquement | `false` | `false` | `true` |
 
-Les invitations fonctionnent toujours. `PASSWORD_LOGIN_ENABLED=false` coupe aussi l'inscription et la réinitialisation par mot de passe, et reste ignorée tant que le SSO n'est pas configuré : une faute de frappe ne bloque personne. Testez une connexion par SSO avant de couper les mots de passe : les comptes existants se connectent alors par SSO et sont liés par e-mail comme ci-dessus.
+Les invitations fonctionnent toujours. `PASSWORD_LOGIN_ENABLED=false` coupe aussi l'inscription et la réinitialisation par mot de passe, et reste ignorée tant que le SSO n'est pas configuré : une faute de frappe ne bloque personne. Testez une connexion par SSO avant de couper les mots de passe, et faites d'abord lier le SSO aux utilisateurs existants dans **Paramètres → Connexion** : sans lien, ils ne pourront plus se connecter une fois les mots de passe coupés.
 
 **Si le fournisseur est en panne sur un serveur 100 % SSO**, mettez `PASSWORD_LOGIN_ENABLED=true`, lancez `docker compose up -d`, puis donnez un mot de passe à votre compte :
 

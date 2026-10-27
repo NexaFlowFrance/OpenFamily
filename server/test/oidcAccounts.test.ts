@@ -36,38 +36,29 @@ describe('a returning identity', () => {
     });
 });
 
-describe('linking an existing account by email', () => {
-    it('links a password account when the provider verified the address', async () => {
-        const alice = await registerWithPassword('alice@example.org');
-        const result = await sso();
-        expect(result.status).toBe(200);
-        expect(result.body.data.user.id).toBe(alice.user.id);
-        expect(result.body.data.created).toBe(false);
-        const profile = await me(result.body.data.token);
-        expect(profile.body.data.user).toMatchObject({ has_password: true, sso_linked: true });
-    });
-
+describe('an existing account with the same email', () => {
     it.each([
-        ['email_verified missing', { email_verified: undefined }],
-        ['email_verified false', { email_verified: false }],
-        ['email_verified as the string "true"', { email_verified: 'true' }],
-    ])('refuses when %s', async (_label, claims) => {
-        await registerWithPassword('alice@example.org');
+        ['verified by the provider', {}],
+        ['not verified', { email_verified: false }],
+    ])('is never opened by SSO (%s): its holder links from Settings', async (_label, claims) => {
+        const alice = await registerWithPassword('alice@example.org');
         idp.reset(claims);
         const result = await sso();
         expect(result.status).toBe(409);
         expect(result.body.error).toBe('account_conflict');
+        expect(result.body.data).toBeUndefined();
         expect((await query('SELECT count(*)::int AS n FROM user_identities')).rows[0].n).toBe(0);
+        expect(await countUsers()).toBe(1);
+
+        // Once linked from Settings, the same provider account signs in to it.
+        idp.reset();
+        await sso({ link: true, token: alice.token });
+        const again = await sso();
+        expect(again.status).toBe(200);
+        expect(again.body.data.user.id).toBe(alice.user.id);
     });
 
-    it('refuses when OIDC_LINK_BY_EMAIL is off', async () => {
-        await registerWithPassword('alice@example.org');
-        configure({ OIDC_LINK_BY_EMAIL: 'false' });
-        const result = await sso();
-        expect(result.body.error).toBe('account_conflict');
-    });
-
-    it('refuses an account already linked to another identity (recycled address)', async () => {
+    it('is refused when it was created through SSO by another identity (recycled address)', async () => {
         await sso();
         idp.reset({ sub: 'someone-new-with-the-same-address' });
         const result = await sso();
@@ -76,18 +67,10 @@ describe('linking an existing account by email', () => {
         expect(await countUsers()).toBe(1);
     });
 
-    it('refuses when the address matches two accounts differing only by case', async () => {
+    it('is refused when the address matches accounts differing only by case', async () => {
         await query(`INSERT INTO users (email, password_hash, name) VALUES ('Alice@example.org', 'x', 'A'), ('alice@example.org', 'x', 'B')`);
         const result = await sso();
         expect(result.body.error).toBe('account_conflict');
-    });
-
-    it('still links existing accounts when sign-up is closed', async () => {
-        const alice = await registerWithPassword('alice@example.org');
-        configure({ REGISTRATION_ENABLED: 'false' });
-        const result = await sso();
-        expect(result.status).toBe(200);
-        expect(result.body.data.user.id).toBe(alice.user.id);
     });
 });
 

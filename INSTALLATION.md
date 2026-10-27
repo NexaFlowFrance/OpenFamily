@@ -199,8 +199,8 @@ People can sign in with an OpenID Connect provider you already run: Authentik, K
 The server must reach the provider over HTTPS. Keep the client secret in `.env` only; to change it, set the new one at the provider, update `.env`, run `docker compose up -d`, then revoke the old one.
 
 **Who gets in.** The first time someone signs in with SSO:
-- if an account already uses the same email and the provider says that email is verified (`email_verified`), the two are linked and they reach their account. If people can change their email at your provider without it being checked, set `OIDC_LINK_BY_EMAIL=false`: they then link SSO themselves in **Settings → Sign-in**, after signing in with their password;
-- otherwise a new account is created, only if the provider verified the email, and only if SSO sign-up is open (`OIDC_REGISTRATION_ENABLED`, which follows `REGISTRATION_ENABLED` when unset) or they came through an invitation. In Keycloak, users created by an administrator have "Email verified" off until you tick it.
+- if an account already uses the same email, SSO does not open it: the person signs in with their password and links SSO in **Settings → Sign-in**, once. An email alone never proves who owns an account (password sign-up does not check it, and some providers let people set any address), so after that the account is recognised by its link to the provider, not by email;
+- if no account uses the email, a new one is created, only if the provider verified the email, and only if SSO sign-up is open (`OIDC_REGISTRATION_ENABLED`, which follows `REGISTRATION_ENABLED` when unset) or they came through an invitation. In Keycloak, users created by an administrator have "Email verified" off until you tick it.
 
 | Goal | `PASSWORD_LOGIN_ENABLED` | `REGISTRATION_ENABLED` | `OIDC_REGISTRATION_ENABLED` |
 |---|---|---|---|
@@ -209,7 +209,7 @@ The server must reach the provider over HTTPS. Keep the client secret in `.env` 
 | Invitations only, either way | `true` | `false` | (unset) |
 | SSO only | `false` | `false` | `true` |
 
-Invitations always work. `PASSWORD_LOGIN_ENABLED=false` also turns off password sign-up and reset, and is ignored until SSO is configured, so nobody is locked out by a typo. Test an SSO sign-in before turning passwords off: existing users then sign in through SSO and are linked by email as above.
+Invitations always work. `PASSWORD_LOGIN_ENABLED=false` also turns off password sign-up and reset, and is ignored until SSO is configured, so nobody is locked out by a typo. Test an SSO sign-in before turning passwords off, and have existing users link SSO in **Settings → Sign-in** first: without a link, they cannot sign in once passwords are off.
 
 **If the provider is down on an SSO-only server**, set `PASSWORD_LOGIN_ENABLED=true`, run `docker compose up -d`, and give your account a password:
 

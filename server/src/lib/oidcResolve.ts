@@ -7,9 +7,9 @@ import { normalizeEmail } from './normalize';
 
 /**
  * Turns a completed sign-in at the identity provider into an OpenFamily
- * account. An account is known by the provider's (issuer, subject) pair; the
- * email only matters the first time, to link an existing account or to create
- * a new one.
+ * account. An account is known by the provider's (issuer, subject) pair, never
+ * by email: an existing account is only reached through a link its holder made
+ * from Settings. The email only matters when a new account is created.
  */
 
 /** What the callback kept from the validated ID token (or UserInfo). */
@@ -96,27 +96,16 @@ const signIn = async (claims: OidcClaims, inviteToken: string | null): Promise<R
             return { kind: 'login', payload, created: false };
         }
 
-        // From here on a new link or a new account is made, both of which need an email.
+        // From here on a new account is made, which needs an email.
         if (!claims.email) throw new Outcome('email_required');
         const email = normalizeEmail(claims.email);
 
-        const matches = await tx.query('SELECT id FROM users WHERE LOWER(email) = $1 FOR UPDATE', [email]);
-        if (matches.rows.length > 1) throw new Outcome('account_conflict');
-
-        if (matches.rows.length === 1) {
-            const userId = matches.rows[0].id as string;
-            // Linking an existing account on the provider's word alone needs a
-            // verified address, the operator's consent, and an account not yet
-            // linked to this provider (a recycled address must not take it over).
-            if (!claims.emailVerified || !config.oidc?.linkByEmail) throw new Outcome('account_conflict');
-            const linked = await tx.query('SELECT 1 FROM user_identities WHERE user_id = $1 AND issuer = $2', [userId, claims.iss]);
-            if (linked.rows.length > 0) throw new Outcome('account_conflict');
-
-            await insertIdentity(tx.query, userId, claims);
-            const payload = await buildAuthPayload(tx.query, userId);
-            if (!payload) throw new Outcome('invalid_code');
-            return { kind: 'login', payload, created: false };
-        }
+        // An account with this address is never opened on the provider's word:
+        // the provider may vouch for addresses it never checked, and password
+        // sign-up never checks them either, so the account may not be this
+        // person's. Its holder links SSO from Settings instead.
+        const matches = await tx.query('SELECT 1 FROM users WHERE LOWER(email) = $1 LIMIT 1', [email]);
+        if (matches.rows.length > 0) throw new Outcome('account_conflict');
 
         // A new account. Its email becomes the account's address for password
         // reset and invitations, so the provider must vouch for it.

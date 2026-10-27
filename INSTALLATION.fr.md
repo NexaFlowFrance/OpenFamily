@@ -64,7 +64,7 @@ Facultatif, mais utile :
 
 | Variable | Rôle |
 |---|---|
-| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Notifications push (rappels, activité de la famille). Générez les clés avec `docker run --rm node:20-alpine npx -y web-push generate-vapid-keys` ; `VAPID_SUBJECT` vaut `mailto:` suivi de votre e-mail. Le push demande aussi le HTTPS (étape 6). |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Notifications push (rappels, activité de la famille). Générez les clés avec `docker run --rm node:26-alpine npx -y web-push generate-vapid-keys` ; `VAPID_SUBJECT` vaut `mailto:` suivi de votre e-mail. Le push demande aussi le HTTPS (étape 6). |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | E-mails d'invitation et de réinitialisation du mot de passe. Sans eux, les invitations marchent quand même en partageant leur lien. |
 | `REGISTRATION_ENABLED` | `false` ferme les inscriptions : seules les personnes que vous invitez peuvent créer un compte (voir l'étape 5). |
 

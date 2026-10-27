@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 env:
-  NODE_VERSION: "20.18.0"          # runtime Node embarqué dans l'installeur
+  NODE_VERSION: "26.12.1"          # runtime Node embarqué dans l'installeur
   PG_VERSION: "16.4-1"             # binaires PostgreSQL portables (EnterpriseDB)
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "26"
 
       # ---------------------------------------------------------------------
       # 1. Compiler l'application (shared + serveur + client en same-origin)

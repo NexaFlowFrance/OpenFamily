@@ -113,7 +113,7 @@ npm run dev
 ## 🛠️ Technologies
 
 **Frontend** : React 19 · TypeScript · Vite 7 · TailwindCSS · Radix UI · i18next · PWA
-**Backend** : Node 20 · Express · PostgreSQL 16 · WebSocket · Web Push (VAPID) · JWT + bcrypt
+**Backend** : Node 26 · Express · PostgreSQL 16 · WebSocket · Web Push (VAPID) · JWT + bcrypt
 **DevOps** : Docker Compose · GitHub Actions (CI + publication ghcr.io)
 
 ## 🔐 Sécurité

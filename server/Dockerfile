@@ -3,7 +3,7 @@
 # for arm64 (QEMU) crashed with "Illegal instruction" in npm ci in October
 # 2026. The production stage below stays on the target architecture, since
 # native modules (bcrypt) must match it.
-FROM --platform=$BUILDPLATFORM node:20-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:26-alpine AS builder
 
 WORKDIR /app
 
@@ -31,7 +31,7 @@ RUN cd shared && npm run build
 RUN cd server && npm run build
 
 # Production stage
-FROM node:20-alpine
+FROM node:26-alpine
 
 WORKDIR /app
 

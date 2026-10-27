@@ -34,7 +34,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$NODE_VERSION = "20.18.0"
+$NODE_VERSION = "26.12.1"
 $PG_VERSION   = "16.4-1"
 
 function Info($m)  { Write-Host "[OpenFamily] $m" -ForegroundColor Cyan }

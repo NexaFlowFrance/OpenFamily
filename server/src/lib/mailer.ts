@@ -1,5 +1,6 @@
 import nodemailer, { type Transporter } from 'nodemailer';
 import logger from './logger';
+import { isLanguage, Language } from './languages';
 
 /**
  * Transactional email.
@@ -48,17 +49,9 @@ const getTransporter = (): Transporter => {
     return transporter;
 };
 
-type Language = 'fr' | 'en' | 'pt' | 'ru' | 'es' | 'zh' | 'de';
-
 const normalizeLanguage = (language?: string | null): Language => {
-    const normalized = language?.trim().toLowerCase() ?? '';
-    if (normalized.startsWith('en')) return 'en';
-    if (normalized.startsWith('pt')) return 'pt';
-    if (normalized.startsWith('ru')) return 'ru';
-    if (normalized.startsWith('es')) return 'es';
-    if (normalized.startsWith('zh')) return 'zh';
-    if (normalized.startsWith('de')) return 'de';
-    return 'fr';
+    const primary = language?.trim().toLowerCase().split(/[-_]/)[0];
+    return isLanguage(primary) ? primary : 'fr';
 };
 
 /** Escape characters that would break out of HTML text nodes or attributes. */

@@ -137,7 +137,7 @@
     "confirmUnlink": "Délier {{name}} ? Vous vous connecterez avec votre mot de passe, et vos autres appareils seront déconnectés.",
     "unlinkNeedsPassword": "Votre compte n'a pas encore de mot de passe. Définissez-en un avec « Mot de passe oublié ? » sur la page de connexion pour pouvoir délier.",
     "unlinkPasswordOff": "La connexion par mot de passe est désactivée sur ce serveur : la connexion unique ne peut pas être déliée.",
-    "relinkNote": "Vous reconnecter plus tard avec {{name}} peut lier à nouveau votre compte.",
+    "relinkNote": "Une fois le lien supprimé, la connexion avec {{name}} n'ouvre plus ce compte. Vous pourrez le lier à nouveau ici.",
     "linked": "La connexion unique est maintenant liée.",
     "unlinked": "La connexion unique est déliée. Vos autres appareils ont été déconnectés.",
     "logoutEverywhere": "Se déconnecter de tous les appareils",

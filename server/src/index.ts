@@ -7,6 +7,7 @@ import { clients, broadcast } from './lib/broadcaster';
 import { startReminderScheduler } from './lib/reminderScheduler';
 import { startCalendarSubscriptionScheduler } from './lib/calendarSources';
 import { verifyAccessToken, WS_SESSION_REVOKED } from './lib/authTokens';
+import { getAuthConfig } from './config/authConfig';
 
 export { broadcast };
 
@@ -86,6 +87,9 @@ const startServer = async () => {
         // Test database connection
         await pool.query('SELECT NOW()');
         logger.info('server.database_connected');
+
+        // Read the sign-in settings now, so a missing SSO variable is logged at boot.
+        getAuthConfig();
 
         startReminderScheduler();
         startCalendarSubscriptionScheduler();

@@ -3,10 +3,9 @@ import { Router, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { query, withTransaction } from '../db';
 import { getAuthConfig } from '../config/authConfig';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { authMiddleware, AuthRequest, bearerToken } from '../middleware/auth';
 import { InvalidTokenError, issueAccessToken, revokeUserSessions, verifyAccessToken } from '../lib/authTokens';
 import {
-    appOrigin,
     challengeMatches,
     describeOidcError,
     getProvider,
@@ -52,11 +51,6 @@ const flowRateLimiter = () => rateLimit({
 });
 const startRateLimiter = flowRateLimiter();
 const callbackRateLimiter = flowRateLimiter();
-
-const bearerToken = (req: Request): string => {
-    const header = req.headers.authorization;
-    return header?.startsWith('Bearer ') ? header.slice(7).trim() : '';
-};
 
 // Error codes the provider may send back in the redirect (RFC 6749 and OpenID
 // Connect). Anything else is attacker-controlled text and is never logged.
@@ -125,26 +119,32 @@ router.get('/callback', callbackRateLimiter, async (req: Request, res: Response)
     const settings = getAuthConfig().oidc;
     if (!settings) return res.status(404).end();
 
-    const backToApp = (fragment: string) => res.redirect(302, `${appOrigin(settings)}/auth/callback#${fragment}`);
+    const backToApp = (fragment: string) => res.redirect(302, `${settings.appUrl}/auth/callback#${fragment}`);
     const fail = (code: string) => backToApp(`error=${code}`);
 
     const state = typeof req.query.state === 'string' ? req.query.state : '';
     if (!state) return fail('invalid_request');
 
     // Claim the flow: a state works once, and only before it expires.
-    const claimed = await query(
-        `UPDATE oidc_flows SET state_hash = NULL
-         WHERE state_hash = $1 AND expires_at > NOW() AND handoff_hash IS NULL
-         RETURNING id, code_verifier, nonce`,
-        [sha256Hex(state)],
-    );
-    const flow = claimed.rows[0] as { id: string; code_verifier: string; nonce: string } | undefined;
+    let flow: { id: string; code_verifier: string; nonce: string } | undefined;
+    try {
+        const claimed = await query(
+            `UPDATE oidc_flows SET state_hash = NULL
+             WHERE state_hash = $1 AND expires_at > NOW() AND handoff_hash IS NULL
+             RETURNING id, code_verifier, nonce`,
+            [sha256Hex(state)],
+        );
+        flow = claimed.rows[0];
+    } catch (error) {
+        logger.error('auth.oidc_callback_failed', { error: describeOidcError(error) });
+        return fail('sign_in_failed');
+    }
     if (!flow) return fail('expired');
 
     if (typeof req.query.error === 'string') {
         const providerError = KNOWN_PROVIDER_ERRORS.has(req.query.error) ? req.query.error : 'other';
         logger.info('auth.oidc_provider_error', { flowId: flow.id, error: providerError });
-        await query('DELETE FROM oidc_flows WHERE id = $1', [flow.id]);
+        await query('DELETE FROM oidc_flows WHERE id = $1', [flow.id]).catch(() => undefined);
         return fail('cancelled');
     }
 
@@ -210,21 +210,27 @@ router.post('/exchange', async (req: Request, res: Response) => {
         return res.status(400).json({ success: false, error: 'invalid_code' });
     }
 
-    // Abandoned sign-ins hold the claims (email, name) of their callback: they
-    // go here as well as on /start.
-    await query('DELETE FROM oidc_flows WHERE expires_at < NOW()');
-
-    // Burn the code before anything else: of two concurrent exchanges only one
-    // gets the row, and a failed exchange cannot be retried.
-    const consumed = await query(
-        `DELETE FROM oidc_flows WHERE handoff_hash = $1 AND expires_at > NOW()
-         RETURNING client_challenge, mode, link_user_id, invite_token, claims`,
-        [sha256Hex(code)],
-    );
-    const flow = consumed.rows[0] as {
+    let flow: {
         client_challenge: string; mode: 'login' | 'link'; link_user_id: string | null;
         invite_token: string | null; claims: OidcClaims;
     } | undefined;
+    try {
+        // Abandoned sign-ins hold the claims (email, name) of their callback:
+        // they go here as well as on /start.
+        await query('DELETE FROM oidc_flows WHERE expires_at < NOW()');
+
+        // Burn the code before anything else: of two concurrent exchanges only
+        // one gets the row, and a failed exchange cannot be retried.
+        const consumed = await query(
+            `DELETE FROM oidc_flows WHERE handoff_hash = $1 AND expires_at > NOW()
+             RETURNING client_challenge, mode, link_user_id, invite_token, claims`,
+            [sha256Hex(code)],
+        );
+        flow = consumed.rows[0];
+    } catch (error) {
+        logger.error('auth.oidc_exchange_failed', { error: describeOidcError(error) });
+        return res.status(503).json({ success: false, error: 'Service unavailable' });
+    }
     if (!flow || !challengeMatches(clientVerifier, flow.client_challenge)) {
         return res.status(400).json({ success: false, error: 'invalid_code' });
     }

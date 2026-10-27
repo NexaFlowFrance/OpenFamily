@@ -137,7 +137,7 @@
     "confirmUnlink": "Verknüpfung mit {{name}} lösen? Du meldest dich dann mit deinem Passwort an, und deine anderen Geräte werden abgemeldet.",
     "unlinkNeedsPassword": "Dein Konto hat noch kein Passwort. Lege eines über „Passwort vergessen?“ auf der Anmeldeseite fest, um die Verknüpfung lösen zu können.",
     "unlinkPasswordOff": "Die Anmeldung mit Passwort ist auf diesem Server deaktiviert, daher kann die Einmalanmeldung nicht gelöst werden.",
-    "relinkNote": "Eine spätere Anmeldung mit {{name}} kann dein Konto erneut verknüpfen.",
+    "relinkNote": "Nach dem Trennen öffnet eine Anmeldung mit {{name}} dieses Konto nicht mehr. Du kannst es hier erneut verknüpfen.",
     "linked": "Die Einmalanmeldung ist jetzt verknüpft.",
     "unlinked": "Die Verknüpfung ist gelöst. Deine anderen Geräte wurden abgemeldet.",
     "logoutEverywhere": "Von allen Geräten abmelden",

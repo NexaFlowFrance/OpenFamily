@@ -22,6 +22,8 @@ export interface Tamper {
     userinfoStatus?: number;
     /** The provider refuses the sign-in with this error code (and a free-text description). */
     authorizeError?: string;
+    /** The token endpoint refuses the code with this error code (and a free-text description). */
+    tokenError?: string;
 }
 
 interface PendingCode {
@@ -115,6 +117,9 @@ export class FakeIdp {
             const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
             if (!pending || pending.challenge !== challenge || pending.redirectUri !== body.get('redirect_uri')) {
                 return json(400, { error: 'invalid_grant' });
+            }
+            if (this.tamper.tokenError) {
+                return json(400, { error: this.tamper.tokenError, error_description: 'SECRET-DESCRIPTION <script>alert(1)</script>' });
             }
             return json(200, {
                 access_token: 'test-access-token',

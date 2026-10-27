@@ -1,5 +1,6 @@
 import request from 'supertest';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import logger from '../src/lib/logger';
 import { app, configure, idp, query, resetState, runCallback, sso, startSuite, stopSuite } from './helpers';
 
 // What openid-client checks for us, as configured by lib/oidcProvider.ts. Each
@@ -103,5 +104,16 @@ describe('provider connection', () => {
         const response = await request(app).post('/api/auth/oidc/start').send({ clientChallenge: 'a'.repeat(43) });
         expect(response.status).toBe(503);
         expect(response.body.error).toBe('provider_unavailable');
+    });
+
+    it('logs why the provider refused the code, without its free-text description', async () => {
+        const warn = vi.spyOn(logger, 'warn');
+        idp.tamper.tokenError = 'invalid_client';
+        await expectRefused();
+        const logged = JSON.stringify(warn.mock.calls.filter(([event]) => event === 'auth.oidc_callback_failed'));
+        warn.mockRestore();
+        expect(logged).toContain('error=invalid_client');
+        expect(logged).toContain('status=400');
+        expect(logged).not.toContain('SECRET-DESCRIPTION');
     });
 });

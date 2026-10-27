@@ -41,6 +41,7 @@
         "@types/supertest": "^6.0.3",
         "@types/web-push": "^3.6.3",
         "@types/ws": "^8.5.10",
+        "jose": "^6.2.13",
         "supertest": "^7.3.1",
         "tsx": "^4.7.0",
         "typescript": "^5.3.3",

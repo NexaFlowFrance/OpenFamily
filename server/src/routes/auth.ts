@@ -8,7 +8,7 @@ import { normalizeEmail } from '../lib/normalize';
 import { isMailEnabled, sendPasswordResetEmail } from '../lib/mailer';
 import { resolveAppBaseUrl } from '../lib/appUrl';
 import { parseDisabledModules } from './userSettings';
-import { getAuthConfig } from '../config/authConfig';
+import { getAuthConfig, passwordResetEnabled } from '../config/authConfig';
 import { buildAuthPayload } from '../lib/authPayload';
 import { revokeUserSessions } from '../lib/authTokens';
 import { acceptInviteForNewUser, checkInvite } from '../lib/invites';
@@ -60,7 +60,7 @@ router.get('/config', (_req, res) => {
         data: {
             passwordLogin: config.passwordLogin,
             passwordSignup: config.passwordSignup,
-            passwordReset: config.passwordLogin && isMailEnabled(),
+            passwordReset: passwordResetEnabled(),
             oidc: config.oidc
                 ? { enabled: true, name: config.oidc.providerName, signup: config.oidcSignup }
                 : { enabled: false, name: null, signup: false },

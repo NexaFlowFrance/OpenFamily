@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { api, AuthServerConfig } from '../lib/api';
 import { isNative } from '../lib/serverConfig';
-import { ssoSupported, startSso } from '../lib/sso';
+import { onPageRestored, ssoSupported, startSso } from '../lib/sso';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -40,6 +40,8 @@ const Login: React.FC = () => {
     // "Forgot password" sub-form, shown in place of the credentials form.
     const [forgotMode, setForgotMode] = useState(false);
     const [forgotSent, setForgotSent] = useState(false);
+
+    useEffect(() => onPageRestored(() => setSsoLoading(false)), []);
 
     // Detect invite token in URL (both the plain ?invite= form and the hash route
     // used by the native shell); auto-switch to registration mode.

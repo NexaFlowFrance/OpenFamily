@@ -40,11 +40,15 @@ describe('effective configuration', () => {
         expect(getAuthConfig()).toMatchObject({ passwordLogin: true, oidc: null });
     });
 
-    it('keeps SSO off without a public address to come back to', () => {
+    it.each([
+        ['without a redirect URI either', undefined],
+        // The redirect URI is the API's address, which may not be the app's.
+        ['even with a redirect URI', 'https://api.example.org/api/auth/oidc/callback'],
+    ])('keeps SSO off without the app\'s public address (%s)', (_label, redirectUri) => {
         const publicUrl = process.env.APP_PUBLIC_URL;
         delete process.env.APP_PUBLIC_URL;
         try {
-            configure();
+            configure({ OIDC_REDIRECT_URI: redirectUri });
             expect(getAuthConfig().oidc).toBeNull();
         } finally {
             process.env.APP_PUBLIC_URL = publicUrl;

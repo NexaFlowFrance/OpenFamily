@@ -96,6 +96,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         const ws = new WebSocket(`${wsBase()}/ws`);
         wsRef.current = ws;
+        let authenticated = false;
 
         ws.onopen = () => {
             reconnectDelay.current = RECONNECT_DELAY_MS;
@@ -114,8 +115,10 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         ws.onmessage = (event: MessageEvent) => {
             try {
-                const msg = JSON.parse(event.data as string) as WsUpdateMessage;
-                if (msg.type === 'update' && msg.entity) {
+                const msg = JSON.parse(event.data as string) as WsUpdateMessage | { type: 'auth'; success: boolean };
+                if (msg.type === 'auth') {
+                    authenticated = msg.success;
+                } else if (msg.type === 'update' && msg.entity) {
                     notify(msg.entity);
                 }
             } catch {
@@ -127,11 +130,13 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
             clearPing();
             if (unmounted.current) return;
 
-            // 4001: the server refused or ended this session (signed out
-            // elsewhere, removed from the family...). Ask the API whether the
-            // current token still works: a 401 there signs the app out, while a
-            // fresh token (after leaving a family, for instance) reconnects below.
-            if (event.code === WS_SESSION_ENDED) {
+            // 4001 on a socket that was signed in: its session was revoked.
+            // That also happens to this device when it leaves a family or
+            // unlinks SSO, and the response carrying its fresh token may still
+            // be on its way: just reconnect below, with whatever token is
+            // current by then. 4001 at sign-in: the token is refused, so ask
+            // the API, whose 401 signs the app out.
+            if (event.code === WS_SESSION_ENDED && !authenticated) {
                 api.get('/api/auth/me').catch(() => undefined);
             }
 

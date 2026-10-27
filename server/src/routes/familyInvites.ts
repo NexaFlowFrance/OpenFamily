@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { Router } from 'express';
+import { Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { query, QueryFn, withTransaction } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
@@ -9,6 +9,7 @@ import { createLocalizedNotification } from '../lib/notifications';
 import { normalizeEmail } from '../lib/normalize';
 import { isMailEnabled, sendFamilyInviteEmail } from '../lib/mailer';
 import { resolveAppBaseUrl } from '../lib/appUrl';
+import logger from '../lib/logger';
 
 const router = Router();
 
@@ -46,6 +47,18 @@ const lockFamilyOwner = async (db: QueryFn, ownerId: string): Promise<boolean> =
 };
 
 class FamilyChangedError extends Error {}
+
+// Express 4 does not catch a rejected async handler, and an unhandled rejection
+// ends the process: the membership routes answer 503 on a database error instead.
+const guarded = (event: string, handler: (req: AuthRequest, res: Response) => Promise<unknown>) =>
+    async (req: AuthRequest, res: Response) => {
+        try {
+            await handler(req, res);
+        } catch (error) {
+            logger.error(event, { error: error instanceof Error ? error.message : String(error) });
+            if (!res.headersSent) res.status(503).json({ success: false, error: 'Service unavailable' });
+        }
+    };
 
 // Loose shape check: enough to catch typos before an email is stored/sent,
 // without rejecting valid but unusual addresses.
@@ -170,7 +183,7 @@ router.get('/', async (req: AuthRequest, res) => {
 });
 
 // POST /join - already-logged-in user joins using an invite token (returns new JWT)
-router.post('/join', async (req: AuthRequest, res) => {
+router.post('/join', guarded('family.join_failed', async (req, res) => {
     const { token } = req.body as { token?: string };
 
     if (!token) {
@@ -236,10 +249,10 @@ router.post('/join', async (req: AuthRequest, res) => {
             user: { id: req.actualUserId, name: user.name, email: user.email, is_owner: false },
         },
     });
-});
+}));
 
 // DELETE /leave - member leaves the family (returns new standalone JWT)
-router.delete('/leave', async (req: AuthRequest, res) => {
+router.delete('/leave', guarded('family.leave_failed', async (req, res) => {
     if (req.isOwner) {
         return res.status(400).json({
             success: false,
@@ -278,10 +291,10 @@ router.delete('/leave', async (req: AuthRequest, res) => {
             user: { id: req.actualUserId, name: user.name, email: user.email, is_owner: true },
         },
     });
-});
+}));
 
 // DELETE /:id - revoke a pending invite (owner only)
-router.delete('/members/:userId', async (req: AuthRequest, res) => {
+router.delete('/members/:userId', guarded('family.remove_member_failed', async (req, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
     }
@@ -304,7 +317,7 @@ router.delete('/members/:userId', async (req: AuthRequest, res) => {
         return res.status(404).json({ success: false, error: 'Membre introuvable' });
     }
     return res.json({ success: true });
-});
+}));
 
 // PUT /members/:userId/role - owner changes a member's account role (parent / enfant)
 router.put('/members/:userId/role', async (req: AuthRequest, res) => {
@@ -356,7 +369,7 @@ const FAMILY_SCOPED_TABLES = [
 ] as const;
 
 // POST /transfer-ownership - owner hands the family (and all its data) to a member
-router.post('/transfer-ownership', async (req: AuthRequest, res) => {
+router.post('/transfer-ownership', guarded('family.transfer_failed', async (req, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Seul le propriétaire peut transférer la famille' });
     }
@@ -460,7 +473,7 @@ router.post('/transfer-ownership', async (req: AuthRequest, res) => {
             },
         },
     });
-});
+}));
 
 // ── Join requests (ask an owner for access) ───────────────────────────────────
 
@@ -580,7 +593,7 @@ router.get('/requests', async (req: AuthRequest, res) => {
 });
 
 // POST /requests/:id/approve - owner approves a pending request
-router.post('/requests/:id/approve', async (req: AuthRequest, res) => {
+router.post('/requests/:id/approve', guarded('family.approve_failed', async (req, res) => {
     if (!req.isOwner) {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
     }
@@ -640,7 +653,7 @@ router.post('/requests/:id/approve', async (req: AuthRequest, res) => {
     });
 
     return res.json({ success: true });
-});
+}));
 
 // POST /requests/:id/reject - owner rejects a pending request
 router.post('/requests/:id/reject', async (req: AuthRequest, res) => {

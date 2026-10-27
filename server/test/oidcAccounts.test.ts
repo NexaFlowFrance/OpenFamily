@@ -38,14 +38,16 @@ describe('a returning identity', () => {
 
 describe('an existing account with the same email', () => {
     it.each([
-        ['verified by the provider', {}],
-        ['not verified', { email_verified: false }],
-    ])('is never opened by SSO (%s): its holder links from Settings', async (_label, claims) => {
+        ['verified by the provider', {}, 'account_conflict'],
+        // Refused before the lookup: an unverified address must not reveal
+        // whether it has an account here.
+        ['not verified', { email_verified: false }, 'email_unverified'],
+    ])('is never opened by SSO (%s): its holder links from Settings', async (_label, claims, code) => {
         const alice = await registerWithPassword('alice@example.org');
         idp.reset(claims);
         const result = await sso();
         expect(result.status).toBe(409);
-        expect(result.body.error).toBe('account_conflict');
+        expect(result.body.error).toBe(code);
         expect(result.body.data).toBeUndefined();
         expect((await query('SELECT count(*)::int AS n FROM user_identities')).rows[0].n).toBe(0);
         expect(await countUsers()).toBe(1);

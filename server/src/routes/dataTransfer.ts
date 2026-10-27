@@ -7,11 +7,11 @@ import { withTextLines } from '../lib/recipeLines';
 import { OPENFAMILY_VERSION } from '../version';
 import { cleanContent, cleanImage, cleanLink } from '../lib/postFields';
 import { cleanImageUrl } from '../lib/recipeImage';
+import { isLanguage } from '../lib/languages';
 
 const PORTABLE_FORMAT = 'openfamily-portable';
 const PORTABLE_VERSION = '2.0';
 const SUPPORTED_IMPORT_VERSIONS = new Set(['1.0', PORTABLE_VERSION]);
-const SUPPORTED_LANGUAGES = new Set(['fr', 'en', 'pt', 'ru', 'zh', 'es', 'de']);
 
 const PORTABLE_EXCLUSIONS = [
     'password_hashes_and_authentication_tokens',
@@ -507,7 +507,7 @@ router.post('/import', requireParent, importBodyParser, async (req: AuthRequest,
             const assignments: string[] = [];
             const values: unknown[] = [];
 
-            if (typeof ref.language === 'string' && SUPPORTED_LANGUAGES.has(ref.language)) {
+            if (isLanguage(ref.language)) {
                 values.push(ref.language);
                 assignments.push(`language = $${values.length}`);
             }

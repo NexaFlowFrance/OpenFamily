@@ -137,7 +137,7 @@
     "confirmUnlink": "取消关联 {{name}}？之后您将使用密码登录，其他设备会被退出登录。",
     "unlinkNeedsPassword": "您的账户还没有密码。请在登录页面通过“忘记密码？”设置密码后再取消关联。",
     "unlinkPasswordOff": "此服务器已关闭密码登录，因此无法取消关联单点登录。",
-    "relinkNote": "以后再次使用 {{name}} 登录，可能会重新关联您的账户。",
+    "relinkNote": "解除关联后，使用 {{name}} 登录将不再打开此账户。您可以在此处重新关联。",
     "linked": "单点登录已关联。",
     "unlinked": "单点登录已取消关联，其他设备已退出登录。",
     "logoutEverywhere": "在所有设备上退出登录",

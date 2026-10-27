@@ -20,6 +20,8 @@ export interface OidcSettings {
     issuerUrl: string;
     clientId: string;
     clientSecret: string;
+    /** Where the app is served (APP_PUBLIC_URL), where the callback sends the browser back to. */
+    appUrl: string;
     redirectUri: string;
     providerName: string;
     scopes: string;
@@ -61,20 +63,22 @@ const readOidcSettings = (): OidcSettings | null => {
         return null;
     }
 
-    // The provider redirects back to this address, so it must be the server's
-    // public one. It is never guessed from the request's Host header.
+    // The provider redirects to the API and the API then sends the browser to
+    // the app, so both public addresses must be known. They are never guessed
+    // from the request's Host header, nor from each other: the API may be
+    // served from another host than the app (VITE_API_URL).
     const publicUrl = trimmed(process.env.APP_PUBLIC_URL).replace(/\/+$/, '');
-    const redirectUri = trimmed(process.env.OIDC_REDIRECT_URI)
-        || (publicUrl ? `${publicUrl}/api/auth/oidc/callback` : '');
-    if (!redirectUri) {
-        logger.error('auth.oidc_disabled', { reason: 'set APP_PUBLIC_URL or OIDC_REDIRECT_URI' });
+    if (!publicUrl) {
+        logger.error('auth.oidc_disabled', { reason: 'set APP_PUBLIC_URL' });
         return null;
     }
+    const redirectUri = trimmed(process.env.OIDC_REDIRECT_URI) || `${publicUrl}/api/auth/oidc/callback`;
 
     return {
         issuerUrl,
         clientId,
         clientSecret,
+        appUrl: publicUrl,
         redirectUri,
         providerName: trimmed(process.env.OIDC_PROVIDER_NAME) || 'SSO',
         scopes: trimmed(process.env.OIDC_SCOPES) || 'openid email profile',

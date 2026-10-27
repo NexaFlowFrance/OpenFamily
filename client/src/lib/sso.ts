@@ -50,6 +50,19 @@ export const startSso = async (mode: SsoMode, invite?: string | null): Promise<v
     window.location.assign(response.data.authorizationUrl);
 };
 
+/**
+ * Calls `reset` when the page is restored from the back/forward cache, as when
+ * someone comes back from the provider with the Back button: the page returns
+ * exactly as it was left, its buttons still busy. Returns the cleanup.
+ */
+export const onPageRestored = (reset: () => void): (() => void) => {
+    const listener = (event: PageTransitionEvent) => {
+        if (event.persisted) reset();
+    };
+    window.addEventListener('pageshow', listener);
+    return () => window.removeEventListener('pageshow', listener);
+};
+
 /** Reads and forgets the sign-in this tab started, if any. */
 export const takePendingSso = (): PendingSso | null => {
     const raw = sessionStorage.getItem(STORAGE_KEY);

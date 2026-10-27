@@ -137,7 +137,7 @@
     "confirmUnlink": "Desvincular {{name}}? Você vai entrar com sua senha, e seus outros dispositivos serão desconectados.",
     "unlinkNeedsPassword": "Sua conta ainda não tem senha. Crie uma em “Esqueceu sua senha?” na página de login para poder desvincular.",
     "unlinkPasswordOff": "O login com senha está desativado neste servidor, então o login único não pode ser desvinculado.",
-    "relinkNote": "Entrar de novo com {{name}} mais tarde pode vincular sua conta novamente.",
+    "relinkNote": "Depois de desvincular, entrar com {{name}} não abre mais esta conta. Você pode vinculá-la de novo aqui.",
     "linked": "O login único agora está vinculado.",
     "unlinked": "O login único foi desvinculado. Seus outros dispositivos foram desconectados.",
     "logoutEverywhere": "Sair de todos os dispositivos",

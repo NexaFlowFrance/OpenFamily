@@ -66,13 +66,22 @@ export const getProvider = async (): Promise<{ client: OpenIdClientModule; confi
  */
 export const describeOidcError = (error: unknown): string => {
     if (error && typeof error === 'object') {
-        const { name, code } = error as { name?: unknown; code?: unknown };
-        return [typeof name === 'string' ? name : 'Error', typeof code === 'string' ? code : '']
-            .filter(Boolean)
-            .join(':');
+        const { name, code, error: oauthError, status } = error as {
+            name?: unknown; code?: unknown; error?: unknown; status?: unknown;
+        };
+        return [
+            [typeof name === 'string' ? name : 'Error', typeof code === 'string' ? code : ''].filter(Boolean).join(':'),
+            // The provider's OAuth error code (invalid_grant, invalid_client...)
+            // and HTTP status say what went wrong. Its free-text description is
+            // left out, like the message: both may carry anything.
+            typeof oauthError === 'string' && OAUTH_ERROR_CODE.test(oauthError) ? `error=${oauthError}` : '',
+            typeof status === 'number' ? `status=${status}` : '',
+        ].filter(Boolean).join(' ');
     }
     return 'unknown';
 };
+
+const OAUTH_ERROR_CODE = /^[a-z0-9_.-]{1,64}$/i;
 
 // Values derived from random secrets are stored hashed, so a database dump
 // never contains a usable state or handoff code.
@@ -83,12 +92,6 @@ export const challengeMatches = (verifier: string, challenge: string): boolean =
     const computed = Buffer.from(crypto.createHash('sha256').update(verifier).digest('base64url'));
     const expected = Buffer.from(challenge);
     return computed.length === expected.length && crypto.timingSafeEqual(computed, expected);
-};
-
-/** Where the app is served, for the redirect that ends the provider round trip. */
-export const appOrigin = (settings: OidcSettings): string => {
-    const publicUrl = process.env.APP_PUBLIC_URL?.trim().replace(/\/+$/, '');
-    return publicUrl || new URL(settings.redirectUri).origin;
 };
 
 /** For tests that switch providers between cases. */

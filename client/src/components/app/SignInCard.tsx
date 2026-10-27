@@ -5,7 +5,7 @@ import { Card, CardContent, Button } from '../ui';
 import { api, AuthServerConfig } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { isNative } from '../../lib/serverConfig';
-import { ssoSupported, startSso } from '../../lib/sso';
+import { onPageRestored, ssoSupported, startSso } from '../../lib/sso';
 
 interface SignInState {
     hasPassword: boolean;
@@ -29,6 +29,8 @@ const SignInCard: React.FC = () => {
         const me = await api.get<{ success: boolean; data: { user: { has_password?: boolean; sso_linked?: boolean } } }>('/api/auth/me');
         setState({ hasPassword: me.data.user.has_password !== false, ssoLinked: Boolean(me.data.user.sso_linked) });
     };
+
+    useEffect(() => onPageRestored(() => setBusy(null)), []);
 
     useEffect(() => {
         api.getAuthConfig().then(setConfig).catch(() => setConfig(null));

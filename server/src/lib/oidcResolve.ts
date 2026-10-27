@@ -4,6 +4,7 @@ import { getAuthConfig } from '../config/authConfig';
 import { AuthPayload, buildAuthPayload } from './authPayload';
 import { acceptInviteForNewUser, checkInvite } from './invites';
 import { normalizeEmail } from './normalize';
+import { isLanguage, Language } from './languages';
 
 /**
  * Turns a completed sign-in at the identity provider into an OpenFamily
@@ -51,11 +52,9 @@ class Outcome extends Error {
 /** Another request created the same identity between our read and our insert. */
 class IdentityRace extends Error {}
 
-const SUPPORTED_LANGUAGES = new Set(['fr', 'en', 'pt', 'ru', 'zh', 'es', 'de']);
-
-const languageFromLocale = (locale: string | undefined): string | null => {
+const languageFromLocale = (locale: string | undefined): Language | null => {
     const primary = locale?.trim().toLowerCase().split(/[-_]/)[0];
-    return primary && SUPPORTED_LANGUAGES.has(primary) ? primary : null;
+    return isLanguage(primary) ? primary : null;
 };
 
 const displayName = (claims: OidcClaims, email: string): string => {
@@ -96,8 +95,12 @@ const signIn = async (claims: OidcClaims, inviteToken: string | null): Promise<R
             return { kind: 'login', payload, created: false };
         }
 
-        // From here on a new account is made, which needs an email.
+        // From here on a new account is made, which needs an email. It becomes
+        // the account's address for password reset and invitations, so the
+        // provider must vouch for it. Checked before looking the address up,
+        // so an unverified one never reveals whether it has an account here.
         if (!claims.email) throw new Outcome('email_required');
+        if (!claims.emailVerified) throw new Outcome('email_unverified');
         const email = normalizeEmail(claims.email);
 
         // An account with this address is never opened on the provider's word:
@@ -106,10 +109,6 @@ const signIn = async (claims: OidcClaims, inviteToken: string | null): Promise<R
         // person's. Its holder links SSO from Settings instead.
         const matches = await tx.query('SELECT 1 FROM users WHERE LOWER(email) = $1 LIMIT 1', [email]);
         if (matches.rows.length > 0) throw new Outcome('account_conflict');
-
-        // A new account. Its email becomes the account's address for password
-        // reset and invitations, so the provider must vouch for it.
-        if (!claims.emailVerified) throw new Outcome('email_unverified');
 
         let invite = null;
         if (inviteToken) {

@@ -11,9 +11,14 @@ export interface AuthRequest extends Request {
     isOwner?: boolean;
 }
 
+/** The token in the Authorization header, or '' when there is none. */
+export const bearerToken = (req: Request): string => {
+    const header = req.headers.authorization;
+    return header?.startsWith('Bearer ') ? header.slice(7).trim() : '';
+};
+
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+    const token = bearerToken(req);
 
     if (!token) {
         return res.status(401).json({ success: false, error: 'No token provided' });

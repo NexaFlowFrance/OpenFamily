@@ -137,7 +137,7 @@
     "confirmUnlink": "Unlink {{name}}? You will sign in with your password, and your other devices will be signed out.",
     "unlinkNeedsPassword": "Your account has no password yet. Set one with “Forgot your password?” on the sign-in page to be able to unlink.",
     "unlinkPasswordOff": "Password sign-in is turned off on this server, so single sign-on cannot be unlinked.",
-    "relinkNote": "Signing in with {{name}} again later may link your account again.",
+    "relinkNote": "Once unlinked, signing in with {{name}} no longer opens this account. You can link it again here.",
     "linked": "Single sign-on is now linked.",
     "unlinked": "Single sign-on is unlinked. Your other devices were signed out.",
     "logoutEverywhere": "Sign out of all devices",

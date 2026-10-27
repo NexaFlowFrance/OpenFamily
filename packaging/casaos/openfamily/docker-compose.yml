@@ -129,6 +129,14 @@ services:
       # API from a different origin (e.g. a custom domain on another port).
       - CORS_ORIGINS=http://localhost:8480
       - REGISTRATION_ENABLED=true
+      # Single sign-on (OpenID Connect), off while OIDC_ISSUER_URL is empty.
+      # See https://github.com/NexaFlowFrance/OpenFamily/blob/main/INSTALLATION.md
+      - APP_PUBLIC_URL=
+      - OIDC_ISSUER_URL=
+      - OIDC_CLIENT_ID=
+      - OIDC_CLIENT_SECRET=
+      - OIDC_PROVIDER_NAME=
+      - PASSWORD_LOGIN_ENABLED=true
     volumes:
       - /DATA/AppData/$AppID/uploads:/app/uploads
     networks:
@@ -156,6 +164,24 @@ services:
         - container: REGISTRATION_ENABLED
           description:
             en_us: 'Set to false to disable new account creation after the family is set up'
+        - container: APP_PUBLIC_URL
+          description:
+            en_us: 'Address you open OpenFamily at (needed for single sign-on), e.g. https://family.example.org'
+        - container: OIDC_ISSUER_URL
+          description:
+            en_us: 'Single sign-on: OpenID Connect issuer URL (empty = off). Redirect URI: <APP_PUBLIC_URL>/api/auth/oidc/callback'
+        - container: OIDC_CLIENT_ID
+          description:
+            en_us: 'Single sign-on: client ID'
+        - container: OIDC_CLIENT_SECRET
+          description:
+            en_us: 'Single sign-on: client secret'
+        - container: OIDC_PROVIDER_NAME
+          description:
+            en_us: 'Single sign-on: button label ("Continue with ...")'
+        - container: PASSWORD_LOGIN_ENABLED
+          description:
+            en_us: 'Set to false for an SSO-only server (ignored while SSO is not configured)'
       volumes:
         - container: /app/uploads
           description:

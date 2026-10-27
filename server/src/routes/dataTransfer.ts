@@ -18,6 +18,7 @@ const PORTABLE_EXCLUSIONS = [
     'account_authorization_and_family_membership_state',
     'calendar_tokens',
     'password_reset_tokens',
+    'single_sign_on_identities_and_sign_in_flows',
     'family_invites_and_join_requests',
     'push_subscriptions',
     'generated_notifications',

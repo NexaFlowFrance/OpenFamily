@@ -1,8 +1,9 @@
 import crypto from 'node:crypto';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { query, getClient } from '../db';
-import { authMiddleware, AuthRequest, generateToken } from '../middleware/auth';
+import { query, QueryFn, withTransaction } from '../db';
+import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { issueAccessToken, revokeUserSessions } from '../lib/authTokens';
 import { broadcast } from '../lib/broadcaster';
 import { createLocalizedNotification } from '../lib/notifications';
 import { normalizeEmail } from '../lib/normalize';
@@ -27,6 +28,24 @@ const inviteRateLimiter = rateLimit({
 // Account roles assignable to family members ('parent' = full access, 'enfant' = read-mostly)
 const cleanAccountRole = (value: unknown): 'parent' | 'enfant' =>
     value === 'enfant' ? 'enfant' : 'parent';
+
+// A fresh token for the account, read inside the transaction that changed its
+// family, so it carries the committed owner and session version.
+const tokenFor = async (db: QueryFn, userId: string): Promise<string> => {
+    const { rows } = await db('SELECT id, family_owner_id, token_version FROM users WHERE id = $1', [userId]);
+    return issueAccessToken(rows[0]);
+};
+
+// Every change to a family's membership locks the owner's row first. That row
+// serialises concurrent changes to the same family (two removals, a transfer
+// racing a leave...), and taking it first everywhere keeps them deadlock-free.
+// Returns false when the account is no longer a family owner.
+const lockFamilyOwner = async (db: QueryFn, ownerId: string): Promise<boolean> => {
+    const { rows } = await db('SELECT id FROM users WHERE id = $1 AND family_owner_id IS NULL FOR UPDATE', [ownerId]);
+    return rows.length > 0;
+};
+
+class FamilyChangedError extends Error {}
 
 // Loose shape check: enough to catch typos before an email is stored/sent,
 // without rejecting valid but unusual addresses.
@@ -184,17 +203,31 @@ router.post('/join', async (req: AuthRequest, res) => {
         });
     }
 
-    // Update family membership; the account role is set from the invite (chosen by the inviter)
-    await query(
-        'UPDATE users SET family_owner_id = $1, role = $2 WHERE id = $3',
-        [invite.owner_id, cleanAccountRole(invite.role), req.actualUserId]
-    );
-    await query("UPDATE family_invites SET status = 'accepted' WHERE id = $1", [invite.id]);
+    let newToken: string;
+    try {
+        newToken = await withTransaction(async (tx) => {
+            if (!(await lockFamilyOwner(tx.query, invite.owner_id))) throw new FamilyChangedError();
+            const claimed = await tx.query(
+                "UPDATE family_invites SET status = 'accepted' WHERE id = $1 AND status = 'pending' RETURNING id",
+                [invite.id]
+            );
+            if (claimed.rows.length === 0) throw new FamilyChangedError();
+            // Update family membership; the account role is set from the invite (chosen by the inviter)
+            await tx.query(
+                'UPDATE users SET family_owner_id = $1, role = $2 WHERE id = $3',
+                [invite.owner_id, cleanAccountRole(invite.role), req.actualUserId]
+            );
+            return tokenFor(tx.query, req.actualUserId!);
+        });
+    } catch (error) {
+        if (error instanceof FamilyChangedError) {
+            return res.status(409).json({ success: false, error: 'Invitation invalide ou expirée' });
+        }
+        throw error;
+    }
 
     const userResult = await query('SELECT name, email FROM users WHERE id = $1', [req.actualUserId]);
     const user = userResult.rows[0] as { name: string; email: string };
-
-    const newToken = generateToken(req.actualUserId!, invite.owner_id);
 
     return res.json({
         success: true,
@@ -214,12 +247,29 @@ router.delete('/leave', async (req: AuthRequest, res) => {
         });
     }
 
-    await query('UPDATE users SET family_owner_id = NULL WHERE id = $1', [req.actualUserId]);
+    // Leaving signs the account out of its other devices: their tokens still
+    // point at the family's data. This session continues with the new token.
+    let newToken: string;
+    try {
+        newToken = await withTransaction(async (tx) => {
+            if (!(await lockFamilyOwner(tx.query, req.userId!))) throw new FamilyChangedError();
+            const left = await tx.query(
+                'UPDATE users SET family_owner_id = NULL WHERE id = $1 AND family_owner_id = $2 RETURNING id',
+                [req.actualUserId, req.userId]
+            );
+            if (left.rows.length === 0) throw new FamilyChangedError();
+            await revokeUserSessions(tx, [req.actualUserId!], 'left_family');
+            return tokenFor(tx.query, req.actualUserId!);
+        });
+    } catch (error) {
+        if (error instanceof FamilyChangedError) {
+            return res.status(409).json({ success: false, error: 'family_changed' });
+        }
+        throw error;
+    }
 
     const userResult = await query('SELECT name, email FROM users WHERE id = $1', [req.actualUserId]);
     const user = userResult.rows[0] as { name: string; email: string };
-
-    const newToken = generateToken(req.actualUserId!, req.actualUserId!);
 
     return res.json({
         success: true,
@@ -236,21 +286,23 @@ router.delete('/members/:userId', async (req: AuthRequest, res) => {
         return res.status(403).json({ success: false, error: 'Accès réservé au propriétaire' });
     }
 
-    const memberCheck = await query(
-        'SELECT id FROM users WHERE id = $1 AND family_owner_id = $2',
-        [req.params.userId, req.userId]
-    );
+    // The removed member is signed out everywhere: their tokens would otherwise
+    // keep reaching this family's data until they expire.
+    const removed = await withTransaction(async (tx) => {
+        if (!(await lockFamilyOwner(tx.query, req.userId!))) return false;
+        // Scoped to this owner's family, so it can never detach anyone else.
+        const detached = await tx.query(
+            'UPDATE users SET family_owner_id = NULL WHERE id = $1 AND family_owner_id = $2 RETURNING id',
+            [req.params.userId, req.userId]
+        );
+        if (detached.rows.length === 0) return false;
+        await revokeUserSessions(tx, [req.params.userId], 'removed_from_family');
+        return true;
+    });
 
-    if (memberCheck.rows.length === 0) {
+    if (!removed) {
         return res.status(404).json({ success: false, error: 'Membre introuvable' });
     }
-
-    // Defence in depth: re-scope the mutation itself so it can never detach a
-    // user who is not (or no longer) a member of this owner's family.
-    await query(
-        'UPDATE users SET family_owner_id = NULL WHERE id = $1 AND family_owner_id = $2',
-        [req.params.userId, req.userId]
-    );
     return res.json({ success: true });
 });
 
@@ -327,40 +379,53 @@ router.post('/transfer-ownership', async (req: AuthRequest, res) => {
     }
 
     const oldOwnerId = req.userId!;
-    const client = await getClient();
+    let newToken: string;
     try {
-        await client.query('BEGIN');
+        newToken = await withTransaction(async (tx) => {
+            // Same lock order as every other family change: the owner's row
+            // first, then re-check that the target is still a member.
+            if (!(await lockFamilyOwner(tx.query, oldOwnerId))) throw new FamilyChangedError();
+            const stillMember = await tx.query(
+                'SELECT id FROM users WHERE id = $1 AND family_owner_id = $2 FOR UPDATE',
+                [newOwnerId, oldOwnerId]
+            );
+            if (stillMember.rows.length === 0) throw new FamilyChangedError();
+            const members = await tx.query('SELECT id FROM users WHERE family_owner_id = $1', [oldOwnerId]);
 
-        // Re-key every family-scoped table from the old owner to the new owner.
-        // The new owner's pre-join standalone rows (if any) are orphaned and inaccessible,
-        // so we drop them first to avoid unique-constraint clashes.
-        for (const table of FAMILY_SCOPED_TABLES) {
-            await client.query(`DELETE FROM ${table} WHERE user_id = $1`, [newOwnerId]);
-            await client.query(`UPDATE ${table} SET user_id = $1 WHERE user_id = $2`, [newOwnerId, oldOwnerId]);
-        }
+            // Re-key every family-scoped table from the old owner to the new owner.
+            // The new owner's pre-join standalone rows (if any) are orphaned and inaccessible,
+            // so we drop them first to avoid unique-constraint clashes.
+            for (const table of FAMILY_SCOPED_TABLES) {
+                await tx.query(`DELETE FROM ${table} WHERE user_id = $1`, [newOwnerId]);
+                await tx.query(`UPDATE ${table} SET user_id = $1 WHERE user_id = $2`, [newOwnerId, oldOwnerId]);
+            }
 
-        // Swap ownership pointers.
-        await client.query('UPDATE users SET family_owner_id = NULL WHERE id = $1', [newOwnerId]);
-        await client.query(
-            'UPDATE users SET family_owner_id = $1 WHERE family_owner_id = $2 AND id <> $1',
-            [newOwnerId, oldOwnerId]
-        );
-        await client.query('UPDATE users SET family_owner_id = $1 WHERE id = $2', [newOwnerId, oldOwnerId]);
+            // Swap ownership pointers.
+            await tx.query('UPDATE users SET family_owner_id = NULL WHERE id = $1', [newOwnerId]);
+            await tx.query(
+                'UPDATE users SET family_owner_id = $1 WHERE family_owner_id = $2 AND id <> $1',
+                [newOwnerId, oldOwnerId]
+            );
+            await tx.query('UPDATE users SET family_owner_id = $1 WHERE id = $2', [newOwnerId, oldOwnerId]);
 
-        // Move invites and pending requests to the new owner.
-        await client.query('UPDATE family_invites SET owner_id = $1 WHERE owner_id = $2', [newOwnerId, oldOwnerId]);
-        await client.query('UPDATE family_join_requests SET owner_id = $1 WHERE owner_id = $2', [newOwnerId, oldOwnerId]);
+            // Move invites and pending requests to the new owner.
+            await tx.query('UPDATE family_invites SET owner_id = $1 WHERE owner_id = $2', [newOwnerId, oldOwnerId]);
+            await tx.query('UPDATE family_join_requests SET owner_id = $1 WHERE owner_id = $2', [newOwnerId, oldOwnerId]);
 
-        await client.query('COMMIT');
+            // Everyone in the family now has a different owner, so every token
+            // issued so far points at the wrong data: sign them all out. The
+            // former owner, who made this request, continues with a fresh token.
+            const everyone = [oldOwnerId, ...members.rows.map((row: { id: string }) => row.id)];
+            await revokeUserSessions(tx, everyone, 'ownership_transferred');
+            return tokenFor(tx.query, oldOwnerId);
+        });
     } catch (err) {
-        await client.query('ROLLBACK');
+        if (err instanceof FamilyChangedError) {
+            return res.status(409).json({ success: false, error: 'family_changed' });
+        }
         return res.status(500).json({ success: false, error: 'Le transfert a échoué' });
-    } finally {
-        client.release();
     }
 
-    // Refresh the (former) owner's JWT - they are now a regular member.
-    const newToken = generateToken(oldOwnerId, newOwnerId);
     const userResult = await query('SELECT name, email, role, currency FROM users WHERE id = $1', [oldOwnerId]);
     const user = userResult.rows[0] as { name: string; email: string; role: string; currency: string };
 
@@ -542,11 +607,19 @@ router.post('/requests/:id/approve', async (req: AuthRequest, res) => {
 
     // The approver picks the new member's role (defaults to 'parent')
     const memberRole = cleanAccountRole((req.body as { role?: string } | undefined)?.role);
-    await query(
-        'UPDATE users SET family_owner_id = $1, role = $2 WHERE id = $3',
-        [req.userId, memberRole, request.requester_id]
-    );
-    await query("UPDATE family_join_requests SET status = 'approved', responded_at = NOW() WHERE id = $1", [request.id]);
+    const approved = await withTransaction(async (tx) => {
+        if (!(await lockFamilyOwner(tx.query, req.userId!))) return false;
+        const joined = await tx.query(
+            'UPDATE users SET family_owner_id = $1, role = $2 WHERE id = $3 AND family_owner_id IS NULL RETURNING id',
+            [req.userId, memberRole, request.requester_id]
+        );
+        if (joined.rows.length === 0) return false;
+        await tx.query("UPDATE family_join_requests SET status = 'approved', responded_at = NOW() WHERE id = $1", [request.id]);
+        return true;
+    });
+    if (!approved) {
+        return res.status(409).json({ success: false, error: 'family_changed' });
+    }
 
     // Notify both sides so their UI refreshes
     broadcast(request.requester_id, { type: 'update', entity: 'family', action: 'updated' });

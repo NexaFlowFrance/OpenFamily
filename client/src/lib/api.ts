@@ -179,9 +179,61 @@ class ApiClient {
         return response;
     }
 
+    /** Which sign-in options the server offers. Older servers only know /registration. */
+    async getAuthConfig(): Promise<AuthServerConfig> {
+        try {
+            const response = await this.get<{ success: boolean; data: AuthServerConfig }>('/api/auth/config');
+            if (response?.data) return response.data;
+        } catch {
+            // fall through to the older endpoint
+        }
+        const legacy = await this.get<{ success: boolean; data?: { open?: boolean } }>('/api/auth/registration');
+        return {
+            passwordLogin: true,
+            passwordSignup: legacy?.data?.open !== false,
+            passwordReset: true,
+            oidc: { enabled: false, name: null, signup: false },
+        };
+    }
+
+    /** Redeems the one-time code from the SSO callback. Login mode stores the new session. */
+    async exchangeSso(code: string, clientVerifier: string) {
+        const response = await this.post<{ success: boolean; data: SsoExchangeResult }>(
+            '/api/auth/oidc/exchange',
+            { code, clientVerifier }
+        );
+        if (response.data.mode === 'login') {
+            this.setToken(response.data.token);
+        }
+        return response.data;
+    }
+
+    /** Unlinks SSO. Other devices are signed out; this one continues with a fresh token. */
+    async unlinkSso() {
+        const response = await this.delete<{ success: boolean; data: { token: string } }>('/api/auth/oidc/link');
+        this.setToken(response.data.token);
+    }
+
+    /** Signs this account out of every device, this one included. */
+    async logoutEverywhere() {
+        await this.post('/api/auth/logout-all', {});
+        this.setToken(null);
+    }
+
     logout() {
         this.setToken(null);
     }
 }
+
+export interface AuthServerConfig {
+    passwordLogin: boolean;
+    passwordSignup: boolean;
+    passwordReset: boolean;
+    oidc: { enabled: boolean; name: string | null; signup: boolean };
+}
+
+export type SsoExchangeResult =
+    | { mode: 'login'; created: boolean; token: string; user: any }
+    | { mode: 'link'; email: string | null };
 
 export const api = new ApiClient();

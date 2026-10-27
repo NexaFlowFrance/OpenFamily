@@ -35,6 +35,13 @@ services:
       # for normal use. Kept aligned with the app domain for exposed setups.
       - CORS_ORIGINS=${APP_PROTOCOL:-http}://${APP_DOMAIN}
       - REGISTRATION_ENABLED=${OPENFAMILY_REGISTRATION_ENABLED:-true}
+      # Single sign-on (OpenID Connect): off while the issuer URL is empty.
+      - APP_PUBLIC_URL=${OPENFAMILY_PUBLIC_URL:-}
+      - OIDC_ISSUER_URL=${OPENFAMILY_OIDC_ISSUER_URL:-}
+      - OIDC_CLIENT_ID=${OPENFAMILY_OIDC_CLIENT_ID:-}
+      - OIDC_CLIENT_SECRET=${OPENFAMILY_OIDC_CLIENT_SECRET:-}
+      - OIDC_PROVIDER_NAME=${OPENFAMILY_OIDC_PROVIDER_NAME:-}
+      - PASSWORD_LOGIN_ENABLED=${OPENFAMILY_PASSWORD_LOGIN_ENABLED:-true}
     volumes:
       - ${APP_DATA_DIR}/data/uploads:/app/uploads
     depends_on:

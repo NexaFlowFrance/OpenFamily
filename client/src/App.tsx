@@ -7,6 +7,7 @@ import { isNative, isServerConfigured } from './lib/serverConfig';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
+import SsoCallback from './pages/SsoCallback';
 import Kiosk from './pages/Kiosk';
 import ServerSetup from './pages/ServerSetup';
 import Dashboard from './pages/Dashboard';
@@ -56,6 +57,11 @@ function App() {
     // Password reset arrives by email link, so it must work while logged out.
     if (location.pathname === '/reset-password') {
         return <ResetPassword onDone={() => navigate('/', { replace: true })} />;
+    }
+
+    // The identity provider sends the browser back here, signed in or not.
+    if (location.pathname === '/auth/callback') {
+        return <SsoCallback onDone={(path) => navigate(path, { replace: true })} />;
     }
 
     if (!isAuthenticated) {

@@ -126,5 +126,22 @@
       "saturday": "Samedi",
       "sunday": "Dimanche"
     }
+  },
+  "signIn": {
+    "title": "Connexion",
+    "subtitle": "Comment vous vous connectez à OpenFamily, sur cet appareil et les autres.",
+    "ssoLinked": "Votre compte est lié à {{name}}.",
+    "ssoNotLinked": "Liez votre compte {{name}} pour vous connecter avec.",
+    "link": "Lier {{name}}",
+    "unlink": "Délier",
+    "confirmUnlink": "Délier {{name}} ? Vous vous connecterez avec votre mot de passe, et vos autres appareils seront déconnectés.",
+    "unlinkNeedsPassword": "Votre compte n'a pas encore de mot de passe. Définissez-en un avec « Mot de passe oublié ? » sur la page de connexion pour pouvoir délier.",
+    "unlinkPasswordOff": "La connexion par mot de passe est désactivée sur ce serveur : la connexion unique ne peut pas être déliée.",
+    "relinkNote": "Vous reconnecter plus tard avec {{name}} peut lier à nouveau votre compte.",
+    "linked": "La connexion unique est maintenant liée.",
+    "unlinked": "La connexion unique est déliée. Vos autres appareils ont été déconnectés.",
+    "logoutEverywhere": "Se déconnecter de tous les appareils",
+    "logoutEverywhereDesc": "Téléphone perdu, ou connexion sur un ordinateur partagé ? Ceci vous déconnecte partout, y compris ici.",
+    "confirmLogoutEverywhere": "Se déconnecter de tous les appareils, y compris celui-ci ?"
   }
 }

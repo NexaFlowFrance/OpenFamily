@@ -312,6 +312,11 @@ async function route(method: string, path: string, q: Record<string, string>, bo
 
     // ── Auth ──────────────────────────────────────────────────────────────────
     if (path === '/api/auth/me') return ok({ user: store.user });
+    // The demo has no identity provider: password sign-in only.
+    if (path === '/api/auth/config') {
+        return ok({ passwordLogin: true, passwordSignup: true, passwordReset: false, oidc: { enabled: false, name: null, signup: false } });
+    }
+    if (path === '/api/auth/logout-all') return ok({});
     if (path === '/api/auth/login' || path === '/api/auth/register' || path === '/api/auth/refresh' || path === '/api/invites/join' || path === '/api/invites/leave')
         return ok({ token: 'demo-token', user: store.user });
     if (path === '/api/auth/currency') { store.user = { ...store.user, currency: body.currency }; return ok({ user: store.user }); }

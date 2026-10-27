@@ -126,5 +126,22 @@
       "saturday": "Sábado",
       "sunday": "Domingo"
     }
+  },
+  "signIn": {
+    "title": "Inicio de sesión",
+    "subtitle": "Cómo inicias sesión en OpenFamily, en este dispositivo y en los demás.",
+    "ssoLinked": "Tu cuenta está vinculada a {{name}}.",
+    "ssoNotLinked": "Vincula tu cuenta de {{name}} para iniciar sesión con ella.",
+    "link": "Vincular {{name}}",
+    "unlink": "Desvincular",
+    "confirmUnlink": "¿Desvincular {{name}}? Iniciarás sesión con tu contraseña y se cerrará la sesión en tus otros dispositivos.",
+    "unlinkNeedsPassword": "Tu cuenta aún no tiene contraseña. Crea una con «¿Olvidaste tu contraseña?» en la página de inicio de sesión para poder desvincular.",
+    "unlinkPasswordOff": "El inicio de sesión con contraseña está desactivado en este servidor, así que no se puede desvincular el inicio de sesión único.",
+    "relinkNote": "Si más adelante vuelves a iniciar sesión con {{name}}, tu cuenta puede quedar vinculada de nuevo.",
+    "linked": "El inicio de sesión único ya está vinculado.",
+    "unlinked": "El inicio de sesión único está desvinculado. Se cerró la sesión en tus otros dispositivos.",
+    "logoutEverywhere": "Cerrar sesión en todos los dispositivos",
+    "logoutEverywhereDesc": "¿Perdiste el móvil o iniciaste sesión en un ordenador compartido? Esto cierra tu sesión en todas partes, también aquí.",
+    "confirmLogoutEverywhere": "¿Cerrar sesión en todos los dispositivos, incluido este?"
   }
 }

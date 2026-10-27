@@ -126,5 +126,22 @@
       "saturday": "星期六",
       "sunday": "星期日"
     }
+  },
+  "signIn": {
+    "title": "登录",
+    "subtitle": "您在此设备及其他设备上登录 OpenFamily 的方式。",
+    "ssoLinked": "您的账户已关联 {{name}}。",
+    "ssoNotLinked": "关联您的 {{name}} 账户即可用它登录。",
+    "link": "关联 {{name}}",
+    "unlink": "取消关联",
+    "confirmUnlink": "取消关联 {{name}}？之后您将使用密码登录，其他设备会被退出登录。",
+    "unlinkNeedsPassword": "您的账户还没有密码。请在登录页面通过“忘记密码？”设置密码后再取消关联。",
+    "unlinkPasswordOff": "此服务器已关闭密码登录，因此无法取消关联单点登录。",
+    "relinkNote": "以后再次使用 {{name}} 登录，可能会重新关联您的账户。",
+    "linked": "单点登录已关联。",
+    "unlinked": "单点登录已取消关联，其他设备已退出登录。",
+    "logoutEverywhere": "在所有设备上退出登录",
+    "logoutEverywhereDesc": "手机丢失，或在共用电脑上登录过？此操作会让您在所有地方退出登录，包括这里。",
+    "confirmLogoutEverywhere": "在所有设备上退出登录，包括这台设备？"
   }
 }

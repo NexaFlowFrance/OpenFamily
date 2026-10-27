@@ -2,12 +2,17 @@ import crypto from 'node:crypto';
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import rateLimit from 'express-rate-limit';
-import { query } from '../db';
-import { authMiddleware, AuthRequest, generateToken } from '../middleware/auth';
+import { query, withTransaction } from '../db';
+import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { normalizeEmail } from '../lib/normalize';
 import { isMailEnabled, sendPasswordResetEmail } from '../lib/mailer';
 import { resolveAppBaseUrl } from '../lib/appUrl';
 import { parseDisabledModules } from './userSettings';
+import { getAuthConfig } from '../config/authConfig';
+import { buildAuthPayload } from '../lib/authPayload';
+import { revokeUserSessions } from '../lib/authTokens';
+import { acceptInviteForNewUser, checkInvite } from '../lib/invites';
+import { isAcceptablePassword, MIN_PASSWORD_LENGTH } from '../lib/passwordPolicy';
 
 const router = Router();
 
@@ -15,7 +20,11 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     try {
         // Use actualUserId so members see their own profile, not the owner's
         const result = await query(
-            'SELECT id, email, name, role, currency, language, week_start_day, avatar_url, (family_owner_id IS NULL) AS is_owner FROM users WHERE id = $1',
+            `SELECT id, email, name, role, currency, language, week_start_day, avatar_url,
+                    (family_owner_id IS NULL) AS is_owner,
+                    (password_hash IS NOT NULL) AS has_password,
+                    EXISTS (SELECT 1 FROM user_identities WHERE user_id = users.id) AS sso_linked
+             FROM users WHERE id = $1`,
             [req.actualUserId]
         );
         if (result.rows.length === 0) {
@@ -33,26 +42,47 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     }
 });
 
-const registrationOpen = (): boolean => process.env.REGISTRATION_ENABLED !== 'false';
-
-// Whether anyone can create an account, read by the login page to show or hide
-// "Sign up". No session: it is the first thing an unauthenticated app asks.
+// Whether anyone can create an account with a password, read by the login page
+// of older clients to show or hide "Sign up". Newer clients read /config.
 // Invitations work either way (see the register route), so a closed server is
 // an invitation-only server.
 router.get('/registration', (_req, res) => {
-    res.json({ success: true, data: { open: registrationOpen() } });
+    res.json({ success: true, data: { open: getAuthConfig().passwordSignup } });
+});
+
+// Which sign-in and sign-up options the login page should offer. Public and
+// free of secrets: it is the first thing an unauthenticated app asks.
+router.get('/config', (_req, res) => {
+    const config = getAuthConfig();
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({
+        success: true,
+        data: {
+            passwordLogin: config.passwordLogin,
+            passwordSignup: config.passwordSignup,
+            passwordReset: config.passwordLogin && isMailEnabled(),
+            oidc: config.oidc
+                ? { enabled: true, name: config.oidc.providerName, signup: config.oidcSignup }
+                : { enabled: false, name: null, signup: false },
+        },
+    });
 });
 
 // Register
 router.post('/register', async (req, res) => {
     const { email, password, name, inviteToken } = req.body ?? {};
     const hasInvite = typeof inviteToken === 'string' && inviteToken.length > 0;
+    const config = getAuthConfig();
+
+    if (!config.passwordLogin) {
+        return res.status(403).json({ success: false, error: 'Password sign-in is disabled' });
+    }
 
     // Closed sign-ups (REGISTRATION_ENABLED=false) still let an invited person
     // in: the invitation was created by a parent of the family, is random, dated
     // and may be bound to an e-mail, which is all the authorisation a self-hosted
     // server needs. Without one, the request is refused before any lookup.
-    if (!registrationOpen() && !hasInvite) {
+    if (!config.passwordSignup && !hasInvite) {
         return res.status(403).json({ success: false, error: 'Registration is disabled' });
     }
 
@@ -64,8 +94,8 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ success: false, error: 'Missing required fields' });
         }
 
-        if (password.length < 8) {
-            return res.status(400).json({ success: false, error: 'Password must be at least 8 characters' });
+        if (!isAcceptablePassword(password)) {
+            return res.status(400).json({ success: false, error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` });
         }
 
         // Check if user exists. Keep the error generic so the endpoint
@@ -78,69 +108,50 @@ router.post('/register', async (req, res) => {
         // A new account joins an existing family ONLY via an explicit, valid invite token.
         // Validate the invite BEFORE creating the account so an invalid token never leaves an orphan user.
         // Without a token the user becomes their own family owner (standalone account).
-        let invite: { id: string; owner_id: string; role: string } | null = null;
-        if (hasInvite) {
-            const inviteResult = await query(
-                `SELECT id, owner_id, invitee_email, role FROM family_invites
-                 WHERE token = $1 AND status = 'pending' AND expires_at > NOW()`,
-                [inviteToken]
-            );
-            if (inviteResult.rows.length === 0) {
-                return res.status(400).json({ success: false, error: 'Invitation invalide ou expirée' });
-            }
-
-            const row = inviteResult.rows[0] as { id: string; owner_id: string; invitee_email: string | null; role: string | null };
-
-            // If the invite targets a specific email, enforce it matches the registering account.
-            if (row.invitee_email && normalizeEmail(row.invitee_email) !== normalizedEmail) {
-                return res.status(403).json({ success: false, error: 'Cette invitation est réservée à une autre adresse e-mail' });
-            }
-
-            invite = { id: row.id, owner_id: row.owner_id, role: row.role === 'enfant' ? 'enfant' : 'parent' };
+        const inviteCheck = hasInvite ? await checkInvite(query, inviteToken, normalizedEmail) : null;
+        if (inviteCheck && !inviteCheck.ok) {
+            return inviteCheck.reason === 'wrong_email'
+                ? res.status(403).json({ success: false, error: 'Cette invitation est réservée à une autre adresse e-mail' })
+                : res.status(400).json({ success: false, error: 'Invitation invalide ou expirée' });
         }
+        const invite = inviteCheck?.ok ? inviteCheck.invite : null;
 
         // The account role is NEVER taken from the client: an invited member gets the
         // role chosen by the inviter; a standalone account owns its family → 'parent'.
         const cleanedRole = invite ? invite.role : 'parent';
 
-        // Hash password
         const password_hash = await bcrypt.hash(password, 12);
 
-        // Create user
-        const result = await query(
-            'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name, role, currency, language, week_start_day, avatar_url',
-            [normalizedEmail, password_hash, cleanedName, cleanedRole]
-        );
+        const payload = await withTransaction(async (tx) => {
+            const created = await tx.query(
+                'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id',
+                [normalizedEmail, password_hash, cleanedName, cleanedRole]
+            );
+            const userId = created.rows[0].id as string;
+            if (invite && !(await acceptInviteForNewUser(tx.query, invite, userId))) {
+                throw new InviteNoLongerValidError();
+            }
+            return buildAuthPayload(tx.query, userId);
+        });
 
-        const user = result.rows[0];
-        let ownerId: string = user.id;
-
-        if (invite) {
-            ownerId = invite.owner_id;
-            await query('UPDATE users SET family_owner_id = $1 WHERE id = $2', [invite.owner_id, user.id]);
-            await query("UPDATE family_invites SET status = 'accepted' WHERE id = $1", [invite.id]);
-        }
-
-        const token = generateToken(user.id, ownerId);
-        const isOwner = ownerId === user.id;
-
-        // disabled_modules is family-wide: a brand-new owner has none; an invited
-        // member inherits the owner's current setting.
-        let disabled_modules: string[] = [];
-        if (!isOwner) {
-            const ownerModules = await query('SELECT disabled_modules FROM users WHERE id = $1', [ownerId]);
-            disabled_modules = parseDisabledModules(ownerModules.rows[0]?.disabled_modules);
-        }
-
-        res.json({ success: true, data: { user: { ...user, is_owner: isOwner, role: user.role, currency: user.currency || 'EUR', disabled_modules }, token } });
+        res.json({ success: true, data: payload });
     } catch (error) {
+        if (error instanceof InviteNoLongerValidError) {
+            return res.status(400).json({ success: false, error: 'Invitation invalide ou expirée' });
+        }
         console.error('Register error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });
 
+class InviteNoLongerValidError extends Error {}
+
 // Login
 router.post('/login', async (req, res) => {
+    if (!getAuthConfig().passwordLogin) {
+        return res.status(403).json({ success: false, error: 'Password sign-in is disabled' });
+    }
+
     try {
         const { email, password } = req.body;
         const normalizedEmail = typeof email === 'string' ? normalizeEmail(email) : '';
@@ -150,37 +161,25 @@ router.post('/login', async (req, res) => {
         }
 
         // Find user
-        const result = await query('SELECT * FROM users WHERE LOWER(email) = $1', [normalizedEmail]);
-        if (result.rows.length === 0) {
+        const result = await query('SELECT id, password_hash FROM users WHERE LOWER(email) = $1', [normalizedEmail]);
+        const user = result.rows[0] as { id: string; password_hash: string | null } | undefined;
+
+        // An account created through single sign-on has no password: it can
+        // never be signed into with one, whatever is sent.
+        if (!user || !user.password_hash || typeof password !== 'string') {
             return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
 
-        const user = result.rows[0];
-
-        // Check password
         const isValid = await bcrypt.compare(password, user.password_hash);
-
         if (!isValid) {
             return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
 
-        // Include family ownerId in JWT so all data queries use the correct user scope
-        const ownerId: string = user.family_owner_id ?? user.id;
-        const token = generateToken(user.id, ownerId);
-        const isOwner = !user.family_owner_id;
-
-        // disabled_modules is family-wide: read it from the owner's row (own row if owner).
-        const disabled_modules = isOwner
-            ? parseDisabledModules(user.disabled_modules)
-            : parseDisabledModules((await query('SELECT disabled_modules FROM users WHERE id = $1', [ownerId])).rows[0]?.disabled_modules);
-
-        res.json({
-            success: true,
-            data: {
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', week_start_day: user.week_start_day ?? null, avatar_url: user.avatar_url ?? null, disabled_modules },
-                token
-            }
-        });
+        const payload = await buildAuthPayload(query, user.id);
+        if (!payload) {
+            return res.status(401).json({ success: false, error: 'Invalid credentials' });
+        }
+        res.json({ success: true, data: payload });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -213,6 +212,9 @@ const hashResetToken = (token: string): string =>
 // the address matches an account, so it cannot be used to enumerate emails.
 // Only the token's SHA-256 is stored; the raw token exists only in the email.
 router.post('/password/forgot', passwordResetRateLimiter, async (req, res) => {
+    if (!getAuthConfig().passwordLogin) {
+        return res.status(403).json({ success: false, error: 'Password sign-in is disabled' });
+    }
     try {
         const { email } = req.body as { email?: unknown };
         const normalizedEmail = typeof email === 'string' ? normalizeEmail(email) : '';
@@ -269,14 +271,17 @@ router.post('/password/forgot', passwordResetRateLimiter, async (req, res) => {
 
 // Consume a reset link: set the new password and burn the token.
 router.post('/password/reset', passwordResetRateLimiter, async (req, res) => {
+    if (!getAuthConfig().passwordLogin) {
+        return res.status(403).json({ success: false, error: 'Password sign-in is disabled' });
+    }
     try {
         const { token, password } = req.body as { token?: unknown; password?: unknown };
 
         if (typeof token !== 'string' || !/^[a-f0-9]{64}$/i.test(token)) {
             return res.status(400).json({ success: false, error: 'invalid_or_expired_token' });
         }
-        if (typeof password !== 'string' || password.length < 8) {
-            return res.status(400).json({ success: false, error: 'Password must be at least 8 characters' });
+        if (!isAcceptablePassword(password)) {
+            return res.status(400).json({ success: false, error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` });
         }
 
         const resetResult = await query(
@@ -290,10 +295,24 @@ router.post('/password/reset', passwordResetRateLimiter, async (req, res) => {
         }
 
         const password_hash = await bcrypt.hash(password, 12);
-        await query('UPDATE users SET password_hash = $1 WHERE id = $2', [password_hash, reset.user_id]);
-        await query('UPDATE password_resets SET used_at = NOW() WHERE id = $1', [reset.id]);
-        // Burn any other outstanding link for this account too.
-        await query('DELETE FROM password_resets WHERE user_id = $1 AND used_at IS NULL', [reset.user_id]);
+        const applied = await withTransaction(async (tx) => {
+            // Claiming the link and changing the password happen together, so a
+            // link can only ever be used once.
+            const claimed = await tx.query(
+                'UPDATE password_resets SET used_at = NOW() WHERE id = $1 AND used_at IS NULL RETURNING id',
+                [reset.id]
+            );
+            if (claimed.rows.length === 0) return false;
+            await tx.query('UPDATE users SET password_hash = $1 WHERE id = $2', [password_hash, reset.user_id]);
+            // Burn any other outstanding link for this account too.
+            await tx.query('DELETE FROM password_resets WHERE user_id = $1 AND used_at IS NULL', [reset.user_id]);
+            // Whoever knew the old password may still hold a session: end them all.
+            await revokeUserSessions(tx, [reset.user_id], 'password_reset');
+            return true;
+        });
+        if (!applied) {
+            return res.status(400).json({ success: false, error: 'invalid_or_expired_token' });
+        }
 
         return res.json({ success: true });
     } catch (error) {
@@ -305,33 +324,26 @@ router.post('/password/reset', passwordResetRateLimiter, async (req, res) => {
 // Refresh the JWT to reflect the current family membership (e.g. after a join request was approved)
 router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
     try {
-        const result = await query(
-            'SELECT id, email, name, role, currency, language, week_start_day, avatar_url, disabled_modules, family_owner_id FROM users WHERE id = $1',
-            [req.actualUserId]
-        );
-        if (result.rows.length === 0) {
+        const payload = await buildAuthPayload(query, req.actualUserId!);
+        if (!payload) {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
-
-        const user = result.rows[0];
-        const ownerId: string = user.family_owner_id ?? user.id;
-        const token = generateToken(user.id, ownerId);
-        const isOwner = !user.family_owner_id;
-
-        // disabled_modules is family-wide: read it from the owner's row (own row if owner).
-        const disabled_modules = isOwner
-            ? parseDisabledModules(user.disabled_modules)
-            : parseDisabledModules((await query('SELECT disabled_modules FROM users WHERE id = $1', [ownerId])).rows[0]?.disabled_modules);
-
-        return res.json({
-            success: true,
-            data: {
-                token,
-                user: { id: user.id, email: user.email, name: user.name, role: user.role, is_owner: isOwner, currency: user.currency || 'EUR', language: user.language || 'fr', week_start_day: user.week_start_day ?? null, avatar_url: user.avatar_url ?? null, disabled_modules },
-            },
-        });
+        return res.json({ success: true, data: payload });
     } catch (error) {
         console.error('Refresh token error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Sign out of every device, this one included: every token issued so far stops
+// working. Signing out of a single device needs no server call (the app just
+// forgets its token).
+router.post('/logout-all', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        await withTransaction((tx) => revokeUserSessions(tx, [req.actualUserId!], 'logout_all'));
+        return res.json({ success: true });
+    } catch (error) {
+        console.error('Logout everywhere error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });

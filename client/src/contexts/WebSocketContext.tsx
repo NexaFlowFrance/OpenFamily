@@ -53,6 +53,8 @@ const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
 const RECONNECT_DELAY_MS = 2_000;
 const RECONNECT_MAX_DELAY_MS = 30_000;
 const PING_INTERVAL_MS = 25_000;
+// Close code the server uses when a session is refused or revoked.
+const WS_SESSION_ENDED = 4001;
 
 // ─── Provider ────────────────────────────────────────────────────────────────
 
@@ -121,9 +123,17 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
             }
         };
 
-        ws.onclose = () => {
+        ws.onclose = (event: CloseEvent) => {
             clearPing();
             if (unmounted.current) return;
+
+            // 4001: the server refused or ended this session (signed out
+            // elsewhere, removed from the family...). Ask the API whether the
+            // current token still works: a 401 there signs the app out, while a
+            // fresh token (after leaving a family, for instance) reconnects below.
+            if (event.code === WS_SESSION_ENDED) {
+                api.get('/api/auth/me').catch(() => undefined);
+            }
 
             // Exponential back-off reconnection
             reconnectTimer.current = setTimeout(() => {

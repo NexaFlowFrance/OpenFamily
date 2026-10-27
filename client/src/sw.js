@@ -60,6 +60,11 @@ sw.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Single sign-on and the sign-in options: always live, never cached.
+    if (url.pathname.includes('/api/auth/oidc/') || url.pathname.endsWith('/api/auth/config')) {
+        return;
+    }
+
     // API reads: network-first with a cache fallback so data stays viewable offline.
     if (url.pathname.includes('/api/')) {
         event.respondWith(

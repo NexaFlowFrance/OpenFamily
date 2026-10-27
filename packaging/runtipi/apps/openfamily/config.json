@@ -7,7 +7,7 @@
   "port": 8480,
   "categories": ["utilities"],
   "description": "OpenFamily is a family organizer for your home server. It brings the whole household together in one app: a shared calendar, tasks and chores with a rewards system for kids, shopping lists, meal planning with a recipe book and recipe import, a family budget, a wall-mounted kiosk mode and an optional AI assistant. English and French interface.",
-  "tipi_version": 1,
+  "tipi_version": 2,
   "version": "1.2.0",
   "source": "https://github.com/NexaFlowFrance/OpenFamily",
   "website": "https://openfamily.fr/",
@@ -35,6 +35,47 @@
       "required": false,
       "default": "true",
       "env_variable": "OPENFAMILY_REGISTRATION_ENABLED"
+    },
+    {
+      "type": "url",
+      "label": "Public URL (needed for single sign-on)",
+      "hint": "The address you open OpenFamily at, e.g. https://family.example.org",
+      "required": false,
+      "env_variable": "OPENFAMILY_PUBLIC_URL"
+    },
+    {
+      "type": "url",
+      "label": "SSO issuer URL (OpenID Connect)",
+      "hint": "Leave empty to keep single sign-on off. Redirect URI to register at your provider: <public URL>/api/auth/oidc/callback",
+      "required": false,
+      "env_variable": "OPENFAMILY_OIDC_ISSUER_URL"
+    },
+    {
+      "type": "text",
+      "label": "SSO client ID",
+      "required": false,
+      "env_variable": "OPENFAMILY_OIDC_CLIENT_ID"
+    },
+    {
+      "type": "password",
+      "label": "SSO client secret",
+      "required": false,
+      "env_variable": "OPENFAMILY_OIDC_CLIENT_SECRET"
+    },
+    {
+      "type": "text",
+      "label": "SSO button label",
+      "hint": "Shown as \"Continue with ...\" on the sign-in page",
+      "required": false,
+      "env_variable": "OPENFAMILY_OIDC_PROVIDER_NAME"
+    },
+    {
+      "type": "boolean",
+      "label": "Allow password sign-in",
+      "hint": "Disable for an SSO-only server (ignored while SSO is not configured).",
+      "required": false,
+      "default": "true",
+      "env_variable": "OPENFAMILY_PASSWORD_LOGIN_ENABLED"
     }
   ],
   "created_at": 1781308800000,

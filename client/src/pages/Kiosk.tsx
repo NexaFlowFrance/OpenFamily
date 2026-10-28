@@ -547,9 +547,12 @@ const Kiosk: React.FC = () => {
                                             {(task.points ?? 0) > 0 && (
                                                 <span className="shrink-0 text-caption text-amber-500">⭐ {task.points}</span>
                                             )}
-                                            {(task.assigned_to_members || []).slice(0, 1).map((m) => (
-                                                <span key={m.id} className="shrink-0 text-caption text-muted-foreground">{m.name}</span>
-                                            ))}
+                                            {(task.assigned_to_members || []).length > 0 && (
+                                                // Everyone the task is assigned to, not only the first.
+                                                <span className="max-w-[45%] shrink-0 truncate text-caption text-muted-foreground">
+                                                    {(task.assigned_to_members || []).map((m) => m.name).join(', ')}
+                                                </span>
+                                            )}
                                         </button>
                                     </li>
                                 ))}

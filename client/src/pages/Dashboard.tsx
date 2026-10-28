@@ -261,25 +261,25 @@ const Dashboard: React.FC = () => {
                             )}
                             <div className="rounded-card border border-border bg-card divide-y divide-border overflow-hidden">
                                 {group.items.map((appt) => (
-                                    <div key={appt.occurrence_id || appt.id} className="grid grid-cols-[72px_1fr_auto] gap-4 items-center px-5 py-4">
+                                    <div key={appt.occurrence_id || appt.id} className="grid grid-cols-[72px_1fr] gap-4 items-baseline px-5 py-4">
                                         <div className="font-serif text-body text-muted-foreground tabular-nums">
                                             {fmtTime(appt.start_time)}
                                         </div>
-                                        <div>
+                                        <div className="min-w-0">
                                             <p className="text-body font-medium text-foreground">{appt.title}</p>
                                             {appt.description && (
                                                 <p className="text-caption text-muted-foreground mt-0.5">{appt.description}</p>
                                             )}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-caption text-muted-foreground">
-                                            {appt.family_members_data?.[0] && (
-                                                <>
-                                                    <span
-                                                        className="h-2 w-2 rounded-full flex-none"
-                                                        style={{ background: appt.family_members_data[0].color }}
-                                                    />
-                                                    <span>{appt.family_members_data[0].name}</span>
-                                                </>
+                                            {/* Everyone taking part, not only the first: a family dinner names the whole family. */}
+                                            {(appt.family_members_data ?? []).length > 0 && (
+                                                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-muted-foreground">
+                                                    {(appt.family_members_data ?? []).map((member) => (
+                                                        <span key={member.id} className="inline-flex items-center gap-1.5">
+                                                            <span className="h-2 w-2 flex-none rounded-full" style={{ background: member.color }} />
+                                                            {member.name}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             )}
                                         </div>
                                     </div>

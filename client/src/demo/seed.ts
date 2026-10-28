@@ -86,7 +86,7 @@ export function createSeed(): DemoStore {
             },
         ],
         tasks: [
-            { id: 'tk1', title: 'Take out the trash', is_completed: false, frequency: 'Hebdomadaire', priority: 'Moyenne', assigned_to: ['m-kid1'], assigned_to_members: [kid1], due_date: atTime(addDays(now, 1), 18), created_at: atTime(now, 9), points: 5, pending_approval: false },
+            { id: 'tk1', title: 'Take out the trash', is_completed: false, frequency: 'Hebdomadaire', priority: 'Moyenne', assigned_to: ['m-kid1', 'm-kid2'], assigned_to_members: [kid1, kid2], due_date: atTime(addDays(now, 1), 18), created_at: atTime(now, 9), points: 5, pending_approval: false },
             { id: 'tk2', title: 'Homework — math', is_completed: false, frequency: 'Quotidien', priority: 'Haute', assigned_to: ['m-kid1'], assigned_to_members: [kid1], due_date: atTime(now, 17), created_at: atTime(now, 9), points: 10, pending_approval: false },
             { id: 'tk3', title: 'Water the plants', is_completed: true, frequency: 'Une fois', priority: 'Basse', assigned_to: ['m-mom'], assigned_to_members: [mom], completed_at: atTime(now, 8), created_at: atTime(addDays(now, -1), 9), points: 0, pending_approval: false },
             { id: 'tk4', title: 'Book dentist appointment', is_completed: false, frequency: 'Une fois', priority: 'Moyenne', assigned_to: ['m-dad'], assigned_to_members: [dad], created_at: atTime(now, 10), points: 0, pending_approval: false },
@@ -94,7 +94,7 @@ export function createSeed(): DemoStore {
             { id: 'tk5', title: 'Tidy up the bedroom', is_completed: true, frequency: 'Hebdomadaire', priority: 'Moyenne', assigned_to: ['m-kid2'], assigned_to_members: [kid2], completed_at: atTime(now, 10, 30), created_at: atTime(addDays(now, -1), 9), points: 8, pending_approval: true },
         ],
         appointments: [
-            { id: 'a1', title: 'Dentist — Mia', start_time: atTime(dayInMonth(now.getDate()), 15), end_time: atTime(dayInMonth(now.getDate()), 16), location: 'City Dental', family_member_ids: ['m-kid1'], family_members_data: [kid1], reminder_30min: true, reminder_1hour: false, reminder_minutes: [30] },
+            { id: 'a1', title: 'Dentist — Mia', start_time: atTime(dayInMonth(now.getDate()), 15), end_time: atTime(dayInMonth(now.getDate()), 16), location: 'City Dental', family_member_ids: ['m-kid1', 'm-mom'], family_members_data: [kid1, mom], reminder_30min: true, reminder_1hour: false, reminder_minutes: [30] },
             { id: 'a2', title: 'Football practice', start_time: atTime(addDays(now, 2), 18), end_time: atTime(addDays(now, 2), 19, 30), location: 'Stadium', family_member_ids: ['m-kid2'], family_members_data: [kid2], reminder_30min: false, reminder_1hour: true, reminder_minutes: [60, 1440] },
             { id: 'a3', title: 'Family dinner', start_time: atTime(addDays(now, 5), 20), location: 'Home', family_member_ids: ['m-dad', 'm-mom', 'm-kid1', 'm-kid2'], family_members_data: [dad, mom, kid1, kid2], reminder_30min: false, reminder_1hour: false, reminder_minutes: [] },
         ],

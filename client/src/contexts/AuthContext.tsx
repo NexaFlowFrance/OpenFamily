@@ -63,6 +63,10 @@ interface AuthContextType {
     joinFamily: (inviteToken: string) => Promise<void>;
     leaveFamily: () => Promise<void>;
     refreshToken: () => Promise<void>;
+    /** Adopts the session the SSO exchange returned (its token is already stored). */
+    completeSsoLogin: (user: User) => void;
+    /** Signs this account out of every device, this one included. */
+    logoutEverywhere: () => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
     updateCurrency: (currency: string) => Promise<void>;
@@ -212,6 +216,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
+    const completeSsoLogin = (ssoUser: User) => {
+        setUser(ssoUser);
+        localStorage.setItem('user', JSON.stringify(ssoUser));
+        applyServerLanguage(ssoUser.language);
+        applyRegionalPreferences(ssoUser.week_start_day);
+    };
+
+    const logoutEverywhere = async () => {
+        await api.logoutEverywhere();
+        logout();
+    };
+
     const logout = () => {
         api.logout();
         setUser(null);
@@ -310,6 +326,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 joinFamily,
                 leaveFamily,
                 refreshToken,
+                completeSsoLogin,
+                logoutEverywhere,
                 logout,
                 isAuthenticated: !!user,
                 updateCurrency,

@@ -67,8 +67,9 @@ Optional, but worth it:
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Push notifications (reminders, family activity). Generate the keys with `docker run --rm node:26-alpine npx -y web-push generate-vapid-keys`; `VAPID_SUBJECT` is `mailto:` followed by your e-mail. Push also needs HTTPS (step 6). |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Invitation e-mails and password reset. Without them, invitations still work by sharing their link. |
 | `REGISTRATION_ENABLED` | `false` closes sign-ups: only people you invite can create an account (see step 5). |
+| `OIDC_*`, `PASSWORD_LOGIN_ENABLED` | Sign-in through your own identity provider (Authentik, Keycloak...): see [Single sign-on](#single-sign-on-sso). |
 
-Leave these **empty** unless you know you need them: `VITE_API_URL`, `VITE_WS_URL` (the web app talks to its own address and forwards `/api` itself), `CORS_ORIGINS` (only for a web app served from another domain), `APP_PUBLIC_URL` (only if e-mail links show the wrong address behind your proxy).
+Leave these **empty** unless you know you need them: `VITE_API_URL`, `VITE_WS_URL` (the web app talks to its own address and forwards `/api` itself), `CORS_ORIGINS` (only for a web app served from another domain), `APP_PUBLIC_URL` (only if e-mail links show the wrong address behind your proxy, or for single sign-on).
 
 ## 4. Start it
 
@@ -176,6 +177,54 @@ Keep your `.env` with the dumps: without the same `JWT_SECRET`, saved integratio
 
 Each family can also download its own data from **Settings → Export data** and import it into another OpenFamily.
 
+## Single sign-on (SSO)
+
+People can sign in with an OpenID Connect provider you already run: Authentik, Keycloak, Authelia, Pocket ID, Zitadel, Google... Password sign-in keeps working unless you turn it off.
+
+1. At your provider, create a **confidential** OpenID Connect client (authorization code flow) with:
+   - redirect URI: `https://family.example.com/api/auth/oidc/callback` (your address, then `/api/auth/oidc/callback`)
+   - scopes `openid email profile`
+   - ID tokens signed with RS256 (the usual default)
+2. Add to `.env`:
+
+   | Variable | Value |
+   |---|---|
+   | `APP_PUBLIC_URL` | `https://family.example.com`, the address the redirect URI starts with |
+   | `OIDC_ISSUER_URL` | The provider's issuer, for example `https://auth.example.com/application/o/openfamily/` (Authentik), `https://auth.example.com/realms/home` (Keycloak), `https://id.example.com` (Pocket ID) |
+   | `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | From step 1 |
+   | `OIDC_PROVIDER_NAME` | The button label, for example `Authentik` |
+
+3. Run `docker compose up -d` and open the sign-in page: it shows **Continue with ...**. If it does not, the server log has an `auth.oidc_disabled` line saying what is missing.
+
+The server must reach the provider over HTTPS. Keep the client secret in `.env` only; to change it, set the new one at the provider, update `.env`, run `docker compose up -d`, then revoke the old one.
+
+**Who gets in.** The first time someone signs in with SSO:
+- if an account already uses the same email, SSO does not open it: the person signs in with their password and links SSO in **Settings → Sign-in**, once. An email alone never proves who owns an account (password sign-up does not check it, and some providers let people set any address), so after that the account is recognised by its link to the provider, not by email;
+- if no account uses the email, a new one is created, only if the provider verified the email, and only if SSO sign-up is open (`OIDC_REGISTRATION_ENABLED`, which follows `REGISTRATION_ENABLED` when unset) or they came through an invitation. In Keycloak, users created by an administrator have "Email verified" off until you tick it.
+
+| Goal | `PASSWORD_LOGIN_ENABLED` | `REGISTRATION_ENABLED` | `OIDC_REGISTRATION_ENABLED` |
+|---|---|---|---|
+| Passwords and SSO, anyone can sign up | `true` | `true` | (unset) |
+| Passwords still work, new people only through SSO | `true` | `false` | `true` |
+| Invitations only, either way | `true` | `false` | (unset) |
+| SSO only | `false` | `false` | `true` |
+
+Invitations always work. `PASSWORD_LOGIN_ENABLED=false` also turns off password sign-up and reset, and is ignored until SSO is configured, so nobody is locked out by a typo. Test an SSO sign-in before turning passwords off, and have existing users link SSO in **Settings → Sign-in** first: without a link, they cannot sign in once passwords are off.
+
+**If the provider is down on an SSO-only server**, set `PASSWORD_LOGIN_ENABLED=true`, run `docker compose up -d`, and give your account a password:
+
+```bash
+docker compose exec server node server/dist/scripts/authAdmin.js set-password --email you@example.com
+```
+
+`unlink-sso` instead of `set-password` removes an account's SSO link. Both sign the account out everywhere. With the Windows installer or the Proxmox script, add the same variables to the `.env` file they created; on Unraid, CasaOS and Runtipi they are in the app's settings.
+
+**Good to know.**
+- Signing out at the provider does not sign people out of OpenFamily, and someone removed at the provider keeps their open sessions until they expire (7 days). To end them now: **Settings → Sign-in → Sign out of all devices** for your own account, or remove the person in **Family**. A password reset also signs an account out everywhere.
+- Removing someone from the family or handing the family over to another member now signs the people concerned out of every device.
+- Your reverse proxy may log full addresses, including the one-time code the provider sends to `/api/auth/oidc/callback`. The code is useless after a few seconds, but you can leave query strings out of the log for that path.
+- The Android app keeps password sign-in for now.
+
 ## Proxmox
 
 Run on the Proxmox **host** (not inside a container):
@@ -199,6 +248,8 @@ It creates a Debian container with Docker, generates the secrets and starts Open
 | `port is already allocated` | Another program uses 3000, 3001 or the PostgreSQL port. Change `POSTGRES_PORT` in `.env`, or map another port for the app (for example `"8080:80"` for `client`). |
 | Reminders arrive one or two hours late | `TZ` is missing: set it in `.env` and run `docker compose up -d`. |
 | "Sign up" is missing or refused | `REGISTRATION_ENABLED=false`: invite the person from **Family** instead, or set it to `true`. |
+| No "Continue with ..." button on the sign-in page | SSO is off: the server log's `auth.oidc_disabled` line says which variable is missing (often `APP_PUBLIC_URL`). |
+| SSO ends on "Sign-in failed" | The server log's `auth.oidc_callback_failed` line has the reason. Check that the redirect URI registered at the provider is exactly `APP_PUBLIC_URL` + `/api/auth/oidc/callback`. |
 | No push notifications | They need HTTPS and the three `VAPID_*` values, and must be allowed on each device. |
 | The page loads but nothing updates live behind a proxy | WebSockets are not forwarded: turn on WebSocket support in the proxy. |
 | "413 Request Entity Too Large" when importing | Your own proxy limits uploads: raise its limit (`client_max_body_size 256m` in nginx). |

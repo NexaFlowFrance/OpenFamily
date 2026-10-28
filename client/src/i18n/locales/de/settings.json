@@ -126,5 +126,22 @@
       "saturday": "Samstag",
       "sunday": "Sonntag"
     }
+  },
+  "signIn": {
+    "title": "Anmeldung",
+    "subtitle": "Wie du dich bei OpenFamily anmeldest, auf diesem und anderen Geräten.",
+    "ssoLinked": "Dein Konto ist mit {{name}} verknüpft.",
+    "ssoNotLinked": "Verknüpfe dein {{name}}-Konto, um dich damit anzumelden.",
+    "link": "{{name}} verknüpfen",
+    "unlink": "Verknüpfung lösen",
+    "confirmUnlink": "Verknüpfung mit {{name}} lösen? Du meldest dich dann mit deinem Passwort an, und deine anderen Geräte werden abgemeldet.",
+    "unlinkNeedsPassword": "Dein Konto hat noch kein Passwort. Lege eines über „Passwort vergessen?“ auf der Anmeldeseite fest, um die Verknüpfung lösen zu können.",
+    "unlinkPasswordOff": "Die Anmeldung mit Passwort ist auf diesem Server deaktiviert, daher kann die Einmalanmeldung nicht gelöst werden.",
+    "relinkNote": "Nach dem Trennen öffnet eine Anmeldung mit {{name}} dieses Konto nicht mehr. Du kannst es hier erneut verknüpfen.",
+    "linked": "Die Einmalanmeldung ist jetzt verknüpft.",
+    "unlinked": "Die Verknüpfung ist gelöst. Deine anderen Geräte wurden abgemeldet.",
+    "logoutEverywhere": "Von allen Geräten abmelden",
+    "logoutEverywhereDesc": "Handy verloren oder an einem gemeinsamen Computer angemeldet? Damit wirst du überall abgemeldet, auch hier.",
+    "confirmLogoutEverywhere": "Von allen Geräten abmelden, auch von diesem?"
   }
 }

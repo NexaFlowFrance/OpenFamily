@@ -198,4 +198,46 @@ export const coreMigrations: readonly Migration[] = [
             'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS category VARCHAR(50)',
         ],
     },
+    {
+        // Single sign-on through an OpenID Connect provider. An account created
+        // through SSO has no password. Each account can be linked to at most one
+        // identity at the provider, recognised by (issuer, subject), never by
+        // email. A sign-in in progress lives in oidc_flows for a few minutes:
+        // the server keeps no sessions to hold it otherwise.
+        //
+        // token_version is copied into every login token and checked on each
+        // request: raising it signs that account out of every device (password
+        // reset, removal from a family, "sign out everywhere"...). Tokens issued
+        // before this migration carry no version and count as 0.
+        id: 'core/0008-oidc',
+        statements: [
+            'ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL',
+            'ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0',
+            `CREATE TABLE user_identities (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                issuer TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                email VARCHAR(255),
+                created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                last_login_at TIMESTAMPTZ,
+                CONSTRAINT user_identities_issuer_subject_key UNIQUE (issuer, subject),
+                CONSTRAINT user_identities_user_issuer_key UNIQUE (user_id, issuer)
+            )`,
+            `CREATE TABLE oidc_flows (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                state_hash VARCHAR(64) UNIQUE,
+                code_verifier TEXT NOT NULL,
+                nonce TEXT NOT NULL,
+                client_challenge VARCHAR(64) NOT NULL,
+                mode VARCHAR(8) NOT NULL CHECK (mode IN ('login', 'link')),
+                link_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                invite_token VARCHAR(255),
+                claims JSONB,
+                handoff_hash VARCHAR(64) UNIQUE,
+                expires_at TIMESTAMPTZ NOT NULL
+            )`,
+            'CREATE INDEX idx_oidc_flows_expires_at ON oidc_flows(expires_at)',
+        ],
+    },
 ];

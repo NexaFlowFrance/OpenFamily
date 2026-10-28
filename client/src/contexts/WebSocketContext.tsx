@@ -53,6 +53,8 @@ const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
 const RECONNECT_DELAY_MS = 2_000;
 const RECONNECT_MAX_DELAY_MS = 30_000;
 const PING_INTERVAL_MS = 25_000;
+// Close code the server uses when a session is refused or revoked.
+const WS_SESSION_ENDED = 4001;
 
 // ─── Provider ────────────────────────────────────────────────────────────────
 
@@ -94,6 +96,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         const ws = new WebSocket(`${wsBase()}/ws`);
         wsRef.current = ws;
+        let authenticated = false;
 
         ws.onopen = () => {
             reconnectDelay.current = RECONNECT_DELAY_MS;
@@ -112,8 +115,10 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         ws.onmessage = (event: MessageEvent) => {
             try {
-                const msg = JSON.parse(event.data as string) as WsUpdateMessage;
-                if (msg.type === 'update' && msg.entity) {
+                const msg = JSON.parse(event.data as string) as WsUpdateMessage | { type: 'auth'; success: boolean };
+                if (msg.type === 'auth') {
+                    authenticated = msg.success;
+                } else if (msg.type === 'update' && msg.entity) {
                     notify(msg.entity);
                 }
             } catch {
@@ -121,9 +126,19 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
             }
         };
 
-        ws.onclose = () => {
+        ws.onclose = (event: CloseEvent) => {
             clearPing();
             if (unmounted.current) return;
+
+            // 4001 on a socket that was signed in: its session was revoked.
+            // That also happens to this device when it leaves a family or
+            // unlinks SSO, and the response carrying its fresh token may still
+            // be on its way: just reconnect below, with whatever token is
+            // current by then. 4001 at sign-in: the token is refused, so ask
+            // the API, whose 401 signs the app out.
+            if (event.code === WS_SESSION_ENDED && !authenticated) {
+                api.get('/api/auth/me').catch(() => undefined);
+            }
 
             // Exponential back-off reconnection
             reconnectTimer.current = setTimeout(() => {

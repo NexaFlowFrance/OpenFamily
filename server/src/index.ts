@@ -1,13 +1,13 @@
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
-import jwt from 'jsonwebtoken';
 import app from './app';
 import pool, { runMigrations } from './db';
 import logger from './lib/logger';
 import { clients, broadcast } from './lib/broadcaster';
 import { startReminderScheduler } from './lib/reminderScheduler';
 import { startCalendarSubscriptionScheduler } from './lib/calendarSources';
-import { getJwtSecret } from './config/loadEnv';
+import { verifyAccessToken, WS_SESSION_REVOKED } from './lib/authTokens';
+import { getAuthConfig } from './config/authConfig';
 
 export { broadcast };
 
@@ -24,26 +24,35 @@ wss.on('connection', (ws: WebSocket) => {
 
     let userId: string | null = null;
 
-    ws.on('message', (message: string) => {
+    ws.on('message', async (message: string) => {
         try {
             const data = JSON.parse(message.toString());
 
             if (data.type === 'auth' && typeof data.token === 'string') {
                 try {
-                    const decoded = jwt.verify(data.token, getJwtSecret()) as { userId: string };
-                    userId = decoded.userId;
+                    const verified = await verifyAccessToken(data.token);
+                    // The socket may have closed while the session was checked.
+                    if (ws.readyState !== WebSocket.OPEN) return;
+                    userId = verified.userId;
 
                     if (!clients.has(userId)) {
                         clients.set(userId, new Set());
                     }
                     clients.get(userId)!.add(ws);
 
+                    // A revocation committed during the first check closed only
+                    // the sockets registered at the time. Now that this one is
+                    // registered, any later revocation closes it too, and a
+                    // second check catches one that came in between.
+                    await verifyAccessToken(data.token);
+                    if (ws.readyState !== WebSocket.OPEN) return;
+
                     logger.info('ws.authenticated', { userId });
                     ws.send(JSON.stringify({ type: 'auth', success: true }));
                 } catch {
                     logger.warn('ws.auth_failed');
                     ws.send(JSON.stringify({ type: 'auth', success: false }));
-                    ws.close(4001, 'Unauthorized');
+                    ws.close(WS_SESSION_REVOKED, 'Unauthorized');
                 }
             }
             // ping/pong for keepalive — no response needed, TCP layer handles it
@@ -78,6 +87,9 @@ const startServer = async () => {
         // Test database connection
         await pool.query('SELECT NOW()');
         logger.info('server.database_connected');
+
+        // Read the sign-in settings now, so a missing SSO variable is logged at boot.
+        getAuthConfig();
 
         startReminderScheduler();
         startCalendarSubscriptionScheduler();

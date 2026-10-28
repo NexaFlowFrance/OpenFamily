@@ -45,6 +45,7 @@ all in one place, on **your** server, with **your** data.
 | 🔄 **Real-time sync** | Instant updates across every device (WebSocket) |
 | 🔔 **Notifications** | Appointment reminders, task alerts (Web Push VAPID) + in-app |
 | 👥 **Shared accounts** | Invite by link, **access requests**, **ownership transfer** |
+| 🔑 **Single sign-on** | Sign in with your own OpenID Connect provider (Authentik, Keycloak, Pocket ID...), optional SSO-only servers, **sign out of all devices** |
 | 🛡️ **Roles & permissions** | **Parent / child** accounts — read-only budget for children |
 | 🌍 **Multilingual** | **English / French / German / Portuguese / Russian / Spanish / Simplified Chinese** interface with automatic detection |
 | 📴 **Offline mode** | Browse cached data without a connection (PWA) |
@@ -172,7 +173,8 @@ npm run dev
 
 JWT auth (7 days, auto refresh) · passwords hashed with **bcrypt (cost 12)** · secure HTTP
 headers via **helmet** · rate limiting on auth endpoints · strict configurable CORS ·
-server-side input validation · structured logs (no sensitive data).
+server-side input validation · structured logs (no sensitive data) · optional **OpenID Connect
+single sign-on** (PKCE, signed ID tokens) · sessions revocable per account.
 
 ## 🗺️ Roadmap
 

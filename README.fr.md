@@ -31,6 +31,7 @@
 | 🔄 **Sync temps réel** | Mise à jour instantanée entre tous les appareils (WebSocket) |
 | 🔔 **Notifications** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) + in-app |
 | 👥 **Comptes partagés** | Invitations par lien, demandes d'accès, transfert de propriété |
+| 🔑 **Connexion unique (SSO)** | Connexion avec votre propre fournisseur OpenID Connect (Authentik, Keycloak, Pocket ID...), serveurs 100 % SSO en option, **déconnexion de tous les appareils** |
 | 🛡️ **Rôles & permissions** | Comptes **parent / enfant** — budget en lecture seule pour les enfants |
 | 🌍 **Multilingue** | Interface **français / anglais / allemand / portugais / russe / espagnol / chinois simplifié** avec détection automatique |
 | 📴 **Mode hors ligne** | Consultation des données en cache sans connexion (PWA) |
@@ -118,7 +119,7 @@ npm run dev
 
 ## 🔐 Sécurité
 
-JWT (7 j, refresh auto) · bcrypt (cost 12) · helmet · rate limiting · CORS strict · validation serveur.
+JWT (7 j, refresh auto) · bcrypt (cost 12) · helmet · rate limiting · CORS strict · validation serveur · connexion unique OpenID Connect en option (PKCE, jetons signés) · sessions révocables par compte.
 
 ## 💛 Soutenir le projet
 

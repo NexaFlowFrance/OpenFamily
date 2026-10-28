@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
+import { isLanguage, LANGUAGES } from '../lib/languages';
 
 const router = Router();
-
-const SUPPORTED_LANGUAGES = ['fr', 'en', 'pt', 'ru', 'zh', 'es', 'de'] as const;
 
 // Single source of truth for the optional modules a family may hide.
 // Always-on modules (dashboard, shopping, tasks, calendar, family, settings)
@@ -87,8 +86,8 @@ router.put('/language', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { language } = req.body as { language?: unknown };
 
-        if (typeof language !== 'string' || !SUPPORTED_LANGUAGES.includes(language as typeof SUPPORTED_LANGUAGES[number])) {
-            return res.status(400).json({ success: false, error: `Invalid language. Supported values: ${SUPPORTED_LANGUAGES.join(', ')}` });
+        if (!isLanguage(language)) {
+            return res.status(400).json({ success: false, error: `Invalid language. Supported values: ${LANGUAGES.join(', ')}` });
         }
 
         // actualUserId: the preference belongs to the logged-in member, not the family owner.

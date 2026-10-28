@@ -7,6 +7,12 @@ import { apiBase } from './serverConfig';
 const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
 const AUTH_EXPIRED_EVENT = 'openfamily:auth-expired';
 
+export class ApiError extends Error {
+    constructor(message: string, readonly status: number) {
+        super(message);
+    }
+}
+
 class ApiClient {
     private token: string | null = null;
 
@@ -42,8 +48,9 @@ class ApiClient {
             'Content-Type': 'application/json',
         };
 
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
+        const sentToken = this.token;
+        if (sentToken) {
+            headers['Authorization'] = `Bearer ${sentToken}`;
         }
 
         const response = await fetch(`${apiBase()}${endpoint}`, {
@@ -58,7 +65,10 @@ class ApiClient {
         const data = contentType.includes('application/json') ? await response.json() : null;
 
         if (!response.ok) {
-            if (response.status === 401) {
+            // A 401 only ends the session it was sent with: a request still in
+            // flight when a fresh token arrives (leaving a family, unlinking
+            // SSO...) must not sign out the new session.
+            if (response.status === 401 && sentToken === this.token) {
                 this.setToken(null);
                 localStorage.removeItem('user');
                 window.dispatchEvent(
@@ -69,7 +79,7 @@ class ApiClient {
             }
 
             const fallbackMessage = `HTTP ${response.status}`;
-            throw new Error(data?.error || data?.message || fallbackMessage);
+            throw new ApiError(data?.error || data?.message || fallbackMessage, response.status);
         }
 
         return data as T;
@@ -179,9 +189,64 @@ class ApiClient {
         return response;
     }
 
+    /** Which sign-in options the server offers. Older servers only know /registration. */
+    async getAuthConfig(): Promise<AuthServerConfig> {
+        try {
+            const response = await this.get<{ success: boolean; data: AuthServerConfig }>('/api/auth/config');
+            if (response?.data) return response.data;
+        } catch (error) {
+            // Only a server without this endpoint falls back. Any other failure
+            // (rate limit, outage) must not pass off an SSO-only server as a
+            // password one.
+            if (!(error instanceof ApiError && error.status === 404)) throw error;
+        }
+        const legacy = await this.get<{ success: boolean; data?: { open?: boolean } }>('/api/auth/registration');
+        return {
+            passwordLogin: true,
+            passwordSignup: legacy?.data?.open !== false,
+            passwordReset: true,
+            oidc: { enabled: false, name: null, signup: false },
+        };
+    }
+
+    /** Redeems the one-time code from the SSO callback. Login mode stores the new session. */
+    async exchangeSso(code: string, clientVerifier: string) {
+        const response = await this.post<{ success: boolean; data: SsoExchangeResult }>(
+            '/api/auth/oidc/exchange',
+            { code, clientVerifier }
+        );
+        if (response.data.mode === 'login') {
+            this.setToken(response.data.token);
+        }
+        return response.data;
+    }
+
+    /** Unlinks SSO. Other devices are signed out; this one continues with a fresh token. */
+    async unlinkSso() {
+        const response = await this.delete<{ success: boolean; data: { token: string } }>('/api/auth/oidc/link');
+        this.setToken(response.data.token);
+    }
+
+    /** Signs this account out of every device, this one included. */
+    async logoutEverywhere() {
+        await this.post('/api/auth/logout-all', {});
+        this.setToken(null);
+    }
+
     logout() {
         this.setToken(null);
     }
 }
+
+export interface AuthServerConfig {
+    passwordLogin: boolean;
+    passwordSignup: boolean;
+    passwordReset: boolean;
+    oidc: { enabled: boolean; name: string | null; signup: boolean };
+}
+
+export type SsoExchangeResult =
+    | { mode: 'login'; created: boolean; token: string; user: any }
+    | { mode: 'link'; email: string | null };
 
 export const api = new ApiClient();

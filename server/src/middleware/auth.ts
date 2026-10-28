@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { getJwtSecret } from '../config/loadEnv';
 import { query } from '../db';
+import { InvalidTokenError, verifyAccessToken } from '../lib/authTokens';
 
 export interface AuthRequest extends Request {
     /** Effective family-owner user ID — used by all data queries */
@@ -12,27 +11,33 @@ export interface AuthRequest extends Request {
     isOwner?: boolean;
 }
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-        const authHeader = req.headers.authorization;
-        const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
-
-        if (!token) {
-            return res.status(401).json({ success: false, error: 'No token provided' });
-        }
-
-        const decoded = jwt.verify(token, getJwtSecret()) as { userId: string; ownerId?: string };
-        req.actualUserId = decoded.userId;
-        req.userId = decoded.ownerId ?? decoded.userId;
-        req.isOwner = !decoded.ownerId || decoded.ownerId === decoded.userId;
-        next();
-    } catch (error) {
-        return res.status(401).json({ success: false, error: 'Invalid token' });
-    }
+/** The token in the Authorization header, or '' when there is none. */
+export const bearerToken = (req: Request): string => {
+    const header = req.headers.authorization;
+    return header?.startsWith('Bearer ') ? header.slice(7).trim() : '';
 };
 
-export const generateToken = (userId: string, ownerId?: string): string => {
-    return jwt.sign({ userId, ownerId: ownerId ?? userId }, getJwtSecret(), { expiresIn: '7d' });
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const token = bearerToken(req);
+
+    if (!token) {
+        return res.status(401).json({ success: false, error: 'No token provided' });
+    }
+
+    try {
+        const verified = await verifyAccessToken(token);
+        req.actualUserId = verified.userId;
+        req.userId = verified.ownerId;
+        req.isOwner = verified.ownerId === verified.userId;
+    } catch (error) {
+        if (error instanceof InvalidTokenError) {
+            return res.status(401).json({ success: false, error: 'Invalid token' });
+        }
+        // The session check needs the database: never let a request through
+        // when it cannot be made.
+        return res.status(503).json({ success: false, error: 'Service unavailable' });
+    }
+    return next();
 };
 
 /**

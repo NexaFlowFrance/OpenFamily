@@ -1,0 +1,35 @@
+# CI only: adds a mock OpenID Connect provider to the stack and points the
+# server at it, for scripts/smoke-sso.sh. The provider signs everyone in as the
+# same test user, without a login form. Never use this file for a real install.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.ci-sso.yml up -d --build
+#
+# The provider's address must be the same for the server (inside the compose
+# network) and for the test script (on the host), so CI maps "idp" to
+# 127.0.0.1 in /etc/hosts.
+services:
+  idp:
+    image: ghcr.io/navikt/mock-oauth2-server:2.1.10
+    container_name: openfamily-ci-idp
+    environment:
+      SERVER_PORT: 8080
+      JSON_CONFIG: >-
+        {"interactiveLogin": false, "tokenCallbacks": [{"issuerId": "default", "tokenExpiry": 120,
+        "requestMappings": [{"requestParam": "grant_type", "match": "authorization_code",
+        "claims": {"sub": "smoke-sso-user", "email": "smoke-sso@example.org", "email_verified": true,
+        "name": "Smoke SSO", "aud": ["openfamily-ci"]}}]}]}
+    ports:
+      - "8080:8080"
+
+  server:
+    environment:
+      APP_PUBLIC_URL: http://localhost:3001
+      OIDC_ISSUER_URL: http://idp:8080/default
+      OIDC_CLIENT_ID: openfamily-ci
+      OIDC_CLIENT_SECRET: openfamily-ci-secret
+      OIDC_PROVIDER_NAME: CI provider
+      # The mock provider speaks plain http.
+      OIDC_ALLOW_INSECURE_HTTP: "true"
+    depends_on:
+      idp:
+        condition: service_started

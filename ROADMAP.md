@@ -93,6 +93,10 @@ can shift based on feedback — issues and discussions are welcome.
 - **Home Assistant to-do lists** *(v1.9)*: the configured list is synced even
   when Home Assistant's legacy shopping list is still around. Contributed by
   @sawmans.
+- **Single sign-on** *(next release)*: sign in with your own OpenID Connect
+  provider (Authentik, Keycloak, Pocket ID...), link it to an existing account,
+  or run an SSO-only server. "Sign out of all devices" in Settings, and removing
+  someone from the family now signs them out everywhere. Android follows later.
 
 ## Under consideration
 

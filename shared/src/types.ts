@@ -19,7 +19,8 @@ export interface BaseEntity {
 // User
 export interface User extends BaseEntity {
     email: string;
-    password_hash: string;
+    // Null for accounts created through single sign-on.
+    password_hash: string | null;
     name: string;
 }
 

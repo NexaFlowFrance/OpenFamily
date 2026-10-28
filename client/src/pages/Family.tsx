@@ -279,7 +279,9 @@ const Family: React.FC = () => {
                 { newOwnerId: account.id }
             );
             if (res.success) {
-                // Our token now reflects member status; sync it.
+                // The transfer signed everyone out, this session included; carry
+                // on with the token it returned, then sync the profile.
+                if (res.data?.token) api.setToken(res.data.token);
                 await refreshToken();
                 await loadSharedAccounts();
                 await loadMembers();

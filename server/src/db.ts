@@ -1,4 +1,4 @@
-import { Pool, types } from 'pg';
+import { Pool, QueryResult, types } from 'pg';
 import { loadEnv } from './config/loadEnv';
 import logger from './lib/logger';
 import { runVersionedMigrations } from './migrations/runner';
@@ -47,7 +47,7 @@ pool.on('error', (err) => {
     process.exit(-1);
 });
 
-export const query = async (text: string, params?: any[]) => {
+export const query: QueryFn = async (text, params) => {
     const start = Date.now();
     const operation = text.trim().split(/\s+/)[0]?.toUpperCase() || 'UNKNOWN';
 
@@ -92,6 +92,48 @@ export const getClient = async () => {
     };
 
     return client;
+};
+
+/** Signature shared by query() and Transaction.query, for helpers that run either way. */
+export type QueryFn = (text: string, params?: any[]) => Promise<QueryResult<any>>;
+
+export interface Transaction {
+    query: QueryFn;
+    /** Runs `fn` once the transaction has committed; dropped if it rolls back. */
+    afterCommit: (fn: () => void) => void;
+}
+
+/**
+ * Runs `fn` inside BEGIN/COMMIT on one pooled connection, rolling back on any
+ * error. Side effects that must only happen for committed changes (closing the
+ * sockets of revoked sessions, for instance) are registered with afterCommit.
+ */
+export const withTransaction = async <T>(fn: (tx: Transaction) => Promise<T>): Promise<T> => {
+    const client = await getClient();
+    const hooks: Array<() => void> = [];
+    try {
+        await client.query('BEGIN');
+        const result = await fn({
+            query: (text, params) => client.query(text, params),
+            afterCommit: (hook) => hooks.push(hook),
+        });
+        await client.query('COMMIT');
+        for (const hook of hooks) {
+            try {
+                hook();
+            } catch (error) {
+                logger.warn('db.after_commit_hook_failed', {
+                    error: error instanceof Error ? error.message : String(error),
+                });
+            }
+        }
+        return result;
+    } catch (error) {
+        await client.query('ROLLBACK').catch(() => undefined);
+        throw error;
+    } finally {
+        client.release();
+    }
 };
 
 // Serialises schema changes between server instances starting at the same time.

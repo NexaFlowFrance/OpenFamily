@@ -2,6 +2,7 @@ import { query } from '../db';
 import { sendPushToUser } from './pushService';
 import { broadcast } from './broadcaster';
 import logger from './logger';
+import { isLanguage, Language } from './languages';
 
 export interface CreateNotificationInput {
     /** Recipient user ID (the actual account, not necessarily the family owner) */
@@ -14,8 +15,7 @@ export interface CreateNotificationInput {
     url?: string;
 }
 
-export type NotificationLanguage = 'fr' | 'en' | 'pt' | 'ru' | 'es' | 'zh' | 'de';
-export type LocalizedTexts = Record<NotificationLanguage, { title: string; message: string }>;
+export type LocalizedTexts = Record<Language, { title: string; message: string }>;
 
 /**
  * Same as createNotification, with the title and message picked in the
@@ -25,11 +25,11 @@ export type LocalizedTexts = Record<NotificationLanguage, { title: string; messa
 export async function createLocalizedNotification(
     input: Omit<CreateNotificationInput, 'title' | 'message'> & { texts: LocalizedTexts }
 ): Promise<void> {
-    let lang: NotificationLanguage = 'fr';
+    let lang: Language = 'fr';
     try {
         const result = await query('SELECT language FROM users WHERE id = $1', [input.userId]);
         const saved = String(result.rows[0]?.language ?? '').toLowerCase().split(/[-_]/)[0];
-        if (saved in input.texts) lang = saved as NotificationLanguage;
+        if (isLanguage(saved)) lang = saved;
     } catch {
         // Fall back to French; delivery matters more than the language.
     }

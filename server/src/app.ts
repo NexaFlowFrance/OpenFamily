@@ -162,7 +162,10 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
 
     return res.json([
         {
-            relation: ['delegate_permission/common.handle_all_urls'],
+            // handle_all_urls: App Links (https://<domain>/join... opens the app).
+            // get_login_creds: the Play Console "credential sharing" association,
+            // so password managers can offer the site's credentials in the app.
+            relation: ['delegate_permission/common.handle_all_urls', 'delegate_permission/common.get_login_creds'],
             target: {
                 namespace: 'android_app',
                 package_name: process.env.ANDROID_PACKAGE_NAME || 'fr.nexaflow.openfamily',

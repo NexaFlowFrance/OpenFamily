@@ -25,6 +25,7 @@
     "noResults": "没有结果",
     "noLocation": "选择一个地点，在此信息屏上显示天气。",
     "change": "更改",
+    "temperatureUnit": "温度单位",
     "photoBackground": "照片背景",
     "photoBackgroundHint": "随机显示照片库中的照片作为背景，需要连接 Immich 集成。"
   },

@@ -25,6 +25,7 @@
     "noResults": "No results",
     "noLocation": "Pick a location to show the weather on this display.",
     "change": "Change",
+    "temperatureUnit": "Temperature unit",
     "photoBackground": "Photo background",
     "photoBackgroundHint": "Shows random photos from your library as the background. Requires a connected Immich integration."
   },

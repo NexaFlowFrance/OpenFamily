@@ -25,6 +25,7 @@
     "noResults": "Aucun résultat",
     "noLocation": "Choisissez un lieu pour afficher la météo sur cet écran.",
     "change": "Changer",
+    "temperatureUnit": "Unité de température",
     "photoBackground": "Fond photo",
     "photoBackgroundHint": "Affiche des photos aléatoires de votre bibliothèque en arrière-plan. Nécessite une intégration Immich connectée."
   },

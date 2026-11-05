@@ -30,9 +30,23 @@ const hhmm = (iso: string) => formatTime(iso);
 // ── Per-device kiosk settings (localStorage — the right scope for a wall display) ──
 
 interface KioskLocation { name: string; lat: number; lon: number }
-interface KioskSettings { location: KioskLocation | null; photoBackground: boolean }
+type TemperatureUnit = 'celsius' | 'fahrenheit';
+interface KioskSettings { location: KioskLocation | null; photoBackground: boolean; temperatureUnit: TemperatureUnit }
 
 const SETTINGS_KEY = 'openfamily.kioskSettings';
+
+// Where the weather is read in Fahrenheit: the United States and its territories,
+// the Bahamas, Belize, the Cayman Islands, Palau, Micronesia, the Marshall Islands
+// and Liberia. A device set to one of these regions starts in °F; every other one,
+// and any device whose language names no region, starts in °C. After that the
+// display settings decide.
+const FAHRENHEIT_REGIONS = new Set(['US', 'PR', 'GU', 'VI', 'AS', 'MP', 'UM', 'BS', 'BZ', 'KY', 'PW', 'FM', 'MH', 'LR']);
+
+const defaultTemperatureUnit = (): TemperatureUnit => {
+    const tag = typeof navigator !== 'undefined' ? navigator.language || '' : '';
+    const region = /[-_]([A-Za-z]{2})(?:[-_]|$)/.exec(tag)?.[1].toUpperCase();
+    return region && FAHRENHEIT_REGIONS.has(region) ? 'fahrenheit' : 'celsius';
+};
 
 const loadKioskSettings = (): KioskSettings => {
     try {
@@ -43,16 +57,24 @@ const loadKioskSettings = (): KioskSettings => {
             return {
                 location: loc && typeof loc.lat === 'number' && typeof loc.lon === 'number' && typeof loc.name === 'string' ? loc : null,
                 photoBackground: Boolean(parsed.photoBackground),
+                temperatureUnit: parsed.temperatureUnit === 'celsius' || parsed.temperatureUnit === 'fahrenheit'
+                    ? parsed.temperatureUnit
+                    : defaultTemperatureUnit(),
             };
         }
     } catch { /* corrupted settings → defaults */ }
-    return { location: null, photoBackground: false };
+    return { location: null, photoBackground: false, temperatureUnit: defaultTemperatureUnit() };
 };
 
 // ── Weather (Open-Meteo, no API key, public CORS — also works in the static demo) ──
 
 interface WeatherHour { time: string; temp: number; code: number }
 interface WeatherState { temp: number; code: number; isDay: boolean; min: number; max: number; hours: WeatherHour[] }
+
+// Open-Meteo answers in Celsius and the display converts: switching units needs
+// no new request, and what is on screen is never still in the unit just left.
+const inUnit = (celsius: number, unit: TemperatureUnit): number =>
+    Math.round(unit === 'fahrenheit' ? (celsius * 9) / 5 + 32 : celsius);
 
 // WMO weather codes → lucide icon
 const weatherIcon = (code: number, isDay: boolean, className: string): React.ReactElement => {
@@ -386,10 +408,10 @@ const Kiosk: React.FC = () => {
                         {weatherIcon(weather.code, weather.isDay, 'h-10 w-10 shrink-0 text-primary')}
                         <div>
                             <div className="font-serif text-[clamp(1.6rem,3vw,2.4rem)] font-semibold leading-none tabular-nums">
-                                {Math.round(weather.temp)}°
+                                {inUnit(weather.temp, settings.temperatureUnit)}°
                             </div>
                             <p className="mt-1 whitespace-nowrap text-caption text-muted-foreground">
-                                {settings.location.name} · ↑ {Math.round(weather.max)}° ↓ {Math.round(weather.min)}°
+                                {settings.location.name} · ↑ {inUnit(weather.max, settings.temperatureUnit)}° ↓ {inUnit(weather.min, settings.temperatureUnit)}°
                             </p>
                         </div>
                         {weather.hours.length > 0 && (
@@ -400,7 +422,7 @@ const Kiosk: React.FC = () => {
                                             {new Intl.DateTimeFormat(intlLocale(), { hour: 'numeric' }).format(new Date(h.time))}
                                         </span>
                                         {weatherIcon(h.code, true, 'h-4 w-4 text-muted-foreground')}
-                                        <span className="text-caption tabular-nums">{Math.round(h.temp)}°</span>
+                                        <span className="text-caption tabular-nums">{inUnit(h.temp, settings.temperatureUnit)}°</span>
                                     </div>
                                 ))}
                             </div>
@@ -702,6 +724,33 @@ const Kiosk: React.FC = () => {
                                     <p className="text-caption text-muted-foreground">{t('kiosk:displaySettings.noLocation')}</p>
                                 </>
                             )}
+                        </div>
+
+                        {/* Temperature unit */}
+                        <div className="mt-6 flex items-center justify-between gap-4">
+                            <p className="text-caption font-medium">{t('kiosk:displaySettings.temperatureUnit')}</p>
+                            <div
+                                role="group"
+                                aria-label={t('kiosk:displaySettings.temperatureUnit')}
+                                className="flex shrink-0 items-center gap-1 rounded-input border border-border p-0.5"
+                            >
+                                {(['celsius', 'fahrenheit'] as const).map((unit) => (
+                                    <button
+                                        key={unit}
+                                        type="button"
+                                        aria-pressed={settings.temperatureUnit === unit}
+                                        onClick={() => setSettings((s) => ({ ...s, temperatureUnit: unit }))}
+                                        className={cn(
+                                            'min-w-[3rem] rounded px-3 py-2 text-body transition-colors',
+                                            settings.temperatureUnit === unit
+                                                ? 'bg-primary-soft font-medium text-primary'
+                                                : 'text-muted-foreground active:bg-surface-2'
+                                        )}
+                                    >
+                                        {unit === 'celsius' ? '°C' : '°F'}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Photo background toggle */}

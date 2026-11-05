@@ -25,6 +25,7 @@
     "noResults": "Keine Ergebnisse",
     "noLocation": "Wähle einen Ort, um auf dieser Anzeige das Wetter zu sehen.",
     "change": "Ändern",
+    "temperatureUnit": "Temperatureinheit",
     "photoBackground": "Fotohintergrund",
     "photoBackgroundHint": "Zeigt zufällige Fotos aus deiner Bibliothek als Hintergrund. Erfordert eine verbundene Immich-Integration."
   },

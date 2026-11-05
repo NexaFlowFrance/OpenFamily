@@ -25,6 +25,7 @@
     "noResults": "Sin resultados",
     "noLocation": "Elige una ubicación para mostrar el tiempo en esta pantalla.",
     "change": "Cambiar",
+    "temperatureUnit": "Unidad de temperatura",
     "photoBackground": "Fondo con fotos",
     "photoBackgroundHint": "Muestra fotos aleatorias de tu biblioteca como fondo. Requiere una integración con Immich."
   },

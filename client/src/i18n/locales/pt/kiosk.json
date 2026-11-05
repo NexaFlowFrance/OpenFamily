@@ -25,6 +25,7 @@
     "noResults": "Nenhum resultado",
     "noLocation": "Escolha uma localização para exibir a previsão do tempo nesta tela.",
     "change": "Alterar",
+    "temperatureUnit": "Unidade de temperatura",
     "photoBackground": "Fotos de fundo",
     "photoBackgroundHint": "Exibe fotos aleatórias da sua biblioteca como plano de fundo. Requer integração com o Immich."
   },

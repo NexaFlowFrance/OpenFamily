@@ -53,8 +53,8 @@
       "urlPlaceholder": "http://homeassistant.local:8123",
       "tokenLabel": "Langlebiges Zugriffstoken",
       "tokenPlaceholder": "eyJ… (aus Profil > Sicherheit)",
-      "entityLabel": "To-do-Entität (optional)",
-      "entityPlaceholder": "todo.shopping_list"
+      "entityLabel": "To-do-Entitäten (optional, durch Kommas getrennt)",
+      "entityPlaceholder": "todo.shopping_list, todo.groceries"
     },
     "grocy": {
       "tagline": "Haushaltsverwaltung",

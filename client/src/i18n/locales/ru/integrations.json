@@ -53,8 +53,8 @@
       "urlPlaceholder": "http://homeassistant.local:8123",
       "tokenLabel": "Долгосрочный токен",
       "tokenPlaceholder": "eyJ… (Профиль > Безопасность)",
-      "entityLabel": "Сущность списка дел (необязательно)",
-      "entityPlaceholder": "todo.shopping_list"
+      "entityLabel": "Сущности списков дел (необязательно, через запятую)",
+      "entityPlaceholder": "todo.shopping_list, todo.groceries"
     },
     "grocy": {
       "tagline": "Управление хозяйством",

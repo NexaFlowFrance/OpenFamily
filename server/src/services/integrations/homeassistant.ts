@@ -77,11 +77,28 @@ function getTodoItemsViaWebSocket(baseUrl: string, token: string, entityId: stri
     });
 }
 
-// The todo entity the user typed in the form, if any. When set, it is the list to sync:
+// The todo entities the user typed in the form, if any: one, or several separated by
+// commas, semicolons or spaces ("todo.coop, todo.lidl"). An entity id contains none of
+// those characters, so the split is unambiguous. When set, they are the lists to sync:
 // the legacy shopping_list integration is still loaded on many installs (HA sets it up
 // during onboarding) and must not take precedence over an explicit choice.
-function configuredEntityId(value: unknown): string {
-    return typeof value === 'string' ? value.trim() : '';
+export function parseTodoEntityIds(value: unknown): string[] {
+    if (typeof value !== 'string') return [];
+    const ids = value.split(/[\s,;]+/).map((id) => id.toLowerCase()).filter(Boolean);
+    return Array.from(new Set(ids));
+}
+
+// Each list is read over its own connection, one after the other: plenty for the
+// handful of lists a household keeps, and a bound on how long a sync can run.
+export const MAX_TODO_ENTITIES = 20;
+export const TOO_MANY_TODO_ENTITIES = `${MAX_TODO_ENTITIES} listes Home Assistant au maximum`;
+
+// With several lists, an error has to say which one it is about.
+function entityError(entityId: string, error: unknown, several: boolean): string {
+    const message = error instanceof Error && error.message
+        ? error.message
+        : `Entité "${entityId}" introuvable dans Home Assistant`;
+    return several && !message.includes(entityId) ? `${entityId} : ${message}` : message;
 }
 
 export async function testHomeAssistantConnection(baseUrl: string, token: string, haEntityId?: string): Promise<{ success: boolean; message: string }> {
@@ -94,14 +111,19 @@ export async function testHomeAssistantConnection(baseUrl: string, token: string
             return { success: false, message: `Erreur HTTP ${resp.status}` };
         }
 
-        const entityId = configuredEntityId(haEntityId);
-        if (entityId) {
-            try {
-                const items = await getTodoItemsViaWebSocket(baseUrl, token, entityId);
-                return { success: true, message: `Connecté a Home Assistant (${entityId}, ${items.length} element${items.length > 1 ? 's' : ''})` };
-            } catch (e) {
-                return { success: false, message: e instanceof Error ? e.message : `Entité "${entityId}" introuvable dans Home Assistant` };
+        const entityIds = parseTodoEntityIds(haEntityId);
+        if (entityIds.length > MAX_TODO_ENTITIES) return { success: false, message: TOO_MANY_TODO_ENTITIES };
+        if (entityIds.length > 0) {
+            const found: string[] = [];
+            for (const entityId of entityIds) {
+                try {
+                    const items = await getTodoItemsViaWebSocket(baseUrl, token, entityId);
+                    found.push(`${entityId}, ${items.length} element${items.length > 1 ? 's' : ''}`);
+                } catch (e) {
+                    return { success: false, message: entityError(entityId, e, entityIds.length > 1) };
+                }
             }
+            return { success: true, message: `Connecté a Home Assistant (${found.join(' ; ')})` };
         }
 
         // Check which shopping API is available and warn accordingly
@@ -125,6 +147,27 @@ export async function testHomeAssistantConnection(baseUrl: string, token: string
     }
 }
 
+// Adds the names that are not on the family's shopping list yet.
+async function importShoppingNames(userId: string, names: string[]): Promise<{ imported: number; errors: number }> {
+    let imported = 0;
+    let errors = 0;
+    for (const name of names) {
+        try {
+            const existing = await query(
+                'SELECT id FROM shopping_items WHERE user_id = $1 AND LOWER(name) = LOWER($2)',
+                [userId, name]
+            );
+            if (existing.rows.length === 0) {
+                await query('INSERT INTO shopping_items (user_id, name, category, is_checked) VALUES ($1, $2, $3, false)', [userId, name, 'Autre']);
+                imported++;
+            }
+        } catch {
+            errors++;
+        }
+    }
+    return { imported, errors };
+}
+
 export async function syncHomeAssistant(
     _integrationId: string,
     userId: string,
@@ -137,54 +180,35 @@ export async function syncHomeAssistant(
     if (!token) throw new Error('Token manquant');
 
     const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-    let imported = 0;
-    let errors = 0;
 
-    // Resolve entity_id from config (user can override) or fall back to default
-    const configuredEntity = configuredEntityId(config.ha_entity_id);
-    const entityId = configuredEntity || 'todo.shopping_list';
+    // The entities from the config (the user can name one or several) or the default one.
+    const entityIds = parseTodoEntityIds(config.ha_entity_id);
+    if (entityIds.length > MAX_TODO_ENTITIES) throw new Error(TOO_MANY_TODO_ENTITIES);
 
     // Strategy 1: legacy REST shopping_list endpoint, only when no entity was configured
-    const slResp = configuredEntity
+    const slResp = entityIds.length > 0
         ? null
         : await safeFetch(`${baseUrl}/api/shopping_list`, { headers, timeoutMs: HA_TIMEOUT_MS });
     if (slResp?.ok) {
         const items = await slResp.json() as HAShoppingItem[];
-        for (const item of items) {
-            if (item.complete) continue;
-            try {
-                const existing = await query(
-                    'SELECT id FROM shopping_items WHERE user_id = $1 AND LOWER(name) = LOWER($2)',
-                    [userId, item.name]
-                );
-                if (existing.rows.length === 0) {
-                    await query('INSERT INTO shopping_items (user_id, name, category, is_checked) VALUES ($1, $2, $3, false)', [userId, item.name, 'Autre']);
-                    imported++;
-                }
-            } catch {
-                errors++;
-            }
-        }
-        return { imported, errors };
+        return importShoppingNames(userId, items.filter((item) => !item.complete).map((item) => item.name));
     }
 
-    // Strategy 2: modern todo entity via WebSocket
-    const todoItems = await getTodoItemsViaWebSocket(baseUrl, token, entityId);
-    for (const item of todoItems) {
-        if (item.status === 'completed') continue;
+    // Strategy 2: modern todo entities via WebSocket. Every list is read before anything
+    // is written: a list that cannot be read (renamed, removed) fails the sync under its
+    // own name, instead of leaving the family with part of what it asked for.
+    const targets = entityIds.length > 0 ? entityIds : ['todo.shopping_list'];
+    const names: string[] = [];
+    for (const entityId of targets) {
+        let items: HATodoItem[];
         try {
-            const existing = await query(
-                'SELECT id FROM shopping_items WHERE user_id = $1 AND LOWER(name) = LOWER($2)',
-                [userId, item.summary]
-            );
-            if (existing.rows.length === 0) {
-                await query('INSERT INTO shopping_items (user_id, name, category, is_checked) VALUES ($1, $2, $3, false)', [userId, item.summary, 'Autre']);
-                imported++;
-            }
-        } catch {
-            errors++;
+            items = await getTodoItemsViaWebSocket(baseUrl, token, entityId);
+        } catch (e) {
+            throw new Error(entityError(entityId, e, targets.length > 1));
+        }
+        for (const item of items) {
+            if (item.status !== 'completed') names.push(item.summary);
         }
     }
-
-    return { imported, errors };
+    return importShoppingNames(userId, names);
 }

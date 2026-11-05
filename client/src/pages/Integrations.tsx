@@ -218,6 +218,9 @@ const Integrations: React.FC = () => {
                 setIntegrations((prev) => [...prev.filter((i) => i.type !== res.data.type), res.data]);
                 closeModal();
             }
+        } catch (e) {
+            // A refused connection (unsafe address, too many lists...) says why, in the form.
+            setTestStatus({ ok: false, message: e instanceof Error ? e.message : t('integrations:modal.error') });
         } finally {
             setSaving(false);
         }

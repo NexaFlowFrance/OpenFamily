@@ -53,8 +53,8 @@
       "urlPlaceholder": "http://homeassistant.local:8123",
       "tokenLabel": "长期访问令牌",
       "tokenPlaceholder": "eyJ……（在个人资料 > 安全中获取）",
-      "entityLabel": "待办实体（可选）",
-      "entityPlaceholder": "todo.shopping_list"
+      "entityLabel": "待办实体（可选，多个用逗号分隔）",
+      "entityPlaceholder": "todo.shopping_list, todo.groceries"
     },
     "grocy": {
       "tagline": "家庭管理",

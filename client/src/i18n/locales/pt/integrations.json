@@ -53,8 +53,8 @@
       "urlPlaceholder": "http://homeassistant.local:8123",
       "tokenLabel": "Token de longa duração (LLAT)",
       "tokenPlaceholder": "eyJ… (obtido em Perfil > Segurança)",
-      "entityLabel": "Entidade Todo (opcional)",
-      "entityPlaceholder": "todo.shopping_list"
+      "entityLabel": "Entidades Todo (opcional, separadas por vírgulas)",
+      "entityPlaceholder": "todo.shopping_list, todo.groceries"
     },
     "grocy": {
       "tagline": "Gerenciamento residencial",

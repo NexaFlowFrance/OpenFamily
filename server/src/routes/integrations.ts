@@ -5,7 +5,9 @@ import { encryptCredentials, decryptCredentials } from '../utils/crypto';
 import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
 import { testMealieConnection, syncMealie } from '../services/integrations/mealie';
 import { testTandoorConnection, syncTandoor, fetchTandoorMealPlan, TandoorMealPlanEntry } from '../services/integrations/tandoor';
-import { testHomeAssistantConnection, syncHomeAssistant } from '../services/integrations/homeassistant';
+import {
+    testHomeAssistantConnection, syncHomeAssistant, parseTodoEntityIds, MAX_TODO_ENTITIES, TOO_MANY_TODO_ENTITIES,
+} from '../services/integrations/homeassistant';
 import { testGrocyConnection, syncGrocy } from '../services/integrations/grocy';
 import { testNextcloudConnection, syncNextcloud } from '../services/integrations/nextcloud';
 import { testImmichConnection, syncImmich, fetchImmichRandomPhoto } from '../services/integrations/immich';
@@ -243,7 +245,12 @@ router.post('/', requireParent, async (req: AuthRequest, res) => {
 
     // Merge any integration-specific config fields
     const extraConfig: Record<string, string> = {};
-    if (ha_entity_id) extraConfig.ha_entity_id = ha_entity_id;
+    // One or several todo entities, kept in one normalised form ("todo.a, todo.b").
+    const todoEntityIds = parseTodoEntityIds(ha_entity_id);
+    if (todoEntityIds.length > MAX_TODO_ENTITIES) {
+        return res.status(400).json({ success: false, error: TOO_MANY_TODO_ENTITIES });
+    }
+    if (todoEntityIds.length > 0) extraConfig.ha_entity_id = todoEntityIds.join(', ');
     const config = Object.keys(extraConfig).length > 0 ? { ...(configFromBody || {}), ...extraConfig } : (configFromBody || {});
 
     const cleanUrl = base_url.replace(/\/$/, '');

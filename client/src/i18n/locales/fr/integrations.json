@@ -53,8 +53,8 @@
       "urlPlaceholder": "http://homeassistant.local:8123",
       "tokenLabel": "Token longue durée",
       "tokenPlaceholder": "eyJ… (depuis Profil > Sécurité)",
-      "entityLabel": "Entité todo (facultatif)",
-      "entityPlaceholder": "todo.shopping_list"
+      "entityLabel": "Entités todo (facultatif, séparées par des virgules)",
+      "entityPlaceholder": "todo.shopping_list, todo.groceries"
     },
     "grocy": {
       "tagline": "Gestion du foyer",

@@ -143,5 +143,24 @@
     "logoutEverywhere": "Cerrar sesión en todos los dispositivos",
     "logoutEverywhereDesc": "¿Perdiste el móvil o iniciaste sesión en un ordenador compartido? Esto cierra tu sesión en todas partes, también aquí.",
     "confirmLogoutEverywhere": "¿Cerrar sesión en todos los dispositivos, incluido este?"
+  },
+  "displayLinks": {
+    "title": "Enlaces de pantalla",
+    "subtitle": "Una dirección fija que muestra el plan del día, las comidas, las tareas y dónde está cada uno sin iniciar sesión: para un marco de tinta electrónica, un lector electrónico o cualquier pantalla que no pueda iniciar sesión.",
+    "empty": "Todavía no hay ningún enlace.",
+    "nameLabel": "Nombre de la pantalla",
+    "namePlaceholder": "Marco de la cocina",
+    "create": "Crear enlace",
+    "address": "Dirección de {{name}}",
+    "copy": "Copiar la dirección",
+    "open": "Abrir",
+    "revoke": "Revocar",
+    "confirmRevoke": "¿Revocar el enlace «{{name}}»? La pantalla que lo usa dejará de mostrar el día de tu familia.",
+    "lastUsed": "Último uso: {{date}}",
+    "neverUsed": "Nunca usado",
+    "limit": "Diez enlaces como máximo. Revoca uno para crear otro.",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "warning": "Cualquiera que tenga una dirección puede leer la página. Dásela solo a la pantalla y revoca los enlaces que ya no uses.",
+    "options": "Opciones: añade {{show}} a la dirección para elegir los bloques y {{scale}} para un texto más grande."
   }
 }

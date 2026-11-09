@@ -143,5 +143,24 @@
     "logoutEverywhere": "Sair de todos os dispositivos",
     "logoutEverywhereDesc": "Perdeu o celular ou entrou em um computador compartilhado? Isso encerra sua sessão em todos os lugares, inclusive aqui.",
     "confirmLogoutEverywhere": "Sair de todos os dispositivos, inclusive deste?"
+  },
+  "displayLinks": {
+    "title": "Links de exibição",
+    "subtitle": "Um endereço fixo que mostra a programação do dia, as refeições, as tarefas e quem está onde sem fazer login: para um quadro de papel eletrônico, um leitor digital ou qualquer tela que não consiga entrar na conta.",
+    "empty": "Nenhum link ainda.",
+    "nameLabel": "Nome da tela",
+    "namePlaceholder": "Quadro da cozinha",
+    "create": "Criar link",
+    "address": "Endereço de {{name}}",
+    "copy": "Copiar o endereço",
+    "open": "Abrir",
+    "revoke": "Revogar",
+    "confirmRevoke": "Revogar o link “{{name}}”? A tela que o utiliza deixará de mostrar o dia da sua família.",
+    "lastUsed": "Último uso: {{date}}",
+    "neverUsed": "Nunca usado",
+    "limit": "No máximo dez links. Revogue um para criar outro.",
+    "error": "Algo deu errado. Tente novamente.",
+    "warning": "Qualquer pessoa que tenha um endereço pode ler a página. Passe-o apenas para a tela e revogue os links que não usa mais.",
+    "options": "Opções: acrescente {{show}} ao endereço para escolher os blocos e {{scale}} para um texto maior."
   }
 }

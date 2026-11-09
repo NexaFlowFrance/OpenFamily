@@ -240,4 +240,26 @@ export const coreMigrations: readonly Migration[] = [
             'CREATE INDEX idx_oidc_flows_expires_at ON oidc_flows(expires_at)',
         ],
     },
+    {
+        // Display links: a stable address that shows the family's day without
+        // signing in, for a screen that cannot (e-paper frame, e-reader). A
+        // family has several, each with a name and revocable on its own. The
+        // token is kept readable, like users.calendar_token, so that Settings
+        // can show the address again. locale is the language and region the
+        // page is written in, taken from whoever created the link.
+        id: 'core/0009-display-links',
+        statements: [
+            `CREATE TABLE display_links (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                name VARCHAR(80) NOT NULL,
+                token VARCHAR(64) NOT NULL UNIQUE,
+                locale VARCHAR(35) NOT NULL,
+                created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                last_used_at TIMESTAMPTZ
+            )`,
+            'CREATE INDEX idx_display_links_user ON display_links(user_id)',
+        ],
+    },
 ];

@@ -44,6 +44,7 @@ all in one place, on **your** server, with **your** data.
 | 👨‍👩‍👧‍👦 **Family** | Member profiles, health info, emergency contacts |
 | 🔄 **Real-time sync** | Instant updates across every device (WebSocket) |
 | 🔔 **Notifications** | Appointment reminders, task alerts (Web Push VAPID) + in-app |
+| 🖼️ **Wall & e-paper displays** | Full-screen kiosk for a tablet, and **display links**: a login-free page of the family's day for an e-paper frame (InkyPi), an e-reader or any screen that cannot sign in |
 | 👥 **Shared accounts** | Invite by link, **access requests**, **ownership transfer** |
 | 🔑 **Single sign-on** | Sign in with your own OpenID Connect provider (Authentik, Keycloak, Pocket ID...), optional SSO-only servers, **sign out of all devices** |
 | 🛡️ **Roles & permissions** | **Parent / child** accounts — read-only budget for children |

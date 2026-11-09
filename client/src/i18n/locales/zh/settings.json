@@ -143,5 +143,24 @@
     "logoutEverywhere": "在所有设备上退出登录",
     "logoutEverywhereDesc": "手机丢失，或在共用电脑上登录过？此操作会让您在所有地方退出登录，包括这里。",
     "confirmLogoutEverywhere": "在所有设备上退出登录，包括这台设备？"
+  },
+  "displayLinks": {
+    "title": "显示屏链接",
+    "subtitle": "一个固定地址，无需登录即可显示当天的日程、餐食、任务和成员去向：适用于电子墨水相框、电子书阅读器或任何无法登录的屏幕。",
+    "empty": "还没有链接。",
+    "nameLabel": "屏幕名称",
+    "namePlaceholder": "厨房相框",
+    "create": "创建链接",
+    "address": "{{name}} 的地址",
+    "copy": "复制地址",
+    "open": "打开",
+    "revoke": "撤销",
+    "confirmRevoke": "要撤销链接“{{name}}”吗？使用该链接的屏幕将不再显示您家庭的当日安排。",
+    "lastUsed": "上次使用：{{date}}",
+    "neverUsed": "从未使用",
+    "limit": "最多十个链接。请先撤销一个，再创建新的。",
+    "error": "出了点问题，请重试。",
+    "warning": "任何拥有地址的人都能查看此页面。请只将地址用于该屏幕，并撤销不再使用的链接。",
+    "options": "选项：在地址后添加 {{show}} 可选择显示的板块，添加 {{scale}} 可放大文字。"
   }
 }

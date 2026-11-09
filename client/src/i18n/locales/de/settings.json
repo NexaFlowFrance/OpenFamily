@@ -143,5 +143,24 @@
     "logoutEverywhere": "Von allen Geräten abmelden",
     "logoutEverywhereDesc": "Handy verloren oder an einem gemeinsamen Computer angemeldet? Damit wirst du überall abgemeldet, auch hier.",
     "confirmLogoutEverywhere": "Von allen Geräten abmelden, auch von diesem?"
+  },
+  "displayLinks": {
+    "title": "Anzeige-Links",
+    "subtitle": "Eine feste Adresse, die den Tagesablauf, die Mahlzeiten, die Aufgaben und wer wo ist ohne Anmeldung zeigt: für einen E-Paper-Rahmen, einen E-Reader oder jeden Bildschirm, der sich nicht anmelden kann.",
+    "empty": "Noch kein Link.",
+    "nameLabel": "Name des Bildschirms",
+    "namePlaceholder": "Rahmen in der Küche",
+    "create": "Link erstellen",
+    "address": "Adresse von {{name}}",
+    "copy": "Adresse kopieren",
+    "open": "Öffnen",
+    "revoke": "Widerrufen",
+    "confirmRevoke": "Den Link „{{name}}“ widerrufen? Der Bildschirm, der ihn nutzt, zeigt den Tag deiner Familie dann nicht mehr an.",
+    "lastUsed": "Zuletzt verwendet: {{date}}",
+    "neverUsed": "Noch nie verwendet",
+    "limit": "Höchstens zehn Links. Widerrufe einen, um einen neuen zu erstellen.",
+    "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "warning": "Wer eine Adresse kennt, kann die Seite lesen. Gib sie nur dem Bildschirm und widerrufe Links, die du nicht mehr brauchst.",
+    "options": "Optionen: Hänge {{show}} an die Adresse an, um die Blöcke auszuwählen, und {{scale}} für größeren Text."
   }
 }

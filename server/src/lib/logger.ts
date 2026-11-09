@@ -103,3 +103,10 @@ export const logger = {
 };
 
 export default logger;
+
+// Two addresses carry their secret in the path, because the device that
+// fetches them cannot send a header: a display link and the calendar feed.
+// They are logged without it.
+export const redactPath = (path: string): string => path
+    .replace(/^\/api\/display\/[^/]+/, '/api/display/[redacted]')
+    .replace(/^\/api\/calendar\/[^/]+\/openfamily\.ics$/, '/api/calendar/[redacted]/openfamily.ics');

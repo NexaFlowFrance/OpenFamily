@@ -68,106 +68,107 @@ const enrichAppointmentsWithMembers = async (appointments: any[], userId: string
     });
 };
 
+// The family's appointments with their members. Given a range, recurring
+// appointments are expanded into the occurrences that fall inside it. Shared
+// by the route below and by the display page (lib/displaySnapshot.ts).
+export const listAppointments = async (userId: string, start_date?: unknown, end_date?: unknown): Promise<any[]> => {
+    let queryText = 'SELECT * FROM appointments WHERE user_id = $1';
+    const params: any[] = [userId];
+
+    const nonRecurringConditions: string[] = [];
+    const recurringConditions: string[] = [];
+
+    if (start_date) {
+        params.push(start_date);
+        const parameter = `$${params.length}`;
+
+        nonRecurringConditions.push(
+            `COALESCE(end_time, start_time) >= ${parameter}`
+        );
+        recurringConditions.push(
+            `(recurrence_until IS NULL OR recurrence_until >= (${parameter})::date)`
+        );
+    }
+
+    if (end_date) {
+        params.push(end_date);
+        const parameter = `$${params.length}`;
+
+        nonRecurringConditions.push(`start_time <= ${parameter}`);
+        recurringConditions.push(`start_time <= ${parameter}`);
+    }
+
+    if (nonRecurringConditions.length > 0) {
+        queryText += ` AND (
+            (
+                recurrence_frequency = 'none'
+                AND ${nonRecurringConditions.join(' AND ')}
+            )
+            OR
+            (
+                recurrence_frequency <> 'none'
+                AND ${recurringConditions.join(' AND ')}
+            )
+        )`;
+    }
+
+    queryText += ' ORDER BY start_time ASC';
+
+    const result = await query(queryText, params);
+
+    const exceptionsByAppointment = new Map<string, Map<string, any>>();
+
+    if (start_date && end_date && result.rows.length > 0) {
+        const recurringIds = result.rows
+            .filter((row: any) => row.recurrence_frequency !== 'none')
+            .map((row: any) => row.id);
+
+        if (recurringIds.length > 0) {
+            const exceptionResult = await query(
+                `SELECT appointment_id, occurrence_date, exception_type, override_data
+                 FROM appointment_recurrence_exceptions
+                 WHERE appointment_id = ANY($1::uuid[])
+                   AND occurrence_date BETWEEN ($2)::date AND ($3)::date`,
+                [
+                    recurringIds,
+                    String(start_date).slice(0, 10),
+                    String(end_date).slice(0, 10),
+                ]
+            );
+
+            for (const exception of exceptionResult.rows) {
+                const appointmentId = String(exception.appointment_id);
+                const occurrenceDate = String(exception.occurrence_date).slice(0, 10);
+
+                if (!exceptionsByAppointment.has(appointmentId)) {
+                    exceptionsByAppointment.set(appointmentId, new Map());
+                }
+
+                exceptionsByAppointment
+                    .get(appointmentId)!
+                    .set(occurrenceDate, exception);
+            }
+        }
+    }
+
+    const rows =
+        start_date && end_date
+            ? expandRecurringAppointments(
+                result.rows,
+                String(start_date),
+                String(end_date),
+                exceptionsByAppointment
+            )
+            : result.rows;
+
+    return enrichAppointmentsWithMembers(rows, userId);
+};
+
 // Get all appointments
 router.get('/', async (req: AuthRequest, res) => {
     try {
         const { start_date, end_date } = req.query;
-
-        let queryText = 'SELECT * FROM appointments WHERE user_id = $1';
-        const params: any[] = [req.userId];
-
-        const nonRecurringConditions: string[] = [];
-        const recurringConditions: string[] = [];
-
-        if (start_date) {
-            params.push(start_date);
-            const parameter = `$${params.length}`;
-
-            nonRecurringConditions.push(
-                `COALESCE(end_time, start_time) >= ${parameter}`
-            );
-            recurringConditions.push(
-                `(recurrence_until IS NULL OR recurrence_until >= (${parameter})::date)`
-            );
-        }
-
-        if (end_date) {
-            params.push(end_date);
-            const parameter = `$${params.length}`;
-
-            nonRecurringConditions.push(`start_time <= ${parameter}`);
-            recurringConditions.push(`start_time <= ${parameter}`);
-        }
-
-        if (nonRecurringConditions.length > 0) {
-            queryText += ` AND (
-                (
-                    recurrence_frequency = 'none'
-                    AND ${nonRecurringConditions.join(' AND ')}
-                )
-                OR
-                (
-                    recurrence_frequency <> 'none'
-                    AND ${recurringConditions.join(' AND ')}
-                )
-            )`;
-        }
-
-        queryText += ' ORDER BY start_time ASC';
-
-        const result = await query(queryText, params);
-
-        const exceptionsByAppointment = new Map<string, Map<string, any>>();
-
-        if (start_date && end_date && result.rows.length > 0) {
-            const recurringIds = result.rows
-                .filter((row: any) => row.recurrence_frequency !== 'none')
-                .map((row: any) => row.id);
-
-            if (recurringIds.length > 0) {
-                const exceptionResult = await query(
-                    `SELECT appointment_id, occurrence_date, exception_type, override_data
-                     FROM appointment_recurrence_exceptions
-                     WHERE appointment_id = ANY($1::uuid[])
-                       AND occurrence_date BETWEEN ($2)::date AND ($3)::date`,
-                    [
-                        recurringIds,
-                        String(start_date).slice(0, 10),
-                        String(end_date).slice(0, 10),
-                    ]
-                );
-
-                for (const exception of exceptionResult.rows) {
-                    const appointmentId = String(exception.appointment_id);
-                    const occurrenceDate = String(exception.occurrence_date).slice(0, 10);
-
-                    if (!exceptionsByAppointment.has(appointmentId)) {
-                        exceptionsByAppointment.set(appointmentId, new Map());
-                    }
-
-                    exceptionsByAppointment
-                        .get(appointmentId)!
-                        .set(occurrenceDate, exception);
-                }
-            }
-        }
-
-        const rows =
-            start_date && end_date
-                ? expandRecurringAppointments(
-                    result.rows,
-                    String(start_date),
-                    String(end_date),
-                    exceptionsByAppointment
-                )
-                : result.rows;
-
-        const appointments = await enrichAppointmentsWithMembers(
-            rows,
-            req.userId!
-        );
-
-        res.json({ success: true, data: appointments });
+        res.json({ success: true, data: await listAppointments(req.userId!, start_date, end_date) });
     } catch (error) {
         console.error('Get appointments error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });

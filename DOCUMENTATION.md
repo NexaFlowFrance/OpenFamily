@@ -113,6 +113,39 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 - **Personnalisable par membre** : chaque compte choisit les blocs affichés et leur ordre
 - Accès rapide à tous les modules
 
+### 🖼️ Liens d'affichage (cadre e-paper, liseuse, écran mural)
+Une adresse stable qui affiche la journée de la famille **sans connexion**, pour un écran
+qui ne peut pas ouvrir de session : cadre e-paper alimenté par un outil de capture (InkyPi...),
+navigateur d'une liseuse, tablette murale.
+
+- **Création** : Paramètres → Liens d'affichage, pour les comptes parents. Un nom par écran,
+  dix liens au plus par famille, chacun révocable séparément. L'adresse reste visible dans
+  les paramètres, avec la date de sa dernière utilisation.
+- **Contenu** : rendez-vous du jour et du lendemain, repas, qui est où, tâches, courses et
+  mots de la famille. Les modules que la famille a désactivés n'apparaissent pas.
+- **Rendu** : une page HTML complète produite par le serveur, sans JavaScript, donc lisible
+  par un outil qui capture la page dès son chargement et par le navigateur d'une liseuse.
+  Elle s'adapte à la taille de l'écran : ce qui ne tient pas est retiré bloc par bloc,
+  jamais coupé au milieu d'une ligne. Noir sur blanc, dans la langue et le format d'heure
+  de la personne qui a créé le lien.
+- **Options**, à ajouter à la fin de l'adresse :
+
+  | Option | Effet | Exemple |
+  |---|---|---|
+  | `show` | Blocs à afficher, dans l'ordre donné : `schedule`, `meals`, `planning`, `tasks`, `shopping`, `notes` | `?show=schedule,tasks` |
+  | `scale` | Taille du texte, de 0.5 à 2.5 | `?scale=1.3` |
+  | `refresh` | Secondes avant que la page se recharge seule : 300 par défaut, 30 au minimum, 0 pour jamais | `?refresh=900` |
+  | `lang` | Langue de la page : `fr`, `en`, `de`, `es`, `pt`, `ru`, `zh` | `?lang=en` |
+
+  Plusieurs options se combinent avec `&` : `…/api/display/<jeton>?show=schedule,tasks&scale=1.3`.
+- **InkyPi** : dans le plugin *Screenshot*, collez l'adresse du lien. La capture se fait à
+  la résolution et dans l'orientation de l'écran.
+- **Sécurité** : toute personne qui possède l'adresse peut lire la page. Le jeton (256 bits
+  aléatoires) n'ouvre que cette page, en lecture seule, et rien d'autre dans l'API. Révoquer
+  un lien le coupe aussitôt. La page n'est ni mise en cache ni indexable. Le jeton
+  n'apparaît ni dans les journaux du serveur ni dans ceux du conteneur web fourni ; un
+  reverse proxy placé devant journalise les adresses selon sa propre configuration.
+
 ---
 
 ## Architecture technique

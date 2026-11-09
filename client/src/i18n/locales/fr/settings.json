@@ -143,5 +143,24 @@
     "logoutEverywhere": "Se déconnecter de tous les appareils",
     "logoutEverywhereDesc": "Téléphone perdu, ou connexion sur un ordinateur partagé ? Ceci vous déconnecte partout, y compris ici.",
     "confirmLogoutEverywhere": "Se déconnecter de tous les appareils, y compris celui-ci ?"
+  },
+  "displayLinks": {
+    "title": "Liens d'affichage",
+    "subtitle": "Une adresse stable qui affiche le programme du jour, les repas, les tâches et qui est où, sans se connecter : pour un cadre e-paper, une liseuse ou tout écran qui ne peut pas ouvrir de session.",
+    "empty": "Aucun lien pour l'instant.",
+    "nameLabel": "Nom de l'écran",
+    "namePlaceholder": "Cadre de la cuisine",
+    "create": "Créer un lien",
+    "address": "Adresse de {{name}}",
+    "copy": "Copier l'adresse",
+    "open": "Ouvrir",
+    "revoke": "Révoquer",
+    "confirmRevoke": "Révoquer le lien « {{name}} » ? L'écran qui l'utilise n'affichera plus la journée de votre famille.",
+    "lastUsed": "Dernière utilisation : {{date}}",
+    "neverUsed": "Jamais utilisé",
+    "limit": "Dix liens au maximum. Révoquez-en un pour en créer un autre.",
+    "error": "Une erreur est survenue. Réessayez.",
+    "warning": "Toute personne qui possède une adresse peut lire la page. Ne la donnez qu'à l'écran, et révoquez un lien qui ne sert plus.",
+    "options": "Options : ajoutez {{show}} à l'adresse pour choisir les blocs, et {{scale}} pour un texte plus grand."
   }
 }

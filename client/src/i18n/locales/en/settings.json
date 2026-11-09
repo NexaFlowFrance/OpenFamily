@@ -143,5 +143,24 @@
     "logoutEverywhere": "Sign out of all devices",
     "logoutEverywhereDesc": "Lost a phone, or signed in on a shared computer? This signs you out everywhere, including here.",
     "confirmLogoutEverywhere": "Sign out of all devices, including this one?"
+  },
+  "displayLinks": {
+    "title": "Display links",
+    "subtitle": "A stable address that shows today's schedule, meals, tasks and who's where without signing in: for an e-paper frame, an e-reader or any screen that cannot log in.",
+    "empty": "No link yet.",
+    "nameLabel": "Name of the screen",
+    "namePlaceholder": "Kitchen frame",
+    "create": "Create link",
+    "address": "Address of {{name}}",
+    "copy": "Copy the address",
+    "open": "Open",
+    "revoke": "Revoke",
+    "confirmRevoke": "Revoke the link “{{name}}”? The screen that uses it will stop showing your family's day.",
+    "lastUsed": "Last used: {{date}}",
+    "neverUsed": "Never used",
+    "limit": "Ten links at most. Revoke one to create another.",
+    "error": "Something went wrong. Please try again.",
+    "warning": "Anyone who has an address can read the page. Give it to the screen only, and revoke a link you no longer use.",
+    "options": "Options: add {{show}} to the address to choose the blocks, and {{scale}} for larger text."
   }
 }

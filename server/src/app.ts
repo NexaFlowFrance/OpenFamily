@@ -27,8 +27,9 @@ import categoriesRoutes from './routes/categories';
 import kakeiboRoutes from './routes/kakeibo';
 import postsRoutes from './routes/posts';
 import oidcRoutes from './routes/oidc';
+import displayLinksRoutes, { displayPageRouter } from './routes/displayLinks';
 import { loadEnv } from './config/loadEnv';
-import logger from './lib/logger';
+import logger, { redactPath } from './lib/logger';
 
 loadEnv();
 
@@ -63,6 +64,18 @@ const outboundRateLimiter = rateLimit({
         success: false,
         error: 'Too many requests. Please try again later.'
     }
+});
+
+// A display link is opened without a session, by whoever holds its address.
+// Its token cannot be guessed (256 random bits); this only keeps one client
+// from hammering the page, which reads the family's whole day each time. A
+// screen that reloads every 30 seconds, the fastest allowed, uses 30 of these.
+const displayRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 600,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: 'Too many requests. Please try again later.',
 });
 
 // Middleware
@@ -131,7 +144,10 @@ app.use((req, res, next) => {
     res.on('finish', () => {
         logger.info('http.request', {
             method: req.method,
-            path: req.path,
+            // The whole path, not req.path: by now that one is relative to the
+            // router that answered, so it read "/" for half the API and held a
+            // display link's token on its own, where nothing could recognise it.
+            path: redactPath(req.originalUrl.split('?')[0]),
             statusCode: res.statusCode,
             durationMs: Date.now() - startedAt,
             ip: req.ip,
@@ -187,6 +203,9 @@ app.use('/api/ai', outboundRateLimiter);
 app.use('/api/recipes/import-url', outboundRateLimiter);
 app.use('/api/integrations', outboundRateLimiter);
 app.use('/api/auth/oidc', oidcRoutes);
+// The page behind a display link, and the links' management (parents).
+app.use('/api/display', displayRateLimiter, displayPageRouter);
+app.use('/api/display-links', displayLinksRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', userSettingsRoutes);
 app.use('/api/shopping', shoppingRoutes);

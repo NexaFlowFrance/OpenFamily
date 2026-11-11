@@ -1,0 +1,19 @@
+{
+  "title": "Connecta't al servidor",
+  "subtitle": "OpenFamily s'allotja al teu servidor: configura l'aplicació perquè s'hi connecti.",
+  "urlLabel": "Adreça del servidor",
+  "placeholder": "http://192.168.1.10:3001",
+  "hint": "Fes servir la mateixa adreça que obres al navegador (p. ex., http://192.168.1.10:3001) o bé la teva adreça HTTPS o de Tailscale.",
+  "connect": "Connecta",
+  "connecting": "Connectant…",
+  "errors": {
+    "invalid": "Introdueix un URL vàlid que comenci per http:// o https://",
+    "unreachable": "No s’ha pogut accedir al servidor. Comprova l’adreça i que el servidor estigui en funcionament."
+  },
+  "settings": {
+    "title": "Servidor",
+    "connectedTo": "Connectat a {{url}}",
+    "change": "Canvia de servidor",
+    "disconnect": "Desconnecta"
+  }
+}

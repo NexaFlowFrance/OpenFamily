@@ -1,0 +1,130 @@
+{
+  "loading": "carregant família…",
+  "title": "Família",
+  "subtitle": "Gestiona els membres de la família",
+  "addMember": "Afegeix un membre",
+  "empty": "Encara no hi ha membres a la família. Afegeix-ne el primer!",
+  "roles": {
+    "Parent": "Pare/mare",
+    "Enfant": "Infant",
+    "Etudiant": "Estudiant",
+    "Autre": "Altres"
+  },
+  "colors": {
+    "coral": "Corall",
+    "orange": "Taronja",
+    "yellow": "Groc",
+    "green": "Verd",
+    "cyan": "Cian",
+    "blue": "Blau",
+    "indigo": "Anyil",
+    "pink": "Rosa"
+  },
+  "card": {
+    "age_one": "{{count}} any",
+    "age_other": "{{count}} anys",
+    "health": "Salut",
+    "allergies": "Al·lèrgies:",
+    "medications": "Medicaments:",
+    "emergency": "Contacte d'emergència"
+  },
+  "shared": {
+    "title": "Comptes compartits",
+    "subtitle": "Comparteix l'accés a les dades de la família amb altres comptes.",
+    "you": "(tu)",
+    "owner": "Propietari",
+    "child": "🧒 infant",
+    "parent": "👨 progenitor",
+    "none": "Encara no hi ha cap altre compte que comparteixi aquesta família.",
+    "roleParent": "Pare/mare",
+    "roleChild": "Infant",
+    "roleTitle": "Rol del membre",
+    "transferTitle": "Transfereix la propietat a aquest compte",
+    "kickTitle": "Expulsa aquest compte"
+  },
+  "link": {
+    "label": "Compte enllaçat",
+    "none": "Cap compte enllaçat",
+    "hint": "Enllaça aquest perfil amb un compte compartit: el compte d’un infant podrà veure la seva guardiola i els seus objectius."
+  },
+  "requests": {
+    "title": "Sol·licituds d'accés",
+    "accept": "Accepta",
+    "rejectTitle": "Rebutja"
+  },
+  "myRequest": {
+    "pendingTitle": "Sol·licitud pendent",
+    "sentTo": "Enviada a {{name}} ({{email}})"
+  },
+  "join": {
+    "title": "Uneix-te a una família",
+    "desc": "Introdueix l’adreça electrònica del propietari de la família a la qual et vols unir. Rebrà una sol·licitud que podrà acceptar o rebutjar.",
+    "rejected": "S'ha rebutjat la teva última sol·licitud.",
+    "emailPlaceholder": "correu electrònic@example.com",
+    "sending": "Enviant…",
+    "send": "Envia la sol·licitud",
+    "emailRequired": "Cal una adreça de correu electrònic"
+  },
+  "invite": {
+    "roleLabel": "Convida com a",
+    "generate": "Genera un enllaç d'invitació",
+    "generating": "Generant…",
+    "copyTitle": "Copia",
+    "title": "Convida un membre",
+    "desc": "Envia la invitació per correu electrònic o comparteix l’enllaç tu mateix. La persona convidada crearà el seu compte des d’aquest enllaç i s’unirà a la família sense pagar cap subscripció addicional.",
+    "emailLabel": "Correu electrònic (opcional)",
+    "emailPlaceholder": "membre@example.com",
+    "send": "Envia la invitació",
+    "sent": "S'ha enviat la invitació a {{email}}.",
+    "sendFailed": "No s'ha pogut enviar el correu. Comparteix tu mateix l'enllaç de sota.",
+    "linkHint": "Aquest enllaç és vàlid durant 7 dies. La persona convidada ha de crear el compte des d’aquest enllaç per unir-se a la família."
+  },
+  "leave": {
+    "leaving": "Sortint…",
+    "leave": "Surt de la família compartida"
+  },
+  "dialog": {
+    "editTitle": "Edita el membre",
+    "addTitle": "Afegeix un membre",
+    "description": "Introdueix les dades del membre de la família"
+  },
+  "form": {
+    "name": "Nom",
+    "namePlaceholder": "p. ex., Maria Puig",
+    "role": "Rol",
+    "color": "Color",
+    "birthdate": "Data de naixement (opcional)",
+    "healthInfo": "Informació de salut",
+    "allergies": "Al·lèrgies (separades per comes)",
+    "allergiesPlaceholder": "p. ex., cacauets, lactosa",
+    "medications": "Medicaments (separats per comes)",
+    "medicationsPlaceholder": "p. ex., aspirina, insulina",
+    "emergencyContact": "Contacte d'emergència",
+    "contactName": "Nom del contacte",
+    "contactNamePlaceholder": "p. ex., Joan Puig",
+    "contactPhone": "Telèfon del contacte",
+    "contactPhonePlaceholder": "p. ex., +34 600 123 456",
+    "notes": "Notes (opcional)",
+    "notesPlaceholder": "Més notes…"
+  },
+  "confirm": {
+    "kick": "Vols expulsar aquest compte de la família?",
+    "transfer": "Vols transferir la propietat de la família a {{name}}?\n\nPassaràs a ser un membre normal. Es conservaran totes les dades familiars i les gestionarà el nou propietari. Aquesta acció és irreversible.",
+    "delete": "Segur que vols suprimir aquest membre de la família?",
+    "leave": "Vols sortir de la família compartida? Recuperaràs les teves dades pròpies."
+  },
+  "errors": {
+    "load": "No s’ha pogut carregar la família.",
+    "save": "No s’ha pogut desar aquest membre.",
+    "delete": "No s’ha pogut suprimir aquest membre.",
+    "kick": "No s’ha pogut expulsar aquest membre.",
+    "role": "No s’ha pogut canviar el rol.",
+    "transfer": "No s’ha pogut transferir la propietat.",
+    "leave": "No s’ha pogut sortir de la família.",
+    "invite": "No s’ha pogut crear l’enllaç d’invitació.",
+    "cancelRequest": "No s'ha pogut cancel·lar la sol·licitud.",
+    "sendRequest": "No s’ha pogut enviar la sol·licitud.",
+    "approve": "No s’ha pogut acceptar la sol·licitud.",
+    "reject": "No s’ha pogut rebutjar la sol·licitud."
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "loading": "Carregant el pressupost…",
+  "categories": {
+    "Logement": "Habitatge",
+    "Alimentation": "Queviures",
+    "Transport": "Transport",
+    "Santé": "Salut",
+    "Loisirs": "Oci",
+    "Abonnements": "Subscripcions",
+    "Assurance": "Assegurança",
+    "Enfants": "Infants",
+    "Maison": "Llar",
+    "Autre": "Altres",
+    "Prélèvements": "Rebuts recurrents"
+  },
+  "readOnly": "Mode de només lectura. Només els pares poden editar el pressupost.",
+  "alerts": {
+    "title": "Límits assolits",
+    "over": " · excedit",
+    "warn": " (≥ 80%)"
+  },
+  "balance": {
+    "current": "Saldo actual",
+    "pointed_one": "S'ha conciliat {{count}} moviment recurrent",
+    "pointed_other": "S'han conciliat {{count}} moviments recurrents",
+    "expenses_one": "{{count}} despesa",
+    "expenses_other": "{{count}} despeses",
+    "opening": "Saldo inicial: {{amount}}"
+  },
+  "forecast": {
+    "title": "Previsió",
+    "subtitle": "Propers moviments recurrents: +{{income}} d'ingressos · -{{expenses}} de despeses"
+  },
+  "analytics": "Anàlisi i límits",
+  "charts": {
+    "expensesByCategory": "Despeses per categoria",
+    "noExpenses": "Aquest mes no hi ha despeses",
+    "yearEvolution": "Evolució anual",
+    "income": "Ingressos",
+    "expenses": "Despeses"
+  },
+  "limits": {
+    "title": "Límits mensuals",
+    "subtitle": "Seguiment de la despesa per categoria",
+    "define": "Defineix",
+    "none": "No s'ha definit cap límit"
+  },
+  "sections": {
+    "recurring": "Moviments recurrents",
+    "expenses": "Despeses",
+    "income": "Ingressos"
+  },
+  "recurring": {
+    "empty": "Aquest mes no hi ha moviments recurrents",
+    "markOn": "Marca com a conciliat",
+    "markOff": "Desmarca",
+    "dayPrefix": "dia",
+    "frequency": {
+      "daily": "Diari",
+      "weekly": "Setmanal",
+      "monthly": "Mensual",
+      "yearly": "Anual",
+      "none": "No es repeteix"
+    },
+    "units": {
+      "daily_one": "dia",
+      "daily_other": "dies",
+      "weekly_one": "setmana",
+      "weekly_other": "setmanes",
+      "monthly_one": "mes",
+      "monthly_other": "mesos",
+      "yearly_one": "any",
+      "yearly_other": "anys"
+    }
+  },
+  "empty": {
+    "expenses": "Aquest mes no hi ha despeses",
+    "income": "Aquest mes no hi ha ingressos"
+  },
+  "sheets": {
+    "new": "Afegeix un moviment",
+    "edit": "Edita el moviment",
+    "limit": "Límit mensual"
+  },
+  "toggle": {
+    "expense": "Despesa",
+    "income": "Ingressos"
+  },
+  "fields": {
+    "amount": "Import ({{currency}})",
+    "description": "Descripció (opcional)",
+    "descriptionPlaceholder": "p. ex., queviures, nòmina, ingrés d'una inversió…",
+    "date": "Data",
+    "category": "Categoria",
+    "limit": "Límit mensual ({{currency}})",
+    "limitHint": "Posa 0 per deixar de fer el seguiment d'aquesta categoria.",
+    "startDate": "Data d'inici",
+    "repeat": "Repeteix",
+    "every": "cada",
+    "repeatUntil": "Repeteix fins a (opcional)",
+    "addToCalendar": "Afegeix al calendari",
+    "addToCalendarHint": "Crea un esdeveniment de calendari de tot el dia amb la mateixa data i recurrència.",
+    "type": "Tipus"
+  },
+  "errors": {
+    "amountInvalid": "L'import no és vàlid.",
+    "save": "S'ha produït un error en desar.",
+    "limitInvalid": "El límit no és vàlid.",
+    "startDateRequired": "Cal indicar la data d'inici.",
+    "intervalInvalid": "L'interval de repetició ha de ser d'entre 1 i 365.",
+    "repeatUntilInvalid": "La data de finalització no pot ser anterior a la data d'inici.",
+    "editRecurrenceType": "Per canviar entre un moviment puntual i un de recurrent, suprimeix aquest moviment i torna’l a afegir."
+  },
+  "confirm": {
+    "deleteRecurring": "Vols suprimir aquest moviment recurrent?",
+    "deleteEntry": "Vols suprimir aquest moviment?"
+  },
+  "classic": "Clàssic"
+}

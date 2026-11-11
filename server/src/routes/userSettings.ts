@@ -81,7 +81,7 @@ export const parseDisabledModules = (raw: unknown): string[] => {
 
 // Update the authenticated user's preferred language (used for the UI and for
 // server-generated notifications such as appointment reminders).
-// PUT /api/auth/language - body: { "language": "fr" | "en" | "pt" | "ru" | "zh" | "es" | "de" }
+// PUT /api/auth/language - body: { "language": "fr" | "en" | "pt" | "ru" | "zh" | "es" | "ca" | "de" }
 router.put('/language', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { language } = req.body as { language?: unknown };

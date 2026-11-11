@@ -1,0 +1,91 @@
+{
+  "loading": "Carregant les tasques…",
+  "title": "Tasques",
+  "subtitle": "Gestiona les tasques familiars i en segueix el progrés",
+  "newTask": "Tasca nova",
+  "priorities": {
+    "Haute": "Alta",
+    "Moyenne": "Mitjana",
+    "Basse": "Baixa"
+  },
+  "frequencies": {
+    "Une fois": "Una vegada",
+    "Quotidien": "Diari",
+    "Hebdomadaire": "Setmanal",
+    "Mensuel": "Mensual",
+    "Trimestriel": "Cada trimestre",
+    "Quadrimestriel": "Cada quatre mesos",
+    "Annuel": "Anual"
+  },
+  "stats": {
+    "total": "Total",
+    "completed": "Completades",
+    "pending": "Pendents",
+    "completionRate": "Percentatge de compleció"
+  },
+  "filters": {
+    "label": "Filtres:",
+    "statusAll": "Tots",
+    "statusPending": "Pendents",
+    "statusCompleted": "Completades",
+    "allPriorities": "Totes les prioritats",
+    "allMembers": "Tots els membres",
+    "unassigned": "Sense assignar",
+    "allFrequencies": "Totes les freqüències",
+    "allCategories": "Totes les categories",
+    "noCategory": "Sense categoria"
+  },
+  "empty": {
+    "none": "Encara no hi ha tasques. Crea la primera!",
+    "noMatch": "Cap tasca coincideix amb els filtres seleccionats."
+  },
+  "due": "Data límit: {{date}}",
+  "dialog": {
+    "editTitle": "Edita la tasca",
+    "createTitle": "Tasca nova",
+    "description": "Introdueix els detalls de la tasca"
+  },
+  "form": {
+    "title": "Títol",
+    "titlePlaceholder": "p. ex., fer la compra",
+    "description": "Descripció (opcional)",
+    "descriptionPlaceholder": "Més detalls…",
+    "priority": "Prioritat",
+    "frequency": "Freqüència",
+    "dueDate": "Data límit (opcional)",
+    "assignTo": "Assigna a (opcional)",
+    "noMembers": "No hi ha membres disponibles",
+    "points": "Punts que es poden guanyar (opcional)",
+    "pointsHint": "Els membres assignats guanyaran aquests punts quan completin la tasca.",
+    "category": "Categoria (opcional)",
+    "noCategory": "Cap"
+  },
+  "approval": {
+    "pendingBadge": "Pendent d'aprovació",
+    "approve": "Aprova",
+    "reject": "Rebutja",
+    "toastTitle": "Molt bé, has completat la tasca!",
+    "toastDescription": "Els punts se t’afegiran quan un dels pares ho aprovi."
+  },
+  "confirmDelete": "Segur que vols suprimir aquesta tasca?",
+  "errors": {
+    "loadTasks": "No s'han pogut carregar les tasques.",
+    "loadMembers": "No s'han pogut carregar els membres.",
+    "loadStats": "No s'han pogut carregar les estadístiques.",
+    "saveTask": "No s'ha pogut desar aquesta tasca.",
+    "toggleTask": "No s'ha pogut actualitzar aquesta tasca.",
+    "deleteTask": "No s'ha pogut suprimir aquesta tasca.",
+    "approveTask": "No s'ha pogut aprovar aquesta tasca.",
+    "rejectTask": "No s'ha pogut rebutjar aquesta tasca."
+  },
+  "categories": {
+    "Cuisine": "Cuina",
+    "Chambre": "Dormitori",
+    "Salle de bain": "Bany",
+    "Salon": "Sala d'estar",
+    "Extérieur": "A l'aire lliure",
+    "École": "Escola",
+    "Administratif": "Tràmits",
+    "Autre": "Altres"
+  }
+}

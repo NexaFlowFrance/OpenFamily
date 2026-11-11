@@ -416,6 +416,44 @@ export const sendFamilyInviteEmail = async (
                 footer: 'OpenFamily, tu organizador familiar de código abierto. Recibes este correo porque un miembro de OpenFamily invitó esta dirección a unirse a su familia.',
             }),
         };
+    } else if (lang === 'ca') {
+        const text = [
+            `${inviterName} t'ha convidat a unir-te a la seva família a OpenFamily.`,
+            '',
+            'OpenFamily reuneix el calendari familiar, les llistes de la compra, les tasques, els àpats i el pressupost en un sol espai, sense anuncis ni seguiment.',
+            '',
+            `Per acceptar la invitació, obre aquest enllaç i crea un compte o inicia sessió si ja en tens un: ${joinUrl}`,
+            '',
+            `Aquesta invitació caduca el ${expires}. Si no coneixes ${inviterName}, ignora aquest correu.`,
+            '',
+            'Fins aviat,',
+            'L’equip d’OpenFamily',
+        ].join('\n');
+        content = {
+            subject: `${inviterName} t'ha convidat a la seva família a OpenFamily`,
+            text,
+            html: renderEmailHtml({
+                lang: 'ca',
+                subject: `${inviterName} t'ha convidat a la seva família a OpenFamily`,
+                tagline: 'La vida familiar, ben organitzada.',
+                preheader: 'Uneix-te a la teva família a OpenFamily en pocs passos.',
+                greeting: `${name} t'ha convidat`,
+                intro: `${name} t'ha convidat a unir-te al seu espai familiar a OpenFamily: calendari compartit, llistes de la compra, tasques, àpats i pressupost en un sol lloc, sense anuncis ni seguiment.`,
+                cta: { label: 'Uneix-te a la família', url: joinUrl },
+                stepsIntro: 'Com acceptar la invitació:',
+                stepsHtml: [
+                    'Prem el botó Uneix-te a la família de més amunt.',
+                    'Crea un compte o inicia sessió si ja en tens un. S’associarà automàticament a la família.',
+                    'I ja està: les dades familiars compartides apareixeran de seguida.',
+                ],
+                noteText: `Aquesta invitació caduca el ${escapeHtml(expires)}. Si el botó no funciona, copia aquest enllaç al navegador: ${linkHtml}. Si no coneixes ${name}, ignora aquest correu.`,
+                service: { label: 'Adreça del servei', url: originOf(joinUrl), host },
+                supportHtml: `Tens cap pregunta? Escriu a <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}" style="color:#dc4a60;text-decoration:none;font-weight:600;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
+                signoff: 'Fins aviat,',
+                team: 'L’equip d’OpenFamily',
+                footer: 'OpenFamily, el teu organitzador familiar de codi obert. Has rebut aquest correu perquè un membre d’OpenFamily ha convidat aquesta adreça a unir-se a la seva família.',
+            }),
+        };
     } else if (lang === 'zh') {
         const text = [
             `${inviterName} 邀请您加入 OpenFamily 中的家庭。`,
@@ -686,6 +724,39 @@ export const sendPasswordResetEmail = async (
                 signoff: 'Hasta pronto,',
                 team: 'El equipo de OpenFamily',
                 footer: 'OpenFamily, tu organizador familiar de código abierto. Recibes este correo porque se solicitó restablecer la contraseña de esta cuenta.',
+            }),
+        };
+    } else if (lang === 'ca') {
+        const greetingName = cleanName ? `Hola ${cleanName}` : 'Hola';
+        const text = [
+            `${greetingName},`,
+            '',
+            `S'ha demanat restablir la contrasenya del teu compte d'OpenFamily (${email}).`,
+            '',
+            `Per triar una contrasenya nova, obre aquest enllaç: ${resetUrl}`,
+            '',
+            'L’enllaç és vàlid durant 60 minuts i només es pot fer servir una vegada. Si no has demanat aquest canvi, ignora aquest correu. La contrasenya no canviarà.',
+            '',
+            'Fins aviat,',
+            'L’equip d’OpenFamily',
+        ].join('\n');
+        content = {
+            subject: 'Restableix la contrasenya d’OpenFamily',
+            text,
+            html: renderEmailHtml({
+                lang: 'ca',
+                subject: 'Restableix la contrasenya d’OpenFamily',
+                tagline: 'La vida familiar, ben organitzada.',
+                preheader: 'Tria una contrasenya nova per al teu compte d’OpenFamily.',
+                greeting: escapeHtml(greetingName),
+                intro: `S'ha demanat restablir la contrasenya del teu compte d'OpenFamily (<span style="font-weight:700;color:#2a2028;">${escapeHtml(email)}</span>). Prem el botó de sota per triar-ne una de nova.`,
+                cta: { label: 'Tria una contrasenya nova', url: resetUrl },
+                noteText: `L’enllaç és vàlid durant 60 minuts i només es pot fer servir una vegada. Si el botó no funciona, copia aquest enllaç al navegador: ${linkHtml}. Si no has demanat aquest canvi, ignora aquest correu. La contrasenya no canviarà.`,
+                service: { label: 'Adreça del servei', url: originOf(resetUrl), host },
+                supportHtml: `Tens cap pregunta? Escriu a <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}" style="color:#dc4a60;text-decoration:none;font-weight:600;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
+                signoff: 'Fins aviat,',
+                team: 'L’equip d’OpenFamily',
+                footer: 'OpenFamily, el teu organitzador familiar de codi obert. Has rebut aquest correu perquè s’ha demanat restablir la contrasenya d’aquest compte.',
             }),
         };
     } else if (lang === 'zh') {

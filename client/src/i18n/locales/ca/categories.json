@@ -1,0 +1,26 @@
+{
+  "title": "Categories",
+  "subtitle": "Personalitza les categories de Compres, Receptes, Pressupost i Tasques. Si canvies el nom d'una categoria, també s'actualitzaran els elements existents.",
+  "parentOnly": "Només els pares poden editar les categories.",
+  "modules": {
+    "shopping": "Compres",
+    "recipe": "Receptes",
+    "budget": "Pressupost",
+    "task": "Tasques"
+  },
+  "addPlaceholder": "Categoria nova…",
+  "add": "Afegeix",
+  "save": "Desa",
+  "saved": "Categories desades.",
+  "reset": "Descarta els canvis",
+  "moveUp": "Mou amunt",
+  "moveDown": "Mou avall",
+  "remove": "Treu",
+  "hintReassign": "Els elements d'una categoria eliminada es mouran a «{{fallback}}».",
+  "errors": {
+    "empty": "Els noms de les categories no poden estar buits.",
+    "duplicate": "Categoria duplicada: {{name}}",
+    "atLeastOne": "Conserva almenys una categoria.",
+    "save": "No s'han pogut desar les categories."
+  }
+}

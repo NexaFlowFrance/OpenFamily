@@ -1,0 +1,33 @@
+{
+  "mode": {
+    "classic": "Clàssic",
+    "kakeibo": "Kakeibo"
+  },
+  "availableTitle": "Disponible per gastar",
+  "availableSub": "{{income}} d’ingressos − {{goal}} d’estalvi",
+  "spentSoFar": "Gastat: {{amount}}",
+  "householdIncome": "Ingressos de la llar",
+  "extraIncome": "Ingressos extra d'aquest mes",
+  "totalIncome": "Ingressos totals",
+  "savingsGoal": "Objectiu d'estalvi",
+  "pillarsTitle": "En què es gasten els diners?",
+  "pillars": {
+    "survival": "Necessitats bàsiques",
+    "wants": "Desitjos",
+    "culture": "Cultura",
+    "extra": "Extra"
+  },
+  "pillarHint": {
+    "survival": "necessitats",
+    "wants": "plaers",
+    "culture": "creixement personal",
+    "extra": "imprevistos"
+  },
+  "noExpenses": "No s'han registrat despeses aquest mes.",
+  "reviewTitle": "Balanç de final de mes",
+  "actualSavings": "Estalvi real",
+  "goalReached": "Objectiu assolit: {{amount}} per sobre de la meta!",
+  "goalMissed": "Et falten {{amount}} per assolir l’objectiu.",
+  "notesLabel": "Notes de reflexió",
+  "notesPlaceholder": "Què ha anat bé? Què es pot millorar el mes vinent?"
+}

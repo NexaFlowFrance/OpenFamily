@@ -1,0 +1,82 @@
+{
+  "items": {
+    "today": "Avui",
+    "shopping": "Compres",
+    "tasks": "Tasques",
+    "rewards": "Diners de butxaca",
+    "calendar": "Cites",
+    "planning": "Planificació",
+    "recipes": "Receptes",
+    "meals": "Àpats",
+    "budget": "Pressupost",
+    "family": "Família",
+    "integrations": "Integracions",
+    "settings": "Configuració",
+    "posts": "Publicacions"
+  },
+  "mobile": {
+    "home": "Llar",
+    "planning": "Planificació",
+    "lists": "Llistes",
+    "budget": "Pressupost",
+    "family": "Família"
+  },
+  "quickActions": {
+    "title": "Accions ràpides",
+    "addShopping": "Afegeix un producte de la compra",
+    "addTask": "Afegeix una tasca",
+    "addAppointment": "Afegeix una cita",
+    "addSchedule": "Afegeix una entrada a l'horari",
+    "addRecipe": "Afegeix una recepta",
+    "addMeal": "Afegeix un àpat",
+    "addExpense": "Afegeix una despesa",
+    "addMember": "Afegeix un membre",
+    "addPost": "Publicació nova"
+  },
+  "user": {
+    "profile": "Perfil",
+    "toggleTheme": "Canvia el tema",
+    "logout": "Tanca la sessió",
+    "openMenu": "Obre el menú"
+  },
+  "offline": "Mode fora de línia. Les dades que es mostren provenen de la memòria cau. Podràs tornar a fer canvis quan es recuperi la connexió.",
+  "pageTitleFallback": "Tauler",
+  "posts": {
+    "title": "Publicacions familiars",
+    "subtitle": "Comparteix amb la família què et passa pel cap, una foto o un enllaç.",
+    "newPost": "Publicació nova",
+    "editPost": "Edita la publicació",
+    "editing": "Estàs editant una de les teves publicacions.",
+    "placeholder": "Què et passa pel cap?",
+    "linkPlaceholder": "Comparteix un enllaç (opcional)",
+    "addPhoto": "Afegeix una foto",
+    "post": "Publica",
+    "saveChanges": "Desa els canvis",
+    "cancel": "Cancel·la",
+    "photoPreview": "Previsualització de la foto",
+    "removePhoto": "Treu la foto",
+    "sharedPhoto": "Foto compartida",
+    "empty": "Encara no hi ha publicacions familiars.",
+    "emptySubtitle": "Sigues el primer a compartir alguna cosa.",
+    "edited": "editat",
+    "edit": "Edita la publicació",
+    "delete": "Suprimeix la publicació",
+    "confirmDelete": "Vols suprimir aquesta publicació?",
+    "seen": "Vist",
+    "markSeen": "Marca com a vist",
+    "seenBy": "Ho han vist: {{names}}",
+    "notSeen": "Encara no ho ha vist ningú",
+    "errors": {
+      "load": "No s'han pogut carregar les publicacions.",
+      "save": "No s'ha pogut desar la publicació.",
+      "delete": "No s'ha pogut suprimir la publicació.",
+      "seen": "No s'ha pogut marcar la publicació com a vista.",
+      "empty": "Afegeix primer una mica de text, una foto o un enllaç.",
+      "image": "No s’ha pogut fer servir aquesta foto.",
+      "imageTooLarge": "La foto encara és massa gran després de canviar-ne la mida."
+    }
+  },
+  "rail": {
+    "label": "Seccions"
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "appName": "OpenFamily",
+  "demo": {
+    "notice": "Mode de demostració: els canvis no es desaran i es perdran en tornar a carregar la pàgina.",
+    "reset": "Restableix",
+    "star": "Dona una estrella a GitHub"
+  },
+  "language": {
+    "syncError": "No s’ha pogut desar la preferència d’idioma.",
+    "currencySyncError": "No s’ha pogut actualitzar la moneda predeterminada."
+  },
+  "actions": {
+    "add": "Afegeix",
+    "edit": "Edita",
+    "delete": "Suprimeix",
+    "cancel": "Cancel·la",
+    "save": "Desa",
+    "saveChanges": "Desa els canvis",
+    "close": "Tanca",
+    "confirm": "Confirma",
+    "create": "Crea",
+    "update": "Actualitza",
+    "search": "Cerca",
+    "filter": "Filtra",
+    "back": "Enrere",
+    "today": "Avui",
+    "retry": "Torna-ho a provar",
+    "apply": "Aplica",
+    "reset": "Restableix",
+    "export": "Exporta",
+    "import": "Importa",
+    "clear": "Buida",
+    "send": "Envia",
+    "loadMore": "Carrega'n més"
+  },
+  "states": {
+    "loading": "Carregant…",
+    "saving": "Desant…",
+    "empty": "Encara no hi ha res",
+    "error": "S'ha produït un error"
+  },
+  "labels": {
+    "name": "Nom",
+    "fullName": "Nom complet",
+    "description": "Descripció",
+    "date": "Data",
+    "time": "Hora",
+    "startTime": "Hora d'inici",
+    "endTime": "Hora de finalització",
+    "location": "Lloc",
+    "notes": "Notes",
+    "category": "Categoria",
+    "quantity": "Quantitat",
+    "price": "Preu",
+    "amount": "Quantitat",
+    "email": "Correu electrònic",
+    "password": "Contrasenya",
+    "optional": "opcional",
+    "all": "Tots",
+    "none": "Cap"
+  },
+  "days": [
+    "dilluns",
+    "dimarts",
+    "dimecres",
+    "dijous",
+    "divendres",
+    "dissabte",
+    "diumenge"
+  ],
+  "daysShort": [
+    "dl.",
+    "dt.",
+    "dc.",
+    "dj.",
+    "dv.",
+    "ds.",
+    "dg."
+  ],
+  "months": [
+    "gener",
+    "febrer",
+    "març",
+    "abril",
+    "maig",
+    "juny",
+    "juliol",
+    "agost",
+    "setembre",
+    "octubre",
+    "novembre",
+    "desembre"
+  ],
+  "monthsShort": [
+    "gen.",
+    "febr.",
+    "març",
+    "abr.",
+    "maig",
+    "juny",
+    "jul.",
+    "ag.",
+    "set.",
+    "oct.",
+    "nov.",
+    "des."
+  ]
+}

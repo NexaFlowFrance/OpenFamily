@@ -24,6 +24,9 @@ export const LANGUAGE_CONFIG: Record<string, LanguageConfig> = {
     es: {
         label: 'ES',
     },
+    ca: {
+        label: 'CA',
+    },
     de: {
         label: 'DE',
     },

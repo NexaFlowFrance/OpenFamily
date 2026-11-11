@@ -1,0 +1,73 @@
+{
+  "magic": {
+    "open": "Assistent d'IA",
+    "title": "Assistent d'IA ✨",
+    "description": "Explica què vols afegir i l'assistent s'encarregarà de la resta.",
+    "placeholder": "Afegeix lasanya dijous al vespre i recorda a la Mia que agafi la bossa del gimnàs…",
+    "parse": "Analitza",
+    "parsing": "Analitzant…",
+    "nothingFound": "No s’ha trobat cap element que es pugui dur a terme en aquesta nota. Prova de reformular-la.",
+    "back": "Enrere",
+    "reviewHint": "Revisa les propostes, desmarca les que no vulguis i confirma-les.",
+    "confirm": "Afegeix-ne ({{count}})",
+    "confirming": "Afegint…",
+    "successTitle": "Fet ✨",
+    "successDescription": "S'han afegit {{count}} elements.",
+    "partialTitle": "Afegit parcialment",
+    "partialDescription": "S’han afegit {{added}} elements i n’han fallat {{failed}}.",
+    "allFailed": "No s'ha pogut afegir cap element. Torna-ho a provar.",
+    "types": {
+      "task": "Tasca",
+      "appointment": "Cita",
+      "shopping_item": "Compres",
+      "budget_entry": "Pressupost"
+    }
+  },
+  "meals": {
+    "button": "Suggereix un menú ✨",
+    "dialogTitle": "Suggeriments per sopar",
+    "dialogDescription": "Setmana del {{start}} al {{end}} — basat en les teves receptes.",
+    "loading": "L'assistent està preparant el menú…",
+    "empty": "Ja hi ha tots els sopars d'aquesta setmana planificats.",
+    "confirm": "Afegeix al pla ({{count}})",
+    "successTitle": "Menú afegit ✨",
+    "successDescription": "S'han planificat {{count}} sopars.",
+    "partialTitle": "Afegit parcialment",
+    "partialDescription": "S’han afegit {{added}} i n’han fallat {{failed}}."
+  },
+  "settings": {
+    "title": "Assistent d'IA",
+    "subtitle": "Connecta un model d’IA (local o al núvol) per afegir elements en llenguatge natural i obtenir suggeriments de menús.",
+    "provider": "Proveïdor",
+    "providers": {
+      "ollama": "Ollama (local)",
+      "openai": "API compatible amb OpenAI",
+      "anthropic": "Claude d'Anthropic",
+      "gemini": "Google Gemini"
+    },
+    "baseUrl": "URL del servidor",
+    "apiKey": "Clau de l'API",
+    "keyKept": "••• (es conserva)",
+    "clearKey": "Esborra la clau desada",
+    "model": "Model",
+    "enabled": "Assistent activat",
+    "privacy": "Privadesa: la clau de l’API s’encripta i només es desa al TEU servidor. Amb Ollama, res no surt de casa: les notes es processen localment.",
+    "parentOnly": "Només els pares poden canviar aquesta configuració.",
+    "save": "Desa",
+    "saving": "Desant…",
+    "saved": "S'han desat els paràmetres.",
+    "test": "Prova la connexió",
+    "testing": "Provant…",
+    "testSuccess": "Connexió correcta: el model respon bé."
+  },
+  "errors": {
+    "AI_NOT_CONFIGURED": "L’assistent d’IA no està configurat. Ves a Configuració.",
+    "AI_DISABLED": "L’assistent d’IA està desactivat a Configuració.",
+    "AI_UNREACHABLE": "No es pot contactar amb el proveïdor d'IA. Comprova l'URL i que el servei estigui en funcionament.",
+    "AI_UNAUTHORIZED": "El proveïdor ha rebutjat la clau de l'API. Comprova-la a la configuració.",
+    "AI_MODEL_NOT_FOUND": "No s’ha trobat el model al proveïdor. Comprova’n el nom (p. ex., llama3.1).",
+    "AI_INVALID_RESPONSE": "El model ha retornat una resposta no vàlida. Torna-ho a provar o canvia de model.",
+    "AI_PROVIDER_ERROR": "El proveïdor d'IA ha retornat un error. Torna-ho a provar.",
+    "AI_NOT_ENOUGH_RECIPES": "Afegeix almenys 5 receptes perquè l'assistent pugui preparar un menú."
+  }
+}

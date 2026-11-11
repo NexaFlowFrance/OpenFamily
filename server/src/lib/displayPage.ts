@@ -32,7 +32,7 @@ export interface DisplayOptions {
 }
 
 const DEFAULT_LOCALE: Record<Language, string> = {
-    fr: 'fr-FR', en: 'en-GB', pt: 'pt-BR', ru: 'ru-RU', es: 'es-ES', zh: 'zh-CN', de: 'de-DE',
+    fr: 'fr-FR', en: 'en-GB', pt: 'pt-BR', ru: 'ru-RU', es: 'es-ES', ca: 'ca-ES', zh: 'zh-CN', de: 'de-DE',
 };
 
 const DEFAULT_REFRESH_SECONDS = 300;

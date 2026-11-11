@@ -1,5 +1,5 @@
 /** The languages of the interface, e-mails, notifications and reminders. French is the default. */
-export const LANGUAGES = ['fr', 'en', 'pt', 'ru', 'es', 'zh', 'de'] as const;
+export const LANGUAGES = ['fr', 'en', 'pt', 'ru', 'es', 'ca', 'zh', 'de'] as const;
 
 export type Language = typeof LANGUAGES[number];
 

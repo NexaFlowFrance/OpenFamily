@@ -23,6 +23,11 @@ services:
       dockerfile: ./server/Dockerfile
     container_name: openfamily-server
     restart: unless-stopped
+    # Lets the container reach services running on the host itself, such as an
+    # Ollama installed next to Docker, at http://host.docker.internal:11434.
+    # Docker Desktop resolves that name on its own; on Linux it needs this line.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432

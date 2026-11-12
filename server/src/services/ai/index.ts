@@ -26,10 +26,13 @@ export interface AiCompletionRequest {
     user: string;
     /** JSON schema of the expected response object (additionalProperties:false everywhere). */
     jsonSchema: Record<string, unknown>;
+    /** Overrides the shared timeout: the connection test lets a model load first. */
+    timeoutMs?: number;
 }
 
 export type AiErrorCode =
     | 'AI_UNREACHABLE'
+    | 'AI_CONNECTION_DROPPED'
     | 'AI_UNAUTHORIZED'
     | 'AI_MODEL_NOT_FOUND'
     | 'AI_INVALID_RESPONSE'
@@ -44,6 +47,8 @@ export class AiError extends Error {
 
 /** All providers share the same hard timeout. */
 export const AI_TIMEOUT_MS = 60_000;
+/** The connection test waits longer: the first call to a local model loads it. */
+export const AI_TEST_TIMEOUT_MS = 180_000;
 
 export const DEFAULT_BASE_URLS: Record<AiProvider, string | null> = {
     ollama: 'http://localhost:11434',
@@ -63,18 +68,60 @@ export const DEFAULT_BASE_URLS: Record<AiProvider, string | null> = {
  * Imported lazily to avoid a circular import (safeFetch imports AI_TIMEOUT_MS
  * from this module).
  */
-export async function aiFetch(url: string, init: RequestInit): Promise<Response> {
+export async function aiFetch(url: string, init: RequestInit, timeoutMs: number = AI_TIMEOUT_MS): Promise<Response> {
     const { safeFetch } = await import('../../lib/safeFetch');
+    const startedAt = Date.now();
     try {
         // LAN/private targets stay legitimate here (local Ollama, LM Studio…);
         // the guard always blocks metadata endpoints regardless.
-        return await safeFetch(url, { ...init, timeoutMs: AI_TIMEOUT_MS });
+        return await safeFetch(url, { ...init, timeoutMs });
     } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
-            throw new AiError('AI_UNREACHABLE', `Le fournisseur IA n'a pas répondu en ${AI_TIMEOUT_MS / 1000}s`);
-        }
-        throw new AiError('AI_UNREACHABLE', error instanceof Error ? error.message : 'Fournisseur IA injoignable');
+        throw describeFetchFailure(error, url, Date.now() - startedAt, timeoutMs);
     }
+}
+
+const TLS_CODES = ['CERT_HAS_EXPIRED', 'DEPTH_ZERO_SELF_SIGNED_CERT', 'SELF_SIGNED_CERT_IN_CHAIN', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'ERR_TLS_CERT_ALTNAME_INVALID'];
+
+/**
+ * What went wrong on the way to the provider, said precisely. The settings page
+ * shows this text, and "cannot reach" covers very different situations: nothing
+ * listening, an unknown host, a connection that a proxy in between cut after its
+ * own timeout, a model that crashed mid-answer. fetch() wraps the real reason in
+ * its `cause`.
+ */
+export function describeFetchFailure(error: unknown, url: string, elapsedMs: number, timeoutMs: number): AiError {
+    if (error instanceof Error && error.name === 'AbortError') {
+        return new AiError('AI_UNREACHABLE', `Le fournisseur IA n'a pas répondu en ${Math.round(timeoutMs / 1000)} s`);
+    }
+    const cause = error instanceof Error ? (error as { cause?: unknown }).cause : undefined;
+    const causeMessage = cause instanceof Error ? cause.message : typeof cause === 'string' ? cause : '';
+    const code = String((cause as { code?: unknown })?.code ?? (error as { code?: unknown })?.code ?? '');
+    const text = `${causeMessage} ${error instanceof Error ? error.message : String(error)}`.toLowerCase();
+    let host = url;
+    try {
+        host = new URL(url).host;
+    } catch {
+        // Keep the address as given.
+    }
+    const elapsed = `${Math.round(elapsedMs / 1000)} s`;
+
+    if (code === 'ECONNREFUSED') {
+        return new AiError('AI_UNREACHABLE', `Connexion refusée par ${host} : rien n'écoute à cette adresse`);
+    }
+    if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') {
+        return new AiError('AI_UNREACHABLE', `Nom d'hôte introuvable : ${host}`);
+    }
+    if (code === 'ECONNRESET' || code === 'EPIPE' || code === 'UND_ERR_SOCKET' || text.includes('other side closed') || text.includes('socket hang up')) {
+        return new AiError('AI_CONNECTION_DROPPED', `${host} a coupé la connexion après ${elapsed}, avant de répondre`);
+    }
+    if (code === 'EHOSTUNREACH' || code === 'ENETUNREACH' || code === 'ETIMEDOUT' || code === 'UND_ERR_CONNECT_TIMEOUT') {
+        return new AiError('AI_UNREACHABLE', `${host} est injoignable (${code})`);
+    }
+    if (TLS_CODES.includes(code) || code.startsWith('ERR_TLS') || code.startsWith('ERR_SSL')) {
+        return new AiError('AI_UNREACHABLE', `Certificat TLS de ${host} refusé (${code})`);
+    }
+    const detail = causeMessage || (error instanceof Error ? error.message : String(error)) || 'Fournisseur IA injoignable';
+    return new AiError('AI_UNREACHABLE', code ? `${detail} (${code})` : detail);
 }
 
 /**

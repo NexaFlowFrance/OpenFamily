@@ -64,6 +64,7 @@
     "AI_NOT_CONFIGURED": "Der KI-Assistent ist nicht eingerichtet. Gehe zu den Einstellungen.",
     "AI_DISABLED": "Der KI-Assistent ist in den Einstellungen deaktiviert.",
     "AI_UNREACHABLE": "Der KI-Anbieter ist nicht erreichbar. Prüfe die URL und ob der Dienst läuft.",
+    "AI_CONNECTION_DROPPED": "Der KI-Anbieter hat die Verbindung vor einer Antwort abgebrochen. Meist liegt es an einem Proxy dazwischen oder an einem abstürzenden Modell.",
     "AI_UNAUTHORIZED": "API-Schlüssel abgelehnt. Prüfe ihn in den Einstellungen.",
     "AI_MODEL_NOT_FOUND": "Modell beim Anbieter nicht gefunden. Prüfe den Namen (z. B. llama3.1).",
     "AI_INVALID_RESPONSE": "Das Modell hat eine ungültige Antwort geliefert. Versuche es erneut oder wechsle das Modell.",

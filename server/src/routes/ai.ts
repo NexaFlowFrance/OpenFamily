@@ -3,7 +3,10 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
 import { encryptCredentials, decryptCredentials } from '../utils/crypto';
 import { assertSafeIntegrationUrl, UnsafeUrlError } from '../utils/urlGuard';
-import { aiComplete, aiCompleteWithUsage, AiError, DEFAULT_BASE_URLS, type AiProvider, type AiSettings } from '../services/ai';
+import {
+    aiComplete, aiCompleteWithUsage, AiError, AI_TEST_TIMEOUT_MS, DEFAULT_BASE_URLS, type AiProvider, type AiSettings,
+} from '../services/ai';
+import { ollamaHasModel, ollamaListModels } from '../services/ai/ollama';
 import {
     PARSE_SCHEMA,
     MEALS_SCHEMA,
@@ -24,6 +27,8 @@ const router = Router();
 router.use(authMiddleware);
 
 const PROVIDERS: AiProvider[] = ['ollama', 'openai', 'anthropic', 'gemini'];
+// Listing the models of an Ollama server is quick; it is the reachability check.
+const AI_MODEL_LIST_TIMEOUT_MS = 15_000;
 
 interface AiSettingsRow {
     provider: AiProvider;
@@ -208,6 +213,26 @@ router.post('/test', requireParent, async (req: AuthRequest, res) => {
             model: model.trim().slice(0, 100),
         };
 
+        const startedAt = Date.now();
+
+        // Ollama first: is there an Ollama at this address, and does it have the
+        // model? Its answer names the installed ones, which a missing model's
+        // error alone never says (issue #137).
+        if (settings.provider === 'ollama') {
+            const installed = await ollamaListModels(settings.base_url, AI_MODEL_LIST_TIMEOUT_MS);
+            if (!ollamaHasModel(installed, settings.model)) {
+                return res.status(502).json({
+                    success: false,
+                    error: 'AI_MODEL_NOT_FOUND',
+                    message: installed.length > 0
+                        ? `Modèles installés sur ce serveur : ${installed.slice(0, 12).join(', ')}${installed.length > 12 ? '…' : ''}`
+                        : `Aucun modèle installé sur ce serveur. Sur la machine d'Ollama : ollama pull ${settings.model}`,
+                });
+            }
+        }
+
+        // The first call to a local model loads it, which can take a while: the
+        // test waits longer than the assistant does.
         const result = await aiComplete(settings, {
             system: 'Tu es un test de connexion. Réponds uniquement en JSON.',
             user: 'Réponds avec {"ok":true}',
@@ -217,6 +242,7 @@ router.post('/test', requireParent, async (req: AuthRequest, res) => {
                 required: ['ok'],
                 properties: { ok: { type: 'boolean' } },
             },
+            timeoutMs: AI_TEST_TIMEOUT_MS,
         });
 
         if (result.ok !== true) {
@@ -226,8 +252,16 @@ router.post('/test', requireParent, async (req: AuthRequest, res) => {
                 message: 'Le modèle a répondu, mais pas le JSON attendu',
             });
         }
-        res.json({ success: true, message: 'OK' });
+        res.json({ success: true, message: 'OK', elapsed_ms: Date.now() - startedAt });
     } catch (error) {
+        if (error instanceof AiError) {
+            // The settings page shows the reason once; the server log keeps it.
+            logger.warn('ai.test_failed', {
+                provider: (req.body as { provider?: unknown })?.provider,
+                code: error.code,
+                reason: error.message,
+            });
+        }
         handleAiError(res, error, 'test');
     }
 });

@@ -64,6 +64,7 @@
     "AI_NOT_CONFIGURED": "L'assistant IA n'est pas configuré. Rendez-vous dans les Réglages.",
     "AI_DISABLED": "L'assistant IA est désactivé dans les Réglages.",
     "AI_UNREACHABLE": "Impossible de joindre le fournisseur IA. Vérifiez l'URL et que le service tourne.",
+    "AI_CONNECTION_DROPPED": "Le fournisseur IA a coupé la connexion avant de répondre. En général, un proxy entre les deux ou un modèle qui plante.",
     "AI_UNAUTHORIZED": "Clé API refusée. Vérifiez-la dans les Réglages.",
     "AI_MODEL_NOT_FOUND": "Modèle introuvable chez le fournisseur. Vérifiez son nom (ex. llama3.1).",
     "AI_INVALID_RESPONSE": "Le modèle a renvoyé une réponse invalide. Réessayez ou changez de modèle.",

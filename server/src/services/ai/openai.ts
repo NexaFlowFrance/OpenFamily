@@ -47,7 +47,7 @@ export async function openaiComplete(
             ],
             response_format: { type: 'json_object' },
         }),
-    });
+    }, request.timeoutMs);
 
     if (!response.ok) {
         const detail = await safeErrorMessage(response);

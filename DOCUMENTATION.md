@@ -113,6 +113,32 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 - **Personnalisable par membre** : chaque compte choisit les blocs affichés et leur ordre
 - Accès rapide à tous les modules
 
+### 🤖 Assistant IA
+Facultatif. Un modèle de langage, local ou dans le nuage, ajoute des éléments en langage
+naturel (« lasagnes jeudi soir et rappelle à Mia son sac de piscine ») et propose des menus
+à partir de vos recettes. Il se configure dans Paramètres → Assistant IA, par un compte parent.
+
+- **Fournisseurs** : Ollama (local, aucune clé, rien ne quitte la maison), toute API
+  compatible OpenAI (LM Studio, vLLM, OpenAI...), Anthropic Claude, Google Gemini. La clé
+  d'API est chiffrée et ne quitte jamais votre serveur.
+- **Ollama à côté d'OpenFamily dans Docker** : c'est le serveur OpenFamily qui appelle Ollama,
+  depuis son conteneur. `http://localhost:11434` désigne donc le conteneur lui-même, pas la
+  machine. Utilisez :
+  - `http://host.docker.internal:11434` si Ollama tourne sur la machine hôte (le
+    `docker-compose.yml` fourni déclare ce nom, y compris sous Linux) ;
+  - `http://<nom-du-conteneur>:11434` si Ollama est un conteneur sur le même réseau Docker ;
+  - l'adresse IP de la machine, sinon.
+  Le modèle doit être téléchargé sur la machine d'Ollama (`ollama pull qwen3.5:4b`).
+- **Tester la connexion** : le bouton vérifie d'abord qu'un Ollama répond à l'adresse et
+  qu'il a bien le modèle, en nommant ceux qu'il a, puis lui demande une réponse. Le premier
+  appel charge le modèle en mémoire et peut prendre une à deux minutes sur une machine
+  modeste ; le test attend jusqu'à trois minutes, l'assistant une. Les appels suivants
+  prennent quelques secondes. En cas d'échec, la page affiche le message du fournisseur lui-même
+  (modèle absent, mémoire insuffisante...), et le journal du serveur le garde (`ai.test_failed`).
+- **Un reverse proxy entre les deux** coupe souvent la connexion après son propre délai
+  (10 ou 30 secondes) : le test le signale comme « connexion coupée avant de répondre ».
+  Préférez une adresse directe, ou relevez le délai du proxy à deux minutes au moins.
+
 ### 🖼️ Liens d'affichage (cadre e-paper, liseuse, écran mural)
 Une adresse stable qui affiche la journée de la famille **sans connexion**, pour un écran
 qui ne peut pas ouvrir de session : cadre e-paper alimenté par un outil de capture (InkyPi...),

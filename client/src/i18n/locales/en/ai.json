@@ -64,6 +64,7 @@
     "AI_NOT_CONFIGURED": "The AI assistant is not configured. Head to Settings.",
     "AI_DISABLED": "The AI assistant is disabled in Settings.",
     "AI_UNREACHABLE": "Cannot reach the AI provider. Check the URL and that the service is running.",
+    "AI_CONNECTION_DROPPED": "The AI provider dropped the connection before answering. A proxy between the two, or the model crashing, usually explains it.",
     "AI_UNAUTHORIZED": "API key rejected. Check it in Settings.",
     "AI_MODEL_NOT_FOUND": "Model not found at the provider. Check its name (e.g. llama3.1).",
     "AI_INVALID_RESPONSE": "The model returned an invalid response. Retry or switch models.",

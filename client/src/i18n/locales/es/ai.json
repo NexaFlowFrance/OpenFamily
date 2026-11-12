@@ -64,6 +64,7 @@
     "AI_NOT_CONFIGURED": "El asistente de IA no está configurado. Ve a Ajustes.",
     "AI_DISABLED": "El asistente de IA está desactivado en Ajustes.",
     "AI_UNREACHABLE": "No se puede contactar con el proveedor de IA. Comprueba la URL y que el servicio esté funcionando.",
+    "AI_CONNECTION_DROPPED": "El proveedor de IA cortó la conexión antes de responder. Suele deberse a un proxy intermedio o a que el modelo falla.",
     "AI_UNAUTHORIZED": "La clave API fue rechazada. Compruébala en Ajustes.",
     "AI_MODEL_NOT_FOUND": "El proveedor no encontró el modelo. Comprueba su nombre, por ejemplo llama3.1.",
     "AI_INVALID_RESPONSE": "El modelo devolvió una respuesta no válida. Inténtalo de nuevo o cambia de modelo.",

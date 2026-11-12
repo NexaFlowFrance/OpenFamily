@@ -64,6 +64,7 @@
     "AI_NOT_CONFIGURED": "尚未配置 AI 助手，请前往“设置”。",
     "AI_DISABLED": "AI 助手已在“设置”中停用。",
     "AI_UNREACHABLE": "无法连接 AI 服务提供商，请检查 URL 及服务是否正在运行。",
+    "AI_CONNECTION_DROPPED": "AI 提供方在回复前断开了连接。通常是中间的代理或模型崩溃导致。",
     "AI_UNAUTHORIZED": "API 密钥被拒绝，请在“设置”中检查。",
     "AI_MODEL_NOT_FOUND": "服务提供商中未找到该模型，请检查模型名称（例如 llama3.1）。",
     "AI_INVALID_RESPONSE": "模型返回了无效响应，请重试或切换模型。",

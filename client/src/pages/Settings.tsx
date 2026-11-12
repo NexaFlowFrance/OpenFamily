@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
 import { Download, Upload, CheckCircle, AlertCircle, Loader2, Bell, BellOff, Globe, Languages, Camera, Trash2, MonitorPlay, Sparkles, LayoutGrid, Server, Tags, ArrowUp, ArrowDown, Plus, Heart, Star } from 'lucide-react';
 import { Card, CardContent, Button, Input, Select } from '../components/ui';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
@@ -98,7 +98,7 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
     const [saveError, setSaveError] = useState('');
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [testing, setTesting] = useState(false);
-    const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+    const [testResult, setTestResult] = useState<{ success: boolean; message: string; detail?: string } | null>(null);
 
     useEffect(() => {
         const load = async () => {
@@ -167,15 +167,19 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
         setTestResult(null);
         setSaveSuccess(false);
         try {
-            const response = await api.post<{ success: boolean; message?: string }>('/api/ai/test', {
+            const response = await api.post<{ success: boolean; message?: string; elapsed_ms?: number }>('/api/ai/test', {
                 provider,
                 base_url: provider === 'anthropic' || provider === 'gemini' ? undefined : baseUrl.trim() || undefined,
                 api_key: apiKey.trim() || undefined,
                 model: model.trim() || undefined,
             });
-            setTestResult({ success: Boolean(response.success), message: t('ai:settings.testSuccess') });
+            // How long the model took says a lot about the setup: a first call that
+            // loads the model can take a minute, the next ones a second.
+            const seconds = typeof response.elapsed_ms === 'number' ? ` (${(response.elapsed_ms / 1000).toFixed(1)} s)` : '';
+            setTestResult({ success: Boolean(response.success), message: t('ai:settings.testSuccess') + seconds });
         } catch (err) {
-            setTestResult({ success: false, message: aiError(err) });
+            // The provider's own words (an Ollama error, a model list...) are the useful part.
+            setTestResult({ success: false, message: aiError(err), detail: err instanceof ApiError ? err.detail : undefined });
         } finally {
             setTesting(false);
         }
@@ -324,6 +328,11 @@ const AiAssistantCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                                             <AlertCircle className="h-4 w-4 shrink-0" />
                                         )}
                                         {testResult.message}
+                                    </p>
+                                )}
+                                {testResult?.detail && (
+                                    <p className="break-words rounded-input border border-border bg-surface-2 px-3 py-2 font-mono text-micro text-foreground">
+                                        {testResult.detail}
                                     </p>
                                 )}
 

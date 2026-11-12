@@ -64,6 +64,7 @@
     "AI_NOT_CONFIGURED": "O assistente de IA não está configurado. Acesse as Configurações.",
     "AI_DISABLED": "O assistente de IA está desativado nas Configurações.",
     "AI_UNREACHABLE": "Não foi possível conectar ao provedor de IA. Verifique a URL do servidor.",
+    "AI_CONNECTION_DROPPED": "O provedor de IA encerrou a conexão antes de responder. Em geral é um proxy no meio do caminho ou o modelo que falha.",
     "AI_UNAUTHORIZED": "Chave de API rejeitada. Verifique a chave nas Configurações.",
     "AI_MODEL_NOT_FOUND": "Modelo não encontrado no provedor. Verifique o nome (ex: gemini-2.5-flash, gpt-4o-mini).",
     "AI_INVALID_RESPONSE": "O modelo retornou uma resposta inválida. Tente novamente ou mude o modelo.",

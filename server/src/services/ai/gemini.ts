@@ -46,7 +46,7 @@ export async function geminiComplete(
                 responseJsonSchema: request.jsonSchema,
             },
         }),
-    });
+    }, request.timeoutMs);
 
     if (!response.ok) {
         const { message, status, reason } = await readError(response);

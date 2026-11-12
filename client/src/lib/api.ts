@@ -8,7 +8,11 @@ const IS_DEMO = Boolean(import.meta.env.VITE_DEMO);
 const AUTH_EXPIRED_EVENT = 'openfamily:auth-expired';
 
 export class ApiError extends Error {
-    constructor(message: string, readonly status: number) {
+    /**
+     * `message` is the server's error code or text; `detail`, when the server
+     * sends both, is the longer explanation that goes with the code.
+     */
+    constructor(message: string, readonly status: number, readonly detail?: string) {
         super(message);
     }
 }
@@ -79,7 +83,8 @@ class ApiClient {
             }
 
             const fallbackMessage = `HTTP ${response.status}`;
-            throw new ApiError(data?.error || data?.message || fallbackMessage, response.status);
+            const detail = data?.error && typeof data?.message === 'string' && data.message !== data.error ? data.message : undefined;
+            throw new ApiError(data?.error || data?.message || fallbackMessage, response.status, detail);
         }
 
         return data as T;

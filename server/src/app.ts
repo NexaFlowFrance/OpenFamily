@@ -28,6 +28,7 @@ import kakeiboRoutes from './routes/kakeibo';
 import postsRoutes from './routes/posts';
 import oidcRoutes from './routes/oidc';
 import displayLinksRoutes, { displayPageRouter } from './routes/displayLinks';
+import apiTokensRoutes from './routes/apiTokens';
 import { loadEnv } from './config/loadEnv';
 import logger, { redactPath } from './lib/logger';
 
@@ -206,6 +207,7 @@ app.use('/api/auth/oidc', oidcRoutes);
 // The page behind a display link, and the links' management (parents).
 app.use('/api/display', displayRateLimiter, displayPageRouter);
 app.use('/api/display-links', displayLinksRoutes);
+app.use('/api/api-tokens', apiTokensRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', userSettingsRoutes);
 app.use('/api/shopping', shoppingRoutes);

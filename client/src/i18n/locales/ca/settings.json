@@ -162,5 +162,29 @@
     "error": "S'ha produït un error. Torna-ho a provar.",
     "warning": "Qualsevol persona que tingui l’adreça pot llegir la pàgina. Comparteix-la només amb la pantalla i revoca els enllaços que ja no facis servir.",
     "options": "Opcions: afegeix {{show}} a l’adreça per triar els blocs i {{scale}} per ampliar el text."
+  },
+  "apiTokens": {
+    "title": "Testimonis d'API",
+    "subtitle": "Permet que un altre programa llegeixi o afegeixi dades de la teva família: Home Assistant, Gladys Assistant, n8n, Node-RED, un script. Un testimoni no caduca mai i es pot revocar aquí en qualsevol moment.",
+    "empty": "Encara no hi ha cap testimoni.",
+    "nameLabel": "Per a què serveix el testimoni",
+    "namePlaceholder": "Gladys Assistant",
+    "scopeRead": "Només lectura",
+    "scopeWrite": "Lectura i escriptura",
+    "create": "Crea un testimoni",
+    "created": "Testimoni «{{name}}» creat",
+    "createdHint": "Copia'l ara: no es tornarà a mostrar.",
+    "secret": "El testimoni",
+    "copy": "Copia el testimoni",
+    "done": "Ja l'he copiat",
+    "revoke": "Revoca",
+    "confirmRevoke": "Vols revocar el testimoni «{{name}}»? El programa que el fa servir deixarà de funcionar de seguida.",
+    "createdBy": "creat per {{name}}",
+    "lastUsed": "Darrer ús: {{date}}",
+    "neverUsed": "No s'ha fet servir mai",
+    "limit": "Pots tenir com a màxim vint testimonis. Revoca'n un per crear-ne un altre.",
+    "error": "S'ha produït un error. Torna-ho a provar.",
+    "warning": "Un testimoni actua com el teu compte sobre les dades de la família, però mai no pot modificar el compte mateix, els membres de la família ni altres credencials. Dona'l només a un programa i revoca els testimonis que ja no facis servir.",
+    "usage": "El programa l'envia a la capçalera {{header}} de cada petició."
   }
 }

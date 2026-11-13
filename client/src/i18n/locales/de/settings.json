@@ -162,5 +162,29 @@
     "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
     "warning": "Wer eine Adresse kennt, kann die Seite lesen. Gib sie nur dem Bildschirm und widerrufe Links, die du nicht mehr brauchst.",
     "options": "Optionen: Hänge {{show}} an die Adresse an, um die Blöcke auszuwählen, und {{scale}} für größeren Text."
+  },
+  "apiTokens": {
+    "title": "API-Token",
+    "subtitle": "Lass ein anderes Programm die Daten deiner Familie lesen oder ergänzen: Home Assistant, Gladys Assistant, n8n, Node-RED, ein Skript. Ein Token läuft nie ab und lässt sich hier jederzeit widerrufen.",
+    "empty": "Noch kein Token.",
+    "nameLabel": "Wofür das Token ist",
+    "namePlaceholder": "Gladys Assistant",
+    "scopeRead": "Nur lesen",
+    "scopeWrite": "Lesen und schreiben",
+    "create": "Token erstellen",
+    "created": "Token „{{name}}“ erstellt",
+    "createdHint": "Kopiere es jetzt: Es wird nicht noch einmal angezeigt.",
+    "secret": "Das Token",
+    "copy": "Token kopieren",
+    "done": "Ich habe es kopiert",
+    "revoke": "Widerrufen",
+    "confirmRevoke": "Das Token „{{name}}“ widerrufen? Das Programm, das es nutzt, funktioniert dann sofort nicht mehr.",
+    "createdBy": "erstellt von {{name}}",
+    "lastUsed": "Zuletzt verwendet: {{date}}",
+    "neverUsed": "Noch nie verwendet",
+    "limit": "Höchstens zwanzig Token. Widerrufe eines, um ein neues zu erstellen.",
+    "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "warning": "Ein Token handelt wie dein Konto in den Daten der Familie, kann aber nie das Konto selbst, die Familienmitglieder oder andere Zugangsdaten ändern. Gib es nur einem einzigen Programm und widerrufe Token, die du nicht mehr brauchst.",
+    "usage": "Das Programm sendet es im Header {{header}} jeder Anfrage."
   }
 }

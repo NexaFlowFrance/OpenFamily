@@ -162,5 +162,29 @@
     "error": "出了点问题，请重试。",
     "warning": "任何拥有地址的人都能查看此页面。请只将地址用于该屏幕，并撤销不再使用的链接。",
     "options": "选项：在地址后添加 {{show}} 可选择显示的板块，添加 {{scale}} 可放大文字。"
+  },
+  "apiTokens": {
+    "title": "API 令牌",
+    "subtitle": "允许其他程序读取或添加您家庭的数据：Home Assistant、Gladys Assistant、n8n、Node-RED 或脚本。令牌永不过期，可随时在此撤销。",
+    "empty": "还没有令牌。",
+    "nameLabel": "令牌用途",
+    "namePlaceholder": "Gladys Assistant",
+    "scopeRead": "只读",
+    "scopeWrite": "读写",
+    "create": "创建令牌",
+    "created": "令牌“{{name}}”已创建",
+    "createdHint": "请立即复制：它不会再次显示。",
+    "secret": "令牌",
+    "copy": "复制令牌",
+    "done": "我已复制",
+    "revoke": "撤销",
+    "confirmRevoke": "要撤销令牌“{{name}}”吗？使用它的程序将立即停止工作。",
+    "createdBy": "由 {{name}} 创建",
+    "lastUsed": "上次使用：{{date}}",
+    "neverUsed": "从未使用",
+    "limit": "最多二十个令牌。请先撤销一个，再创建新的。",
+    "error": "出了点问题，请重试。",
+    "warning": "令牌以您的账户身份访问家庭数据，但永远无法修改账户本身、家庭成员或其他凭据。请只将它交给一个程序，并撤销不再使用的令牌。",
+    "usage": "程序在每个请求的 {{header}} 头中发送它。"
   }
 }

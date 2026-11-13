@@ -162,5 +162,29 @@
     "error": "Something went wrong. Please try again.",
     "warning": "Anyone who has an address can read the page. Give it to the screen only, and revoke a link you no longer use.",
     "options": "Options: add {{show}} to the address to choose the blocks, and {{scale}} for larger text."
+  },
+  "apiTokens": {
+    "title": "API tokens",
+    "subtitle": "Let another program read or add to your family's data: Home Assistant, Gladys Assistant, n8n, Node-RED, a script. A token never expires and can be revoked here at any time.",
+    "empty": "No token yet.",
+    "nameLabel": "What the token is for",
+    "namePlaceholder": "Gladys Assistant",
+    "scopeRead": "Read only",
+    "scopeWrite": "Read and write",
+    "create": "Create token",
+    "created": "Token “{{name}}” created",
+    "createdHint": "Copy it now: it will not be shown again.",
+    "secret": "The token",
+    "copy": "Copy the token",
+    "done": "I have copied it",
+    "revoke": "Revoke",
+    "confirmRevoke": "Revoke the token “{{name}}”? The program that uses it will stop working at once.",
+    "createdBy": "created by {{name}}",
+    "lastUsed": "Last used: {{date}}",
+    "neverUsed": "Never used",
+    "limit": "Twenty tokens at most. Revoke one to create another.",
+    "error": "Something went wrong. Please try again.",
+    "warning": "A token acts as your account on the family's data, but can never change the account itself, the family's members or other credentials. Give it to one program only, and revoke a token you no longer use.",
+    "usage": "The program sends it in the {{header}} header of every request."
   }
 }

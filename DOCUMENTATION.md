@@ -161,7 +161,7 @@ navigateur d'une liseuse, tablette murale.
   | `show` | Blocs à afficher, dans l'ordre donné : `schedule`, `meals`, `planning`, `tasks`, `shopping`, `notes` | `?show=schedule,tasks` |
   | `scale` | Taille du texte, de 0.5 à 2.5 | `?scale=1.3` |
   | `refresh` | Secondes avant que la page se recharge seule : 300 par défaut, 30 au minimum, 0 pour jamais | `?refresh=900` |
-  | `lang` | Langue de la page : `fr`, `en`, `de`, `es`, `pt`, `ru`, `zh` | `?lang=en` |
+  | `lang` | Langue de la page : `fr`, `en`, `de`, `es`, `pt`, `ru`, `ca`, `zh` | `?lang=en` |
 
   Plusieurs options se combinent avec `&` : `…/api/display/<jeton>?show=schedule,tasks&scale=1.3`.
 - **InkyPi** : dans le plugin *Screenshot*, collez l'adresse du lien. La capture se fait à
@@ -171,6 +171,41 @@ navigateur d'une liseuse, tablette murale.
   un lien le coupe aussitôt. La page n'est ni mise en cache ni indexable. Le jeton
   n'apparaît ni dans les journaux du serveur ni dans ceux du conteneur web fourni ; un
   reverse proxy placé devant journalise les adresses selon sa propre configuration.
+
+### 🔑 Jetons d'API (Home Assistant, Gladys Assistant, n8n, scripts)
+Un jeton d'API laisse un autre programme lire ou compléter les données de la famille par
+l'API REST et le WebSocket d'OpenFamily, sans mot de passe ni session qui expire.
+
+- **Création** : Paramètres → Jetons d'API, pour les comptes parents. Un nom par programme,
+  une portée (*lecture seule* ou *lecture et écriture*), vingt jetons au plus par famille,
+  chacun révocable séparément. Le secret commence par `ofk_` et n'est affiché qu'une fois :
+  le serveur n'en garde qu'une empreinte SHA-256. Les paramètres montrent ensuite le début
+  du jeton, qui l'a créé et sa dernière utilisation.
+- **Utilisation** : le programme l'envoie dans l'en-tête `Authorization: Bearer <jeton>` de
+  chaque requête, exactement comme l'application. Il agit comme le compte parent qui l'a
+  créé, sur les données de sa famille :
+
+  ```bash
+  curl -H "Authorization: Bearer ofk_..." https://openfamily.example/api/shopping
+  curl -H "Authorization: Bearer ofk_..." -H "Content-Type: application/json" \
+       -d '{"name":"Lait","category":"Produits laitiers"}' https://openfamily.example/api/shopping
+  ```
+
+  Le WebSocket (`/ws`) l'accepte aussi : envoyez `{"type":"auth","token":"ofk_..."}` à
+  l'ouverture, puis chaque changement arrive sous la forme
+  `{"type":"update","entity":"shopping","action":"created"}`.
+- **Ce qu'un jeton ne peut pas faire**, quelle que soit sa portée : modifier le compte
+  (profil, mot de passe, sessions, SSO), les comptes de la famille (invitations, liaisons
+  de membres), les autres identifiants (intégrations, abonnements de calendrier, liens
+  d'affichage, autres jetons, clé de l'assistant IA), ni exporter ou importer l'ensemble
+  des données. Ces routes répondent `403 api_token_forbidden` ; une écriture avec un jeton
+  en lecture seule répond `403 read_only_token`. `GET /api/auth/me` reste ouvert : il dit
+  quel compte le jeton représente.
+- **Révocation** : révoquer un jeton le coupe aussitôt, WebSocket compris. Un jeton n'est
+  pas une session : « se déconnecter de tous les appareils » ne le touche pas. Il cesse de
+  fonctionner si le compte qui l'a créé quitte la famille ou est supprimé.
+- **Home Assistant** : une action `rest_command` avec cet en-tête ajoute un article depuis
+  une automatisation ; un capteur `rest` lit la liste.
 
 ---
 
@@ -366,6 +401,7 @@ OpenFamily utilise **PostgreSQL 16** avec le schéma suivant :
 | `family_invites` | Invitations à rejoindre une famille (jeton, rôle, expiration) |
 | `family_join_requests` | Demandes d'accès adressées au propriétaire d'une famille |
 | `password_resets` | Jetons de réinitialisation de mot de passe (empreinte SHA-256, usage unique) |
+| `api_tokens` | Jetons d'API personnels (empreinte SHA-256, portée lecture ou écriture) |
 
 ### Caractéristiques techniques
 - **UUIDs** (v4) comme clés primaires pour toutes les tables

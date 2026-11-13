@@ -162,5 +162,29 @@
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "warning": "Cualquiera que tenga una dirección puede leer la página. Dásela solo a la pantalla y revoca los enlaces que ya no uses.",
     "options": "Opciones: añade {{show}} a la dirección para elegir los bloques y {{scale}} para un texto más grande."
+  },
+  "apiTokens": {
+    "title": "Tokens de API",
+    "subtitle": "Permite que otro programa lea o añada datos de tu familia: Home Assistant, Gladys Assistant, n8n, Node-RED, un script. Un token nunca caduca y se puede revocar aquí en cualquier momento.",
+    "empty": "Todavía no hay ningún token.",
+    "nameLabel": "Para qué sirve el token",
+    "namePlaceholder": "Gladys Assistant",
+    "scopeRead": "Solo lectura",
+    "scopeWrite": "Lectura y escritura",
+    "create": "Crear token",
+    "created": "Token «{{name}}» creado",
+    "createdHint": "Cópialo ahora: no se volverá a mostrar.",
+    "secret": "El token",
+    "copy": "Copiar el token",
+    "done": "Ya lo he copiado",
+    "revoke": "Revocar",
+    "confirmRevoke": "¿Revocar el token «{{name}}»? El programa que lo usa dejará de funcionar de inmediato.",
+    "createdBy": "creado por {{name}}",
+    "lastUsed": "Último uso: {{date}}",
+    "neverUsed": "Nunca usado",
+    "limit": "Veinte tokens como máximo. Revoca uno para crear otro.",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "warning": "Un token actúa como tu cuenta sobre los datos de la familia, pero nunca puede modificar la cuenta en sí, los miembros de la familia ni otras credenciales. Dáselo a un solo programa y revoca los tokens que ya no uses.",
+    "usage": "El programa lo envía en la cabecera {{header}} de cada petición."
   }
 }

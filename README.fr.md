@@ -31,6 +31,7 @@
 | 🔄 **Sync temps réel** | Mise à jour instantanée entre tous les appareils (WebSocket) |
 | 🔔 **Notifications** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) + in-app |
 | 🖼️ **Écrans muraux et e-paper** | Mode kiosque plein écran pour une tablette, et **liens d'affichage** : une page sans connexion qui montre la journée de la famille sur un cadre e-paper (InkyPi), une liseuse ou tout écran qui ne peut pas ouvrir de session |
+| 🔌 **Jetons d'API** | Des jetons personnels pour que Home Assistant, Gladys Assistant, n8n ou un script lisent ou complètent les données de la famille par l'API REST et le WebSocket : lecture seule ou écriture, révocables à tout moment |
 | 👥 **Comptes partagés** | Invitations par lien, demandes d'accès, transfert de propriété |
 | 🔑 **Connexion unique (SSO)** | Connexion avec votre propre fournisseur OpenID Connect (Authentik, Keycloak, Pocket ID...), serveurs 100 % SSO en option, **déconnexion de tous les appareils** |
 | 🛡️ **Rôles & permissions** | Comptes **parent / enfant** — budget en lecture seule pour les enfants |

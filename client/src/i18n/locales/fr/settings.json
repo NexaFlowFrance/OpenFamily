@@ -162,5 +162,29 @@
     "error": "Une erreur est survenue. Réessayez.",
     "warning": "Toute personne qui possède une adresse peut lire la page. Ne la donnez qu'à l'écran, et révoquez un lien qui ne sert plus.",
     "options": "Options : ajoutez {{show}} à l'adresse pour choisir les blocs, et {{scale}} pour un texte plus grand."
+  },
+  "apiTokens": {
+    "title": "Jetons d'API",
+    "subtitle": "Laissez un autre programme lire ou compléter les données de votre famille : Home Assistant, Gladys Assistant, n8n, Node-RED, un script. Un jeton n'expire jamais et se révoque ici à tout moment.",
+    "empty": "Aucun jeton pour l'instant.",
+    "nameLabel": "À quoi sert le jeton",
+    "namePlaceholder": "Gladys Assistant",
+    "scopeRead": "Lecture seule",
+    "scopeWrite": "Lecture et écriture",
+    "create": "Créer un jeton",
+    "created": "Jeton « {{name}} » créé",
+    "createdHint": "Copiez-le maintenant : il ne sera plus affiché.",
+    "secret": "Le jeton",
+    "copy": "Copier le jeton",
+    "done": "Je l'ai copié",
+    "revoke": "Révoquer",
+    "confirmRevoke": "Révoquer le jeton « {{name}} » ? Le programme qui l'utilise cessera de fonctionner aussitôt.",
+    "createdBy": "créé par {{name}}",
+    "lastUsed": "Dernière utilisation : {{date}}",
+    "neverUsed": "Jamais utilisé",
+    "limit": "Vingt jetons au maximum. Révoquez-en un pour en créer un autre.",
+    "error": "Une erreur est survenue. Réessayez.",
+    "warning": "Un jeton agit comme votre compte sur les données de la famille, mais ne peut jamais modifier le compte lui-même, les membres de la famille ni d'autres identifiants. Ne le donnez qu'à un seul programme, et révoquez un jeton qui ne sert plus.",
+    "usage": "Le programme l'envoie dans l'en-tête {{header}} de chaque requête."
   }
 }

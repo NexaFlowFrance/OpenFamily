@@ -162,5 +162,29 @@
     "error": "Algo deu errado. Tente novamente.",
     "warning": "Qualquer pessoa que tenha um endereço pode ler a página. Passe-o apenas para a tela e revogue os links que não usa mais.",
     "options": "Opções: acrescente {{show}} ao endereço para escolher os blocos e {{scale}} para um texto maior."
+  },
+  "apiTokens": {
+    "title": "Tokens de API",
+    "subtitle": "Deixe outro programa ler ou acrescentar dados da sua família: Home Assistant, Gladys Assistant, n8n, Node-RED, um script. Um token nunca expira e pode ser revogado aqui a qualquer momento.",
+    "empty": "Nenhum token por enquanto.",
+    "nameLabel": "Para que serve o token",
+    "namePlaceholder": "Gladys Assistant",
+    "scopeRead": "Somente leitura",
+    "scopeWrite": "Leitura e escrita",
+    "create": "Criar token",
+    "created": "Token “{{name}}” criado",
+    "createdHint": "Copie-o agora: ele não será mostrado de novo.",
+    "secret": "O token",
+    "copy": "Copiar o token",
+    "done": "Já copiei",
+    "revoke": "Revogar",
+    "confirmRevoke": "Revogar o token “{{name}}”? O programa que o utiliza deixará de funcionar imediatamente.",
+    "createdBy": "criado por {{name}}",
+    "lastUsed": "Último uso: {{date}}",
+    "neverUsed": "Nunca usado",
+    "limit": "No máximo vinte tokens. Revogue um para criar outro.",
+    "error": "Algo deu errado. Tente novamente.",
+    "warning": "Um token age como a sua conta sobre os dados da família, mas nunca pode alterar a própria conta, os membros da família nem outras credenciais. Entregue-o a um único programa e revogue os tokens que não usa mais.",
+    "usage": "O programa o envia no cabeçalho {{header}} de cada requisição."
   }
 }

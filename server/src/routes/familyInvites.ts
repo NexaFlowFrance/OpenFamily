@@ -367,6 +367,7 @@ const FAMILY_SCOPED_TABLES = [
     'reward_settings',
     'reward_goals',
     'display_links',
+    'api_tokens',
 ] as const;
 
 // POST /transfer-ownership - owner hands the family (and all its data) to a member

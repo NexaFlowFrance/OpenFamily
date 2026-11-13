@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { query } from '../db';
 import { InvalidTokenError, verifyAccessToken } from '../lib/authTokens';
+import { ApiTokenScope, apiTokenRefusal } from '../lib/apiTokens';
 
 export interface AuthRequest extends Request {
     /** Effective family-owner user ID — used by all data queries */
@@ -9,6 +10,10 @@ export interface AuthRequest extends Request {
     actualUserId?: string;
     /** True when the logged-in user IS the family owner (or a standalone user) */
     isOwner?: boolean;
+    /** How the request signed in: an app's session, or a personal API token */
+    authKind?: 'session' | 'api';
+    /** API tokens only: what the token may do */
+    apiTokenScope?: ApiTokenScope;
 }
 
 /** The token in the Authorization header, or '' when there is none. */
@@ -26,9 +31,18 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
     try {
         const verified = await verifyAccessToken(token);
+        if (verified.kind === 'api') {
+            // The full path: inside a router, req.path is relative to it.
+            const refusal = apiTokenRefusal(req.method, req.originalUrl.split('?')[0], verified.scope ?? 'read');
+            if (refusal) {
+                return res.status(403).json({ success: false, error: refusal });
+            }
+        }
         req.actualUserId = verified.userId;
         req.userId = verified.ownerId;
         req.isOwner = verified.ownerId === verified.userId;
+        req.authKind = verified.kind;
+        req.apiTokenScope = verified.scope;
     } catch (error) {
         if (error instanceof InvalidTokenError) {
             return res.status(401).json({ success: false, error: 'Invalid token' });

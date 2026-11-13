@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import RegionalPreferences from '../components/app/RegionalPreferences';
 import SignInCard from '../components/app/SignInCard';
 import DisplayLinksCard from '../components/app/DisplayLinksCard';
+import ApiTokensCard from '../components/app/ApiTokensCard';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
 import { isNative, getServerUrl, clearServerUrl } from '../lib/serverConfig';
@@ -921,6 +922,10 @@ const Settings: React.FC = () => {
             {/* Display links: the same day, for a screen that cannot sign in.
                 Parents only; the demo has no server to render the page. */}
             {isParent && !import.meta.env.VITE_DEMO && <DisplayLinksCard />}
+
+            {/* API tokens: for another program to read or add to the family's
+                data. Parents only; the demo has no server to call. */}
+            {isParent && !import.meta.env.VITE_DEMO && <ApiTokensCard />}
 
             {/* Profile photo */}
             <Card>

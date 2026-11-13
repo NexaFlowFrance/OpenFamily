@@ -262,4 +262,26 @@ export const coreMigrations: readonly Migration[] = [
             'CREATE INDEX idx_display_links_user ON display_links(user_id)',
         ],
     },
+    {
+        // Personal API tokens (lib/apiTokens): a long-lived credential for
+        // another program. user_id is the family (moved on ownership transfer,
+        // like the data), created_by the parent account the token acts as.
+        // Only the SHA-256 of the secret is kept; token_prefix is how the
+        // secret starts, so that Settings can tell tokens apart.
+        id: 'core/0010-api-tokens',
+        statements: [
+            `CREATE TABLE api_tokens (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                name VARCHAR(80) NOT NULL,
+                token_hash CHAR(64) NOT NULL UNIQUE,
+                token_prefix VARCHAR(12) NOT NULL,
+                scope VARCHAR(5) NOT NULL CHECK (scope IN ('read', 'write')),
+                created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                last_used_at TIMESTAMPTZ
+            )`,
+            'CREATE INDEX idx_api_tokens_user ON api_tokens(user_id)',
+        ],
+    },
 ];

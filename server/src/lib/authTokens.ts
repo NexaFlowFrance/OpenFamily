@@ -1,8 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { getJwtSecret } from '../config/loadEnv';
 import { query, Transaction } from '../db';
-import { clients } from './broadcaster';
+import { clients, WS_SESSION_REVOKED } from './broadcaster';
 import logger from './logger';
+import { ApiTokenScope, hashApiToken, isApiToken, touchApiToken } from './apiTokens';
+
+export { WS_SESSION_REVOKED };
 
 /**
  * The only place login tokens are signed and checked. Every sign-in method
@@ -13,6 +16,9 @@ import logger from './logger';
  * A token carries the account's token_version (tv). Raising the version in the
  * database, with revokeUserSessions, invalidates every token issued before, on
  * every device. Tokens from before versions existed have no tv and count as 0.
+ *
+ * A personal API token (lib/apiTokens) is checked here too, so that every
+ * route and the WebSocket take it like a session.
  */
 
 export interface TokenUser {
@@ -22,10 +28,16 @@ export interface TokenUser {
 }
 
 export interface VerifiedToken {
-    /** The signed-in account. */
+    /** The signed-in account, or the account whose API token this is. */
     userId: string;
     /** The family owner whose data the account works on (itself when standalone). */
     ownerId: string;
+    /** A signed-in app, or a personal API token (see lib/apiTokens). */
+    kind: 'session' | 'api';
+    /** API tokens only: what the token may do. */
+    scope?: ApiTokenScope;
+    /** API tokens only: its row in api_tokens, so that revoking it closes its sockets. */
+    apiTokenId?: string;
 }
 
 interface TokenClaims {
@@ -46,12 +58,42 @@ export const issueAccessToken = (user: TokenUser): string => {
 export class InvalidTokenError extends Error {}
 
 /**
+ * An API token is looked up by its hash and acts as the account that made
+ * it, in the family that account was in at the time: a token whose account
+ * has since left the family or been deleted is refused, and so is a revoked
+ * (deleted) token. Signing the account out everywhere does not touch it: a
+ * token is not a session.
+ */
+const verifyApiToken = async (token: string): Promise<VerifiedToken> => {
+    const result = await query(
+        `SELECT t.id, t.scope, t.user_id AS family_id, u.id AS user_id, COALESCE(u.family_owner_id, u.id) AS owner_id
+         FROM api_tokens t JOIN users u ON u.id = t.created_by
+         WHERE t.token_hash = $1`,
+        [hashApiToken(token)],
+    );
+    const row = result.rows[0] as
+        | { id: string; scope: ApiTokenScope; family_id: string; user_id: string; owner_id: string }
+        | undefined;
+    if (!row) {
+        throw new InvalidTokenError('Invalid token');
+    }
+    if (row.owner_id !== row.family_id) {
+        logger.warn('auth.api_token_left_family', { id: row.id });
+        throw new InvalidTokenError('Invalid token');
+    }
+    touchApiToken(row.id);
+    return { userId: row.user_id, ownerId: row.owner_id, kind: 'api', scope: row.scope, apiTokenId: row.id };
+};
+
+/**
  * Checks the signature and expiry, then that the account still exists and has
  * not been signed out since the token was issued. Throws InvalidTokenError for
  * a token that must be refused; database errors propagate as they are, so the
  * caller can answer 503 instead of letting the request through.
  */
 export const verifyAccessToken = async (token: string): Promise<VerifiedToken> => {
+    if (isApiToken(token)) return verifyApiToken(token);
+
     let claims: TokenClaims;
     try {
         claims = jwt.verify(token, getJwtSecret()) as TokenClaims;
@@ -68,11 +110,8 @@ export const verifyAccessToken = async (token: string): Promise<VerifiedToken> =
         throw new InvalidTokenError('Invalid token');
     }
 
-    return { userId: claims.userId, ownerId: claims.ownerId ?? claims.userId };
+    return { userId: claims.userId, ownerId: claims.ownerId ?? claims.userId, kind: 'session' };
 };
-
-/** WebSocket close code telling the client its session ended. */
-export const WS_SESSION_REVOKED = 4001;
 
 /**
  * Signs the given accounts out everywhere. Runs inside the caller's

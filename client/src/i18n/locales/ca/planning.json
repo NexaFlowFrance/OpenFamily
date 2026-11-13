@@ -1,0 +1,84 @@
+{
+  "loading": "Carregant la planificació…",
+  "noMembers": {
+    "title": "Afegeix primer els membres de la família",
+    "subtitle": "La planificació setmanal es basa en els perfils familiars.",
+    "cta": "Ves a Família"
+  },
+  "title": "Planificació setmanal",
+  "subtitle": "Horaris recurrents de feina i escola, setmana rere setmana.",
+  "newEntry": "Entrada nova",
+  "thisWeek": "Aquesta setmana",
+  "allMembers": "Tots els membres",
+  "allTypes": "Tots els tipus",
+  "types": {
+    "work": "Feina",
+    "school": "Escola",
+    "study": "Estudis",
+    "activity": "Activitat",
+    "other": "Altres"
+  },
+  "add": "Afegeix",
+  "nextDayShort": "+1d",
+  "dayFallback": "Dia {{n}}",
+  "dialog": {
+    "editTitle": "Edita una entrada",
+    "createTitle": "Entrada nova",
+    "description": "Defineix una entrada i aplica-la a un dia o més."
+  },
+  "form": {
+    "member": "membre",
+    "type": "Tipus",
+    "title": "Títol",
+    "titlePlaceholder": "p. ex., oficina - equip de producte / matemàtiques",
+    "days": "Dies corresponents",
+    "weekdays": "Dl.-dv.",
+    "fullWeek": "Tota la setmana",
+    "selectedDay": "Dia seleccionat: {{day}}",
+    "selectedDays": "{{count}} dies seleccionats",
+    "start": "Inici",
+    "end": "Final",
+    "nextDayHint": "Acaba l’endemà (+1 dia)",
+    "thisWeekOnlyStrong": "Només aquesta setmana",
+    "thisWeekOnlyRest": ". L’entrada només s’aplica a la setmana del {{date}}. En cas contrari, es repetirà cada setmana.",
+    "replaceConflicts": "Substitueix les entrades que coincideixin en els dies seleccionats. Si hi ha conflictes i aquesta opció està desactivada, s’ometran aquests dies.",
+    "location": "Lloc (opcional)",
+    "locationPlaceholder": "p. ex., oficina de Lió / institut Jean Moulin",
+    "notes": "Notes (opcional)",
+    "notesPlaceholder": "Informació útil, aula, assignatura, transport…",
+    "participants": "Participants",
+    "participantsHint": "Tria una persona o més. El color de l'activitat serà el de la primera."
+  },
+  "submit": {
+    "applyToDays": "Aplica als dies seleccionats"
+  },
+  "notice": {
+    "saved": "Entrada desada.",
+    "savedDays_one": "desat el {{count}} dia.",
+    "savedDays_other": "desat el {{count}} dies.",
+    "savedDaysConflicts_one": "S’ha desat l’entrada per a {{count}} dia. S’han detectat conflictes aquests dies: {{days}}.",
+    "savedDaysConflicts_other": "S’ha desat l’entrada per a {{count}} dies. S’han detectat conflictes aquests dies: {{days}}.",
+    "skipped": "Omesa en aquesta data",
+    "restored": "Entrada restaurada"
+  },
+  "confirmDelete": "Vols suprimir aquest moviment?",
+  "errors": {
+    "loadMembers": "No s'han pogut carregar els membres.",
+    "loadEntries": "No s'ha pogut carregar la planificació.",
+    "deleteEntry": "No s'ha pogut suprimir aquesta entrada.",
+    "memberTitleRequired": "Cal indicar el membre i el títol.",
+    "timesSame": "Les hores d’inici i de finalització no poden ser iguals.",
+    "selectDay": "Selecciona almenys un dia.",
+    "save": "No s'ha pogut desar aquesta entrada.",
+    "skipOccurrence": "No s’ha pogut canviar aquesta ocurrència.",
+    "skipUnsupported": "El servidor encara no permet ometre una ocurrència. Actualitza’l."
+  },
+  "occurrence": {
+    "skip": "Omet aquesta ocurrència",
+    "restore": "Restaura aquesta ocurrència"
+  },
+  "appointments": {
+    "badge": "APPT",
+    "openCalendar": "Obre al calendari"
+  }
+}

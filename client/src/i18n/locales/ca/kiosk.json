@@ -1,0 +1,37 @@
+{
+  "exit": "Surt",
+  "fullscreen": "Pantalla completa",
+  "exitFullscreen": "Surt de la pantalla completa",
+  "schedule": "Agenda d'avui",
+  "meals": "Àpats d'avui",
+  "tasks": "Tasques d'avui",
+  "whereabouts": "Qui és on avui",
+  "shopping": "Llista de la compra",
+  "allDay": "Tot el dia",
+  "undo": "Desfés",
+  "empty": {
+    "appointments": "No hi ha res planificat per avui",
+    "meals": "No hi ha àpats planificats",
+    "tasks": "Tot al dia ✨",
+    "whereabouts": "Avui no hi ha ningú programat",
+    "shopping": "No hi ha res per comprar"
+  },
+  "displaySettings": {
+    "open": "Configuració de la pantalla",
+    "title": "Configuració de la pantalla",
+    "close": "Tanca",
+    "location": "Ubicació del temps",
+    "searchPlaceholder": "Cerca una ciutat…",
+    "noResults": "Cap resultat",
+    "noLocation": "Tria una ubicació per mostrar-hi el temps.",
+    "change": "Canvia",
+    "temperatureUnit": "Unitat de temperatura",
+    "photoBackground": "Fons amb fotografies",
+    "photoBackgroundHint": "Mostra com a fons fotos aleatòries de la teva biblioteca. Cal tenir connectada la integració d’Immich."
+  },
+  "settings": {
+    "title": "Pantalla d'exposició",
+    "subtitle": "Una pantalla completa i de només lectura per a una tauleta de paret o una pantalla de nevera: mostra el calendari d’avui, els àpats, les tasques i on és cadascú.",
+    "open": "Obre la pantalla del quiosc"
+  }
+}

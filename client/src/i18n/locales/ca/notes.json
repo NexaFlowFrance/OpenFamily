@@ -1,0 +1,35 @@
+{
+  "title": "Notes familiars",
+  "add": "Afegeix una nota",
+  "addTitle": "Nota nova per a la nevera",
+  "placeholder": "No t’oblidis la bossa del gimnàs!",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "Color",
+  "colors": {
+    "yellow": "Groc",
+    "pink": "Rosa",
+    "blue": "Blau",
+    "green": "Verd",
+    "orange": "Taronja"
+  },
+  "expiryLabel": "Caducitat",
+  "expiry": {
+    "today": "Fins aquest vespre",
+    "day": "24 hores",
+    "week": "1 setmana",
+    "never": "Sense caducitat"
+  },
+  "submit": "Penja la nota",
+  "cancel": "Cancel·la",
+  "delete": "Treu aquesta nota",
+  "deleted": "Nota retirada de la nevera",
+  "added": "Nota penjada a la nevera",
+  "emptyHint": "Deixa una nota per a la família: es mostrarà aquí i a la pantalla del quiosc.",
+  "by": "per {{name}}",
+  "age": {
+    "now": "ara mateix",
+    "minutes": "fa {{count}} min",
+    "hours": "fa {{count}} h",
+    "days": "fa {{count}} dies"
+  }
+}

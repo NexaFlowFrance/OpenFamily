@@ -1,0 +1,73 @@
+{
+  "heading": {
+    "before": "El teu ",
+    "highlight": "dia",
+    "after": ", d’un cop d’ull."
+  },
+  "budgetAlert": {
+    "title": "Avís de pressupost",
+    "message_one": "{{count}} categoria ha superat el pressupost mensual.",
+    "message_other": "{{count}} categories han superat el pressupost mensual.",
+    "cta": "Mostra els detalls"
+  },
+  "stats": {
+    "appointments": "Cites",
+    "tasks": "Tasques",
+    "shopping": "Compres",
+    "monthExpenses": "Despeses d'aquest mes"
+  },
+  "today": {
+    "title": "Avui",
+    "viewWeek": "Setmana",
+    "emptyTitle": "No hi ha res planificat.",
+    "emptySubtitle": "Afegeix una cita perquè aparegui aquí.",
+    "emptyCta": "Afegeix una cita",
+    "weekTitle": "Aquesta setmana",
+    "viewDay": "dia",
+    "emptyWeekSubtitle": "Aquesta setmana no hi ha cites."
+  },
+  "aside": {
+    "shopping": "Compres",
+    "shoppingCount_one": "producte per comprar",
+    "shoppingCount_other": "productes per comprar",
+    "budget": "Pressupost d'aquest mes",
+    "budgetSubtitle": "Gastat aquest mes",
+    "tasks": "Tasques pendents",
+    "tasksCount_one": "tasca pendent",
+    "tasksCount_other": "tasques pendents"
+  },
+  "planning": {
+    "title": "Horaris d'aquesta setmana",
+    "viewAll": "Mostra l'horari",
+    "empty": "No s'ha desat cap horari per a aquesta setmana."
+  },
+  "customize": {
+    "button": "Personalitza",
+    "title": "Personalitza la pàgina d'inici",
+    "description": "Tria què es mostra a la pàgina d'inici i en quin ordre. Aquest paràmetre només afecta el teu compte.",
+    "agendaViewLabel": "Visualització de l'agenda",
+    "widgetsLabel": "Blocs que es mostren",
+    "moveUp": "Mou amunt",
+    "moveDown": "Mou avall",
+    "show": "Mostra",
+    "hide": "Amaga",
+    "reset": "Restableix",
+    "allHidden": "Tots els blocs estan amagats. Personalitza la pàgina d'inici per tornar-ne a mostrar algun.",
+    "moduleDisabled": "(mòdul desactivat)",
+    "widgets": {
+      "stats": "Xifres clau",
+      "agenda": "Agenda (cites)",
+      "planning": "Horaris d'aquesta setmana",
+      "quick": "Accés ràpid (compres, pressupost, tasques)",
+      "notes": "Notes familiars"
+    }
+  },
+  "latestPost": {
+    "title": "Darrera publicació familiar",
+    "viewAll": "Mostra totes les publicacions",
+    "seenBy": "Ho han vist: {{names}}",
+    "notSeen": "Encara no ho ha vist ningú",
+    "seen": "Vist",
+    "markSeen": "Marca com a vist"
+  }
+}

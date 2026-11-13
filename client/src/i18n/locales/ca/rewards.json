@@ -1,0 +1,86 @@
+{
+  "loading": "Carregant els diners de butxaca…",
+  "title": "Diners de butxaca",
+  "subtitle": "Les tasques de casa sumen punts, i els punts es converteixen en diners de butxaca",
+  "empty": "Encara no hi ha recompenses. Afegeix estrelles a una tasca per començar!",
+  "streak_one": "{{count}} dia seguit",
+  "streak_other": "{{count}} dies seguits",
+  "pendingCount_one": "{{count}} pendents",
+  "pendingCount_other": "{{count}} pendents",
+  "worth": "per valor de {{amount}}",
+  "approvals": {
+    "title_one": "{{count}} tasca per aprovar",
+    "title_other": "{{count}} tasques per aprovar",
+    "approve": "Aprova",
+    "reject": "Rebutja"
+  },
+  "actions": {
+    "adjust": "Ajusta",
+    "redeem": "Paga"
+  },
+  "types": {
+    "earn": "Punts guanyats",
+    "adjust": "Ajust",
+    "redeem": "Diners de butxaca pagats"
+  },
+  "fields": {
+    "note": "Nota (opcional)"
+  },
+  "adjustDialog": {
+    "title": "Ajusta els punts de {{name}}",
+    "description": "Afegeix una bonificació o treu punts (valor negatiu)",
+    "points": "Punts (+ o −)",
+    "notePlaceholder": "p. ex., ha ajudat a endreçar la compra"
+  },
+  "redeemDialog": {
+    "title": "Paga diners de butxaca a {{name}}",
+    "description": "Saldo disponible: {{balance}} punts",
+    "points": "Punts per convertir",
+    "amount": "Import que es pagarà: {{amount}}",
+    "notePlaceholder": "p. ex., guardiola, sortida al cinema…"
+  },
+  "goals": {
+    "add": "Afegeix un objectiu",
+    "editTitle": "Edita l'objectiu",
+    "progress": "{{current}} / {{target}}",
+    "markAchieved": "Objectiu assolit 🎉"
+  },
+  "goalDialog": {
+    "addTitle": "Objectiu nou per a {{name}}",
+    "editTitle": "Edita l’objectiu de {{name}}",
+    "description": "Un objectiu d'estalvi que s'assoleix amb punts.",
+    "emoji": "Emoji",
+    "titleLabel": "Títol",
+    "titlePlaceholder": "p. ex., videojoc",
+    "target": "Import a assolir ({{currency}})",
+    "delete": "Suprimeix"
+  },
+  "kid": {
+    "hello": "Hola, {{name}}!",
+    "subtitle": "Aquí tens la teva guardiola",
+    "reached": "Molt bé, ho has aconseguit! 🎉",
+    "reachedHint": "Demana a un dels teus pares que confirmi l'objectiu.",
+    "missing": "Encara et falten {{amount}}",
+    "editGoal": "Edita el meu objectiu",
+    "noGoal": "Encara no tens cap objectiu. Tria un somni que vulguis assolir!",
+    "addGoal": "Tria el meu objectiu",
+    "tasksTitle": "Les teves missions",
+    "allTasks": "Mostra-ho tot",
+    "tasksEmpty": "Ara no tens cap missió, molt bé! 🎉",
+    "pendingBadge": "Pendent d'aprovació",
+    "historyTitle": "La teva activitat més recent",
+    "notLinkedTitle": "La teva guardiola t'espera!",
+    "notLinkedMessage": "Demana a un dels teus pares que enllaci el teu compte amb el teu perfil des de la pàgina Família per veure els teus punts i objectius."
+  },
+  "settings": {
+    "rate": "1 punt = {{value}}",
+    "title": "Valor d'un punt",
+    "description": "Defineix el valor monetari d'un punt",
+    "label": "Valor d'un punt",
+    "example": "Exemple: {{points}} punts = {{amount}}"
+  },
+  "errors": {
+    "load": "No s'han pogut carregar els diners de butxaca.",
+    "action": "No s'ha pogut dur a terme aquesta acció."
+  }
+}

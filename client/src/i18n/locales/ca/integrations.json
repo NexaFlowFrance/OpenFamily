@@ -1,0 +1,86 @@
+{
+  "title": "Integracions",
+  "subtitle": "Connecta les aplicacions que allotges tu mateix per centralitzar receptes, menús, compres i calendari.",
+  "connected": "Connectat",
+  "available": "Disponible",
+  "status": {
+    "error": "Error",
+    "connected": "Connectat"
+  },
+  "lastSync": "Sincronitzat {{date}}",
+  "syncTitle": "Sincronitza",
+  "disconnectTitle": "Desconnecta",
+  "confirmDisconnect": "Vols desconnectar aquesta integració?",
+  "modal": {
+    "connect": "Connecta {{name}}",
+    "test": "Prova",
+    "testing": "Provant…",
+    "connecting": "Connectant…",
+    "connectBtn": "Connecta",
+    "encrypted": "Les credencials es xifren amb AES-256 i només es desen al teu servidor.",
+    "error": "Error"
+  },
+  "syncs": {
+    "recipes": "Receptes",
+    "menus": "Menús",
+    "shopping": "Llista de la compra",
+    "stock": "Estoc",
+    "calendar": "Calendari",
+    "appointments": "Cites",
+    "photos": "Fotos"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "Gestor de receptes",
+      "description": "Importa receptes i menús des de la teva instància de Mealie autoallotjada.",
+      "urlLabel": "URL de la instància",
+      "urlPlaceholder": "https://mealie.mydomain.com",
+      "keyLabel": "Clau de l'API",
+      "keyPlaceholder": "A Mealie, ves a Perfil > Claus de l’API"
+    },
+    "tandoor": {
+      "tagline": "Llibre de receptes",
+      "description": "Importa les teves receptes de Tandoor, el gestor de receptes de codi obert.",
+      "urlLabel": "URL de la instància",
+      "urlPlaceholder": "https://tandoor.mydomain.com",
+      "keyLabel": "Token de l'API",
+      "keyPlaceholder": "de Tandoor > configuració > Tokens"
+    },
+    "homeassistant": {
+      "tagline": "Llar intel·ligent",
+      "description": "Sincronitza la llista de la compra amb la llista de Home Assistant.",
+      "urlLabel": "URL de la instància",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "Token de llarga durada",
+      "tokenPlaceholder": "eyJ… (de Profile > Security)",
+      "entityLabel": "Entitats de tasques (opcional, separades per comes)",
+      "entityPlaceholder": "todo.shopping_list, todo.groceries"
+    },
+    "grocy": {
+      "tagline": "Gestió de la llar",
+      "description": "Sincronitza la llista de la compra i l'inventari de Grocy.",
+      "urlLabel": "URL de la instància",
+      "urlPlaceholder": "https://grocy.mydomain.com",
+      "keyLabel": "Clau de l'API",
+      "keyPlaceholder": "de Grocy > gestionar > API keys"
+    },
+    "nextcloud": {
+      "tagline": "Núvol personal",
+      "description": "Importa els esdeveniments del calendari de Nextcloud a les teves cites.",
+      "urlLabel": "Nextcloud URL",
+      "urlPlaceholder": "https://cloud.mydomain.com",
+      "userLabel": "Nom d'usuari",
+      "userPlaceholder": "el teu.username",
+      "passwordLabel": "Contrasenya (o contrasenya d’aplicació)",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "Biblioteca de fotos",
+      "description": "Mostra com a fons de la pantalla del quiosc fotos aleatòries de la biblioteca d’Immich autoallotjada.",
+      "urlLabel": "URL de la instància",
+      "urlPlaceholder": "https://immich.mydomain.com",
+      "keyLabel": "Clau de l'API",
+      "keyPlaceholder": "de Immich > compte configuració > API keys"
+    }
+  }
+}

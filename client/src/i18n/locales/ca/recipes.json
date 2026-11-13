@@ -1,0 +1,134 @@
+{
+  "loading": "Carregant les receptes…",
+  "title": "Receptes",
+  "subtitle": "El receptari de la família",
+  "newRecipe": "Recepta nova",
+  "categories": {
+    "Entrée": "Entrant",
+    "Plat": "Plat principal",
+    "Dessert": "Postres",
+    "Snack": "Aperitiu"
+  },
+  "difficulties": {
+    "Facile": "Fàcil",
+    "Moyen": "Mitjana",
+    "Difficile": "Difícil"
+  },
+  "durations": {
+    "under15": "≤ 15 min",
+    "under30": "≤ 30 min",
+    "under60": "≤ 1 h",
+    "over60": "> 1 h"
+  },
+  "searchPlaceholder": "Cerca una recepta…",
+  "allCategories": "Totes les categories",
+  "allDifficulties": "Tots els nivells de dificultat",
+  "anyDuration": "Qualsevol durada",
+  "filters": {
+    "toggle": "Filtres",
+    "clear": "Esborra els filtres",
+    "ingredientsPlaceholder": "Tinc… (un ingredient i prem Retorn)",
+    "ingredientsMore": "Afegeix un ingredient",
+    "ingredientsHelp": "Només es mostren les receptes que contenen tots aquests ingredients.",
+    "removeIngredient": "Treu {{name}}"
+  },
+  "empty": {
+    "none": "Encara no hi ha receptes. Crea la primera!",
+    "noMatch": "Cap recepta coincideix amb la cerca."
+  },
+  "card": {
+    "min": "{{n}} min",
+    "servings_one": "{{count}} ració",
+    "servings_other": "{{count}} racions",
+    "view": "Mostra"
+  },
+  "dialog": {
+    "editTitle": "Edita la recepta",
+    "createTitle": "Recepta nova",
+    "description": "Introdueix els detalls de la recepta."
+  },
+  "form": {
+    "name": "Nom de la recepta",
+    "namePlaceholder": "p. ex., pastís de poma",
+    "category": "Categoria",
+    "difficulty": "Dificultat",
+    "description": "Descripció (opcional)",
+    "descriptionPlaceholder": "Breu descripció de la recepta…",
+    "prep": "Preparació (min)",
+    "prepPlaceholder": "30",
+    "cook": "Cocció (min)",
+    "cookPlaceholder": "45",
+    "servings": "Racions",
+    "servingsPlaceholder": "4",
+    "ingredients": "Ingredients (un per línia)",
+    "ingredientsPlaceholder": "200 g de farina\n3 ous\n100 g de sucre",
+    "instructions": "Instruccions (un pas per línia)",
+    "instructionsPlaceholder": "Preescalfa el forn a 180 °C\nBarreja la farina i el sucre\nAfegeix-hi els ous",
+    "tags": "Etiquetes (separades per comes)",
+    "tagsPlaceholder": "vegetarià, ràpid, econòmic",
+    "image": "URL de la imatge (opcional)",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "Importa des d'un enllaç",
+    "title": "Importa una recepta",
+    "description": "Enganxa l’enllaç a una pàgina de receptes (Marmiton, 750g, un blog…) i omplirem el formulari per tu.",
+    "urlLabel": "URL de la pàgina de la recepta",
+    "urlPlaceholder": "https://www.marmiton.org/recettes/…",
+    "submit": "Importa",
+    "importing": "Important…",
+    "successTitle": "Recepta importada",
+    "successDescription": "Revisa els detalls i desa-la.",
+    "errors": {
+      "notFoundTitle": "No s'ha trobat cap recepta",
+      "notFound": "Aquesta pàgina no conté cap recepta que es pugui llegir.",
+      "fetchTitle": "La importació ha fallat",
+      "fetch": "No s'ha pogut obtenir aquesta pàgina. Comprova l'enllaç i torna-ho a provar."
+    }
+  },
+  "shopping": {
+    "button": "Afegeix a la llista de la compra",
+    "title": "Afegeix a la llista de la compra",
+    "description": "Tria els ingredients de «{{recipe}}» que vols afegir a la llista de la compra.",
+    "selectAll": "Selecciona-ho tot",
+    "deselectAll": "Desmarca-ho tot",
+    "submit": "Afegeix a la llista",
+    "sending": "Afegint…",
+    "successTitle": "Llista de la compra actualitzada",
+    "successDescription_one": "S'ha afegit {{count}} ingredient a la llista.",
+    "successDescription_other": "S'han afegit {{count}} ingredients a la llista.",
+    "duplicates_one": "{{count}} ja hi era.",
+    "duplicates_other": "{{count}} ja hi eren.",
+    "errorTitle": "No s'ha pogut afegir",
+    "error": "No s'han pogut afegir aquests ingredients. Torna-ho a provar.",
+    "original": "Recepta: {{line}}",
+    "selectedCount": "{{count}} de {{total}} seleccionats"
+  },
+  "refine": {
+    "button": "Millora amb IA",
+    "hint": "Pol·leix el títol, els ingredients i les instruccions amb l’assistent d’IA configurat.",
+    "refining": "Millorant…",
+    "successTitle": "Recepta millorada",
+    "successDescription": "S'han reorganitzat les seccions i els passos. Revisa-ho i desa-ho.",
+    "notConfiguredTitle": "La IA no està configurada",
+    "notConfigured": "Activa i configura l’assistent d’IA a Configuració → Assistent d’IA.",
+    "errorTitle": "La millora ha fallat",
+    "error": "L’assistent d’IA no ha respost. Comprova’n la configuració i torna-ho a provar.",
+    "cost": "{{total}} tokens ({{in}} d'entrada / {{out}} de sortida)"
+  },
+  "detail": {
+    "prep": "Preparació:",
+    "cook": "Cocció:",
+    "servings": "Racions:",
+    "minUnit": "min",
+    "ingredients": "Ingredients",
+    "instructions": "Instruccions"
+  },
+  "confirmDelete": "Segur que vols suprimir aquesta recepta?",
+  "errors": {
+    "load": "No s'han pogut carregar les receptes.",
+    "save": "No s'ha pogut desar aquesta recepta.",
+    "delete": "No s'ha pogut suprimir aquesta recepta.",
+    "invalidImage": "L'enllaç de la imatge no és vàlid. Fes servir una adreça web que comenci per https:// o deixa el camp buit."
+  }
+}

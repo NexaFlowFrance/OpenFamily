@@ -1,0 +1,17 @@
+{
+  "title": "Notificacions",
+  "markAll": "Marca-ho tot com a llegit",
+  "empty": "No hi ha notificacions",
+  "manage": "Gestiona les notificacions →",
+  "timeAgo": {
+    "justNow": "ara mateix",
+    "minutes": "fa {{count}} min",
+    "hours": "fa {{count}} h",
+    "days": "fa {{count}} dies"
+  },
+  "push": {
+    "unsupported": "Aquest navegador no admet les notificacions push",
+    "denied": "Permís denegat",
+    "noVapid": "Clau VAPID no disponible"
+  }
+}

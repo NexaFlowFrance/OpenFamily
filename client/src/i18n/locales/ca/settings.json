@@ -1,0 +1,166 @@
+{
+  "title": "Configuració",
+  "subtitle": "Gestiona les dades i les preferències.",
+  "language": {
+    "title": "Idioma",
+    "subtitle": "Tria l'idioma de la interfície de l'aplicació."
+  },
+  "profile": {
+    "title": "Foto de perfil",
+    "subtitle": "Tria una foto que es mostrarà al menú de l'aplicació.",
+    "change": "Canvia la foto",
+    "choose": "Tria una foto",
+    "remove": "Treu"
+  },
+  "notif": {
+    "title": "Notificacions push",
+    "subtitle": "Rep recordatoris de les cites directament en aquest dispositiu, fins i tot quan l’aplicació està tancada.",
+    "unsupported": "Aquest navegador no admet les notificacions.",
+    "denied": "Permís denegat. Permet les notificacions a la configuració del navegador.",
+    "enable": "Activa les notificacions",
+    "disable": "Desactiva les notificacions",
+    "inProgress": "En curs…",
+    "active": "Les notificacions estan activades en aquest dispositiu."
+  },
+  "currency": {
+    "title": "Moneda",
+    "subtitle": "Tria la moneda en què es mostren els imports a l’aplicació."
+  },
+  "modules": {
+    "title": "Mòduls",
+    "subtitle": "Activa o amaga mòduls opcionals perquè la família només conservi els que fa servir.",
+    "parentOnly": "Només els pares poden canviar els mòduls.",
+    "error": "S'ha produït un error en actualitzar els mòduls.",
+    "names": {
+      "kiosk": "Mode quiosc",
+      "notes": "Notes del tauler",
+      "ai": "Assistent d'IA"
+    },
+    "descriptions": {
+      "budget": "Seguiment del pressupost familiar, les despeses i els ingressos.",
+      "rewards": "Diners de butxaca i recompenses dels infants.",
+      "meals": "Planificació setmanal dels àpats.",
+      "recipes": "Receptari familiar.",
+      "planning": "Horaris setmanals (feina, escola i activitats).",
+      "integrations": "Connexions amb serveis de tercers (Mealie, Home Assistant…).",
+      "kiosk": "Pantalla completa per a una pantalla domèstica compartida.",
+      "notes": "Notes adhesives que es mostren al tauler.",
+      "ai": "Assistent intel·ligent per capturar i organitzar informació ràpidament."
+    }
+  },
+  "export": {
+    "title": "Exporta les dades",
+    "subtitle": "Baixa una còpia JSON portable de les dades de la família i les preferències compartides. No s'hi inclouen les credencials d'autenticació, els secrets de les integracions, les notificacions ni les dades de seguretat temporals.",
+    "button": "Exporta",
+    "inProgress": "Exportant…"
+  },
+  "import": {
+    "title": "Importa dades",
+    "subtitle": "Restaura una exportació portable d’OpenFamily. Es conserven els registres existents i se n’ometen els duplicats; també es restauren les preferències familiars del fitxer.",
+    "success": "Importació correcta",
+    "itemsImported_one": "element importat",
+    "itemsImported_other": "elements importats",
+    "chooseFile": "Tria un fitxer…",
+    "button": "Importa",
+    "inProgress": "Important…",
+    "invalidJson": "El fitxer JSON no és vàlid."
+  },
+  "entities": {
+    "family_settings": "Preferències familiars",
+    "account_preferences": "Preferències del compte",
+    "family_members": "Membres de la família",
+    "tasks": "Tasques",
+    "recipes": "Receptes",
+    "meal_plans": "Àpats planificats",
+    "budget_entries": "Moviments del pressupost",
+    "budget_limits": "Límits del pressupost",
+    "shopping_items": "Elements de la compra",
+    "shopping_list_templates": "Plantilles de compra",
+    "appointments": "Cites",
+    "appointment_recurrence_exceptions": "Excepcions de les cites",
+    "schedule_entries": "Entrades de planificació",
+    "schedule_entry_members": "Participants de planificació",
+    "schedule_entry_exceptions": "Excepcions de planificació",
+    "reward_transactions": "Transaccions de recompenses",
+    "reward_settings": "Configuració de les recompenses",
+    "reward_goals": "Objectius d'estalvi",
+    "family_notes": "Notes familiars",
+    "recurring_expenses": "Despeses recurrents",
+    "recurring_expense_logs": "Controls de despeses recurrents",
+    "kakeibo_months": "Mesos de kakeibo",
+    "family_posts": "Publicacions familiars",
+    "family_post_seen": "Estat de lectura de la publicació"
+  },
+  "errors": {
+    "notif": "S'ha produït un error en configurar les notificacions.",
+    "currency": "S'ha produït un error en actualitzar la moneda.",
+    "avatarImage": "Selecciona una imatge, si us plau.",
+    "avatarRead": "No s’ha pogut llegir el fitxer.",
+    "avatarInvalid": "La imatge no és vàlida.",
+    "avatarCanvas": "Canvas no disponible.",
+    "avatarUpdate": "S'ha produït un error en actualitzar la foto.",
+    "avatarRemove": "S'ha produït un error en treure la foto.",
+    "export": "S'ha produït un error durant l'exportació.",
+    "import": "S'ha produït un error durant la importació."
+  },
+  "support": {
+    "title": "Dona suport a OpenFamily",
+    "subtitle": "OpenFamily és gratuït i de codi obert, i s’allotja al teu servidor. Si és útil per a la teva família, pots donar suport al seu desenvolupament: continuarà sent gratuït en qualsevol cas.",
+    "sponsor": "Convida'm a un cafè",
+    "star": "Dona una estrella a GitHub",
+    "sponsorGithub": "Patrocina a GitHub"
+  },
+  "regional": {
+    "title": "Setmana",
+    "subtitle": "Tria el dia en què comença la setmana als calendaris, la planificació, els àpats i el tauler. Aquesta preferència només és teva.",
+    "weekStart": "Primer dia de la setmana",
+    "weekStartHelp": "L’opció automàtica segueix els usos de l’idioma i la regió.",
+    "automatic": "Automàtic ({{day}})",
+    "saveError": "No s’ha pogut desar la teva preferència.",
+    "days": {
+      "monday": "dilluns",
+      "tuesday": "dimarts",
+      "wednesday": "dimecres",
+      "thursday": "dijous",
+      "friday": "divendres",
+      "saturday": "dissabte",
+      "sunday": "diumenge"
+    }
+  },
+  "signIn": {
+    "title": "Inici de sessió",
+    "subtitle": "Com inicies la sessió a OpenFamily, en aquest dispositiu i en els altres.",
+    "ssoLinked": "El teu compte està enllaçat amb {{name}}.",
+    "ssoNotLinked": "Enllaça el teu compte de {{name}} per iniciar-hi la sessió.",
+    "link": "Enllaça {{name}}",
+    "unlink": "Desenllaça",
+    "confirmUnlink": "Vols desenllaçar {{name}}? Iniciaràs la sessió amb la contrasenya i es tancarà la sessió als altres dispositius.",
+    "unlinkNeedsPassword": "El teu compte encara no té contrasenya. Defineix-ne una amb «Has oblidat la contrasenya?» a la pàgina d’inici de sessió per poder desenllaçar-lo.",
+    "unlinkPasswordOff": "L’inici de sessió amb contrasenya està desactivat en aquest servidor, així que no es pot desenllaçar l’inici de sessió únic.",
+    "relinkNote": "Un cop desenllaçat, iniciar la sessió amb {{name}} ja no obrirà aquest compte. Pots tornar-lo a enllaçar aquí.",
+    "linked": "S’ha enllaçat l’inici de sessió únic.",
+    "unlinked": "S’ha desenllaçat l’inici de sessió únic. També s’ha tancat la sessió als altres dispositius.",
+    "logoutEverywhere": "Tanca la sessió a tots els dispositius",
+    "logoutEverywhereDesc": "Has perdut el telèfon o has iniciat la sessió en un ordinador compartit? Tanca la sessió a tot arreu, també en aquest dispositiu.",
+    "confirmLogoutEverywhere": "Vols tancar la sessió a tots els dispositius, també en aquest?"
+  },
+  "displayLinks": {
+    "title": "Enllaços de pantalla",
+    "subtitle": "Una adreça permanent que mostra l’horari d’avui, els àpats, les tasques i on és cadascú, sense iniciar la sessió: ideal per a un marc de tinta electrònica, un lector electrònic o qualsevol pantalla que no permeti iniciar-la.",
+    "empty": "Encara no hi ha cap enllaç.",
+    "nameLabel": "Nom de la pantalla",
+    "namePlaceholder": "Marc de la cuina",
+    "create": "Crea un enllaç",
+    "address": "Adreça de {{name}}",
+    "copy": "Copia l'adreça",
+    "open": "Obre",
+    "revoke": "Revoca",
+    "confirmRevoke": "Vols revocar l’enllaç «{{name}}»? La pantalla que el fa servir deixarà de mostrar el dia de la teva família.",
+    "lastUsed": "Darrer ús: {{date}}",
+    "neverUsed": "No s'ha fet servir mai",
+    "limit": "Pots tenir com a màxim deu enllaços. Revoca’n un per crear-ne un altre.",
+    "error": "S'ha produït un error. Torna-ho a provar.",
+    "warning": "Qualsevol persona que tingui l’adreça pot llegir la pàgina. Comparteix-la només amb la pantalla i revoca els enllaços que ja no facis servir.",
+    "options": "Opcions: afegeix {{show}} a l’adreça per triar els blocs i {{scale}} per ampliar el text."
+  }
+}

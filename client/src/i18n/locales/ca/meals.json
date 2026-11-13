@@ -1,0 +1,76 @@
+{
+  "loading": "Carregant el planificador…",
+  "title": "Planificador d'àpats",
+  "subtitle": "Planifica els àpats de la setmana",
+  "thisWeek": "Aquesta setmana",
+  "weekOf": "Setmana del {{start}} al {{end}}",
+  "mealTypes": {
+    "Petit-déjeuner": "Esmorzar",
+    "Déjeuner": "Dinar",
+    "Dîner": "Sopar",
+    "Snack": "Aperitiu"
+  },
+  "dialog": {
+    "editTitle": "Edita l'àpat",
+    "addTitle": "Afegeix un àpat",
+    "descriptionFmt": "{{type}} — {{date}}"
+  },
+  "form": {
+    "mealType": "Tipus d'àpat",
+    "recipe": "Recepta (opcional)",
+    "noRecipe": "Cap recepta",
+    "customMeal": "O bé, un àpat personalitzat",
+    "customMealPlaceholder": "p. ex., pizza casolana",
+    "notes": "Notes (opcional)",
+    "notesPlaceholder": "Més notes…",
+    "recipeSearch": "Cerca receptes…"
+  },
+  "shopping": {
+    "button": "Afegeix ingredients a la llista de la compra",
+    "dialogTitle": "Afegeix ingredients a la llista de la compra",
+    "dialogDescription": "Ingredients de les receptes dels àpats planificats entre el {{start}} i el {{end}}. Desmarca els que no necessitis.",
+    "empty": "No hi ha cap àpat amb recepta planificat aquesta setmana.",
+    "selectedCount": "{{selected}} de {{total}} ingredients seleccionats",
+    "alreadyOnList": "ja és a la llista",
+    "confirm_one": "Afegeix {{count}} ingredient",
+    "confirm_other": "Afegeix {{count}} ingredients",
+    "successTitle": "Ingredients afegits",
+    "successDescription_one": "S'ha afegit {{count}} element a la llista de la compra.",
+    "successDescription_other": "S'han afegit {{count}} elements a la llista de la compra.",
+    "partialTitle": "No s'han pogut afegir alguns ingredients",
+    "partialDescription": "S’han afegit {{added}} ingredients i n’han fallat {{failed}}.",
+    "errorTitle": "No s'han pogut afegir els ingredients",
+    "errorDescription": "No s'ha afegit res a la llista de la compra. Torna-ho a provar."
+  },
+  "tandoor": {
+    "button": "Importa des de Tandoor",
+    "dialogTitle": "Importa el pla d'àpats de Tandoor",
+    "dialogDescription": "Àpats planificats a Tandoor del {{start}} al {{end}}.",
+    "loading": "Llegint el pla d’àpats de Tandoor…",
+    "empty": "No hi ha cap àpat planificat a Tandoor per a aquesta setmana.",
+    "error": "No s'ha pogut llegir el pla d'àpats de Tandoor.",
+    "mappingTitle": "Correspondència d'àpats",
+    "mappingHelp": "Tria a quin àpat d'OpenFamily correspon cada tipus d'àpat de Tandoor.",
+    "skipType": "No ho importis",
+    "previewTitle": "Previsualització",
+    "replaces": "substituirà «{{name}}»",
+    "keeps": "«{{name}}» ja estava planificat i es manté",
+    "notImported_one": "No s’importarà {{count}} àpat de Tandoor (tipus no coincident).",
+    "notImported_other": "No s’importaran {{count}} àpats de Tandoor (tipus no coincidents).",
+    "overwrite": "Substitueix els àpats que ja estan planificats",
+    "confirm_one": "Importa {{count}} àpat",
+    "confirm_other": "Importa {{count}} àpats",
+    "successTitle": "Pla d'àpats importat",
+    "successDescription_one": "S’ha importat {{count}} àpat de Tandoor.",
+    "successDescription_other": "S’han importat {{count}} àpats de Tandoor.",
+    "keptDescription_one": "S’ha conservat {{count}} àpat que ja estava planificat.",
+    "keptDescription_other": "S’han conservat {{count}} àpats que ja estaven planificats."
+  },
+  "confirmDelete": "Segur que vols suprimir aquest àpat?",
+  "errors": {
+    "loadPlans": "No s'ha pogut carregar el planificador.",
+    "loadRecipes": "No s'han pogut carregar les receptes.",
+    "save": "No s'ha pogut desar aquest àpat.",
+    "delete": "No s'ha pogut suprimir aquest àpat."
+  }
+}

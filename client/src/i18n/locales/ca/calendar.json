@@ -53,7 +53,7 @@
   "feed": {
     "title": "exportar calendari (iCal)",
     "description": "Subscriu-te des d’Apple Calendar, Google Calendar o Outlook per sincronitzar automàticament les cites.",
-    "generating": "Generating enllaç…",
+    "generating": "Generant l’enllaç…",
     "subscribeLink": "Enllaç de subscripció",
     "subscribeApple": "Subscriu-t’hi (Apple / Outlook)",
     "downloadIcs": "Baixa el fitxer .ics",

@@ -17,9 +17,9 @@
     "enter": "Mode botiga",
     "title": "Mode botiga",
     "cart": "{{done}}/{{total}} al carretó",
-    "remaining_one": "En queden {{count}}",
+    "remaining_one": "En queda {{count}}",
     "remaining_other": "En queden {{count}}",
-    "emptyList": "Buida la llista"
+    "emptyList": "La llista és buida"
   },
   "add": {
     "title": "Afegeix un element",

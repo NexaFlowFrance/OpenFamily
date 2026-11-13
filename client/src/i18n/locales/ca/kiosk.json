@@ -32,6 +32,6 @@
   "settings": {
     "title": "Pantalla d'exposició",
     "subtitle": "Una pantalla completa i de només lectura per a una tauleta de paret o una pantalla de nevera: mostra el calendari d’avui, els àpats, les tasques i on és cadascú.",
-    "open": "obrir quiosc pantalla"
+    "open": "Obre la pantalla del quiosc"
   }
 }

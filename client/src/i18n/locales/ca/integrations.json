@@ -71,7 +71,7 @@
       "urlPlaceholder": "https://cloud.mydomain.com",
       "userLabel": "Nom d'usuari",
       "userPlaceholder": "el teu.username",
-      "passwordLabel": "contrasenya (o app contrasenya)",
+      "passwordLabel": "Contrasenya (o contrasenya d’aplicació)",
       "passwordPlaceholder": "****"
     },
     "immich": {

@@ -74,17 +74,17 @@
     "budgetAmountInvalid": "Introdueix un import de pressupost vàlid."
   },
   "recurrenceScope": {
-    "editTitle": "editar recurrent cita",
+    "editTitle": "Edita la cita recurrent",
     "editDescription": "Vols aplicar aquests canvis només a aquesta ocurrència o a tota la sèrie?",
-    "deleteTitle": "suprimir recurrent cita",
+    "deleteTitle": "Suprimeix la cita recurrent",
     "deleteDescription": "Vols suprimir només aquesta ocurrència o tota la sèrie?",
-    "thisOccurrence": "aquest occurrence",
-    "allOccurrences": "el whole series"
+    "thisOccurrence": "Aquesta ocurrència",
+    "allOccurrences": "Tota la sèrie"
   },
   "search": {
     "placeholder": "Cerca cites...",
     "clear": "Esborra la cerca",
-    "resultCount": "{{count}} matching cita(s)",
+    "resultCount": "Cites coincidents: {{count}}",
     "noResults": "Cap cita coincideix amb la cerca."
   },
   "dayAction": {
@@ -157,7 +157,7 @@
       "FETCH_FAILED": "No s’ha pogut llegir el calendari des d’aquesta adreça. Comprova que sigui correcta i que sigui pública o secreta (no una pàgina d’inici de sessió).",
       "NOT_ICS": "Aquest fitxer no és un calendari en format iCal (.ics).",
       "TOO_LARGE": "Aquest fitxer supera els 10 MB.",
-      "EMPTY": "aquest calendari ha no esdeveniments.",
+      "EMPTY": "Aquest calendari no conté cap esdeveniment.",
       "TOO_MANY": "Ja segueixes 10 calendaris, que és el màxim.",
       "DEMO_UNAVAILABLE": "Aquesta funció no està disponible en el mode de demostració.",
       "generic": "S'ha produït un error. Torna-ho a provar."

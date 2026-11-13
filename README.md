@@ -48,7 +48,7 @@ all in one place, on **your** server, with **your** data.
 | 👥 **Shared accounts** | Invite by link, **access requests**, **ownership transfer** |
 | 🔑 **Single sign-on** | Sign in with your own OpenID Connect provider (Authentik, Keycloak, Pocket ID...), optional SSO-only servers, **sign out of all devices** |
 | 🛡️ **Roles & permissions** | **Parent / child** accounts — read-only budget for children |
-| 🌍 **Multilingual** | **English / French / German / Portuguese / Russian / Spanish / Simplified Chinese** interface with automatic detection |
+| 🌍 **Multilingual** | **English / French / German / Portuguese / Russian / Spanish / Catalan / Simplified Chinese** interface with automatic detection |
 | 📴 **Offline mode** | Browse cached data without a connection (PWA) |
 
 ## 📸 Screenshots

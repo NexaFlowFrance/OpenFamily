@@ -64,6 +64,7 @@
     "AI_NOT_CONFIGURED": "L’assistent d’IA no està configurat. Ves a Configuració.",
     "AI_DISABLED": "L’assistent d’IA està desactivat a Configuració.",
     "AI_UNREACHABLE": "No es pot contactar amb el proveïdor d'IA. Comprova l'URL i que el servei estigui en funcionament.",
+    "AI_CONNECTION_DROPPED": "El proveïdor d'IA ha tallat la connexió abans de respondre. Normalment és un proxy entremig o un model que falla.",
     "AI_UNAUTHORIZED": "El proveïdor ha rebutjat la clau de l'API. Comprova-la a la configuració.",
     "AI_MODEL_NOT_FOUND": "No s’ha trobat el model al proveïdor. Comprova’n el nom (p. ex., llama3.1).",
     "AI_INVALID_RESPONSE": "El model ha retornat una resposta no vàlida. Torna-ho a provar o canvia de model.",

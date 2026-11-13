@@ -216,7 +216,7 @@ const deliver = async (to: string, content: EmailContent, kind: string): Promise
 
 const formatDate = (date: Date, lang: Language): string =>
     new Intl.DateTimeFormat(
-        lang === 'en' ? 'en-GB' : lang === 'pt' ? 'pt-BR' : lang === 'ru' ? 'ru-RU' : lang === 'es' ? 'es-ES' : lang === 'zh' ? 'zh-CN' : lang === 'de' ? 'de-DE' : 'fr-FR', {
+        lang === 'en' ? 'en-GB' : lang === 'pt' ? 'pt-BR' : lang === 'ru' ? 'ru-RU' : lang === 'es' ? 'es-ES' : lang === 'ca' ? 'ca-ES' : lang === 'zh' ? 'zh-CN' : lang === 'de' ? 'de-DE' : 'fr-FR', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',

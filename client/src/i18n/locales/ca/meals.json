@@ -46,7 +46,7 @@
     "button": "Importa des de Tandoor",
     "dialogTitle": "Importa el pla d'àpats de Tandoor",
     "dialogDescription": "Àpats planificats a Tandoor del {{start}} al {{end}}.",
-    "loading": "Reading el Tandoor àpat pla…",
+    "loading": "Llegint el pla d’àpats de Tandoor…",
     "empty": "No hi ha cap àpat planificat a Tandoor per a aquesta setmana.",
     "error": "No s'ha pogut llegir el pla d'àpats de Tandoor.",
     "mappingTitle": "Correspondència d'àpats",

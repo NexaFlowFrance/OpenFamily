@@ -27,11 +27,22 @@
     "change": "Alterar",
     "temperatureUnit": "Unidade de temperatura",
     "photoBackground": "Fotos de fundo",
-    "photoBackgroundHint": "Exibe fotos aleatórias da sua biblioteca como plano de fundo. Requer integração com o Immich."
+    "photoBackgroundHint": "Exibe fotos aleatórias da sua biblioteca como plano de fundo. Requer integração com o Immich.",
+    "screensaver": "Protetor de tela",
+    "screensaverHint": "Depois desse tempo sem ninguém tocar na tela, mostra fotos ou um relógio em movimento, para que uma tela ligada o dia todo não fique marcada.",
+    "screensaverOff": "Desativado",
+    "screensaverMinutes": "{{minutes}} min",
+    "screensaverStyle": "O que o protetor de tela mostra",
+    "screensaverPhotos": "Fotos",
+    "screensaverClock": "Relógio em movimento",
+    "screensaverStyleHint": "As fotos vêm da sua integração com o Immich; sem ela, o relógio é exibido."
   },
   "settings": {
     "title": "Modo Quiosque / Tela da Casa",
     "subtitle": "Painel interativo em tela cheia para tablets de parede ou telas da geladeira — compromissos, refeições, tarefas do dia e localização da família.",
     "open": "Abrir modo quiosque"
+  },
+  "screensaver": {
+    "wake": "Toque na tela para voltar"
   }
 }

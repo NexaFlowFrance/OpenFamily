@@ -27,11 +27,22 @@
     "change": "Canvia",
     "temperatureUnit": "Unitat de temperatura",
     "photoBackground": "Fons amb fotografies",
-    "photoBackgroundHint": "Mostra com a fons fotos aleatòries de la teva biblioteca. Cal tenir connectada la integració d’Immich."
+    "photoBackgroundHint": "Mostra com a fons fotos aleatòries de la teva biblioteca. Cal tenir connectada la integració d’Immich.",
+    "screensaver": "Estalvi de pantalla",
+    "screensaverHint": "Després d'aquest temps sense que ningú toqui la pantalla, mostra fotos o un rellotge que es mou, perquè una pantalla encesa tot el dia no es marqui.",
+    "screensaverOff": "Desactivat",
+    "screensaverMinutes": "{{minutes}} min",
+    "screensaverStyle": "Què mostra l'estalvi de pantalla",
+    "screensaverPhotos": "Fotos",
+    "screensaverClock": "Rellotge en moviment",
+    "screensaverStyleHint": "Les fotos venen de la teva integració amb Immich; sense ella, es mostra el rellotge."
   },
   "settings": {
     "title": "Pantalla d'exposició",
     "subtitle": "Una pantalla completa i de només lectura per a una tauleta de paret o una pantalla de nevera: mostra el calendari d’avui, els àpats, les tasques i on és cadascú.",
     "open": "Obre la pantalla del quiosc"
+  },
+  "screensaver": {
+    "wake": "Toca la pantalla per tornar"
   }
 }

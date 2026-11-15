@@ -27,11 +27,22 @@
     "change": "Change",
     "temperatureUnit": "Temperature unit",
     "photoBackground": "Photo background",
-    "photoBackgroundHint": "Shows random photos from your library as the background. Requires a connected Immich integration."
+    "photoBackgroundHint": "Shows random photos from your library as the background. Requires a connected Immich integration.",
+    "screensaver": "Screensaver",
+    "screensaverHint": "After this long without anyone touching the screen, shows photos or a moving clock, so that a display left on all day does not burn in.",
+    "screensaverOff": "Off",
+    "screensaverMinutes": "{{minutes}} min",
+    "screensaverStyle": "What the screensaver shows",
+    "screensaverPhotos": "Photos",
+    "screensaverClock": "Moving clock",
+    "screensaverStyleHint": "Photos come from your Immich integration; without it, the clock is shown."
   },
   "settings": {
     "title": "Kiosk display",
     "subtitle": "A full-screen, read-only display for a wall tablet or fridge screen — today's calendar, meals, tasks and who's where.",
     "open": "Open kiosk display"
+  },
+  "screensaver": {
+    "wake": "Touch the screen to bring the display back"
   }
 }

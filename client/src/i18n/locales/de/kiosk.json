@@ -27,11 +27,22 @@
     "change": "Ändern",
     "temperatureUnit": "Temperatureinheit",
     "photoBackground": "Fotohintergrund",
-    "photoBackgroundHint": "Zeigt zufällige Fotos aus deiner Bibliothek als Hintergrund. Erfordert eine verbundene Immich-Integration."
+    "photoBackgroundHint": "Zeigt zufällige Fotos aus deiner Bibliothek als Hintergrund. Erfordert eine verbundene Immich-Integration.",
+    "screensaver": "Bildschirmschoner",
+    "screensaverHint": "Zeigt nach dieser Zeit ohne Berührung Fotos oder eine wandernde Uhr, damit ein Bildschirm, der den ganzen Tag läuft, nicht einbrennt.",
+    "screensaverOff": "Aus",
+    "screensaverMinutes": "{{minutes}} Min.",
+    "screensaverStyle": "Was der Bildschirmschoner zeigt",
+    "screensaverPhotos": "Fotos",
+    "screensaverClock": "Wandernde Uhr",
+    "screensaverStyleHint": "Die Fotos kommen aus deiner Immich-Integration; ohne sie wird die Uhr angezeigt."
   },
   "settings": {
     "title": "Kiosk-Anzeige",
     "subtitle": "Eine schreibgeschützte Vollbildanzeige für ein Wand-Tablet oder einen Kühlschrank-Bildschirm – heutige Termine, Mahlzeiten, Aufgaben und wer wo ist.",
     "open": "Kiosk-Anzeige öffnen"
+  },
+  "screensaver": {
+    "wake": "Berühre den Bildschirm, um zur Anzeige zurückzukehren"
   }
 }

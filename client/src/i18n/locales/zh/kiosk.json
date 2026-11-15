@@ -27,11 +27,22 @@
     "change": "更改",
     "temperatureUnit": "温度单位",
     "photoBackground": "照片背景",
-    "photoBackgroundHint": "随机显示照片库中的照片作为背景，需要连接 Immich 集成。"
+    "photoBackgroundHint": "随机显示照片库中的照片作为背景，需要连接 Immich 集成。",
+    "screensaver": "屏幕保护",
+    "screensaverHint": "在这段时间内无人触摸屏幕后，显示照片或移动的时钟，避免全天开启的屏幕出现烧屏。",
+    "screensaverOff": "关闭",
+    "screensaverMinutes": "{{minutes}} 分钟",
+    "screensaverStyle": "屏幕保护显示的内容",
+    "screensaverPhotos": "照片",
+    "screensaverClock": "移动时钟",
+    "screensaverStyleHint": "照片来自您的 Immich 集成；未连接时显示时钟。"
   },
   "settings": {
     "title": "信息屏",
     "subtitle": "适用于壁挂平板或冰箱屏幕的全屏只读视图，展示今日日历、餐食、任务和家庭成员去向。",
     "open": "打开信息屏"
+  },
+  "screensaver": {
+    "wake": "触摸屏幕即可返回"
   }
 }

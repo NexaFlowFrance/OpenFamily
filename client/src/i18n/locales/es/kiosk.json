@@ -27,11 +27,22 @@
     "change": "Cambiar",
     "temperatureUnit": "Unidad de temperatura",
     "photoBackground": "Fondo con fotos",
-    "photoBackgroundHint": "Muestra fotos aleatorias de tu biblioteca como fondo. Requiere una integración con Immich."
+    "photoBackgroundHint": "Muestra fotos aleatorias de tu biblioteca como fondo. Requiere una integración con Immich.",
+    "screensaver": "Salvapantallas",
+    "screensaverHint": "Tras este tiempo sin que nadie toque la pantalla, muestra fotos o un reloj que se mueve, para que una pantalla encendida todo el día no se queme.",
+    "screensaverOff": "Desactivado",
+    "screensaverMinutes": "{{minutes}} min",
+    "screensaverStyle": "Qué muestra el salvapantallas",
+    "screensaverPhotos": "Fotos",
+    "screensaverClock": "Reloj en movimiento",
+    "screensaverStyleHint": "Las fotos vienen de tu integración con Immich; sin ella, se muestra el reloj."
   },
   "settings": {
     "title": "Pantalla quiosco",
     "subtitle": "Una pantalla completa y de solo lectura para una tableta de pared o pantalla de cocina: calendario, comidas, tareas y ubicaciones de hoy.",
     "open": "Abrir pantalla quiosco"
+  },
+  "screensaver": {
+    "wake": "Toca la pantalla para volver"
   }
 }

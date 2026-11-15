@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { formatTime, intlLocale, weekStartsOn } from '../i18n/format';
 import { cn } from '../lib/utils';
 import FamilyNotes, { type FamilyNote } from '../components/app/FamilyNotes';
+import KioskScreensaver, { type ScreensaverStyle } from '../components/app/KioskScreensaver';
 
 interface Member { id: string; name: string; color: string }
 interface Appointment { id: string; occurrence_id?: string; title: string; start_time: string; end_time?: string; location?: string; family_members_data?: Member[] }
@@ -31,7 +32,17 @@ const hhmm = (iso: string) => formatTime(iso);
 
 interface KioskLocation { name: string; lat: number; lon: number }
 type TemperatureUnit = 'celsius' | 'fahrenheit';
-interface KioskSettings { location: KioskLocation | null; photoBackground: boolean; temperatureUnit: TemperatureUnit }
+interface KioskSettings {
+    location: KioskLocation | null;
+    photoBackground: boolean;
+    temperatureUnit: TemperatureUnit;
+    /** Minutes without a touch before the screensaver starts; 0 = never. */
+    screensaverMinutes: number;
+    screensaverStyle: ScreensaverStyle;
+}
+
+// The delays offered in the display settings, in minutes; 0 is "off".
+const SCREENSAVER_DELAYS = [0, 1, 5, 15, 30, 60];
 
 const SETTINGS_KEY = 'openfamily.kioskSettings';
 
@@ -60,10 +71,20 @@ const loadKioskSettings = (): KioskSettings => {
                 temperatureUnit: parsed.temperatureUnit === 'celsius' || parsed.temperatureUnit === 'fahrenheit'
                     ? parsed.temperatureUnit
                     : defaultTemperatureUnit(),
+                screensaverMinutes: SCREENSAVER_DELAYS.includes(parsed.screensaverMinutes as number)
+                    ? (parsed.screensaverMinutes as number)
+                    : 0,
+                screensaverStyle: parsed.screensaverStyle === 'clock' ? 'clock' : 'photos',
             };
         }
     } catch { /* corrupted settings → defaults */ }
-    return { location: null, photoBackground: false, temperatureUnit: defaultTemperatureUnit() };
+    return {
+        location: null,
+        photoBackground: false,
+        temperatureUnit: defaultTemperatureUnit(),
+        screensaverMinutes: 0,
+        screensaverStyle: 'photos',
+    };
 };
 
 // ── Weather (Open-Meteo, no API key, public CORS — also works in the static demo) ──
@@ -159,6 +180,8 @@ const Kiosk: React.FC = () => {
     const [photos, setPhotos] = useState<{ id: number; url: string }[]>([]);
     const photosRef = useRef(photos);
     photosRef.current = photos;
+    // True while the screensaver covers the display
+    const [idle, setIdle] = useState(false);
 
     // City search (settings overlay)
     const [citySearch, setCitySearch] = useState('');
@@ -232,6 +255,22 @@ const Kiosk: React.FC = () => {
         return () => clearInterval(id);
     }, [settings.location]);
 
+    // Screensaver: starts after the chosen time without a touch, a key or a
+    // mouse movement. The open settings overlay counts as someone being there.
+    useEffect(() => {
+        const delay = settings.screensaverMinutes * 60_000;
+        if (!delay || idle || settingsOpen) return undefined;
+        let last = Date.now();
+        const seen = () => { last = Date.now(); };
+        const events = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'] as const;
+        events.forEach((name) => window.addEventListener(name, seen, { passive: true }));
+        const id = window.setInterval(() => { if (Date.now() - last >= delay) setIdle(true); }, 5_000);
+        return () => {
+            window.clearInterval(id);
+            events.forEach((name) => window.removeEventListener(name, seen));
+        };
+    }, [settings.screensaverMinutes, idle, settingsOpen]);
+
     // Immich photo background — new photo every ~2 min, crossfaded.
     // Errors (no integration, demo mode, server down) silently keep the plain background.
     useEffect(() => {
@@ -239,6 +278,8 @@ const Kiosk: React.FC = () => {
             setPhotos((prev) => { prev.forEach((p) => URL.revokeObjectURL(p.url)); return []; });
             return;
         }
+        // Hidden behind the screensaver, which asks for its own photos.
+        if (idle) return;
         const loadPhoto = async () => {
             try {
                 const blob = await api.getBlob('/api/integrations/immich/photo');
@@ -253,7 +294,7 @@ const Kiosk: React.FC = () => {
         void loadPhoto();
         const id = setInterval(() => void loadPhoto(), 120_000);
         return () => clearInterval(id);
-    }, [settings.photoBackground]);
+    }, [settings.photoBackground, idle]);
 
     // Revoke any remaining object URLs on unmount
     useEffect(() => () => { photosRef.current.forEach((p) => URL.revokeObjectURL(p.url)); }, []);
@@ -655,7 +696,7 @@ const Kiosk: React.FC = () => {
             {settingsOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSettingsOpen(false)} />
-                    <div className="relative w-full max-w-md rounded-card border border-border bg-card p-6 shadow-lg">
+                    <div className="relative max-h-full w-full max-w-md overflow-y-auto rounded-card border border-border bg-card p-6 shadow-lg">
                         <div className="mb-5 flex items-center justify-between gap-3">
                             <h2 className="font-serif text-h2">{t('kiosk:displaySettings.title')}</h2>
                             <button
@@ -776,9 +817,70 @@ const Kiosk: React.FC = () => {
                                 )} />
                             </button>
                         </div>
+
+                        {/* Screensaver: when it starts, and what it shows */}
+                        <div className="mt-6">
+                            <p className="text-caption font-medium">{t('kiosk:displaySettings.screensaver')}</p>
+                            <p className="mt-0.5 text-micro text-muted-foreground">{t('kiosk:displaySettings.screensaverHint')}</p>
+                            <div
+                                role="group"
+                                aria-label={t('kiosk:displaySettings.screensaver')}
+                                className="mt-3 flex flex-wrap items-center gap-1 rounded-input border border-border p-0.5"
+                            >
+                                {SCREENSAVER_DELAYS.map((minutes) => (
+                                    <button
+                                        key={minutes}
+                                        type="button"
+                                        aria-pressed={settings.screensaverMinutes === minutes}
+                                        onClick={() => setSettings((s) => ({ ...s, screensaverMinutes: minutes }))}
+                                        className={cn(
+                                            'flex-1 whitespace-nowrap rounded px-2 py-2 text-caption transition-colors',
+                                            settings.screensaverMinutes === minutes
+                                                ? 'bg-primary-soft font-medium text-primary'
+                                                : 'text-muted-foreground active:bg-surface-2'
+                                        )}
+                                    >
+                                        {minutes === 0
+                                            ? t('kiosk:displaySettings.screensaverOff')
+                                            : t('kiosk:displaySettings.screensaverMinutes', { minutes })}
+                                    </button>
+                                ))}
+                            </div>
+                            {settings.screensaverMinutes > 0 && (
+                                <>
+                                    <div
+                                        role="group"
+                                        aria-label={t('kiosk:displaySettings.screensaverStyle')}
+                                        className="mt-2 flex items-center gap-1 rounded-input border border-border p-0.5"
+                                    >
+                                        {(['photos', 'clock'] as const).map((style) => (
+                                            <button
+                                                key={style}
+                                                type="button"
+                                                aria-pressed={settings.screensaverStyle === style}
+                                                onClick={() => setSettings((s) => ({ ...s, screensaverStyle: style }))}
+                                                className={cn(
+                                                    'flex-1 rounded px-3 py-2 text-caption transition-colors',
+                                                    settings.screensaverStyle === style
+                                                        ? 'bg-primary-soft font-medium text-primary'
+                                                        : 'text-muted-foreground active:bg-surface-2'
+                                                )}
+                                            >
+                                                {style === 'photos'
+                                                    ? t('kiosk:displaySettings.screensaverPhotos')
+                                                    : t('kiosk:displaySettings.screensaverClock')}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="mt-2 text-micro text-muted-foreground">{t('kiosk:displaySettings.screensaverStyleHint')}</p>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
+
+            {idle && <KioskScreensaver style={settings.screensaverStyle} onWake={() => setIdle(false)} />}
         </div>
     );
 };

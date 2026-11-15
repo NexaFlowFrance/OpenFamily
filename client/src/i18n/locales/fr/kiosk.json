@@ -27,11 +27,22 @@
     "change": "Changer",
     "temperatureUnit": "Unité de température",
     "photoBackground": "Fond photo",
-    "photoBackgroundHint": "Affiche des photos aléatoires de votre bibliothèque en arrière-plan. Nécessite une intégration Immich connectée."
+    "photoBackgroundHint": "Affiche des photos aléatoires de votre bibliothèque en arrière-plan. Nécessite une intégration Immich connectée.",
+    "screensaver": "Économiseur d'écran",
+    "screensaverHint": "Après ce délai sans que personne ne touche l'écran, affiche des photos ou une horloge qui se déplace, pour éviter le marquage d'un écran allumé toute la journée.",
+    "screensaverOff": "Désactivé",
+    "screensaverMinutes": "{{minutes}} min",
+    "screensaverStyle": "Ce que montre l'économiseur d'écran",
+    "screensaverPhotos": "Photos",
+    "screensaverClock": "Horloge mobile",
+    "screensaverStyleHint": "Les photos viennent de votre intégration Immich ; sans elle, l'horloge s'affiche."
   },
   "settings": {
     "title": "Affichage kiosk",
     "subtitle": "Un affichage plein écran en lecture seule pour une tablette murale ou un écran de frigo — agenda du jour, repas, tâches et qui est où.",
     "open": "Ouvrir l'affichage kiosk"
+  },
+  "screensaver": {
+    "wake": "Touchez l'écran pour retrouver l'affichage"
   }
 }

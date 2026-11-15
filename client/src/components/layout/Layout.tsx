@@ -24,6 +24,7 @@ import {
     Plug,
     PiggyBank,
     MessageSquare,
+    MonitorPlay,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
@@ -282,6 +283,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                         <div className="flex items-center gap-2">
                             <MagicInputButton />
+                            {/* One tap to the wall display, from any page */}
+                            {isModuleEnabled('kiosk') && (
+                                <Link
+                                    to="/kiosk"
+                                    aria-label={t('kiosk:settings.open')}
+                                    title={t('kiosk:settings.open')}
+                                    className="btn-nexus btn-secondary flex h-10 w-10 shrink-0 items-center justify-center"
+                                >
+                                    <MonitorPlay className="h-4 w-4" />
+                                </Link>
+                            )}
                             <NotificationBell />
                             <div className="hidden items-center gap-2 lg:flex">
                                 <Button

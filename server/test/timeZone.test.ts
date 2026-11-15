@@ -4,7 +4,7 @@ import { app, me, query, registerWithPassword, resetState, startSuite, stopSuite
 import { issueAccessToken } from '../src/lib/authTokens';
 import { displayOptions, renderDisplayPage } from '../src/lib/displayPage';
 import { loadDisplaySnapshot } from '../src/lib/displaySnapshot';
-import { buildReminderTexts, reminderMoment } from '../src/lib/reminderScheduler';
+import { buildReminderTexts, checkReminders, reminderMoment } from '../src/lib/reminderScheduler';
 import {
     addDays, canonicalTimeZone, dayInZone, forgetFamilyTimeZones, instantInZone, isoWeekdayOf, isTimeZone,
     naiveInZone, serverTimeZone,
@@ -101,6 +101,34 @@ describe('reminders', () => {
         const event = { title: 'School trip', start_time: '2026-11-16T00:00:00', is_all_day: true, language: 'en', location: null };
         expect(buildReminderTexts({ ...event, timezone: 'Asia/Tokyo' }, 0, now).body).toBe('Today');
         expect(buildReminderTexts({ ...event, timezone: 'America/New_York' }, 0, now).body).toBe('Tomorrow');
+    });
+});
+
+describe('the reminder scheduler', () => {
+    it("sends a reminder when it is due on the family's clocks, wherever the server runs", async () => {
+        const now = new Date();
+        // The same wall-clock time for two families: twenty-nine minutes from
+        // now in Tokyo, which is hours away from now in New York.
+        const start = naiveInZone(new Date(now.getTime() + 29 * 60_000), 'Asia/Tokyo');
+        const other = await registerWithPassword('other@example.org');
+        await setZone(parent.token, 'Asia/Tokyo');
+        await setZone(other.token, 'America/New_York');
+        for (const family of [parent, other]) {
+            const created = await request(app).post('/api/appointments').set(bearer(family.token))
+                .send({ title: 'Dentist', start_time: start, reminder_minutes: [30] });
+            expect(created.status).toBe(200);
+        }
+
+        await checkReminders(now);
+
+        const sent = await query("SELECT user_id, title, message FROM notifications WHERE type = 'appointment_reminder'");
+        expect(sent.rows.map((row: { user_id: string }) => row.user_id)).toEqual([parent.user.id]);
+        expect(sent.rows[0].title).toContain('Dentist');
+        expect(sent.rows[0].message).toContain(start.slice(11, 16));
+
+        // A second pass does not send it again.
+        await checkReminders(now);
+        expect((await query("SELECT count(*)::int AS n FROM notifications WHERE type = 'appointment_reminder'")).rows[0].n).toBe(1);
     });
 });
 

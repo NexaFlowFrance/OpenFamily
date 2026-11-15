@@ -107,8 +107,8 @@ export function reminderMoment(occurrence: Pick<Occurrence, 'start_time' | 'is_a
     return new Date(instantInZone(reference, zoneOf(occurrence)).getTime() - minutes * 60 * 1000);
 }
 
-async function checkReminders(): Promise<void> {
-    const now = new Date();
+/** One pass of the scheduler: sends every reminder that is due at `now`. Exported for the tests. */
+export async function checkReminders(now: Date = new Date()): Promise<void> {
     // Every occurrence that can have a reminder due now: starting at most four
     // weeks ahead, or up to a day ago (an all-day event's reminders count from
     // 09:00, and a late reminder is still sent within the grace period).

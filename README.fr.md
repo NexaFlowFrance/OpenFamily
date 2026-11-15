@@ -2,7 +2,7 @@
   <img src="client/public/OpenFamily.png" alt="OpenFamily" width="90">
   <h1>OpenFamily</h1>
   <p><strong>Application de gestion familiale open source, auto-hébergeable</strong><br>
-  Gardez le contrôle total de vos données — hébergez-la sur votre propre serveur.</p>
+  Gardez le contrôle total de vos données : hébergez-la sur votre propre serveur.</p>
 
   🇬🇧 <a href="README.md">English</a> · 🇫🇷 <strong>Français</strong> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a>
 
@@ -14,7 +14,7 @@
 
 ---
 
-> 🎬 **[Essayez la démo en ligne →](https://openfamily.fr/demo/)** — aucune inscription, rien n'est enregistré.
+> 🎬 **[Essayez la démo en ligne](https://openfamily.fr/demo/)** : aucune inscription, rien n'est enregistré.
 
 ## 🎯 Fonctionnalités
 
@@ -30,11 +30,11 @@
 | 👨‍👩‍👧‍👦 **Famille** | Profils membres, informations santé, contacts d'urgence |
 | 🔄 **Sync temps réel** | Mise à jour instantanée entre tous les appareils (WebSocket) |
 | 🔔 **Notifications** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) + in-app |
-| 🖼️ **Écrans muraux et e-paper** | Mode kiosque plein écran pour une tablette, et **liens d'affichage** : une page sans connexion qui montre la journée de la famille sur un cadre e-paper (InkyPi), une liseuse ou tout écran qui ne peut pas ouvrir de session |
+| 🖼️ **Écrans muraux et e-paper** | Mode kiosque plein écran pour une tablette, avec un économiseur d'écran (photos ou horloge mobile) pour les écrans allumés toute la journée, et **liens d'affichage** : une page sans connexion qui montre la journée de la famille sur un cadre e-paper (InkyPi), une liseuse ou tout écran qui ne peut pas ouvrir de session |
 | 🔌 **Jetons d'API** | Des jetons personnels pour que Home Assistant, Gladys Assistant, n8n ou un script lisent ou complètent les données de la famille par l'API REST et le WebSocket : lecture seule ou écriture, révocables à tout moment |
 | 👥 **Comptes partagés** | Invitations par lien, demandes d'accès, transfert de propriété |
 | 🔑 **Connexion unique (SSO)** | Connexion avec votre propre fournisseur OpenID Connect (Authentik, Keycloak, Pocket ID...), serveurs 100 % SSO en option, **déconnexion de tous les appareils** |
-| 🛡️ **Rôles & permissions** | Comptes **parent / enfant** — budget en lecture seule pour les enfants |
+| 🛡️ **Rôles & permissions** | Comptes **parent / enfant**, avec un budget en lecture seule pour les enfants |
 | 🌍 **Multilingue** | Interface **français / anglais / allemand / portugais / russe / espagnol / catalan / chinois simplifié** avec détection automatique |
 | 📴 **Mode hors ligne** | Consultation des données en cache sans connexion (PWA) |
 
@@ -42,17 +42,18 @@
 
 | Application | Type | Ce qui est synchronisé |
 |---|---|---|
+| **[Gladys Assistant](https://github.com/NexaFlowFrance/gladys-openfamily)** | 🏡 Domotique | Le calendrier familial, la liste de courses et les tâches dans [Gladys](https://gladysassistant.com), l'assistant domotique open source français : widgets de tableau de bord, actions et déclencheurs de scène. S'installe depuis le store d'intégrations de Gladys |
 | **Mealie** | 🍲 Recettes | Import automatique des recettes (API v1 & v2) |
 | **Tandoor** | 🌿 Recettes, planning des repas | Import via l'API Django REST (planning : bouton « Importer depuis Tandoor » du planning des repas) |
 | **Home Assistant** | 🏠 Courses | Sync liste de courses via WebSocket |
 | **Grocy** | 🥦 Courses & stock | Synchronisation liste de courses et stock |
 | **Nextcloud** | ☁️ Calendrier | Import CalDAV avec découverte automatique |
 
-> 🎬 Merci à **[Makernix](https://www.youtube.com/@Makernix)** — c'est lors d'un échange direct avec lui que l'idée des intégrations tierces a émergé.
+> 🎬 Merci à **[Makernix](https://www.youtube.com/@Makernix)** : c'est lors d'un échange direct avec lui que l'idée des intégrations tierces a émergé.
 
 ## 🚀 Démarrage rapide
 
-### 🪟 Windows (.exe) — le plus simple
+### 🪟 Windows (.exe), le plus simple
 
 **NexaFlow** fournit un installeur graphique tout-en-un (Node.js et PostgreSQL embarqués, aucun Docker).
 
@@ -64,7 +65,7 @@
 
 ### 📱 Application Android (APK)
 
-OpenFamily dispose aussi d'une **application Android native** — un client léger qui se
+OpenFamily dispose aussi d'une **application Android native**, un client léger qui se
 connecte à **votre propre** serveur (vous saisissez son adresse au premier lancement, comme
 les apps Nextcloud ou Home Assistant). Elle n'héberge rien elle-même.
 
@@ -79,7 +80,7 @@ l'adresse de votre serveur (ex. `http://192.168.1.10:3001`, ou votre adresse HTT
 
 > 🔄 **Mises à jour automatiques :** ajoutez le dépôt à
 > **[Obtainium](https://github.com/ImranR98/Obtainium)** pour recevoir les mises à jour
-> directement depuis les Releases GitHub — sans store.
+> directement depuis les Releases GitHub, sans store.
 
 ### 🐳 Docker (recommandé pour serveur)
 
@@ -125,7 +126,7 @@ JWT (7 j, refresh auto) · bcrypt (cost 12) · helmet · rate limiting · CORS s
 
 ## 💛 Soutenir le projet
 
-OpenFamily est gratuit, open source (AGPL-3.0) et auto-hébergé — sans publicité, sans
+OpenFamily est gratuit, open source (AGPL-3.0) et auto-hébergé : sans publicité, sans
 pistage, sans version payante. Il est développé et maintenu sur du temps personnel. Si
 l'application aide votre famille, vous pouvez soutenir son développement :
 
@@ -138,15 +139,15 @@ l'application aide votre famille, vous pouvez soutenir son développement :
   </a>
 </p>
 
-Mettre une étoile au dépôt aide tout autant — c'est ainsi que d'autres familles découvrent le projet.
+Mettre une étoile au dépôt aide tout autant : c'est ainsi que d'autres familles découvrent le projet.
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues — ouvrez une [issue](https://github.com/NexaFlowFrance/OpenFamily/issues) ou une [pull request](https://github.com/NexaFlowFrance/OpenFamily/pulls).
+Les contributions sont les bienvenues : ouvrez une [issue](https://github.com/NexaFlowFrance/OpenFamily/issues) ou une [pull request](https://github.com/NexaFlowFrance/OpenFamily/pulls).
 
 ## 📄 Licence
 
-GNU Affero General Public License v3.0 (AGPL-3.0-only) — voir [licence.md](licence.md).
+GNU Affero General Public License v3.0 (AGPL-3.0-only), voir [licence.md](licence.md).
 
 ## 🙏 Crédits
 

@@ -2,7 +2,7 @@
   <img src="client/public/OpenFamily.png" alt="OpenFamily" width="90">
   <h1>OpenFamily</h1>
   <p><strong>The open-source, self-hosted family organizer</strong><br>
-  Keep full control of your family's data — run it on your own server.</p>
+  Keep full control of your family's data: run it on your own server.</p>
 
   🇬🇧 <strong>English</strong> · 🇫🇷 <a href="README.fr.md">Français</a> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a>
 
@@ -18,7 +18,7 @@
 
 <div align="center">
 
-### 🎬 [Try the live demo →](https://openfamily.fr/demo/)
+### 🎬 [Try the live demo](https://openfamily.fr/demo/)
 
 *No sign-up, runs entirely in your browser, nothing is saved.*
 
@@ -27,8 +27,8 @@
 </div>
 
 OpenFamily is a **self-hosted alternative to apps like Cozi or FamilyWall**: shopping lists,
-tasks, a shared calendar, weekly planning, recipes, meal planning and a household budget —
-all in one place, on **your** server, with **your** data.
+tasks, a shared calendar, weekly planning, recipes, meal planning and a household budget,
+all in one place, on your own server.
 
 ## ✨ Features
 
@@ -44,11 +44,11 @@ all in one place, on **your** server, with **your** data.
 | 👨‍👩‍👧‍👦 **Family** | Member profiles, health info, emergency contacts |
 | 🔄 **Real-time sync** | Instant updates across every device (WebSocket) |
 | 🔔 **Notifications** | Appointment reminders, task alerts (Web Push VAPID) + in-app |
-| 🖼️ **Wall & e-paper displays** | Full-screen kiosk for a tablet, and **display links**: a login-free page of the family's day for an e-paper frame (InkyPi), an e-reader or any screen that cannot sign in |
+| 🖼️ **Wall & e-paper displays** | Full-screen kiosk for a tablet, with a screensaver (photos or a moving clock) for screens left on all day, and **display links**: a login-free page of the family's day for an e-paper frame (InkyPi), an e-reader or any screen that cannot sign in |
 | 🔌 **API tokens** | Personal tokens so that Home Assistant, Gladys Assistant, n8n or a script can read or add to the family's data over the REST API and WebSocket: read-only or read-write, revocable at any time |
 | 👥 **Shared accounts** | Invite by link, **access requests**, **ownership transfer** |
 | 🔑 **Single sign-on** | Sign in with your own OpenID Connect provider (Authentik, Keycloak, Pocket ID...), optional SSO-only servers, **sign out of all devices** |
-| 🛡️ **Roles & permissions** | **Parent / child** accounts — read-only budget for children |
+| 🛡️ **Roles & permissions** | **Parent / child** accounts, with a read-only budget for children |
 | 🌍 **Multilingual** | **English / French / German / Portuguese / Russian / Spanish / Catalan / Simplified Chinese** interface with automatic detection |
 | 📴 **Offline mode** | Browse cached data without a connection (PWA) |
 
@@ -64,26 +64,27 @@ all in one place, on **your** server, with **your** data.
 
 ## 🔗 Third-party integrations
 
-Connect OpenFamily to your self-hosted ecosystem in one click — no config files to edit.
+Connect OpenFamily to the rest of your self-hosted setup from the Integrations page, with no config file to edit.
 
 | App | Type | What is synced |
 |---|---|---|
+| **[Gladys Assistant](https://github.com/NexaFlowFrance/gladys-openfamily)** | 🏡 Home automation | The family calendar, shopping list and tasks in [Gladys](https://gladysassistant.com), the open-source home assistant made in France: dashboard widgets, scene actions and triggers. Installed from the Gladys integration store |
 | **Mealie** | 🍲 Recipes | Automatic import of all recipes (pagination, API v1 & v2) |
 | **Tandoor** | 🌿 Recipes, meal plan | Import via the Django REST API (meal plan: "Import from Tandoor" button on the meal planning page) |
 | **Home Assistant** | 🏠 Shopping | Shopping-list sync over WebSocket (modern `todo` entities + legacy) |
 | **Grocy** | 🥦 Shopping & stock | Shopping list and stock synchronization |
 | **Nextcloud** | ☁️ Calendar | CalDAV import with auto-discovery and per-UID deduplication |
 
-> 🎬 Thanks to **[Makernix](https://www.youtube.com/@Makernix)** — the idea of connecting
+> 🎬 Thanks to **[Makernix](https://www.youtube.com/@Makernix)**: the idea of connecting
 > OpenFamily to the self-hosted family ecosystem (Mealie, Grocy, Home Assistant, Nextcloud)
 > emerged from a direct exchange with him.
 
 ## 🚀 Quick start
 
-### 🪟 Windows installer (.exe) — the easiest path
+### 🪟 Windows installer (.exe), the easiest path
 
 For Windows users, **NexaFlow** provides an all-in-one graphical installer: Node.js and
-PostgreSQL are bundled — **no Docker, no configuration** required.
+PostgreSQL are bundled: **no Docker, no configuration** required.
 
 <p>
   <a href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe">
@@ -97,7 +98,7 @@ Wi-Fi, and the **Settings** tab explains how to set up Tailscale for secure remo
 
 ### 📱 Android app (APK)
 
-OpenFamily also has a native **Android app** — a thin client that connects to **your own**
+OpenFamily also has a native **Android app**, a thin client that connects to **your own**
 server (you enter its address on first launch, just like the Nextcloud or Home Assistant
 apps). It hosts nothing itself.
 
@@ -112,7 +113,7 @@ your server URL (e.g. `http://192.168.1.10:3001`, or your HTTPS / Tailscale addr
 
 > 🔄 **Stay up to date automatically:** add the repo to
 > **[Obtainium](https://github.com/ImranR98/Obtainium)** to receive app updates straight from
-> GitHub Releases — no app store required.
+> GitHub Releases, with no app store required.
 
 ### 🐳 Docker (recommended for a server)
 
@@ -162,14 +163,14 @@ npm run dev
 | Your data on your server | ✅ | ❌ |
 | Open source (AGPL-3.0) | ✅ | ❌ |
 | No ads, no tracking | ✅ | ❌ |
-| Self-hosted integrations (Mealie, Grocy, Home Assistant…) | ✅ | ❌ |
+| Self-hosted integrations (Gladys Assistant, Home Assistant, Mealie, Grocy…) | ✅ | ❌ |
 | Works offline (PWA) | ✅ | ⚠️ |
 
 ## 🧰 Tech stack
 
-**Frontend** — React 19 · TypeScript · Vite 7 · TailwindCSS · Radix UI · i18next · PWA (service worker, web push, offline)
-**Backend** — Node.js 26 · Express · PostgreSQL 16 (auto-migration) · WebSocket · Web Push (VAPID) · JWT + bcrypt 12 · helmet · rate limiting
-**DevOps** — Docker Compose (postgres, server, client/nginx) · GitHub Actions (CI + Docker publish to ghcr.io + GitHub Pages demo)
+**Frontend**: React 19 · TypeScript · Vite 7 · TailwindCSS · Radix UI · i18next · PWA (service worker, web push, offline)
+**Backend**: Node.js 26 · Express · PostgreSQL 16 (auto-migration) · WebSocket · Web Push (VAPID) · JWT + bcrypt 12 · helmet · rate limiting
+**DevOps**: Docker Compose (postgres, server, client/nginx) · GitHub Actions (CI + Docker publish to ghcr.io + GitHub Pages demo)
 
 ## 🔐 Security
 
@@ -184,7 +185,7 @@ Planned features and design decisions live in [ROADMAP.md](ROADMAP.md).
 
 ## 💛 Support the project
 
-OpenFamily is free, open source (AGPL-3.0) and self-hosted — no ads, no tracking, no paid
+OpenFamily is free, open source (AGPL-3.0) and self-hosted: no ads, no tracking, no paid
 tier. It is built and maintained on personal time. If it helps your family, you can support
 its development:
 
@@ -197,7 +198,7 @@ its development:
   </a>
 </p>
 
-Starring the repository helps just as much — it is how other families find the project.
+Starring the repository helps just as much: it is how other families find the project.
 
 ## 🤝 Contributing
 
@@ -206,10 +207,8 @@ or a [pull request](https://github.com/NexaFlowFrance/OpenFamily/pulls).
 
 ## 📄 License
 
-GNU Affero General Public License v3.0 (AGPL-3.0-only) — see [licence.md](licence.md).
+GNU Affero General Public License v3.0 (AGPL-3.0-only), see [licence.md](licence.md).
 
 ## 🙏 Credits
 
 Built and maintained by [NexaFlow France](https://nexaflow.fr).
-This project embraces the open-source philosophy and encourages sharing and community
-contribution.

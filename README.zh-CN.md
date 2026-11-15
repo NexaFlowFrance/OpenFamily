@@ -2,7 +2,7 @@
   <img src="client/public/OpenFamily.png" alt="OpenFamily" width="90">
   <h1>OpenFamily</h1>
   <p><strong>开源、自托管的家庭管理工具</strong><br>
-  完全掌控你的家庭数据——在自己的服务器上运行。</p>
+  完全掌控你的家庭数据：在自己的服务器上运行。</p>
 
   🇬🇧 <a href="README.md">English</a> · 🇫🇷 <a href="README.fr.md">Français</a> · 🇨🇳 <strong>简体中文</strong>
 
@@ -18,7 +18,7 @@
 
 <div align="center">
 
-### 🎬 [在线体验 →](https://openfamily.fr/demo/)
+### 🎬 [在线体验](https://openfamily.fr/demo/)
 
 *无需注册，完全在浏览器中运行，不会保存任何数据。*
 
@@ -27,8 +27,8 @@
 </div>
 
 OpenFamily 是 **Cozi 和 FamilyWall 等应用的自托管替代方案**：将购物清单、
-任务、共享日历、每周计划、食谱、餐食计划和家庭预算整合在一起——
-运行在**你自己**的服务器上，管理**你自己**的数据。
+任务、共享日历、每周计划、食谱、餐食计划和家庭预算整合在一起，
+运行在你自己的服务器上。
 
 ## ✨ 功能
 
@@ -44,11 +44,11 @@ OpenFamily 是 **Cozi 和 FamilyWall 等应用的自托管替代方案**：将�
 | 👨‍👩‍👧‍👦 **家庭** | 成员档案、健康信息、紧急联系人 |
 | 🔄 **实时同步** | 通过 WebSocket 在所有设备之间即时更新 |
 | 🔔 **通知** | 日程提醒、任务警报（Web Push VAPID）和应用内通知 |
-| 🖼️ **壁挂屏与电子墨水屏** | 适用于平板的全屏信息屏模式，以及**显示屏链接**：无需登录即可在电子墨水相框（InkyPi）、电子书阅读器或任何无法登录的屏幕上显示家庭当日安排 |
+| 🖼️ **壁挂屏与电子墨水屏** | 适用于平板的全屏信息屏模式（带屏幕保护：照片或移动时钟，适合全天开启的屏幕），以及**显示屏链接**：无需登录即可在电子墨水相框（InkyPi）、电子书阅读器或任何无法登录的屏幕上显示家庭当日安排 |
 | 🔌 **API 令牌** | 个人令牌，让 Home Assistant、Gladys Assistant、n8n 或脚本通过 REST API 和 WebSocket 读取或添加家庭数据：可只读或读写，随时可撤销 |
 | 👥 **共享账号** | 通过链接邀请、**访问请求**、**所有权转让** |
 | 🔑 **单点登录** | 使用您自己的 OpenID Connect 身份提供商登录（Authentik、Keycloak、Pocket ID……），可选仅限 SSO 的服务器，**在所有设备上退出登录** |
-| 🛡️ **角色与权限** | **家长/孩子**账号——孩子只能以只读方式查看预算 |
+| 🛡️ **角色与权限** | **家长/孩子**账号，孩子只能以只读方式查看预算 |
 | 🌍 **多语言** | 支持**英语/法语/德语/葡萄牙语/俄语/西班牙语/加泰罗尼亚语/简体中文**界面和自动检测 |
 | 📴 **离线模式** | 无网络连接时仍可浏览缓存数据（PWA） |
 
@@ -68,18 +68,19 @@ OpenFamily 是 **Cozi 和 FamilyWall 等应用的自托管替代方案**：将�
 
 | 应用 | 类型 | 同步内容 |
 |---|---|---|
+| **[Gladys Assistant](https://github.com/NexaFlowFrance/gladys-openfamily)** | 🏡 智能家居 | 在法国的开源智能家居助手 [Gladys](https://gladysassistant.com) 中显示家庭日历、购物清单和任务：仪表盘小组件、场景动作和触发器。从 Gladys 集成商店安装 |
 | **Mealie** | 🍲 食谱 | 自动导入所有食谱（分页、API v1 和 v2） |
 | **Tandoor** | 🌿 食谱 | 通过 Django REST API 导入 |
 | **Home Assistant** | 🏠 购物 | 通过 WebSocket 同步购物清单（现代 `todo` 实体和旧版实体） |
 | **Grocy** | 🥦 购物与库存 | 同步购物清单和库存 |
 | **Nextcloud** | ☁️ 日历 | 通过自动发现和按 UID 去重导入 CalDAV |
 
-> 🎬 感谢 **[Makernix](https://www.youtube.com/@Makernix)**——将 OpenFamily 与自托管家庭生态系统
+> 🎬 感谢 **[Makernix](https://www.youtube.com/@Makernix)**：将 OpenFamily 与自托管家庭生态系统
 > （Mealie、Grocy、Home Assistant、Nextcloud）连接起来的想法，来自与他的一次直接交流。
 
 ## 🚀 快速开始
 
-### 🪟 Windows 安装程序（.exe）——最简单的方式
+### 🪟 Windows 安装程序（.exe），最简单的方式
 
 针对 Windows 用户，**NexaFlow** 提供一体化图形安装程序：内置 Node.js 和
 PostgreSQL，**无需 Docker，也无需配置**。
@@ -96,7 +97,7 @@ PostgreSQL，**无需 Docker，也无需配置**。
 
 ### 📱 Android 应用（APK）
 
-OpenFamily 还提供原生 **Android 应用**——它是一个连接到**你自己**服务器的轻量客户端
+OpenFamily 还提供原生 **Android 应用**，它是一个连接到**你自己**服务器的轻量客户端
 （首次启动时输入服务器地址，与 Nextcloud 或 Home Assistant 应用类似）。它本身不托管任何服务。
 
 <p>
@@ -159,14 +160,14 @@ npm run dev
 | 数据存储在你自己的服务器上 | ✅ | ❌ |
 | 开源（AGPL-3.0） | ✅ | ❌ |
 | 无广告、无跟踪 | ✅ | ❌ |
-| 自托管集成（Mealie、Grocy、Home Assistant 等） | ✅ | ❌ |
+| 自托管集成（Gladys Assistant、Home Assistant、Mealie、Grocy 等） | ✅ | ❌ |
 | 离线工作（PWA） | ✅ | ⚠️ |
 
 ## 🧰 技术栈
 
-**前端**——React 19 · TypeScript · Vite 7 · TailwindCSS · Radix UI · i18next · PWA（Service Worker、Web Push、离线模式）  
-**后端**——Node.js 26 · Express · PostgreSQL 16（自动迁移）· WebSocket · Web Push（VAPID）· JWT + bcrypt 12 · helmet · 限流  
-**DevOps**——Docker Compose（postgres、server、client/nginx）· GitHub Actions（CI、发布 Docker 镜像到 ghcr.io、GitHub Pages 演示）
+**前端**：React 19 · TypeScript · Vite 7 · TailwindCSS · Radix UI · i18next · PWA（Service Worker、Web Push、离线模式）  
+**后端**：Node.js 26 · Express · PostgreSQL 16（自动迁移）· WebSocket · Web Push（VAPID）· JWT + bcrypt 12 · helmet · 限流  
+**DevOps**：Docker Compose（postgres、server、client/nginx）· GitHub Actions（CI、发布 Docker 镜像到 ghcr.io、GitHub Pages 演示）
 
 ## 🔐 安全
 
@@ -179,7 +180,7 @@ JWT 身份验证（有效期 7 天，自动刷新）· 使用 **bcrypt（cost 12
 
 ## 💛 支持项目
 
-OpenFamily 是免费、开源（AGPL-3.0）且自托管的——没有广告、没有追踪、没有付费版本。
+OpenFamily 是免费、开源（AGPL-3.0）且自托管的：没有广告、没有追踪、没有付费版本。
 它由个人业余时间开发和维护。如果它对你的家庭有帮助，欢迎支持它的开发：
 
 <p>
@@ -191,7 +192,7 @@ OpenFamily 是免费、开源（AGPL-3.0）且自托管的——没有广告、�
   </a>
 </p>
 
-给仓库点个 Star 同样有帮助——其他家庭正是这样发现这个项目的。
+给仓库点个 Star 同样有帮助：其他家庭正是这样发现这个项目的。
 
 ## 🤝 参与贡献
 
@@ -200,9 +201,8 @@ OpenFamily 是免费、开源（AGPL-3.0）且自托管的——没有广告、�
 
 ## 📄 许可证
 
-GNU Affero General Public License v3.0（AGPL-3.0-only）——详见 [licence.md](licence.md)。
+GNU Affero General Public License v3.0（AGPL-3.0-only），详见 [licence.md](licence.md)。
 
 ## 🙏 致谢
 
 由 [NexaFlow France](https://nexaflow.fr) 开发和维护。
-本项目拥抱开源理念，并鼓励分享和社区贡献。

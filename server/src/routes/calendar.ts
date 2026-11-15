@@ -2,6 +2,12 @@ import crypto from 'node:crypto';
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { addDays, dayInZone, familyTimeZone, instantInZone } from '../lib/timeZone';
+import { listAppointments } from './appointments';
+
+// How far the calendar feed reaches around today.
+const FEED_DAYS_BEHIND = 365;
+const FEED_DAYS_AHEAD = 730;
 
 const router = Router();
 
@@ -28,22 +34,17 @@ const foldLine = (line: string): string => {
     return chunks.join('\r\n');
 };
 
-// Format a timestamp as an iCal floating local time (YYYYMMDDTHHMMSS — no 'Z', no TZID).
-// Accepts either a naive local ISO string ('YYYY-MM-DDTHH:mm:ss', as returned by the pg
-// TIMESTAMP type parser in db.ts) or a Date (formatted using local getters, never UTC).
-const formatICSDate = (value: string | Date): string => {
-    if (typeof value === 'string') {
-        // '2026-06-10T14:30:00' → '20260610T143000'
-        return value.replace(/[-:]/g, '').slice(0, 15);
-    }
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return (
-        `${value.getFullYear()}${pad(value.getMonth() + 1)}${pad(value.getDate())}` +
-        `T${pad(value.getHours())}${pad(value.getMinutes())}${pad(value.getSeconds())}`
-    );
-};
+// A moment as iCalendar writes it in UTC: 20260610T123000Z. Appointments are
+// stored as the family's wall-clock times; the feed gives each one as the
+// instant it is in the family's zone (lib/timeZone), so that it lands at the
+// right time in a calendar set to any zone.
+const formatICSInstant = (instant: Date): string => `${instant.toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`;
+// A calendar day, for an all-day event: 20260610.
+const formatICSDay = (day: string): string => day.replace(/-/g, '');
 
-const buildICS = (appointments: any[]): string => {
+const HOUR_MS = 60 * 60 * 1000;
+
+export const buildICS = (appointments: any[], zone: string, now: Date = new Date()): string => {
     const lines: string[] = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
@@ -51,22 +52,33 @@ const buildICS = (appointments: any[]): string => {
         'CALSCALE:GREGORIAN',
         'METHOD:PUBLISH',
         'X-WR-CALNAME:OpenFamily',
-        'X-WR-TIMEZONE:Europe/Paris',
+        `X-WR-TIMEZONE:${zone}`,
     ];
 
-    const stamp = formatICSDate(new Date());
+    const stamp = formatICSInstant(now);
 
     for (const apt of appointments) {
-        // start_time/end_time arrive as naive local strings — keep them floating local.
-        // Default end: start + 1h (new Date(naiveString) parses as local time, and
-        // formatICSDate(Date) emits local components, so no UTC shift occurs).
-        const end = apt.end_time ?? new Date(new Date(apt.start_time).getTime() + 60 * 60 * 1000);
+        const start = String(apt.start_time);
 
         lines.push('BEGIN:VEVENT');
-        lines.push(`UID:${apt.id}@openfamily`);
+        // A series is written out one event per occurrence, each with its own identity.
+        lines.push(`UID:${String(apt.occurrence_id ?? apt.id).replace(':', '_')}@openfamily`);
         lines.push(`DTSTAMP:${stamp}`);
-        lines.push(`DTSTART:${formatICSDate(apt.start_time)}`);
-        lines.push(`DTEND:${formatICSDate(end)}`);
+        if (apt.is_all_day) {
+            // Whole days carry no time and no zone; the end is exclusive.
+            const firstDay = start.slice(0, 10);
+            const endDay = typeof apt.end_time === 'string' && apt.end_time.slice(0, 10) > firstDay
+                ? apt.end_time.slice(0, 10)
+                : firstDay;
+            lines.push(`DTSTART;VALUE=DATE:${formatICSDay(firstDay)}`);
+            lines.push(`DTEND;VALUE=DATE:${formatICSDay(addDays(endDay, 1))}`);
+        } else {
+            const startAt = instantInZone(start, zone);
+            const endAt = apt.end_time ? instantInZone(String(apt.end_time), zone) : null;
+            lines.push(`DTSTART:${formatICSInstant(startAt)}`);
+            // Without an end, or with one before the start: an hour.
+            lines.push(`DTEND:${formatICSInstant(endAt && endAt > startAt ? endAt : new Date(startAt.getTime() + HOUR_MS))}`);
+        }
         lines.push(foldLine(`SUMMARY:${escapeICS(apt.title || 'Rendez-vous')}`));
         if (apt.description) lines.push(foldLine(`DESCRIPTION:${escapeICS(apt.description)}`));
         if (apt.location) lines.push(foldLine(`LOCATION:${escapeICS(apt.location)}`));
@@ -123,12 +135,17 @@ router.get('/:token/openfamily.ics', async (req, res) => {
         }
         const userId = userResult.rows[0].id;
 
-        const appointments = await query(
-            'SELECT id, title, description, start_time, end_time, location FROM appointments WHERE user_id = $1 ORDER BY start_time ASC',
-            [userId]
+        // A year behind, two ahead, in the family's zone. Recurring appointments
+        // come expanded into their occurrences, as the calendar shows them.
+        const zone = await familyTimeZone(userId);
+        const today = dayInZone(new Date(), zone);
+        const appointments = await listAppointments(
+            userId,
+            `${addDays(today, -FEED_DAYS_BEHIND)}T00:00:00`,
+            `${addDays(today, FEED_DAYS_AHEAD)}T23:59:59`,
         );
 
-        const ics = buildICS(appointments.rows);
+        const ics = buildICS(appointments, zone);
         res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
         res.setHeader('Content-Disposition', 'inline; filename="openfamily.ics"');
         res.send(ics);

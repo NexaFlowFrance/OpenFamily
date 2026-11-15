@@ -186,5 +186,18 @@
     "error": "Une erreur est survenue. Réessayez.",
     "warning": "Un jeton agit comme votre compte sur les données de la famille, mais ne peut jamais modifier le compte lui-même, les membres de la famille ni d'autres identifiants. Ne le donnez qu'à un seul programme, et révoquez un jeton qui ne sert plus.",
     "usage": "Le programme l'envoie dans l'en-tête {{header}} de chaque requête."
+  },
+  "timeZone": {
+    "title": "Fuseau horaire",
+    "subtitle": "Là où vit votre famille. Les rappels, le jour affiché sur les écrans muraux et le flux du calendrier le suivent, où que tourne le serveur.",
+    "current": "Le fuseau horaire de votre famille est {{zone}}.",
+    "serverDefault": "Aucun choisi : celui du serveur est utilisé ({{zone}}).",
+    "label": "Fuseau horaire de la famille",
+    "placeholder": "Europe/Paris",
+    "save": "Enregistrer",
+    "useDevice": "Utiliser celui de cet appareil : {{zone}}",
+    "useServer": "Utiliser celui du serveur",
+    "invalid": "Fuseau horaire inconnu. Choisissez-en un dans la liste, par exemple Europe/Paris.",
+    "error": "Impossible d'enregistrer le fuseau horaire."
   }
 }

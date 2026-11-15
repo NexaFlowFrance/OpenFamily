@@ -186,5 +186,18 @@
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "warning": "Un token actúa como tu cuenta sobre los datos de la familia, pero nunca puede modificar la cuenta en sí, los miembros de la familia ni otras credenciales. Dáselo a un solo programa y revoca los tokens que ya no uses.",
     "usage": "El programa lo envía en la cabecera {{header}} de cada petición."
+  },
+  "timeZone": {
+    "title": "Zona horaria",
+    "subtitle": "Donde vive tu familia. Los recordatorios, el día que muestran las pantallas de pared y el calendario compartido la siguen, esté donde esté el servidor.",
+    "current": "La zona horaria de tu familia es {{zone}}.",
+    "serverDefault": "Ninguna elegida: se usa la del servidor ({{zone}}).",
+    "label": "Zona horaria de la familia",
+    "placeholder": "Europe/Madrid",
+    "save": "Guardar",
+    "useDevice": "Usar la de este dispositivo: {{zone}}",
+    "useServer": "Usar la del servidor",
+    "invalid": "Zona horaria desconocida. Elige una de la lista, por ejemplo Europe/Madrid.",
+    "error": "No se ha podido guardar la zona horaria."
   }
 }

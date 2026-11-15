@@ -186,5 +186,18 @@
     "error": "Something went wrong. Please try again.",
     "warning": "A token acts as your account on the family's data, but can never change the account itself, the family's members or other credentials. Give it to one program only, and revoke a token you no longer use.",
     "usage": "The program sends it in the {{header}} header of every request."
+  },
+  "timeZone": {
+    "title": "Time zone",
+    "subtitle": "Where your family lives. Reminders, the day shown on wall displays and the calendar feed follow it, wherever the server runs.",
+    "current": "Your family's time zone is {{zone}}.",
+    "serverDefault": "None chosen: the server's time zone is used ({{zone}}).",
+    "label": "Family time zone",
+    "placeholder": "Europe/Paris",
+    "save": "Save",
+    "useDevice": "Use this device's: {{zone}}",
+    "useServer": "Use the server's",
+    "invalid": "Unknown time zone. Pick one from the list, for example Europe/Paris.",
+    "error": "Could not save the time zone."
   }
 }

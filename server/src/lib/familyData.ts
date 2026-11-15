@@ -52,6 +52,7 @@ export const FAMILY_USER_COLUMNS: ReadonlyArray<{ column: string; reset: string 
     { column: 'custom_categories', reset: 'NULL' },
     { column: 'kakeibo_pillars', reset: 'NULL' },
     { column: 'calendar_token', reset: 'NULL' },
+    { column: 'timezone', reset: 'NULL' },
 ];
 
 /**

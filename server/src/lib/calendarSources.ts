@@ -9,6 +9,7 @@
  * what its source no longer has. Locally chosen members, reminders and notes
  * are kept across refreshes.
  */
+import { familyTimeZone, serverTimeZone } from './timeZone';
 import crypto from 'node:crypto';
 import cron from 'node-cron';
 import { PoolClient } from 'pg';
@@ -33,9 +34,6 @@ export class CalendarSourceError extends Error {
         super(message ?? code);
     }
 }
-
-/** The family's zone: the one the server runs in, as for reminders. */
-export const familyTimeZone = (): string => process.env.TZ || 'Europe/Paris';
 
 const UNTITLED: Record<string, string> = {
     fr: 'Sans titre', en: 'Untitled', pt: 'Sem título', ru: 'Без названия', es: 'Sin título', ca: 'Sense títol', zh: '无标题', de: 'Ohne Titel',
@@ -80,11 +78,11 @@ export async function fetchIcs(url: string): Promise<string> {
 }
 
 /** Parse for storage: followed calendars keep a rolling year behind and ahead. */
-export function parseForStorage(ics: string, language: unknown, followed: boolean) {
+export function parseForStorage(ics: string, language: unknown, followed: boolean, timeZone: string) {
     const now = Date.now();
     try {
         return parseIcs(ics, {
-            timeZone: familyTimeZone(),
+            timeZone,
             windowStart: followed ? new Date(now - 365 * DAY_MS) : null,
             windowEnd: new Date(now + (followed ? 365 : 2 * 365) * DAY_MS),
             untitled: untitledFor(language),
@@ -225,7 +223,12 @@ export async function syncSubscription(subscriptionId: string): Promise<StoreRes
         if (!sub) throw new CalendarSourceError('INVALID_URL', 'Subscription not found');
         try {
             const { url } = decryptCredentials(sub.encrypted_url);
-            const parsed = parseForStorage(await fetchIcs(normalizeCalendarUrl(url).toString()), sub.language, true);
+            const parsed = parseForStorage(
+                await fetchIcs(normalizeCalendarUrl(url).toString()),
+                sub.language,
+                true,
+                await familyTimeZone(sub.user_id),
+            );
             const client = await getClient();
             let stored: StoreResult;
             try {
@@ -296,6 +299,6 @@ async function refreshAll(): Promise<void> {
 export function startCalendarSubscriptionScheduler(): void {
     cron.schedule(`*/${REFRESH_EVERY_MINUTES} * * * *`, () => {
         void refreshAll();
-    }, { timezone: familyTimeZone() });
+    }, { timezone: serverTimeZone() });
     logger.info('calendar_subscription.scheduler_started', { everyMinutes: REFRESH_EVERY_MINUTES });
 }

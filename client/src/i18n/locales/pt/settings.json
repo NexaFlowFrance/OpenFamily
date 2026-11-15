@@ -186,5 +186,18 @@
     "error": "Algo deu errado. Tente novamente.",
     "warning": "Um token age como a sua conta sobre os dados da família, mas nunca pode alterar a própria conta, os membros da família nem outras credenciais. Entregue-o a um único programa e revogue os tokens que não usa mais.",
     "usage": "O programa o envia no cabeçalho {{header}} de cada requisição."
+  },
+  "timeZone": {
+    "title": "Fuso horário",
+    "subtitle": "Onde a sua família vive. Os lembretes, o dia mostrado nas telas de parede e o feed do calendário o seguem, onde quer que o servidor esteja.",
+    "current": "O fuso horário da sua família é {{zone}}.",
+    "serverDefault": "Nenhum escolhido: é usado o do servidor ({{zone}}).",
+    "label": "Fuso horário da família",
+    "placeholder": "America/Sao_Paulo",
+    "save": "Salvar",
+    "useDevice": "Usar o deste dispositivo: {{zone}}",
+    "useServer": "Usar o do servidor",
+    "invalid": "Fuso horário desconhecido. Escolha um da lista, por exemplo America/Sao_Paulo.",
+    "error": "Não foi possível salvar o fuso horário."
   }
 }

@@ -186,5 +186,18 @@
     "error": "S'ha produït un error. Torna-ho a provar.",
     "warning": "Un testimoni actua com el teu compte sobre les dades de la família, però mai no pot modificar el compte mateix, els membres de la família ni altres credencials. Dona'l només a un programa i revoca els testimonis que ja no facis servir.",
     "usage": "El programa l'envia a la capçalera {{header}} de cada petició."
+  },
+  "timeZone": {
+    "title": "Fus horari",
+    "subtitle": "On viu la teva família. Els recordatoris, el dia que mostren les pantalles de paret i el calendari compartit el segueixen, sigui on sigui el servidor.",
+    "current": "El fus horari de la teva família és {{zone}}.",
+    "serverDefault": "No n'hi ha cap de triat: es fa servir el del servidor ({{zone}}).",
+    "label": "Fus horari de la família",
+    "placeholder": "Europe/Madrid",
+    "save": "Desa",
+    "useDevice": "Fes servir el d'aquest dispositiu: {{zone}}",
+    "useServer": "Fes servir el del servidor",
+    "invalid": "Fus horari desconegut. Tria'n un de la llista, per exemple Europe/Madrid.",
+    "error": "No s'ha pogut desar el fus horari."
   }
 }

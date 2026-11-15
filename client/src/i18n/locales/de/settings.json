@@ -186,5 +186,18 @@
     "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
     "warning": "Ein Token handelt wie dein Konto in den Daten der Familie, kann aber nie das Konto selbst, die Familienmitglieder oder andere Zugangsdaten ändern. Gib es nur einem einzigen Programm und widerrufe Token, die du nicht mehr brauchst.",
     "usage": "Das Programm sendet es im Header {{header}} jeder Anfrage."
+  },
+  "timeZone": {
+    "title": "Zeitzone",
+    "subtitle": "Wo deine Familie lebt. Erinnerungen, der Tag auf Wandbildschirmen und der Kalender-Feed richten sich danach, egal wo der Server läuft.",
+    "current": "Die Zeitzone deiner Familie ist {{zone}}.",
+    "serverDefault": "Keine gewählt: Es gilt die Zeitzone des Servers ({{zone}}).",
+    "label": "Zeitzone der Familie",
+    "placeholder": "Europe/Berlin",
+    "save": "Speichern",
+    "useDevice": "Die dieses Geräts verwenden: {{zone}}",
+    "useServer": "Die des Servers verwenden",
+    "invalid": "Unbekannte Zeitzone. Wähle eine aus der Liste, zum Beispiel Europe/Berlin.",
+    "error": "Die Zeitzone konnte nicht gespeichert werden."
   }
 }

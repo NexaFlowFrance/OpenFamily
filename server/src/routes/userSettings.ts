@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
 import { isLanguage, LANGUAGES } from '../lib/languages';
+import { canonicalTimeZone, forgetFamilyTimeZones, isTimeZone, serverTimeZone } from '../lib/timeZone';
 
 const router = Router();
 
@@ -130,6 +131,46 @@ router.put('/regional-preferences', authMiddleware, async (req: AuthRequest, res
         return res.json({ success: true, data: { user: result.rows[0] } });
     } catch (error) {
         console.error('Update regional preferences error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// The family's time zone (lib/timeZone): where its wall-clock times are read
+// to send reminders, to know which day a display shows and to tell other
+// calendars when an event starts. Family-wide, so it lives on the owner's row;
+// null means "the one the server runs in".
+const timeZoneAnswer = (family: string | null) => ({
+    timezone: family ?? serverTimeZone(),
+    family_timezone: family,
+    server_timezone: serverTimeZone(),
+});
+
+// GET /api/auth/timezone → { timezone, family_timezone, server_timezone }
+router.get('/timezone', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const result = await query('SELECT timezone FROM users WHERE id = $1', [req.userId]);
+        const stored = result.rows[0]?.timezone;
+        return res.json({ success: true, data: timeZoneAnswer(isTimeZone(stored) ? stored : null) });
+    } catch (error) {
+        console.error('Get time zone error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// PUT /api/auth/timezone - body: { "timezone": "Europe/Paris" | null } (parents)
+router.put('/timezone', authMiddleware, requireParent, async (req: AuthRequest, res) => {
+    try {
+        const raw = (req.body ?? {}).timezone;
+        const cleared = raw === null || raw === '';
+        if (!cleared && !isTimeZone(raw)) {
+            return res.status(400).json({ success: false, error: 'invalid_timezone' });
+        }
+        const zone = cleared ? null : canonicalTimeZone(raw);
+        await query('UPDATE users SET timezone = $1 WHERE id = $2', [zone, req.userId]);
+        forgetFamilyTimeZones();
+        return res.json({ success: true, data: timeZoneAnswer(zone) });
+    } catch (error) {
+        console.error('Update time zone error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });

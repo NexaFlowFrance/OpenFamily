@@ -1,3 +1,4 @@
+import { addDays, dayInZone, familyTimeZone, isoWeekdayOf } from './timeZone';
 import { query } from '../db';
 import { listAppointments } from '../routes/appointments';
 import { parseDisabledModules } from '../routes/userSettings';
@@ -7,8 +8,8 @@ import { parseDisabledModules } from '../routes/userSettings';
 // shopping, notes) plus tomorrow's appointments, since a screen that is only
 // glanced at in the evening is mostly asked about the next morning.
 //
-// Dates are the server's local ones: the server runs in the family's timezone
-// (TZ), and appointments are stored as local times.
+// "Today" is the family's day (lib/timeZone): the display hangs where the
+// family lives, which may not be where the server runs.
 
 export interface DisplayMember {
     name: string;
@@ -27,6 +28,8 @@ export interface DisplayAppointment {
 
 export interface DisplaySnapshot {
     generatedAt: Date;
+    /** The family's zone: the one the page's date and clock are written in. */
+    timeZone: string;
     /** Local "YYYY-MM-DD". */
     today: string;
     tomorrow: string;
@@ -56,7 +59,6 @@ export const localDay = (date: Date): string =>
 const localDateTime = (date: Date): string =>
     `${localDay(date)} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 
-const isoWeekday = (date: Date): number => ((date.getDay() + 6) % 7) + 1; // Monday = 1 ... Sunday = 7
 
 const text = (value: unknown): string => (typeof value === 'string' ? value : value === null || value === undefined ? '' : String(value));
 
@@ -86,9 +88,9 @@ const dayAppointments = async (userId: string, day: string): Promise<DisplayAppo
 };
 
 export const loadDisplaySnapshot = async (userId: string, now: Date = new Date()): Promise<DisplaySnapshot> => {
-    const today = localDay(now);
-    const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    const tomorrow = localDay(nextDay);
+    const timeZone = await familyTimeZone(userId);
+    const today = dayInZone(now, timeZone);
+    const tomorrow = addDays(today, 1);
 
     const owner = await query('SELECT disabled_modules FROM users WHERE id = $1', [userId]);
     const disabled = new Set(parseDisabledModules(owner.rows[0]?.disabled_modules));
@@ -127,7 +129,7 @@ export const loadDisplaySnapshot = async (userId: string, now: Date = new Date()
                        WHERE e.entry_id = se.id AND e.excluded_date = $3::date
                    )
                  ORDER BY se.start_time, se.title`,
-                [userId, isoWeekday(now), today],
+                [userId, isoWeekdayOf(today), today],
             )
             : null,
         query(
@@ -161,6 +163,7 @@ export const loadDisplaySnapshot = async (userId: string, now: Date = new Date()
 
     return {
         generatedAt: now,
+        timeZone,
         today,
         tomorrow,
         modules,

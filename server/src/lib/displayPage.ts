@@ -156,7 +156,10 @@ html{font-size:calc(3.4vw*var(--s))}
 export const renderDisplayPage = (snapshot: DisplaySnapshot, options: DisplayOptions): string => {
     const strings = DISPLAY_STRINGS[options.language];
     const timeFormat = new Intl.DateTimeFormat(options.locale, { hour: 'numeric', minute: '2-digit' });
-    const dateFormat = new Intl.DateTimeFormat(options.locale, { weekday: 'long', day: 'numeric', month: 'long' });
+    // The moment the page was made is shown on the family's clocks, wherever
+    // the server runs. Stored times need no zone: they are wall-clock already.
+    const nowFormat = new Intl.DateTimeFormat(options.locale, { hour: 'numeric', minute: '2-digit', timeZone: snapshot.timeZone });
+    const dateFormat = new Intl.DateTimeFormat(options.locale, { weekday: 'long', day: 'numeric', month: 'long', timeZone: snapshot.timeZone });
 
     const clock = (value: Date): string => timeFormat.format(value);
     // A local "YYYY-MM-DDTHH:mm:ss", or a planning time "HH:mm:ss".
@@ -267,7 +270,7 @@ export const renderDisplayPage = (snapshot: DisplaySnapshot, options: DisplayOpt
         + `<style>${CSS}</style>\n</head>\n<body>\n<div class="page">\n`
         + `<header><h1>${escapeHtml(dateFormat.format(snapshot.generatedAt))}</h1></header>\n`
         + `<main class="cols${columns.length < 2 ? ' single' : ''}">${columns.join('\n')}</main>\n`
-        + `<footer><span>OpenFamily</span><span>${escapeHtml(strings.updated.replace('{time}', clock(snapshot.generatedAt)))}</span></footer>\n`
+        + `<footer><span>OpenFamily</span><span>${escapeHtml(strings.updated.replace('{time}', nowFormat.format(snapshot.generatedAt)))}</span></footer>\n`
         + '</div>\n</body>\n</html>\n';
 };
 

@@ -186,5 +186,18 @@
     "error": "出了点问题，请重试。",
     "warning": "令牌以您的账户身份访问家庭数据，但永远无法修改账户本身、家庭成员或其他凭据。请只将它交给一个程序，并撤销不再使用的令牌。",
     "usage": "程序在每个请求的 {{header}} 头中发送它。"
+  },
+  "timeZone": {
+    "title": "时区",
+    "subtitle": "您的家庭所在的地方。无论服务器在哪里运行，提醒、壁挂屏显示的日期和日历订阅都以它为准。",
+    "current": "您家庭的时区是 {{zone}}。",
+    "serverDefault": "尚未选择：使用服务器的时区（{{zone}}）。",
+    "label": "家庭时区",
+    "placeholder": "Asia/Shanghai",
+    "save": "保存",
+    "useDevice": "使用此设备的时区：{{zone}}",
+    "useServer": "使用服务器的时区",
+    "invalid": "未知的时区。请从列表中选择，例如 Asia/Shanghai。",
+    "error": "无法保存时区。"
   }
 }

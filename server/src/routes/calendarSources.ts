@@ -1,3 +1,4 @@
+import { familyTimeZone } from '../lib/timeZone';
 import express, { Router } from 'express';
 import { getClient, query } from '../db';
 import { authMiddleware, requireParent, AuthRequest } from '../middleware/auth';
@@ -77,7 +78,7 @@ router.post(
     async (req: AuthRequest, res) => {
         try {
             const ics = typeof req.body === 'string' ? req.body : '';
-            const parsed = parseForStorage(ics, await userLanguage(req), false);
+            const parsed = parseForStorage(ics, await userLanguage(req), false, await familyTimeZone(req.userId!));
             const client = await getClient();
             try {
                 await client.query('BEGIN');
@@ -128,7 +129,12 @@ router.post('/subscriptions', authMiddleware, requireParent, async (req: AuthReq
         }
         const url = normalizeCalendarUrl(req.body?.url);
         // Read it once before saving: a wrong address is refused right away.
-        const parsed = parseForStorage(await fetchIcs(url.toString()), await userLanguage(req), true);
+        const parsed = parseForStorage(
+            await fetchIcs(url.toString()),
+            await userLanguage(req),
+            true,
+            await familyTimeZone(req.userId!),
+        );
         const name = (typeof req.body?.name === 'string' && req.body.name.trim()
             ? req.body.name.trim()
             : parsed.name ?? url.hostname).slice(0, 100);

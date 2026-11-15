@@ -3,6 +3,7 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { toNullIfEmpty } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
+import { familyTimeZone, instantInZone } from '../lib/timeZone';
 import {
     RecurrenceFrequency,
     normalizeRecurrenceFrequency,
@@ -43,8 +44,16 @@ const ensureMembersBelongToUser = async (memberIds: string[], userId: string) =>
     }
 };
 
+/** A stored wall-clock time as the instant it is in the family's zone, in ISO 8601 (UTC). */
+const instantIso = (naive: unknown, zone: string): string | null => {
+    if (typeof naive !== 'string') return null;
+    const instant = instantInZone(naive, zone);
+    return Number.isNaN(instant.getTime()) ? null : instant.toISOString();
+};
+
 const enrichAppointmentsWithMembers = async (appointments: any[], userId: string) => {
     if (appointments.length === 0) return appointments;
+    const zone = await familyTimeZone(userId);
     const membersResult = await query(
         'SELECT id, name, color FROM family_members WHERE user_id = $1',
         [userId]
@@ -64,6 +73,11 @@ const enrichAppointmentsWithMembers = async (appointments: any[], userId: string
             subscription_name: apt.subscription_id ? subscriptionNames.get(String(apt.subscription_id)) ?? null : null,
             family_member_ids: familyMemberIds,
             family_members_data: familyMemberIds.map((id) => membersById.get(id)).filter(Boolean),
+            // start_time and end_time stay what the family typed, with no zone.
+            // The same moments as instants, for a program that does not live in
+            // the family's zone (lib/timeZone).
+            start_at: instantIso(apt.start_time, zone),
+            end_at: instantIso(apt.end_time, zone),
         };
     });
 };

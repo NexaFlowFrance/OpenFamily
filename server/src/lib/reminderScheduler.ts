@@ -6,6 +6,7 @@ import logger from './logger';
 import { expandRecurringAppointments } from './appointmentRecurrence';
 import { ALL_DAY_REMINDER_HOUR, MAX_REMINDER_MINUTES, normalizeReminderMinutes } from './reminders';
 import { isLanguage, Language } from './languages';
+import { dayInZone, instantInZone, isTimeZone, serverTimeZone } from './timeZone';
 
 interface Occurrence {
     id: string;
@@ -17,14 +18,22 @@ interface Occurrence {
     is_all_day?: boolean;
     reminder_minutes?: unknown;
     language: string;
+    /** The family's zone, when it chose one (users.timezone of the owner). */
+    timezone?: string | null;
 }
 
-// appointments.start_time is a naive TIMESTAMP holding LOCAL wall-clock time, so
-// the comparison windows are formatted as naive server-local strings — NOT
-// toISOString(), which is UTC and would shift them by the server's UTC offset.
+// appointments.start_time is a naive TIMESTAMP holding the family's wall-clock
+// time. The SQL window is formatted as naive server-local strings (never
+// toISOString(), which is UTC) and made wide enough for a family living in any
+// other zone; the moment a reminder is due is then worked out in the family's
+// own zone.
 const toLocalNaive = (d: Date): string => format(d, "yyyy-MM-dd'T'HH:mm:ss");
-// Parsed without a zone suffix, a naive string is read as server-local time.
-const fromLocalNaive = (value: string): Date => new Date(value.slice(0, 19));
+// More than the furthest two zones can be apart.
+const ZONE_SPREAD_MS = 27 * 60 * 60 * 1000;
+
+/** The zone an occurrence's times are read in: its family's, or the server's. */
+const zoneOf = (occurrence: { timezone?: string | null }): string =>
+    isTimeZone(occurrence.timezone) ? occurrence.timezone : serverTimeZone();
 
 // A reminder whose moment passed while the server was busy or restarting is
 // still sent if it is less than this late; older ones are dropped, not spammed.
@@ -67,15 +76,15 @@ export function describeLeadTime(minutes: number, lang: Language): string {
 }
 
 /** "Today", "Tomorrow", "In 3 days": how far the day of an all-day event is. */
-function describeDay(occurrenceDay: string, now: Date, lang: Language): string {
-    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+function describeDay(occurrenceDay: string, today: string, lang: Language): string {
+    const [ty, tm, td] = today.split('-').map(Number);
     const [y, m, d] = occurrenceDay.split('-').map(Number);
-    const days = Math.round((Date.UTC(y, m - 1, d) - today) / 86400000);
+    const days = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(ty, tm - 1, td)) / 86400000);
     return capitalize(new Intl.RelativeTimeFormat(LOCALE[lang], { numeric: 'auto' }).format(days, 'day'));
 }
 
 export function buildReminderTexts(
-    occurrence: Pick<Occurrence, 'title' | 'start_time' | 'location' | 'is_all_day' | 'language'>,
+    occurrence: Pick<Occurrence, 'title' | 'start_time' | 'location' | 'is_all_day' | 'language' | 'timezone'>,
     minutes: number,
     now: Date
 ): { title: string; body: string } {
@@ -83,19 +92,19 @@ export function buildReminderTexts(
     const start = String(occurrence.start_time);
     const where = occurrence.location ? ` · ${occurrence.location}` : '';
     const body = occurrence.is_all_day
-        ? `${describeDay(start.slice(0, 10), now, lang)}${where}`
+        ? `${describeDay(start.slice(0, 10), dayInZone(now, zoneOf(occurrence)), lang)}${where}`
         // start_time is 'YYYY-MM-DDTHH:mm:ss' — HH:mm straight from the string.
         : `${describeLeadTime(minutes, lang)} — ${start.slice(11, 16)}${where}`;
     return { title: `${TITLE_PREFIX[lang]}${occurrence.title}`.slice(0, 255), body };
 }
 
 /** When a reminder is due: its offset back from the start, or from 09:00 on an all-day event's day. */
-export function reminderMoment(occurrence: Pick<Occurrence, 'start_time' | 'is_all_day'>, minutes: number): Date {
+export function reminderMoment(occurrence: Pick<Occurrence, 'start_time' | 'is_all_day' | 'timezone'>, minutes: number): Date {
     const start = String(occurrence.start_time);
     const reference = occurrence.is_all_day
         ? `${start.slice(0, 10)}T${String(ALL_DAY_REMINDER_HOUR).padStart(2, '0')}:00:00`
         : start;
-    return new Date(fromLocalNaive(reference).getTime() - minutes * 60 * 1000);
+    return new Date(instantInZone(reference, zoneOf(occurrence)).getTime() - minutes * 60 * 1000);
 }
 
 async function checkReminders(): Promise<void> {
@@ -103,8 +112,8 @@ async function checkReminders(): Promise<void> {
     // Every occurrence that can have a reminder due now: starting at most four
     // weeks ahead, or up to a day ago (an all-day event's reminders count from
     // 09:00, and a late reminder is still sent within the grace period).
-    const from = new Date(now.getTime() - 24 * 60 * 60 * 1000 - GRACE_MS);
-    const to = new Date(now.getTime() + (MAX_REMINDER_MINUTES + 24 * 60) * 60 * 1000);
+    const from = new Date(now.getTime() - 24 * 60 * 60 * 1000 - GRACE_MS - ZONE_SPREAD_MS);
+    const to = new Date(now.getTime() + (MAX_REMINDER_MINUTES + 24 * 60) * 60 * 1000 + ZONE_SPREAD_MS);
     const fromNaive = toLocalNaive(from);
     const toNaive = toLocalNaive(to);
 
@@ -112,7 +121,7 @@ async function checkReminders(): Promise<void> {
         const { rows } = await query(
             `SELECT a.id, a.user_id, a.title, a.start_time, a.end_time, a.location, a.is_all_day,
                     a.reminder_minutes, a.recurrence_frequency, a.recurrence_interval, a.recurrence_until,
-                    COALESCE(u.language, 'fr') AS language
+                    COALESCE(u.language, 'fr') AS language, u.timezone AS timezone
              FROM appointments a
              JOIN users u ON u.id = a.user_id
              WHERE a.start_time <= $2
@@ -201,7 +210,7 @@ async function pruneReminderLog(): Promise<void> {
 }
 
 export function startReminderScheduler(): void {
-    const tz = process.env.TZ ?? 'Europe/Paris';
+    const tz = serverTimeZone();
 
     // Run every minute
     cron.schedule('* * * * *', () => {

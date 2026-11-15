@@ -1,3 +1,4 @@
+import { familyTimeZone } from '../lib/timeZone';
 import crypto from 'node:crypto';
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
@@ -35,7 +36,10 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
         const ownerModules = await query('SELECT disabled_modules FROM users WHERE id = $1', [req.userId]);
         const disabled_modules = parseDisabledModules(ownerModules.rows[0]?.disabled_modules);
 
-        return res.json({ success: true, data: { user: { ...result.rows[0], disabled_modules } } });
+        // The family's time zone, for the same reason: one for everyone.
+        const timezone = await familyTimeZone(req.userId!);
+
+        return res.json({ success: true, data: { user: { ...result.rows[0], disabled_modules, timezone } } });
     } catch (error) {
         console.error('Get current user error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });

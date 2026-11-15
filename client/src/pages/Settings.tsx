@@ -9,6 +9,7 @@ import RegionalPreferences from '../components/app/RegionalPreferences';
 import SignInCard from '../components/app/SignInCard';
 import DisplayLinksCard from '../components/app/DisplayLinksCard';
 import ApiTokensCard from '../components/app/ApiTokensCard';
+import TimeZoneCard from '../components/app/TimeZoneCard';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
 import { isNative, getServerUrl, clearServerUrl } from '../lib/serverConfig';
@@ -869,6 +870,10 @@ const Settings: React.FC = () => {
 
             {/* First day of the week */}
             <RegionalPreferences />
+
+            {/* The family's time zone: one for everyone, chosen by a parent.
+                The demo has no server whose zone could differ. */}
+            {isParent && !import.meta.env.VITE_DEMO && <TimeZoneCard />}
 
             {/* Server (native app only) */}
             {isNative() && (

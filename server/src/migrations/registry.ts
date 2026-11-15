@@ -284,4 +284,11 @@ export const coreMigrations: readonly Migration[] = [
             'CREATE INDEX idx_api_tokens_user ON api_tokens(user_id)',
         ],
     },
+    {
+        // The family's time zone (lib/timeZone), an IANA name such as
+        // Europe/Paris. Family-wide, so it is read on the owner's row; NULL
+        // means the zone the server runs in, as before.
+        id: 'core/0011-family-timezone',
+        statements: ['ALTER TABLE users ADD COLUMN timezone VARCHAR(64)'],
+    },
 ];

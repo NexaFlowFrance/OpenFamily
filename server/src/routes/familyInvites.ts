@@ -7,6 +7,7 @@ import { issueAccessToken, revokeUserSessions } from '../lib/authTokens';
 import { broadcast } from '../lib/broadcaster';
 import { createLocalizedNotification } from '../lib/notifications';
 import { moveFamilyData } from '../lib/familyData';
+import { forgetFamilyTimeZones } from '../lib/timeZone';
 import { normalizeEmail } from '../lib/normalize';
 import { isMailEnabled, sendFamilyInviteEmail } from '../lib/mailer';
 import { resolveAppBaseUrl } from '../lib/appUrl';
@@ -389,6 +390,7 @@ router.post('/transfer-ownership', guarded('family.transfer_failed', async (req,
             // Everything the family owns follows: its rows in every table, and
             // the family-wide settings kept on the owner's own row (lib/familyData).
             await moveFamilyData(tx, oldOwnerId, newOwnerId);
+            forgetFamilyTimeZones();
 
             // Swap ownership pointers.
             await tx.query('UPDATE users SET family_owner_id = NULL WHERE id = $1', [newOwnerId]);

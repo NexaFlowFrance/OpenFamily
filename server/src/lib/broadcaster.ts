@@ -35,6 +35,14 @@ export interface WsRegistration {
     apiTokenId?: string;
 }
 
+type BroadcastListener = (userId: string, data: WsUpdatePayload) => void;
+const listeners = new Set<BroadcastListener>();
+
+/** Lets another part of the server follow what is broadcast (outgoing webhooks). */
+export const onBroadcast = (listener: BroadcastListener): void => {
+    listeners.add(listener);
+};
+
 /** Registered WebSocket connections keyed by userId */
 export const clients = new Map<string, Set<WebSocket>>();
 /** The same connections keyed by the family owner's id. */
@@ -80,6 +88,15 @@ export const unregisterClient = (ws: WebSocket): WsRegistration | undefined => {
  * (its notifications). An owner's own id is both, and reaches the family.
  */
 export const broadcast = (userId: string, data: WsUpdatePayload): void => {
+    // Told whether or not an app is connected right now.
+    listeners.forEach((listener) => {
+        try {
+            listener(userId, data);
+        } catch {
+            // A listener's failure is its own: the apps are still told.
+        }
+    });
+
     const sockets = new Set<WebSocket>([...(clients.get(userId) ?? []), ...(familyClients.get(userId) ?? [])]);
     if (sockets.size === 0) return;
 

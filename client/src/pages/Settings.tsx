@@ -10,6 +10,7 @@ import SignInCard from '../components/app/SignInCard';
 import DisplayLinksCard from '../components/app/DisplayLinksCard';
 import ApiTokensCard from '../components/app/ApiTokensCard';
 import TimeZoneCard from '../components/app/TimeZoneCard';
+import WebhooksCard from '../components/app/WebhooksCard';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
 import { isNative, getServerUrl, clearServerUrl } from '../lib/serverConfig';
@@ -931,6 +932,10 @@ const Settings: React.FC = () => {
             {/* API tokens: for another program to read or add to the family's
                 data. Parents only; the demo has no server to call. */}
             {isParent && !import.meta.env.VITE_DEMO && <ApiTokensCard />}
+
+            {/* Webhooks: the other direction, OpenFamily calling another program
+                when something changes. Parents only; nothing to call from the demo. */}
+            {isParent && !import.meta.env.VITE_DEMO && <WebhooksCard />}
 
             {/* Profile photo */}
             <Card>

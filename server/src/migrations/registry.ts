@@ -291,4 +291,31 @@ export const coreMigrations: readonly Migration[] = [
         id: 'core/0011-family-timezone',
         statements: ['ALTER TABLE users ADD COLUMN timezone VARCHAR(64)'],
     },
+    {
+        // Outgoing webhooks (lib/webhooks): addresses told when the family's
+        // data changes. user_id is the family, like the data. The address and
+        // the signing secret are encrypted together in encrypted_target; only
+        // the host is kept readable, for Settings. events is a JSON list of
+        // entity names, empty for all. A webhook that keeps failing is
+        // switched off (enabled), with the last outcome kept for Settings.
+        id: 'core/0012-webhooks',
+        statements: [
+            `CREATE TABLE webhooks (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+                name VARCHAR(80) NOT NULL,
+                url_host VARCHAR(255) NOT NULL,
+                encrypted_target TEXT NOT NULL,
+                events TEXT NOT NULL DEFAULT '[]',
+                enabled BOOLEAN NOT NULL DEFAULT true,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                last_delivery_at TIMESTAMPTZ,
+                last_status INTEGER,
+                last_error VARCHAR(200),
+                failure_count INTEGER NOT NULL DEFAULT 0
+            )`,
+            'CREATE INDEX idx_webhooks_user ON webhooks(user_id)',
+        ],
+    },
 ];

@@ -54,6 +54,7 @@ const RESERVED_PATHS = [
     '/api/integrations', // other services' credentials
     '/api/calendar', // the feed's token and the subscriptions (the feed itself needs no token)
     '/api/display-links', // other credentials
+    '/api/webhooks', // where the family's changes are sent, and their signing secrets
     '/api/data', // export and import of everything
     '/api/notifications', // the account's own inbox and push subscriptions
     '/api/ai/settings', // the AI provider's key

@@ -834,7 +834,7 @@ const Kiosk: React.FC = () => {
                                         aria-pressed={settings.screensaverMinutes === minutes}
                                         onClick={() => setSettings((s) => ({ ...s, screensaverMinutes: minutes }))}
                                         className={cn(
-                                            'flex-1 whitespace-nowrap rounded px-2 py-2 text-caption transition-colors',
+                                            'flex-1 whitespace-nowrap rounded px-2 py-2 text-body transition-colors',
                                             settings.screensaverMinutes === minutes
                                                 ? 'bg-primary-soft font-medium text-primary'
                                                 : 'text-muted-foreground active:bg-surface-2'
@@ -860,7 +860,7 @@ const Kiosk: React.FC = () => {
                                                 aria-pressed={settings.screensaverStyle === style}
                                                 onClick={() => setSettings((s) => ({ ...s, screensaverStyle: style }))}
                                                 className={cn(
-                                                    'flex-1 rounded px-3 py-2 text-caption transition-colors',
+                                                    'flex-1 rounded px-3 py-2 text-body transition-colors',
                                                     settings.screensaverStyle === style
                                                         ? 'bg-primary-soft font-medium text-primary'
                                                         : 'text-muted-foreground active:bg-surface-2'

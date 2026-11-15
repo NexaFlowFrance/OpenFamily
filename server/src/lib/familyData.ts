@@ -39,6 +39,7 @@ export const FAMILY_TABLES: ReadonlyArray<{ table: string; column: string }> = [
     { table: 'ai_settings', column: 'user_id' },
     { table: 'display_links', column: 'user_id' },
     { table: 'api_tokens', column: 'user_id' },
+    { table: 'webhooks', column: 'user_id' },
 ];
 
 /**
@@ -72,6 +73,7 @@ export const ACCOUNT_REFERENCES: ReadonlyArray<string> = [
     'family_join_requests.requester_id',
     'display_links.created_by',
     'api_tokens.created_by',
+    'webhooks.created_by',
 ];
 
 /**

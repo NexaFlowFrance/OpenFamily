@@ -29,6 +29,8 @@ import postsRoutes from './routes/posts';
 import oidcRoutes from './routes/oidc';
 import displayLinksRoutes, { displayPageRouter } from './routes/displayLinks';
 import apiTokensRoutes from './routes/apiTokens';
+import webhooksRoutes from './routes/webhooks';
+import { startWebhookDispatcher } from './lib/webhooks';
 import { loadEnv } from './config/loadEnv';
 import logger, { redactPath } from './lib/logger';
 
@@ -193,6 +195,9 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
 });
 
 // API Routes
+// Outgoing webhooks follow what is broadcast to the apps (lib/webhooks).
+startWebhookDispatcher();
+
 app.use('/api/auth/login', authRateLimiter);
 app.use('/api/auth/register', authRateLimiter);
 app.use('/api/auth/logout-all', authRateLimiter);
@@ -203,11 +208,14 @@ app.use('/api/auth/oidc/link', authRateLimiter);
 app.use('/api/ai', outboundRateLimiter);
 app.use('/api/recipes/import-url', outboundRateLimiter);
 app.use('/api/integrations', outboundRateLimiter);
+// Only the test call is sent on demand; the others are merged by the dispatcher.
+app.use('/api/webhooks/:id/test', outboundRateLimiter);
 app.use('/api/auth/oidc', oidcRoutes);
 // The page behind a display link, and the links' management (parents).
 app.use('/api/display', displayRateLimiter, displayPageRouter);
 app.use('/api/display-links', displayLinksRoutes);
 app.use('/api/api-tokens', apiTokensRoutes);
+app.use('/api/webhooks', webhooksRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', userSettingsRoutes);
 app.use('/api/shopping', shoppingRoutes);

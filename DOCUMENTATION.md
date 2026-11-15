@@ -197,7 +197,7 @@ l'API REST et le WebSocket d'OpenFamily, sans mot de passe ni session qui expire
 - **Ce qu'un jeton ne peut pas faire**, quelle que soit sa portée : modifier le compte
   (profil, mot de passe, sessions, SSO), les comptes de la famille (invitations, liaisons
   de membres), les autres identifiants (intégrations, abonnements de calendrier, liens
-  d'affichage, autres jetons, clé de l'assistant IA), ni exporter ou importer l'ensemble
+  d'affichage, autres jetons, webhooks, clé de l'assistant IA), ni exporter ou importer l'ensemble
   des données. Ces routes répondent `403 api_token_forbidden` ; une écriture avec un jeton
   en lecture seule répond `403 read_only_token`. `GET /api/auth/me` reste ouvert : il dit
   quel compte le jeton représente.
@@ -206,6 +206,43 @@ l'API REST et le WebSocket d'OpenFamily, sans mot de passe ni session qui expire
   fonctionner si le compte qui l'a créé quitte la famille ou est supprimé.
 - **Home Assistant** : une action `rest_command` avec cet en-tête ajoute un article depuis
   une automatisation ; un capteur `rest` lit la liste.
+
+### 📣 Webhooks (prévenir Home Assistant, n8n, un script)
+Un webhook fait le chemin inverse d'un jeton : c'est OpenFamily qui appelle votre programme
+quand les données de la famille changent, pour qu'il n'ait pas à interroger le serveur en boucle.
+
+- **Création** : Paramètres, puis Webhooks, pour les comptes parents. Un nom, l'adresse à appeler,
+  les types de changement voulus (ou tout), dix webhooks au plus par famille.
+- **Contenu d'un appel** : un `POST` en JSON qui dit ce qui a changé (`shopping.created`,
+  `tasks.updated`...), jamais la donnée elle-même. Le programme lit ensuite l'API avec son
+  jeton. Les changements du même type dans la même seconde ne font qu'un appel.
+- **Signature** : chaque appel porte l'en-tête `X-OpenFamily-Signature`, un HMAC-SHA256 du
+  corps calculé avec le secret du webhook (`whsec_...`), affiché une seule fois à la création.
+- **Suivi** : les paramètres montrent le résultat du dernier appel. Un webhook qui échoue vingt
+  fois de suite est désactivé et le signale ; le bouton « Envoyer un test » envoie un appel à
+  la demande. Un appel raté n'est pas rejoué.
+- **Sécurité** : l'adresse est chiffrée avec le secret, et seul son hôte est réaffiché, car une
+  adresse de webhook Home Assistant vaut mot de passe. Les adresses de métadonnées des
+  hébergeurs sont refusées, et une redirection n'est pas suivie.
+
+### 🌍 Fuseau horaire de la famille
+OpenFamily enregistre les heures comme la famille les saisit, « dentiste à 9 h 30 », sans
+fuseau. Pour envoyer un rappel à l'heure, savoir quel jour afficher sur un écran mural ou dire à
+un autre calendrier quand commence un événement, le serveur a besoin du fuseau de la famille.
+
+- **Réglage** : Paramètres, puis Fuseau horaire, pour les comptes parents. Sans choix, c'est le
+  fuseau du serveur (la variable `TZ`) qui s'applique, comme auparavant.
+- **Ce qui le suit** : les rappels, le jour et l'heure des liens d'affichage, la conversion des
+  calendriers suivis ou importés, et le flux iCal. Ce flux donne chaque événement en UTC, les
+  journées entières comme des journées, et une occurrence par événement pour un rendez-vous
+  récurrent.
+- **Pour les autres programmes** : `GET /api/auth/me` renvoie le fuseau (`timezone`), et chaque
+  rendez-vous porte `start_at` et `end_at`, les mêmes instants au format ISO 8601.
+
+### 📘 Documentation de l'API
+Le guide est dans [API.md](API.md), en anglais : authentification, forme des données, temps
+réel, webhooks, exemple pour Home Assistant. La liste complète des routes et des champs est
+servie par votre propre serveur, au format OpenAPI 3.1, à l'adresse `/api/openapi.json`.
 
 ---
 
@@ -402,6 +439,7 @@ OpenFamily utilise **PostgreSQL 16** avec le schéma suivant :
 | `family_join_requests` | Demandes d'accès adressées au propriétaire d'une famille |
 | `password_resets` | Jetons de réinitialisation de mot de passe (empreinte SHA-256, usage unique) |
 | `api_tokens` | Jetons d'API personnels (empreinte SHA-256, portée lecture ou écriture) |
+| `webhooks` | Webhooks sortants (adresse et secret chiffrés, résultat du dernier appel) |
 
 ### Caractéristiques techniques
 - **UUIDs** (v4) comme clés primaires pour toutes les tables

@@ -31,6 +31,7 @@ import displayLinksRoutes, { displayPageRouter } from './routes/displayLinks';
 import apiTokensRoutes from './routes/apiTokens';
 import webhooksRoutes from './routes/webhooks';
 import { startWebhookDispatcher } from './lib/webhooks';
+import { buildOpenApiDocument } from './lib/openapi';
 import { loadEnv } from './config/loadEnv';
 import logger, { redactPath } from './lib/logger';
 
@@ -212,6 +213,12 @@ app.use('/api/integrations', outboundRateLimiter);
 app.use('/api/webhooks/:id/test', outboundRateLimiter);
 app.use('/api/auth/oidc', oidcRoutes);
 // The page behind a display link, and the links' management (parents).
+// The description of the API for other programs (lib/openapi, API.md): public,
+// like the documentation it is, and free of anything about this server's data.
+app.get('/api/openapi.json', (_req, res) => {
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.json(buildOpenApiDocument());
+});
 app.use('/api/display', displayRateLimiter, displayPageRouter);
 app.use('/api/display-links', displayLinksRoutes);
 app.use('/api/api-tokens', apiTokensRoutes);

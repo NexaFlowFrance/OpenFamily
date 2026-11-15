@@ -45,7 +45,7 @@ all in one place, on your own server.
 | 🔄 **Real-time sync** | Instant updates across every device (WebSocket) |
 | 🔔 **Notifications** | Appointment reminders, task alerts (Web Push VAPID) + in-app |
 | 🖼️ **Wall & e-paper displays** | Full-screen kiosk for a tablet, with a screensaver (photos or a moving clock) for screens left on all day, and **display links**: a login-free page of the family's day for an e-paper frame (InkyPi), an e-reader or any screen that cannot sign in |
-| 🔌 **API tokens** | Personal tokens so that Home Assistant, Gladys Assistant, n8n or a script can read or add to the family's data over the REST API and WebSocket: read-only or read-write, revocable at any time |
+| 🔌 **API, tokens & webhooks** | A [documented API](API.md) for Home Assistant, Gladys Assistant, n8n or a script: personal tokens, read-only or read-write and revocable at any time, real-time updates over WebSocket, and webhooks that call your tools when the family's data changes |
 | 👥 **Shared accounts** | Invite by link, **access requests**, **ownership transfer** |
 | 🔑 **Single sign-on** | Sign in with your own OpenID Connect provider (Authentik, Keycloak, Pocket ID...), optional SSO-only servers, **sign out of all devices** |
 | 🛡️ **Roles & permissions** | **Parent / child** accounts, with a read-only budget for children |

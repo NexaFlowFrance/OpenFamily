@@ -6,6 +6,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { issueAccessToken, revokeUserSessions } from '../lib/authTokens';
 import { broadcast } from '../lib/broadcaster';
 import { createLocalizedNotification } from '../lib/notifications';
+import { moveFamilyData } from '../lib/familyData';
 import { normalizeEmail } from '../lib/normalize';
 import { isMailEnabled, sendFamilyInviteEmail } from '../lib/mailer';
 import { resolveAppBaseUrl } from '../lib/appUrl';
@@ -348,28 +349,6 @@ router.put('/members/:userId/role', async (req: AuthRequest, res) => {
     return res.json({ success: true, data: rows[0] });
 });
 
-// Family-scoped tables whose user_id points to the family owner.
-const FAMILY_SCOPED_TABLES = [
-    'family_members',
-    'family_posts',
-    'shopping_items',
-    'shopping_list_templates',
-    'tasks',
-    'appointments',
-    'schedule_entries',
-    'recipes',
-    'meal_plans',
-    'budget_entries',
-    'budget_limits',
-    'recurring_expenses',
-    'recurring_expense_logs',
-    'reward_transactions',
-    'reward_settings',
-    'reward_goals',
-    'display_links',
-    'api_tokens',
-] as const;
-
 // POST /transfer-ownership - owner hands the family (and all its data) to a member
 router.post('/transfer-ownership', guarded('family.transfer_failed', async (req, res) => {
     if (!req.isOwner) {
@@ -407,13 +386,9 @@ router.post('/transfer-ownership', guarded('family.transfer_failed', async (req,
             if (stillMember.rows.length === 0) throw new FamilyChangedError();
             const members = await tx.query('SELECT id FROM users WHERE family_owner_id = $1', [oldOwnerId]);
 
-            // Re-key every family-scoped table from the old owner to the new owner.
-            // The new owner's pre-join standalone rows (if any) are orphaned and inaccessible,
-            // so we drop them first to avoid unique-constraint clashes.
-            for (const table of FAMILY_SCOPED_TABLES) {
-                await tx.query(`DELETE FROM ${table} WHERE user_id = $1`, [newOwnerId]);
-                await tx.query(`UPDATE ${table} SET user_id = $1 WHERE user_id = $2`, [newOwnerId, oldOwnerId]);
-            }
+            // Everything the family owns follows: its rows in every table, and
+            // the family-wide settings kept on the owner's own row (lib/familyData).
+            await moveFamilyData(tx, oldOwnerId, newOwnerId);
 
             // Swap ownership pointers.
             await tx.query('UPDATE users SET family_owner_id = NULL WHERE id = $1', [newOwnerId]);

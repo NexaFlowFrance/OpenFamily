@@ -79,9 +79,9 @@ Laissez **vides**, sauf besoin précis : `VITE_API_URL`, `VITE_WS_URL` (l'applic
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:1.9.0
+    image: ghcr.io/nexaflowfrance/openfamily-server:2.0.0
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:1.9.0
+    image: ghcr.io/nexaflowfrance/openfamily-client:2.0.0
 ```
 
 ```bash

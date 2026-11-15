@@ -93,18 +93,42 @@ can shift based on feedback — issues and discussions are welcome.
 - **Home Assistant to-do lists** *(v1.9)*: the configured list is synced even
   when Home Assistant's legacy shopping list is still around. Contributed by
   @sawmans.
-- **Single sign-on** *(next release)*: sign in with your own OpenID Connect
+- **Single sign-on** *(v2.0)*: sign in with your own OpenID Connect
   provider (Authentik, Keycloak, Pocket ID...), link it to an existing account,
   or run an SSO-only server. "Sign out of all devices" in Settings, and removing
   someone from the family now signs them out everywhere. Android follows later.
+  Contributed by @macdows.
+- **An API for other programs** *(v2.0)*: personal API tokens, read-only or
+  read-and-write, made and revoked in Settings; webhooks that call Home
+  Assistant, n8n or a script when the family's data changes, each call signed;
+  a guide ([API.md](API.md)) and an OpenAPI description served by the server
+  itself.
+- **Gladys Assistant integration** *(v2.0)*: the family calendar, the shopping
+  list and the tasks in Gladys, the open-source home assistant: dashboard
+  widgets, scene actions and triggers. Published in the Gladys integration
+  store, from [its own repository](https://github.com/NexaFlowFrance/gladys-openfamily).
+- **Display links** *(v2.0)*: a stable address that shows the family's day
+  without signing in, for an e-paper frame, an e-reader or any screen that
+  cannot log in. Asked for by @Altomb.
+- **Kiosk, one tap away and with a screensaver** *(v2.0)*: a shortcut in the top
+  bar, then photos from Immich or a moving clock after a while without a touch,
+  for screens left on all day; the weather in °C or °F. Asked for by
+  @GingerZero and @khxmxle.
+- **A time zone per family** *(v2.0)*: chosen in Settings instead of assumed
+  from the server. Reminders, display links and the calendar feed follow it,
+  and the feed now carries every occurrence of a recurring appointment.
+- **Catalan interface** *(v2.0)*: the eighth language. Contributed by
+  @giro-dev.
+- **Several Home Assistant lists** *(v2.0)*: more than one to-do list can be
+  imported. Asked for by @bino277.
 
 ## Under consideration
 
-- **More languages** — the interface is available in English, French, German,
-  Portuguese, Russian, Spanish and Simplified Chinese. The i18n infrastructure is in place
-  (namespaced JSON locales); the goal is to add Italian, Dutch and more,
-  ideally through a community translation workflow (e.g. Weblate). Contributions
-  welcome.
+- **More languages**: the interface is available in English, French, German,
+  Portuguese, Russian, Spanish, Catalan and Simplified Chinese. The i18n
+  infrastructure is in place (namespaced JSON locales); the goal is to add
+  Italian, Dutch and more, ideally through a community translation workflow
+  (e.g. Weblate). Contributions welcome.
 - **Two-way Google Calendar / CalDAV sync** (today: one-way from Nextcloud or any
   iCal address, including Google, plus iCal export). CalDAV two-way first (covers Nextcloud, iCloud, Fastmail), Google later
   (OAuth verification burden).
@@ -124,9 +148,11 @@ can shift based on feedback — issues and discussions are welcome.
   evening summarizing the week ahead: appointments, chores, meals, budget status.
 - **Scheduled backups** — automatic, recurring export of the family data
   (JSON/SQL) to a local folder, S3-compatible storage or WebDAV, with retention.
-- **Deeper Home Assistant integration** — beyond the shopping-list sync: expose
-  appointments and tasks as HA calendars/sensors so they can drive automations
-  (e.g. light up when a chore is due).
+- **Deeper Home Assistant integration**: beyond the list sync, an integration
+  on the Home Assistant side that mirrors the one for Gladys Assistant, with the
+  calendar, the lists and the tasks as Home Assistant entities that can drive
+  automations (e.g. light up when a chore is due). The API tokens, webhooks and
+  documented API of v2.0 are what it will be built on.
 - **Guest access** — a temporary, limited account or share link for a babysitter
   or grandparents (today's schedule, emergency contacts), and public temporary
   shopping-list links for a partner without an account.

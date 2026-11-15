@@ -57,7 +57,7 @@ Changez ces valeurs. Le serveur refuse de démarrer si `JWT_SECRET` est absent, 
 |---|---|---|
 | `POSTGRES_PASSWORD` | Un mot de passe solide pour la base | `openssl rand -hex 24` |
 | `JWT_SECRET` | Un secret aléatoire de 32 caractères ou plus | `openssl rand -hex 32` |
-| `TZ` | Le fuseau horaire de la famille, par exemple `Europe/Paris`, `America/Montreal` | Les rappels et les agendas importés s'en servent |
+| `TZ` | Le fuseau horaire du serveur, par exemple `Europe/Paris`, `America/Montreal` | Sert aux rappels et aux agendas tant qu'un parent n'a pas choisi celui de la famille dans les Paramètres |
 | `NODE_ENV` | `production` | |
 
 Facultatif, mais utile :
@@ -67,6 +67,7 @@ Facultatif, mais utile :
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Notifications push (rappels, activité de la famille). Générez les clés avec `docker run --rm node:26-alpine npx -y web-push generate-vapid-keys` ; `VAPID_SUBJECT` vaut `mailto:` suivi de votre e-mail. Le push demande aussi le HTTPS (étape 6). |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | E-mails d'invitation et de réinitialisation du mot de passe. Sans eux, les invitations marchent quand même en partageant leur lien. |
 | `REGISTRATION_ENABLED` | `false` ferme les inscriptions : seules les personnes que vous invitez peuvent créer un compte (voir l'étape 5). |
+| `INTEGRATIONS_BLOCK_PRIVATE_IPS` | `true` fait refuser au serveur les appels vers les adresses privées (`192.168.x.x`, `10.x`, `localhost`) pour les intégrations, le fournisseur d'IA et les webhooks. À laisser désactivé à la maison, où Home Assistant ou Ollama sont sur votre réseau ; à activer sur un serveur ouvert à d'autres que votre famille. |
 | `OIDC_*`, `PASSWORD_LOGIN_ENABLED` | Connexion par votre propre fournisseur d'identité (Authentik, Keycloak...) : voir [Connexion unique](#connexion-unique-sso). |
 
 Laissez **vides**, sauf besoin précis : `VITE_API_URL`, `VITE_WS_URL` (l'application parle à sa propre adresse et transmet elle-même `/api`), `CORS_ORIGINS` (seulement pour une application web servie depuis un autre domaine), `APP_PUBLIC_URL` (seulement si les liens des e-mails montrent une mauvaise adresse derrière votre proxy, ou pour la connexion unique).

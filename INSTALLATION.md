@@ -57,7 +57,7 @@ Change these values. The server refuses to start while `JWT_SECRET` is missing, 
 |---|---|---|
 | `POSTGRES_PASSWORD` | A strong database password | `openssl rand -hex 24` |
 | `JWT_SECRET` | A random secret of 32+ characters | `openssl rand -hex 32` |
-| `TZ` | Your family's time zone, e.g. `Europe/Paris`, `America/Montreal` | Reminders and imported calendars use it |
+| `TZ` | The time zone the server runs in, e.g. `Europe/Paris`, `America/Montreal` | Used for reminders and calendars until a parent chooses the family's own in Settings |
 | `NODE_ENV` | `production` | |
 
 Optional, but worth it:
@@ -67,6 +67,7 @@ Optional, but worth it:
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Push notifications (reminders, family activity). Generate the keys with `docker run --rm node:26-alpine npx -y web-push generate-vapid-keys`; `VAPID_SUBJECT` is `mailto:` followed by your e-mail. Push also needs HTTPS (step 6). |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Invitation e-mails and password reset. Without them, invitations still work by sharing their link. |
 | `REGISTRATION_ENABLED` | `false` closes sign-ups: only people you invite can create an account (see step 5). |
+| `INTEGRATIONS_BLOCK_PRIVATE_IPS` | `true` makes the server refuse to call private addresses (`192.168.x.x`, `10.x`, `localhost`) for integrations, the AI provider and webhooks. Leave it off at home, where Home Assistant or Ollama are on your network; turn it on for a server open to people outside your family. |
 | `OIDC_*`, `PASSWORD_LOGIN_ENABLED` | Sign-in through your own identity provider (Authentik, Keycloak...): see [Single sign-on](#single-sign-on-sso). |
 
 Leave these **empty** unless you know you need them: `VITE_API_URL`, `VITE_WS_URL` (the web app talks to its own address and forwards `/api` itself), `CORS_ORIGINS` (only for a web app served from another domain), `APP_PUBLIC_URL` (only if e-mail links show the wrong address behind your proxy, or for single sign-on).

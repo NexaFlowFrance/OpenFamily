@@ -70,6 +70,11 @@ services:
       OIDC_ALLOW_INSECURE_HTTP: ${OIDC_ALLOW_INSECURE_HTTP:-false}
       ANDROID_CERT_SHA256: ${ANDROID_CERT_SHA256:-}
       ANDROID_PACKAGE_NAME: ${ANDROID_PACKAGE_NAME:-}
+      # Hardening, off by default: true makes the server refuse to call
+      # private addresses (192.168.x.x, 10.x, localhost...) for integrations,
+      # the AI provider and webhooks. Leave it off at home, where Home
+      # Assistant or Ollama are on your own network.
+      INTEGRATIONS_BLOCK_PRIVATE_IPS: ${INTEGRATIONS_BLOCK_PRIVATE_IPS:-false}
     ports:
       - "3001:3001"
     depends_on:

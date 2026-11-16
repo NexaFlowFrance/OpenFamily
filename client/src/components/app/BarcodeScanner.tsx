@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Dialog } from '../ui';
+import { isNative } from '../../lib/serverConfig';
 
 // Reads a barcode with the camera, using the detector built into the browser
 // (Chrome and Edge on Android, Samsung Internet, Chrome on macOS). Nothing is
 // loaded for it and no image leaves the device: the browser hands back the
 // digits. Where the detector does not exist, the barcode is typed, and
 // `canScanBarcodes` lets the caller hide the button.
+//
+// The Android app does not declare the camera permission, so its web view
+// refuses the camera: no button there either, the barcode is typed.
 
 interface DetectedBarcode { rawValue: string }
 interface BarcodeDetectorLike { detect: (source: HTMLVideoElement) => Promise<DetectedBarcode[]> }
@@ -15,9 +19,10 @@ type BarcodeDetectorConstructor = new (options?: { formats?: string[] }) => Barc
 const detectorConstructor = (): BarcodeDetectorConstructor | null =>
     (typeof window !== 'undefined' && (window as unknown as { BarcodeDetector?: BarcodeDetectorConstructor }).BarcodeDetector) || null;
 
-/** True when this browser can read a barcode with the camera: it needs the detector, a camera, and HTTPS. */
+/** True when a barcode can be read with the camera here: a browser with the detector, a camera, and HTTPS. */
 export const canScanBarcodes = (): boolean =>
-    Boolean(detectorConstructor())
+    !isNative()
+    && Boolean(detectorConstructor())
     && typeof navigator !== 'undefined'
     && Boolean(navigator.mediaDevices?.getUserMedia)
     && (typeof window === 'undefined' || window.isSecureContext);

@@ -500,7 +500,7 @@ const ShoppingList: React.FC = () => {
     }
 
     return (
-        <div className="mx-auto max-w-4xl space-y-6">
+        <div className="mx-auto max-w-4xl space-y-6 xl:max-w-7xl">
             {error ? (
                 <div className="rounded-input border border-danger/30 bg-danger/10 px-4 py-3 text-caption text-danger">
                     {error}
@@ -523,7 +523,11 @@ const ShoppingList: React.FC = () => {
                 )}
             </div>
 
-            <Card>
+            {/* On a wide screen: the form and the templates on the left, the
+                list and its total on the right. The third row only absorbs
+                the height of a long list, so the two cards keep their own. */}
+            <div className="flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] xl:grid-rows-[auto_auto_1fr] xl:items-start">
+            <Card className="xl:col-start-1 xl:row-start-1">
                 <CardHeader>
                     <CardTitle>{t('shopping:add.title')}</CardTitle>
                 </CardHeader>
@@ -604,7 +608,7 @@ const ShoppingList: React.FC = () => {
                 </CardContent>
             </Card>
 
-            <div className="space-y-3">
+            <div className="space-y-3 xl:col-start-2 xl:row-span-3 xl:row-start-1">
                 {pendingItems.length === 0 && completedItems.length === 0 ? (
                     <div className="rounded-card border border-dashed border-border bg-card py-16 text-center">
                         <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
@@ -742,7 +746,7 @@ const ShoppingList: React.FC = () => {
                 )}
             </div>
 
-            <Card>
+            <Card className="xl:col-start-1 xl:row-start-2">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <ListChecks className="h-5 w-5 text-primary" />
@@ -793,11 +797,12 @@ const ShoppingList: React.FC = () => {
                 </CardContent>
             </Card>
 
-            <div className="sticky bottom-20 z-20 rounded-card border border-border bg-card px-4 py-3 shadow-surface lg:bottom-4">
+            <div className="sticky bottom-20 z-20 rounded-card border border-border bg-card px-4 py-3 shadow-surface lg:bottom-4 xl:col-start-2 xl:row-start-4">
                 <div className="flex items-center justify-between text-caption">
                     <span className="text-muted-foreground">{t('shopping:footer.estimatedTotal')}</span>
                     <span className="text-body font-semibold text-foreground">{formatCurrency(totalPrice, currency)}</span>
                 </div>
+            </div>
             </div>
 
             {/* Template creation dialog */}

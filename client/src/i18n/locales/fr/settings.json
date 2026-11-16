@@ -241,8 +241,25 @@
     "themeDark": "Sombre",
     "themeSystem": "Comme l'appareil",
     "navigation": "Navigation sur grand écran",
-    "navSidebar": "Menu latéral",
+    "navSidebar": "Menu latéral complet",
     "navDock": "Barre en bas",
-    "navHint": "Sur un téléphone, la barre est toujours en bas, avec les autres rubriques derrière « Plus »."
+    "navHint": "La barre contient les rubriques de tous les jours, les autres sont derrière « Plus ». Sur un téléphone, elle est toujours en bas.",
+    "accent": "Couleur",
+    "accents": {
+      "coral": "Corail",
+      "blue": "Bleu",
+      "green": "Vert",
+      "violet": "Violet",
+      "orange": "Orange",
+      "slate": "Ardoise"
+    },
+    "corners": "Angles",
+    "cornersRound": "Arrondis",
+    "cornersSquare": "Droits",
+    "text": "Taille du texte",
+    "textNormal": "Normale",
+    "textLarge": "Grande",
+    "navDockLeft": "Barre à gauche",
+    "navDockRight": "Barre à droite"
   }
 }

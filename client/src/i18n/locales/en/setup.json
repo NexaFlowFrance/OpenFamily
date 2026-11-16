@@ -1,0 +1,35 @@
+{
+  "welcome": {
+    "title": "Welcome, {{name}}",
+    "text": "Three questions and OpenFamily is ready. Everything asked here can be changed later in Settings.",
+    "language": "Language"
+  },
+  "family": {
+    "title": "Who is in the family?",
+    "text": "Add the people of the household, with or without an account. A date of birth puts the birthday in the calendar.",
+    "namePlaceholder": "First name",
+    "birthdate": "Date of birth",
+    "add": "Add someone",
+    "remove": "Remove"
+  },
+  "modules": {
+    "title": "What does your family need?",
+    "text": "Untick what you will not use: it leaves the menu, and comes back whenever you want from Settings."
+  },
+  "done": {
+    "title": "It is ready",
+    "text": "Your family is set up. Three things worth doing next:",
+    "tipInvite": "Invite the other adults from the Family page, so that each has their own sign-in.",
+    "tipPhone": "Put OpenFamily on your phones: the Android app, or \"Add to home screen\" from the browser.",
+    "tipHome": "Arrange your home page with the \"Customise\" button: each member has their own."
+  },
+  "actions": {
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "finish": "Finish",
+    "open": "Open OpenFamily"
+  },
+  "step": "Step {{current}} of {{total}}",
+  "error": "Something could not be saved. Check the connection and try again."
+}

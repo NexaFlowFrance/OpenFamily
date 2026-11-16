@@ -138,6 +138,75 @@
   --shadow-surface-hover: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
+/* Appearance, chosen in Settings and kept on the device (contexts/ThemeContext).
+   The defaults carry no attribute: coral, round corners, normal text. */
+
+:root[data-corners='square'] {
+  --radius: 8px;
+  --radius-card: 8px;
+  --radius-input: 6px;
+}
+
+/* Everything is sized in rem: a larger root makes the whole app larger. */
+:root[data-text='large'] {
+  font-size: 112.5%;
+}
+
+/* Accent colours. Each one gives the colour, its two pressed shades, the soft
+   tint behind what is selected and the colour of text set on it, for the
+   light theme then for the dark one. */
+:root[data-accent='blue'] {
+  --primary: 37 99 235; --primary-hover: 29 78 216; --primary-pressed: 30 64 175;
+  --primary-soft: 224 233 252; --primary-foreground: 255 255 255;
+  --accent: 224 233 252; --accent-foreground: 37 99 235; --ring: 37 99 235;
+}
+:root[data-accent='green'] {
+  --primary: 31 138 91; --primary-hover: 25 116 76; --primary-pressed: 20 96 63;
+  --primary-soft: 220 240 229; --primary-foreground: 255 255 255;
+  --accent: 220 240 229; --accent-foreground: 31 138 91; --ring: 31 138 91;
+}
+:root[data-accent='violet'] {
+  --primary: 124 77 196; --primary-hover: 108 63 178; --primary-pressed: 92 52 153;
+  --primary-soft: 236 227 248; --primary-foreground: 255 255 255;
+  --accent: 236 227 248; --accent-foreground: 124 77 196; --ring: 124 77 196;
+}
+:root[data-accent='orange'] {
+  --primary: 204 98 30; --primary-hover: 181 85 24; --primary-pressed: 156 72 20;
+  --primary-soft: 251 232 216; --primary-foreground: 255 255 255;
+  --accent: 251 232 216; --accent-foreground: 204 98 30; --ring: 204 98 30;
+}
+:root[data-accent='slate'] {
+  --primary: 71 85 105; --primary-hover: 51 65 85; --primary-pressed: 30 41 59;
+  --primary-soft: 226 232 240; --primary-foreground: 255 255 255;
+  --accent: 226 232 240; --accent-foreground: 71 85 105; --ring: 71 85 105;
+}
+
+.dark[data-accent='blue'] {
+  --primary: 96 150 250; --primary-hover: 80 136 245; --primary-pressed: 59 118 238;
+  --primary-soft: 20 28 46; --primary-foreground: 10 18 36;
+  --accent: 20 28 46; --accent-foreground: 96 150 250; --ring: 96 150 250;
+}
+.dark[data-accent='green'] {
+  --primary: 84 182 132; --primary-hover: 70 168 119; --primary-pressed: 58 152 106;
+  --primary-soft: 18 36 28; --primary-foreground: 8 26 18;
+  --accent: 18 36 28; --accent-foreground: 84 182 132; --ring: 84 182 132;
+}
+.dark[data-accent='violet'] {
+  --primary: 168 132 232; --primary-hover: 155 117 224; --primary-pressed: 140 101 214;
+  --primary-soft: 34 26 50; --primary-foreground: 22 12 40;
+  --accent: 34 26 50; --accent-foreground: 168 132 232; --ring: 168 132 232;
+}
+.dark[data-accent='orange'] {
+  --primary: 240 148 84; --primary-hover: 232 134 68; --primary-pressed: 222 120 54;
+  --primary-soft: 44 28 18; --primary-foreground: 36 18 6;
+  --accent: 44 28 18; --accent-foreground: 240 148 84; --ring: 240 148 84;
+}
+.dark[data-accent='slate'] {
+  --primary: 148 163 184; --primary-hover: 133 149 172; --primary-pressed: 118 134 158;
+  --primary-soft: 32 36 44; --primary-foreground: 15 20 28;
+  --accent: 32 36 44; --accent-foreground: 148 163 184; --ring: 148 163 184;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-fast: 1ms;

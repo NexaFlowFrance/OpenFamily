@@ -241,8 +241,25 @@
     "themeDark": "深色",
     "themeSystem": "跟随设备",
     "navigation": "大屏幕上的导航",
-    "navSidebar": "侧边菜单",
-    "navDock": "底部导航栏",
-    "navHint": "在手机上导航栏始终位于底部，其他功能在“更多”中。"
+    "navSidebar": "完整侧边菜单",
+    "navDock": "导航栏在底部",
+    "navHint": "导航栏包含每天常用的功能，其他功能在“更多”中。在手机上导航栏始终位于底部。",
+    "accent": "颜色",
+    "accents": {
+      "coral": "珊瑚红",
+      "blue": "蓝色",
+      "green": "绿色",
+      "violet": "紫色",
+      "orange": "橙色",
+      "slate": "石板灰"
+    },
+    "corners": "圆角",
+    "cornersRound": "圆角",
+    "cornersSquare": "直角",
+    "text": "文字大小",
+    "textNormal": "标准",
+    "textLarge": "大",
+    "navDockLeft": "导航栏在左侧",
+    "navDockRight": "导航栏在右侧"
   }
 }

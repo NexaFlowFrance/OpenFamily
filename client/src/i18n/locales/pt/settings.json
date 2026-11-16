@@ -241,8 +241,25 @@
     "themeDark": "Escuro",
     "themeSystem": "Como o dispositivo",
     "navigation": "Navegação em tela grande",
-    "navSidebar": "Menu lateral",
+    "navSidebar": "Menu lateral completo",
     "navDock": "Barra inferior",
-    "navHint": "No celular a barra fica sempre embaixo, com as outras seções atrás de \"Mais\"."
+    "navHint": "A barra traz as seções do dia a dia, as outras ficam atrás de \"Mais\". No celular ela fica sempre embaixo.",
+    "accent": "Cor",
+    "accents": {
+      "coral": "Coral",
+      "blue": "Azul",
+      "green": "Verde",
+      "violet": "Violeta",
+      "orange": "Laranja",
+      "slate": "Ardósia"
+    },
+    "corners": "Cantos",
+    "cornersRound": "Arredondados",
+    "cornersSquare": "Retos",
+    "text": "Tamanho do texto",
+    "textNormal": "Normal",
+    "textLarge": "Grande",
+    "navDockLeft": "Barra à esquerda",
+    "navDockRight": "Barra à direita"
   }
 }

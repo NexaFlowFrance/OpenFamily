@@ -241,8 +241,25 @@
     "themeDark": "Dunkel",
     "themeSystem": "Wie das Gerät",
     "navigation": "Navigation auf großem Bildschirm",
-    "navSidebar": "Seitenmenü",
+    "navSidebar": "Vollständiges Seitenmenü",
     "navDock": "Leiste unten",
-    "navHint": "Auf dem Handy ist die Leiste immer unten, die übrigen Bereiche stehen hinter „Mehr“."
+    "navHint": "Die Leiste enthält die Bereiche für jeden Tag, die übrigen stehen hinter „Mehr“. Auf dem Handy ist sie immer unten.",
+    "accent": "Farbe",
+    "accents": {
+      "coral": "Koralle",
+      "blue": "Blau",
+      "green": "Grün",
+      "violet": "Violett",
+      "orange": "Orange",
+      "slate": "Schiefer"
+    },
+    "corners": "Ecken",
+    "cornersRound": "Abgerundet",
+    "cornersSquare": "Eckig",
+    "text": "Textgröße",
+    "textNormal": "Normal",
+    "textLarge": "Groß",
+    "navDockLeft": "Leiste links",
+    "navDockRight": "Leiste rechts"
   }
 }

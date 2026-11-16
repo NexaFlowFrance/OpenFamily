@@ -28,6 +28,7 @@ import { Button } from '../ui/Button';
 import { NotificationBell } from '../ui/NotificationBell';
 import { DemoBanner } from '../app/DemoBanner';
 import { MagicInputButton } from '../app/MagicInput';
+import WelcomeSetup from '../app/WelcomeSetup';
 import { NAVIGATION, MOBILE_TABS, MORE_TAB, isOnMobileTab, isRouteActive } from './navigation';
 
 interface LayoutProps {
@@ -51,8 +52,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { t } = useTranslation('nav');
     const { user, logout, isModuleEnabled } = useAuth();
     const { setTheme, actualTheme, navStyle } = useTheme();
-    // The bar at the bottom on every width, and no menu down the side.
-    const dock = navStyle === 'dock';
+    // The bar of everyday sections on every width, and no menu down the side.
+    // On a wide screen it sits where the person chose: bottom, left or right.
+    // On a phone it is always at the bottom.
+    const dock = navStyle !== 'sidebar';
+    const dockSide = navStyle === 'dock-left' ? 'left' : navStyle === 'dock-right' ? 'right' : 'bottom';
 
     // Hide entries whose optional module the family has disabled.
     const visibleNavigation = NAVIGATION.filter((item) => !item.module || isModuleEnabled(item.module));
@@ -234,7 +238,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
             </nav>
 
-            <div className={cn(!dock && 'md:pl-20 lg:pl-72')}>
+            <div className={cn(!dock && 'md:pl-20 lg:pl-72', dock && dockSide === 'left' && 'md:pl-28', dock && dockSide === 'right' && 'md:pr-28')}>
                 <DemoBanner />
                 <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
                     {/* The page takes the width of the screen up to a limit past
@@ -301,7 +305,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                 </header>
 
-                <main className={cn('mx-auto w-full max-w-[1760px] px-4 pb-28 pt-6 lg:px-8 lg:pt-8 2xl:px-10', dock ? 'md:pb-32' : 'md:pb-10')}>
+                <main className={cn('mx-auto w-full max-w-[1760px] px-4 pb-28 pt-6 lg:px-8 lg:pt-8 2xl:px-10', dock && dockSide === 'bottom' ? 'md:pb-32' : 'md:pb-10')}>
                     {isOffline && (
                         <div className="mb-4 flex items-center gap-2 rounded-card border border-amber-300 bg-amber-50 px-4 py-2.5 text-caption text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400">
                             <WifiOff className="h-4 w-4 flex-shrink-0" />
@@ -322,7 +326,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     }}
                     className={cn(
                         'fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98]',
-                        dock ? 'md:bottom-8 md:right-8' : 'md:bottom-6 lg:hidden'
+                        // Beside the bar when it is on the right, never under it.
+                        !dock ? 'md:bottom-6 lg:hidden' : dockSide === 'right' ? 'md:bottom-8 md:right-32' : 'md:bottom-8 md:right-8'
                     )}
                     aria-label={t('quickActions.title')}
                 >
@@ -334,7 +339,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className={cn(
                     'fixed inset-x-4 bottom-44 z-50 rounded-card border border-border bg-card p-4 shadow-surface-hover md:inset-x-auto md:bottom-24 md:right-4 md:w-72',
                     'transition-all duration-base ease-soft',
-                    dock ? 'md:bottom-28 md:right-8' : 'lg:hidden',
+                    !dock ? 'lg:hidden' : dockSide === 'right' ? 'md:bottom-28 md:right-32' : 'md:bottom-28 md:right-8',
                     quickActionsOpen
                         ? 'pointer-events-auto translate-y-0 opacity-100'
                         : 'pointer-events-none translate-y-3 opacity-0'
@@ -359,19 +364,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
             </div>
 
-            {/* On a phone, a bar across the bottom. With the bottom bar chosen
-                on a wide screen, the same bar, set down in the middle. */}
+            {/* On a phone, a bar across the bottom. On a wide screen the same
+                bar floats where the person put it: along the bottom, or down
+                the left or the right edge. */}
             <nav
                 className={cn(
                     'fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur',
-                    dock
-                        ? 'md:inset-x-auto md:bottom-5 md:left-1/2 md:w-[34rem] md:max-w-[calc(100vw-8rem)] md:-translate-x-1/2 md:rounded-[1.4rem] md:border md:bg-card/95 md:pb-0 md:shadow-surface-hover'
-                        : 'md:hidden'
+                    !dock && 'md:hidden',
+                    dock && 'md:rounded-[1.4rem] md:border md:bg-card/95 md:pb-0 md:shadow-surface-hover',
+                    dock && dockSide === 'bottom' && 'md:inset-x-auto md:bottom-5 md:left-1/2 md:w-[34rem] md:max-w-[calc(100vw-8rem)] md:-translate-x-1/2',
+                    dock && dockSide === 'left' && 'md:inset-x-auto md:bottom-auto md:left-5 md:top-1/2 md:w-[5.5rem] md:-translate-y-1/2',
+                    dock && dockSide === 'right' && 'md:inset-x-auto md:bottom-auto md:right-5 md:top-1/2 md:w-[5.5rem] md:-translate-y-1/2',
                 )}
             >
                 <div
-                    className={cn('grid gap-1 px-2 py-2', dock && 'md:gap-1.5 md:p-2')}
-                    style={{ gridTemplateColumns: `repeat(${mobileTabs.length}, minmax(0, 1fr))` }}
+                    className={cn(
+                        'grid grid-cols-[repeat(var(--tabs),minmax(0,1fr))] gap-1 px-2 py-2',
+                        dock && 'md:gap-1.5 md:p-2',
+                        // Down an edge, the tabs are one above the other.
+                        dock && dockSide !== 'bottom' && 'md:grid-cols-1',
+                    )}
+                    style={{ '--tabs': mobileTabs.length } as React.CSSProperties}
                 >
                     {mobileTabs.map((item) => {
                         const Icon = item.icon;
@@ -397,6 +410,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     })}
                 </div>
             </nav>
+
+            {/* Shown once, to whoever has just created a family. */}
+            <WelcomeSetup />
         </div>
     );
 };

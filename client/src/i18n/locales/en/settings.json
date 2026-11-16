@@ -241,8 +241,25 @@
     "themeDark": "Dark",
     "themeSystem": "Like the device",
     "navigation": "Navigation on a wide screen",
-    "navSidebar": "Side menu",
+    "navSidebar": "Full side menu",
     "navDock": "Bar at the bottom",
-    "navHint": "On a phone the bar is always at the bottom, with the other sections behind \"More\"."
+    "navHint": "The bar holds the sections of every day, with the others behind \"More\". On a phone it is always at the bottom.",
+    "accent": "Colour",
+    "accents": {
+      "coral": "Coral",
+      "blue": "Blue",
+      "green": "Green",
+      "violet": "Violet",
+      "orange": "Orange",
+      "slate": "Slate"
+    },
+    "corners": "Corners",
+    "cornersRound": "Rounded",
+    "cornersSquare": "Square",
+    "text": "Text size",
+    "textNormal": "Normal",
+    "textLarge": "Large",
+    "navDockLeft": "Bar on the left",
+    "navDockRight": "Bar on the right"
   }
 }

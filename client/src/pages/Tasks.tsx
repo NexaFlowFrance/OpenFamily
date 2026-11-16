@@ -363,7 +363,7 @@ const Tasks: React.FC = () => {
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="mx-auto max-w-6xl space-y-6 2xl:max-w-[1600px]">
             {error ? (
                 <div className="rounded-input border border-danger/30 bg-danger/10 px-4 py-3 text-caption text-danger">
                     {error}
@@ -488,10 +488,10 @@ const Tasks: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/* Tasks List */}
-            <div className="space-y-3">
+            {/* Tasks List: two side by side on a wide screen */}
+            <div className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
                 {filteredTasks.length === 0 ? (
-                    <Card>
+                    <Card className="2xl:col-span-2">
                         <CardContent className="p-8 text-center">
                             <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
                             <p className="text-muted-foreground">

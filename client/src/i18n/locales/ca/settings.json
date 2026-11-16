@@ -241,8 +241,25 @@
     "themeDark": "Fosc",
     "themeSystem": "Com el dispositiu",
     "navigation": "Navegació en pantalla gran",
-    "navSidebar": "Menú lateral",
+    "navSidebar": "Menú lateral complet",
     "navDock": "Barra inferior",
-    "navHint": "En un telèfon la barra sempre és a baix, amb les altres seccions darrere de «Més»."
+    "navHint": "La barra conté les seccions de cada dia, les altres són darrere de «Més». En un telèfon sempre és a baix.",
+    "accent": "Color",
+    "accents": {
+      "coral": "Corall",
+      "blue": "Blau",
+      "green": "Verd",
+      "violet": "Violeta",
+      "orange": "Taronja",
+      "slate": "Pissarra"
+    },
+    "corners": "Cantonades",
+    "cornersRound": "Arrodonides",
+    "cornersSquare": "Rectes",
+    "text": "Mida del text",
+    "textNormal": "Normal",
+    "textLarge": "Gran",
+    "navDockLeft": "Barra a l'esquerra",
+    "navDockRight": "Barra a la dreta"
   }
 }

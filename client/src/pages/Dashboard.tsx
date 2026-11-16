@@ -447,8 +447,11 @@ const Dashboard: React.FC = () => {
         </aside>
     );
 
+    // As many columns as there are figures: a family that hid Budget has
+    // three, and must not be left with an empty fourth box.
+    const statColumns = isModuleEnabled('budget') ? 'lg:grid-cols-4' : 'lg:grid-cols-3';
     const renderStats = () => (
-        <div key="stats" className="grid grid-cols-2 lg:grid-cols-4 overflow-hidden rounded-card border border-border bg-card">
+        <div key="stats" className={`grid grid-cols-2 ${statColumns} overflow-hidden rounded-card border border-border bg-card`}>
             {statCards
                 // A family that hid Budget must not see a budget tile.
                 .filter((card) => (card.href === '/budget' ? isModuleEnabled('budget') : true))

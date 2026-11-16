@@ -1,0 +1,35 @@
+{
+  "welcome": {
+    "title": "Et donem la benvinguda, {{name}}",
+    "text": "Tres preguntes i OpenFamily estarà a punt. Tot el que es pregunta aquí es pot canviar després a la Configuració.",
+    "language": "Idioma"
+  },
+  "family": {
+    "title": "Qui forma part de la família?",
+    "text": "Afegeix les persones de la llar, amb compte o sense. Una data de naixement posa l'aniversari al calendari.",
+    "namePlaceholder": "Nom",
+    "birthdate": "Data de naixement",
+    "add": "Afegeix algú",
+    "remove": "Treu"
+  },
+  "modules": {
+    "title": "Què necessita la teva família?",
+    "text": "Desmarca el que no faràs servir: la secció surt del menú i torna quan vulguis des de la Configuració."
+  },
+  "done": {
+    "title": "Tot a punt",
+    "text": "La teva família està configurada. Tres coses que val la pena fer ara:",
+    "tipInvite": "Convida els altres adults des de la pàgina Família, perquè cadascú tingui el seu accés.",
+    "tipPhone": "Posa OpenFamily als telèfons: l'aplicació d'Android o «Afegeix a la pantalla d'inici» des del navegador.",
+    "tipHome": "Organitza la teva pàgina d'inici amb el botó «Personalitza»: cada membre té la seva."
+  },
+  "actions": {
+    "next": "Següent",
+    "back": "Enrere",
+    "skip": "Omet",
+    "finish": "Acaba",
+    "open": "Obre OpenFamily"
+  },
+  "step": "Pas {{current}} de {{total}}",
+  "error": "No s'ha pogut desar alguna cosa. Comprova la connexió i torna-ho a provar."
+}

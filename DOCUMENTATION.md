@@ -112,7 +112,9 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 ### ⚙️ Paramètres
 - Export / import des données (transfert de données)
 - Personnalisation de l'application
-- **Apparence**, propre à chaque appareil : thème clair, sombre ou celui de l'appareil, et sur grand écran le choix entre le menu latéral et une barre en bas, comme sur téléphone, avec le reste des rubriques derrière « Plus »
+- **Apparence**, propre à chaque appareil : thème clair, sombre ou celui de l'appareil, couleur d'accent (corail, bleu, vert, violet, orange, ardoise), angles arrondis ou droits, taille du texte normale ou grande
+- **Navigation au choix** sur grand écran : une barre avec les rubriques de tous les jours, placée en bas, à gauche ou à droite, le reste étant derrière « Plus » ; ou le menu latéral complet. Sur téléphone, la barre est toujours en bas
+- **Configuration guidée au premier lancement** : la personne qui crée une famille choisit la langue et le thème, ajoute les membres du foyer (avec leur date de naissance pour les anniversaires) et décoche les rubriques dont la famille n'a pas besoin. Trois étapes, que l'on peut passer, et tout se change ensuite ici
 - **Mot de passe oublié** : réinitialisation par lien e-mail (valable 60 minutes, à usage
   unique), disponible dès que SMTP est configuré
 

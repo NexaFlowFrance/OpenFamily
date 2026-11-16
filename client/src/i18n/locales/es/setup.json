@@ -1,0 +1,35 @@
+{
+  "welcome": {
+    "title": "Te damos la bienvenida, {{name}}",
+    "text": "Tres preguntas y OpenFamily estará listo. Todo lo que se pregunta aquí se puede cambiar después en Ajustes.",
+    "language": "Idioma"
+  },
+  "family": {
+    "title": "¿Quién forma parte de la familia?",
+    "text": "Añade a las personas del hogar, con o sin cuenta. Una fecha de nacimiento pone el cumpleaños en el calendario.",
+    "namePlaceholder": "Nombre",
+    "birthdate": "Fecha de nacimiento",
+    "add": "Añadir a alguien",
+    "remove": "Quitar"
+  },
+  "modules": {
+    "title": "¿Qué necesita tu familia?",
+    "text": "Desmarca lo que no vayas a usar: la sección sale del menú y vuelve cuando quieras desde Ajustes."
+  },
+  "done": {
+    "title": "Todo listo",
+    "text": "Tu familia está configurada. Tres cosas que conviene hacer ahora:",
+    "tipInvite": "Invita a los demás adultos desde la página Familia, para que cada uno tenga su propio acceso.",
+    "tipPhone": "Pon OpenFamily en vuestros teléfonos: la aplicación de Android o «Añadir a la pantalla de inicio» desde el navegador.",
+    "tipHome": "Organiza tu página de inicio con el botón «Personalizar»: cada miembro tiene la suya."
+  },
+  "actions": {
+    "next": "Siguiente",
+    "back": "Atrás",
+    "skip": "Omitir",
+    "finish": "Terminar",
+    "open": "Abrir OpenFamily"
+  },
+  "step": "Paso {{current}} de {{total}}",
+  "error": "Algo no se pudo guardar. Comprueba la conexión e inténtalo de nuevo."
+}

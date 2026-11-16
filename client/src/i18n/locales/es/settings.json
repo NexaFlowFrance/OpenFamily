@@ -241,8 +241,25 @@
     "themeDark": "Oscuro",
     "themeSystem": "Como el dispositivo",
     "navigation": "Navegación en pantalla grande",
-    "navSidebar": "Menú lateral",
+    "navSidebar": "Menú lateral completo",
     "navDock": "Barra inferior",
-    "navHint": "En un teléfono la barra siempre está abajo, con las demás secciones detrás de «Más»."
+    "navHint": "La barra contiene las secciones de todos los días, las demás están detrás de «Más». En un teléfono siempre está abajo.",
+    "accent": "Color",
+    "accents": {
+      "coral": "Coral",
+      "blue": "Azul",
+      "green": "Verde",
+      "violet": "Violeta",
+      "orange": "Naranja",
+      "slate": "Pizarra"
+    },
+    "corners": "Esquinas",
+    "cornersRound": "Redondeadas",
+    "cornersSquare": "Rectas",
+    "text": "Tamaño del texto",
+    "textNormal": "Normal",
+    "textLarge": "Grande",
+    "navDockLeft": "Barra a la izquierda",
+    "navDockRight": "Barra a la derecha"
   }
 }

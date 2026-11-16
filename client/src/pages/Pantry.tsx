@@ -261,7 +261,7 @@ const Pantry: React.FC = () => {
     );
 
     return (
-        <div className="mx-auto max-w-4xl space-y-6">
+        <div className="mx-auto max-w-4xl space-y-6 xl:max-w-7xl">
             {error ? (
                 <div className="rounded-input border border-danger/30 bg-danger/10 px-4 py-3 text-caption text-danger">{error}</div>
             ) : null}
@@ -282,6 +282,8 @@ const Pantry: React.FC = () => {
                 </div>
             )}
 
+            {/* On a wide screen: the form on the left, what is at home on the right. */}
+            <div className="flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] xl:items-start">
             <Card>
                 <CardHeader>
                     <CardTitle>{t('pantry:add.title')}</CardTitle>
@@ -335,6 +337,7 @@ const Pantry: React.FC = () => {
                 </CardContent>
             </Card>
 
+            <div className="space-y-6">
             {!loading && items.length === 0 && (
                 <p className="rounded-card border border-dashed border-border px-4 py-10 text-center text-body text-muted-foreground">
                     {t('pantry:empty')}
@@ -395,6 +398,9 @@ const Pantry: React.FC = () => {
                     </section>
                 );
             })}
+
+            </div>
+            </div>
 
             <Dialog
                 open={Boolean(editing)}

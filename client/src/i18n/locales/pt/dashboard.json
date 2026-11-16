@@ -69,5 +69,18 @@
     "notSeen": "Ninguém viu ainda",
     "seen": "Visto",
     "markSeen": "Marcar como visto"
+  },
+  "cards": {
+    "tasks": "A fazer",
+    "meals": "No cardápio de hoje",
+    "shopping": "A comprar",
+    "birthdays": "Aniversários",
+    "eatSoon": "Para consumir logo",
+    "seeAll": "Ver tudo",
+    "tasksEmpty": "Nada mais a fazer.",
+    "mealsEmpty": "Nada planejado para hoje.",
+    "shoppingEmpty": "A lista está vazia.",
+    "birthdaysEmpty": "Nenhum aniversário nos próximos meses. Adicione as datas de nascimento na página Família.",
+    "pantryEmpty": "Nada para consumir logo."
   }
 }

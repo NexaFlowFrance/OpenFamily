@@ -26,7 +26,7 @@
   "meals": {
     "button": "Suggereix un menú ✨",
     "dialogTitle": "Suggeriments per sopar",
-    "dialogDescription": "Setmana del {{start}} al {{end}} — basat en les teves receptes.",
+    "dialogDescription": "Setmana del {{start}} al {{end}}, basat en les teves receptes.",
     "loading": "L'assistent està preparant el menú…",
     "empty": "Ja hi ha tots els sopars d'aquesta setmana planificats.",
     "confirm": "Afegeix al pla ({{count}})",

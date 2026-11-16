@@ -19,12 +19,12 @@ types.setTypeParser(1114, (val: string) => val.replace(' ', 'T').replace(/\.\d+$
 if (!process.env.POSTGRES_PASSWORD) {
     if (process.env.NODE_ENV === 'production') {
         logger.error('db.missing_password', {
-            message: 'POSTGRES_PASSWORD is not set. Refusing to start in production with the default password — set it in your .env file.',
+            message: 'POSTGRES_PASSWORD is not set. Refusing to start in production with the default password. Set it in your .env file.',
         });
         process.exit(1);
     }
     logger.warn('db.missing_password', {
-        message: 'POSTGRES_PASSWORD is not set — falling back to default (development only). Set it in your .env file.',
+        message: 'POSTGRES_PASSWORD is not set: falling back to default (development only). Set it in your .env file.',
     });
 }
 

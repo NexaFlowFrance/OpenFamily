@@ -1,7 +1,7 @@
 {
   "appName": "OpenFamily",
   "demo": {
-    "notice": "Demo-Modus – deine Änderungen werden nicht gespeichert und beim Neuladen zurückgesetzt.",
+    "notice": "Demo-Modus: deine Änderungen werden nicht gespeichert und beim Neuladen zurückgesetzt.",
     "reset": "Zurücksetzen",
     "star": "Auf GitHub mit Stern markieren"
   },

@@ -39,7 +39,7 @@
   },
   "settings": {
     "title": "Affichage kiosk",
-    "subtitle": "Un affichage plein écran en lecture seule pour une tablette murale ou un écran de frigo — agenda du jour, repas, tâches et qui est où.",
+    "subtitle": "Un affichage plein écran en lecture seule pour une tablette murale ou un écran de frigo : agenda du jour, repas, tâches et qui est où.",
     "open": "Ouvrir l'affichage kiosk"
   },
   "screensaver": {

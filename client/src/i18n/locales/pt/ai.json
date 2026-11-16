@@ -2,7 +2,7 @@
   "magic": {
     "open": "Assistente de IA",
     "title": "Assistente de IA ✨",
-    "description": "Descreva o que deseja adicionar em linguagem natural — o assistente organiza tudo.",
+    "description": "Descreva o que deseja adicionar em linguagem natural: o assistente organiza tudo.",
     "placeholder": "ex: Comprar leite e pão para quinta, e lembrar da reunião de pais amanhã às 14h…",
     "parse": "Analisar",
     "parsing": "Analisando…",
@@ -26,7 +26,7 @@
   "meals": {
     "button": "Sugerir cardápio ✨",
     "dialogTitle": "Sugestões para o jantar",
-    "dialogDescription": "Semana de {{start}} a {{end}} — com base no seu próprio livro de receitas.",
+    "dialogDescription": "Semana de {{start}} a {{end}}, com base no seu próprio livro de receitas.",
     "loading": "O assistente está montando o cardápio…",
     "empty": "Todas as refeições desta semana já estão planejadas.",
     "confirm": "Adicionar ao planejamento ({{count}})",

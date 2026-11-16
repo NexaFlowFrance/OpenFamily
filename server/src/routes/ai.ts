@@ -360,7 +360,7 @@ router.post('/suggest-meals', async (req: AuthRequest, res) => {
         const plannedDates = new Set(plannedResult.rows.map((r: any) => r.date as string));
         const plannedDinners = plannedResult.rows.map((r: any) => ({
             date: r.date as string,
-            name: (r.recipe_name as string) || (r.custom_meal as string) || '—',
+            name: (r.recipe_name as string) || (r.custom_meal as string) || '-',
         }));
         const missingDates = weekDates.filter((d) => !plannedDates.has(d));
         if (missingDates.length === 0) {

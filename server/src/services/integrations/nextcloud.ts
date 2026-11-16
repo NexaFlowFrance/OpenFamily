@@ -114,7 +114,7 @@ export async function testNextcloudConnection(baseUrl: string, username: string,
         const vstr = status.versionstring || status.version || '';
         return {
             success: true,
-            message: `Connecté a Nextcloud ${vstr} — ${hrefs.length} calendrier${hrefs.length > 1 ? 's' : ''} trouvé${hrefs.length > 1 ? 's' : ''}`.trim(),
+            message: `Connecté a Nextcloud ${vstr} : ${hrefs.length} calendrier${hrefs.length > 1 ? 's' : ''} trouvé${hrefs.length > 1 ? 's' : ''}`.trim(),
         };
     } catch (e) {
         return { success: false, message: e instanceof Error ? e.message : 'Impossible de joindre le serveur' };

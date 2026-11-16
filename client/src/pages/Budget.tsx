@@ -538,7 +538,10 @@ const Budget: React.FC = () => {
     const forecastPositive = (forecast?.forecastBalance ?? 0) >= 0;
 
     return (
-        <div className="max-w-2xl mx-auto pb-24">
+        // One column on a phone. On a wide screen the sections are set in two
+        // columns and the page takes the room it is given, instead of a narrow
+        // strip down the middle.
+        <div className="mx-auto max-w-2xl pb-24 xl:max-w-6xl">
 
             {/* Navigation mois */}
             <div className="flex items-center justify-between px-4 py-3 sticky top-0 bg-background/80 backdrop-blur-md z-10 border-b border-border">
@@ -593,7 +596,7 @@ const Budget: React.FC = () => {
             </div>
 
             {mode === 'kakeibo' && (
-                <div className="px-4 pt-3">
+                <div className="px-4 pt-3 xl:mx-auto xl:max-w-3xl">
                     <KakeiboView
                         month={currentMonth}
                         year={currentYear}
@@ -619,7 +622,7 @@ const Budget: React.FC = () => {
             )}
 
             {mode === 'analytics' && (
-                <div className="px-4 pt-4 space-y-3">
+                <div className="px-4 pt-4 [&>*]:mb-3 [&>*]:break-inside-avoid xl:columns-2 xl:gap-6">
                             {/* Répartition par catégorie */}
                             <ChartCard
                                 title={t('budget:charts.expensesByCategory')}
@@ -719,7 +722,7 @@ const Budget: React.FC = () => {
                 </div>
             )}
 
-            <div className="px-4 pt-4 space-y-3" style={{ display: mode === 'classic' ? undefined : 'none' }}>
+            <div className="px-4 pt-4 [&>*]:mb-3 [&>*]:break-inside-avoid xl:columns-2 xl:gap-6" style={{ display: mode === 'classic' ? undefined : 'none' }}>
 
                 {/* Bannière lecture seule (enfant) */}
                 {!canEdit && (

@@ -69,5 +69,18 @@
     "notSeen": "尚无人查看",
     "seen": "已查看",
     "markSeen": "标记为已查看"
+  },
+  "cards": {
+    "tasks": "待办",
+    "meals": "今日菜单",
+    "shopping": "待购",
+    "birthdays": "生日",
+    "eatSoon": "尽快食用",
+    "seeAll": "全部",
+    "tasksEmpty": "没有待办事项。",
+    "mealsEmpty": "今天没有安排。",
+    "shoppingEmpty": "清单是空的。",
+    "birthdaysEmpty": "未来几个月没有生日。请在“家庭”页面添加出生日期。",
+    "pantryEmpty": "没有需要尽快食用的食品。"
   }
 }

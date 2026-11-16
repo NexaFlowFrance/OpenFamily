@@ -43,7 +43,7 @@ const More: React.FC = () => {
     ];
 
     return (
-        <div className="mx-auto max-w-xl space-y-6">
+        <div className="mx-auto max-w-3xl space-y-6">
             <div className="flex items-center gap-3 rounded-card border border-border bg-card p-4">
                 {user?.avatar_url ? (
                     <img src={user.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
@@ -59,7 +59,7 @@ const More: React.FC = () => {
             </div>
 
             <nav aria-label={t('more.title')}>
-                <ul className="grid grid-cols-3 gap-x-2 gap-y-5 sm:grid-cols-4">
+                <ul className="grid grid-cols-3 gap-x-2 gap-y-5 sm:grid-cols-4 lg:grid-cols-6">
                     {tiles.map((tile) => {
                         const Icon = tile.icon;
                         return (

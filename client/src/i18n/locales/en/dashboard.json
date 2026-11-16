@@ -69,5 +69,18 @@
     "notSeen": "Not seen by anyone yet",
     "seen": "Seen",
     "markSeen": "Mark seen"
+  },
+  "cards": {
+    "tasks": "To do",
+    "meals": "On the menu today",
+    "shopping": "To buy",
+    "birthdays": "Birthdays",
+    "eatSoon": "To eat soon",
+    "seeAll": "All",
+    "tasksEmpty": "Nothing left to do.",
+    "mealsEmpty": "Nothing planned for today.",
+    "shoppingEmpty": "The list is empty.",
+    "birthdaysEmpty": "No birthday in the coming months. Add dates of birth on the Family page.",
+    "pantryEmpty": "Nothing to eat soon."
   }
 }

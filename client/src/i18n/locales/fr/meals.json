@@ -13,7 +13,7 @@
   "dialog": {
     "editTitle": "Modifier le repas",
     "addTitle": "Ajouter un repas",
-    "descriptionFmt": "{{type}} — {{date}}"
+    "descriptionFmt": "{{type}}, {{date}}"
   },
   "form": {
     "mealType": "Type de repas",

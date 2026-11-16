@@ -1,7 +1,7 @@
 {
   "appName": "OpenFamily",
   "demo": {
-    "notice": "Mode démo — vos modifications ne sont pas enregistrées et sont réinitialisées au rechargement.",
+    "notice": "Mode démo : vos modifications ne sont pas enregistrées et sont réinitialisées au rechargement.",
     "reset": "Réinitialiser",
     "star": "Mettre une étoile sur GitHub"
   },

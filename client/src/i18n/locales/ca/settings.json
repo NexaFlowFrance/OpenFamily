@@ -232,5 +232,17 @@
     "limit": "Pots tenir com a màxim deu webhooks. Elimina'n un per afegir-ne un altre.",
     "invalidUrl": "No es pot cridar aquesta adreça. Fes servir una adreça http o https completa.",
     "error": "S'ha produït un error. Torna-ho a provar."
+  },
+  "appearance": {
+    "title": "Aparença",
+    "subtitle": "L'aspecte de l'aplicació en aquest dispositiu.",
+    "theme": "Tema",
+    "themeLight": "Clar",
+    "themeDark": "Fosc",
+    "themeSystem": "Com el dispositiu",
+    "navigation": "Navegació en pantalla gran",
+    "navSidebar": "Menú lateral",
+    "navDock": "Barra inferior",
+    "navHint": "En un telèfon la barra sempre és a baix, amb les altres seccions darrere de «Més»."
   }
 }

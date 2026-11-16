@@ -26,7 +26,7 @@
   "noExpenses": "Diesen Monat wurden keine Ausgaben erfasst.",
   "reviewTitle": "Monatsrückblick",
   "actualSavings": "Tatsächlich gespart",
-  "goalReached": "Ziel erreicht – {{amount}} über dem Ziel!",
+  "goalReached": "Ziel erreicht: {{amount}} über dem Ziel!",
   "goalMissed": "{{amount}} unter deinem Ziel.",
   "notesLabel": "Gedanken zum Monat",
   "notesPlaceholder": "Was lief gut? Was lässt sich nächsten Monat verbessern?"

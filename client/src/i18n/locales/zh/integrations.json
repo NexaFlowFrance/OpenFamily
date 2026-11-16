@@ -82,5 +82,35 @@
       "keyLabel": "API 密钥",
       "keyPlaceholder": "在 Immich > 账号设置 > API 密钥中获取"
     }
+  },
+  "outside": {
+    "title": "还可以连接",
+    "subtitle": "在对方应用或设置中配置。",
+    "items": {
+      "gladys": {
+        "name": "Gladys Assistant",
+        "desc": "在开源智能家居助手 Gladys 中显示家庭日历、购物清单和任务。从 Gladys 集成商店安装，并使用在设置中创建的 API 令牌。"
+      },
+      "api": {
+        "name": "Home Assistant、n8n、脚本",
+        "desc": "文档化的 API、个人令牌和 Webhook：你的自动化可以读取家庭当天的安排，并补充清单。"
+      },
+      "calendars": {
+        "name": "Google 日历、Apple 日历、Outlook",
+        "desc": "在任何日历应用中订阅家庭日历，或在 OpenFamily 中关注它们的日历。"
+      },
+      "displays": {
+        "name": "电子墨水相框和壁挂屏幕",
+        "desc": "无需登录即可显示家庭当天安排的页面，适用于电子墨水相框、电子阅读器或任何屏幕。"
+      },
+      "ai": {
+        "name": "Ollama 和 AI 服务商",
+        "desc": "可选的助手，可使用本地模型，或兼容 OpenAI 的 API、Anthropic Claude、Google Gemini。"
+      },
+      "sso": {
+        "name": "单点登录",
+        "desc": "使用 Authentik、Keycloak、Pocket ID 或任何 OpenID Connect 服务登录。在服务器上配置。"
+      }
+    }
   }
 }

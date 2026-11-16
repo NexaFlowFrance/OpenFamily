@@ -26,7 +26,7 @@
   "noExpenses": "Aucune dépense enregistrée ce mois.",
   "reviewTitle": "Bilan de fin de mois",
   "actualSavings": "Réellement épargné",
-  "goalReached": "Objectif atteint — {{amount}} au-dessus !",
+  "goalReached": "Objectif atteint : {{amount}} au-dessus !",
   "goalMissed": "Il manque {{amount}} pour atteindre l'objectif.",
   "notesLabel": "Notes de réflexion",
   "notesPlaceholder": "Qu'est-ce qui a bien marché ? Quoi améliorer le mois prochain ?"

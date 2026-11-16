@@ -1,7 +1,7 @@
 {
   "appName": "OpenFamily",
   "demo": {
-    "notice": "Demo mode — your changes are not saved and reset on reload.",
+    "notice": "Demo mode: your changes are not saved and reset on reload.",
     "reset": "Reset",
     "star": "Star on GitHub"
   },

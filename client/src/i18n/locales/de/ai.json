@@ -2,7 +2,7 @@
   "magic": {
     "open": "KI-Assistent",
     "title": "KI-Assistent ✨",
-    "description": "Beschreibe, was du hinzufügen möchtest – der Assistent erledigt den Rest.",
+    "description": "Beschreibe, was du hinzufügen möchtest: der Assistent erledigt den Rest.",
     "placeholder": "Lasagne am Donnerstagabend eintragen und Mia an ihre Sporttasche erinnern…",
     "parse": "Analysieren",
     "parsing": "Wird analysiert…",
@@ -26,7 +26,7 @@
   "meals": {
     "button": "Menü vorschlagen ✨",
     "dialogTitle": "Vorschläge fürs Abendessen",
-    "dialogDescription": "Woche vom {{start}} bis {{end}} – auf Basis deiner eigenen Rezepte.",
+    "dialogDescription": "Woche vom {{start}} bis {{end}}, auf Basis deiner eigenen Rezepte.",
     "loading": "Der Assistent stellt das Menü zusammen…",
     "empty": "Alle Abendessen dieser Woche sind bereits geplant.",
     "confirm": "Zum Plan hinzufügen ({{count}})",
@@ -51,14 +51,14 @@
     "clearKey": "Gespeicherten Schlüssel löschen",
     "model": "Modell",
     "enabled": "Assistent aktiviert",
-    "privacy": "Datenschutz: Der API-Schlüssel wird verschlüsselt und nur auf DEINEM Server gespeichert. Mit Ollama verlässt nichts das Haus – Notizen werden lokal verarbeitet.",
+    "privacy": "Datenschutz: Der API-Schlüssel wird verschlüsselt und nur auf DEINEM Server gespeichert. Mit Ollama verlässt nichts das Haus: Notizen werden lokal verarbeitet.",
     "parentOnly": "Nur Eltern können diese Einstellungen ändern.",
     "save": "Speichern",
     "saving": "Wird gespeichert…",
     "saved": "Einstellungen gespeichert.",
     "test": "Verbindung testen",
     "testing": "Wird getestet…",
-    "testSuccess": "Verbindung erfolgreich – das Modell antwortet korrekt."
+    "testSuccess": "Verbindung erfolgreich: das Modell antwortet korrekt."
   },
   "errors": {
     "AI_NOT_CONFIGURED": "Der KI-Assistent ist nicht eingerichtet. Gehe zu den Einstellungen.",

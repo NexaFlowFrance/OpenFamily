@@ -23,8 +23,12 @@ export const TOGGLEABLE_MODULES = [
 ] as const;
 
 // Dashboard widgets, in default display order. 'quick' is the shopping/budget/
-// tasks quick-access card row; 'agenda' carries the day/week toggle.
-export const DASHBOARD_WIDGETS = ['stats', 'agenda', 'planning', 'quick', 'notes'] as const;
+// tasks quick-access card row; 'agenda' carries the day/week toggle. The small
+// cards (tasks, meals, shopping, birthdays, pantry) each list a few lines of
+// what is coming. 'quick' repeats figures the page already gives twice: it is
+// hidden until someone asks for it.
+export const DASHBOARD_WIDGETS = ['stats', 'agenda', 'tasks', 'meals', 'shopping', 'birthdays', 'pantry', 'planning', 'quick', 'notes'] as const;
+const HIDDEN_BY_DEFAULT: readonly DashboardWidget[] = ['quick'];
 export type DashboardWidget = typeof DASHBOARD_WIDGETS[number];
 
 export interface DashboardPrefs {
@@ -36,21 +40,41 @@ export interface DashboardPrefs {
 const isWidget = (v: unknown): v is DashboardWidget =>
     typeof v === 'string' && (DASHBOARD_WIDGETS as readonly string[]).includes(v);
 
+/**
+ * A saved order, completed with the widgets it does not know: each one goes
+ * right after the nearest widget that comes before it by default and that the
+ * order already holds. A layout saved before the small cards existed thus
+ * gets them under the agenda, where they belong, not at the foot of the page.
+ */
+export const completeWidgetOrder = (order: DashboardWidget[]): DashboardWidget[] => {
+    const complete = [...order];
+    DASHBOARD_WIDGETS.forEach((widget, index) => {
+        if (complete.includes(widget)) return;
+        let at = 0;
+        for (let before = index - 1; before >= 0; before -= 1) {
+            const position = complete.indexOf(DASHBOARD_WIDGETS[before]);
+            if (position !== -1) {
+                at = position + 1;
+                break;
+            }
+        }
+        complete.splice(at, 0, widget);
+    });
+    return complete;
+};
+
 // Parse the JSON text stored in users.dashboard_prefs into a complete, valid
-// prefs object. Unknown widgets are dropped, missing ones appended in default
-// order, so the dashboard always knows where every widget goes.
+// prefs object. Unknown widgets are dropped and missing ones put in their
+// place, so the dashboard always knows where every widget goes.
 export const parseDashboardPrefs = (raw: unknown): DashboardPrefs => {
-    const defaults: DashboardPrefs = { order: [...DASHBOARD_WIDGETS], hidden: [], agendaView: 'day' };
+    const defaults: DashboardPrefs = { order: [...DASHBOARD_WIDGETS], hidden: [...HIDDEN_BY_DEFAULT], agendaView: 'day' };
     if (typeof raw !== 'string' || raw.trim() === '') return defaults;
     try {
         const parsed = JSON.parse(raw) as Partial<DashboardPrefs> | null;
         if (!parsed || typeof parsed !== 'object') return defaults;
 
         const order = Array.isArray(parsed.order) ? parsed.order.filter(isWidget) : [];
-        const dedupedOrder = Array.from(new Set(order));
-        for (const widget of DASHBOARD_WIDGETS) {
-            if (!dedupedOrder.includes(widget)) dedupedOrder.push(widget);
-        }
+        const dedupedOrder = completeWidgetOrder(Array.from(new Set(order)));
 
         const hidden = Array.isArray(parsed.hidden)
             ? Array.from(new Set(parsed.hidden.filter(isWidget)))

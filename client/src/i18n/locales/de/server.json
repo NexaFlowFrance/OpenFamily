@@ -1,6 +1,6 @@
 {
   "title": "Mit deinem Server verbinden",
-  "subtitle": "OpenFamily wird selbst gehostet – richte die App auf deinen eigenen Server aus.",
+  "subtitle": "OpenFamily wird selbst gehostet: richte die App auf deinen eigenen Server aus.",
   "urlLabel": "Serveradresse",
   "placeholder": "http://192.168.1.10:3001",
   "hint": "Verwende dieselbe Adresse, die du im Browser öffnest (z. B. http://192.168.1.10:3001), oder deine HTTPS- bzw. Tailscale-Adresse.",

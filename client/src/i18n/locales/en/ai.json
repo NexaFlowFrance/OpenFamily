@@ -2,7 +2,7 @@
   "magic": {
     "open": "AI assistant",
     "title": "AI assistant ✨",
-    "description": "Describe what you want to add — the assistant takes care of the rest.",
+    "description": "Describe what you want to add: the assistant takes care of the rest.",
     "placeholder": "Add lasagna Thursday night and remind Mia about her gym bag…",
     "parse": "Analyze",
     "parsing": "Analyzing…",
@@ -26,7 +26,7 @@
   "meals": {
     "button": "Suggest a menu ✨",
     "dialogTitle": "Dinner suggestions",
-    "dialogDescription": "Week of {{start}} to {{end}} — based on your own recipes.",
+    "dialogDescription": "Week of {{start}} to {{end}}, based on your own recipes.",
     "loading": "The assistant is composing the menu…",
     "empty": "Every dinner this week is already planned.",
     "confirm": "Add to plan ({{count}})",
@@ -51,14 +51,14 @@
     "clearKey": "Clear the stored key",
     "model": "Model",
     "enabled": "Assistant enabled",
-    "privacy": "Privacy: the API key is encrypted and stored only on YOUR server. With Ollama nothing leaves the house — notes are processed locally.",
+    "privacy": "Privacy: the API key is encrypted and stored only on YOUR server. With Ollama nothing leaves the house: notes are processed locally.",
     "parentOnly": "Only parents can change these settings.",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Settings saved.",
     "test": "Test connection",
     "testing": "Testing…",
-    "testSuccess": "Connection successful — the model responds correctly."
+    "testSuccess": "Connection successful: the model responds correctly."
   },
   "errors": {
     "AI_NOT_CONFIGURED": "The AI assistant is not configured. Head to Settings.",

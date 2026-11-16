@@ -69,5 +69,18 @@
     "notSeen": "Encara no ho ha vist ningú",
     "seen": "Vist",
     "markSeen": "Marca com a vist"
+  },
+  "cards": {
+    "tasks": "Per fer",
+    "meals": "Al menú d'avui",
+    "shopping": "Per comprar",
+    "birthdays": "Aniversaris",
+    "eatSoon": "Per consumir aviat",
+    "seeAll": "Veure-ho tot",
+    "tasksEmpty": "No queda res per fer.",
+    "mealsEmpty": "No hi ha res previst per avui.",
+    "shoppingEmpty": "La llista és buida.",
+    "birthdaysEmpty": "Cap aniversari en els pròxims mesos. Afegeix les dates de naixement a la pàgina Família.",
+    "pantryEmpty": "Res per consumir aviat."
   }
 }

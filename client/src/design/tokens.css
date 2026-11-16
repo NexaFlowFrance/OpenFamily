@@ -62,9 +62,9 @@
   --input: 231 220 204;
   --ring: 220 74 96;
 
-  --radius: 8px;
-  --radius-card: 8px;
-  --radius-input: 6px;
+  --radius: 12px;
+  --radius-card: 16px;
+  --radius-input: 10px;
   --radius-pill: 999px;
 
   /* Éditorial : on s'appuie sur les filets, pas sur les ombres */
@@ -79,61 +79,63 @@
 .dark {
   color-scheme: dark;
 
-  /* Mode sombre : ambiance prune-noir du fond du logo */
-  --bg: #110a18;
-  --surface: #1b1126;
-  --surface-2: #180f22;
-  --border-base: #2c1e38;
-  --border-strong-base: #3e2b4d;
-  --text-base: #f2eaee;
-  --text-muted-base: #b7a8b1;
+  /* Mode sombre : un noir neutre, à peine réchauffé pour rester de la même
+     famille que le papier crème du mode clair. Le prune du logo n'y est plus
+     qu'une teinte de graphique, pas la couleur des fonds. */
+  --bg: #0f0f10;
+  --surface: #18181a;
+  --surface-2: #141415;
+  --border-base: #29282b;
+  --border-strong-base: #3a393d;
+  --text-base: #f1efec;
+  --text-muted-base: #a9a5a3;
 
-  --primary-base: #ff6b7e;
-  --primary-hover-base: #ff566d;
-  --primary-pressed-base: #f04764;
-  --primary-soft-base: #2a1525;
+  --primary-base: #ee6277;
+  --primary-hover-base: #e7546b;
+  --primary-pressed-base: #dc4a60;
+  --primary-soft-base: #2a181b;
 
-  --background: 17 10 24;
-  --foreground: 242 234 238;
-  --card: 27 17 38;
-  --card-foreground: 242 234 238;
-  --popover: 27 17 38;
-  --popover-foreground: 242 234 238;
+  --background: 15 15 16;
+  --foreground: 241 239 236;
+  --card: 24 24 26;
+  --card-foreground: 241 239 236;
+  --popover: 28 28 30;
+  --popover-foreground: 241 239 236;
 
-  --surface-rgb: 27 17 38;
-  --surface-2-rgb: 24 15 34;
+  --surface-rgb: 24 24 26;
+  --surface-2-rgb: 20 20 21;
 
-  --primary: 255 107 126;
-  --primary-foreground: 36 14 22;
-  --primary-hover: 255 86 109;
-  --primary-pressed: 240 71 100;
-  --primary-soft: 42 21 37;
+  --primary: 238 98 119;
+  --primary-foreground: 32 12 17;
+  --primary-hover: 231 84 107;
+  --primary-pressed: 220 74 96;
+  --primary-soft: 42 24 27;
 
-  --peach: 240 168 120;
-  --plum: 181 131 168;
+  --peach: 232 164 116;
+  --plum: 168 138 160;
 
-  --secondary: 24 15 34;
-  --secondary-foreground: 242 234 238;
-  --muted: 24 15 34;
-  --muted-foreground: 183 168 177;
-  --accent: 42 21 37;
-  --accent-foreground: 255 107 126;
+  --secondary: 30 30 32;
+  --secondary-foreground: 241 239 236;
+  --muted: 30 30 32;
+  --muted-foreground: 169 165 163;
+  --accent: 42 24 27;
+  --accent-foreground: 238 98 119;
 
-  --destructive: 240 113 123;
-  --destructive-foreground: 36 14 22;
+  --destructive: 236 110 120;
+  --destructive-foreground: 32 12 17;
 
-  --success: 95 168 111;
-  --warning: 217 182 94;
-  --danger: 240 113 123;
-  --info: 181 131 168;
+  --success: 96 166 112;
+  --warning: 214 180 96;
+  --danger: 236 110 120;
+  --info: 168 138 160;
 
-  --border: 44 30 56;
-  --border-strong: 62 43 77;
-  --input: 44 30 56;
-  --ring: 255 107 126;
+  --border: 41 40 43;
+  --border-strong: 58 57 61;
+  --input: 41 40 43;
+  --ring: 238 98 119;
 
-  --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-surface-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-surface-hover: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {

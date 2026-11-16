@@ -26,7 +26,7 @@
   "meals": {
     "button": "Proposer un menu ✨",
     "dialogTitle": "Suggestions de dîners",
-    "dialogDescription": "Semaine du {{start}} au {{end}} — à partir de vos propres recettes.",
+    "dialogDescription": "Semaine du {{start}} au {{end}}, à partir de vos propres recettes.",
     "loading": "L'assistant compose le menu…",
     "empty": "Tous les dîners de la semaine sont déjà planifiés.",
     "confirm": "Ajouter au planning ({{count}})",
@@ -51,14 +51,14 @@
     "clearKey": "Effacer la clé enregistrée",
     "model": "Modèle",
     "enabled": "Assistant activé",
-    "privacy": "Confidentialité : la clé API est chiffrée et stockée uniquement sur VOTRE serveur. Avec Ollama, rien ne quitte la maison — les notes sont analysées en local.",
+    "privacy": "Confidentialité : la clé API est chiffrée et stockée uniquement sur VOTRE serveur. Avec Ollama, rien ne quitte la maison : les notes sont analysées en local.",
     "parentOnly": "Seuls les parents peuvent modifier ces réglages.",
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "saved": "Réglages enregistrés.",
     "test": "Tester la connexion",
     "testing": "Test en cours…",
-    "testSuccess": "Connexion réussie — le modèle répond correctement."
+    "testSuccess": "Connexion réussie : le modèle répond correctement."
   },
   "errors": {
     "AI_NOT_CONFIGURED": "L'assistant IA n'est pas configuré. Rendez-vous dans les Réglages.",

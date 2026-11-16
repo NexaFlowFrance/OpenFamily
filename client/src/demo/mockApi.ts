@@ -22,7 +22,7 @@ type Json = Record<string, unknown>;
 // The member's dashboard layout (mirrors /api/auth/dashboard-prefs). Reset on
 // reload, like everything else. Without this route the fallback below answered
 // an empty array and the dashboard crashed on `prefs.order`.
-let demoDashboardPrefs: Json = { order: ['stats', 'agenda', 'planning', 'quick', 'notes'], hidden: [], agendaView: 'day' };
+let demoDashboardPrefs: Json = { order: ['stats', 'agenda', 'tasks', 'meals', 'shopping', 'birthdays', 'pantry', 'planning', 'quick', 'notes'], hidden: ['quick'], agendaView: 'day' };
 
 const ok = <T,>(data: T) => ({ success: true, data });
 const uid = () =>
@@ -508,6 +508,39 @@ async function route(method: string, path: string, q: Record<string, string>, bo
         // comparison is correct.
         if (q.start_date) list = list.filter((a) => ((a.end_time as string) || (a.start_time as string)) >= q.start_date);
         if (q.end_date) list = list.filter((a) => (a.start_time as string) <= q.end_date);
+        // Like the server: asked with a range, the list carries the birthdays
+        // that fall in it, worked out from the dates of birth.
+        if (q.start_date && q.end_date) {
+            const from = q.start_date.slice(0, 10);
+            const to = q.end_date.slice(0, 10);
+            const birthdays: Json[] = [];
+            for (const member of store.familyMembers as Json[]) {
+                const born = typeof member.birthdate === 'string' ? member.birthdate.slice(0, 10) : '';
+                if (!born) continue;
+                const birthYear = Number(born.slice(0, 4));
+                for (let year = Math.max(Number(from.slice(0, 4)), birthYear + 1); year <= Number(to.slice(0, 4)); year += 1) {
+                    const day = `${year}-${born.slice(5)}`;
+                    if (day < from || day > to) continue;
+                    birthdays.push({
+                        id: `birthday-${member.id}`,
+                        occurrence_id: `birthday-${member.id}-${year}`,
+                        kind: 'birthday',
+                        title: `${member.name}'s birthday`,
+                        start_time: `${day}T00:00:00`,
+                        end_time: `${day}T23:59:00`,
+                        is_all_day: true,
+                        color: member.color,
+                        family_member_ids: [member.id],
+                        family_members_data: [{ id: member.id, name: member.name, color: member.color }],
+                        reminder_minutes: [],
+                        birthday: { member_id: member.id, name: member.name, age: year - birthYear, birth_date: born },
+                    });
+                }
+            }
+            if (birthdays.length > 0) {
+                list = [...list, ...birthdays].sort((a, b) => String(a.start_time).localeCompare(String(b.start_time)));
+            }
+        }
         return ok(list);
     }
     if (path === '/api/appointments' && method === 'POST') return ok(create('appointments', body));

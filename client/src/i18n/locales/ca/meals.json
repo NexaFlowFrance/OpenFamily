@@ -13,7 +13,7 @@
   "dialog": {
     "editTitle": "Edita l'àpat",
     "addTitle": "Afegeix un àpat",
-    "descriptionFmt": "{{type}} — {{date}}"
+    "descriptionFmt": "{{type}}, {{date}}"
   },
   "form": {
     "mealType": "Tipus d'àpat",

@@ -19,7 +19,7 @@ interface User {
 }
 
 /** Dashboard widgets, in default display order (mirrors the server's list). */
-export const DASHBOARD_WIDGETS = ['stats', 'agenda', 'planning', 'quick', 'notes'] as const;
+export const DASHBOARD_WIDGETS = ['stats', 'agenda', 'tasks', 'meals', 'shopping', 'birthdays', 'pantry', 'planning', 'quick', 'notes'] as const;
 export type DashboardWidget = typeof DASHBOARD_WIDGETS[number];
 
 export interface DashboardPrefs {
@@ -30,7 +30,8 @@ export interface DashboardPrefs {
 
 export const DEFAULT_DASHBOARD_PREFS: DashboardPrefs = {
     order: [...DASHBOARD_WIDGETS],
-    hidden: [],
+    // The quick access tiles repeat the key figures: hidden until asked for.
+    hidden: ['quick'],
     agendaView: 'day',
 };
 
@@ -49,7 +50,20 @@ export function normalizeDashboardPrefs(raw: unknown): DashboardPrefs {
         ? (raw as Partial<Record<keyof DashboardPrefs, unknown>>)
         : {};
     const order = Array.isArray(src.order) ? src.order.filter(isWidget) : [];
-    for (const widget of DASHBOARD_WIDGETS) if (!order.includes(widget)) order.push(widget);
+    // A widget the order does not hold goes right after the nearest one that
+    // comes before it by default (same rule as the server).
+    DASHBOARD_WIDGETS.forEach((widget, index) => {
+        if (order.includes(widget)) return;
+        let at = 0;
+        for (let before = index - 1; before >= 0; before -= 1) {
+            const position = order.indexOf(DASHBOARD_WIDGETS[before]);
+            if (position !== -1) {
+                at = position + 1;
+                break;
+            }
+        }
+        order.splice(at, 0, widget);
+    });
     const hidden = Array.isArray(src.hidden) ? src.hidden.filter(isWidget) : [];
     const agendaView = src.agendaView === 'week' ? 'week' : 'day';
     return { order, hidden, agendaView };

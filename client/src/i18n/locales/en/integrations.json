@@ -82,5 +82,35 @@
       "keyLabel": "API key",
       "keyPlaceholder": "From Immich > Account settings > API keys"
     }
+  },
+  "outside": {
+    "title": "Also connects with",
+    "subtitle": "Set up from the other app, or in Settings.",
+    "items": {
+      "gladys": {
+        "name": "Gladys Assistant",
+        "desc": "The family calendar, the shopping list and the tasks in Gladys, the open-source home assistant. Installed from the Gladys integration store, with an API token made in Settings."
+      },
+      "api": {
+        "name": "Home Assistant, n8n, scripts",
+        "desc": "A documented API, personal tokens and webhooks: your automations read the family's day and add to its lists."
+      },
+      "calendars": {
+        "name": "Google Calendar, Apple Calendar, Outlook",
+        "desc": "Subscribe to the family calendar from any calendar app, or follow theirs in OpenFamily."
+      },
+      "displays": {
+        "name": "E-paper frames and wall screens",
+        "desc": "A page of the family's day that needs no sign-in, for an e-paper frame, an e-reader or any screen."
+      },
+      "ai": {
+        "name": "Ollama and AI providers",
+        "desc": "An optional assistant, with a local model or an OpenAI-compatible, Anthropic Claude or Google Gemini API."
+      },
+      "sso": {
+        "name": "Single sign-on",
+        "desc": "Sign in with Authentik, Keycloak, Pocket ID or any OpenID Connect provider. Set up on the server."
+      }
+    }
   }
 }

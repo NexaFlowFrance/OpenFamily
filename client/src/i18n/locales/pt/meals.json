@@ -13,7 +13,7 @@
   "dialog": {
     "editTitle": "Editar refeição",
     "addTitle": "Adicionar refeição",
-    "descriptionFmt": "{{type}} — {{date}}"
+    "descriptionFmt": "{{type}}, {{date}}"
   },
   "form": {
     "mealType": "Tipo de refeição",

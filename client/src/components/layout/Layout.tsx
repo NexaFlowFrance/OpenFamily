@@ -50,7 +50,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
     const { t } = useTranslation('nav');
     const { user, logout, isModuleEnabled } = useAuth();
-    const { setTheme, actualTheme } = useTheme();
+    const { setTheme, actualTheme, navStyle } = useTheme();
+    // The bar at the bottom on every width, and no menu down the side.
+    const dock = navStyle === 'dock';
 
     // Hide entries whose optional module the family has disabled.
     const visibleNavigation = NAVIGATION.filter((item) => !item.module || isModuleEnabled(item.module));
@@ -100,7 +102,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <aside
                 className={cn(
                     'fixed left-0 top-0 z-50 h-full w-72 border-r border-border bg-card shadow-surface',
-                    'transform transition-transform duration-base ease-soft lg:translate-x-0',
+                    'transform transition-transform duration-base ease-soft',
+                    !dock && 'lg:translate-x-0',
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 )}
             >
@@ -200,7 +203,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 tap away and leaves the width to the content. */}
             <nav
                 aria-label={t('rail.label')}
-                className="fixed left-0 top-0 z-30 hidden h-full w-20 flex-col border-r border-border bg-card md:flex lg:hidden"
+                className={cn('fixed left-0 top-0 z-30 hidden h-full w-20 flex-col border-r border-border bg-card', !dock && 'md:flex lg:hidden')}
             >
                 <Link to="/" className="flex h-16 shrink-0 items-center justify-center border-b border-border" aria-label="OpenFamily">
                     <img src={`${import.meta.env.BASE_URL}OpenFamily.png`} alt="" className="h-8 w-8 object-contain" />
@@ -231,10 +234,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
             </nav>
 
-            <div className="md:pl-20 lg:pl-72">
+            <div className={cn(!dock && 'md:pl-20 lg:pl-72')}>
                 <DemoBanner />
                 <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
-                    <div className="container flex h-16 max-w-[1200px] items-center justify-between px-4 lg:px-6">
+                    {/* The page takes the width of the screen up to a limit past
+                        which lines get too long to read: nothing is gained by
+                        leaving half of a wide screen empty. */}
+                    <div className="mx-auto flex h-16 w-full max-w-[1760px] items-center justify-between px-4 lg:px-8 2xl:px-10">
                         <div className="flex items-center gap-3">
                             <button
                                 type="button"
@@ -244,7 +250,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 }}
                                 // On a phone the bottom bar's "More" holds the menu; this
                                 // button is for the medium widths, next to the rail.
-                                className="hidden rounded-input p-2 text-muted-foreground hover:bg-surface-2 md:block lg:hidden"
+                                className={cn('hidden rounded-input p-2 text-muted-foreground hover:bg-surface-2', !dock && 'md:block lg:hidden')}
                                 aria-label={t('user.openMenu')}
                             >
                                 <Menu className="h-5 w-5" />
@@ -295,7 +301,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                 </header>
 
-                <main className="container max-w-[1200px] px-4 pb-28 pt-6 md:pb-10 lg:px-6 lg:pt-8">
+                <main className={cn('mx-auto w-full max-w-[1760px] px-4 pb-28 pt-6 lg:px-8 lg:pt-8 2xl:px-10', dock ? 'md:pb-32' : 'md:pb-10')}>
                     {isOffline && (
                         <div className="mb-4 flex items-center gap-2 rounded-card border border-amber-300 bg-amber-50 px-4 py-2.5 text-caption text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400">
                             <WifiOff className="h-4 w-4 flex-shrink-0" />
@@ -314,7 +320,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         setSidebarOpen(false);
                         setQuickActionsOpen((open) => !open);
                     }}
-                    className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98] md:bottom-6 lg:hidden"
+                    className={cn(
+                        'fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98]',
+                        dock ? 'md:bottom-8 md:right-8' : 'md:bottom-6 lg:hidden'
+                    )}
                     aria-label={t('quickActions.title')}
                 >
                     <Plus className="h-6 w-6" />
@@ -324,7 +333,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div
                 className={cn(
                     'fixed inset-x-4 bottom-44 z-50 rounded-card border border-border bg-card p-4 shadow-surface-hover md:inset-x-auto md:bottom-24 md:right-4 md:w-72',
-                    'transition-all duration-base ease-soft lg:hidden',
+                    'transition-all duration-base ease-soft',
+                    dock ? 'md:bottom-28 md:right-8' : 'lg:hidden',
                     quickActionsOpen
                         ? 'pointer-events-auto translate-y-0 opacity-100'
                         : 'pointer-events-none translate-y-3 opacity-0'
@@ -349,9 +359,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
             </div>
 
-            <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur md:hidden">
+            {/* On a phone, a bar across the bottom. With the bottom bar chosen
+                on a wide screen, the same bar, set down in the middle. */}
+            <nav
+                className={cn(
+                    'fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur',
+                    dock
+                        ? 'md:inset-x-auto md:bottom-5 md:left-1/2 md:w-[34rem] md:max-w-[calc(100vw-8rem)] md:-translate-x-1/2 md:rounded-[1.4rem] md:border md:bg-card/95 md:pb-0 md:shadow-surface-hover'
+                        : 'md:hidden'
+                )}
+            >
                 <div
-                    className="grid gap-1 px-2 py-2"
+                    className={cn('grid gap-1 px-2 py-2', dock && 'md:gap-1.5 md:p-2')}
                     style={{ gridTemplateColumns: `repeat(${mobileTabs.length}, minmax(0, 1fr))` }}
                 >
                     {mobileTabs.map((item) => {
@@ -365,13 +384,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 aria-current={active ? 'page' : undefined}
                                 className={cn(
                                     'flex flex-col items-center justify-center gap-1 rounded-input px-1 py-2',
+                                    dock && 'md:rounded-[1rem] md:py-2.5',
                                     active
                                         ? 'bg-primary-soft text-primary'
                                         : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground'
                                 )}
                             >
-                                <Icon className="h-4 w-4 shrink-0" />
-                                <span className="text-[10px] font-medium leading-none whitespace-nowrap">{t(item.labelKey)}</span>
+                                <Icon className={cn('h-4 w-4 shrink-0', dock && 'md:h-5 md:w-5')} />
+                                <span className={cn('text-[10px] font-medium leading-none whitespace-nowrap', dock && 'md:text-[11px]')}>{t(item.labelKey)}</span>
                             </Link>
                         );
                     })}

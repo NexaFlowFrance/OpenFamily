@@ -106,7 +106,7 @@
   },
   "support": {
     "title": "支持 OpenFamily",
-    "subtitle": "OpenFamily 是免费开源的，自托管在你自己的服务器上。如果它对你的家庭有帮助，你可以支持它的开发——无论如何它都会保持免费。",
+    "subtitle": "OpenFamily 是免费开源的，自托管在你自己的服务器上。如果它对你的家庭有帮助，你可以支持它的开发。无论如何它都会保持免费。",
     "sponsor": "请我喝杯咖啡",
     "star": "在 GitHub 上加星",
     "sponsorGithub": "在 GitHub 上赞助"
@@ -232,5 +232,17 @@
     "limit": "最多十个 Webhook。请先移除一个，再添加新的。",
     "invalidUrl": "无法调用此地址。请使用完整的 http 或 https 地址。",
     "error": "出了点问题，请重试。"
+  },
+  "appearance": {
+    "title": "外观",
+    "subtitle": "应用在此设备上的显示方式。",
+    "theme": "主题",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "themeSystem": "跟随设备",
+    "navigation": "大屏幕上的导航",
+    "navSidebar": "侧边菜单",
+    "navDock": "底部导航栏",
+    "navHint": "在手机上导航栏始终位于底部，其他功能在“更多”中。"
   }
 }

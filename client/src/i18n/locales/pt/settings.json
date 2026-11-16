@@ -232,5 +232,17 @@
     "limit": "No máximo dez webhooks. Remova um para adicionar outro.",
     "invalidUrl": "Este endereço não pode ser chamado. Use um endereço http ou https completo.",
     "error": "Algo deu errado. Tente novamente."
+  },
+  "appearance": {
+    "title": "Aparência",
+    "subtitle": "A aparência do aplicativo neste dispositivo.",
+    "theme": "Tema",
+    "themeLight": "Claro",
+    "themeDark": "Escuro",
+    "themeSystem": "Como o dispositivo",
+    "navigation": "Navegação em tela grande",
+    "navSidebar": "Menu lateral",
+    "navDock": "Barra inferior",
+    "navHint": "No celular a barra fica sempre embaixo, com as outras seções atrás de \"Mais\"."
   }
 }

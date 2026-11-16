@@ -24,7 +24,7 @@
   "delete": "Remover esta nota",
   "deleted": "Nota removida da geladeira",
   "added": "Nota colada na geladeira",
-  "emptyHint": "Deixe um recadinho para a família — ele aparece aqui e na tela do Modo Quiosque.",
+  "emptyHint": "Deixe um recadinho para a família: ele aparece aqui e na tela do Modo Quiosque.",
   "by": "por {{name}}",
   "age": {
     "now": "agora mesmo",

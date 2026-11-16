@@ -95,7 +95,7 @@ export function buildReminderTexts(
     const body = occurrence.is_all_day
         ? `${describeDay(start.slice(0, 10), dayInZone(now, zoneOf(occurrence)), lang)}${where}`
         // start_time is 'YYYY-MM-DDTHH:mm:ss' — HH:mm straight from the string.
-        : `${describeLeadTime(minutes, lang)} — ${start.slice(11, 16)}${where}`;
+        : `${describeLeadTime(minutes, lang)} · ${start.slice(11, 16)}${where}`;
     return { title: `${TITLE_PREFIX[lang]}${occurrence.title}`.slice(0, 255), body };
 }
 

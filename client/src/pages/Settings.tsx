@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import RegionalPreferences from '../components/app/RegionalPreferences';
 import SignInCard from '../components/app/SignInCard';
 import DisplayLinksCard from '../components/app/DisplayLinksCard';
+import AppearanceCard from '../components/app/AppearanceCard';
 import ApiTokensCard from '../components/app/ApiTokensCard';
 import TimeZoneCard from '../components/app/TimeZoneCard';
 import WebhooksCard from '../components/app/WebhooksCard';
@@ -848,11 +849,16 @@ const Settings: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <div>
+        // One column of cards on a phone or a laptop; two on a wide screen,
+        // where a single column would stretch each card across the room.
+        <div className="[&>*]:mb-6 [&>*]:break-inside-avoid 2xl:columns-2 2xl:gap-6">
+            <div className="[column-span:all]">
                 <h2 className="text-title font-bold text-foreground">{t('settings:title')}</h2>
                 <p className="text-caption text-muted-foreground">{t('settings:subtitle')}</p>
             </div>
+
+            {/* Theme and navigation, for this device */}
+            <AppearanceCard />
 
             {/* Language */}
             <Card>

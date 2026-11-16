@@ -1,7 +1,7 @@
 {
   "appName": "OpenFamily",
   "demo": {
-    "notice": "Modo de demonstração — suas alterações não são salvas e são reiniciadas ao recarregar.",
+    "notice": "Modo de demonstração: suas alterações não são salvas e são reiniciadas ao recarregar.",
     "reset": "Reiniciar",
     "star": "Dar estrela no GitHub"
   },

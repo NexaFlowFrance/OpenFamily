@@ -13,7 +13,7 @@
   "dialog": {
     "editTitle": "编辑餐食",
     "addTitle": "添加餐食",
-    "descriptionFmt": "{{type}} — {{date}}"
+    "descriptionFmt": "{{type}}，{{date}}"
   },
   "form": {
     "mealType": "餐食类型",

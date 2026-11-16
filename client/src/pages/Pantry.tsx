@@ -71,8 +71,9 @@ const Pantry: React.FC = () => {
     const [scanning, setScanning] = useState(false);
     const [editing, setEditing] = useState<PantryItem | null>(null);
     const [editForm, setEditForm] = useState<FormState>(EMPTY_FORM);
-    // Asked once: the answer does not change while the page is open.
-    const scanner = useMemo(() => canScanBarcodes(), []);
+    // Asked once: the answer does not change while the page is open. The demo
+    // has no server to look a barcode up, and its host forbids the camera.
+    const scanner = useMemo(() => !import.meta.env.VITE_DEMO && canScanBarcodes(), []);
 
     const load = async () => {
         try {

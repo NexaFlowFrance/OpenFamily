@@ -24,7 +24,7 @@
   "delete": "Retirer ce mot",
   "deleted": "Mot retiré du frigo",
   "added": "Mot collé sur le frigo",
-  "emptyHint": "Laissez un petit mot à la famille — il s'affichera ici et sur l'écran kiosk.",
+  "emptyHint": "Laissez un petit mot à la famille : il s'affichera ici et sur l'écran kiosk.",
   "by": "par {{name}}",
   "age": {
     "now": "à l'instant",

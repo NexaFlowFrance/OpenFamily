@@ -82,5 +82,35 @@
       "keyLabel": "Clé API",
       "keyPlaceholder": "Depuis Immich > Paramètres du compte > Clés API"
     }
+  },
+  "outside": {
+    "title": "Se branche aussi sur",
+    "subtitle": "À régler depuis l'autre application, ou dans les Paramètres.",
+    "items": {
+      "gladys": {
+        "name": "Gladys Assistant",
+        "desc": "L'agenda de la famille, la liste de courses et les tâches dans Gladys, l'assistant domotique open source. S'installe depuis la boutique d'intégrations de Gladys, avec un jeton d'API créé dans les Paramètres."
+      },
+      "api": {
+        "name": "Home Assistant, n8n, scripts",
+        "desc": "Une API documentée, des jetons personnels et des webhooks : vos automatisations lisent la journée de la famille et complètent ses listes."
+      },
+      "calendars": {
+        "name": "Google Agenda, Calendrier Apple, Outlook",
+        "desc": "Abonnez-vous à l'agenda de la famille depuis n'importe quelle application d'agenda, ou suivez les leurs dans OpenFamily."
+      },
+      "displays": {
+        "name": "Cadres e-paper et écrans muraux",
+        "desc": "Une page de la journée de la famille, sans connexion, pour un cadre e-paper, une liseuse ou tout autre écran."
+      },
+      "ai": {
+        "name": "Ollama et fournisseurs d'IA",
+        "desc": "Un assistant facultatif, avec un modèle local ou une API compatible OpenAI, Anthropic Claude ou Google Gemini."
+      },
+      "sso": {
+        "name": "Connexion unique",
+        "desc": "Connectez-vous avec Authentik, Keycloak, Pocket ID ou tout fournisseur OpenID Connect. Se règle sur le serveur."
+      }
+    }
   }
 }

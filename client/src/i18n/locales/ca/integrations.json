@@ -82,5 +82,35 @@
       "keyLabel": "Clau de l'API",
       "keyPlaceholder": "de Immich > compte configuració > API keys"
     }
+  },
+  "outside": {
+    "title": "També es connecta amb",
+    "subtitle": "Es configura des de l'altra aplicació o a la Configuració.",
+    "items": {
+      "gladys": {
+        "name": "Gladys Assistant",
+        "desc": "El calendari familiar, la llista de la compra i les tasques a Gladys, l'assistent domòtic de codi obert. S'instal·la des de la botiga d'integracions de Gladys, amb un token d'API creat a la Configuració."
+      },
+      "api": {
+        "name": "Home Assistant, n8n, scripts",
+        "desc": "Una API documentada, tokens personals i webhooks: les teves automatitzacions llegeixen el dia de la família i completen les seves llistes."
+      },
+      "calendars": {
+        "name": "Google Calendar, Calendari d'Apple, Outlook",
+        "desc": "Subscriu-te al calendari familiar des de qualsevol aplicació de calendari, o segueix els seus a OpenFamily."
+      },
+      "displays": {
+        "name": "Marcs e-paper i pantalles de paret",
+        "desc": "Una pàgina amb el dia de la família que no necessita iniciar sessió, per a un marc e-paper, un lector o qualsevol pantalla."
+      },
+      "ai": {
+        "name": "Ollama i proveïdors d'IA",
+        "desc": "Un assistent opcional, amb un model local o una API compatible amb OpenAI, Anthropic Claude o Google Gemini."
+      },
+      "sso": {
+        "name": "Inici de sessió únic",
+        "desc": "Inicia sessió amb Authentik, Keycloak, Pocket ID o qualsevol proveïdor OpenID Connect. Es configura al servidor."
+      }
+    }
   }
 }

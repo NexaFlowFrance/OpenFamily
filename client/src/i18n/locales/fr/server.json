@@ -1,6 +1,6 @@
 {
   "title": "Connectez-vous à votre serveur",
-  "subtitle": "OpenFamily est auto-hébergé — indiquez l'adresse de votre propre serveur.",
+  "subtitle": "OpenFamily est auto-hébergé : indiquez l'adresse de votre propre serveur.",
   "urlLabel": "Adresse du serveur",
   "placeholder": "http://192.168.1.10:3001",
   "hint": "Utilisez la même adresse que dans votre navigateur (ex. http://192.168.1.10:3001), ou votre adresse HTTPS / Tailscale.",

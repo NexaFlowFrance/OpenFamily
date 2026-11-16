@@ -106,7 +106,7 @@
   },
   "support": {
     "title": "OpenFamily unterstützen",
-    "subtitle": "OpenFamily ist kostenlos und Open Source und läuft selbst gehostet auf deinem eigenen Server. Wenn es deiner Familie hilft, kannst du die Entwicklung unterstützen – kostenlos bleibt es so oder so.",
+    "subtitle": "OpenFamily ist kostenlos und Open Source und läuft selbst gehostet auf deinem eigenen Server. Wenn es deiner Familie hilft, kannst du die Entwicklung unterstützen. Kostenlos bleibt es so oder so.",
     "sponsor": "Spendiere mir einen Kaffee",
     "star": "Auf GitHub mit Stern markieren",
     "sponsorGithub": "Auf GitHub sponsern"
@@ -232,5 +232,17 @@
     "limit": "Höchstens zehn Webhooks. Entferne einen, um einen neuen hinzuzufügen.",
     "invalidUrl": "Diese Adresse kann nicht aufgerufen werden. Verwende eine vollständige http- oder https-Adresse.",
     "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+  },
+  "appearance": {
+    "title": "Darstellung",
+    "subtitle": "Wie die App auf diesem Gerät aussieht.",
+    "theme": "Design",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "themeSystem": "Wie das Gerät",
+    "navigation": "Navigation auf großem Bildschirm",
+    "navSidebar": "Seitenmenü",
+    "navDock": "Leiste unten",
+    "navHint": "Auf dem Handy ist die Leiste immer unten, die übrigen Bereiche stehen hinter „Mehr“."
   }
 }

@@ -8,8 +8,9 @@ import { dateLocale, formatDateTime, formatTime, intlLocale, isoWeekdayAtOffset,
 import {
     ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, ChevronRight, Clock,
     SlidersHorizontal, Eye, EyeOff, ArrowUp, ArrowDown, CalendarDays,
+    Cake, Refrigerator, UtensilsCrossed,
 } from 'lucide-react';
-import { addDays, format, isSameDay, startOfWeek } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, isSameDay, startOfWeek } from 'date-fns';
 import { Button } from '../components/ui/Button';
 import { Dialog } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +32,58 @@ interface Appointment {
     start_time: string;
     end_time?: string;
     family_members_data?: Array<{ id: string; name: string; color: string }>;
+    is_all_day?: boolean;
+    kind?: string;
 }
+
+// What the small cards list: a few lines each, never the whole section.
+const CARD_LINES = 5;
+interface HomeTask { id: string; title: string; is_completed: boolean; due_date?: string | null; assigned_to_members?: Array<{ id: string; name: string; color: string }> }
+interface HomeMeal { id: string; date: string; meal_type: string; custom_meal?: string | null; recipe?: { name: string } | null; recipe_name?: string | null }
+interface HomeShoppingItem { id: string; name: string; is_checked?: boolean; quantity?: string | number | null; unit?: string | null }
+interface HomePantryItem { id: string; name: string; expires_on: string | null }
+interface HomeBirthday { id: string; occurrence_id?: string; start_time: string; kind?: string; color?: string; birthday?: { name: string; age: number } }
+// Meal slots are stored under their French names, in the order of the day.
+const MEAL_ORDER = ['Petit-déjeuner', 'Déjeuner', 'Dîner', 'Snack'];
+/** From this many days before its date, a product is to be eaten soon. */
+const EAT_SOON_DAYS = 7;
+/** How far ahead the birthdays card looks. */
+const BIRTHDAY_DAYS = 120;
+/** The agenda's day view: today, and this many days after it. */
+const AGENDA_DAYS_AHEAD = 2;
+
+/** A small card of the home page: a title, a way to the whole section, a few lines. */
+const HomeCard: React.FC<{
+    icon: typeof Calendar;
+    title: string;
+    count?: number;
+    allLabel: string;
+    onOpen: () => void;
+    children: React.ReactNode;
+}> = ({ icon: Icon, title, count, allLabel, onOpen, children }) => (
+    <section className="flex h-full flex-col rounded-card border border-border bg-card p-5">
+        <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="flex min-w-0 items-center gap-2.5 font-serif text-h2 text-foreground">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-input bg-primary-soft text-primary">
+                    <Icon className="h-4 w-4" />
+                </span>
+                <span className="truncate">{title}</span>
+                {count !== undefined && count > 0 && (
+                    <span className="rounded-pill bg-surface-2 px-2 py-0.5 font-sans text-micro font-medium text-muted-foreground">{count}</span>
+                )}
+            </h2>
+            <button
+                type="button"
+                onClick={onOpen}
+                className="flex shrink-0 items-center gap-0.5 rounded-input px-1.5 py-1 text-micro font-medium text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+            >
+                {allLabel}
+                <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+        </div>
+        <div className="flex-1">{children}</div>
+    </section>
+);
 
 interface PlanningEntry {
     id: string;
@@ -61,7 +113,7 @@ interface LatestFamilyPost {
 }
 
 const Dashboard: React.FC = () => {
-    const { t } = useTranslation(['dashboard', 'common', 'notes']);
+    const { t } = useTranslation(['dashboard', 'common', 'notes', 'meals', 'pantry', 'calendar']);
     const { user, isModuleEnabled, dashboardPrefs, updateDashboardPrefs } = useAuth();
     const currency = user?.currency || 'EUR';
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -69,6 +121,11 @@ const Dashboard: React.FC = () => {
     const [planning, setPlanning] = useState<PlanningEntry[]>([]);
     const [notes, setNotes] = useState<FamilyNote[]>([]);
     const [latestPost, setLatestPost] = useState<LatestFamilyPost | null>(null);
+    const [homeTasks, setHomeTasks] = useState<HomeTask[]>([]);
+    const [homeMeals, setHomeMeals] = useState<HomeMeal[]>([]);
+    const [homeShopping, setHomeShopping] = useState<HomeShoppingItem[]>([]);
+    const [homePantry, setHomePantry] = useState<HomePantryItem[]>([]);
+    const [homeBirthdays, setHomeBirthdays] = useState<HomeBirthday[]>([]);
     const [loading, setLoading] = useState(true);
     const [customizing, setCustomizing] = useState(false);
     const navigate = useNavigate();
@@ -91,6 +148,9 @@ const Dashboard: React.FC = () => {
     useWebSocketUpdates('budget', () => { void loadAll(); });
     useWebSocketUpdates('planning', () => { void loadPlanning(); });
     useWebSocketUpdates('notes', () => { void loadNotes(); });
+    useWebSocketUpdates('meal-plans', () => { void loadCards(); });
+    useWebSocketUpdates('pantry', () => { void loadCards(); });
+    useWebSocketUpdates('family', () => { void loadCards(); });
     useWebSocketUpdates('posts', () => { void loadLatestPost(); });
 
     const loadLatestPost = async () => {
@@ -106,6 +166,30 @@ const Dashboard: React.FC = () => {
         } catch (e) {
             console.error('Latest post load error:', e);
         }
+    };
+
+    // The small cards. Each asks for its own list and keeps what it had if the
+    // request fails: one section that does not answer must not empty the page.
+    const loadCards = async () => {
+        const todayDay = format(new Date(), 'yyyy-MM-dd');
+        const list = async <T,>(url: string, keep: (rows: T[]) => void) => {
+            try {
+                const res = await api.get<{ success: boolean; data: T[] }>(url);
+                if (res.success && Array.isArray(res.data)) keep(res.data);
+            } catch (e) {
+                console.error('Dashboard card load error:', url, e);
+            }
+        };
+        await Promise.all([
+            list<HomeTask>('/api/tasks', setHomeTasks),
+            list<HomeShoppingItem>('/api/shopping', setHomeShopping),
+            isModuleEnabled('meals') ? list<HomeMeal>(`/api/meal-plans?start_date=${todayDay}&end_date=${todayDay}`, setHomeMeals) : Promise.resolve(),
+            isModuleEnabled('pantry') ? list<HomePantryItem>('/api/pantry', setHomePantry) : Promise.resolve(),
+            list<HomeBirthday>(
+                `/api/appointments?start_date=${todayDay}T00:00:00&end_date=${format(addDays(new Date(), BIRTHDAY_DAYS), 'yyyy-MM-dd')}T23:59:59`,
+                (rows) => setHomeBirthdays(rows.filter((row) => row.kind === 'birthday')),
+            ),
+        ]);
     };
 
     const loadNotes = async () => {
@@ -134,14 +218,17 @@ const Dashboard: React.FC = () => {
             void loadNotes();
             void loadLatestPost();
             void loadPlanning();
+            void loadCards();
             const [statsRes, apptRes] = await Promise.all([
                 api.get<{ success: boolean; data: DashboardStats }>('/api/dashboard'),
                 (() => {
                     // Naive local bounds - appointment times are stored as local
                     // "YYYY-MM-DDTHH:mm:ss" strings, so the window must not be UTC.
                     // Week view spans Monday to Sunday, day view just today.
+                    // The day view also brings the two days that follow:
+                    // what comes next is part of knowing where the day is going.
                     const from = agendaView === 'week' ? weekStart : new Date();
-                    const to = agendaView === 'week' ? addDays(weekStart, 6) : new Date();
+                    const to = agendaView === 'week' ? addDays(weekStart, 6) : addDays(new Date(), AGENDA_DAYS_AHEAD);
                     const start = format(from, "yyyy-MM-dd'T'00:00:00");
                     const end = format(to, "yyyy-MM-dd'T'23:59:59");
                     return api.get<{ success: boolean; data: Appointment[] }>(
@@ -204,16 +291,18 @@ const Dashboard: React.FC = () => {
         },
     ];
 
-    // Week view groups appointments by day; day view is a single group.
-    const appointmentDays = agendaView === 'week'
-        ? Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)).map((date) => ({
-            date,
-            items: appointments.filter((a) => isSameDay(new Date(a.start_time), date)),
-        })).filter((group) => group.items.length > 0)
-        : [{ date: new Date(), items: appointments }];
+    // Appointments grouped by day: the seven days of the week view, today and
+    // the two days after it for the day view. A day with nothing is left out.
+    const appointmentDays = (agendaView === 'week'
+        ? Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+        : Array.from({ length: AGENDA_DAYS_AHEAD + 1 }, (_, i) => addDays(new Date(), i))
+    ).map((date) => ({
+        date,
+        items: appointments.filter((a) => isSameDay(new Date(a.start_time), date)),
+    })).filter((group) => group.items.length > 0);
 
     const renderAgenda = () => (
-        <section key="agenda" className={prefs.hidden.includes('quick') ? '' : 'lg:col-span-2'}>
+        <section key="agenda" className="h-full rounded-card border border-border bg-card p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
                 <h2 className="font-serif text-h2">
                     {agendaView === 'week' ? t('dashboard:today.weekTitle') : t('dashboard:today.title')}
@@ -254,16 +343,19 @@ const Dashboard: React.FC = () => {
                 <div className="space-y-4">
                     {appointmentDays.map((group) => (
                         <div key={group.date.toISOString()}>
-                            {agendaView === 'week' && (
+                            {(agendaView === 'week' || !isSameDay(group.date, new Date())) && (
                                 <p className="text-micro uppercase tracking-[0.08em] text-muted-foreground mb-2 first-letter:uppercase">
                                     {format(group.date, 'EEEE d MMMM', { locale: dateLocale() })}
                                 </p>
                             )}
-                            <div className="rounded-card border border-border bg-card divide-y divide-border overflow-hidden">
+                            <div className="divide-y divide-border">
                                 {group.items.map((appt) => (
-                                    <div key={appt.occurrence_id || appt.id} className="grid grid-cols-[72px_1fr] gap-4 items-baseline px-5 py-4">
+                                    <div key={appt.occurrence_id || appt.id} className="grid grid-cols-[72px_1fr] items-baseline gap-4 py-3">
                                         <div className="font-serif text-body text-muted-foreground tabular-nums">
-                                            {fmtTime(appt.start_time)}
+                                            {/* A whole day, a birthday among them, has no hour to show. */}
+                                            {appt.kind === 'birthday'
+                                                ? <Cake className="h-4 w-4 text-primary" aria-hidden="true" />
+                                                : appt.is_all_day ? <span className="font-sans text-micro">{t('calendar:form.allDay')}</span> : fmtTime(appt.start_time)}
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-body font-medium text-foreground">{appt.title}</p>
@@ -597,12 +689,152 @@ const Dashboard: React.FC = () => {
         </section>
     );
 
+    // --- the small cards --------------------------------------------------------------
+    const emptyLine = (text: string) => <p className="py-2 text-caption text-muted-foreground">{text}</p>;
+    const dayOf = (value: string) => new Date(`${value.slice(0, 10)}T00:00:00`);
+
+    const renderTasksCard = () => {
+        const open = homeTasks
+            .filter((task) => !task.is_completed)
+            // What has a date comes first, the nearest first.
+            .sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999')));
+        return (
+            <HomeCard icon={CheckSquare} title={t('dashboard:cards.tasks')} count={open.length} allLabel={t('dashboard:cards.seeAll')} onOpen={() => navigate('/tasks')}>
+                {open.length === 0 ? emptyLine(t('dashboard:cards.tasksEmpty')) : (
+                    <ul className="divide-y divide-border">
+                        {open.slice(0, CARD_LINES).map((task) => {
+                            const late = task.due_date ? differenceInCalendarDays(dayOf(task.due_date), new Date()) < 0 : false;
+                            return (
+                                <li key={task.id} className="flex items-center justify-between gap-3 py-2">
+                                    <span className="min-w-0">
+                                        <span className="block truncate text-caption font-medium text-foreground">{task.title}</span>
+                                        {(task.assigned_to_members || []).length > 0 && (
+                                            <span className="block truncate text-micro text-muted-foreground">
+                                                {(task.assigned_to_members || []).map((member) => member.name).join(', ')}
+                                            </span>
+                                        )}
+                                    </span>
+                                    {task.due_date && (
+                                        <span className={`shrink-0 text-micro ${late ? 'font-medium text-danger' : 'text-muted-foreground'}`}>
+                                            {isSameDay(dayOf(task.due_date), new Date()) ? t('common:actions.today') : format(dayOf(task.due_date), 'd MMM', { locale: dateLocale() })}
+                                        </span>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+            </HomeCard>
+        );
+    };
+
+    const renderMealsCard = () => {
+        const meals = [...homeMeals].sort((a, b) => MEAL_ORDER.indexOf(a.meal_type) - MEAL_ORDER.indexOf(b.meal_type));
+        return (
+            <HomeCard icon={UtensilsCrossed} title={t('dashboard:cards.meals')} allLabel={t('dashboard:cards.seeAll')} onOpen={() => navigate('/meal-planning')}>
+                {meals.length === 0 ? emptyLine(t('dashboard:cards.mealsEmpty')) : (
+                    <ul className="divide-y divide-border">
+                        {meals.slice(0, CARD_LINES).map((meal) => (
+                            <li key={meal.id} className="flex items-baseline justify-between gap-3 py-2">
+                                <span className="shrink-0 text-micro uppercase tracking-wide text-muted-foreground">
+                                    {t(`meals:mealTypes.${meal.meal_type}`, { defaultValue: meal.meal_type })}
+                                </span>
+                                <span className="min-w-0 truncate text-right text-caption font-medium text-foreground">
+                                    {meal.recipe?.name || meal.recipe_name || meal.custom_meal || ''}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </HomeCard>
+        );
+    };
+
+    const renderShoppingCard = () => {
+        const toBuy = homeShopping.filter((item) => !item.is_checked);
+        return (
+            <HomeCard icon={ShoppingCart} title={t('dashboard:cards.shopping')} count={toBuy.length} allLabel={t('dashboard:cards.seeAll')} onOpen={() => navigate('/shopping')}>
+                {toBuy.length === 0 ? emptyLine(t('dashboard:cards.shoppingEmpty')) : (
+                    <ul className="flex flex-wrap gap-1.5 pt-1">
+                        {toBuy.slice(0, 12).map((item) => (
+                            <li key={item.id} className="rounded-pill border border-border bg-surface-2 px-2.5 py-1 text-micro text-foreground">
+                                {item.name}
+                            </li>
+                        ))}
+                        {toBuy.length > 12 && (
+                            <li className="rounded-pill px-2.5 py-1 text-micro text-muted-foreground">+{toBuy.length - 12}</li>
+                        )}
+                    </ul>
+                )}
+            </HomeCard>
+        );
+    };
+
+    const renderBirthdaysCard = () => {
+        const coming = [...homeBirthdays].sort((a, b) => a.start_time.localeCompare(b.start_time));
+        return (
+            <HomeCard icon={Cake} title={t('dashboard:cards.birthdays')} allLabel={t('dashboard:cards.seeAll')} onOpen={() => navigate('/calendar')}>
+                {coming.length === 0 ? emptyLine(t('dashboard:cards.birthdaysEmpty')) : (
+                    <ul className="divide-y divide-border">
+                        {coming.slice(0, CARD_LINES).map((entry) => {
+                            const isToday = isSameDay(dayOf(entry.start_time), new Date());
+                            return (
+                                <li key={entry.occurrence_id || entry.id} className="flex items-center justify-between gap-3 py-2">
+                                    <span className="flex min-w-0 items-center gap-2">
+                                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: entry.color || 'rgb(var(--primary))' }} />
+                                        <span className="truncate text-caption font-medium text-foreground">{entry.birthday?.name}</span>
+                                        <span className="shrink-0 text-micro text-muted-foreground">
+                                            {t('calendar:birthday.age', { count: entry.birthday?.age ?? 0 })}
+                                        </span>
+                                    </span>
+                                    <span className={`shrink-0 text-micro ${isToday ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>
+                                        {isToday ? t('common:actions.today') : format(dayOf(entry.start_time), 'd MMM', { locale: dateLocale() })}
+                                    </span>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+            </HomeCard>
+        );
+    };
+
+    const renderPantryCard = () => {
+        const soon = homePantry
+            .filter((item) => item.expires_on && differenceInCalendarDays(dayOf(item.expires_on), new Date()) <= EAT_SOON_DAYS)
+            .sort((a, b) => String(a.expires_on).localeCompare(String(b.expires_on)));
+        return (
+            <HomeCard icon={Refrigerator} title={t('dashboard:cards.eatSoon')} count={soon.length} allLabel={t('dashboard:cards.seeAll')} onOpen={() => navigate('/pantry')}>
+                {soon.length === 0 ? emptyLine(t('dashboard:cards.pantryEmpty')) : (
+                    <ul className="divide-y divide-border">
+                        {soon.slice(0, CARD_LINES).map((item) => {
+                            const days = differenceInCalendarDays(dayOf(item.expires_on as string), new Date());
+                            const date = format(dayOf(item.expires_on as string), 'd MMM', { locale: dateLocale() });
+                            const label = days < 0 ? t('pantry:expiry.past', { date })
+                                : days === 0 ? t('pantry:expiry.today')
+                                : days <= 3 ? t('pantry:expiry.soon', { count: days })
+                                : t('pantry:expiry.date', { date });
+                            return (
+                                <li key={item.id} className="flex items-center justify-between gap-3 py-2">
+                                    <span className="min-w-0 truncate text-caption font-medium text-foreground">{item.name}</span>
+                                    <span className={`shrink-0 text-micro ${days <= 0 ? 'font-medium text-danger' : days <= 3 ? 'font-medium text-warning' : 'text-muted-foreground'}`}>{label}</span>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+            </HomeCard>
+        );
+    };
+
     // A widget shows when the member has not hidden it AND its module is enabled
-    // for the family. Agenda and quick access sit side by side in one grid row.
+    // for the family.
     const isVisible = (key: DashboardWidget) => {
         if (prefs.hidden.includes(key)) return false;
         if (key === 'notes') return isModuleEnabled('notes');
         if (key === 'planning') return isModuleEnabled('planning');
+        if (key === 'meals') return isModuleEnabled('meals');
+        if (key === 'pantry') return isModuleEnabled('pantry');
         return true;
     };
 
@@ -611,6 +843,11 @@ const Dashboard: React.FC = () => {
         agenda: t('dashboard:customize.widgets.agenda'),
         planning: t('dashboard:customize.widgets.planning'),
         quick: t('dashboard:customize.widgets.quick'),
+        tasks: t('dashboard:cards.tasks'),
+        meals: t('dashboard:cards.meals'),
+        shopping: t('dashboard:cards.shopping'),
+        birthdays: t('dashboard:cards.birthdays'),
+        pantry: t('dashboard:cards.eatSoon'),
         notes: t('dashboard:customize.widgets.notes'),
     };
 
@@ -620,29 +857,36 @@ const Dashboard: React.FC = () => {
             case 'agenda': return renderAgenda();
             case 'planning': return renderPlanning();
             case 'quick': return renderQuickAccess();
+            case 'tasks': return renderTasksCard();
+            case 'meals': return renderMealsCard();
+            case 'shopping': return renderShoppingCard();
+            case 'birthdays': return renderBirthdaysCard();
+            case 'pantry': return renderPantryCard();
             case 'notes': return renderNotes();
             default: return null;
         }
     };
 
-    // Agenda + quick access share a row when both are visible and adjacent.
-    const blocks: React.ReactNode[] = [];
+    // The page is a grid: one column on a phone, two on a laptop, three on a
+    // wide screen. The key figures, the week's schedules and the notes take a
+    // whole row, the agenda two columns, and the small cards one each, filling
+    // the room next to and under them in the order the member chose.
+    const WIDGET_SPAN: Record<DashboardWidget, string> = {
+        stats: 'col-span-full',
+        agenda: 'lg:row-span-2 2xl:col-span-2',
+        planning: 'col-span-full',
+        quick: '',
+        tasks: '',
+        meals: '',
+        shopping: '',
+        birthdays: '',
+        pantry: '',
+        notes: 'col-span-full',
+    };
     const visibleOrder = prefs.order.filter(isVisible);
-    for (let i = 0; i < visibleOrder.length; i++) {
-        const key = visibleOrder[i];
-        const next = visibleOrder[i + 1];
-        if (key === 'agenda' && next === 'quick') {
-            blocks.push(
-                <div key="agenda-quick" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {renderAgenda()}
-                    {renderQuickAccess()}
-                </div>
-            );
-            i++;
-            continue;
-        }
-        blocks.push(renderWidget(key));
-    }
+    const blocks = visibleOrder.map((key) => (
+        <div key={key} className={`min-w-0 ${WIDGET_SPAN[key]}`}>{renderWidget(key)}</div>
+    ));
 
     return (
         <div className="space-y-8">
@@ -685,7 +929,9 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
 
-            {blocks}
+            <div className="grid grid-cols-1 gap-6 [grid-auto-flow:row_dense] lg:grid-cols-2 2xl:grid-cols-3">
+                {blocks}
+            </div>
 
             {visibleOrder.length === 0 && (
                 <div className="rounded-card border border-dashed border-border-strong p-8 text-center">

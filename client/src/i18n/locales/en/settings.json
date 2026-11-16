@@ -106,7 +106,7 @@
   },
   "support": {
     "title": "Support OpenFamily",
-    "subtitle": "OpenFamily is free and open source, self-hosted on your own server. If it helps your family, you can support its development — it stays free either way.",
+    "subtitle": "OpenFamily is free and open source, self-hosted on your own server. If it helps your family, you can support its development. It stays free either way.",
     "sponsor": "Buy me a coffee",
     "star": "Star on GitHub",
     "sponsorGithub": "Sponsor on GitHub"
@@ -232,5 +232,17 @@
     "limit": "Ten webhooks at most. Remove one to add another.",
     "invalidUrl": "This address cannot be called. Use a full http or https address.",
     "error": "Something went wrong. Please try again."
+  },
+  "appearance": {
+    "title": "Appearance",
+    "subtitle": "How the app looks on this device.",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "Like the device",
+    "navigation": "Navigation on a wide screen",
+    "navSidebar": "Side menu",
+    "navDock": "Bar at the bottom",
+    "navHint": "On a phone the bar is always at the bottom, with the other sections behind \"More\"."
   }
 }

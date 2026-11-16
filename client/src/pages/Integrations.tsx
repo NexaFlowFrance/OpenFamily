@@ -4,9 +4,23 @@ import { api } from '../lib/api';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { CheckCircle2, AlertCircle, RefreshCw, Unplug, Plug, X, Clock } from 'lucide-react';
+import { CheckCircle2, AlertCircle, RefreshCw, Unplug, Plug, X, Clock, CalendarDays, ExternalLink, House, KeyRound, MonitorSmartphone, Sparkles, Webhook, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { intlLocale } from '../i18n/format';
+
+// What connects to OpenFamily from the other side: set up in another app or
+// in Settings, not on this page. Listed here so that the page says everything
+// OpenFamily can be connected to, not only what it connects to by itself.
+const DOCS = 'https://github.com/NexaFlowFrance/OpenFamily/blob/main';
+const OUTSIDE: Array<{ id: string; icon: typeof House; to?: string; href?: string }> = [
+    { id: 'gladys', icon: House, href: 'https://github.com/NexaFlowFrance/gladys-openfamily' },
+    { id: 'api', icon: Webhook, href: `${DOCS}/API.md` },
+    { id: 'calendars', icon: CalendarDays, to: '/calendar' },
+    { id: 'displays', icon: MonitorSmartphone, to: '/settings' },
+    { id: 'ai', icon: Sparkles, to: '/settings' },
+    { id: 'sso', icon: KeyRound, href: `${DOCS}/INSTALLATION.md#single-sign-on-sso` },
+];
 
 // Brand SVG icons (Simple Icons paths, viewBox 0 0 24 24)
 const BRAND_SVG: Record<string, { path: string; hex: string }> = {
@@ -87,6 +101,7 @@ interface CatalogItem {
 
 const Integrations: React.FC = () => {
     const { t } = useTranslation(['integrations', 'common']);
+    const navigate = useNavigate();
     const CATALOG: CatalogItem[] = [
         {
             id: 'mealie',
@@ -260,7 +275,7 @@ const Integrations: React.FC = () => {
     }
 
     return (
-        <div className="space-y-8 max-w-2xl">
+        <div className="max-w-6xl space-y-8">
             <div>
                 <h1 className="font-serif text-display text-foreground">{t('integrations:title')}</h1>
                 <p className="text-caption text-muted-foreground mt-1">
@@ -333,7 +348,7 @@ const Integrations: React.FC = () => {
             {availableCatalog.length > 0 && (
                 <section>
                     <h2 className="font-serif text-h2 mb-4">{t('integrations:available')}</h2>
-                    <div className="grid gap-3">
+                    <div className="grid gap-3 lg:grid-cols-2">
                         {availableCatalog.map((item) => (
                             <button
                                 key={item.id}
@@ -361,6 +376,36 @@ const Integrations: React.FC = () => {
                     </div>
                 </section>
             )}
+
+            <section>
+                <h2 className="mb-1 font-serif text-h2">{t('integrations:outside.title')}</h2>
+                <p className="mb-4 text-caption text-muted-foreground">{t('integrations:outside.subtitle')}</p>
+                <div className="grid gap-3 lg:grid-cols-2">
+                    {OUTSIDE.map((item) => {
+                        const Icon = item.icon;
+                        const body = (
+                            <>
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-input border border-border bg-surface-2 text-primary">
+                                    <Icon className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-body font-semibold text-foreground">{t(`integrations:outside.items.${item.id}.name`)}</p>
+                                    <p className="text-caption text-muted-foreground">{t(`integrations:outside.items.${item.id}.desc`)}</p>
+                                </div>
+                                {item.href
+                                    ? <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+                                    : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />}
+                            </>
+                        );
+                        const className = 'group flex items-center gap-4 rounded-card border border-border bg-card p-5 text-left transition-colors hover:bg-surface-2';
+                        return item.href ? (
+                            <a key={item.id} href={item.href} target="_blank" rel="noopener noreferrer" className={className}>{body}</a>
+                        ) : (
+                            <button key={item.id} type="button" onClick={() => navigate(item.to as string)} className={className}>{body}</button>
+                        );
+                    })}
+                </div>
+            </section>
 
             {/* Connect modal */}
             {activeModal && (() => {

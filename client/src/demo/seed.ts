@@ -53,7 +53,9 @@ export function createSeed(): DemoStore {
     const dad = { id: 'm-dad', name: 'Alex', role: 'Parent', color: '#2563EB', birthdate: '1986-04-12', monthly_income: 2600 };
     const mom = { id: 'm-mom', name: 'Sam', role: 'Parent', color: '#DB2777', birthdate: '1988-09-03', monthly_income: 2100 };
     const kid1 = { id: 'm-kid1', name: 'Mia', role: 'Enfant', color: '#16A34A', birthdate: `${y - 9}-02-18`, allergies: ['Peanuts'] };
-    const kid2 = { id: 'm-kid2', name: 'Noah', role: 'Enfant', color: '#F97316', birthdate: `${y - 6}-11-27` };
+    // Noah turns six in five days, whatever the day the demo is opened.
+    const soon = addDays(now, 5);
+    const kid2 = { id: 'm-kid2', name: 'Noah', role: 'Enfant', color: '#F97316', birthdate: `${soon.getFullYear() - 6}-${pad(soon.getMonth() + 1)}-${pad(soon.getDate())}` };
 
     return {
         user: {
@@ -88,16 +90,24 @@ export function createSeed(): DemoStore {
         ],
         tasks: [
             { id: 'tk1', title: 'Take out the trash', is_completed: false, frequency: 'Hebdomadaire', priority: 'Moyenne', assigned_to: ['m-kid1', 'm-kid2'], assigned_to_members: [kid1, kid2], due_date: atTime(addDays(now, 1), 18), created_at: atTime(now, 9), points: 5, pending_approval: false },
-            { id: 'tk2', title: 'Homework — math', is_completed: false, frequency: 'Quotidien', priority: 'Haute', assigned_to: ['m-kid1'], assigned_to_members: [kid1], due_date: atTime(now, 17), created_at: atTime(now, 9), points: 10, pending_approval: false },
+            { id: 'tk2', title: 'Maths homework', is_completed: false, frequency: 'Quotidien', priority: 'Haute', assigned_to: ['m-kid1'], assigned_to_members: [kid1], due_date: atTime(now, 17), created_at: atTime(now, 9), points: 10, pending_approval: false },
             { id: 'tk3', title: 'Water the plants', is_completed: true, frequency: 'Une fois', priority: 'Basse', assigned_to: ['m-mom'], assigned_to_members: [mom], completed_at: atTime(now, 8), created_at: atTime(addDays(now, -1), 9), points: 0, pending_approval: false },
             { id: 'tk4', title: 'Book dentist appointment', is_completed: false, frequency: 'Une fois', priority: 'Moyenne', assigned_to: ['m-dad'], assigned_to_members: [dad], created_at: atTime(now, 10), points: 0, pending_approval: false },
             // Completed by a child — waiting for a parent's approval (showcases the queue).
             { id: 'tk5', title: 'Tidy up the bedroom', is_completed: true, frequency: 'Hebdomadaire', priority: 'Moyenne', assigned_to: ['m-kid2'], assigned_to_members: [kid2], completed_at: atTime(now, 10, 30), created_at: atTime(addDays(now, -1), 9), points: 8, pending_approval: true },
+            { id: 'tk6', title: 'Empty the dishwasher', is_completed: false, frequency: 'Quotidien', priority: 'Moyenne', assigned_to: ['m-kid1'], assigned_to_members: [kid1], due_date: atTime(now, 19), created_at: atTime(now, 7), points: 5, pending_approval: false },
+            { id: 'tk7', title: 'Pay the school canteen', is_completed: false, frequency: 'Une fois', priority: 'Haute', assigned_to: ['m-mom'], assigned_to_members: [mom], due_date: atTime(addDays(now, 2), 12), created_at: atTime(addDays(now, -2), 9), points: 0, pending_approval: false },
+            { id: 'tk8', title: 'Sort the recycling', is_completed: false, frequency: 'Hebdomadaire', priority: 'Basse', assigned_to: ['m-kid2'], assigned_to_members: [kid2], due_date: atTime(addDays(now, 3), 18), created_at: atTime(addDays(now, -1), 9), points: 5, pending_approval: false },
         ],
         appointments: [
-            { id: 'a1', title: 'Dentist — Mia', start_time: atTime(dayInMonth(now.getDate()), 15), end_time: atTime(dayInMonth(now.getDate()), 16), location: 'City Dental', family_member_ids: ['m-kid1', 'm-mom'], family_members_data: [kid1, mom], reminder_30min: true, reminder_1hour: false, reminder_minutes: [30] },
+            { id: 'a1', title: 'Dentist, Mia', start_time: atTime(dayInMonth(now.getDate()), 15), end_time: atTime(dayInMonth(now.getDate()), 16), location: 'City Dental', family_member_ids: ['m-kid1', 'm-mom'], family_members_data: [kid1, mom], reminder_30min: true, reminder_1hour: false, reminder_minutes: [30] },
             { id: 'a2', title: 'Football practice', start_time: atTime(addDays(now, 2), 18), end_time: atTime(addDays(now, 2), 19, 30), location: 'Stadium', family_member_ids: ['m-kid2'], family_members_data: [kid2], reminder_30min: false, reminder_1hour: true, reminder_minutes: [60, 1440] },
             { id: 'a3', title: 'Family dinner', start_time: atTime(addDays(now, 5), 20), location: 'Home', family_member_ids: ['m-dad', 'm-mom', 'm-kid1', 'm-kid2'], family_members_data: [dad, mom, kid1, kid2], reminder_30min: false, reminder_1hour: false, reminder_minutes: [] },
+            { id: 'a4', title: 'Parents and teachers meeting', start_time: atTime(addDays(now, 1), 18, 30), end_time: atTime(addDays(now, 1), 19, 30), location: 'School', family_member_ids: ['m-dad', 'm-mom'], family_members_data: [dad, mom], reminder_30min: true, reminder_1hour: false, color: '#7A5270' },
+            { id: 'a5', title: 'Piano lesson', start_time: atTime(addDays(now, 3), 17), end_time: atTime(addDays(now, 3), 17, 45), location: 'Music school', family_member_ids: ['m-kid1'], family_members_data: [kid1], reminder_30min: false, reminder_1hour: false, color: '#16A34A' },
+            { id: 'a6', title: 'Paediatrician, Noah', start_time: atTime(addDays(now, 4), 10, 15), end_time: atTime(addDays(now, 4), 10, 45), location: 'Health centre', family_member_ids: ['m-kid2', 'm-dad'], family_members_data: [kid2, dad], reminder_30min: false, reminder_1hour: true, color: '#F97316' },
+            { id: 'a7', title: 'Grandparents visiting', start_time: atTime(addDays(now, 6), 0), end_time: atTime(addDays(now, 6), 23, 59), is_all_day: true, family_member_ids: ['m-dad', 'm-mom', 'm-kid1', 'm-kid2'], family_members_data: [dad, mom, kid1, kid2], reminder_30min: false, reminder_1hour: false, color: '#DB8A4E' },
+            { id: 'a8', title: 'Swimming gala', start_time: atTime(addDays(now, 9), 14), end_time: atTime(addDays(now, 9), 17), location: 'City pool', family_member_ids: ['m-kid1', 'm-kid2'], family_members_data: [kid1, kid2], reminder_30min: false, reminder_1hour: true, color: '#2563EB' },
         ],
         planning: [
             { id: 'p1', family_member_id: 'm-dad', family_member_name: 'Alex', family_member_color: '#2563EB', family_member_role: 'Parent', schedule_type: 'work', title: 'Office', day_of_week: 1, start_time: '09:00', end_time: '17:30' },
@@ -107,6 +117,19 @@ export function createSeed(): DemoStore {
             { id: 'p5', family_member_id: 'm-kid2', family_member_name: 'Noah', family_member_color: '#F97316', family_member_role: 'Enfant', schedule_type: 'activity', title: 'Football', day_of_week: 3, start_time: '18:00', end_time: '19:30' },
             // Both children: shows an activity with several participants.
             { id: 'p6', family_member_ids: ['m-kid1', 'm-kid2'], family_member_id: 'm-kid1', family_member_name: 'Mia', family_member_color: '#16A34A', family_member_role: 'Enfant', schedule_type: 'activity', title: 'Swimming', day_of_week: 6, start_time: '10:00', end_time: '11:00' },
+            { id: 'p7', family_member_id: 'm-dad', family_member_name: 'Alex', family_member_color: '#2563EB', family_member_role: 'Parent', schedule_type: 'work', title: 'Office', day_of_week: 3, start_time: '09:00', end_time: '17:30' },
+            { id: 'p8', family_member_id: 'm-dad', family_member_name: 'Alex', family_member_color: '#2563EB', family_member_role: 'Parent', schedule_type: 'work', title: 'Office', day_of_week: 4, start_time: '09:00', end_time: '17:30' },
+            { id: 'p9', family_member_id: 'm-dad', family_member_name: 'Alex', family_member_color: '#2563EB', family_member_role: 'Parent', schedule_type: 'work', title: 'Working from home', day_of_week: 5, start_time: '09:00', end_time: '16:00' },
+            { id: 'p10', family_member_id: 'm-mom', family_member_name: 'Sam', family_member_color: '#DB2777', family_member_role: 'Parent', schedule_type: 'work', title: 'Hospital shift', day_of_week: 1, start_time: '07:00', end_time: '15:00' },
+            { id: 'p11', family_member_id: 'm-mom', family_member_name: 'Sam', family_member_color: '#DB2777', family_member_role: 'Parent', schedule_type: 'work', title: 'Hospital shift', day_of_week: 3, start_time: '07:00', end_time: '15:00' },
+            { id: 'p12', family_member_id: 'm-mom', family_member_name: 'Sam', family_member_color: '#DB2777', family_member_role: 'Parent', schedule_type: 'work', title: 'Hospital shift', day_of_week: 4, start_time: '07:00', end_time: '15:00' },
+            { id: 'p13', family_member_id: 'm-kid1', family_member_name: 'Mia', family_member_color: '#16A34A', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 3, start_time: '08:30', end_time: '12:00' },
+            { id: 'p14', family_member_id: 'm-kid1', family_member_name: 'Mia', family_member_color: '#16A34A', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 4, start_time: '08:30', end_time: '16:30' },
+            { id: 'p15', family_member_id: 'm-kid1', family_member_name: 'Mia', family_member_color: '#16A34A', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 5, start_time: '08:30', end_time: '16:30' },
+            { id: 'p16', family_member_id: 'm-kid2', family_member_name: 'Noah', family_member_color: '#F97316', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 1, start_time: '08:45', end_time: '16:15' },
+            { id: 'p17', family_member_id: 'm-kid2', family_member_name: 'Noah', family_member_color: '#F97316', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 2, start_time: '08:45', end_time: '16:15' },
+            { id: 'p18', family_member_id: 'm-kid2', family_member_name: 'Noah', family_member_color: '#F97316', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 4, start_time: '08:45', end_time: '16:15' },
+            { id: 'p19', family_member_id: 'm-kid2', family_member_name: 'Noah', family_member_color: '#F97316', family_member_role: 'Enfant', schedule_type: 'school', title: 'School', day_of_week: 5, start_time: '08:45', end_time: '16:15' },
         ],
         recipes: [
             { id: 'r1', name: 'Spaghetti Bolognese', category: 'Plat', description: 'A family classic everyone loves.', ingredients: ['400g spaghetti', '500g minced beef', '1 onion', '2 cans chopped tomatoes', 'Olive oil', 'Salt & pepper'], instructions: ['Brown the beef and onion.', 'Add the tomatoes and simmer 20 min.', 'Cook the spaghetti.', 'Combine and serve.'], prep_time: 15, cook_time: 30, servings: 4, difficulty: 'Facile', tags: ['quick', 'family'] },
@@ -117,7 +140,7 @@ export function createSeed(): DemoStore {
             { id: 'mp1', date: isoDate(now), meal_type: 'Petit-déjeuner', custom_meal: 'Pancakes & fruit' },
             { id: 'mp2', date: isoDate(now), meal_type: 'Déjeuner', recipe_id: 'r3', recipe: { id: 'r3', name: 'Garden Salad' } },
             { id: 'mp3', date: isoDate(now), meal_type: 'Dîner', recipe_id: 'r1', recipe: { id: 'r1', name: 'Spaghetti Bolognese' } },
-            { id: 'mp4', date: isoDate(monday), meal_type: 'Dîner', custom_meal: 'Homemade pizza' },
+            { id: 'mp4', date: isoDate(addDays(now, 1)), meal_type: 'Dîner', custom_meal: 'Homemade pizza' },
             { id: 'mp5', date: isoDate(addDays(monday, 4)), meal_type: 'Dîner', recipe_id: 'r3', recipe: { id: 'r3', name: 'Garden Salad' } },
             { id: 'mp6', date: isoDate(addDays(monday, 5)), meal_type: 'Snack', recipe_id: 'r2', recipe: { id: 'r2', name: 'Apple Pie' } },
         ],
@@ -140,7 +163,7 @@ export function createSeed(): DemoStore {
         ],
         notifications: [
             { id: 'n1', title: 'Reminder', message: 'Dentist appointment for Mia at 3:00 PM', type: 'appointment', is_read: false, related_id: 'a1', created_at: atTime(now, 8) },
-            { id: 'n2', title: 'Task due', message: 'Homework — math is due today', type: 'task', is_read: false, related_id: 'tk2', created_at: atTime(now, 7, 30) },
+            { id: 'n2', title: 'Task due', message: 'Maths homework is due today', type: 'task', is_read: false, related_id: 'tk2', created_at: atTime(now, 7, 30) },
             { id: 'n3', title: 'Budget alert', message: 'Leisure spending is at 80% of the monthly limit', type: 'budget', is_read: true, related_id: null, created_at: atTime(addDays(now, -1), 19) },
         ],
         // What is at home: one product to eat soon, so that the page shows it.
@@ -168,10 +191,10 @@ export function createSeed(): DemoStore {
             // savings-goal bar sits at ~67% of the 30 € target below.
             { id: 'rt0', member_id: 'm-kid1', task_id: null, points: 90, type: 'adjust', note: 'Birthday money 🎂', created_at: atTime(addDays(now, -12), 11) },
             { id: 'rt1', member_id: 'm-kid1', task_id: 'tk1', points: 5, type: 'earn', note: 'Take out the trash', created_at: atTime(addDays(now, -3), 18, 15) },
-            { id: 'rt2', member_id: 'm-kid1', task_id: 'tk2', points: 10, type: 'earn', note: 'Homework — math', created_at: atTime(addDays(now, -2), 17, 40) },
-            { id: 'rt3', member_id: 'm-kid1', task_id: 'tk2', points: 10, type: 'earn', note: 'Homework — math', created_at: atTime(addDays(now, -1), 17, 5) },
+            { id: 'rt2', member_id: 'm-kid1', task_id: 'tk2', points: 10, type: 'earn', note: 'Maths homework', created_at: atTime(addDays(now, -2), 17, 40) },
+            { id: 'rt3', member_id: 'm-kid1', task_id: 'tk2', points: 10, type: 'earn', note: 'Maths homework', created_at: atTime(addDays(now, -1), 17, 5) },
             { id: 'rt4', member_id: 'm-kid1', task_id: null, points: 5, type: 'adjust', note: 'Helped carry the groceries', created_at: atTime(addDays(now, -1), 19) },
-            { id: 'rt5', member_id: 'm-kid1', task_id: null, points: -20, type: 'redeem', note: 'Pocket money — comic book', created_at: atTime(addDays(now, -1), 19, 30) },
+            { id: 'rt5', member_id: 'm-kid1', task_id: null, points: -20, type: 'redeem', note: 'Pocket money: comic book', created_at: atTime(addDays(now, -1), 19, 30) },
             { id: 'rt6', member_id: 'm-kid2', task_id: null, points: 5, type: 'earn', note: 'Set the table', created_at: atTime(addDays(now, -2), 19) },
         ],
         rewardSettings: { points_value: 0.2 },

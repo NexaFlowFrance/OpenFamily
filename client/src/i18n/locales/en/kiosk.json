@@ -39,7 +39,7 @@
   },
   "settings": {
     "title": "Kiosk display",
-    "subtitle": "A full-screen, read-only display for a wall tablet or fridge screen — today's calendar, meals, tasks and who's where.",
+    "subtitle": "A full-screen, read-only display for a wall tablet or fridge screen: today's calendar, meals, tasks and who's where.",
     "open": "Open kiosk display"
   },
   "screensaver": {

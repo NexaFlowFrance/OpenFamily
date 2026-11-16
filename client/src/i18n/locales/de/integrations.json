@@ -82,5 +82,35 @@
       "keyLabel": "API-Schlüssel",
       "keyPlaceholder": "Aus Immich > Kontoeinstellungen > API-Schlüssel"
     }
+  },
+  "outside": {
+    "title": "Verbindet sich auch mit",
+    "subtitle": "Wird in der anderen App oder in den Einstellungen eingerichtet.",
+    "items": {
+      "gladys": {
+        "name": "Gladys Assistant",
+        "desc": "Familienkalender, Einkaufsliste und Aufgaben in Gladys, dem Open-Source-Smart-Home-Assistenten. Wird aus dem Integrations-Store von Gladys installiert, mit einem API-Token aus den Einstellungen."
+      },
+      "api": {
+        "name": "Home Assistant, n8n, Skripte",
+        "desc": "Eine dokumentierte API, persönliche Tokens und Webhooks: Deine Automationen lesen den Tag der Familie und ergänzen ihre Listen."
+      },
+      "calendars": {
+        "name": "Google Kalender, Apple Kalender, Outlook",
+        "desc": "Abonniere den Familienkalender in jeder Kalender-App oder folge deren Kalendern in OpenFamily."
+      },
+      "displays": {
+        "name": "E-Paper-Rahmen und Wandbildschirme",
+        "desc": "Eine Seite mit dem Tag der Familie ohne Anmeldung, für einen E-Paper-Rahmen, einen E-Reader oder jeden Bildschirm."
+      },
+      "ai": {
+        "name": "Ollama und KI-Anbieter",
+        "desc": "Ein optionaler Assistent, mit einem lokalen Modell oder einer OpenAI-kompatiblen API, Anthropic Claude oder Google Gemini."
+      },
+      "sso": {
+        "name": "Single Sign-on",
+        "desc": "Anmeldung mit Authentik, Keycloak, Pocket ID oder jedem OpenID-Connect-Anbieter. Wird auf dem Server eingerichtet."
+      }
+    }
   }
 }

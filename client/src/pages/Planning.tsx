@@ -69,6 +69,7 @@ interface WeekAppointment {
     end_time?: string | null;
     location?: string | null;
     family_member_ids?: string[];
+    is_all_day?: boolean;
 }
 
 interface PlanningBulkResult {
@@ -550,7 +551,7 @@ const Planning: React.FC = () => {
     }
 
     return (
-        <div className="mx-auto max-w-[1200px] space-y-6">
+        <div className="space-y-6">
             {error ? (
                 <div className="rounded-input border border-danger/30 bg-danger/10 px-4 py-3 text-caption text-danger">
                     {error}
@@ -623,9 +624,11 @@ const Planning: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/* Seven side-by-side days need about 1500px; below that the week
-                wraps so times and titles stay readable. */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-7">
+            {/* As many days side by side as the page has room for, each at
+                least wide enough for a time, a title and its buttons: seven on a
+                wide screen, and the week wraps below that instead of squeezing
+                its cards until their text is cut. */}
+            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr))' }}>
                 {orderedDays.map((day, index) => {
                     const dateForHeader = addDays(weekStart, index);
                     const dayEntries = visibleEntries.filter((entry) => entry.day_of_week === day.value);
@@ -702,7 +705,9 @@ const Planning: React.FC = () => {
                                                         {entry.title}
                                                     </p>
                                                     {/* Participants, then actions: 32px targets, usable with a finger */}
-                                                    <div className="mt-1.5 flex items-center justify-between gap-1">
+                                                    {/* Who, in full; the buttons go under the names
+                                                        when a narrow column has no room for both. */}
+                                                    <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-1">
                                                         <div className="flex min-w-0 items-center gap-1">
                                                             <TypeIcon className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
                                                             <span className="flex flex-shrink-0 items-center -space-x-0.5">
@@ -715,13 +720,13 @@ const Planning: React.FC = () => {
                                                                     />
                                                                 ))}
                                                             </span>
-                                                            <span className="truncate text-micro text-muted-foreground">
+                                                            <span className="text-micro text-muted-foreground">
                                                                 {people.length === 1
                                                                     ? people[0].name
                                                                     : `${people[0].name} +${people.length - 1}`}
                                                             </span>
                                                         </div>
-                                                        <div className="-mr-1 flex flex-shrink-0 items-center">
+                                                        <div className="-mr-1 ml-auto flex flex-shrink-0 items-center">
                                                             {isSeries && (
                                                                 <button
                                                                     type="button"
@@ -756,7 +761,7 @@ const Planning: React.FC = () => {
                                                         </div>
                                                     </div>
                                                     {entry.location ? (
-                                                        <p className="truncate text-micro text-muted-foreground">{entry.location}</p>
+                                                        <p className="break-words text-micro text-muted-foreground">{entry.location}</p>
                                                     ) : null}
                                                 </div>
                                             </div>
@@ -777,9 +782,12 @@ const Planning: React.FC = () => {
                                     >
                                         <div className="flex items-center gap-1">
                                             <CalendarClock className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
-                                            <p className="text-micro font-semibold leading-tight text-foreground">
-                                                {formatTime(appointment.start_time)}
-                                            </p>
+                                            {/* A whole day, a birthday among them, has no hour to show. */}
+                                            {!appointment.is_all_day && (
+                                                <p className="text-micro font-semibold leading-tight text-foreground">
+                                                    {formatTime(appointment.start_time)}
+                                                </p>
+                                            )}
                                             <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground">
                                                 {t('planning:appointments.badge')}
                                             </span>
@@ -788,7 +796,7 @@ const Planning: React.FC = () => {
                                             {appointment.title}
                                         </p>
                                         {appointment.location ? (
-                                            <p className="mt-0.5 truncate text-micro text-muted-foreground">{appointment.location}</p>
+                                            <p className="mt-0.5 break-words text-micro text-muted-foreground">{appointment.location}</p>
                                         ) : null}
                                     </button>
                                 ))}

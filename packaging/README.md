@@ -38,7 +38,7 @@ Each file was validated for its format, and each compose file was started with D
 
 The repositories above need nobody's approval: anyone can add them. Being listed in a system's own catalog is a submission to its maintainers.
 
-> **Submissions are made by the maintainer, in person.** Read the contribution guide and the template of the catalog in full, fill the template yourself, field by field, and answer the reviewers yourself. OpenFamily was banned from *awesome-selfhosted* because a pull request prepared by an AI replaced the submission template. No tool, script or assistant writes the text of a submission.
+> **Submissions are made by the maintainer, in person.** Read the contribution guide and the template of the catalog in full, fill the template yourself, field by field, and answer the reviewers yourself: the people who keep these catalogs expect someone on the other side.
 
 - **Unraid Community Applications**: open a support thread on the Unraid forums, put its address in `<Support>` of `unraid/openfamily.xml`, then follow the current policies to ask for inclusion: <https://forums.unraid.net/topic/87144-ca-application-policies-notes/>.
 - **Umbrel App Store**: a pull request to <https://github.com/getumbrel/umbrel-apps>, from the files of `umbrel/nexaflow-openfamily/` renamed to the id they ask for.

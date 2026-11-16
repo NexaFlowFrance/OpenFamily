@@ -84,6 +84,22 @@ créez votre compte. L'image est publiée pour amd64 et arm64 (Raspberry Pi 4 et
 des NAS). Le **[guide serveur](INSTALLATION.fr.md)** couvre le HTTPS, les mises à jour et les
 sauvegardes.
 
+### 📦 Depuis le catalogue d'applications de votre serveur
+
+Sur ces systèmes, OpenFamily s'installe depuis le catalogue, comme n'importe quelle application. Chaque lien explique comment l'ajouter, pas à pas (en anglais) :
+
+| Système | Comment |
+|---|---|
+| **Home Assistant** (OS ou Supervised) | [Ajouter le dépôt d'applications](https://github.com/NexaFlowFrance/home-assistant-apps) |
+| **Umbrel** | [Ajouter la boutique communautaire](https://github.com/NexaFlowFrance/umbrel-app-store) |
+| **CasaOS, ZimaOS** | [Ajouter la boutique d'applications](https://github.com/NexaFlowFrance/casaos-appstore) |
+| **Runtipi** | [Ajouter la boutique d'applications](https://github.com/NexaFlowFrance/runtipi-appstore) |
+| **Unraid** | [Récupérer le modèle](https://github.com/NexaFlowFrance/unraid-templates) |
+| **TrueNAS** | Dans le catalogue des applications communautaires, à OpenFamily |
+| **Proxmox** | Un [script](INSTALLATION.fr.md#proxmox) qui crée le conteneur |
+
+Les cinq premiers sont nouveaux. Si l'un d'eux ne fonctionne pas chez vous, [dites-le-nous](https://github.com/NexaFlowFrance/OpenFamily/issues) : cela sert à tous ceux qui viendront après.
+
 ### 🪟 Windows (.exe), le plus simple
 
 **NexaFlow** fournit un installeur graphique tout-en-un (Node.js et PostgreSQL embarqués, aucun Docker).

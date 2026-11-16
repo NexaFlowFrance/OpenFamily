@@ -14,7 +14,7 @@
   Everything to back up is in the data folder.</Overview>
   <Category>Productivity: Tools: Status:Stable</Category>
   <WebUI>http://[IP]:[PORT:3000]/</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/packaging/unraid/openfamily.xml</TemplateURL>
+  <TemplateURL>https://raw.githubusercontent.com/NexaFlowFrance/unraid-templates/main/openfamily.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png</Icon>
   <ExtraParams>--restart unless-stopped</ExtraParams>
   <Config Name="Web UI Port" Target="3000" Default="8480" Mode="tcp" Description="The address of OpenFamily in a browser and in the Android app: http://UNRAID-IP:PORT" Type="Port" Display="always" Required="true" Mask="false">8480</Config>

@@ -109,6 +109,22 @@ Open http://localhost:3000, or `http://<server-address>:3000` from a phone, and 
 account. The image is published for amd64 and arm64 (Raspberry Pi 4 and 5, most NAS). The
 **[server guide](INSTALLATION.md)** covers HTTPS, updates and backups.
 
+### 📦 From the app catalog of your server
+
+On these systems OpenFamily installs from the catalog, like any other app. Each link says how to add it, step by step:
+
+| System | How |
+|---|---|
+| **Home Assistant** (OS or Supervised) | [Add the app repository](https://github.com/NexaFlowFrance/home-assistant-apps) |
+| **Umbrel** | [Add the community app store](https://github.com/NexaFlowFrance/umbrel-app-store) |
+| **CasaOS, ZimaOS** | [Add the app store](https://github.com/NexaFlowFrance/casaos-appstore) |
+| **Runtipi** | [Add the app store](https://github.com/NexaFlowFrance/runtipi-appstore) |
+| **Unraid** | [Get the template](https://github.com/NexaFlowFrance/unraid-templates) |
+| **TrueNAS** | In the catalog of community apps, under OpenFamily |
+| **Proxmox** | A [script](INSTALLATION.md#proxmox) that creates the container |
+
+The first five are new. If one does not work on your system, [tell us](https://github.com/NexaFlowFrance/OpenFamily/issues): it helps everyone after you.
+
 ### 🪟 Windows installer (.exe), the easiest path
 
 For Windows users, **NexaFlow** provides an all-in-one graphical installer: Node.js and

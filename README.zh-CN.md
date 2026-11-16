@@ -105,6 +105,22 @@ docker run -d --name openfamily --restart unless-stopped \
 
 打开 http://localhost:3000，或在手机上打开 `http://<服务器地址>:3000`，然后创建账号。镜像支持 amd64 和 arm64（Raspberry Pi 4 和 5、大多数 NAS）。HTTPS、更新与备份见 **[服务器指南（英文）](INSTALLATION.md)**。
 
+### 📦 从服务器的应用目录安装
+
+在以下系统上，OpenFamily 可以像其他应用一样从应用目录安装。每个链接都有逐步的添加说明（英文）：
+
+| 系统 | 方式 |
+|---|---|
+| **Home Assistant**（OS 或 Supervised） | [添加应用仓库](https://github.com/NexaFlowFrance/home-assistant-apps) |
+| **Umbrel** | [添加社区应用商店](https://github.com/NexaFlowFrance/umbrel-app-store) |
+| **CasaOS、ZimaOS** | [添加应用商店](https://github.com/NexaFlowFrance/casaos-appstore) |
+| **Runtipi** | [添加应用商店](https://github.com/NexaFlowFrance/runtipi-appstore) |
+| **Unraid** | [获取模板](https://github.com/NexaFlowFrance/unraid-templates) |
+| **TrueNAS** | 在社区应用目录中搜索 OpenFamily |
+| **Proxmox** | 使用[脚本](INSTALLATION.md#proxmox)创建容器 |
+
+前五项是新增的。如果在你的系统上无法使用，请[告诉我们](https://github.com/NexaFlowFrance/OpenFamily/issues)，这对之后的用户也有帮助。
+
 ### 🪟 Windows 安装程序（.exe），最简单的方式
 
 针对 Windows 用户，**NexaFlow** 提供一体化图形安装程序：内置 Node.js 和

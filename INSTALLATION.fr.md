@@ -23,6 +23,7 @@ Ce guide va d'un serveur vide à OpenFamily en service pour votre famille, joign
 |---|---|
 | Un PC Windows allumé en permanence | L'[installateur Windows](https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe). Pas de Docker, rien à configurer. |
 | Un hôte Proxmox | Le [script Proxmox](#proxmox) : il crée le conteneur, installe Docker et configure tout. |
+| Home Assistant, Umbrel, CasaOS, Runtipi, Unraid ou TrueNAS | Le catalogue d'applications du système : voir [la liste](README.fr.md#-depuis-le-catalogue-dapplications-de-votre-serveur). |
 | N'importe quelle machine avec Docker : un serveur, un NAS, un Raspberry Pi | [Un seul conteneur](#la-voie-rapide-en-un-seul-conteneur) : une commande, rien à configurer. |
 | Un serveur où vous voulez PostgreSQL, l'API et le serveur web dans des conteneurs séparés, ou construire depuis les sources | Docker Compose : ce guide, dès l'étape 1. |
 

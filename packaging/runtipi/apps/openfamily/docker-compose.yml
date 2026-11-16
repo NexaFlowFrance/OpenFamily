@@ -23,7 +23,7 @@ services:
       start_period: 90s
     x-runtipi:
       is_main: true
-      internal_port: 3000
+      internal_port: '3000'
 
 x-runtipi:
   schema_version: 2

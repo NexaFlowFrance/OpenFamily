@@ -1,0 +1,43 @@
+name: Something does not work
+description: A bug, an error, something that behaves differently from what the app says
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you got instead. A screenshot helps.
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How is OpenFamily installed?
+      options:
+        - Docker, one container (ghcr.io/nexaflowfrance/openfamily)
+        - Docker Compose (three containers)
+        - Windows installer
+        - Proxmox script
+        - From an app catalog (Unraid, CasaOS, Runtipi, Umbrel, Home Assistant, TrueNAS)
+        - OpenFamily Cloud
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The tag of the image you run, or the release you installed.
+      placeholder: "2.1.0"
+  - type: input
+    id: device
+    attributes:
+      label: Where do you see it?
+      description: Browser and device, or the Android app.
+      placeholder: Firefox on a laptop, Android app on a Pixel 8...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Anything in the logs?
+      description: "With Docker: `docker logs openfamily` (or `docker compose logs server`). Remove anything private before pasting."
+      render: text

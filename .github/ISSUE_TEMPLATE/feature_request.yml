@@ -1,0 +1,21 @@
+name: An idea
+description: Something OpenFamily could do for your family
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What would you like to do?
+      description: The situation at home that made you think of it is the most useful part.
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: How do you manage today?
+      description: With OpenFamily, another app, a sheet of paper on the fridge...
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else?
+      description: Examples from other apps, sketches, links.

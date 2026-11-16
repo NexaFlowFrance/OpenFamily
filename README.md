@@ -217,8 +217,12 @@ Starring the repository helps just as much: it is how other families find the pr
 
 ## 🤝 Contributing
 
-Contributions are welcome! Open an [issue](https://github.com/NexaFlowFrance/OpenFamily/issues)
-or a [pull request](https://github.com/NexaFlowFrance/OpenFamily/pulls).
+A good part of OpenFamily came from the people who use it: languages, integrations, ideas that became features.
+
+- **An idea or a question?** Start a [discussion](https://github.com/NexaFlowFrance/OpenFamily/discussions).
+- **Something does not work?** Open an [issue](https://github.com/NexaFlowFrance/OpenFamily/issues/new/choose).
+- **Your language is missing or imperfect?** [TRANSLATING.md](TRANSLATING.md): a translation can arrive one text at a time, the app shows the rest in English.
+- **You want to write code?** [CONTRIBUTING.md](CONTRIBUTING.md) says how to run the project and what a pull request needs.
 
 ## 📄 License
 

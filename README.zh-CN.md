@@ -208,8 +208,12 @@ OpenFamily 是免费、开源（AGPL-3.0）且自托管的：没有广告、没�
 
 ## 🤝 参与贡献
 
-欢迎贡献！你可以创建 [Issue](https://github.com/NexaFlowFrance/OpenFamily/issues)
-或提交 [Pull Request](https://github.com/NexaFlowFrance/OpenFamily/pulls)。
+OpenFamily 的许多部分来自它的使用者：语言、集成，以及后来变成功能的想法。
+
+- **有想法或疑问？** 发起一个[讨论](https://github.com/NexaFlowFrance/OpenFamily/discussions)。
+- **发现问题？** 创建一个 [Issue](https://github.com/NexaFlowFrance/OpenFamily/issues/new/choose)。
+- **缺少你的语言，或翻译不够好？** 参见 [TRANSLATING.md](TRANSLATING.md)（英文）：翻译可以逐条提交，未翻译的部分会以英文显示。
+- **想写代码？** [CONTRIBUTING.md](CONTRIBUTING.md)（英文）说明了如何运行项目以及 Pull Request 的要求。
 
 ## 📄 许可证
 

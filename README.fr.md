@@ -159,7 +159,12 @@ Mettre une étoile au dépôt aide tout autant : c'est ainsi que d'autres famill
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues : ouvrez une [issue](https://github.com/NexaFlowFrance/OpenFamily/issues) ou une [pull request](https://github.com/NexaFlowFrance/OpenFamily/pulls).
+Une bonne part d'OpenFamily vient des personnes qui l'utilisent : des langues, des intégrations, des idées devenues des fonctions.
+
+- **Une idée ou une question ?** Lancez une [discussion](https://github.com/NexaFlowFrance/OpenFamily/discussions).
+- **Quelque chose ne marche pas ?** Ouvrez une [issue](https://github.com/NexaFlowFrance/OpenFamily/issues/new/choose).
+- **Votre langue manque ou est imparfaite ?** [TRANSLATING.md](TRANSLATING.md) (en anglais) : une traduction peut arriver texte par texte, l'application affiche le reste en anglais.
+- **Envie d'écrire du code ?** [CONTRIBUTING.md](CONTRIBUTING.md) (en anglais) explique comment lancer le projet et ce qu'attend une pull request.
 
 ## 📄 Licence
 

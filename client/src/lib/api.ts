@@ -154,6 +154,13 @@ class ApiClient {
     async register(email: string, password: string, name: string, inviteToken?: string, role?: string) {
         const body: Record<string, string> = { email, password, name, role: role ?? 'parent' };
         if (inviteToken) body.inviteToken = inviteToken;
+        // A new family starts on the clocks of the device that creates it.
+        try {
+            const zone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (zone) body.timezone = zone;
+        } catch {
+            // No zone to offer: the family follows the server's.
+        }
 
         const response = await this.post<any>(
             '/api/auth/register',

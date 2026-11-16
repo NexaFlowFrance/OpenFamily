@@ -1,4 +1,4 @@
-import { familyTimeZone } from '../lib/timeZone';
+import { canonicalTimeZone, familyTimeZone, isTimeZone } from '../lib/timeZone';
 import crypto from 'node:crypto';
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
@@ -74,7 +74,7 @@ router.get('/config', (_req, res) => {
 
 // Register
 router.post('/register', async (req, res) => {
-    const { email, password, name, inviteToken } = req.body ?? {};
+    const { email, password, name, inviteToken, timezone } = req.body ?? {};
     const hasInvite = typeof inviteToken === 'string' && inviteToken.length > 0;
     const config = getAuthConfig();
 
@@ -124,12 +124,19 @@ router.post('/register', async (req, res) => {
         // role chosen by the inviter; a standalone account owns its family → 'parent'.
         const cleanedRole = invite ? invite.role : 'parent';
 
+        // A new family starts on the clocks of the person who creates it: the
+        // sign-up form sends the zone of its browser, so reminders are on time
+        // without anyone setting TZ on the server. Someone invited joins a
+        // family that already has its own. Anything that is not a zone is
+        // ignored, and the family follows the server until a parent chooses.
+        const familyZone = !invite && isTimeZone(timezone) ? canonicalTimeZone(timezone) : null;
+
         const password_hash = await bcrypt.hash(password, 12);
 
         const payload = await withTransaction(async (tx) => {
             const created = await tx.query(
-                'INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) RETURNING id',
-                [normalizedEmail, password_hash, cleanedName, cleanedRole]
+                'INSERT INTO users (email, password_hash, name, role, timezone) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                [normalizedEmail, password_hash, cleanedName, cleanedRole, familyZone]
             );
             const userId = created.rows[0].id as string;
             if (invite && !(await acceptInviteForNewUser(tx.query, invite, userId))) {

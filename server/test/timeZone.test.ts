@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { app, me, query, registerWithPassword, resetState, startSuite, stopSuite } from './helpers';
+import { app, createInvite, me, query, registerWithPassword, resetState, startSuite, stopSuite } from './helpers';
 import { issueAccessToken } from '../src/lib/authTokens';
 import { displayOptions, renderDisplayPage } from '../src/lib/displayPage';
 import { loadDisplaySnapshot } from '../src/lib/displaySnapshot';
@@ -137,6 +137,35 @@ describe("the family's time zone setting", () => {
         const answer = await request(app).get('/api/auth/timezone').set(bearer(parent.token));
         expect(answer.body.data).toEqual({ timezone: serverTimeZone(), family_timezone: null, server_timezone: serverTimeZone() });
         expect((await me(parent.token)).body.data.user.timezone).toBe(serverTimeZone());
+    });
+
+    it('starts on the clocks of the browser that creates the family', async () => {
+        const signUp = (email: string, extra: Record<string, unknown>) => request(app).post('/api/auth/register')
+            .send({ email, password: 'correct-horse-1', name: 'Someone', ...extra });
+        const zoneOf = async (token: string) =>
+            (await request(app).get('/api/auth/timezone').set(bearer(token))).body.data.family_timezone;
+
+        const montreal = await signUp('montreal@example.org', { timezone: 'america/montreal' });
+        expect(montreal.status).toBe(200);
+        // Stored under the name the runtime knows it by, like a zone a parent types.
+        expect(await zoneOf(montreal.body.data.token)).toBe(canonicalTimeZone('America/Montreal'));
+
+        // What is not a zone does not stop the sign-up: the family follows the server.
+        for (const [email, timezone] of [['a@example.org', 'Europe/Atlantis'], ['b@example.org', 42], ['c@example.org', '']] as const) {
+            const answer = await signUp(email, { timezone });
+            expect(answer.status).toBe(200);
+            expect(await zoneOf(answer.body.data.token)).toBeNull();
+        }
+
+        // Someone invited joins a family that has its zone: theirs is not kept.
+        await setZone(parent.token, 'Asia/Tokyo');
+        const invited = await signUp('invited@example.org', {
+            inviteToken: await createInvite(parent.token), timezone: 'America/Montreal',
+        });
+        expect(invited.status).toBe(200);
+        expect((await me(invited.body.data.token)).body.data.user.timezone).toBe('Asia/Tokyo');
+        const row = await query('SELECT timezone FROM users WHERE id = $1', [invited.body.data.user.id]);
+        expect(row.rows[0].timezone).toBeNull();
     });
 
     it('is chosen by a parent, for the whole family', async () => {

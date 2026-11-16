@@ -538,7 +538,7 @@
 <!-- HERO -->
 <div class="hero">
   <a class="hero-badge" href="https://github.com/NexaFlowFrance/OpenFamily/releases/latest" target="_blank" rel="noopener">
-    v2.0 : une API ouverte avec jetons et webhooks, Gladys Assistant, écrans muraux, connexion unique
+    v2.1 : une seule commande Docker pour installer, et une barre du bas pensée pour le téléphone
   </a>
   <img class="logo" src="OpenFamily.png" alt="OpenFamily" />
   <h1>La gestion familiale,<br><em>maîtrisée par vous.</em></h1>
@@ -767,37 +767,27 @@
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-content">
-        <h4>Cloner le projet et configurer l'environnement</h4>
-        <p>Copiez le fichier d'environnement et renseignez vos paramètres (secrets JWT, URL, VAPID…).</p>
-        <pre>git clone https://github.com/NexaFlowFrance/OpenFamily.git
-cd OpenFamily
-cp .env.example .env
-# Éditez .env avec vos paramètres</pre>
+        <h4>Démarrer OpenFamily en une commande</h4>
+        <p>Un seul conteneur contient l'interface, l'API et la base de données. Il n'y a rien à configurer : les secrets sont créés au premier démarrage et rangés avec vos données. Publié pour amd64 et arm64 (Raspberry Pi, NAS).</p>
+        <pre>docker run -d --name openfamily --restart unless-stopped \
+  -p 3000:3000 -v openfamily:/data \
+  ghcr.io/nexaflowfrance/openfamily:latest</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-content">
-        <h4>Démarrer avec Docker Compose</h4>
-        <p>Lance les 3 services : PostgreSQL, le serveur Express et le frontend Nginx.</p>
-        <pre>docker-compose up -d --build</pre>
+        <h4>Ouvrir l'application et créer votre compte</h4>
+        <p>Depuis le serveur lui-même, ou depuis n'importe quel téléphone ou ordinateur de votre réseau. Votre compte devient le propriétaire d'une nouvelle famille, et vous invitez les autres depuis la page Famille.</p>
+        <pre>http://localhost:3000
+http://&lt;adresse-du-serveur&gt;:3000</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-content">
-        <h4>Accéder à l'application</h4>
-        <p>L'application est accessible sur votre réseau local (ou votre domaine en production).</p>
-        <pre>Frontend : http://localhost:3000
-API      : http://localhost:3001/health</pre>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <h4>Vérifier le bon fonctionnement</h4>
-        <p>Lancez le smoke test qui valide tous les modules API.</p>
-        <pre>npm run smoke:api</pre>
+        <h4>Aller plus loin</h4>
+        <p>Le HTTPS avec un domaine ou Tailscale, les mises à jour et les sauvegardes sont dans le <a href="https://github.com/NexaFlowFrance/OpenFamily/blob/main/INSTALLATION.fr.md" target="_blank" rel="noopener">guide serveur</a>, avec l'installation Docker Compose pour qui veut chaque partie dans son conteneur.</p>
       </div>
     </div>
   </div>

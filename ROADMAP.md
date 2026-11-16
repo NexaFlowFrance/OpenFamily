@@ -121,6 +121,17 @@ can shift based on feedback — issues and discussions are welcome.
   @giro-dev.
 - **Several Home Assistant lists** *(v2.0)*: more than one to-do list can be
   imported. Asked for by @bino277.
+- **Install in one command** *(v2.1)*: one image,
+  `ghcr.io/nexaflowfrance/openfamily`, holds the interface, the API and the
+  database, for amd64 and arm64. Nothing to configure: its secrets are
+  generated on the first start and kept with the data. Definitions for Unraid,
+  CasaOS, Runtipi, Umbrel and Home Assistant are built on it
+  ([packaging](packaging/README.md)).
+- **A bottom bar made for the phone** *(v2.1)*: home, calendar, tasks and
+  shopping under the thumb, and every other section behind "More", laid out
+  like the apps of a home screen.
+- **The family's time zone without asking** *(v2.1)*: a new family takes the
+  time zone of the browser that creates it.
 
 ## Under consideration
 

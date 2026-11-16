@@ -16,6 +16,10 @@
 
 > 🎬 **[Essayez la démo en ligne](https://openfamily.fr/demo/)** : aucune inscription, rien n'est enregistré.
 
+<div align="center">
+  <img src="docs/screenshots/dashboard.png" alt="L'accueil d'OpenFamily" width="820">
+</div>
+
 OpenFamily est une **alternative auto-hébergée à des applications comme Cozi ou FamilyWall** : listes de courses, tâches, agenda partagé, planning de la semaine, recettes, repas, garde-manger et budget du foyer, au même endroit, sur votre propre serveur.
 
 ## 🌟 Ce qui le distingue
@@ -52,6 +56,28 @@ OpenFamily est une **alternative auto-hébergée à des applications comme Cozi 
 | 🛡️ **Rôles & permissions** | Comptes **parent / enfant**, avec un budget en lecture seule pour les enfants |
 | 🌍 **Multilingue** | Interface **français / anglais / allemand / portugais / russe / espagnol / catalan / chinois simplifié** avec détection automatique |
 | 📴 **Mode hors ligne** | Consultation des données en cache sans connexion (PWA) |
+
+## 📸 Captures d'écran
+
+| Courses (mode magasin) | Agenda | Budget |
+|---|---|---|
+| <img src="docs/screenshots/shopping.png" alt="Liste de courses" width="260"> | <img src="docs/screenshots/calendar.png" alt="Agenda" width="260"> | <img src="docs/screenshots/budget.png" alt="Budget" width="260"> |
+
+| Repas | Famille | Planning de la semaine |
+|---|---|---|
+| <img src="docs/screenshots/meals.png" alt="Repas de la semaine" width="260"> | <img src="docs/screenshots/family.png" alt="Famille" width="260"> | <img src="docs/screenshots/planning.png" alt="Planning de la semaine" width="260"> |
+
+En thème sombre :
+
+| Accueil | Agenda | Planning de la semaine |
+|---|---|---|
+| <img src="docs/screenshots/dashboard-dark.png" alt="Accueil, thème sombre" width="260"> | <img src="docs/screenshots/calendar-dark.png" alt="Agenda, thème sombre" width="260"> | <img src="docs/screenshots/planning-dark.png" alt="Planning de la semaine, thème sombre" width="260"> |
+
+Sur un téléphone :
+
+| Accueil | Accueil, thème sombre | Courses | Agenda |
+|---|---|---|---|
+| <img src="docs/screenshots/mobile-dashboard.png" alt="Accueil, sur un téléphone" width="190"> | <img src="docs/screenshots/mobile-dashboard-dark.png" alt="Accueil, sur un téléphone, thème sombre" width="190"> | <img src="docs/screenshots/mobile-shopping.png" alt="Courses, sur un téléphone" width="190"> | <img src="docs/screenshots/mobile-calendar.png" alt="Agenda, sur un téléphone" width="190"> |
 
 ## 🔗 Intégrations tierces
 

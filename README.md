@@ -75,6 +75,18 @@ budget, all in one place, on your own server.
 |---|---|---|
 | <img src="docs/screenshots/meals.png" alt="Meal planner" width="260"> | <img src="docs/screenshots/family.png" alt="Family" width="260"> | <img src="docs/screenshots/planning.png" alt="Weekly planning" width="260"> |
 
+In the dark theme:
+
+| Home | Calendar | Weekly planning |
+|---|---|---|
+| <img src="docs/screenshots/dashboard-dark.png" alt="Home, dark theme" width="260"> | <img src="docs/screenshots/calendar-dark.png" alt="Calendar, dark theme" width="260"> | <img src="docs/screenshots/planning-dark.png" alt="Weekly planning, dark theme" width="260"> |
+
+On a phone:
+
+| Home | Home, dark theme | Shopping | Calendar |
+|---|---|---|---|
+| <img src="docs/screenshots/mobile-dashboard.png" alt="Home, on a phone" width="190"> | <img src="docs/screenshots/mobile-dashboard-dark.png" alt="Home, on a phone, dark theme" width="190"> | <img src="docs/screenshots/mobile-shopping.png" alt="Shopping, on a phone" width="190"> | <img src="docs/screenshots/mobile-calendar.png" alt="Calendar, on a phone" width="190"> |
+
 ## 🔗 Third-party integrations
 
 Connect OpenFamily to the rest of your self-hosted setup from the Integrations page, with no config file to edit.

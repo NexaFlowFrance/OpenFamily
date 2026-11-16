@@ -75,6 +75,18 @@ OpenFamily 是 **Cozi 和 FamilyWall 等应用的自托管替代方案**：将�
 |---|---|---|
 | <img src="docs/screenshots/meals.png" alt="餐食计划" width="260"> | <img src="docs/screenshots/family.png" alt="家庭" width="260"> | <img src="docs/screenshots/planning.png" alt="每周计划" width="260"> |
 
+深色主题：
+
+| 首页 | 日历 | 每周计划 |
+|---|---|---|
+| <img src="docs/screenshots/dashboard-dark.png" alt="首页，深色主题" width="260"> | <img src="docs/screenshots/calendar-dark.png" alt="日历，深色主题" width="260"> | <img src="docs/screenshots/planning-dark.png" alt="每周计划，深色主题" width="260"> |
+
+在手机上：
+
+| 首页 | 首页，深色主题 | 购物 | 日历 |
+|---|---|---|---|
+| <img src="docs/screenshots/mobile-dashboard.png" alt="首页，手机" width="190"> | <img src="docs/screenshots/mobile-dashboard-dark.png" alt="首页，手机，深色主题" width="190"> | <img src="docs/screenshots/mobile-shopping.png" alt="购物，手机" width="190"> | <img src="docs/screenshots/mobile-calendar.png" alt="日历，手机" width="190"> |
+
 ## 🔗 第三方集成
 
 一键将 OpenFamily 连接到你的自托管生态系统，无需编辑配置文件。

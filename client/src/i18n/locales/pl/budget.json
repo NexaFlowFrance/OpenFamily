@@ -1,0 +1,125 @@
+{
+  "loading": "Ładowanie budżetu…",
+  "categories": {
+    "Logement": "Mieszkanie",
+    "Alimentation": "Żywność",
+    "Transport": "Transport",
+    "Santé": "Zdrowie",
+    "Loisirs": "Wypoczynek",
+    "Abonnements": "Subskrypcje",
+    "Assurance": "Ubezpieczenia",
+    "Enfants": "Dzieci",
+    "Maison": "Dom",
+    "Autre": "Inne",
+    "Prélèvements": "Stałe obciążenia"
+  },
+  "readOnly": "Tryb tylko do odczytu. Tylko rodzice mogą edytować budżet.",
+  "alerts": {
+    "title": "Osiągnięte limity",
+    "over": " · przekroczono",
+    "warn": " (≥ 80%)"
+  },
+  "balance": {
+    "current": "Obecny saldo",
+    "pointed_one": "{{count}} stałe obciążenie rozliczone",
+    "pointed_few": "{{count}} stałe obciążenia rozliczone",
+    "pointed_many": "{{count}} stałych obciążeń rozliczonych",
+    "expenses_one": "{{count}} wydatek",
+    "expenses_few": "{{count}} wydatki",
+    "expenses_many": "{{count}} wydatków",
+    "opening": "Saldo otwarcia: {{amount}}"
+  },
+  "forecast": {
+    "title": "Prognoza",
+    "subtitle": "Nadchodzące stałe: +{{income}} dochód · −{{expenses}} wydatki"
+  },
+  "analytics": "Analizy i limity",
+  "charts": {
+    "expensesByCategory": "Wydatki według kategorii",
+    "noExpenses": "Brak wydatków w tym miesiącu",
+    "yearEvolution": "Trend roczny",
+    "income": "Dochód",
+    "expenses": "Wydatki"
+  },
+  "limits": {
+    "title": "Miesięczne limity",
+    "subtitle": "Śledzenie wydatków według kategorii",
+    "define": "Ustaw",
+    "none": "Brak ustawionego limitu"
+  },
+  "sections": {
+    "recurring": "Stałe pozycje",
+    "expenses": "Wydatki",
+    "income": "Dochody"
+  },
+  "recurring": {
+    "empty": "Brak stałych pozycji w tym miesiącu",
+    "markOn": "Oznacz jako rozliczone",
+    "markOff": "Anuluj oznaczenie",
+    "dayPrefix": "dzień",
+    "frequency": {
+      "daily": "Codzienne",
+      "weekly": "Co tydzień",
+      "monthly": "Co miesiąc",
+      "yearly": "Co rok",
+      "none": "Nie powtarza się"
+    },
+    "units": {
+      "daily_one": "dzień",
+      "daily_few": "dni",
+      "daily_many": "dni",
+      "weekly_one": "tydzień",
+      "weekly_few": "tygodnie",
+      "weekly_many": "tygodni",
+      "monthly_one": "miesiąc",
+      "monthly_few": "miesiące",
+      "monthly_many": "miesięcy",
+      "yearly_one": "rok",
+      "yearly_few": "lata",
+      "yearly_many": "lat"
+    }
+  },
+  "empty": {
+    "expenses": "Brak wydatków w tym miesiącu",
+    "income": "Brak dochodów w tym miesiącu"
+  },
+  "sheets": {
+    "new": "Dodaj pozycję",
+    "edit": "Edytuj pozycję",
+    "limit": "Miesięczny limit"
+  },
+  "toggle": {
+    "expense": "Wydatek",
+    "income": "Dochód"
+  },
+  "fields": {
+    "amount": "Kwota ({{currency}})",
+    "description": "Opis (opcjonalnie)",
+    "descriptionPlaceholder": "np. zakupy, wynagrodzenie, wpłata inwestycyjna…",
+    "date": "Data",
+    "category": "Kategoria",
+    "limit": "Miesięczny limit ({{currency}})",
+    "limitHint": "Ustaw 0, aby usunąć śledzenie tej kategorii.",
+    "startDate": "Data rozpoczęcia",
+    "repeat": "Powtarzaj",
+    "every": "Co",
+    "repeatUntil": "Powtarzaj do (opcjonalnie)",
+    "addToCalendar": "Dodaj do kalendarza",
+    "addToCalendarHint": "Utworzy całodniowe wydarzenie kalendarzowe z tą samą datą i powtarzalnością.",
+    "type": "Typ"
+  },
+  "errors": {
+    "amountInvalid": "Nieprawidłowa kwota.",
+    "save": "Błąd podczas zapisu.",
+    "limitInvalid": "Nieprawidłowy limit.",
+    "startDateRequired": "Data rozpoczęcia jest wymagana.",
+    "intervalInvalid": "Interwał powtarzania musi być między 1 a 365.",
+    "repeatUntilInvalid": "Data powtarzania do nie może być wcześniejsza niż data rozpoczęcia.",
+    "editRecurrenceType": "Aby przełączyć między jednorazowym a powtarzającym się, usuń tę pozycję i dodaj ponownie."
+  },
+  "confirm": {
+    "deleteRecurring": "Usunąć tę stałą pozycję?",
+    "deleteEntry": "Usunąć tę pozycję?"
+  },
+  "classic": "Klasyczny"
+}

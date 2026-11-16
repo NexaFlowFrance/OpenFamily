@@ -1,0 +1,82 @@
+{
+  "loading": "Ładowanie planu posiłków…",
+  "title": "Plan posiłków",
+  "subtitle": "Zaplanuj posiłki na tydzień",
+  "thisWeek": "Ten tydzień",
+  "weekOf": "Tydzień od {{start}} do {{end}}",
+  "mealTypes": {
+    "Petit-déjeuner": "Śniadanie",
+    "Déjeuner": "Obiad",
+    "Dîner": "Kolacja",
+    "Snack": "Przekąska"
+  },
+  "dialog": {
+    "editTitle": "Edytuj posiłek",
+    "addTitle": "Dodaj posiłek",
+    "descriptionFmt": "{{type}} — {{date}}"
+  },
+  "form": {
+    "mealType": "Typ posiłku",
+    "recipe": "Przepis (opcjonalnie)",
+    "noRecipe": "Bez przepisu",
+    "customMeal": "Albo własny posiłek",
+    "customMealPlaceholder": "np. Pizza domowa",
+    "notes": "Notatki (opcjonalnie)",
+    "notesPlaceholder": "Dodatkowe notatki…",
+    "recipeSearch": "Szukaj przepisów…"
+  },
+  "shopping": {
+    "button": "Dodaj składniki do listy zakupów",
+    "dialogTitle": "Dodaj składniki do listy zakupów",
+    "dialogDescription": "Składniki z przepisów zaplanowanych od {{start}} do {{end}}. Odznacz to, czego nie potrzebujesz.",
+    "empty": "W tym tygodniu nie zaplanowano posiłku z przepisem.",
+    "selectedCount": "Wybrano {{selected}} z {{total}} składników",
+    "alreadyOnList": "już na liście",
+    "confirm_one": "Dodaj {{count}} składnik",
+    "confirm_few": "Dodaj {{count}} składniki",
+    "confirm_many": "Dodaj {{count}} składników",
+    "successTitle": "Składniki dodane",
+    "successDescription_one": "Dodano {{count}} pozycję do listy zakupów.",
+    "successDescription_few": "Dodano {{count}} pozycje do listy zakupów.",
+    "successDescription_many": "Dodano {{count}} pozycji do listy zakupów.",
+    "partialTitle": "Niektóre składniki nie zostały dodane",
+    "partialDescription": "Dodano: {{added}}, nie udało się: {{failed}}.",
+    "errorTitle": "Nie udało się dodać składników",
+    "errorDescription": "Nic nie zostało dodane do listy zakupów. Spróbuj ponownie."
+  },
+  "tandoor": {
+    "button": "Importuj z Tandoor",
+    "dialogTitle": "Importuj plan posiłków z Tandoor",
+    "dialogDescription": "Posiłki zaplanowane w Tandoor od {{start}} do {{end}}.",
+    "loading": "Odczytywanie planu posiłków z Tandoor…",
+    "empty": "W Tandoor nie zaplanowano posiłków na ten tydzień.",
+    "error": "Nie udało się odczytać planu posiłków z Tandoor.",
+    "mappingTitle": "Dopasowanie posiłków",
+    "mappingHelp": "Wybierz, któremu posiłkowi OpenFamily odpowiada każdy typ posiłku z Tandoor.",
+    "skipType": "Nie importuj",
+    "previewTitle": "Podgląd",
+    "replaces": "zastąpi „{{name}}”",
+    "keeps": "„{{name}}” jest już zaplanowany, zostanie zachowany",
+    "notImported_one": "{{count}} posiłek z Tandoor nie zostanie zaimportowany (niedopasowany typ).",
+    "notImported_few": "{{count}} posiłki z Tandoor nie zostaną zaimportowane (niedopasowane typy).",
+    "notImported_many": "{{count}} posiłków z Tandoor nie zostanie zaimportowanych (niedopasowane typy).",
+    "overwrite": "Zastąp posiłki, które są już zaplanowane",
+    "confirm_one": "Importuj {{count}} posiłek",
+    "confirm_few": "Importuj {{count}} posiłki",
+    "confirm_many": "Importuj {{count}} posiłków",
+    "successTitle": "Zaimportowano plan posiłków",
+    "successDescription_one": "Zaimportowano {{count}} posiłek z Tandoor.",
+    "successDescription_few": "Zaimportowano {{count}} posiłki z Tandoor.",
+    "successDescription_many": "Zaimportowano {{count}} posiłków z Tandoor.",
+    "keptDescription_one": "Zachowano {{count}} już zaplanowany posiłek.",
+    "keptDescription_few": "Zachowano {{count}} już zaplanowane posiłki.",
+    "keptDescription_many": "Zachowano {{count}} już zaplanowanych posiłków."
+  },
+  "confirmDelete": "Czy na pewno chcesz usunąć ten posiłek?",
+  "errors": {
+    "loadPlans": "Nie udało się wczytać planu posiłków.",
+    "loadRecipes": "Nie udało się wczytać przepisów.",
+    "save": "Nie udało się zapisać tego posiłku.",
+    "delete": "Nie udało się usunąć tego posiłku."
+  }
+}

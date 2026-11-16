@@ -1,0 +1,17 @@
+{
+  "title": "Powiadomienia",
+  "markAll": "Oznacz wszystkie jako przeczytane",
+  "empty": "Brak powiadomień",
+  "manage": "Zarządzaj powiadomieniami →",
+  "timeAgo": {
+    "justNow": "przed chwilą",
+    "minutes": "{{count}} min. temu",
+    "hours": "{{count}} godz. temu",
+    "days": "{{count}} dni temu"
+  },
+  "push": {
+    "unsupported": "Ta przeglądarka nie obsługuje powiadomień push",
+    "denied": "Brak zgody na powiadomienia",
+    "noVapid": "Klucz VAPID jest niedostępny"
+  }
+}

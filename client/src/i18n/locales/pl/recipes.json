@@ -1,0 +1,137 @@
+{
+  "loading": "Ładowanie przepisów…",
+  "title": "Przepisy",
+  "subtitle": "Biblioteka przepisów Twojej rodziny",
+  "newRecipe": "Nowy przepis",
+  "categories": {
+    "Entrée": "Przystawka",
+    "Plat": "Danie główne",
+    "Dessert": "Deser",
+    "Snack": "Przekąska"
+  },
+  "difficulties": {
+    "Facile": "Łatwy",
+    "Moyen": "Średni",
+    "Difficile": "Trudny"
+  },
+  "durations": {
+    "under15": "≤ 15 min",
+    "under30": "≤ 30 min",
+    "under60": "≤ 1 godz.",
+    "over60": "> 1 godz."
+  },
+  "searchPlaceholder": "Szukaj przepisu…",
+  "allCategories": "Wszystkie kategorie",
+  "allDifficulties": "Wszystkie stopnie trudności",
+  "anyDuration": "Dowolny czas",
+  "filters": {
+    "toggle": "Filtry",
+    "clear": "Wyczyść filtry",
+    "ingredientsPlaceholder": "Mam… (składnik, potem Enter)",
+    "ingredientsMore": "Dodaj składnik",
+    "ingredientsHelp": "Pokazywane są tylko przepisy zawierające wszystkie te składniki.",
+    "removeIngredient": "Usuń {{name}}"
+  },
+  "empty": {
+    "none": "Brak przepisów. Utwórz swój pierwszy przepis!",
+    "noMatch": "Żaden przepis nie pasuje do wyszukiwania."
+  },
+  "card": {
+    "min": "{{n}} min",
+    "servings_one": "{{count}} porcja",
+    "servings_few": "{{count}} porcje",
+    "servings_many": "{{count}} porcji",
+    "view": "Zobacz"
+  },
+  "dialog": {
+    "editTitle": "Edytuj przepis",
+    "createTitle": "Nowy przepis",
+    "description": "Uzupełnij szczegóły przepisu"
+  },
+  "form": {
+    "name": "Nazwa przepisu",
+    "namePlaceholder": "np. Szarlotka",
+    "category": "Kategoria",
+    "difficulty": "Stopień trudności",
+    "description": "Opis (opcjonalnie)",
+    "descriptionPlaceholder": "Krótki opis przepisu…",
+    "prep": "Przygotowanie (min)",
+    "prepPlaceholder": "30",
+    "cook": "Gotowanie (min)",
+    "cookPlaceholder": "45",
+    "servings": "Porcje",
+    "servingsPlaceholder": "4",
+    "ingredients": "Składniki (jeden w linii)",
+    "ingredientsPlaceholder": "200 g mąki\n3 jajka\n100 g cukru",
+    "instructions": "Instrukcje (jeden krok w linii)",
+    "instructionsPlaceholder": "Rozgrzej piekarnik do 180°C\nWymieszaj mąkę z cukrem\nDodaj jajka",
+    "tags": "Tagi (oddziel przecinkami)",
+    "tagsPlaceholder": "wegetariański, szybki, budżetowy",
+    "image": "Adres URL obrazu (opcjonalnie)",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "Importuj z linku",
+    "title": "Importuj przepis",
+    "description": "Wklej link do strony z przepisem (Marmiton, 750g, blog…) i wypełnimy formularz za Ciebie.",
+    "urlLabel": "Adres URL strony z przepisem",
+    "urlPlaceholder": "https://www.marmiton.org/recettes/…",
+    "submit": "Importuj",
+    "importing": "Importowanie…",
+    "successTitle": "Zaimportowano przepis",
+    "successDescription": "Przejrzyj szczegóły, a następnie zapisz.",
+    "errors": {
+      "notFoundTitle": "Nie znaleziono przepisu",
+      "notFound": "Ta strona nie zawiera czytanego przepisu.",
+      "fetchTitle": "Import nie powiódł się",
+      "fetch": "Nie udało się pobrać tej strony. Sprawdź link i spróbuj ponownie."
+    }
+  },
+  "shopping": {
+    "button": "Dodaj do listy zakupów",
+    "title": "Dodaj do listy zakupów",
+    "description": "Wybierz składniki z „{{recipe}}”, aby dodać je do listy zakupów.",
+    "selectAll": "Zaznacz wszystkie",
+    "deselectAll": "Odznacz wszystkie",
+    "submit": "Dodaj do listy",
+    "sending": "Dodawanie…",
+    "successTitle": "Lista zakupów zaktualizowana",
+    "successDescription_one": "Dodano {{count}} składnik do Twojej listy.",
+    "successDescription_few": "Dodano {{count}} składniki do Twojej listy.",
+    "successDescription_many": "Dodano {{count}} składników do Twojej listy.",
+    "duplicates_one": "{{count}} był już na liście.",
+    "duplicates_few": "{{count}} były już na liście.",
+    "duplicates_many": "{{count}} było już na liście.",
+    "errorTitle": "Nie udało się dodać",
+    "error": "Nie udało się dodać tych składników. Spróbuj ponownie.",
+    "original": "Przepis: {{line}}",
+    "selectedCount": "Wybrano {{count}} z {{total}}"
+  },
+  "refine": {
+    "button": "Ulepsz przez AI",
+    "hint": "Uładuj tytuł, składniki i instrukcje przez skonfigurowane AI",
+    "refining": "Ulepszanie…",
+    "successTitle": "Przepis ulepszony",
+    "successDescription": "Sekcje i kroki uporządkowane. Przejrzyj, a następnie zapisz.",
+    "notConfiguredTitle": "AI nie skonfigurowane",
+    "notConfigured": "Włącz i skonfiguruj asystenta AI w Ustawienia → Asystent AI.",
+    "errorTitle": "Ulepszanie nie powiodło się",
+    "error": "Asystent AI nie odpowiedział. Sprawdź konfigurację i spróbuj ponownie.",
+    "cost": "{{total}} tokenów ({{in}} wejściowych / {{out}} wyjściowych)"
+  },
+  "detail": {
+    "prep": "Przygotowanie:",
+    "cook": "Gotowanie:",
+    "servings": "Porcje:",
+    "minUnit": "min",
+    "ingredients": "Składniki",
+    "instructions": "Instrukcje"
+  },
+  "confirmDelete": "Czy na pewno chcesz usunąć ten przepis?",
+  "errors": {
+    "load": "Nie udało się wczytać przepisów.",
+    "save": "Nie udało się zapisać tego przepisu.",
+    "delete": "Nie udało się usunąć tego przepisu.",
+    "invalidImage": "Ten link do obrazu jest nieprawidłowy. Użyj adresu zaczynającego się od https:// albo zostaw pole puste."
+  }
+}

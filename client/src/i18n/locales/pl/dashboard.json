@@ -1,0 +1,76 @@
+{
+  "heading": {
+    "before": "Twój ",
+    "highlight": "dzień",
+    "after": " w pigułce."
+  },
+  "budgetAlert": {
+    "title": "Alert budżetu",
+    "message_one": "{{count}} kategoria przekroczyła swój miesięczny budżet.",
+    "message_few": "{{count}} kategorie przekroczyły swój miesięczny budżet.",
+    "message_many": "{{count}} kategorii przekroczyło swój miesięczny budżet.",
+    "cta": "Zobacz szczegóły"
+  },
+  "stats": {
+    "appointments": "Umówienia",
+    "tasks": "Zadania",
+    "shopping": "Zakupy",
+    "monthExpenses": "Wydatki w tym miesiącu"
+  },
+  "today": {
+    "title": "Dziś",
+    "viewWeek": "Tydzień",
+    "emptyTitle": "Nic nie zaplanowano.",
+    "emptySubtitle": "Dodaj umówienie, aby zobaczyć je tutaj.",
+    "emptyCta": "Dodaj umówienie",
+    "weekTitle": "W tym tygodniu",
+    "viewDay": "Dzień",
+    "emptyWeekSubtitle": "Brak umówień w tym tygodniu."
+  },
+  "aside": {
+    "shopping": "Zakupy",
+    "shoppingCount_one": "produkt do kupienia",
+    "shoppingCount_few": "produkty do kupienia",
+    "shoppingCount_many": "produktów do kupienia",
+    "budget": "Budżet tego miesiąca",
+    "budgetSubtitle": "wydano w tym miesiącu",
+    "tasks": "Oczekujące zadania",
+    "tasksCount_one": "zadanie do wykonania",
+    "tasksCount_few": "zadania do wykonania",
+    "tasksCount_many": "zadań do wykonania"
+  },
+  "planning": {
+    "title": "Plany na ten tydzień",
+    "viewAll": "Zobacz plan",
+    "empty": "Brak zapisanego planu na ten tydzień."
+  },
+  "customize": {
+    "button": "Dostosuj",
+    "title": "Dostosuj swoją stronę główną",
+    "description": "Wybierz, co pojawia się na Twojej stronie głównej i w jakiej kolejności. To ustawienie jest przypisane do Twojego konta.",
+    "agendaViewLabel": "Widok agendy",
+    "widgetsLabel": "Wyświetlane bloki",
+    "moveUp": "Przenieś wyżej",
+    "moveDown": "Przenieś niżej",
+    "show": "Pokaż",
+    "hide": "Ukryj",
+    "reset": "Przywróć domyślne",
+    "allHidden": "Wszystkie bloki są ukryte. Dostosuj stronę główną, aby ponownie je pokazać.",
+    "moduleDisabled": "(moduł wyłączony)",
+    "widgets": {
+      "stats": "Kluczowe liczby",
+      "agenda": "Agenda (umówienia)",
+      "planning": "Plany na ten tydzień",
+      "quick": "Szybki dostęp (zakupy, budżet, zadania)",
+      "notes": "Notatki rodzinne"
+    }
+  },
+  "latestPost": {
+    "title": "Najnowszy post rodzinny",
+    "viewAll": "Zobacz wszystkie posty",
+    "seenBy": "Obejrzało: {{names}}",
+    "notSeen": "Nikt jeszcze nie obejrzał",
+    "seen": "Obejrzane",
+    "markSeen": "Oznacz jako obejrzane"
+  }
+}

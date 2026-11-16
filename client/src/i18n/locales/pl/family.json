@@ -1,0 +1,131 @@
+{
+  "loading": "Ładowanie rodziny…",
+  "title": "Rodzina",
+  "subtitle": "Zarządzaj członkami rodziny",
+  "addMember": "Dodaj członka",
+  "empty": "Brak członków rodziny. Dodaj pierwszego członka!",
+  "roles": {
+    "Parent": "Rodzic",
+    "Enfant": "Dziecko",
+    "Etudiant": "Student",
+    "Autre": "Inny"
+  },
+  "colors": {
+    "coral": "Koralowy",
+    "orange": "Pomarańczowy",
+    "yellow": "Żółty",
+    "green": "Zielony",
+    "cyan": "Cyjanowy",
+    "blue": "Niebieski",
+    "indigo": "Granatowy",
+    "pink": "Różowy"
+  },
+  "card": {
+    "age_one": "{{count}} rok",
+    "age_few": "{{count}} lata",
+    "age_many": "{{count}} lat",
+    "health": "Zdrowie",
+    "allergies": "Alergie:",
+    "medications": "Leki:",
+    "emergency": "Kontakt awaryjny"
+  },
+  "shared": {
+    "title": "Współdzielone konta",
+    "subtitle": "Udostępnij dostęp do danych rodziny innym kontom.",
+    "you": "(Ty)",
+    "owner": "Właściciel",
+    "child": "🧒 Dziecko",
+    "parent": "👨 Rodzic",
+    "none": "Żadne inne konto jeszcze nie współdzieli tej rodziny.",
+    "roleParent": "Rodzic",
+    "roleChild": "Dziecko",
+    "roleTitle": "Rola członka",
+    "transferTitle": "Przenieś własność na to konto",
+    "kickTitle": "Usuń to konto"
+  },
+  "link": {
+    "label": "Połączone konto",
+    "none": "Brak połączonego konta",
+    "hint": "Połącz ten profil z współdzielonym kontem: konto dziecka zobaczy swoje oszczędności i cele."
+  },
+  "requests": {
+    "title": "Prośby o dostęp",
+    "accept": "Zaakceptuj",
+    "rejectTitle": "Odrzuć"
+  },
+  "myRequest": {
+    "pendingTitle": "Wysłana prośba",
+    "sentTo": "Wysłana do {{name}} ({{email}})"
+  },
+  "join": {
+    "title": "Dołącz do rodziny",
+    "desc": "Wpisz adres e-mail właściciela rodziny, do której chcesz dołączyć. Otrzyma prośbę do zaakceptowania lub odrzucenia.",
+    "rejected": "Twoja ostatnia prośba została odrzucona.",
+    "emailPlaceholder": "adres@przyklad.com",
+    "sending": "Wysyłanie…",
+    "send": "Wyślij prośbę",
+    "emailRequired": "Adres e-mail jest wymagany"
+  },
+  "invite": {
+    "roleLabel": "Zaproś jako",
+    "generate": "Wygeneruj link zaproszenia",
+    "generating": "Generowanie…",
+    "copyTitle": "Kopiuj",
+    "title": "Zaproś członka rodziny",
+    "desc": "Wyślij zaproszenie e-mailem albo sam udostępnij link. Odbiorca tworzy konto przez ten link: dołącza do Twojej rodziny bez dodatkowej opłaty za subskrypcję.",
+    "emailLabel": "Adres e-mail (opcjonalnie)",
+    "emailPlaceholder": "czlonk@przyklad.com",
+    "send": "Wyślij zaproszenie",
+    "sent": "Zaproszenie wysłane na {{email}}.",
+    "sendFailed": "Nie udało się wysłać wiadomości e-mail. Udostępnij poniższy link samodzielnie.",
+    "linkHint": "Ten link jest ważny przez 7 dni. Odbiorca musi utworzyć konto przez ten link, aby dołączyć do Twojej rodziny."
+  },
+  "leave": {
+    "leaving": "Opuszczanie…",
+    "leave": "Opuść współdzieloną rodzinę"
+  },
+  "dialog": {
+    "editTitle": "Edytuj członka",
+    "addTitle": "Dodaj członka",
+    "description": "Uzupełnij dane członka rodziny"
+  },
+  "form": {
+    "name": "Imię i nazwisko",
+    "namePlaceholder": "np. Maria Kowalska",
+    "role": "Rola",
+    "color": "Kolor",
+    "birthdate": "Data urodzenia (opcjonalnie)",
+    "healthInfo": "Informacje zdrowotne",
+    "allergies": "Alergie (oddziel przecinkami)",
+    "allergiesPlaceholder": "np. orzeszki ziemne, laktoza",
+    "medications": "Leki (oddziel przecinkami)",
+    "medicationsPlaceholder": "np. aspiryna, insulina",
+    "emergencyContact": "Kontakt awaryjny",
+    "contactName": "Imię i nazwisko",
+    "contactNamePlaceholder": "np. Jan Nowak",
+    "contactPhone": "Telefon kontaktowy",
+    "contactPhonePlaceholder": "np. +48 555 123 456",
+    "notes": "Notatki (opcjonalnie)",
+    "notesPlaceholder": "Dodatkowe informacje…"
+  },
+  "confirm": {
+    "kick": "Usunąć to konto z rodziny?",
+    "transfer": "Przenieść własność rodziny na {{name}}?\n\nStaniesz się zwykłym członkiem. Wszystkie dane rodziny zostaną zachowane i będą zarządzane przez nowego właściciela. Tej operacji nie można cofnąć.",
+    "delete": "Czy na pewno chcesz usunąć tego członka rodziny?",
+    "leave": "Opuścić współdzieloną rodzinę? Odzyskasz swoje własne dane."
+  },
+  "errors": {
+    "load": "Nie udało się wczytać rodziny.",
+    "save": "Nie udało się zapisać tego członka.",
+    "delete": "Nie udało się usunąć tego członka.",
+    "kick": "Nie udało się usunąć tego członka.",
+    "role": "Nie udało się zmienić roli.",
+    "transfer": "Nie udało się przenieść własności.",
+    "leave": "Nie udało się opuścić rodziny.",
+    "invite": "Nie udało się wygenerować linku zaproszenia.",
+    "cancelRequest": "Nie udało się anulować prośby.",
+    "sendRequest": "Nie udało się wysłać prośby.",
+    "approve": "Nie udało się zatwierdzić prośby.",
+    "reject": "Nie udało się odrzucić prośby."
+  }
+}

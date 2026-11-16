@@ -1,0 +1,37 @@
+{
+  "exit": "Wyjdź",
+  "fullscreen": "Pełny ekran",
+  "exitFullscreen": "Wyjdź z pełnego ekranu",
+  "schedule": "Dzisiejszy plan",
+  "meals": "Dzisiejsze posiłki",
+  "tasks": "Do zrobienia dziś",
+  "whereabouts": "Gdzie dziś jest kto",
+  "shopping": "Lista zakupów",
+  "allDay": "Cały dzień",
+  "undo": "Cofnij",
+  "empty": {
+    "appointments": "Dziś nic nie zaplanowano",
+    "meals": "Brak zaplanowanych posiłków",
+    "tasks": "Wszystko zrobione ✨",
+    "whereabouts": "Dziś nikt nigdzie się nie wybrał",
+    "shopping": "Nic do kupienia"
+  },
+  "displaySettings": {
+    "open": "Ustawienia wyświetlacza",
+    "title": "Ustawienia wyświetlacza",
+    "close": "Zamknij",
+    "location": "Lokalizacja pogody",
+    "searchPlaceholder": "Szukaj miasta…",
+    "noResults": "Brak wyników",
+    "noLocation": "Wybierz lokalizację, aby pokazywać pogodę na tym wyświetlaczu.",
+    "change": "Zmień",
+    "temperatureUnit": "Jednostka temperatury",
+    "photoBackground": "Tło z fotografią",
+    "photoBackgroundHint": "Wyświetla losowe zdjęcia z Twojej biblioteki jako tło. Wymaga podłączonej integracji z Immich."
+  },
+  "settings": {
+    "title": "Wyświetlacz kioskowy",
+    "subtitle": "Pełnoekranowy, do-odczytu wyświetlacz na tablet ścienny lub ekran w lodówce — dzisiejszy kalendarz, posiłki, zadania i lokalizacja rodziny.",
+    "open": "Otwórz wyświetlacz kioskowy"
+  }
+}

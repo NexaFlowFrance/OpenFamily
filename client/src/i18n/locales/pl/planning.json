@@ -1,0 +1,86 @@
+{
+  "loading": "Ładowanie planu…",
+  "noMembers": {
+    "title": "Najpierw dodaj członków rodziny",
+    "subtitle": "Tygodniowe planowanie opiera się na profilach członków rodziny.",
+    "cta": "Przejdź do Rodziny"
+  },
+  "title": "Planowanie tygodniowe",
+  "subtitle": "Stałe godziny pracy i ramówki szkolne, tydzień po tygodniu.",
+  "newEntry": "Nowy wpis",
+  "thisWeek": "Ten tydzień",
+  "allMembers": "Wszyscy członkowie",
+  "allTypes": "Wszystkie typy",
+  "types": {
+    "work": "Praca",
+    "school": "Szkoła",
+    "study": "Nauka",
+    "activity": "Zajęcia",
+    "other": "Inne"
+  },
+  "add": "Dodaj",
+  "nextDayShort": "+1d",
+  "dayFallback": "Dzień {{n}}",
+  "dialog": {
+    "editTitle": "Edytuj wpis",
+    "createTitle": "Nowy wpis",
+    "description": "Zdefiniuj wpis i zastosuj go do jednego lub więcej dni."
+  },
+  "form": {
+    "member": "Członek rodziny",
+    "type": "Typ",
+    "title": "Tytuł",
+    "titlePlaceholder": "np. Biuro — zespół produktowy / Matematyka",
+    "days": "Dotyczące dni",
+    "weekdays": "Pon-Pt",
+    "fullWeek": "Cały tydzień",
+    "selectedDay": "Wybrany dzień: {{day}}",
+    "selectedDays": "Wybrano dni: {{count}}",
+    "start": "Początek",
+    "end": "Koniec",
+    "nextDayHint": "Kończy się następnego dnia (+1 dzień)",
+    "thisWeekOnlyStrong": "Tylko w tym tygodniu",
+    "thisWeekOnlyRest": ". Wpis ma zastosowanie tylko w tygodniu od {{date}}. W przeciwnym razie powtarza się co tydzień.",
+    "replaceConflicts": "Zastąp konfliktujące wpisy w wybranych dniach. Jeśli konflikt istnieje i ta opcja jest wyłączona, te dni zostaną pominięte.",
+    "location": "Lokalizacja (opcjonalnie)",
+    "locationPlaceholder": "np. biuro centralne / Szkoła Podstawowa nr 1",
+    "notes": "Notatki (opcjonalnie)",
+    "notesPlaceholder": "Przydatne informacje, sala, przedmiot, transport…",
+    "participants": "Uczestnicy",
+    "participantsHint": "Wybierz jedną lub więcej osób. Pierwsza z nich nadaje zajęciom kolor."
+  },
+  "submit": {
+    "applyToDays": "Zastosuj do wybranych dni"
+  },
+  "notice": {
+    "saved": "Wpis zapisany.",
+    "savedDays_one": "Zapisano w {{count}} dniu.",
+    "savedDays_few": "Zapisano w {{count}} dniach.",
+    "savedDays_many": "Zapisano w {{count}} dniach.",
+    "savedDaysConflicts_one": "Zapisano w {{count}} dniu. Wykryto konflikty w: {{days}}.",
+    "savedDaysConflicts_few": "Zapisano w {{count}} dniach. Wykryto konflikty w: {{days}}.",
+    "savedDaysConflicts_many": "Zapisano w {{count}} dniach. Wykryto konflikty w: {{days}}.",
+    "skipped": "Pominięto w tej dacie",
+    "restored": "Przywrócono"
+  },
+  "confirmDelete": "Usunąć ten wpis?",
+  "errors": {
+    "loadMembers": "Nie udało się wczytać członków.",
+    "loadEntries": "Nie udało się wczytać planu.",
+    "deleteEntry": "Nie udało się usunąć tego wpisu.",
+    "memberTitleRequired": "Członek rodziny i tytuł są wymagane.",
+    "timesSame": "Godzina rozpoczęcia i zakończenia nie mogą być takie same.",
+    "selectDay": "Wybierz co najmniej jeden dzień.",
+    "save": "Nie udało się zapisać tego wpisu.",
+    "skipOccurrence": "Nie udało się zmienić tego wystąpienia",
+    "skipUnsupported": "Twój serwer nie obsługuje jeszcze pomijania wystąpień. Zaktualizuj go."
+  },
+  "occurrence": {
+    "skip": "Pomiń to wystąpienie",
+    "restore": "Przywróć to wystąpienie"
+  },
+  "appointments": {
+    "badge": "UMÓW",
+    "openCalendar": "Otwórz w kalendarzu"
+  }
+}

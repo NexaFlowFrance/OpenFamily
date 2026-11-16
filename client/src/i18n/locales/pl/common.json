@@ -1,0 +1,108 @@
+{
+  "appName": "OpenFamily",
+  "demo": {
+    "notice": "Tryb demo — Twoje zmiany nie są zapisywane i zostaną usunięte po odświeżeniu.",
+    "reset": "Resetuj",
+    "star": "Oceń na GitHubie"
+  },
+  "language": {
+    "syncError": "Nie udało się zapisać wybranego języka.",
+    "currencySyncError": "Nie udało się zaktualizować domyślnej waluty."
+  },
+  "actions": {
+    "add": "Dodaj",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "saveChanges": "Zapisz zmiany",
+    "close": "Zamknij",
+    "confirm": "Potwierdź",
+    "create": "Utwórz",
+    "update": "Zaktualizuj",
+    "search": "Szukaj",
+    "filter": "Filtruj",
+    "back": "Wstecz",
+    "today": "Dziś",
+    "retry": "Spróbuj ponownie",
+    "apply": "Zastosuj",
+    "reset": "Resetuj",
+    "export": "Eksportuj",
+    "import": "Importuj",
+    "clear": "Wyczyść",
+    "send": "Wyślij",
+    "loadMore": "Pokaż więcej"
+  },
+  "states": {
+    "loading": "Ładowanie…",
+    "saving": "Zapisywanie…",
+    "empty": "Na razie nic tu nie ma",
+    "error": "Wystąpił błąd"
+  },
+  "labels": {
+    "name": "Nazwa",
+    "fullName": "Imię i nazwisko",
+    "description": "Opis",
+    "date": "Data",
+    "time": "Godzina",
+    "startTime": "Początek",
+    "endTime": "Koniec",
+    "location": "Lokalizacja",
+    "notes": "Notatki",
+    "category": "Kategoria",
+    "quantity": "Ilość",
+    "price": "Cena",
+    "amount": "Kwota",
+    "email": "Adres e-mail",
+    "password": "Hasło",
+    "optional": "opcjonalnie",
+    "all": "Wszystkie",
+    "none": "Brak"
+  },
+  "days": [
+    "Poniedziałek",
+    "Wtorek",
+    "Środa",
+    "Czwartek",
+    "Piątek",
+    "Sobota",
+    "Niedziela"
+  ],
+  "daysShort": [
+    "Pon",
+    "Wt",
+    "Śr",
+    "Czw",
+    "Pt",
+    "Sob",
+    "Nd"
+  ],
+  "months": [
+    "Styczeń",
+    "Luty",
+    "Marzec",
+    "Kwiecień",
+    "Maj",
+    "Czerwiec",
+    "Lipiec",
+    "Sierpień",
+    "Wrzesień",
+    "Październik",
+    "Listopad",
+    "Grudzień"
+  ],
+  "monthsShort": [
+    "Sty",
+    "Lut",
+    "Mar",
+    "Kwi",
+    "Maj",
+    "Cze",
+    "Lip",
+    "Sie",
+    "Wrz",
+    "Paź",
+    "Lis",
+    "Gru"
+  ]
+}

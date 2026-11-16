@@ -1,0 +1,146 @@
+{
+  "title": "Ustawienia",
+  "subtitle": "Zarządzaj swoimi danymi i preferencjami.",
+  "language": {
+    "title": "Język",
+    "subtitle": "Wybierz język interfejsu aplikacji."
+  },
+  "profile": {
+    "title": "Zdjęcie profilowe",
+    "subtitle": "Wybierz zdjęcie, które pojawi się w menu aplikacji.",
+    "change": "Zmień zdjęcie",
+    "choose": "Wybierz zdjęcie",
+    "remove": "Usuń"
+  },
+  "notif": {
+    "title": "Powiadomienia push",
+    "subtitle": "Otrzymuj przypomnienia o umówieniach bezpośrednio na tym urządzeniu, nawet gdy aplikacja jest zamknięta.",
+    "unsupported": "Powiadomienia nie są obsługiwane w tej przeglądarce.",
+    "denied": "Brak zgody. Zezwól na powiadomienia w ustawieniach przeglądarki.",
+    "enable": "Włącz powiadomienia",
+    "disable": "Wyłącz powiadomienia",
+    "inProgress": "Przetwarzanie…",
+    "active": "Powiadomienia włączone na tym urządzeniu."
+  },
+  "currency": {
+    "title": "Waluta",
+    "subtitle": "Wybierz walutę używaną do wyświetlania kwot w aplikacji."
+  },
+  "modules": {
+    "title": "Moduły",
+    "subtitle": "Włączaj lub ukrywaj opcjonalne moduły, aby zostawić tylko te, z których korzysta Twoja rodzina.",
+    "parentOnly": "Tylko rodzice mogą zmieniać moduły.",
+    "error": "Błąd podczas aktualizacji modułów.",
+    "names": {
+      "kiosk": "Tryb kioskowy",
+      "notes": "Notatki na pulpicie",
+      "ai": "Asystent AI"
+    },
+    "descriptions": {
+      "budget": "Śledzenie budżetu rodziny, wydatków i dochodów.",
+      "rewards": "Kieszonkowe i nagrody dla dzieci.",
+      "meals": "Tygodniowe planowanie posiłków.",
+      "recipes": "Rodzinna książka przepisów.",
+      "planning": "Tygodniowe harmonogramy (praca, szkoła, zajęcia).",
+      "integrations": "Połączenia z zewnętrznymi usługami (Mealie, Home Assistant…).",
+      "kiosk": "Pełnoekranowy wyświetlacz na wspólny ekran główny.",
+      "notes": "Notatki przyklejone do pulpitu.",
+      "ai": "Inteligentny asystent do szybkiego przechwytywania i organizowania."
+    }
+  },
+  "export": {
+    "title": "Eksport danych",
+    "subtitle": "Pobierz przenośną kopię JSON Twoich danych rodzinnych i preferencji całej rodziny. Poświadczenia logowania, sekrety integracji, powiadomienia i tymczasowe dane bezpieczeństwa nie są dołączone.",
+    "button": "Eksportuj",
+    "inProgress": "Eksportowanie…"
+  },
+  "import": {
+    "title": "Import danych",
+    "subtitle": "Przywróć przenośny eksport OpenFamily. Istniejące rekordy są zachowane, a duplikaty pomijane; preferencje całej rodziny z pliku są przywracane.",
+    "success": "Import zakończony",
+    "chooseFile": "Wybierz plik…",
+    "button": "Importuj",
+    "inProgress": "Importowanie…",
+    "invalidJson": "Nieprawidłowy plik JSON.",
+    "itemsImported": "pozycji zaimportowanych"
+  },
+  "entities": {
+    "family_settings": "Preferencje rodziny",
+    "account_preferences": "Preferencje konta",
+    "family_members": "Członkowie rodziny",
+    "tasks": "Zadania",
+    "recipes": "Przepisy",
+    "meal_plans": "Zaplanowane posiłki",
+    "budget_entries": "Pozycje budżetu",
+    "budget_limits": "Limita budżetu",
+    "shopping_items": "Pozycje zakupów",
+    "shopping_list_templates": "Szablony zakupów",
+    "appointments": "Umówienia",
+    "appointment_recurrence_exceptions": "Wyjątki umówień",
+    "schedule_entries": "Wpisy planowania",
+    "schedule_entry_members": "Uczestnicy planowania",
+    "schedule_entry_exceptions": "Wyjątki planowania",
+    "reward_transactions": "Transakcje nagród",
+    "reward_settings": "Ustawienia nagród",
+    "reward_goals": "Cele oszczędności",
+    "family_notes": "Notatki rodzinne",
+    "recurring_expenses": "Stałe wydatki",
+    "recurring_expense_logs": "Kontrola stałych wydatków",
+    "kakeibo_months": "Miesiące kakeibo",
+    "family_posts": "Posty rodzinne",
+    "family_post_seen": "Status przeczytania postów"
+  },
+  "errors": {
+    "notif": "Błąd podczas konfigurowania powiadomień.",
+    "currency": "Błąd podczas aktualizacji waluty.",
+    "avatarImage": "Wybierz obraz.",
+    "avatarRead": "Nie udało się odczytać pliku.",
+    "avatarInvalid": "Nieprawidłowy obraz.",
+    "avatarCanvas": "Plótno niedostępne.",
+    "avatarUpdate": "Błąd podczas aktualizacji zdjęcia.",
+    "avatarRemove": "Błąd podczas usuwania zdjęcia.",
+    "export": "Błąd podczas eksportu.",
+    "import": "Błąd podczas importu."
+  },
+  "support": {
+    "title": "Wsparcie OpenFamily",
+    "subtitle": "OpenFamily jest darmowe i open source, hostowane na własnym serwerze. Jeśli pomaga Twojej rodzinie, możesz wesprzeć jego rozwój — i tak pozostaje darmowe.",
+    "sponsor": "Kup mi kawę",
+    "star": "Oceń na GitHubie",
+    "sponsorGithub": "Sponsor na GitHubie"
+  },
+  "regional": {
+    "title": "Tydzień",
+    "subtitle": "Wybierz, od którego dnia zaczynają się tygodnie w kalendarzu, planowaniu, posiłkach i na pulpicie. To ustawienie należy tylko do Ciebie.",
+    "weekStart": "Pierwszy dzień tygodnia",
+    "weekStartHelp": "Automatycznie śledzi konwencje Twojego języka i regionu.",
+    "automatic": "Automatycznie ({{day}})",
+    "saveError": "Nie udało się zapisać preferencji.",
+    "days": {
+      "monday": "Poniedziałek",
+      "tuesday": "Wtorek",
+      "wednesday": "Środa",
+      "thursday": "Czwartek",
+      "friday": "Piątek",
+      "saturday": "Sobota",
+      "sunday": "Niedziela"
+    }
+  },
+  "signIn": {
+    "title": "Logowanie",
+    "subtitle": "Jak logujesz się do OpenFamily na tym i innych urządzeniach.",
+    "ssoLinked": "Twoje konto jest połączone z {{name}}.",
+    "ssoNotLinked": "Połącz swoje konto {{name}}, aby logować się przez nie.",
+    "link": "Połącz {{name}}",
+    "unlink": "Rozłącz",
+    "confirmUnlink": "Rozłączyć {{name}}? Będziesz logować się hasłem, a inne urządzenia zostaną wylogowane.",
+    "unlinkNeedsPassword": "Twoje konto nie ma jeszcze hasła. Ustaw je przez „Zapomniałeś hasła?” na stronie logowania, aby móc rozłączyć.",
+    "unlinkPasswordOff": "Logowanie hasłem jest wyłączone na tym serwerze, więc logowanie SSO nie może zostać rozłączone.",
+    "relinkNote": "Po rozłączeniu logowanie przez {{name}} nie otworzy już tego konta. Możesz połączyć je ponownie tutaj.",
+    "linked": "Logowanie SSO zostało połączone.",
+    "unlinked": "Logowanie SSO zostało rozłączone. Inne urządzenia zostały wylogowane.",
+    "logoutEverywhere": "Wyloguj ze wszystkich urządzeń",
+    "logoutEverywhereDesc": "Utracony telefon albo logowanie na wspólnym komputerze? To wyloguje Cię wszędzie, w tym tutaj.",
+    "confirmLogoutEverywhere": "Wylogować ze wszystkich urządzeń, w tym z tego?"
+  }
+}

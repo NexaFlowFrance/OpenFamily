@@ -1,0 +1,86 @@
+{
+  "title": "Integracje",
+  "subtitle": "Połącz swoje aplikacje self-hosted, aby scentralizować przepisy, menu, zakupy i kalendarz.",
+  "connected": "Połączone",
+  "available": "Dostępne",
+  "status": {
+    "error": "Błąd",
+    "connected": "Połączone"
+  },
+  "lastSync": "Synchronizacja: {{date}}",
+  "syncTitle": "Synchronizacja",
+  "disconnectTitle": "Rozłącz",
+  "confirmDisconnect": "Rozłączyć tę integrację?",
+  "modal": {
+    "connect": "Połącz {{name}}",
+    "test": "Test",
+    "testing": "Testowanie…",
+    "connecting": "Łączenie…",
+    "connectBtn": "Połącz",
+    "encrypted": "Poświadczenia są szyfrowane AES-256 i przechowywane wyłącznie na Twoim serwerze.",
+    "error": "Błąd"
+  },
+  "syncs": {
+    "recipes": "Przepisy",
+    "menus": "Menu",
+    "shopping": "Lista zakupów",
+    "stock": "Zapasy",
+    "calendar": "Kalendarz",
+    "appointments": "Umówienia",
+    "photos": "Zdjęcia"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "Menedżer przepisów",
+      "description": "Importuj przepisy i menu z własnej instancji Mealie.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "https://mealie.twojadomena.com",
+      "keyLabel": "Klucz API",
+      "keyPlaceholder": "Z Mealie > Profil > Klucze API"
+    },
+    "tandoor": {
+      "tagline": "Książka przepisów",
+      "description": "Importuj przepisy z Tandoor, menedżera open source.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "https://tandoor.twojadomena.com",
+      "keyLabel": "Token API",
+      "keyPlaceholder": "Z Tandoor > Ustawienia > Tokeny"
+    },
+    "homeassistant": {
+      "tagline": "Inteligentny dom",
+      "description": "Synchronizuj listę zakupów z listą w Home Assistant.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "Token długoterminowy",
+      "tokenPlaceholder": "eyJ… (z Profilu > Bezpieczeństwo)",
+      "entityLabel": "Encje todo (opcjonalnie, oddziel przecinkami)",
+      "entityPlaceholder": "todo.shopping_list, todo.groceries"
+    },
+    "grocy": {
+      "tagline": "Zarządzanie gospodarstwem",
+      "description": "Synchronizuj listę zakupów i zapasy z Grocy.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "https://grocy.twojadomena.com",
+      "keyLabel": "Klucz API",
+      "keyPlaceholder": "Z Grocy > Zarządzanie > Klucze API"
+    },
+    "nextcloud": {
+      "tagline": "Chmura osobista",
+      "description": "Importuj wydarzenia z kalendarza Nextcloud do swoich umówień.",
+      "urlLabel": "Adres URL Nextcloud",
+      "urlPlaceholder": "https://chmura.twojadomena.com",
+      "userLabel": "Nazwa użytkownika",
+      "userPlaceholder": "twoj.nazwa",
+      "passwordLabel": "Hasło (lub hasło aplikacji)",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "Biblioteka zdjęć",
+      "description": "Wyświetlaj losowe zdjęcia z własnej biblioteki Immich jako tło wyświetlacza kioskowego.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "https://immich.twojadomena.com",
+      "keyLabel": "Klucz API",
+      "keyPlaceholder": "Z Immich > Ustawienia konta > Klucze API"
+    }
+  }
+}

@@ -42,15 +42,21 @@ start
 
 echo "[2/5] One volume, and the interface on the same port as the API"
 [ "$(docker inspect "$NAME" --format '{{len .Mounts}}')" = 1 ] || fail "the container has more than its one volume"
-curl -fsS "$BASE/" | grep -q '<div id="root">' || fail "the interface is not served"
-curl -fsS "$BASE/calendar" | grep -q '<div id="root">' || fail "an address of the app opened directly does not give the app"
+# Answers are read into variables before they are searched: with pipefail, a
+# grep that has found its line and left closes the pipe on the command feeding
+# it, and the check fails for having succeeded early.
+PAGE=$(curl -fsS "$BASE/")
+case "$PAGE" in *'<div id="root">'*) ;; *) fail "the interface is not served" ;; esac
+DEEP=$(curl -fsS "$BASE/calendar")
+case "$DEEP" in *'<div id="root">'*) ;; *) fail "an address of the app opened directly does not give the app" ;; esac
 [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/nope")" = 404 ] || fail "an unknown API address is not a 404"
 # The page is checked again at every visit, or an update would not be seen;
 # the files it loads are named after their content and kept for good.
-curl -fsSI "$BASE/" | grep -qi '^cache-control: no-cache' || fail "the page may be kept by the browser across an update"
-ASSET=$(curl -fsS "$BASE/" | grep -o '/assets/[^"]*\.js' | head -n 1)
-[ -n "$ASSET" ] || fail "the page loads no built script"
-curl -fsSI "$BASE$ASSET" | grep -qi '^cache-control:.*immutable' || fail "the built files are not cached for good"
+PAGE_HEADERS=$(curl -fsSI "$BASE/")
+grep -qi '^cache-control: no-cache' <<< "$PAGE_HEADERS" || fail "the page may be kept by the browser across an update"
+[[ "$PAGE" =~ (/assets/[^\"]*\.js) ]] || fail "the page loads no built script"
+ASSET_HEADERS=$(curl -fsSI "$BASE${BASH_REMATCH[1]}")
+grep -qi '^cache-control:.*immutable' <<< "$ASSET_HEADERS" || fail "the built files are not cached for good"
 
 echo "[3/5] The API"
 API_BASE="$BASE" bash "$HERE/smoke-api.sh"
@@ -66,7 +72,14 @@ ZONE=$(curl -fsS "$BASE/api/auth/timezone" -H "Authorization: Bearer $TOKEN" | j
 echo "[5/5] A new container on the same volume"
 docker stop "$NAME" >/dev/null
 [ "$(docker inspect "$NAME" --format '{{.State.ExitCode}}')" = 0 ] || fail "the container did not stop cleanly"
-docker logs "$NAME" 2>&1 | grep -q "database system is shut down" || fail "PostgreSQL was not shut down cleanly"
+# The last thing a clean stop leaves in the log. Read into a variable, not
+# through a pipe: the first start also writes this line, early on, and a grep
+# that stops at it would close the pipe on "docker logs" and fail the check.
+LAST_LINES=$(docker logs --tail=3 "$NAME" 2>&1)
+case "$LAST_LINES" in
+  *"database system is shut down"*) ;;
+  *) fail "PostgreSQL was not shut down cleanly" ;;
+esac
 docker rm "$NAME" >/dev/null
 start
 # The session was signed with a secret made on the first start: it is only

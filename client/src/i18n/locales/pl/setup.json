@@ -1,0 +1,35 @@
+{
+  "welcome": {
+    "title": "Witaj, {{name}}",
+    "text": "Trzy pytania i OpenFamily jest gotowy. Wszystko, co tu pytamy, można później zmienić w Ustawieniach.",
+    "language": "Język"
+  },
+  "family": {
+    "title": "Kto jest w rodzinie?",
+    "text": "Dodaj osoby z gospodarstwa, z kontem albo bez. Data urodzenia dodaje urodziny do kalendarza.",
+    "namePlaceholder": "Imię",
+    "birthdate": "Data urodzenia",
+    "add": "Dodaj kogoś",
+    "remove": "Usuń"
+  },
+  "modules": {
+    "title": "Czego potrzebuje Twoja rodzina?",
+    "text": "Odznacz, czego nie będziesz używać: zniknie z menu, a wróci w każdej chwili z Ustawień."
+  },
+  "done": {
+    "title": "Gotowe",
+    "text": "Twoja rodzina jest skonfigurowana. Trzy rzeczy, które warto zrobić dalej:",
+    "tipInvite": "Zaproś pozostałych dorosłych ze strony Rodzina, aby każdy miał własne logowanie.",
+    "tipPhone": "Postaw OpenFamily na telefonach: aplikacja Android albo „Dodaj do ekranu głównego” z przeglądarki.",
+    "tipHome": "Ułóż stronę główną przyciskiem „Dostosuj”: każdy członek ma własną."
+  },
+  "actions": {
+    "next": "Dalej",
+    "back": "Wstecz",
+    "skip": "Pomiń",
+    "finish": "Zakończ",
+    "open": "Otwórz OpenFamily"
+  },
+  "step": "Krok {{current}} z {{total}}",
+  "error": "Nie udało się zapisać czegoś. Sprawdź połączenie i spróbuj ponownie."
+}

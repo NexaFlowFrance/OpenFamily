@@ -27,11 +27,22 @@
     "change": "Zmień",
     "temperatureUnit": "Jednostka temperatury",
     "photoBackground": "Tło z fotografią",
-    "photoBackgroundHint": "Wyświetla losowe zdjęcia z Twojej biblioteki jako tło. Wymaga podłączonej integracji z Immich."
+    "photoBackgroundHint": "Wyświetla losowe zdjęcia z Twojej biblioteki jako tło. Wymaga podłączonej integracji z Immich.",
+    "screensaver": "Wygaszacz ekranu",
+    "screensaverHint": "Po tym czasie bez dotknięcia ekranu wyświetla zdjęcia lub ruchomy zegar, aby ekran włączony cały dzień nie wypalał się.",
+    "screensaverOff": "Wyłączony",
+    "screensaverMinutes": "{{minutes}} min",
+    "screensaverStyle": "Co pokazuje wygaszacz",
+    "screensaverPhotos": "Zdjęcia",
+    "screensaverClock": "Ruchomy zegar",
+    "screensaverStyleHint": "Zdjęcia pochodzą z Twojej integracji Immich; bez niej pokazywany jest zegar."
   },
   "settings": {
     "title": "Wyświetlacz kioskowy",
     "subtitle": "Pełnoekranowy, do-odczytu wyświetlacz na tablet ścienny lub ekran w lodówce — dzisiejszy kalendarz, posiłki, zadania i lokalizacja rodziny.",
     "open": "Otwórz wyświetlacz kioskowy"
+  },
+  "screensaver": {
+    "wake": "Dotknij ekranu, aby przywrócić wyświetlacz"
   }
 }

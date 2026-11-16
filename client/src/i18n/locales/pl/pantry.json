@@ -1,0 +1,70 @@
+{
+  "header": {
+    "title": "Spiżarnia",
+    "count_one": "{{count}} produkt w domu",
+    "count_few": "{{count}} produkty w domu",
+    "count_many": "{{count}} produktów w domu"
+  },
+  "soon": {
+    "banner_one": "{{count}} produkt wkrótce do zjedzenia",
+    "banner_few": "{{count}} produkty wkrótce do zjedzenia",
+    "banner_many": "{{count}} produktów wkrótce do zjedzenia"
+  },
+  "add": {
+    "title": "Dodaj produkt"
+  },
+  "edit": {
+    "title": "Edytuj produkt"
+  },
+  "empty": "Na razie nic tu nie ma. Dodaj, co masz w domu: produkty do jedzenia w pierwszej kolejności pojawią się na górze.",
+  "form": {
+    "namePlaceholder": "np. mleko, ryż",
+    "quantity": "Ilość",
+    "unit": "Jednostka",
+    "unitPlaceholder": "l, kg, opakowanie",
+    "location": "Gdzie",
+    "expiresOn": "Zdatny do"
+  },
+  "locations": {
+    "fridge": "Lodówka",
+    "freezer": "Mrożarka",
+    "cupboard": "Szafka",
+    "other": "Gdzie indziej"
+  },
+  "barcode": {
+    "label": "Kod kreskowy",
+    "placeholder": "Wpisz albo zeskanuj",
+    "find": "Znajdź",
+    "invalid": "Kod kreskowy to 6–20 cyfr.",
+    "found": "Znaleziono w Open Food Facts.",
+    "known": "Rozpoznano: już miałeś ten produkt.",
+    "unknown": "Nierozpoznany kod. Wpisz nazwę: następnym razem będzie rozpoznany.",
+    "unavailable": "Baza produktów jest niedostępna. Wpisz nazwę."
+  },
+  "scan": {
+    "button": "Skanuj",
+    "title": "Skanuj kod kreskowy",
+    "description": "Umieść kod kreskowy przed kamerą.",
+    "unavailable": "Kamera jest niedostępna. Wpisz kod ręcznie."
+  },
+  "expiry": {
+    "past": "Przeterminowany ({{date}})",
+    "today": "Do zjedzenia dziś",
+    "soon_one": "Zdatny w ciągu {{count}} dnia",
+    "soon_few": "Zdatny w ciągu {{count}} dni",
+    "soon_many": "Zdatny w ciągu {{count}} dni",
+    "date": "Zdatny do {{date}}"
+  },
+  "actions": {
+    "less": "O jeden mniej",
+    "more": "O jeden więcej"
+  },
+  "toShopping": {
+    "button": "Dodaj do listy zakupów",
+    "done": "„{{name}}” dodano do listy zakupów"
+  },
+  "errors": {
+    "load": "Nie udało się wczytać spiżarni.",
+    "save": "Nie udało się zapisać zmiany."
+  }
+}

@@ -1,86 +1,89 @@
 {
-  "loading": "Loading pocket money…",
-  "title": "Pocket money",
-  "subtitle": "Chores earn points, points become pocket money",
-  "empty": "No rewards yet. Add stars to a task to get started!",
-  "streak_one": "{{count}} day in a row",
-  "streak_other": "{{count}} days in a row",
-  "pendingCount_one": "{{count}} pending",
-  "pendingCount_other": "{{count}} pending",
-  "worth": "worth {{amount}}",
+  "loading": "Ładowanie kieszonkowego…",
+  "title": "Kieszonkowe",
+  "subtitle": "Obowiązki dają punkty, punkty zamieniają się w kieszonkowe",
+  "empty": "Brak nagród. Dodaj gwiazdki do zadania, aby zacząć!",
+  "streak_one": "{{count}} dzień z rzędu",
+  "streak_few": "{{count}} dni z rzędu",
+  "streak_many": "{{count}} dni z rzędu",
+  "pendingCount_one": "{{count}} oczekujące",
+  "pendingCount_few": "{{count}} oczekujące",
+  "pendingCount_many": "{{count}} oczekujących",
+  "worth": "wartość {{amount}}",
   "approvals": {
-    "title_one": "{{count}} task to approve",
-    "title_other": "{{count}} tasks to approve",
-    "approve": "Approve",
-    "reject": "Reject"
+    "title_one": "{{count}} zadanie do zatwierdzenia",
+    "title_few": "{{count}} zadania do zatwierdzenia",
+    "title_many": "{{count}} zadań do zatwierdzenia",
+    "approve": "Zatwierdź",
+    "reject": "Odrzuć"
   },
   "actions": {
-    "adjust": "Adjust",
-    "redeem": "Pay out"
+    "adjust": "Dostosuj",
+    "redeem": "Wypłać"
   },
   "types": {
-    "earn": "Points earned",
-    "adjust": "Adjustment",
-    "redeem": "Pocket money paid out"
+    "earn": "Zdobyte punkty",
+    "adjust": "Korekta",
+    "redeem": "Wypłacone kieszonkowe"
   },
   "fields": {
-    "note": "Note (optional)"
+    "note": "Notatka (opcjonalnie)"
   },
   "adjustDialog": {
-    "title": "Adjust {{name}}'s points",
-    "description": "Add a bonus or remove points (negative value)",
-    "points": "Points (+ or −)",
-    "notePlaceholder": "e.g. Helped put away the groceries"
+    "title": "Dostosuj punkty {{name}}",
+    "description": "Dodaj bonus lub odejmij punkty (wartość ujemna)",
+    "points": "Punkty (+ lub −)",
+    "notePlaceholder": "np. Pomógł upakować zakupy"
   },
   "redeemDialog": {
-    "title": "Pay out pocket money to {{name}}",
-    "description": "Available balance: {{balance}} points",
-    "points": "Points to convert",
-    "amount": "Amount to pay out: {{amount}}",
-    "notePlaceholder": "e.g. Piggy bank, cinema trip…"
+    "title": "Wypłać kieszonkowe dla {{name}}",
+    "description": "Dostępny stan: {{balance}} punktów",
+    "points": "Punkty do zamiany",
+    "amount": "Kwota do wypłaty: {{amount}}",
+    "notePlaceholder": "np. Świnka skarbonka, wycieczka do kina…"
   },
   "goals": {
-    "add": "Add a goal",
-    "editTitle": "Edit the goal",
+    "add": "Dodaj cel",
+    "editTitle": "Edytuj cel",
     "progress": "{{current}} / {{target}}",
-    "markAchieved": "Goal achieved 🎉"
+    "markAchieved": "Cel osiągnięty 🎉"
   },
   "goalDialog": {
-    "addTitle": "New goal for {{name}}",
-    "editTitle": "Edit {{name}}'s goal",
-    "description": "A savings goal to reach with points",
+    "addTitle": "Nowy cel dla {{name}}",
+    "editTitle": "Edytuj cel {{name}}",
+    "description": "Cel oszczędności do osiągnięcia punktami",
     "emoji": "Emoji",
-    "titleLabel": "Title",
-    "titlePlaceholder": "e.g. Video game",
-    "target": "Amount to reach ({{currency}})",
-    "delete": "Delete"
+    "titleLabel": "Tytuł",
+    "titlePlaceholder": "np. Gra komputerowa",
+    "target": "Kwota do osiągnięcia ({{currency}})",
+    "delete": "Usuń"
   },
   "kid": {
-    "hello": "Hi {{name}}!",
-    "subtitle": "Here is your piggy bank",
-    "reached": "Well done, you made it! 🎉",
-    "reachedHint": "Ask a parent to confirm your goal.",
-    "missing": "You still need {{amount}}",
-    "editGoal": "Edit my goal",
-    "noGoal": "You don't have a goal yet. Pick a dream to reach!",
-    "addGoal": "Pick my goal",
-    "tasksTitle": "Your missions",
-    "allTasks": "See all",
-    "tasksEmpty": "No missions right now, well done! 🎉",
-    "pendingBadge": "Awaiting approval",
-    "historyTitle": "Your latest activity",
-    "notLinkedTitle": "Your piggy bank is waiting!",
-    "notLinkedMessage": "Ask a parent to link your account to your profile from the Family page to see your points and goals."
+    "hello": "Cześć {{name}}!",
+    "subtitle": "Oto Twoja świnka skarbonka",
+    "reached": "Świetnie, udało Ci się! 🎉",
+    "reachedHint": "Poproś rodzica o potwierdzenie Twojego celu.",
+    "missing": "Brakuje jeszcze {{amount}}",
+    "editGoal": "Edytuj mój cel",
+    "noGoal": "Nie masz jeszcze celu. Wybierz marzenie do osiągnięcia!",
+    "addGoal": "Wybierz mój cel",
+    "tasksTitle": "Twoje misje",
+    "allTasks": "Zobacz wszystkie",
+    "tasksEmpty": "Brak misji, świetnie! 🎉",
+    "pendingBadge": "Oczekuje na zatwierdzenie",
+    "historyTitle": "Twoja ostatnia aktywność",
+    "notLinkedTitle": "Twoja świnka skarbonka czeka!",
+    "notLinkedMessage": "Poproś rodzica o połączenie Twojego konta z profilem ze strony Rodzina, aby zobaczyć punkty i cele."
   },
   "settings": {
-    "rate": "1 point = {{value}}",
-    "title": "Value of one point",
-    "description": "Set the money value of one point",
-    "label": "Value of one point",
-    "example": "Example: {{points}} points = {{amount}}"
+    "rate": "1 punkt = {{value}}",
+    "title": "Wartość jednego punktu",
+    "description": "Ustaw wartość pieniężną jednego punktu",
+    "label": "Wartość jednego punktu",
+    "example": "Przykład: {{points}} punktów = {{amount}}"
   },
   "errors": {
-    "load": "Unable to load pocket money.",
-    "action": "Unable to perform this action."
+    "load": "Nie udało się wczytać kieszonkowego.",
+    "action": "Nie udało się wykonać tej akcji."
   }
 }

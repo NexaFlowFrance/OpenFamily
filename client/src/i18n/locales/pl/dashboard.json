@@ -72,5 +72,18 @@
     "notSeen": "Nikt jeszcze nie obejrzał",
     "seen": "Obejrzane",
     "markSeen": "Oznacz jako obejrzane"
+  },
+  "cards": {
+    "tasks": "Do zrobienia",
+    "meals": "Na dzisiejszym menu",
+    "shopping": "Do kupienia",
+    "birthdays": "Urodziny",
+    "eatSoon": "Wkrótce do zjedzenia",
+    "seeAll": "Wszystkie",
+    "tasksEmpty": "Nic więcej do zrobienia.",
+    "mealsEmpty": "Na dziś nic nie zaplanowano.",
+    "shoppingEmpty": "Lista jest pusta.",
+    "birthdaysEmpty": "W nadchodzących miesiącach brak urodzin. Dodaj daty urodzenia na stronie Rodzina.",
+    "pantryEmpty": "Nic wkrótce do zjedzenia."
   }
 }

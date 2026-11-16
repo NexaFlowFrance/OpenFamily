@@ -12,14 +12,15 @@
     "family": "Rodzina",
     "integrations": "Integracje",
     "settings": "Ustawienia",
-    "posts": "Posty"
+    "posts": "Posty",
+    "pantry": "spiżarnia"
   },
   "mobile": {
     "home": "Start",
-    "planning": "Plan",
-    "lists": "Listy",
-    "budget": "Budżet",
-    "family": "Rodzina"
+    "calendar": "Kalendarz",
+    "tasks": "Zadania",
+    "shopping": "Zakupy",
+    "more": "Więcej"
   },
   "quickActions": {
     "title": "Szybkie akcje",
@@ -78,5 +79,10 @@
   },
   "rail": {
     "label": "Sekcje"
+  },
+  "more": {
+    "title": "Wszystko inne",
+    "darkTheme": "Ciemny motyw",
+    "lightTheme": "Jasny motyw"
   }
 }

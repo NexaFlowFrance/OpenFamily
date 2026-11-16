@@ -1,86 +1,116 @@
 {
-  "title": "Integrations",
-  "subtitle": "Connect your self-hosted apps to centralize recipes, menus, shopping and calendar.",
-  "connected": "Connected",
-  "available": "Available",
+  "title": "Integracje",
+  "subtitle": "Połącz swoje aplikacje self-hosted, aby scentralizować przepisy, menu, zakupy i kalendarz.",
+  "connected": "Połączone",
+  "available": "Dostępne",
   "status": {
-    "error": "Error",
-    "connected": "Connected"
+    "error": "Błąd",
+    "connected": "Połączone"
   },
-  "lastSync": "Synced {{date}}",
-  "syncTitle": "Sync",
-  "disconnectTitle": "Disconnect",
-  "confirmDisconnect": "Disconnect this integration?",
+  "lastSync": "Synchronizacja: {{date}}",
+  "syncTitle": "Synchronizacja",
+  "disconnectTitle": "Rozłącz",
+  "confirmDisconnect": "Rozłączyć tę integrację?",
   "modal": {
-    "connect": "Connect {{name}}",
+    "connect": "Połącz {{name}}",
     "test": "Test",
-    "testing": "Testing…",
-    "connecting": "Connecting…",
-    "connectBtn": "Connect",
-    "encrypted": "Credentials are AES-256 encrypted and stored on your server only.",
-    "error": "Error"
+    "testing": "Testowanie…",
+    "connecting": "Łączenie…",
+    "connectBtn": "Połącz",
+    "encrypted": "Poświadczenia są szyfrowane AES-256 i przechowywane wyłącznie na Twoim serwerze.",
+    "error": "Błąd"
   },
   "syncs": {
-    "recipes": "Recipes",
-    "menus": "Menus",
-    "shopping": "Shopping list",
-    "stock": "Stock",
-    "calendar": "Calendar",
-    "appointments": "Appointments",
-    "photos": "Photos"
+    "recipes": "Przepisy",
+    "menus": "Menu",
+    "shopping": "Lista zakupów",
+    "stock": "Zapasy",
+    "calendar": "Kalendarz",
+    "appointments": "Umówienia",
+    "photos": "Zdjęcia"
   },
   "catalog": {
     "mealie": {
-      "tagline": "Recipe manager",
-      "description": "Import your recipes and menus from your self-hosted Mealie instance.",
-      "urlLabel": "Instance URL",
-      "urlPlaceholder": "https://mealie.mydomain.com",
-      "keyLabel": "API key",
-      "keyPlaceholder": "From Mealie > Profile > API keys"
+      "tagline": "Menedżer przepisów",
+      "description": "Importuj przepisy i menu z własnej instancji Mealie.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "https://mealie.twojadomena.com",
+      "keyLabel": "Klucz API",
+      "keyPlaceholder": "Z Mealie > Profil > Klucze API"
     },
     "tandoor": {
-      "tagline": "Recipe book",
-      "description": "Import your recipes from Tandoor, the open-source manager.",
-      "urlLabel": "Instance URL",
-      "urlPlaceholder": "https://tandoor.mydomain.com",
-      "keyLabel": "API token",
-      "keyPlaceholder": "From Tandoor > Settings > Tokens"
+      "tagline": "Książka przepisów",
+      "description": "Importuj przepisy z Tandoor, menedżera open source.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "https://tandoor.twojadomena.com",
+      "keyLabel": "Token API",
+      "keyPlaceholder": "Z Tandoor > Ustawienia > Tokeny"
     },
     "homeassistant": {
-      "tagline": "Smart home",
-      "description": "Sync your shopping list with the Home Assistant list.",
-      "urlLabel": "Instance URL",
+      "tagline": "Inteligentny dom",
+      "description": "Synchronizuj listę zakupów z listą w Home Assistant.",
+      "urlLabel": "Adres URL instancji",
       "urlPlaceholder": "http://homeassistant.local:8123",
-      "tokenLabel": "Long-lived token",
-      "tokenPlaceholder": "eyJ… (from Profile > Security)",
-      "entityLabel": "Todo entities (optional, comma-separated)",
+      "tokenLabel": "Token długoterminowy",
+      "tokenPlaceholder": "eyJ… (z Profilu > Bezpieczeństwo)",
+      "entityLabel": "Encje todo (opcjonalnie, oddziel przecinkami)",
       "entityPlaceholder": "todo.shopping_list, todo.groceries"
     },
     "grocy": {
-      "tagline": "Household management",
-      "description": "Sync your shopping list and stock from Grocy.",
-      "urlLabel": "Instance URL",
-      "urlPlaceholder": "https://grocy.mydomain.com",
-      "keyLabel": "API key",
-      "keyPlaceholder": "From Grocy > Manage > API keys"
+      "tagline": "Zarządzanie gospodarstwem",
+      "description": "Synchronizuj listę zakupów i zapasy z Grocy.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "https://grocy.twojadomena.com",
+      "keyLabel": "Klucz API",
+      "keyPlaceholder": "Z Grocy > Zarządzanie > Klucze API"
     },
     "nextcloud": {
-      "tagline": "Personal cloud",
-      "description": "Import your Nextcloud calendar events into your appointments.",
-      "urlLabel": "Nextcloud URL",
-      "urlPlaceholder": "https://cloud.mydomain.com",
-      "userLabel": "Username",
-      "userPlaceholder": "your.username",
-      "passwordLabel": "Password (or app password)",
+      "tagline": "Chmura osobista",
+      "description": "Importuj wydarzenia z kalendarza Nextcloud do swoich umówień.",
+      "urlLabel": "Adres URL Nextcloud",
+      "urlPlaceholder": "https://chmura.twojadomena.com",
+      "userLabel": "Nazwa użytkownika",
+      "userPlaceholder": "twoj.nazwa",
+      "passwordLabel": "Hasło (lub hasło aplikacji)",
       "passwordPlaceholder": "****"
     },
     "immich": {
-      "tagline": "Photo library",
-      "description": "Show random photos from your self-hosted Immich library as the kiosk display background.",
-      "urlLabel": "Instance URL",
-      "urlPlaceholder": "https://immich.mydomain.com",
-      "keyLabel": "API key",
-      "keyPlaceholder": "From Immich > Account settings > API keys"
+      "tagline": "Biblioteka zdjęć",
+      "description": "Wyświetlaj losowe zdjęcia z własnej biblioteki Immich jako tło wyświetlacza kioskowego.",
+      "urlLabel": "Adres URL instancji",
+      "urlPlaceholder": "https://immich.twojadomena.com",
+      "keyLabel": "Klucz API",
+      "keyPlaceholder": "Z Immich > Ustawienia konta > Klucze API"
+    }
+  },
+  "outside": {
+    "title": "Łączy się też z",
+    "subtitle": "Konfigurujesz w drugiej aplikacji lub w Ustawieniach.",
+    "items": {
+      "gladys": {
+        "name": "Gladys Assistant",
+        "desc": "Kalendarz rodziny, lista zakupów i zadania w Gladys, asyście domowym open source. Instalacja ze sklepu integracji Gladys, z tokenem API tworzonym w Ustawieniach."
+      },
+      "api": {
+        "name": "Home Assistant, n8n, skrypty",
+        "desc": "Dokumentowane API, osobiste tokeny i webhooki: Twoje automatyzacje czytają dzień rodziny i dodają do jej list."
+      },
+      "calendars": {
+        "name": "Google Calendar, Apple Calendar, Outlook",
+        "desc": "Subskrybuj kalendarz rodziny z dowolnej aplikacji kalendarzowej albo śledź ich kalendarz w OpenFamily."
+      },
+      "displays": {
+        "name": "Ramki e-paper i ekrany ścienne",
+        "desc": "Strona dnia rodziny bez logowania — dla ramki e-paper, czytnika e-booków czy dowolnego ekranu."
+      },
+      "ai": {
+        "name": "Ollama i dostawcy AI",
+        "desc": "Opcjonalny asystent z modelem lokalnym albo API zgodnym z OpenAI, Anthropic Claude lub Google Gemini."
+      },
+      "sso": {
+        "name": "Logowanie jednorazowe (SSO)",
+        "desc": "Loguj się przez Authentik, Keycloak, Pocket ID lub dowolny dostawca OpenID Connect. Konfigurujesz na serwerze."
+      }
     }
   }
 }

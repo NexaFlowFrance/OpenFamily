@@ -2,7 +2,7 @@
   <img src="client/public/OpenFamily.png" alt="OpenFamily" width="90">
   <h1>OpenFamily</h1>
   <p><strong>Application de gestion familiale open source, auto-hébergeable</strong><br>
-  Gardez le contrôle total de vos données : hébergez-la sur votre propre serveur.</p>
+  Gardez le contrôle total de vos données : hébergez-la sur votre propre serveur, ou laissez-nous l'héberger pour vous en France.</p>
 
   🇬🇧 <a href="README.md">English</a> · 🇫🇷 <strong>Français</strong> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a>
 
@@ -15,6 +15,19 @@
 ---
 
 > 🎬 **[Essayez la démo en ligne](https://openfamily.fr/demo/)** : aucune inscription, rien n'est enregistré.
+
+OpenFamily est une **alternative auto-hébergée à des applications comme Cozi ou FamilyWall** : listes de courses, tâches, agenda partagé, planning de la semaine, recettes, repas, garde-manger et budget du foyer, au même endroit, sur votre propre serveur.
+
+## 🌟 Ce qui le distingue
+
+| | |
+|---|---|
+| 📱 **Une vraie application Android** | Un [APK](https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily.apk) qui se connecte à votre propre serveur, tenu à jour avec Obtainium. Sur les autres téléphones, l'application web s'installe sur l'écran d'accueil. |
+| 🔌 **Ouvert au reste de la maison** | Une [API documentée](API.md) avec jetons personnels et webhooks, et des intégrations avec Home Assistant, [Gladys Assistant](https://github.com/NexaFlowFrance/gladys-openfamily), Mealie, Tandoor, Grocy et Nextcloud. Votre domotique peut lire la journée de la famille et compléter la liste de courses. |
+| 🖼️ **À l'aise sur un mur** | Un mode kiosque pour une tablette dans la cuisine, avec écran de veille, et des pages sans connexion pensées pour un cadre e-paper ou une liseuse. |
+| 🤖 **Un assistant qui peut rester à la maison** | Ajoutez des éléments en langage naturel et recevez des idées de menus à partir de vos recettes, avec un modèle local via Ollama ou le fournisseur de votre choix. Facultatif, et éteint tant que vous ne l'avez pas configuré. |
+| 🐳 **En service en une commande** | [Un seul conteneur](#-docker-en-une-commande), rien à configurer. Sous Windows, un installateur sans Docker du tout. |
+| ☁️ **Ou hébergé pour vous** | [OpenFamily Cloud](https://openfamily.fr/#cloud) fait tourner la même application open source sur des serveurs en France, pour les familles qui préfèrent ne pas en gérer un. Vous pouvez tout exporter et passer sur votre propre serveur quand vous le voulez. |
 
 ## 🎯 Fonctionnalités
 
@@ -33,6 +46,7 @@
 | 🔔 **Notifications** | Rappels de rendez-vous, alertes tâches (Web Push VAPID) + in-app |
 | 🖼️ **Écrans muraux et e-paper** | Mode kiosque plein écran pour une tablette, avec un économiseur d'écran (photos ou horloge mobile) pour les écrans allumés toute la journée, et **liens d'affichage** : une page sans connexion qui montre la journée de la famille sur un cadre e-paper (InkyPi), une liseuse ou tout écran qui ne peut pas ouvrir de session |
 | 🔌 **API, jetons et webhooks** | Une [API documentée](API.md) pour Home Assistant, Gladys Assistant, n8n ou un script : des jetons personnels en lecture seule ou en écriture, révocables à tout moment, le temps réel par WebSocket, et des webhooks qui préviennent vos outils quand les données de la famille changent |
+| 🤖 **Assistant IA** *(facultatif)* | Dites-le en langage naturel (« lasagnes jeudi soir et rappelle à Mia son sac de piscine ») et chaque chose va au bon endroit ; recevez aussi des idées de menus à partir de vos recettes. Fonctionne avec un modèle local (Ollama), toute API compatible OpenAI, Anthropic Claude ou Google Gemini |
 | 👥 **Comptes partagés** | Invitations par lien, demandes d'accès, transfert de propriété |
 | 🔑 **Connexion unique (SSO)** | Connexion avec votre propre fournisseur OpenID Connect (Authentik, Keycloak, Pocket ID...), serveurs 100 % SSO en option, **déconnexion de tous les appareils** |
 | 🛡️ **Rôles & permissions** | Comptes **parent / enfant**, avec un budget en lecture seule pour les enfants |

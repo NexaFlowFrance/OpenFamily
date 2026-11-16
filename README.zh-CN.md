@@ -27,8 +27,19 @@
 </div>
 
 OpenFamily 是 **Cozi 和 FamilyWall 等应用的自托管替代方案**：将购物清单、
-任务、共享日历、每周计划、食谱、餐食计划和家庭预算整合在一起，
+任务、共享日历、每周计划、食谱、餐食计划、储藏和家庭预算整合在一起，
 运行在你自己的服务器上。
+
+## 🌟 与众不同之处
+
+| | |
+|---|---|
+| 📱 **真正的 Android 应用** | 一个连接到你自己服务器的 [APK](https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily.apk)，可通过 Obtainium 保持更新。在其他手机上，Web 应用可以安装到主屏幕。 |
+| 🔌 **向家里的其他系统开放** | 带个人令牌和 Webhook 的[文档化 API](API.md)，并集成 Home Assistant、[Gladys Assistant](https://github.com/NexaFlowFrance/gladys-openfamily)、Mealie、Tandoor、Grocy 和 Nextcloud。你的智能家居可以读取家庭当天的安排，并往购物清单里添加物品。 |
+| 🖼️ **适合挂在墙上** | 为厨房平板准备的信息屏模式（带屏保），以及为电子墨水相框或电子阅读器设计的免登录页面。 |
+| 🤖 **可以留在家里的助手** | 用自然语言添加内容，并根据你自己的食谱获得菜单建议；可通过 Ollama 使用本地模型，也可选择其他服务商。可选功能，未配置前保持关闭。 |
+| 🐳 **一条命令即可运行** | [一个容器](#-docker一条命令)，无需任何配置。在 Windows 上还有完全不需要 Docker 的安装程序。 |
+| ☁️ **或由我们托管** | [OpenFamily Cloud](https://openfamily.fr/#cloud) 在法国的服务器上运行同一个开源应用，适合不想自己维护服务器的家庭。你可以随时导出全部数据并迁移到自己的服务器。 |
 
 ## ✨ 功能
 
@@ -47,6 +58,7 @@ OpenFamily 是 **Cozi 和 FamilyWall 等应用的自托管替代方案**：将�
 | 🔔 **通知** | 日程提醒、任务警报（Web Push VAPID）和应用内通知 |
 | 🖼️ **壁挂屏与电子墨水屏** | 适用于平板的全屏信息屏模式（带屏幕保护：照片或移动时钟，适合全天开启的屏幕），以及**显示屏链接**：无需登录即可在电子墨水相框（InkyPi）、电子书阅读器或任何无法登录的屏幕上显示家庭当日安排 |
 | 🔌 **API、令牌与 Webhook** | 面向 Home Assistant、Gladys Assistant、n8n 或脚本的[API 文档](API.md)：只读或读写、可随时撤销的个人令牌，基于 WebSocket 的实时更新，以及在家庭数据变化时通知你的工具的 Webhook |
+| 🤖 **AI 助手**（可选） | 用自然语言说出需求（“周四晚上吃千层面，并提醒 Mia 带游泳包”），内容会自动归入相应位置；还能根据你的食谱获得菜单建议。支持本地模型（Ollama）、任何兼容 OpenAI 的 API、Anthropic Claude 或 Google Gemini |
 | 👥 **共享账号** | 通过链接邀请、**访问请求**、**所有权转让** |
 | 🔑 **单点登录** | 使用您自己的 OpenID Connect 身份提供商登录（Authentik、Keycloak、Pocket ID……），可选仅限 SSO 的服务器，**在所有设备上退出登录** |
 | 🛡️ **角色与权限** | **家长/孩子**账号，孩子只能以只读方式查看预算 |
@@ -174,6 +186,8 @@ npm run dev
 | 开源（AGPL-3.0） | ✅ | ❌ |
 | 无广告、无跟踪 | ✅ | ❌ |
 | 自托管集成（Gladys Assistant、Home Assistant、Mealie、Grocy 等） | ✅ | ❌ |
+| 带令牌和 Webhook 的文档化 API | ✅ | ❌ |
+| 可在本地模型上运行的 AI 助手 | ✅ | ❌ |
 | 离线工作（PWA） | ✅ | ⚠️ |
 
 ## 🧰 技术栈

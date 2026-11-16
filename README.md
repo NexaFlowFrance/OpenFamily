@@ -2,7 +2,7 @@
   <img src="client/public/OpenFamily.png" alt="OpenFamily" width="90">
   <h1>OpenFamily</h1>
   <p><strong>The open-source, self-hosted family organizer</strong><br>
-  Keep full control of your family's data: run it on your own server.</p>
+  Keep full control of your family's data: run it on your own server, or let us host it for you in France.</p>
 
   🇬🇧 <strong>English</strong> · 🇫🇷 <a href="README.fr.md">Français</a> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a>
 
@@ -27,8 +27,19 @@
 </div>
 
 OpenFamily is a **self-hosted alternative to apps like Cozi or FamilyWall**: shopping lists,
-tasks, a shared calendar, weekly planning, recipes, meal planning and a household budget,
-all in one place, on your own server.
+tasks, a shared calendar, weekly planning, recipes, meal planning, a pantry and a household
+budget, all in one place, on your own server.
+
+## 🌟 What sets it apart
+
+| | |
+|---|---|
+| 📱 **A real Android app** | An [APK](https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily.apk) that connects to your own server, kept up to date with Obtainium. On any other phone, the web app installs to the home screen. |
+| 🔌 **Open to the rest of the house** | A [documented API](API.md) with personal tokens and webhooks, and integrations with Home Assistant, [Gladys Assistant](https://github.com/NexaFlowFrance/gladys-openfamily), Mealie, Tandoor, Grocy and Nextcloud. Your home automation can read the family's day and add to the shopping list. |
+| 🖼️ **At home on a wall** | A kiosk mode for a tablet in the kitchen, with a screensaver, and login-free pages made for an e-paper frame or an e-reader. |
+| 🤖 **An assistant that can stay at home** | Add things in plain language and get menu ideas from your own recipes, with a local model through Ollama or the provider of your choice. Optional, and off until you set it up. |
+| 🐳 **Running in one command** | [One container](#-docker-in-one-command), nothing to configure. On Windows, an installer with no Docker at all. |
+| ☁️ **Or hosted for you** | [OpenFamily Cloud](https://openfamily.fr/#cloud) runs the same open-source app on servers in France, for families who would rather not run one. You can export everything and move to your own server whenever you want. |
 
 ## ✨ Features
 
@@ -47,6 +58,7 @@ all in one place, on your own server.
 | 🔔 **Notifications** | Appointment reminders, task alerts (Web Push VAPID) + in-app |
 | 🖼️ **Wall & e-paper displays** | Full-screen kiosk for a tablet, with a screensaver (photos or a moving clock) for screens left on all day, and **display links**: a login-free page of the family's day for an e-paper frame (InkyPi), an e-reader or any screen that cannot sign in |
 | 🔌 **API, tokens & webhooks** | A [documented API](API.md) for Home Assistant, Gladys Assistant, n8n or a script: personal tokens, read-only or read-write and revocable at any time, real-time updates over WebSocket, and webhooks that call your tools when the family's data changes |
+| 🤖 **AI assistant** *(optional)* | Say it in plain language ("lasagna on Thursday evening, and remind Mia about her swimming bag") and it lands in the right place, and get menu ideas from your recipes. Works with a local model (Ollama), any OpenAI-compatible API, Anthropic Claude or Google Gemini |
 | 👥 **Shared accounts** | Invite by link, **access requests**, **ownership transfer** |
 | 🔑 **Single sign-on** | Sign in with your own OpenID Connect provider (Authentik, Keycloak, Pocket ID...), optional SSO-only servers, **sign out of all devices** |
 | 🛡️ **Roles & permissions** | **Parent / child** accounts, with a read-only budget for children |
@@ -180,6 +192,8 @@ npm run dev
 | Open source (AGPL-3.0) | ✅ | ❌ |
 | No ads, no tracking | ✅ | ❌ |
 | Self-hosted integrations (Gladys Assistant, Home Assistant, Mealie, Grocy…) | ✅ | ❌ |
+| A documented API, with tokens and webhooks | ✅ | ❌ |
+| An AI assistant that can run on a local model | ✅ | ❌ |
 | Works offline (PWA) | ✅ | ⚠️ |
 
 ## 🧰 Tech stack

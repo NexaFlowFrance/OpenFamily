@@ -14,7 +14,7 @@ services:
   app:
     # The web interface, the API and PostgreSQL in one container. Its secrets
     # are generated on the first start and kept in /data.
-    image: ghcr.io/nexaflowfrance/openfamily:2.2.0
+    image: ghcr.io/nexaflowfrance/openfamily:2.2.0@sha256:111e6f95ab31082ce5ffab25501ec26142950cb42a6df6be6f2bee5a6c18af0e
     restart: on-failure
     stop_grace_period: 1m
     volumes:

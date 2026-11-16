@@ -16,10 +16,15 @@
   },
   "mobile": {
     "home": "首页",
-    "planning": "计划",
-    "lists": "清单",
-    "budget": "预算",
-    "family": "家庭"
+    "calendar": "日历",
+    "tasks": "任务",
+    "shopping": "购物",
+    "more": "更多"
+  },
+  "more": {
+    "title": "其他功能",
+    "darkTheme": "深色主题",
+    "lightTheme": "浅色主题"
   },
   "quickActions": {
     "title": "快捷操作",

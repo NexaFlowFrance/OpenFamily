@@ -13,7 +13,6 @@ import {
     UtensilsCrossed,
     Wallet,
     Users,
-    Settings,
     Moon,
     Sun,
     LogOut,
@@ -21,8 +20,6 @@ import {
     X,
     Plus,
     WifiOff,
-    Plug,
-    PiggyBank,
     MessageSquare,
     MonitorPlay,
 } from 'lucide-react';
@@ -31,36 +28,11 @@ import { Button } from '../ui/Button';
 import { NotificationBell } from '../ui/NotificationBell';
 import { DemoBanner } from '../app/DemoBanner';
 import { MagicInputButton } from '../app/MagicInput';
+import { NAVIGATION, MOBILE_TABS, MORE_TAB, isOnMobileTab, isRouteActive } from './navigation';
 
 interface LayoutProps {
     children: ReactNode;
 }
-
-// `module` ties a nav entry to an optional module key (see TOGGLEABLE_MODULES on
-// the server). Entries without a `module` are always-on and can never be hidden.
-const navigation: { labelKey: string; href: string; icon: typeof Home; module?: string }[] = [
-    { labelKey: 'items.today', href: '/', icon: Home },
-    { labelKey: 'items.shopping', href: '/shopping', icon: ShoppingCart },
-    { labelKey: 'items.tasks', href: '/tasks', icon: CheckSquare },
-    { labelKey: 'items.posts', href: '/posts', icon: MessageSquare },
-    { labelKey: 'items.rewards', href: '/rewards', icon: PiggyBank, module: 'rewards' },
-    { labelKey: 'items.calendar', href: '/calendar', icon: CalendarIcon },
-    { labelKey: 'items.planning', href: '/planning', icon: CalendarDays, module: 'planning' },
-    { labelKey: 'items.recipes', href: '/recipes', icon: ChefHat, module: 'recipes' },
-    { labelKey: 'items.meals', href: '/meal-planning', icon: UtensilsCrossed, module: 'meals' },
-    { labelKey: 'items.budget', href: '/budget', icon: Wallet, module: 'budget' },
-    { labelKey: 'items.family', href: '/family', icon: Users },
-    { labelKey: 'items.integrations', href: '/integrations', icon: Plug, module: 'integrations' },
-    { labelKey: 'items.settings', href: '/settings', icon: Settings },
-];
-
-const mobileTabs: { labelKey: string; href: string; icon: typeof Home; module?: string }[] = [
-    { labelKey: 'mobile.home', href: '/', icon: Home },
-    { labelKey: 'mobile.planning', href: '/planning', icon: CalendarDays, module: 'planning' },
-    { labelKey: 'mobile.lists', href: '/shopping', icon: ShoppingCart },
-    { labelKey: 'mobile.budget', href: '/budget', icon: Wallet, module: 'budget' },
-    { labelKey: 'mobile.family', href: '/family', icon: Users },
-];
 
 const quickActions: { labelKey: string; href: string; icon: typeof Home; module?: string }[] = [
     { labelKey: 'quickActions.addShopping', href: '/shopping', icon: ShoppingCart },
@@ -74,13 +46,6 @@ const quickActions: { labelKey: string; href: string; icon: typeof Home; module?
     { labelKey: 'quickActions.addMember', href: '/family', icon: Users },
 ];
 
-const isRouteActive = (pathname: string, href: string) => {
-    if (href === '/') {
-        return pathname === '/';
-    }
-    return pathname === href || pathname.startsWith(`${href}/`);
-};
-
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
     const { t } = useTranslation('nav');
@@ -88,8 +53,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { setTheme, actualTheme } = useTheme();
 
     // Hide entries whose optional module the family has disabled.
-    const visibleNavigation = navigation.filter((item) => !item.module || isModuleEnabled(item.module));
-    const visibleMobileTabs = mobileTabs.filter((item) => !item.module || isModuleEnabled(item.module));
+    const visibleNavigation = NAVIGATION.filter((item) => !item.module || isModuleEnabled(item.module));
+    // The phone's bottom bar: four everyday sections, then "More" for the rest.
+    const mobileTabs = [...MOBILE_TABS, MORE_TAB];
+    const onMobileTab = isOnMobileTab(location.pathname);
+    const onMoreGrid = location.pathname === MORE_TAB.href;
     const visibleQuickActions = quickActions.filter((item) => !item.module || isModuleEnabled(item.module));
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
     const [quickActionsOpen, setQuickActionsOpen] = React.useState(false);
@@ -106,7 +74,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         };
     }, []);
 
-    const currentPage = navigation.find((item) => isRouteActive(location.pathname, item.href));
+    const currentPage = NAVIGATION.find((item) => isRouteActive(location.pathname, item.href));
+    const pageTitle = currentPage
+        ? t(currentPage.labelKey)
+        : location.pathname === MORE_TAB.href ? t(MORE_TAB.labelKey) : t('pageTitleFallback');
 
     const toggleTheme = () => {
         setTheme(actualTheme === 'dark' ? 'light' : 'dark');
@@ -271,13 +242,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     setQuickActionsOpen(false);
                                     setSidebarOpen(true);
                                 }}
-                                className="rounded-input p-2 text-muted-foreground hover:bg-surface-2 lg:hidden"
+                                // On a phone the bottom bar's "More" holds the menu; this
+                                // button is for the medium widths, next to the rail.
+                                className="hidden rounded-input p-2 text-muted-foreground hover:bg-surface-2 md:block lg:hidden"
                                 aria-label={t('user.openMenu')}
                             >
                                 <Menu className="h-5 w-5" />
                             </button>
                             <h1 className="text-caption font-semibold text-foreground">
-                                {currentPage ? t(currentPage.labelKey) : t('pageTitleFallback')}
+                                {pageTitle}
                             </h1>
                         </div>
 
@@ -333,17 +306,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </main>
             </div>
 
-            <button
-                type="button"
-                onClick={() => {
-                    setSidebarOpen(false);
-                    setQuickActionsOpen((open) => !open);
-                }}
-                className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98] md:bottom-6 lg:hidden"
-                aria-label={t('quickActions.title')}
-            >
-                <Plus className="h-6 w-6" />
-            </button>
+            {/* Nothing to add from the grid of sections: the button would only sit on its last row. */}
+            {!onMoreGrid && (
+                <button
+                    type="button"
+                    onClick={() => {
+                        setSidebarOpen(false);
+                        setQuickActionsOpen((open) => !open);
+                    }}
+                    className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-surface-hover transition-all duration-fast ease-soft hover:bg-primary-hover active:scale-[0.98] md:bottom-6 lg:hidden"
+                    aria-label={t('quickActions.title')}
+                >
+                    <Plus className="h-6 w-6" />
+                </button>
+            )}
 
             <div
                 className={cn(
@@ -376,15 +352,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur md:hidden">
                 <div
                     className="grid gap-1 px-2 py-2"
-                    style={{ gridTemplateColumns: `repeat(${visibleMobileTabs.length}, minmax(0, 1fr))` }}
+                    style={{ gridTemplateColumns: `repeat(${mobileTabs.length}, minmax(0, 1fr))` }}
                 >
-                    {visibleMobileTabs.map((item) => {
+                    {mobileTabs.map((item) => {
                         const Icon = item.icon;
-                        const active = isRouteActive(location.pathname, item.href);
+                        // "More" is lit for every page reached through it.
+                        const active = item.href === MORE_TAB.href ? !onMobileTab : isRouteActive(location.pathname, item.href);
                         return (
                             <Link
                                 key={item.labelKey}
                                 to={item.href}
+                                aria-current={active ? 'page' : undefined}
                                 className={cn(
                                     'flex flex-col items-center justify-center gap-1 rounded-input px-1 py-2',
                                     active

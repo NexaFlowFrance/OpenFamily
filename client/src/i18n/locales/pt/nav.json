@@ -16,10 +16,15 @@
   },
   "mobile": {
     "home": "Início",
-    "planning": "Planejamento",
-    "lists": "Listas",
-    "budget": "Orçamento",
-    "family": "Família"
+    "calendar": "Agenda",
+    "tasks": "Tarefas",
+    "shopping": "Compras",
+    "more": "Mais"
+  },
+  "more": {
+    "title": "Todo o resto",
+    "darkTheme": "Tema escuro",
+    "lightTheme": "Tema claro"
   },
   "quickActions": {
     "title": "Ações rápidas",

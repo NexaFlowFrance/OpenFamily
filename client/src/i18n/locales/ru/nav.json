@@ -16,10 +16,15 @@
   },
   "mobile": {
     "home": "Главная",
-    "planning": "Расписание",
-    "lists": "Списки",
-    "budget": "Бюджет",
-    "family": "Семья"
+    "calendar": "Календарь",
+    "tasks": "Задачи",
+    "shopping": "Покупки",
+    "more": "Ещё"
+  },
+  "more": {
+    "title": "Всё остальное",
+    "darkTheme": "Тёмная тема",
+    "lightTheme": "Светлая тема"
   },
   "quickActions": {
     "title": "Быстрые действия",

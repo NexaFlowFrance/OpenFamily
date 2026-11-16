@@ -16,10 +16,15 @@
   },
   "mobile": {
     "home": "Start",
-    "planning": "Wochenplan",
-    "lists": "Listen",
-    "budget": "Budget",
-    "family": "Familie"
+    "calendar": "Kalender",
+    "tasks": "Aufgaben",
+    "shopping": "Einkauf",
+    "more": "Mehr"
+  },
+  "more": {
+    "title": "Alles Weitere",
+    "darkTheme": "Dunkles Design",
+    "lightTheme": "Helles Design"
   },
   "quickActions": {
     "title": "Schnellaktionen",

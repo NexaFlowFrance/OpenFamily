@@ -16,10 +16,15 @@
   },
   "mobile": {
     "home": "Llar",
-    "planning": "Planificació",
-    "lists": "Llistes",
-    "budget": "Pressupost",
-    "family": "Família"
+    "calendar": "Agenda",
+    "tasks": "Tasques",
+    "shopping": "Compra",
+    "more": "Més"
+  },
+  "more": {
+    "title": "Tota la resta",
+    "darkTheme": "Tema fosc",
+    "lightTheme": "Tema clar"
   },
   "quickActions": {
     "title": "Accions ràpides",

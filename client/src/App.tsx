@@ -22,6 +22,7 @@ import MealPlanning from './pages/MealPlanning';
 import Budget from './pages/Budget';
 import Family from './pages/Family';
 import Settings from './pages/Settings';
+import More from './pages/More';
 import Join from './pages/Join';
 import Integrations from './pages/Integrations';
 
@@ -88,6 +89,7 @@ function App() {
                 <Route path="/budget" element={moduleRoute('budget', <Budget />)} />
                 <Route path="/family" element={<Family />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/more" element={<More />} />
                 <Route path="/integrations" element={moduleRoute('integrations', <Integrations />)} />
                 <Route path="/join" element={<Join />} />
                 <Route path="*" element={<Navigate to="/" replace />} />

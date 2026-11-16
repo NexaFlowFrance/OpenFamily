@@ -722,7 +722,7 @@ const Calendar: React.FC = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="space-y-6">
             {error ? (
                 <div className="rounded-input border border-danger/30 bg-danger/10 px-4 py-3 text-caption text-danger">
                     {error}

@@ -405,7 +405,7 @@ const Family: React.FC = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="space-y-6">
             {error ? (
                 <div className="rounded-input border border-danger/30 bg-danger/10 px-4 py-3 text-caption text-danger">
                     {error}
@@ -430,7 +430,7 @@ const Family: React.FC = () => {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                     {members.map((member) => (
                         <Card key={member.id} className="hover:shadow-lg transition-shadow">
                             <CardContent className="p-6">

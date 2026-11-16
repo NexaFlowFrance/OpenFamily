@@ -154,3 +154,20 @@ jobs:
       - name: Shutdown stack
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.ci-sso.yml down -v
+
+  smoke-all-in-one:
+    name: Smoke all-in-one image
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build the image
+        run: docker build -f docker/all-in-one/Dockerfile -t openfamily:smoke .
+
+      - name: Start it with a port and a volume, and nothing else
+        # The one-line install: no secret, no database to prepare. The script
+        # then replaces the container on the same volume, as an update does.
+        run: bash ./scripts/smoke-all-in-one.sh openfamily:smoke

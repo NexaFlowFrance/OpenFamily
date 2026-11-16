@@ -5,6 +5,7 @@
 Ce guide va d'un serveur vide à OpenFamily en service pour votre famille, joignable depuis vos téléphones et tenu à jour. Il suppose un serveur Linux (un VPS, un mini-PC, un NAS qui fait tourner Docker, un Raspberry Pi 4/5 ou un conteneur Proxmox) et un terminal. Node.js n'est pas nécessaire sur le serveur : tout tourne dans Docker.
 
 - [Choisir sa méthode](#choisir-sa-méthode)
+- [La voie rapide, en un seul conteneur](#la-voie-rapide-en-un-seul-conteneur)
 - [1. Installer Docker](#1-installer-docker)
 - [2. Récupérer OpenFamily](#2-récupérer-openfamily)
 - [3. Le configurer](#3-le-configurer)
@@ -22,9 +23,70 @@ Ce guide va d'un serveur vide à OpenFamily en service pour votre famille, joign
 |---|---|
 | Un PC Windows allumé en permanence | L'[installateur Windows](https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe). Pas de Docker, rien à configurer. |
 | Un hôte Proxmox | Le [script Proxmox](#proxmox) : il crée le conteneur, installe Docker et configure tout. |
-| N'importe quel serveur Linux avec Docker | Ce guide, dès l'étape 1. |
+| N'importe quelle machine avec Docker : un serveur, un NAS, un Raspberry Pi | [Un seul conteneur](#la-voie-rapide-en-un-seul-conteneur) : une commande, rien à configurer. |
+| Un serveur où vous voulez PostgreSQL, l'API et le serveur web dans des conteneurs séparés, ou construire depuis les sources | Docker Compose : ce guide, dès l'étape 1. |
 
-**Ressources :** 1 cœur et 1 Go de RAM suffisent pour une famille ; 2 Go sont confortables pendant la construction des images. Comptez 3 Go de disque pour les images Docker et quelques centaines de Mo pour la base. amd64 et arm64 (Raspberry Pi) sont pris en charge.
+**Ressources :** 1 cœur et 1 Go de RAM suffisent pour une famille ; 2 Go sont confortables pendant la construction des images. L'image unique prend environ 500 Mo de disque ; comptez 3 Go pour construire les images vous-même, et quelques centaines de Mo pour la base. amd64 et arm64 (Raspberry Pi) sont pris en charge.
+
+## La voie rapide, en un seul conteneur
+
+Une seule image contient l'interface web, l'API et PostgreSQL. Elle n'a pas besoin de fichier `.env` : les secrets sont créés au premier démarrage et rangés avec les données. Si Docker n'est pas encore installé, faites d'abord l'[étape 1](#1-installer-docker).
+
+```bash
+docker run -d --name openfamily --restart unless-stopped \
+  -p 3000:3000 -v openfamily:/data \
+  ghcr.io/nexaflowfrance/openfamily:latest
+```
+
+OpenFamily répond sur `http://<adresse-du-serveur>:3000` une dizaine de secondes plus tard, un peu plus la première fois sur un Raspberry Pi, le temps de créer la base. L'application Android se connecte à la même adresse. Continuez ensuite avec [5. Créer votre famille](#5-créer-votre-famille) et [6. Y accéder hors de chez vous, en HTTPS](#6-y-accéder-hors-de-chez-vous-en-https) : les deux s'appliquent tels quels.
+
+Vous préférez un fichier compose ? [`docker/all-in-one/docker-compose.yml`](docker/all-in-one/docker-compose.yml) démarre le même conteneur : téléchargez-le, puis lancez `docker compose up -d` à côté.
+
+**Ce qu'il faut garder.** Tout est dans `/data` : la base de données, et `openfamily.env`, les secrets créés au premier démarrage (la clé qui signe les sessions et chiffre les mots de passe d'intégrations enregistrés, le mot de passe de la base, les clés des notifications push). Utilisez un volume Docker comme ci-dessus, ou un dossier d'un disque Linux (`-v /srv/openfamily:/data`). Un dossier Windows ou un partage SMB ne convient pas : PostgreSQL a besoin d'un système de fichiers qui conserve les permissions Unix.
+
+**Réglages.** Aucun n'est obligatoire. Chaque variable facultative de l'[étape 3](#3-le-configurer) peut être donnée avec `-e`, ou toutes ensemble dans un fichier avec `--env-file` :
+
+```bash
+docker run -d --name openfamily --restart unless-stopped \
+  -p 3000:3000 -v openfamily:/data \
+  -e REGISTRATION_ENABLED=false \
+  -e SMTP_HOST=smtp.example.com -e MAIL_FROM="OpenFamily <famille@example.com>" \
+  ghcr.io/nexaflowfrance/openfamily:latest
+```
+
+- Un `JWT_SECRET` ou une paire de clés `VAPID_*` donnés ainsi l'emportent sur ceux du volume. C'est la façon de reprendre les secrets d'une installation existante.
+- Les réglages de la base et `SERVER_PORT` appartiennent à l'image. Pour un autre port, changez la partie gauche de `-p` (`-p 8080:3000`).
+- `TZ` est facultatif : une nouvelle famille prend le fuseau horaire du navigateur qui la crée, et un parent peut le changer dans les Paramètres.
+- Pour joindre un service qui tourne sur la même machine, comme Ollama, ajoutez `--add-host host.docker.internal:host-gateway` et donnez `http://host.docker.internal:11434` comme adresse.
+
+**Mettre à jour.** Sauvegardez d'abord. Récupérez la nouvelle image et remplacez le conteneur : les données restent dans le volume, et les changements de base de données s'appliquent tout seuls au démarrage.
+
+```bash
+docker pull ghcr.io/nexaflowfrance/openfamily:latest
+docker stop openfamily && docker rm openfamily
+docker run -d --name openfamily ...   # la même commande que la première fois
+```
+
+Pour rester sur une version de votre choix, mettez son numéro à la place de `latest`, par exemple `ghcr.io/nexaflowfrance/openfamily:2.1.0`.
+
+**Sauvegarder et restaurer.** Deux fichiers contiennent tout :
+
+```bash
+docker exec openfamily pg_dump -U openfamily -d openfamily -Fc > openfamily-$(date +%F).dump
+docker exec openfamily cat /data/openfamily.env > openfamily-secrets.env
+```
+
+Gardez-les ensemble, ailleurs que sur le serveur. Pour restaurer dans une installation neuve, démarrez le conteneur comme ci-dessus, puis :
+
+```bash
+docker exec -i openfamily pg_restore -U openfamily -d openfamily --clean --if-exists --no-owner < openfamily-2026-11-16.dump
+docker cp openfamily-secrets.env openfamily:/data/openfamily.env
+docker restart openfamily
+```
+
+Sans le fichier des secrets, les comptes et les données sont bien là, mais les mots de passe d'intégrations et les adresses d'agendas suivis enregistrés ne peuvent plus être lus, et chaque téléphone doit autoriser de nouveau les notifications.
+
+**Venir de l'installation Docker Compose, ou y revenir.** Les deux utilisent PostgreSQL 16 : une copie faite d'un côté se restaure de l'autre. Faites-la avec la commande de l'[étape 8](#8-sauvegarder-et-restaurer), restaurez-la avec la ligne `pg_restore` ci-dessus, et donnez au nouveau conteneur le `JWT_SECRET` et les clés `VAPID_*` de votre `.env` avec `-e`.
 
 ## 1. Installer Docker
 

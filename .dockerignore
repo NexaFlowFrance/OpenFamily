@@ -1,0 +1,25 @@
+# What no image build reads. Without this file the whole working folder went
+# to Docker at every build: the dependencies of the host, its build outputs,
+# the Android project.
+.git
+.github
+.claude
+.vscode
+.idea
+
+# Installed and built on the host, for the host. An image installs and builds
+# its own; a stale tsbuildinfo even makes tsc believe there is nothing to emit.
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+
+# Never in a build context.
+**/.env
+**/.env.*
+
+client/android
+client/ios
+docs
+installer
+packaging
+store

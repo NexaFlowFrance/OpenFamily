@@ -53,6 +53,22 @@
 
 ## 🚀 Démarrage rapide
 
+### 🐳 Docker, en une commande
+
+Un seul conteneur contient l'interface, l'API et la base de données. Il n'y a rien à
+configurer : les secrets sont créés au premier démarrage et rangés avec vos données.
+
+```bash
+docker run -d --name openfamily --restart unless-stopped \
+  -p 3000:3000 -v openfamily:/data \
+  ghcr.io/nexaflowfrance/openfamily:latest
+```
+
+Ouvrez http://localhost:3000, ou `http://<adresse-du-serveur>:3000` depuis un téléphone, et
+créez votre compte. L'image est publiée pour amd64 et arm64 (Raspberry Pi 4 et 5, la plupart
+des NAS). Le **[guide serveur](INSTALLATION.fr.md)** couvre le HTTPS, les mises à jour et les
+sauvegardes.
+
 ### 🪟 Windows (.exe), le plus simple
 
 **NexaFlow** fournit un installeur graphique tout-en-un (Node.js et PostgreSQL embarqués, aucun Docker).
@@ -76,15 +92,15 @@ les apps Nextcloud ou Home Assistant). Elle n'héberge rien elle-même.
 </p>
 
 Installez l'APK, autorisez les sources inconnues si demandé, ouvrez l'app et saisissez
-l'adresse de votre serveur (ex. `http://192.168.1.10:3001`, ou votre adresse HTTPS / Tailscale).
+l'adresse de votre serveur (ex. `http://192.168.1.10:3000`, ou votre adresse HTTPS / Tailscale).
 
 > 🔄 **Mises à jour automatiques :** ajoutez le dépôt à
 > **[Obtainium](https://github.com/ImranR98/Obtainium)** pour recevoir les mises à jour
 > directement depuis les Releases GitHub, sans store.
 
-### 🐳 Docker (recommandé pour serveur)
+### 🧩 Docker Compose, chaque partie dans son conteneur
 
-> 📘 **Une vraie installation sur serveur ?** Suivez le **[guide serveur pas à pas](INSTALLATION.fr.md)** : secrets à définir, HTTPS avec un domaine ou Tailscale, mises à jour et sauvegardes.
+La même application en trois conteneurs (PostgreSQL, l'API, le serveur web), pour un serveur où vous les voulez séparés ou pour construire depuis les sources. Le **[guide serveur pas à pas](INSTALLATION.fr.md)** détaille tout : secrets à définir, HTTPS avec un domaine ou Tailscale, mises à jour et sauvegardes.
 
 ```bash
 cp .env.example .env   # éditez vos paramètres
@@ -118,7 +134,7 @@ npm run dev
 
 **Frontend** : React 19 · TypeScript · Vite 7 · TailwindCSS · Radix UI · i18next · PWA
 **Backend** : Node 26 · Express · PostgreSQL 16 · WebSocket · Web Push (VAPID) · JWT + bcrypt
-**DevOps** : Docker Compose · GitHub Actions (CI + publication ghcr.io)
+**DevOps** : une image tout-en-un, ou Docker Compose · GitHub Actions (CI + publication ghcr.io)
 
 ## 🔐 Sécurité
 

@@ -248,14 +248,28 @@ app.use('/api/categories', categoriesRoutes);
 app.use('/api/kakeibo', kakeiboRoutes);
 
 app.use('/api/posts', postsRoutes);
-// Static client (native Windows install): serve the built SPA from the same origin
-// as the API, so the app is reachable from any device on the LAN via http://<ip>:3000.
+// Static client (all-in-one image, native Windows install): serve the built SPA
+// from the same origin as the API, so the app is reachable from any device on
+// the LAN via http://<ip>:3000.
 if (process.env.SERVE_CLIENT_DIR) {
     const clientDir = path.resolve(process.env.SERVE_CLIENT_DIR);
-    app.use(express.static(clientDir));
+    const builtFiles = path.join(clientDir, 'assets') + path.sep;
+    app.use(express.static(clientDir, {
+        setHeaders: (res, filePath) => {
+            // The build names each file under assets/ after its content: a new
+            // version is a new name, so the browser may keep these for good.
+            // Everything else (the page, the service worker, the manifest)
+            // keeps its name from one version to the next and is checked again
+            // at every visit, or an update would not be seen.
+            res.setHeader('Cache-Control', filePath.startsWith(builtFiles)
+                ? 'public, max-age=31536000, immutable'
+                : 'no-cache');
+        },
+    }));
     // SPA fallback: any non-API GET returns index.html (client-side routing).
     app.get(/^(?!\/api\/|\/health|\/ws).*/, (req, res, next) => {
         if (req.method !== 'GET') return next();
+        res.setHeader('Cache-Control', 'no-cache');
         res.sendFile(path.join(clientDir, 'index.html'));
     });
 }

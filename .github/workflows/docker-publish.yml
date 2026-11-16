@@ -77,3 +77,19 @@ jobs:
             ${{ env.IMAGE_PREFIX }}-server:${{ steps.version.outputs.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # The interface, the API and PostgreSQL in one image, for the one-line
+      # install. Its own cache: the two steps above share theirs, and the last
+      # one to write would otherwise push this one's layers out.
+      - name: Build & push all-in-one image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/all-in-one/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}:latest
+            ${{ env.IMAGE_PREFIX }}:${{ steps.version.outputs.VERSION }}
+          cache-from: type=gha,scope=all-in-one
+          cache-to: type=gha,mode=max,scope=all-in-one

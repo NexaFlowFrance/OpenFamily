@@ -9,7 +9,7 @@
   [![Release](https://img.shields.io/github/v/release/NexaFlowFrance/OpenFamily?color=2563eb&label=version)](https://github.com/NexaFlowFrance/OpenFamily/releases/latest)
   [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
   [![Live demo](https://img.shields.io/badge/Live%20demo-online-DC4A60)](https://openfamily.fr/demo/)
-  [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily-client)
+  [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily)
   [![License: AGPL v3](https://img.shields.io/badge/License-AGPL--v3-blue.svg)](licence.md)
   [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](https://github.com/NexaFlowFrance/OpenFamily)
 </div>
@@ -81,6 +81,21 @@ Connect OpenFamily to the rest of your self-hosted setup from the Integrations p
 
 ## 🚀 Quick start
 
+### 🐳 Docker, in one command
+
+One container holds the interface, the API and the database. There is nothing to configure:
+the secrets are generated on the first start and kept with your data.
+
+```bash
+docker run -d --name openfamily --restart unless-stopped \
+  -p 3000:3000 -v openfamily:/data \
+  ghcr.io/nexaflowfrance/openfamily:latest
+```
+
+Open http://localhost:3000, or `http://<server-address>:3000` from a phone, and create your
+account. The image is published for amd64 and arm64 (Raspberry Pi 4 and 5, most NAS). The
+**[server guide](INSTALLATION.md)** covers HTTPS, updates and backups.
+
 ### 🪟 Windows installer (.exe), the easiest path
 
 For Windows users, **NexaFlow** provides an all-in-one graphical installer: Node.js and
@@ -109,15 +124,15 @@ apps). It hosts nothing itself.
 </p>
 
 Install the APK, allow installs from unknown sources when prompted, open the app and enter
-your server URL (e.g. `http://192.168.1.10:3001`, or your HTTPS / Tailscale address).
+your server URL (e.g. `http://192.168.1.10:3000`, or your HTTPS / Tailscale address).
 
 > 🔄 **Stay up to date automatically:** add the repo to
 > **[Obtainium](https://github.com/ImranR98/Obtainium)** to receive app updates straight from
 > GitHub Releases, with no app store required.
 
-### 🐳 Docker (recommended for a server)
+### 🧩 Docker Compose, each part in its own container
 
-> 📘 **Installing on a server for real?** Follow the step-by-step **[server guide](INSTALLATION.md)**: secrets to set, HTTPS with a domain or Tailscale, updates and backups.
+The same app as three containers (PostgreSQL, the API, the web server), for a server where you want them apart or want to build from the sources. The step-by-step **[server guide](INSTALLATION.md)** walks through it: secrets to set, HTTPS with a domain or Tailscale, updates and backups.
 
 ```bash
 cp .env.example .env   # edit your settings
@@ -170,7 +185,7 @@ npm run dev
 
 **Frontend**: React 19 · TypeScript · Vite 7 · TailwindCSS · Radix UI · i18next · PWA (service worker, web push, offline)
 **Backend**: Node.js 26 · Express · PostgreSQL 16 (auto-migration) · WebSocket · Web Push (VAPID) · JWT + bcrypt 12 · helmet · rate limiting
-**DevOps**: Docker Compose (postgres, server, client/nginx) · GitHub Actions (CI + Docker publish to ghcr.io + GitHub Pages demo)
+**DevOps**: one all-in-one image, or Docker Compose (postgres, server, client/nginx) · GitHub Actions (CI + Docker publish to ghcr.io + GitHub Pages demo)
 
 ## 🔐 Security
 

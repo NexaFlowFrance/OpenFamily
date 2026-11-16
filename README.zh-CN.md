@@ -9,7 +9,7 @@
   [![Release](https://img.shields.io/github/v/release/NexaFlowFrance/OpenFamily?color=2563eb&label=version)](https://github.com/NexaFlowFrance/OpenFamily/releases/latest)
   [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
   [![Live demo](https://img.shields.io/badge/Live%20demo-online-DC4A60)](https://openfamily.fr/demo/)
-  [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily-client)
+  [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily)
   [![License: AGPL v3](https://img.shields.io/badge/License-AGPL--v3-blue.svg)](licence.md)
   [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](https://github.com/NexaFlowFrance/OpenFamily)
 </div>
@@ -80,6 +80,18 @@ OpenFamily 是 **Cozi 和 FamilyWall 等应用的自托管替代方案**：将�
 
 ## 🚀 快速开始
 
+### 🐳 Docker，一条命令
+
+一个容器包含界面、API 和数据库。无需任何配置：密钥在首次启动时自动生成，并与数据保存在一起。
+
+```bash
+docker run -d --name openfamily --restart unless-stopped \
+  -p 3000:3000 -v openfamily:/data \
+  ghcr.io/nexaflowfrance/openfamily:latest
+```
+
+打开 http://localhost:3000，或在手机上打开 `http://<服务器地址>:3000`，然后创建账号。镜像支持 amd64 和 arm64（Raspberry Pi 4 和 5、大多数 NAS）。HTTPS、更新与备份见 **[服务器指南（英文）](INSTALLATION.md)**。
+
 ### 🪟 Windows 安装程序（.exe），最简单的方式
 
 针对 Windows 用户，**NexaFlow** 提供一体化图形安装程序：内置 Node.js 和
@@ -107,14 +119,14 @@ OpenFamily 还提供原生 **Android 应用**，它是一个连接到**你自己
 </p>
 
 安装 APK，在系统提示时允许安装未知来源应用，然后打开应用并输入服务器 URL
-（例如 `http://192.168.1.10:3001`，或你的 HTTPS / Tailscale 地址）。
+（例如 `http://192.168.1.10:3000`，或你的 HTTPS / Tailscale 地址）。
 
 > 🔄 **自动保持最新版本：**将本仓库添加到
 > **[Obtainium](https://github.com/ImranR98/Obtainium)**，即可直接通过 GitHub Releases 接收应用更新，无需应用商店。
 
-### 🐳 Docker（推荐用于服务器）
+### 🧩 Docker Compose，各部分独立容器
 
-> 📘 **正式部署到服务器？** 请按照分步 **[服务器指南（英文）](INSTALLATION.md)** 操作：需要设置的密钥、通过域名或 Tailscale 启用 HTTPS、更新与备份。
+同一个应用拆成三个容器（PostgreSQL、API、Web 服务器），适合希望各部分分开运行或从源码构建的服务器。请按照分步 **[服务器指南（英文）](INSTALLATION.md)** 操作：需要设置的密钥、通过域名或 Tailscale 启用 HTTPS、更新与备份。
 
 ```bash
 cp .env.example .env   # 编辑配置
@@ -167,7 +179,7 @@ npm run dev
 
 **前端**：React 19 · TypeScript · Vite 7 · TailwindCSS · Radix UI · i18next · PWA（Service Worker、Web Push、离线模式）  
 **后端**：Node.js 26 · Express · PostgreSQL 16（自动迁移）· WebSocket · Web Push（VAPID）· JWT + bcrypt 12 · helmet · 限流  
-**DevOps**：Docker Compose（postgres、server、client/nginx）· GitHub Actions（CI、发布 Docker 镜像到 ghcr.io、GitHub Pages 演示）
+**DevOps**：一体化镜像，或 Docker Compose（postgres、server、client/nginx）· GitHub Actions（CI、发布 Docker 镜像到 ghcr.io、GitHub Pages 演示）
 
 ## 🔐 安全
 

@@ -5,6 +5,7 @@
 This guide takes you from an empty server to OpenFamily running for your family, reachable from your phones, and kept up to date. It assumes a Linux server (a VPS, a mini PC, a NAS that runs Docker, a Raspberry Pi 4/5 or a Proxmox container) and a terminal. No Node.js is needed on the server: everything runs in Docker.
 
 - [Choose how to install](#choose-how-to-install)
+- [The quick way: one container](#the-quick-way-one-container)
 - [1. Install Docker](#1-install-docker)
 - [2. Get OpenFamily](#2-get-openfamily)
 - [3. Configure it](#3-configure-it)
@@ -22,9 +23,70 @@ This guide takes you from an empty server to OpenFamily running for your family,
 |---|---|
 | A Windows PC that stays on | The [Windows installer](https://github.com/NexaFlowFrance/OpenFamily/releases/latest/download/OpenFamily-Setup.exe). No Docker, nothing to configure. |
 | A Proxmox host | The [Proxmox script](#proxmox): it creates the container, installs Docker and configures everything. |
-| Any Linux server with Docker | This guide, from step 1. |
+| Any machine with Docker: a server, a NAS, a Raspberry Pi | [One container](#the-quick-way-one-container): one command, nothing to configure. |
+| A server where you want PostgreSQL, the API and the web server in separate containers, or want to build from the sources | Docker Compose: this guide, from step 1. |
 
-**Resources:** 1 CPU core and 1 GB of RAM are enough for a family; 2 GB is comfortable while building the images. Count 3 GB of disk for Docker images and a few hundred MB for the database. amd64 and arm64 (Raspberry Pi) are both supported.
+**Resources:** 1 CPU core and 1 GB of RAM are enough for a family; 2 GB is comfortable while building the images. The single image takes about 500 MB of disk; count 3 GB to build the images yourself, and a few hundred MB for the database. amd64 and arm64 (Raspberry Pi) are both supported.
+
+## The quick way: one container
+
+One image holds the web interface, the API and PostgreSQL. It needs no `.env` file: the secrets are generated on the first start and stored with the data. If Docker is not installed yet, do [step 1](#1-install-docker) first.
+
+```bash
+docker run -d --name openfamily --restart unless-stopped \
+  -p 3000:3000 -v openfamily:/data \
+  ghcr.io/nexaflowfrance/openfamily:latest
+```
+
+OpenFamily is at `http://<server-address>:3000` about ten seconds later, a little longer the first time on a Raspberry Pi, while the database is created. The Android app connects to the same address. Then continue with [5. Create your family](#5-create-your-family) and [6. Reach it from outside your home, over HTTPS](#6-reach-it-from-outside-your-home-over-https): both apply as they are.
+
+Prefer a compose file? [`docker/all-in-one/docker-compose.yml`](docker/all-in-one/docker-compose.yml) starts the same container: download it, then run `docker compose up -d` next to it.
+
+**What to keep.** Everything is in `/data`: the database, and `openfamily.env`, the secrets made on the first start (the key that signs sessions and encrypts saved integration passwords, the database password, the push notification keys). Use a Docker volume as above, or a folder of a Linux disk (`-v /srv/openfamily:/data`). A Windows folder or an SMB share will not do: PostgreSQL needs a file system that keeps Unix permissions.
+
+**Settings.** None is required. Every optional variable of [step 3](#3-configure-it) can be given with `-e`, or all of them in a file with `--env-file`:
+
+```bash
+docker run -d --name openfamily --restart unless-stopped \
+  -p 3000:3000 -v openfamily:/data \
+  -e REGISTRATION_ENABLED=false \
+  -e SMTP_HOST=smtp.example.com -e MAIL_FROM="OpenFamily <family@example.com>" \
+  ghcr.io/nexaflowfrance/openfamily:latest
+```
+
+- A `JWT_SECRET` or a pair of `VAPID_*` keys given this way wins over the one stored in the volume. That is how the secrets of an existing install are carried over.
+- The database settings and `SERVER_PORT` belong to the image. To use another port, change the left side of `-p` (`-p 8080:3000`).
+- `TZ` is optional: a new family takes the time zone of the browser that creates it, and a parent can change it in Settings.
+- To reach a service running on the same machine, such as Ollama, add `--add-host host.docker.internal:host-gateway` and use `http://host.docker.internal:11434` as its address.
+
+**Update.** Back up first. Pull the new image and replace the container: the data stays in the volume, and database changes run by themselves when it starts.
+
+```bash
+docker pull ghcr.io/nexaflowfrance/openfamily:latest
+docker stop openfamily && docker rm openfamily
+docker run -d --name openfamily ...   # the same command as the first time
+```
+
+To stay on a version of your choice, use its number in place of `latest`, for example `ghcr.io/nexaflowfrance/openfamily:2.1.0`.
+
+**Back up and restore.** Two files hold everything:
+
+```bash
+docker exec openfamily pg_dump -U openfamily -d openfamily -Fc > openfamily-$(date +%F).dump
+docker exec openfamily cat /data/openfamily.env > openfamily-secrets.env
+```
+
+Keep them together, somewhere other than the server. To restore into a new install, start the container as above, then:
+
+```bash
+docker exec -i openfamily pg_restore -U openfamily -d openfamily --clean --if-exists --no-owner < openfamily-2026-11-16.dump
+docker cp openfamily-secrets.env openfamily:/data/openfamily.env
+docker restart openfamily
+```
+
+Without the secrets file the accounts and the data are all there, but saved integration passwords and followed calendar addresses can no longer be read, and each phone has to allow notifications again.
+
+**Coming from the Docker Compose install, or going back.** Both run PostgreSQL 16, so a dump made on one side restores on the other. Make it with the command of [step 8](#8-back-up-and-restore), restore it with the `pg_restore` line above, and give the new container the `JWT_SECRET` and the `VAPID_*` keys of your `.env` with `-e`.
 
 ## 1. Install Docker
 

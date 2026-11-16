@@ -1,0 +1,2 @@
+# Runs inside a Linux image: a checkout on Windows must not give it CRLF.
+docker/all-in-one/entrypoint.sh text eol=lf

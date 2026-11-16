@@ -1,0 +1,26 @@
+# OpenFamily in one container: the interface, the API and PostgreSQL.
+# Nothing to configure. Start it with:
+#   docker compose up -d
+# then open http://<this machine>:3000 and create your account.
+services:
+  openfamily:
+    image: ghcr.io/nexaflowfrance/openfamily:latest
+    container_name: openfamily
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Everything to keep: the database, and the secrets made on the first start.
+      - openfamily:/data
+    # Lets OpenFamily reach a service running on this machine itself, such as
+    # Ollama, at http://host.docker.internal:11434.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # Optional settings, listed in INSTALLATION.md. For example:
+    # environment:
+    #   REGISTRATION_ENABLED: "false"   # once your own account exists
+    #   SMTP_HOST: smtp.example.com
+    #   MAIL_FROM: "OpenFamily <family@example.com>"
+
+volumes:
+  openfamily:

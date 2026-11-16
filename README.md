@@ -36,7 +36,7 @@ all in one place, on your own server.
 |---|---|
 | 🛒 **Shopping list** | Categories, prices, quantities, templates, **aisle-by-aisle store mode** |
 | ✅ **Tasks** | Recurring tasks, family assignment, statistics |
-| 📅 **Appointments** | Monthly calendar, automatic reminders, color coding, **iCal export (.ics / webcal)** |
+| 📅 **Appointments** | Monthly calendar, automatic reminders, color coding, **birthdays** taken from the family's dates of birth, **iCal export (.ics / webcal)** |
 | 🗓️ **Weekly planning** | Work hours and school timetables per family member |
 | 🍳 **Recipes** | Family library, advanced filters, prep/cook times |
 | 🍽️ **Meal planner** | Weekly view, PDF export, linked recipes |

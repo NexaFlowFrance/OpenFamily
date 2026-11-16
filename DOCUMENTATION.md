@@ -61,6 +61,7 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 - **Rappels automatiques** configurables (30 min avant, 1h avant)
 - Association à un membre de la famille
 - Notes complémentaires par événement
+- **Anniversaires** : chaque membre dont la date de naissance est renseignée sur la page Famille a son anniversaire dans le calendrier, chaque année, avec l'âge atteint. Il n'y a rien à saisir. Les anniversaires apparaissent aussi dans le kiosque, les liens d'affichage et le flux iCal, et toute la famille reçoit une notification le matin du jour même. Une personne née un 29 février est fêtée le 28 les années sans 29. Pour quelqu'un qui n'est pas dans la famille (grands-parents, amis), créez un rendez-vous répété chaque année.
 
 ### 🗓️ Planning hebdomadaire
 - Gestion des emplois du temps de chaque membre de la famille

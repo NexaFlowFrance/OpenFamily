@@ -104,6 +104,13 @@ curl -H "Authorization: Bearer ofk_..." \
   "http://your-server:3000/api/appointments?start_date=2026-11-01T00:00:00&end_date=2026-11-30T23:59:59"
 ```
 
+**Birthdays.** The same request also returns the birthdays of the family members that fall in
+the range. They are worked out from the dates of birth and stored nowhere: whole-day entries
+whose `kind` is `birthday`, with a `birthday` object (`member_id`, `name`, `age`,
+`birth_date`) and a title in the language of the family's owner. Their `id` is not a UUID, and
+they cannot be changed or deleted (`409 birthday_read_only`): a date of birth is changed with
+`PUT /api/family/{id}`.
+
 ## The main routes
 
 | What          | Routes                                                                             |

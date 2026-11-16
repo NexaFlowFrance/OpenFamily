@@ -22,7 +22,7 @@
 |---|---|
 | 🛒 **Liste de courses** | Catégorisation, prix, quantités, templates, **mode magasin par rayon** |
 | ✅ **Tâches** | Tâches récurrentes, assignation familiale, statistiques |
-| 📅 **Rendez-vous** | Calendrier mensuel, rappels automatiques, code couleur, **export iCal (.ics / webcal)** |
+| 📅 **Rendez-vous** | Calendrier mensuel, rappels automatiques, code couleur, **anniversaires** tirés des dates de naissance de la famille, **export iCal (.ics / webcal)** |
 | 🗓️ **Planning hebdomadaire** | Horaires de travail et emploi du temps scolaire par membre |
 | 🍳 **Recettes** | Bibliothèque familiale, filtres avancés, temps de préparation |
 | 🍽️ **Planning repas** | Vue hebdomadaire, export PDF, liaison recettes |

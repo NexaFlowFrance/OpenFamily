@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { apiBase } from '../lib/serverConfig';
-import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw, Search, X } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw, Search, X, Cake } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge, Select, DatePicker } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
 import { dateLocale, formatTime, orderIsoWeekdays, weekStartsOn } from '../i18n/format';
@@ -42,6 +42,9 @@ interface Appointment {
     /** Set on events copied from a followed calendar (Google, Outlook...). */
     subscription_id?: string | null;
     subscription_name?: string | null;
+    /** A birthday, worked out by the server from a date of birth on the Family page. */
+    kind?: 'birthday';
+    birthday?: { member_id: string; name: string; age: number; birth_date: string };
 }
 
 interface FamilyMember {
@@ -204,6 +207,8 @@ const Calendar: React.FC = () => {
         returnToEditor: boolean;
     } | null>(null);
 
+    // A birthday that was tapped: shown, never edited.
+    const [birthdayShown, setBirthdayShown] = useState<Appointment | null>(null);
     const [dayAction, setDayAction] = useState<{
         date: Date;
         appointments: Appointment[];
@@ -516,6 +521,12 @@ const Calendar: React.FC = () => {
     };
 
     const handleEdit = (appointment: Appointment) => {
+        // A birthday is not an appointment anyone typed: it comes from the
+        // Family page, and that is where its date is changed.
+        if (appointment.kind === 'birthday') {
+            setBirthdayShown(appointment);
+            return;
+        }
         setEditingAppointment(appointment);
         setEndManuallySet(Boolean(appointment.end_time));
         setFormData({
@@ -926,10 +937,16 @@ const Calendar: React.FC = () => {
                                                     borderLeft: `3px solid ${apt.color || '#DC4A60'}`,
                                                 }}
                                             >
-                                                <div className="font-medium truncate">{apt.title}</div>
-                                                <div className="text-muted-foreground">
-                                                    {formatTime(apt.start_time)}
+                                                <div className="font-medium truncate">
+                                                    {apt.kind === 'birthday' && <Cake className="mr-0.5 inline h-3 w-3 align-[-2px]" aria-hidden="true" />}
+                                                    {apt.title}
                                                 </div>
+                                                {/* A birthday lasts the day: it has no hour to show. */}
+                                                {apt.kind !== 'birthday' && (
+                                                    <div className="text-muted-foreground">
+                                                        {formatTime(apt.start_time)}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                         {dayAppointments.length > 3 && (
@@ -964,7 +981,10 @@ const Calendar: React.FC = () => {
                                         style={{ backgroundColor: apt.color || '#DC4A60' }}
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold text-body mb-1 break-words">{apt.title}</h4>
+                                        <h4 className="font-semibold text-body mb-1 break-words">
+                                            {apt.kind === 'birthday' && <Cake className="mr-1.5 inline h-4 w-4 align-[-2px] text-primary" aria-hidden="true" />}
+                                            {apt.title}
+                                        </h4>
                                         <div className="flex flex-wrap items-center gap-3 text-body-sm text-muted-foreground">
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />
@@ -973,11 +993,16 @@ const Calendar: React.FC = () => {
                                                     <span> → {format(new Date(apt.end_time), 'dd MMM yyyy', { locale: dateLocale() })}</span>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-1">
-                                                <Clock className="w-4 h-4" />
-                                                {formatTime(apt.start_time)}
-                                                {apt.end_time && ` - ${formatTime(apt.end_time)}`}
-                                            </div>
+                                            {apt.kind !== 'birthday' && (
+                                                <div className="flex items-center gap-1">
+                                                    <Clock className="w-4 h-4" />
+                                                    {formatTime(apt.start_time)}
+                                                    {apt.end_time && ` - ${formatTime(apt.end_time)}`}
+                                                </div>
+                                            )}
+                                            {apt.kind === 'birthday' && apt.birthday && (
+                                                <div>{t('calendar:birthday.age', { count: apt.birthday.age })}</div>
+                                            )}
                                             {apt.location && (
                                                 <div className="flex items-center gap-1">
                                                     <MapPin className="w-4 h-4" />
@@ -985,7 +1010,7 @@ const Calendar: React.FC = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        {(apt.family_members_data || []).length > 0 && (
+                                        {(apt.family_members_data || []).length > 0 && apt.kind !== 'birthday' && (
                                             <div className="mt-2 flex flex-wrap gap-1">
                                                 {(apt.family_members_data || []).map((m) => (
                                                     <Badge key={m.id} variant="primary">
@@ -996,10 +1021,12 @@ const Calendar: React.FC = () => {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Button variant="ghost" size="sm" onClick={() => handleEdit(apt)}>
-                                            <Edit2 className="h-4 w-4" />
-                                        </Button>
-                                        {!apt.subscription_id && (
+                                        {apt.kind !== 'birthday' && (
+                                            <Button variant="ghost" size="sm" onClick={() => handleEdit(apt)}>
+                                                <Edit2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {!apt.subscription_id && apt.kind !== 'birthday' && (
                                             <Button variant="ghost" size="sm" onClick={() => { void handleDelete(apt); }}>
                                                 <Trash2 className="h-4 w-4 text-red-500" />
                                             </Button>
@@ -1015,6 +1042,30 @@ const Calendar: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* A birthday: whose, which one, and where its date lives */}
+            <Dialog
+                open={Boolean(birthdayShown)}
+                onOpenChange={(open) => { if (!open) setBirthdayShown(null); }}
+                title={birthdayShown?.title ?? ''}
+                description={birthdayShown ? format(new Date(birthdayShown.start_time), 'PPPP', { locale: dateLocale() }) : ''}
+            >
+                <div className="space-y-4">
+                    <p className="flex items-center gap-2 text-body font-medium text-foreground">
+                        <Cake className="h-5 w-5 text-primary" aria-hidden="true" />
+                        {t('calendar:birthday.age', { count: birthdayShown?.birthday?.age ?? 0 })}
+                    </p>
+                    <p className="text-body-sm text-muted-foreground">{t('calendar:birthday.notice')}</p>
+                    <div className="flex flex-wrap justify-end gap-2">
+                        <Button type="button" variant="secondary" onClick={() => setBirthdayShown(null)}>
+                            {t('common:actions.close')}
+                        </Button>
+                        <Button type="button" onClick={() => navigate('/family')}>
+                            {t('calendar:birthday.openFamily')}
+                        </Button>
+                    </div>
+                </div>
+            </Dialog>
 
             {/* Dialog */}
             <Dialog

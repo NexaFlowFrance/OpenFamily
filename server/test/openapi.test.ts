@@ -120,8 +120,18 @@ describe('the fields the document promises', () => {
         const listed = await request(app).get('/api/appointments?start_date=2026-12-01T00:00:00&end_date=2026-12-10T23:59:59').set(bearer());
         expect(listed.body.data.length).toBe(2);
         // A weekly series over ten days: two occurrences, each with its own identity.
-        expect(missing('Appointment', listed.body.data[0])).toEqual([]);
+        // `kind` and `birthday` are on birthdays only.
+        expect(missing('Appointment', listed.body.data[0], ['kind', 'birthday'])).toEqual([]);
         expect(listed.body.data.map((entry: Json) => entry.occurrence_date)).toEqual(['2026-12-01', '2026-12-08']);
+
+        // A birthday, worked out from a date of birth, carries every field of an appointment.
+        await query("UPDATE family_members SET birth_date = '2019-12-20' WHERE id = $1", [member.rows[0].id]);
+        const withBirthday = await request(app).get('/api/appointments?start_date=2026-12-20T00:00:00&end_date=2026-12-20T23:59:59').set(bearer());
+        expect(withBirthday.body.data.length).toBe(1);
+        expect(missing('Appointment', withBirthday.body.data[0])).toEqual([]);
+        expect(missing('Appointment', withBirthday.body.data[0].birthday, Object.keys(document.components.schemas.Appointment.properties)
+            .filter((name) => !['member_id', 'name', 'age', 'birth_date'].includes(name)))).toEqual([]);
+        await query('UPDATE family_members SET birth_date = NULL WHERE id = $1', [member.rows[0].id]);
 
         const meal = await request(app).post('/api/meal-plans').set(bearer()).send({ date: '2026-12-01', meal_type: 'Dîner', custom_meal: 'Lasagna' });
         expect(missing('MealPlan', meal.body.data)).toEqual([]);

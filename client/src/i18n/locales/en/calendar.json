@@ -162,5 +162,11 @@
       "DEMO_UNAVAILABLE": "Not available in the demo.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "birthday": {
+    "age_one": "{{count}} year old",
+    "age_other": "{{count}} years old",
+    "notice": "This birthday comes from the date of birth on the Family page.",
+    "openFamily": "Open the Family page"
   }
 }

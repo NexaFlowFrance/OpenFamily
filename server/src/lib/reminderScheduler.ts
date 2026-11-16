@@ -6,6 +6,7 @@ import logger from './logger';
 import { expandRecurringAppointments } from './appointmentRecurrence';
 import { ALL_DAY_REMINDER_HOUR, MAX_REMINDER_MINUTES, normalizeReminderMinutes } from './reminders';
 import { Language, writingLanguage } from './languages';
+import { checkBirthdays } from './birthdays';
 import { dayInZone, instantInZone, isTimeZone, serverTimeZone } from './timeZone';
 
 interface Occurrence {
@@ -218,6 +219,10 @@ export function startReminderScheduler(): void {
     }, { timezone: tz });
     cron.schedule('17 3 * * *', () => {
         void pruneReminderLog();
+    }, { timezone: tz });
+    // Birthdays: a notice on the morning of the day, on each family's clocks.
+    cron.schedule('*/10 * * * *', () => {
+        void checkBirthdays();
     }, { timezone: tz });
 
     logger.info('reminder.scheduler_started', { timezone: tz });

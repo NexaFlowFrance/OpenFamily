@@ -161,5 +161,10 @@
       "DEMO_UNAVAILABLE": "演示版中不可用。",
       "generic": "出了点问题，请重试。"
     }
+  },
+  "birthday": {
+    "age_other": "{{count}} 岁",
+    "notice": "这个生日来自“家庭”页面中填写的出生日期。",
+    "openFamily": "打开“家庭”页面"
   }
 }

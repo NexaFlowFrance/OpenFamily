@@ -318,4 +318,18 @@ export const coreMigrations: readonly Migration[] = [
             'CREATE INDEX idx_webhooks_user ON webhooks(user_id)',
         ],
     },
+    {
+        // Birthdays (lib/birthdays) are worked out from the dates of birth and
+        // stored nowhere. This only remembers that a family was told about a
+        // member's birthday in a given year, so that it is told once.
+        id: 'core/0013-birthday-notices',
+        statements: [
+            `CREATE TABLE birthday_notice_log (
+                family_member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+                year INTEGER NOT NULL,
+                sent_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                PRIMARY KEY (family_member_id, year)
+            )`,
+        ],
+    },
 ];

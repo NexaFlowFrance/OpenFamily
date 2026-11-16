@@ -162,5 +162,11 @@
       "DEMO_UNAVAILABLE": "Aquesta funció no està disponible en el mode de demostració.",
       "generic": "S'ha produït un error. Torna-ho a provar."
     }
+  },
+  "birthday": {
+    "age_one": "{{count}} any",
+    "age_other": "{{count}} anys",
+    "notice": "Aquest aniversari ve de la data de naixement indicada a la pàgina Família.",
+    "openFamily": "Obre la pàgina Família"
   }
 }

@@ -1,3 +1,4 @@
+import { birthdayAppointments, isBirthdayId } from '../lib/birthdays';
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
@@ -175,8 +176,30 @@ export const listAppointments = async (userId: string, start_date?: unknown, end
             )
             : result.rows;
 
-    return enrichAppointmentsWithMembers(rows, userId);
+    const listed = await enrichAppointmentsWithMembers(rows, userId);
+    if (!start_date || !end_date) return listed;
+
+    // Asked with a range, the list also carries the birthdays that fall in it,
+    // worked out from the dates of birth on the Family page (lib/birthdays).
+    const birthdays = await enrichAppointmentsWithMembers(
+        await birthdayAppointments(userId, String(start_date), String(end_date)),
+        userId,
+    );
+    if (birthdays.length === 0) return listed;
+    return [...listed, ...birthdays].sort((a, b) => String(a.start_time).localeCompare(String(b.start_time)));
 };
+
+// A birthday is not stored: there is nothing to change or delete under its id.
+// The date of birth is changed on the Family page.
+export const birthdayRefusal = {
+    success: false,
+    error: 'birthday_read_only',
+    message: "A birthday comes from the family member's date of birth. Change it on the Family page.",
+};
+router.param('id', (req, res, next, id) => {
+    if (isBirthdayId(id)) return res.status(409).json(birthdayRefusal);
+    return next();
+});
 
 // Get all appointments
 router.get('/', async (req: AuthRequest, res) => {

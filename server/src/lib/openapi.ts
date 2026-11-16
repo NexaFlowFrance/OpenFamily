@@ -348,9 +348,20 @@ export const buildOpenApiDocument = (): Record<string, unknown> => ({
             },
             Appointment: {
                 type: 'object',
-                description: 'Asked with a range, a recurring appointment comes as one entry per occurrence.',
+                description: 'Asked with a range, a recurring appointment comes as one entry per occurrence, and the birthdays of the family members that fall in the range come with them (`kind` is `birthday`). A birthday is worked out from a date of birth: it cannot be changed or deleted here.',
                 properties: {
-                    id: uuid,
+                    id: { type: 'string', description: 'A UUID. For a birthday: `birthday-` followed by the id of the family member.' },
+                    kind: { type: 'string', description: 'Only on a birthday: `birthday`.' },
+                    birthday: {
+                        type: 'object',
+                        description: 'Only on a birthday: whose it is, and the age reached that day.',
+                        properties: {
+                            member_id: uuid,
+                            name: { type: 'string' },
+                            age: { type: 'integer' },
+                            birth_date: { type: 'string', format: 'date' },
+                        },
+                    },
                     title: { type: 'string' },
                     start_time: { type: 'string', description: LOCAL_TIME },
                     end_time: nullable('string', { description: LOCAL_TIME }),

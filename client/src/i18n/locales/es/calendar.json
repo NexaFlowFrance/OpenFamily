@@ -162,5 +162,11 @@
       "DEMO_UNAVAILABLE": "No disponible en la demo.",
       "generic": "Algo salió mal. Inténtalo de nuevo."
     }
+  },
+  "birthday": {
+    "age_one": "{{count}} año",
+    "age_other": "{{count}} años",
+    "notice": "Este cumpleaños viene de la fecha de nacimiento indicada en la página Familia.",
+    "openFamily": "Abrir la página Familia"
   }
 }

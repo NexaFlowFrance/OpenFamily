@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Pantry",
+    "count_one": "{{count}} product at home",
+    "count_other": "{{count}} products at home"
+  },
+  "soon": {
+    "banner_one": "{{count}} product to eat soon",
+    "banner_other": "{{count}} products to eat soon"
+  },
+  "add": {
+    "title": "Add a product"
+  },
+  "edit": {
+    "title": "Edit the product"
+  },
+  "empty": "Nothing here yet. Add what you have at home: the products to eat first will come first.",
+  "form": {
+    "namePlaceholder": "E.g. Milk, Rice",
+    "quantity": "Qty",
+    "unit": "Unit",
+    "unitPlaceholder": "L, kg, pack",
+    "location": "Where",
+    "expiresOn": "Use by"
+  },
+  "locations": {
+    "fridge": "Fridge",
+    "freezer": "Freezer",
+    "cupboard": "Cupboard",
+    "other": "Elsewhere"
+  },
+  "barcode": {
+    "label": "Barcode",
+    "placeholder": "Type it, or scan it",
+    "find": "Find",
+    "invalid": "A barcode is made of 6 to 20 digits.",
+    "found": "Found in Open Food Facts.",
+    "known": "Recognised: you already had this product.",
+    "unknown": "Unknown barcode. Type the name: it will be recognised next time.",
+    "unavailable": "The product database cannot be reached. Type the name."
+  },
+  "scan": {
+    "button": "Scan",
+    "title": "Scan a barcode",
+    "description": "Hold the barcode in front of the camera.",
+    "unavailable": "The camera is not available. Type the barcode instead."
+  },
+  "expiry": {
+    "past": "Past its date ({{date}})",
+    "today": "Use today",
+    "soon_one": "Use within {{count}} day",
+    "soon_other": "Use within {{count}} days",
+    "date": "Use by {{date}}"
+  },
+  "actions": {
+    "less": "One less",
+    "more": "One more"
+  },
+  "toShopping": {
+    "button": "Add to the shopping list",
+    "done": "{{name}} added to the shopping list"
+  },
+  "errors": {
+    "load": "The pantry could not be loaded.",
+    "save": "The change could not be saved."
+  }
+}

@@ -48,6 +48,15 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 - Case à cocher pour marquer les articles achetés
 - Notes optionnelles par article
 
+### 🧊 Garde-manger
+- Ce qu'il y a à la maison, rangé par emplacement : réfrigérateur, congélateur, placard, ailleurs
+- **Date limite** par produit : ce qui doit être consommé en premier vient en premier, et la page signale ce qui est à consommer sous trois jours ou déjà dépassé
+- Quantités ajustées d'un geste (un de plus, un de moins), et **ajout à la liste de courses** en un geste
+- **Code-barres** : tapez-le, lisez-le avec une douchette (elle tape les chiffres comme un clavier) ou scannez-le avec la caméra. Le nom est alors rempli tout seul
+- La recherche interroge d'abord votre propre garde-manger : un produit que vous avez déjà nommé garde le nom que vous lui avez donné. Sinon le serveur interroge [Open Food Facts](https://world.openfoodfacts.org), la base libre de produits alimentaires. Seuls les chiffres du code-barres lui sont envoyés, rien sur votre famille, et seulement quand vous lancez une recherche
+- Le scan par la caméra utilise le lecteur intégré au navigateur : il est proposé dans Chrome, Edge et Samsung Internet sur Android, en HTTPS. Ailleurs (Firefox, iPhone), le bouton n'apparaît pas et le code-barres se tape. L'application Android n'a pas encore accès à la caméra : le code-barres s'y tape aussi
+- Module facultatif : une famille qui ne s'en sert pas le masque dans Paramètres
+
 ### ✅ Gestion des tâches
 - Création de tâches avec titre, description et date d'échéance
 - **Tâches récurrentes** : quotidiennes, hebdomadaires, mensuelles ou annuelles

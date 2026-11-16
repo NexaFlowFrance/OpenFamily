@@ -117,6 +117,7 @@ they cannot be changed or deleted (`409 birthday_read_only`): a date of birth is
 | ------------- | ---------------------------------------------------------------------------------- |
 | Account       | `GET /api/auth/me`                                                                 |
 | Shopping list | `GET` `POST /api/shopping`, `PUT` `DELETE /api/shopping/{id}`                      |
+| Pantry        | `GET` `POST /api/pantry`, `PUT` `DELETE /api/pantry/{id}`, `GET /api/pantry/lookup/{barcode}` |
 | Tasks         | `GET` `POST /api/tasks`, `PUT` `DELETE /api/tasks/{id}`                            |
 | Appointments  | `GET` `POST /api/appointments`, `PUT` `DELETE /api/appointments/{id}`              |
 | Meal plan     | `GET` `POST /api/meal-plans`, `PUT` `DELETE /api/meal-plans/{id}`                  |

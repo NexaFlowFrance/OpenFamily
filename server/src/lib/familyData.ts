@@ -21,6 +21,7 @@ export const FAMILY_TABLES: ReadonlyArray<{ table: string; column: string }> = [
     { table: 'family_notes', column: 'user_id' },
     { table: 'shopping_items', column: 'user_id' },
     { table: 'shopping_list_templates', column: 'user_id' },
+    { table: 'pantry_items', column: 'user_id' },
     { table: 'tasks', column: 'user_id' },
     { table: 'appointments', column: 'user_id' },
     { table: 'calendar_subscriptions', column: 'user_id' },

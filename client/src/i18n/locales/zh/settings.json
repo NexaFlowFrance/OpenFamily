@@ -41,6 +41,7 @@
       "rewards": "管理孩子的零用钱和奖励。",
       "meals": "规划每周餐食。",
       "recipes": "家庭食谱簿。",
+      "pantry": "家里有什么，含保质期和条形码。",
       "planning": "每周安排（工作、上学、活动）。",
       "integrations": "连接第三方服务（Mealie、Home Assistant 等）。",
       "kiosk": "用于家庭共享屏幕的全屏显示。",

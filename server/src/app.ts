@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
 import userSettingsRoutes from './routes/userSettings';
 import shoppingRoutes from './routes/shopping';
+import pantryRoutes from './routes/pantry';
 import tasksRoutes from './routes/tasks';
 import appointmentsRoutes from './routes/appointments';
 import recipesRoutes from './routes/recipes';
@@ -208,6 +209,8 @@ app.use('/api/auth/oidc/link', authRateLimiter);
 // Outbound-triggering routes: looser limiter applied to the whole path prefix.
 app.use('/api/ai', outboundRateLimiter);
 app.use('/api/recipes/import-url', outboundRateLimiter);
+// A barcode lookup asks Open Food Facts.
+app.use('/api/pantry/lookup', outboundRateLimiter);
 app.use('/api/integrations', outboundRateLimiter);
 // Only the test call is sent on demand; the others are merged by the dispatcher.
 app.use('/api/webhooks/:id/test', outboundRateLimiter);
@@ -226,6 +229,7 @@ app.use('/api/webhooks', webhooksRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', userSettingsRoutes);
 app.use('/api/shopping', shoppingRoutes);
+app.use('/api/pantry', pantryRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/appointments', appointmentsRoutes);
 app.use('/api/recipes', recipesRoutes);

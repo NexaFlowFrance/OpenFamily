@@ -13,6 +13,7 @@ import {
     PiggyBank,
     MessageSquare,
     LayoutGrid,
+    Refrigerator,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -35,6 +36,7 @@ export const NAVIGATION: NavItem[] = [
     { labelKey: 'items.planning', href: '/planning', icon: CalendarDays, module: 'planning' },
     { labelKey: 'items.recipes', href: '/recipes', icon: ChefHat, module: 'recipes' },
     { labelKey: 'items.meals', href: '/meal-planning', icon: UtensilsCrossed, module: 'meals' },
+    { labelKey: 'items.pantry', href: '/pantry', icon: Refrigerator, module: 'pantry' },
     { labelKey: 'items.budget', href: '/budget', icon: Wallet, module: 'budget' },
     { labelKey: 'items.family', href: '/family', icon: Users },
     { labelKey: 'items.integrations', href: '/integrations', icon: Plug, module: 'integrations' },

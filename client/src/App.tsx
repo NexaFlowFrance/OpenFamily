@@ -15,6 +15,7 @@ import Posts from './pages/Posts';
 import ShoppingList from './pages/ShoppingList';
 import Tasks from './pages/Tasks';
 import Rewards from './pages/Rewards';
+import Pantry from './pages/Pantry';
 import Calendar from './pages/Calendar';
 import Planning from './pages/Planning';
 import Recipes from './pages/Recipes';
@@ -86,6 +87,7 @@ function App() {
                 <Route path="/planning" element={moduleRoute('planning', <Planning />)} />
                 <Route path="/recipes" element={moduleRoute('recipes', <Recipes />)} />
                 <Route path="/meal-planning" element={moduleRoute('meals', <MealPlanning />)} />
+                <Route path="/pantry" element={moduleRoute('pantry', <Pantry />)} />
                 <Route path="/budget" element={moduleRoute('budget', <Budget />)} />
                 <Route path="/family" element={<Family />} />
                 <Route path="/settings" element={<Settings />} />

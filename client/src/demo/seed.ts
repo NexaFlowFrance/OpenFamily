@@ -41,6 +41,7 @@ export interface DemoStore {
     budgetLimits: Record<string, unknown>[];
     notifications: Record<string, unknown>[];
     notes: Record<string, unknown>[];
+    pantry: Record<string, unknown>[];
     posts: Record<string, unknown>[];
     integrations: Record<string, unknown>[];
     rewardTransactions: Record<string, unknown>[];
@@ -141,6 +142,13 @@ export function createSeed(): DemoStore {
             { id: 'n1', title: 'Reminder', message: 'Dentist appointment for Mia at 3:00 PM', type: 'appointment', is_read: false, related_id: 'a1', created_at: atTime(now, 8) },
             { id: 'n2', title: 'Task due', message: 'Homework — math is due today', type: 'task', is_read: false, related_id: 'tk2', created_at: atTime(now, 7, 30) },
             { id: 'n3', title: 'Budget alert', message: 'Leisure spending is at 80% of the monthly limit', type: 'budget', is_read: true, related_id: null, created_at: atTime(addDays(now, -1), 19) },
+        ],
+        // What is at home: one product to eat soon, so that the page shows it.
+        pantry: [
+            { id: 'pa1', name: 'Yaourts nature', quantity: '6', unit: null, location: 'fridge', expires_on: isoDate(addDays(now, 2)), barcode: null, notes: null },
+            { id: 'pa2', name: 'Lait demi-écrémé', quantity: '2', unit: 'L', location: 'fridge', expires_on: isoDate(addDays(now, 9)), barcode: '3428272960018', notes: null },
+            { id: 'pa3', name: 'Petits pois', quantity: '1', unit: 'kg', location: 'freezer', expires_on: null, barcode: null, notes: null },
+            { id: 'pa4', name: 'Pâtes', quantity: '3', unit: null, location: 'cupboard', expires_on: null, barcode: null, notes: null },
         ],
         // Fridge post-its (no expiry so they always show in the demo)
         notes: [

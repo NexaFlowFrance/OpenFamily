@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Rebost",
+    "count_one": "{{count}} producte a casa",
+    "count_other": "{{count}} productes a casa"
+  },
+  "soon": {
+    "banner_one": "{{count}} producte per consumir aviat",
+    "banner_other": "{{count}} productes per consumir aviat"
+  },
+  "add": {
+    "title": "Afegeix un producte"
+  },
+  "edit": {
+    "title": "Edita el producte"
+  },
+  "empty": "Encara no hi ha res. Afegeix el que tens a casa: el que s'ha de consumir primer apareixerà primer.",
+  "form": {
+    "namePlaceholder": "P. ex.: Llet, Arròs",
+    "quantity": "Qt.",
+    "unit": "Unitat",
+    "unitPlaceholder": "L, kg, paquet",
+    "location": "On",
+    "expiresOn": "Consumir abans del"
+  },
+  "locations": {
+    "fridge": "Nevera",
+    "freezer": "Congelador",
+    "cupboard": "Armari",
+    "other": "Un altre lloc"
+  },
+  "barcode": {
+    "label": "Codi de barres",
+    "placeholder": "Escriu-lo o escaneja'l",
+    "find": "Cerca",
+    "invalid": "Un codi de barres té entre 6 i 20 xifres.",
+    "found": "Trobat a Open Food Facts.",
+    "known": "Reconegut: ja havies tingut aquest producte.",
+    "unknown": "Codi de barres desconegut. Escriu el nom: es reconeixerà la pròxima vegada.",
+    "unavailable": "No es pot accedir a la base de productes. Escriu el nom."
+  },
+  "scan": {
+    "button": "Escaneja",
+    "title": "Escaneja un codi de barres",
+    "description": "Posa el codi de barres davant de la càmera.",
+    "unavailable": "La càmera no està disponible. Escriu el codi de barres."
+  },
+  "expiry": {
+    "past": "Caducat ({{date}})",
+    "today": "Consumir avui",
+    "soon_one": "Consumir en {{count}} dia",
+    "soon_other": "Consumir en {{count}} dies",
+    "date": "Abans del {{date}}"
+  },
+  "actions": {
+    "less": "Un de menys",
+    "more": "Un de més"
+  },
+  "toShopping": {
+    "button": "Afegeix a la llista de la compra",
+    "done": "{{name}} afegit a la llista de la compra"
+  },
+  "errors": {
+    "load": "No s'ha pogut carregar el rebost.",
+    "save": "No s'ha pogut desar el canvi."
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "header": {
+    "title": "储藏",
+    "count_other": "家里有 {{count}} 件食品"
+  },
+  "soon": {
+    "banner_other": "{{count}} 件食品需要尽快食用"
+  },
+  "add": {
+    "title": "添加食品"
+  },
+  "edit": {
+    "title": "编辑食品"
+  },
+  "empty": "这里还没有内容。添加家里现有的食品：需要先吃的会排在前面。",
+  "form": {
+    "namePlaceholder": "例如：牛奶、大米",
+    "quantity": "数量",
+    "unit": "单位",
+    "unitPlaceholder": "升、千克、包",
+    "location": "存放位置",
+    "expiresOn": "保质期至"
+  },
+  "locations": {
+    "fridge": "冰箱",
+    "freezer": "冷冻室",
+    "cupboard": "橱柜",
+    "other": "其他位置"
+  },
+  "barcode": {
+    "label": "条形码",
+    "placeholder": "输入或扫描",
+    "find": "查找",
+    "invalid": "条形码由 6 到 20 位数字组成。",
+    "found": "已在 Open Food Facts 中找到。",
+    "known": "已识别：你以前添加过这件食品。",
+    "unknown": "未知的条形码。请输入名称：下次就能识别。",
+    "unavailable": "无法连接食品数据库。请输入名称。"
+  },
+  "scan": {
+    "button": "扫描",
+    "title": "扫描条形码",
+    "description": "将条形码对准摄像头。",
+    "unavailable": "摄像头不可用。请改为输入条形码。"
+  },
+  "expiry": {
+    "past": "已过期（{{date}}）",
+    "today": "今天食用",
+    "soon_other": "请在 {{count}} 天内食用",
+    "date": "{{date}} 前食用"
+  },
+  "actions": {
+    "less": "减少一个",
+    "more": "增加一个"
+  },
+  "toShopping": {
+    "button": "加入购物清单",
+    "done": "已将 {{name}} 加入购物清单"
+  },
+  "errors": {
+    "load": "无法加载储藏。",
+    "save": "无法保存更改。"
+  }
+}

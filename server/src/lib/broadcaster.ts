@@ -13,7 +13,8 @@ export type WsEntity =
     | 'integrations'
     | 'rewards'
     | 'notes'
-    | 'posts';
+    | 'posts'
+    | 'pantry';
 
 export type WsAction = 'created' | 'updated' | 'deleted' | 'synced';
 

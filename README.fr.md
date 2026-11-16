@@ -21,6 +21,7 @@
 | | |
 |---|---|
 | 🛒 **Liste de courses** | Catégorisation, prix, quantités, templates, **mode magasin par rayon** |
+| 🧊 **Garde-manger** | Ce qu'il y a à la maison, par emplacement (réfrigérateur, congélateur, placard), avec les dates limites et ce qu'il faut consommer en premier, la **recherche par code-barres** (tapé, scanné avec la caméra ou une douchette) et l'ajout à la liste de courses en un geste |
 | ✅ **Tâches** | Tâches récurrentes, assignation familiale, statistiques |
 | 📅 **Rendez-vous** | Calendrier mensuel, rappels automatiques, code couleur, **anniversaires** tirés des dates de naissance de la famille, **export iCal (.ics / webcal)** |
 | 🗓️ **Planning hebdomadaire** | Horaires de travail et emploi du temps scolaire par membre |

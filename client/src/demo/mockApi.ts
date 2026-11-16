@@ -810,6 +810,30 @@ async function route(method: string, path: string, q: Record<string, string>, bo
         if (method === 'DELETE') { remove('notes', seg[2]); return ok({}); }
     }
 
+    // ── Pantry ──────────────────────────────────────────────────────────────────
+    if (path === '/api/pantry' && method === 'GET') {
+        // Like the server: what is good for the shortest time first, no date last.
+        return ok([...(store.pantry as Json[])].sort((a, b) =>
+            String(a.expires_on ?? '9999').localeCompare(String(b.expires_on ?? '9999')) || String(a.name).localeCompare(String(b.name))));
+    }
+    if (path === '/api/pantry' && method === 'POST') {
+        return ok(create('pantry', {
+            name: String(body.name || '').trim(),
+            quantity: body.quantity === null || body.quantity === undefined || body.quantity === '' ? null : String(body.quantity),
+            unit: body.unit || null,
+            location: body.location || 'cupboard',
+            expires_on: body.expires_on || null,
+            barcode: body.barcode || null,
+            notes: null,
+        }));
+    }
+    // The demo has no server to ask Open Food Facts: a barcode stays unknown.
+    if (seg[1] === 'pantry' && seg[2] === 'lookup') throw new Error('unknown_barcode');
+    if (seg[1] === 'pantry' && seg.length === 3) {
+        if (method === 'PUT') return ok(update('pantry', seg[2], 'quantity' in body && body.quantity !== null ? { ...body, quantity: String(body.quantity) } : body));
+        if (method === 'DELETE') { remove('pantry', seg[2]); return ok({}); }
+    }
+
     // ── Notifications ───────────────────────────────────────────────────────────
     if (path === '/api/notifications' && method === 'GET') return ok(store.notifications);
     if (path === '/api/notifications/unread-count') return ok({ count: (store.notifications as Json[]).filter((n) => !n.is_read).length });

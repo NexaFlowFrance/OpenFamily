@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Garde-manger",
+    "count_one": "{{count}} produit à la maison",
+    "count_other": "{{count}} produits à la maison"
+  },
+  "soon": {
+    "banner_one": "{{count}} produit à consommer vite",
+    "banner_other": "{{count}} produits à consommer vite"
+  },
+  "add": {
+    "title": "Ajouter un produit"
+  },
+  "edit": {
+    "title": "Modifier le produit"
+  },
+  "empty": "Rien ici pour l'instant. Ajoutez ce que vous avez à la maison : les produits à consommer en premier viendront en premier.",
+  "form": {
+    "namePlaceholder": "Ex : Lait, Riz",
+    "quantity": "Qté",
+    "unit": "Unité",
+    "unitPlaceholder": "L, kg, paquet",
+    "location": "Où",
+    "expiresOn": "À consommer avant le"
+  },
+  "locations": {
+    "fridge": "Réfrigérateur",
+    "freezer": "Congélateur",
+    "cupboard": "Placard",
+    "other": "Ailleurs"
+  },
+  "barcode": {
+    "label": "Code-barres",
+    "placeholder": "Tapez-le, ou scannez-le",
+    "find": "Chercher",
+    "invalid": "Un code-barres compte 6 à 20 chiffres.",
+    "found": "Trouvé dans Open Food Facts.",
+    "known": "Reconnu : vous avez déjà eu ce produit.",
+    "unknown": "Code-barres inconnu. Tapez le nom : il sera reconnu la prochaine fois.",
+    "unavailable": "La base de produits est injoignable. Tapez le nom."
+  },
+  "scan": {
+    "button": "Scanner",
+    "title": "Scanner un code-barres",
+    "description": "Présentez le code-barres devant la caméra.",
+    "unavailable": "La caméra n'est pas disponible. Tapez le code-barres à la place."
+  },
+  "expiry": {
+    "past": "Date dépassée ({{date}})",
+    "today": "À consommer aujourd'hui",
+    "soon_one": "À consommer sous {{count}} jour",
+    "soon_other": "À consommer sous {{count}} jours",
+    "date": "Avant le {{date}}"
+  },
+  "actions": {
+    "less": "Un de moins",
+    "more": "Un de plus"
+  },
+  "toShopping": {
+    "button": "Ajouter à la liste de courses",
+    "done": "{{name}} ajouté à la liste de courses"
+  },
+  "errors": {
+    "load": "Le garde-manger n'a pas pu être chargé.",
+    "save": "La modification n'a pas pu être enregistrée."
+  }
+}

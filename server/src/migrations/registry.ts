@@ -332,4 +332,27 @@ export const coreMigrations: readonly Migration[] = [
             )`,
         ],
     },
+    {
+        // The pantry (routes/pantry): what the family has at home. user_id is
+        // the family, like the rest of its data. location is one of fridge,
+        // freezer, cupboard, other; barcode holds the digits of a scanned
+        // product, kept so that the next pack is recognised.
+        id: 'core/0014-pantry',
+        statements: [
+            `CREATE TABLE pantry_items (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                name VARCHAR(255) NOT NULL,
+                quantity DECIMAL(10, 2),
+                unit VARCHAR(50),
+                location VARCHAR(20) NOT NULL DEFAULT 'cupboard',
+                expires_on DATE,
+                barcode VARCHAR(20),
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`,
+            'CREATE INDEX idx_pantry_items_user ON pantry_items(user_id)',
+        ],
+    },
 ];

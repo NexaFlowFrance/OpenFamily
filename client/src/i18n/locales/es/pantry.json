@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Despensa",
+    "count_one": "{{count}} producto en casa",
+    "count_other": "{{count}} productos en casa"
+  },
+  "soon": {
+    "banner_one": "{{count}} producto para consumir pronto",
+    "banner_other": "{{count}} productos para consumir pronto"
+  },
+  "add": {
+    "title": "Añadir un producto"
+  },
+  "edit": {
+    "title": "Editar el producto"
+  },
+  "empty": "Todavía no hay nada. Añade lo que tienes en casa: lo que hay que consumir primero aparecerá primero.",
+  "form": {
+    "namePlaceholder": "Ej.: Leche, Arroz",
+    "quantity": "Cant.",
+    "unit": "Unidad",
+    "unitPlaceholder": "L, kg, paquete",
+    "location": "Dónde",
+    "expiresOn": "Consumir antes del"
+  },
+  "locations": {
+    "fridge": "Nevera",
+    "freezer": "Congelador",
+    "cupboard": "Armario",
+    "other": "Otro lugar"
+  },
+  "barcode": {
+    "label": "Código de barras",
+    "placeholder": "Escríbelo o escanéalo",
+    "find": "Buscar",
+    "invalid": "Un código de barras tiene entre 6 y 20 cifras.",
+    "found": "Encontrado en Open Food Facts.",
+    "known": "Reconocido: ya tuviste este producto.",
+    "unknown": "Código de barras desconocido. Escribe el nombre: se reconocerá la próxima vez.",
+    "unavailable": "No se puede acceder a la base de productos. Escribe el nombre."
+  },
+  "scan": {
+    "button": "Escanear",
+    "title": "Escanear un código de barras",
+    "description": "Coloca el código de barras delante de la cámara.",
+    "unavailable": "La cámara no está disponible. Escribe el código de barras."
+  },
+  "expiry": {
+    "past": "Caducado ({{date}})",
+    "today": "Consumir hoy",
+    "soon_one": "Consumir en {{count}} día",
+    "soon_other": "Consumir en {{count}} días",
+    "date": "Antes del {{date}}"
+  },
+  "actions": {
+    "less": "Uno menos",
+    "more": "Uno más"
+  },
+  "toShopping": {
+    "button": "Añadir a la lista de la compra",
+    "done": "{{name}} añadido a la lista de la compra"
+  },
+  "errors": {
+    "load": "No se pudo cargar la despensa.",
+    "save": "No se pudo guardar el cambio."
+  }
+}

@@ -380,6 +380,7 @@ const MODULE_DEFINITIONS: { key: string; labelKey: string; descKey: string }[] =
     { key: 'rewards', labelKey: 'nav:items.rewards', descKey: 'settings:modules.descriptions.rewards' },
     { key: 'meals', labelKey: 'nav:items.meals', descKey: 'settings:modules.descriptions.meals' },
     { key: 'recipes', labelKey: 'nav:items.recipes', descKey: 'settings:modules.descriptions.recipes' },
+    { key: 'pantry', labelKey: 'nav:items.pantry', descKey: 'settings:modules.descriptions.pantry' },
     { key: 'planning', labelKey: 'nav:items.planning', descKey: 'settings:modules.descriptions.planning' },
     { key: 'integrations', labelKey: 'nav:items.integrations', descKey: 'settings:modules.descriptions.integrations' },
     { key: 'kiosk', labelKey: 'settings:modules.names.kiosk', descKey: 'settings:modules.descriptions.kiosk' },

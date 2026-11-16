@@ -41,6 +41,7 @@
       "rewards": "Pontuação e mesada para os filhos.",
       "meals": "Planejamento das refeições da semana.",
       "recipes": "Catálogo de receitas favoritas da casa.",
+      "pantry": "O que há em casa, com datas de validade e códigos de barras.",
       "planning": "Quadro semanal de horários (trabalho, escola, atividades).",
       "integrations": "Conexão com serviços de terceiros (Mealie, Home Assistant…).",
       "kiosk": "Exibição em tela cheia para tablets e telas compartilhadas da casa.",

@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Despensa",
+    "count_one": "{{count}} produto em casa",
+    "count_other": "{{count}} produtos em casa"
+  },
+  "soon": {
+    "banner_one": "{{count}} produto para consumir logo",
+    "banner_other": "{{count}} produtos para consumir logo"
+  },
+  "add": {
+    "title": "Adicionar um produto"
+  },
+  "edit": {
+    "title": "Editar o produto"
+  },
+  "empty": "Nada aqui por enquanto. Adicione o que você tem em casa: o que deve ser consumido primeiro aparece primeiro.",
+  "form": {
+    "namePlaceholder": "Ex.: Leite, Arroz",
+    "quantity": "Qtd.",
+    "unit": "Unidade",
+    "unitPlaceholder": "L, kg, pacote",
+    "location": "Onde",
+    "expiresOn": "Consumir até"
+  },
+  "locations": {
+    "fridge": "Geladeira",
+    "freezer": "Congelador",
+    "cupboard": "Armário",
+    "other": "Outro lugar"
+  },
+  "barcode": {
+    "label": "Código de barras",
+    "placeholder": "Digite ou escaneie",
+    "find": "Buscar",
+    "invalid": "Um código de barras tem de 6 a 20 dígitos.",
+    "found": "Encontrado no Open Food Facts.",
+    "known": "Reconhecido: você já teve este produto.",
+    "unknown": "Código de barras desconhecido. Digite o nome: ele será reconhecido da próxima vez.",
+    "unavailable": "A base de produtos está inacessível. Digite o nome."
+  },
+  "scan": {
+    "button": "Escanear",
+    "title": "Escanear um código de barras",
+    "description": "Aponte a câmera para o código de barras.",
+    "unavailable": "A câmera não está disponível. Digite o código de barras."
+  },
+  "expiry": {
+    "past": "Vencido ({{date}})",
+    "today": "Consumir hoje",
+    "soon_one": "Consumir em {{count}} dia",
+    "soon_other": "Consumir em {{count}} dias",
+    "date": "Até {{date}}"
+  },
+  "actions": {
+    "less": "Um a menos",
+    "more": "Um a mais"
+  },
+  "toShopping": {
+    "button": "Adicionar à lista de compras",
+    "done": "{{name}} adicionado à lista de compras"
+  },
+  "errors": {
+    "load": "Não foi possível carregar a despensa.",
+    "save": "Não foi possível salvar a alteração."
+  }
+}

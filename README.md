@@ -35,6 +35,7 @@ all in one place, on your own server.
 | | |
 |---|---|
 | 🛒 **Shopping list** | Categories, prices, quantities, templates, **aisle-by-aisle store mode** |
+| 🧊 **Pantry** | What is at home, by place (fridge, freezer, cupboard), with use-by dates and what to eat first, **barcode lookup** (typed, scanned with the camera or a handheld scanner) and one tap to the shopping list |
 | ✅ **Tasks** | Recurring tasks, family assignment, statistics |
 | 📅 **Appointments** | Monthly calendar, automatic reminders, color coding, **birthdays** taken from the family's dates of birth, **iCal export (.ics / webcal)** |
 | 🗓️ **Weekly planning** | Work hours and school timetables per family member |

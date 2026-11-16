@@ -105,6 +105,10 @@ const IMPORT_COLUMNS: Record<string, ReadonlySet<string>> = {
         'id', 'author_user_id', 'content', 'image_url', 'link_url',
         'created_at', 'updated_at',
     ]),
+    pantry_items: new Set([
+        'id', 'name', 'quantity', 'unit', 'location', 'expires_on', 'barcode', 'notes',
+        'created_at', 'updated_at',
+    ]),
 };
 
 // node-postgres serializes JavaScript arrays as PostgreSQL arrays. These columns
@@ -271,6 +275,7 @@ router.get('/export', requireParent, async (req: AuthRequest, res) => {
             kakeiboMonths,
             familyPosts,
             familyPostSeen,
+            pantryItems,
         ] = await Promise.all([
             query(
                 `SELECT currency, disabled_modules, custom_categories, kakeibo_pillars
@@ -337,6 +342,7 @@ router.get('/export', requireParent, async (req: AuthRequest, res) => {
                  WHERE fp.user_id = $1`,
                 [userId]
             ),
+            query('SELECT * FROM pantry_items WHERE user_id = $1', [userId]),
         ]);
 
         const exportData = {
@@ -370,6 +376,7 @@ router.get('/export', requireParent, async (req: AuthRequest, res) => {
             kakeibo_months: kakeiboMonths.rows,
             family_posts: familyPosts.rows,
             family_post_seen: familyPostSeen.rows,
+            pantry_items: pantryItems.rows,
         };
 
         return res.json({ success: true, data: exportData });
@@ -756,6 +763,7 @@ router.post('/import', requireParent, importBodyParser, async (req: AuthRequest,
         });
 
         await importRows('family_notes', importData.family_notes);
+        await importRows('pantry_items', importData.pantry_items);
 
         // Earliest month each item was marked paid in the file, as the migration
         // does: an old file may hold marks from before the item's creation date.

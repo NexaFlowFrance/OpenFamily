@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Vorrat",
+    "count_one": "{{count}} Produkt zu Hause",
+    "count_other": "{{count}} Produkte zu Hause"
+  },
+  "soon": {
+    "banner_one": "{{count}} Produkt bald aufbrauchen",
+    "banner_other": "{{count}} Produkte bald aufbrauchen"
+  },
+  "add": {
+    "title": "Produkt hinzufügen"
+  },
+  "edit": {
+    "title": "Produkt bearbeiten"
+  },
+  "empty": "Noch nichts hier. Fügen Sie hinzu, was Sie zu Hause haben: Was zuerst verbraucht werden muss, steht zuerst.",
+  "form": {
+    "namePlaceholder": "z. B. Milch, Reis",
+    "quantity": "Menge",
+    "unit": "Einheit",
+    "unitPlaceholder": "L, kg, Packung",
+    "location": "Wo",
+    "expiresOn": "Haltbar bis"
+  },
+  "locations": {
+    "fridge": "Kühlschrank",
+    "freezer": "Gefrierfach",
+    "cupboard": "Schrank",
+    "other": "Woanders"
+  },
+  "barcode": {
+    "label": "Barcode",
+    "placeholder": "Eintippen oder scannen",
+    "find": "Suchen",
+    "invalid": "Ein Barcode besteht aus 6 bis 20 Ziffern.",
+    "found": "In Open Food Facts gefunden.",
+    "known": "Erkannt: Dieses Produkt hatten Sie schon.",
+    "unknown": "Unbekannter Barcode. Geben Sie den Namen ein: Beim nächsten Mal wird er erkannt.",
+    "unavailable": "Die Produktdatenbank ist nicht erreichbar. Geben Sie den Namen ein."
+  },
+  "scan": {
+    "button": "Scannen",
+    "title": "Barcode scannen",
+    "description": "Halten Sie den Barcode vor die Kamera.",
+    "unavailable": "Die Kamera ist nicht verfügbar. Tippen Sie den Barcode stattdessen ein."
+  },
+  "expiry": {
+    "past": "Abgelaufen ({{date}})",
+    "today": "Heute aufbrauchen",
+    "soon_one": "In {{count}} Tag aufbrauchen",
+    "soon_other": "In {{count}} Tagen aufbrauchen",
+    "date": "Haltbar bis {{date}}"
+  },
+  "actions": {
+    "less": "Eins weniger",
+    "more": "Eins mehr"
+  },
+  "toShopping": {
+    "button": "Zur Einkaufsliste hinzufügen",
+    "done": "{{name}} zur Einkaufsliste hinzugefügt"
+  },
+  "errors": {
+    "load": "Der Vorrat konnte nicht geladen werden.",
+    "save": "Die Änderung konnte nicht gespeichert werden."
+  }
+}

@@ -19,6 +19,7 @@ export const TOGGLEABLE_MODULES = [
     'kiosk',
     'notes',
     'ai',
+    'pantry',
 ] as const;
 
 // Dashboard widgets, in default display order. 'quick' is the shopping/budget/

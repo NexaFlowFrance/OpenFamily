@@ -1,4 +1,4 @@
-# OpenFamily — Documentation complète
+# OpenFamily, documentation complète
 
 ## Sommaire
 
@@ -112,14 +112,17 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 ### ⚙️ Paramètres
 - Export / import des données (transfert de données)
 - Personnalisation de l'application
+- **Apparence**, propre à chaque appareil : thème clair, sombre ou celui de l'appareil, et sur grand écran le choix entre le menu latéral et une barre en bas, comme sur téléphone, avec le reste des rubriques derrière « Plus »
 - **Mot de passe oublié** : réinitialisation par lien e-mail (valable 60 minutes, à usage
   unique), disponible dès que SMTP est configuré
 
 ### 📊 Tableau de bord (Dashboard)
 - Vue d'ensemble de l'activité familiale
-- **Agenda au jour ou à la semaine**, au choix
+- **Agenda au jour ou à la semaine**, au choix. La vue du jour montre aussi les deux jours suivants
 - **Plannings de la semaine** (travail, école, activités) directement sur l'accueil
 - Résumé des tâches en cours, prochains rendez-vous, budget du mois
+- **Cartes de ce qui arrive** : les tâches à faire, le menu du jour, la liste de courses, les prochains anniversaires et les produits du garde-manger à consommer vite
+- La page occupe la largeur de l'écran : une colonne sur téléphone, deux sur un portable, trois sur un grand écran
 - **Personnalisable par membre** : chaque compte choisit les blocs affichés et leur ordre
 - Accès rapide à tous les modules
 
@@ -280,9 +283,9 @@ OpenFamily suit une architecture **client-serveur classique en 3 tiers** :
 ### Monorepo avec workspaces npm
 
 Le projet utilise les **npm workspaces** pour structurer le code en 3 packages :
-- `@openfamily/client` — l'application frontend
-- `@openfamily/server` — l'API backend
-- `shared/` — les types TypeScript et constantes partagés entre client et serveur
+- `@openfamily/client` : l'application frontend
+- `@openfamily/server` : l'API backend
+- `shared/` : les types TypeScript et constantes partagés entre client et serveur
 
 ---
 
@@ -296,16 +299,16 @@ Le projet utilise les **npm workspaces** pour structurer le code en 3 packages :
 | **TypeScript** | 5.3+ | Typage statique du code JavaScript |
 | **Vite** | 7 | Bundler et serveur de développement ultra-rapide |
 | **TailwindCSS** | 3.4 | Framework CSS utility-first pour le styling |
-| **Radix UI** | — | Composants UI accessibles et non stylés (Dialog, Select, Switch, Tabs, Toast…) |
+| **Radix UI** | - | Composants UI accessibles et non stylés (Dialog, Select, Switch, Tabs, Toast…) |
 | **React Router** | 6 | Routage côté client (SPA) |
 | **React Hook Form** | 7 | Gestion des formulaires avec validation |
 | **Zod** | 3 | Schémas de validation des données |
 | **Recharts** | 2 | Graphiques et visualisations (budget, statistiques) |
 | **Framer Motion** | 10 | Animations et transitions fluides |
 | **date-fns** | 3 | Manipulation et formatage des dates |
-| **Lucide React** | — | Bibliothèque d'icônes SVG |
-| **vite-plugin-pwa** | — | Support PWA (Service Worker, manifest, offline) |
-| **class-variance-authority** | — | Gestion de variants CSS pour les composants |
+| **Lucide React** | - | Bibliothèque d'icônes SVG |
+| **vite-plugin-pwa** | - | Support PWA (Service Worker, manifest, offline) |
+| **class-variance-authority** | - | Gestion de variants CSS pour les composants |
 
 ### Backend
 
@@ -470,7 +473,7 @@ OpenFamily utilise **PostgreSQL 16** avec le schéma suivant :
 | **Réinitialisation de mot de passe** | Lien e-mail à usage unique, valable 60 minutes. Seule l'empreinte SHA-256 du jeton est stockée ; la réponse est identique que l'adresse existe ou non (pas d'énumération de comptes) et l'endpoint est limité en débit |
 | **Invitations** | Jeton aléatoire de 32 octets, expiration configurable (7 jours par défaut), révocable ; création limitée en débit et réservée au propriétaire de la famille |
 | **CORS** | Origines configurables via variable d'environnement |
-| **Isolation des données** | Chaque requête est filtrée par `user_id` — un utilisateur ne voit que ses propres données |
+| **Isolation des données** | Chaque requête est filtrée par `user_id` : un utilisateur ne voit que ses propres données |
 | **Variables d'environnement** | Les secrets (JWT_SECRET, mots de passe DB, clés VAPID) ne sont jamais codés en dur |
 | **HTTPS** | Recommandé en production (nécessaire pour les notifications push et le service worker) |
 
@@ -482,9 +485,9 @@ OpenFamily utilise **PostgreSQL 16** avec le schéma suivant :
 
 L'application se déploie en **3 conteneurs Docker** orchestrés par Docker Compose :
 
-1. **openfamily-db** — PostgreSQL 16 Alpine, avec initialisation automatique du schéma
-2. **openfamily-server** — API Node.js/Express, avec health check intégré
-3. **openfamily-client** — Fichiers statiques React servis par Nginx
+1. **openfamily-db** : PostgreSQL 16 Alpine, avec initialisation automatique du schéma
+2. **openfamily-server** : API Node.js/Express, avec health check intégré
+3. **openfamily-client** : Fichiers statiques React servis par Nginx
 
 ```bash
 # Cloner et configurer

@@ -1,28 +1,28 @@
-# OpenFamily — Roadmap
+# OpenFamily roadmap
 
 This document tracks larger ideas that are not yet implemented, and records decisions
 about features that were considered. It is not a commitment or a schedule: priorities
-can shift based on feedback — issues and discussions are welcome.
+can shift based on feedback: issues and discussions are welcome.
 
 ## Shipped
 
-- **Family command center / kiosk display** *(v1.1, expanded in v1.2)* — full-screen
+- **Family command center / kiosk display** *(v1.1, expanded in v1.2)*: full-screen
   view for a wall tablet (fridge / hallway): today's shared calendar, meals, tasks,
   who's where. v1.2 added weather (Open-Meteo), an optional Immich photo background,
   a shopping panel and touch interactions (tap to complete/check).
-- **Kids mode with chores → allowance** *(v1.2)* — points on tasks, parent approval
+- **Kids mode, from chores to an allowance** *(v1.2)*: points on tasks, parent approval
   flow, pocket-money page (balances, streaks, adjust/redeem), savings goals with
   progress bars and a dedicated kid view.
-- **Local-first AI assistant** *(v1.2, first slice)* — provider abstraction
+- **Local-first AI assistant** *(v1.2, first slice)*: provider abstraction
   (Ollama / OpenAI-compatible / Anthropic / Google Gemini, bring-your-own-key, keys encrypted at
   rest): natural-language input (Ctrl+K) that turns a sentence into tasks,
   appointments, shopping items or budget entries, and automatic weekly dinner
   suggestions from the recipe library.
-- **Recipe import from URL** *(v1.2)* — paste a link, the server parses the
+- **Recipe import from URL** *(v1.2)*: paste a link, the server parses the
   schema.org/Recipe JSON-LD and prefills the recipe form.
-- **Recipes → shopping list** *(v1.2)* — aggregate the displayed week's ingredients
+- **From recipes to the shopping list** *(v1.2)*: aggregate the displayed week's ingredients
   into the shopping list, with deduplication and review before adding.
-- **Family sticky notes** *(v1.2)* — digital fridge notes with colors and expiry,
+- **Family sticky notes** *(v1.2)*: digital fridge notes with colors and expiry,
   shown on the Dashboard and the Kiosk in realtime.
 - **Password reset by email** *(v1.5)*: one-time link valid for 60 minutes; only
   the token's SHA-256 is stored, the response never reveals whether an address is
@@ -155,33 +155,33 @@ can shift based on feedback — issues and discussions are welcome.
 - **Two-way Google Calendar / CalDAV sync** (today: one-way from Nextcloud or any
   iCal address, including Google, plus iCal export). CalDAV two-way first (covers Nextcloud, iCloud, Fastmail), Google later
   (OAuth verification burden).
-- **Self-hosted family location** — private location sharing via OwnTracks /
+- **Self-hosted family location**: private location sharing via OwnTracks /
   Traccar / Home Assistant `device_tracker`, plus geo-reminders ("you're near the
   supermarket, 5 items on the list"). Would replace the static planning on the
   Kiosk "who's where".
-- **AI assistant, next slices** — receipt photo → budget entries and dish photo →
+- **AI assistant, next slices**: receipt photo to budget entries and dish photo to
   recipe (needs a vision-capable model), streaming responses, per-member rate limits.
 - **Pantry, next steps**: "use it up" recipe suggestions from what is about to
   expire, barcodes on the shopping list, camera scanning in the Android app
   and on browsers without a barcode detector, a link with Grocy for those who
   have it.
-- **Offline mode** — the PWA currently needs a network connection; the goal is
+- **Offline mode**: the PWA currently needs a network connection; the goal is
   read access to today's data (calendar, lists, meals) when offline, then queued
   writes with background sync.
-- **Weekly family digest** — an optional email or notification every Sunday
+- **Weekly family digest**: an optional email or notification every Sunday
   evening summarizing the week ahead: appointments, chores, meals, budget status.
-- **Scheduled backups** — automatic, recurring export of the family data
+- **Scheduled backups**: automatic, recurring export of the family data
   (JSON/SQL) to a local folder, S3-compatible storage or WebDAV, with retention.
 - **Deeper Home Assistant integration**: beyond the list sync, an integration
   on the Home Assistant side that mirrors the one for Gladys Assistant, with the
   calendar, the lists and the tasks as Home Assistant entities that can drive
   automations (e.g. light up when a chore is due). The API tokens, webhooks and
   documented API of v2.0 are what it will be built on.
-- **Guest access** — a temporary, limited account or share link for a babysitter
+- **Guest access**: a temporary, limited account or share link for a babysitter
   or grandparents (today's schedule, emergency contacts), and public temporary
   shopping-list links for a partner without an account.
 
-## Pronote / EcoleDirecte (deferred — no official free API)
+## Pronote / EcoleDirecte (deferred: no official free API)
 
 There is **no official, free, public API** for either service.
 
@@ -190,7 +190,7 @@ There is **no official, free, public API** for either service.
   whenever Pronote changes, and sit in a legal/ToS grey area (the vendor has historically
   been hostile to scraping). Precedent: the Home Assistant Pronote integration uses
   `pronotepy`.
-- **EcoleDirecte**: same situation — only an unofficial, community-maintained API.
+- **EcoleDirecte**: same situation, with only an unofficial, community-maintained API.
 
 **Decision:** not a pillar feature for now. If pursued later, it should be an **optional,
 clearly-labelled "best-effort / unsupported" integration**, server-side (credentials +

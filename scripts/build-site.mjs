@@ -68,7 +68,7 @@ log('demo built and copied to /demo/');
 // ── 4. Apache config (shared hosting) ────────────────────────────────────────
 // Protects the waiting-list data, forces HTTPS and gives the SPA its fallback.
 const host = DOMAIN.replace(/^https?:\/\//, '');
-fs.writeFileSync(path.join(OUT, '.htaccess'), `# OpenFamily — ${host}
+fs.writeFileSync(path.join(OUT, '.htaccess'), `# OpenFamily, ${host}
 
 Options -Indexes
 

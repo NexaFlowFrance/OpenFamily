@@ -1,7 +1,7 @@
-# OpenFamily — Android app (Capacitor)
+# OpenFamily, the Android app (Capacitor)
 
 The Android app is a **thin client**, not a hosted service. It bundles the OpenFamily
-web UI and, on first launch, asks for **your own self-hosted server's address** — exactly
+web UI and, on first launch, asks for **your own self-hosted server's address**: exactly
 like the Nextcloud / Home Assistant / Jellyfin apps. OpenFamily (NexaFlow) hosts nothing.
 
 - App shell: [`client/capacitor.config.ts`](../client/capacitor.config.ts)
@@ -39,7 +39,7 @@ Prerequisites: Node 22+ (26 recommended), JDK 21, Android SDK (Android Studio).
 npm run install:all
 npm run build:shared
 cd client
-npm run android:add     # first time only — (re)generates client/android/ (already committed)
+npm run android:add     # first time only: (re)generates client/android/ (already committed)
 npm run cap:sync        # build:native + cap sync
 npm run android:open    # open in Android Studio → Run / Build APK
 # or a one-liner onto a connected device/emulator:
@@ -138,7 +138,7 @@ at build time. Without it the links still work, they simply open in the browser.
 
 ## Notes
 
-- **Push notifications**: the app reuses the existing **Web Push (VAPID)** — no Firebase
+- **Push notifications**: the app reuses the existing **Web Push (VAPID)**, with no Firebase
   (keeps it Google‑free). Native UnifiedPush/ntfy can come later.
 - **Service worker** is disabled in the native build (`vite build --mode native`); the app
   shell is already local, only API calls go to your server.

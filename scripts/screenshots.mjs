@@ -28,6 +28,7 @@ const desktop = [
     ['tasks', 'tasks'],
     ['planning', 'planning'],
     ['recipes', 'recipes'],
+    ['pantry', 'pantry'],
 ];
 const mobile = [
     ['', 'dashboard'],

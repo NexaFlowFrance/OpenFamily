@@ -180,7 +180,7 @@ echo -e "
 
 # ─── Rollback (fonction d'aide, non automatique) ──────────────────────────────
 rollback_info() {
-  echo -e "\n${YELLOW}${BOLD}En cas de problème — Procédure de rollback :${NC}"
+  echo -e "\n${YELLOW}${BOLD}En cas de problème, procédure de rollback :${NC}"
   echo -e "
   1. Retourner à l'ancien code :
      ${CYAN}cd $INSTALL_DIR && git checkout $CURRENT_COMMIT${NC}

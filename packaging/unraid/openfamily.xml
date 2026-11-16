@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>OpenFamily</Name>
+  <Repository>ghcr.io/nexaflowfrance/openfamily:latest</Repository>
+  <Registry>https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily</Registry>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/NexaFlowFrance/OpenFamily/issues</Support>
+  <Project>https://openfamily.fr/</Project>
+  <Overview>
+  OpenFamily is a family organizer for your own server: a shared calendar with reminders, tasks and chores with a rewards system for kids, shopping lists updated live on every phone, meal planning with a recipe book, a family budget, a kiosk mode for a wall tablet and an optional AI assistant. It has an Android app, a documented API with webhooks, and integrations with Home Assistant, Gladys Assistant, Mealie, Grocy and Nextcloud. The interface is available in eight languages.[br][br]
+  This one container holds the web interface, the API and its PostgreSQL database. There is nothing to prepare: the secrets are generated on the first start and kept in the data folder. Start it, open the Web UI and create your account.[br][br]
+  Everything to back up is in the data folder.</Overview>
+  <Category>Productivity: Tools: Status:Stable</Category>
+  <WebUI>http://[IP]:[PORT:3000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/packaging/unraid/openfamily.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/OpenFamily.png</Icon>
+  <ExtraParams>--restart unless-stopped</ExtraParams>
+  <Config Name="Web UI Port" Target="3000" Default="8480" Mode="tcp" Description="The address of OpenFamily in a browser and in the Android app: http://UNRAID-IP:PORT" Type="Port" Display="always" Required="true" Mask="false">8480</Config>
+  <Config Name="Data" Target="/data" Default="/mnt/user/appdata/openfamily" Mode="rw" Description="The database and the secrets generated on the first start. This is the folder to back up." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/openfamily</Config>
+  <Config Name="Allow Registration" Target="REGISTRATION_ENABLED" Default="true" Mode="" Description="Leave on true to create your account, then set to false: after that only people invited from the Family page can create one." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="Public URL" Target="APP_PUBLIC_URL" Default="" Mode="" Description="The address you open OpenFamily at, e.g. https://family.example.org. Needed for single sign-on, and when e-mail links show the wrong address behind a reverse proxy." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="SMTP Host" Target="SMTP_HOST" Default="" Mode="" Description="Mail server for invitation and password reset e-mails. Empty = no e-mail is sent; invitations still work by sharing their link." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="SMTP Port" Target="SMTP_PORT" Default="587" Mode="" Description="Mail server port" Type="Variable" Display="advanced" Required="false" Mask="false">587</Config>
+  <Config Name="SMTP User" Target="SMTP_USER" Default="" Mode="" Description="Mail server user name" Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="SMTP Password" Target="SMTP_PASS" Default="" Mode="" Description="Mail server password" Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Mail From" Target="MAIL_FROM" Default="" Mode="" Description="Sender of the e-mails, e.g. OpenFamily &lt;family@example.org&gt;" Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="SSO Issuer URL" Target="OIDC_ISSUER_URL" Default="" Mode="" Description="Single sign-on (OpenID Connect) issuer URL. Empty = off. Redirect URI to register at your provider: [Public URL]/api/auth/oidc/callback" Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="SSO Client ID" Target="OIDC_CLIENT_ID" Default="" Mode="" Description="Single sign-on client ID" Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="SSO Client Secret" Target="OIDC_CLIENT_SECRET" Default="" Mode="" Description="Single sign-on client secret" Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="SSO Button Label" Target="OIDC_PROVIDER_NAME" Default="" Mode="" Description="Shown as 'Continue with ...' on the sign-in page" Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Allow Password Sign-in" Target="PASSWORD_LOGIN_ENABLED" Default="true" Mode="" Description="Set to false for an SSO-only server (ignored while SSO is not configured)" Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+</Container>

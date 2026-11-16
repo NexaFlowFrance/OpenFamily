@@ -1,0 +1,32 @@
+name: OpenFamily
+version: "2.1.0"
+slug: openfamily
+description: "Family organizer: shared calendar, tasks and chores, shopping lists, meals and budget"
+url: https://github.com/NexaFlowFrance/OpenFamily
+arch:
+  - aarch64
+  - amd64
+# The image published with each OpenFamily release, for both architectures.
+# Home Assistant pulls the tag named by "version" above.
+image: ghcr.io/nexaflowfrance/openfamily
+# The image starts and stops its two processes itself.
+init: false
+startup: application
+boot: auto
+ports:
+  3000/tcp: 8480
+ports_description:
+  3000/tcp: Web interface and API
+webui: http://[HOST]:[PORT:3000]
+watchdog: http://[HOST]:[PORT:3000]/health
+# The data is a PostgreSQL database: it is copied while the app is stopped, so
+# that a backup can always be restored.
+backup: cold
+options:
+  registration_enabled: true
+  env_vars: []
+schema:
+  registration_enabled: bool
+  env_vars:
+    - name: match(^[A-Z_][A-Z0-9_]*$)
+      value: str

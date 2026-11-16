@@ -1,223 +1,81 @@
-# OpenFamily — app store packaging
+# OpenFamily in app catalogs
 
-Submission-ready manifests for self-hosted app stores: **Runtipi**, **CasaOS (BigBearCasaOS)** and **Unraid Community Apps**.
+Ready-made definitions of OpenFamily for the catalogs of home servers: **Unraid**, **CasaOS**, **Runtipi**, **Umbrel** and **Home Assistant**.
 
-> ## ⚠️ Submissions must be made by the maintainer, personally
+> ## Submissions are made by the maintainer, in person
 >
-> These files are **technical artifacts only**. Every store submission (PR,
-> forum post, issue) must be written **by hand, by the maintainer**:
+> These files are technical material only. Every submission to a catalog (pull request, forum post, issue) is written **by hand, by the maintainer**:
 >
-> - Read each store's contribution guide and PR template **in full**.
-> - Fill the PR/issue template **yourself, field by field** — never paste
->   generated text over it, never delete template sections.
-> - Answer reviewer feedback personally.
+> - Read the contribution guide and the pull request template of the catalog in full.
+> - Fill the template yourself, field by field. Never paste generated text over it, never delete its sections.
+> - Answer the reviewers yourself.
 >
-> OpenFamily was banned from *awesome-selfhosted* because an AI-prepared PR
-> replaced the submission template. That must never happen again. No tool,
-> script or assistant writes the PR text — only the maintainer does.
+> OpenFamily was banned from *awesome-selfhosted* because a pull request prepared by an AI replaced the submission template. No tool, script or assistant writes the text of a submission.
 
----
+## One container everywhere
 
-## Shared design decisions (read first)
+Every definition here runs the same image, `ghcr.io/nexaflowfrance/openfamily`: the web interface, the API and PostgreSQL in one container (see [`docker/all-in-one`](../docker/all-in-one)).
 
-All three packages deploy the same topology, mirroring the root
-`docker-compose.yml`:
+- **One port**: 3000 in the container, for the pages, the API and live updates. The definitions publish it on **8480**, away from the ports other apps like to take.
+- **One folder to keep**: `/data`, the database and the secrets.
+- **No secret to prepare**: the key that signs sessions, the database password and the push notification keys are generated on the first start and stored in `/data/openfamily.env`.
+- **Settings are optional**: `REGISTRATION_ENABLED`, the `SMTP_*`, `OIDC_*` and other variables of [INSTALLATION.md](../INSTALLATION.md) are passed as environment variables where the catalog allows it.
+- **Versions**: the definitions name a release (`2.1.0`), which catalogs prefer to `latest`. Unraid is the exception: its users expect `latest` and the update button that goes with it.
 
-```
-browser ──► client (nginx, port 80, the ONLY exposed entry point)
-                ├── serves the SPA
-                └── proxies /api, /ws, /health ──► server (port 3001)
-                                                      └──► postgres 16 (alpine)
-```
+What was checked, and what was not: each file was validated for its format, and each compose file was started with Docker and answered on its port. **None of them was installed from the catalog software itself** (no Unraid, CasaOS, Runtipi, umbrelOS or Home Assistant OS at hand). Install it once on the real thing before submitting.
 
-- **Images pinned to `1.2.0`** (`ghcr.io/nexaflowfrance/openfamily-server`,
-  `ghcr.io/nexaflowfrance/openfamily-client`). Stores prefer pinned tags;
-  `latest` is acceptable only for personal/manual installs, never in the
-  submitted manifests. When releasing, bump the tag in all three packages
-  (plus `tipi_version`/`updated_at` for Runtipi).
-- **nginx override (important):** the published client image is built with
-  absolute `http://localhost:3001` / `ws://localhost:3001` URLs baked into the
-  JS bundle, and its stock nginx does **not** proxy the API. Each package
-  therefore replaces `/etc/nginx/conf.d/default.conf` with a config that
-  (a) proxies `/api`, `/ws` and `/health` to the server container and
-  (b) rewrites the baked `localhost:3001` URLs to same-origin via
-  `sub_filter`. This makes the app work from any device on the network.
-  *Upstream fix worth doing:* build the published client image with
-  same-origin defaults and a proxying `client/nginx.conf`; the `sub_filter`
-  lines then become harmless no-ops and can eventually be dropped.
-- **Database schema:** the server creates and migrates its own schema at
-  startup (`runMigrations()` in `server/src/db.ts`) — every package just
-  points it at an empty Postgres 16 database. Nothing to ship, download or
-  import.
-- **Secrets:** `JWT_SECRET` must be ≥ 32 chars and not a known placeholder
-  (the server refuses to start otherwise); `POSTGRES_PASSWORD` is mandatory in
-  production. Runtipi generates both (`type: random`); CasaOS ships
-  random-looking placeholders with explicit *CHANGE ME* comments; Unraid uses
-  required masked variables.
-- **CORS:** all browser traffic is same-origin through the client proxy, so
-  CORS never triggers in the default setup. `CORS_ORIGINS` is wired anyway
-  (Runtipi: app domain; CasaOS/Unraid: documented as "only for cross-origin
-  API use").
-- **Persistence:** postgres data dir + the server's `/app/uploads` (mounted in
-  the root compose; currently unused by the code but kept for forward
-  compatibility).
+## Unraid, `unraid/`
 
----
+`openfamily.xml` is a Community Applications template (`<Container version="2">`): one port, one path (`/mnt/user/appdata/openfamily`), the registration switch, and the e-mail and single sign-on settings under *advanced*.
 
-## Runtipi — `packaging/runtipi/`
+**Try it:** copy the file to `/boot/config/plugins/dockerMan/templates-user/` on the server, then *Docker*, *Add Container*, and pick it in the *Template* list.
 
-### Files
+**Submit it:**
 
-```
-runtipi/apps/openfamily/
-├── config.json               # app metadata, port 8480, form_fields (random secrets)
-├── docker-compose.yml        # dynamic compose, x-runtipi schema_version 2
-├── data/
-│   └── nginx/default.conf    # same-origin proxy config (mounted over /etc/nginx/conf.d)
-└── metadata/
-    ├── description.md
-    └── logo.jpg              # 500×500, generated from client/public/OpenFamily.png
-```
+1. Host the template in a public repository of its own (for example `NexaFlowFrance/unraid-templates`) and make `<TemplateURL>` match its final address.
+2. Open a support thread on the Unraid forums and put its address in `<Support>`.
+3. Follow the current Community Applications policies to ask for inclusion: <https://forums.unraid.net/topic/87144-ca-application-policies-notes/>.
 
-Format mirrored from the official `runtipi/runtipi-appstore` (`linkwarden`
-config.json + `searxng` `data/` convention) and the schema-v2 compose from
-`runtipi/example-appstore` (`whoami`) and the dynamic-compose reference. The
-`data/` folder is copied to `${APP_DATA_DIR}/data` on install, which is how
-the nginx config and the schema reach the containers.
+## CasaOS, `casaos/`
 
-### Test locally
+`openfamily/docker-compose.yml` follows the BigBearCasaOS format (`big-bear-` names, `/DATA/AppData/$AppID`, `x-casaos` descriptions in English and French).
 
-1. Push the **contents of `packaging/runtipi/`** (so `apps/` sits at the repo
-   root) to a public GitHub repo, e.g. `NexaFlowFrance/runtipi-appstore`.
-2. In your Runtipi instance (v4+): **Settings → App Stores → Add** and enter
-   the repo URL.
-3. Install *OpenFamily* from the new store; secrets are generated by the
-   install form. App answers on port **8480**.
+**Try it:** CasaOS dashboard, *+*, *Install a customized app*, *Import*, paste the file.
 
-### Submission
+**Submit it:** fork <https://github.com/bigbeartechworld/big-bear-casaos>, add `Apps/openfamily/docker-compose.yml` with whatever their guidelines ask for today, and open the pull request yourself. Their forum is a good place to announce it first: <https://community.bigbeartechworld.com>.
 
-The official `runtipi/runtipi-appstore` **no longer accepts new apps** (its
-README limits PRs to bug fixes). The supported path is to publish your own
-app store and share its URL:
+## Runtipi, `runtipi/`
 
-1. Create the public repo from the template:
-   <https://github.com/runtipi/example-appstore>
-2. Copy `packaging/runtipi/apps/` into it.
-3. Document the store URL in the OpenFamily README/website so users can add it
-   (guide: <https://runtipi.io/docs/guides/create-your-own-app-store>).
+`apps/openfamily/` holds `config.json` (metadata and the install form), `docker-compose.yml` (schema version 2) and `metadata/` (description and logo).
 
-If the official store reopens to new apps, follow its `CONTRIBUTING.md` and PR
-template — **maintainer-written PR text only** (see warning above).
+**Try it:** push the content of `runtipi/` to a public repository, so that `apps/` is at its root, then in Runtipi: *Settings*, *App Stores*, *Add*.
 
----
+**Submit it:** the official store no longer takes new apps. The supported way is a store of your own, made from <https://github.com/runtipi/example-appstore>, whose address you give in the README and on the website.
 
-## CasaOS (BigBearCasaOS) — `packaging/casaos/`
+On a new release: change the image tag and `version`, add one to `tipi_version`, refresh `updated_at`.
 
-### Files
+## Umbrel, `umbrel/`
 
-```
-casaos/openfamily/docker-compose.yml   # compose + x-casaos extension
-```
+A community app store: `umbrel-app-store.yml` names it (`nexaflow`), and `nexaflow-openfamily/` holds the app (`umbrel-app.yml` and `docker-compose.yml`). The app turns off Umbrel's own sign-in page in front of it (`PROXY_AUTH_ADD: "false"`): OpenFamily has its accounts, and its Android app and API clients could not get past it.
 
-Format mirrored from `bigbeartechworld/big-bear-casaos` → `Apps/docmost`
-(multi-service app with postgres 16-alpine): `big-bear-` service-name prefix,
-`/DATA/AppData/$AppID/...` volumes, per-service `x-casaos` env/volume/port
-descriptions, top-level `x-casaos` store metadata (`main`, `port_map: "8480"`,
-`tips.before_install`, icon URL). Descriptions and tips are provided in
-`en_us` **and** `fr_fr`.
+**Try it:** push the content of `umbrel/` to a public repository, so that `umbrel-app-store.yml` is at its root, then in umbrelOS: *App Store*, the three dots, *Community App Stores*, and add the address of the repository.
 
-CasaOS specifics:
+**Submit it:** the community store needs no approval. For the official store, follow <https://github.com/getumbrel/umbrel-apps>, which also asks for the image to be pinned by digest (`image: ...:2.1.0@sha256:...`).
 
-- **Secrets are hardcoded placeholders** (CasaOS has no generator) with
-  prominent *CHANGE ME* comments — `POSTGRES_PASSWORD` appears twice (server +
-  db) and must match.
-- The client's nginx config is written inline by a `command:` override
-  (CasaOS can't ship extra files); nginx runtime vars are `$$`-escaped for
-  compose interpolation.
+## Home Assistant, `home-assistant/`
 
-### Test locally
+An app repository (what Home Assistant called add-ons): `repository.yaml` names it, and `openfamily/` holds the app: `config.yaml`, the documentation shown in Home Assistant (`README.md`, `DOCS.md`), the translations of its settings and its icons. It pulls the published image, stores everything in the `/data` folder Home Assistant gives each app, and is stopped during backups so that the database is copied whole.
 
-CasaOS Dashboard → **“+” → Install a customized app → Import** → paste
-`docker-compose.yml` (after replacing the two secrets) → install. Web UI on
-port **8480**.
+The two settings of the app reach the container through `/data/options.json`, which the image reads at start: the registration switch, and a list of name and value pairs for any other variable.
 
-### Submission
+**Try it:** push the content of `home-assistant/` to a public repository, so that `repository.yaml` is at its root, then in Home Assistant: *Settings*, *Apps*, *App store*, the three dots, *Repositories*, and add the address of the repository.
 
-1. Fork <https://github.com/bigbeartechworld/big-bear-casaos>.
-2. Add `Apps/openfamily/docker-compose.yml` (+ any assets their current
-   guidelines require) following their existing apps.
-3. Open the PR **personally**, reading and filling their PR template by hand,
-   and/or propose the app on their forum first:
-   <https://community.bigbeartechworld.com>.
+**Submit it:** nothing to submit, the repository is the catalog. Give its address in the README, with the button from <https://my.home-assistant.io/create-link/>.
 
-(The vanilla CasaOS store, <https://github.com/IceWhaleTech/CasaOS-AppStore>,
-is a possible second target; its format differs slightly — re-check before
-submitting there.)
+On a new release: change `version` in `config.yaml`. Home Assistant then offers the update.
 
----
+## On each release
 
-## Unraid Community Apps — `packaging/unraid/`
-
-### Files
-
-```
-unraid/
-├── openfamily-server.xml          # CA template — API server
-├── openfamily-client.xml          # CA template — web UI (entry point)
-└── nginx/default.conf.template    # envsubst template the client mounts
-```
-
-Format mirrored from `selfhosters/unRAID-CA-templates` (`forgejo.xml`,
-`drone.xml`): `<Container version="2">`, `<Config Type="Port|Variable|Path">`,
-masked secret variables, `[br]`-formatted `<Overview>`, `<Requires>` for
-prerequisites.
-
-Unraid is single-container oriented, so OpenFamily ships as **two templates**
-plus an existing **PostgreSQL 16** container from CA. The linkage:
-
-1. Install a PostgreSQL 16 container from CA; create the `openfamily` DB/user
-   (no schema import needed — the server creates its own tables on first start).
-2. Install **OpenFamily-Server** (point `POSTGRES_HOST` at the postgres
-   container, set `POSTGRES_PASSWORD` and a generated `JWT_SECRET`).
-3. One-time download of the nginx template (also in the template Overview):
-   `mkdir -p /mnt/user/appdata/openfamily/nginx && wget -O /mnt/user/appdata/openfamily/nginx/default.conf.template https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/packaging/unraid/nginx/default.conf.template`
-4. Install **OpenFamily-Client**, set *Server Address* to `UNRAID-IP:3001`.
-   Open `http://UNRAID-IP:8480`.
-
-The client uses the stock nginx-image envsubst mechanism
-(`/etc/nginx/templates` → `/etc/nginx/conf.d/default.conf`), so the server
-address is configured from the Unraid UI, not by editing files. A compose-based
-alternative (Compose Manager plugin + the CasaOS compose, adjusted) also works
-and may be preferable for users who dislike the manual step — both are valid;
-the templates are the CA-idiomatic route.
-
-### Test locally
-
-Copy both XMLs to `/boot/config/plugins/dockerMan/templates-user/` on the
-Unraid box (or add the GitHub repo URL under **Docker → Template
-Repositories**), then **Docker → Add Container** and pick the templates from
-the *Template* dropdown.
-
-### Submission
-
-1. Host the templates in a dedicated public repo (e.g.
-   `NexaFlowFrance/unraid-templates`) — raw URLs in `<TemplateURL>` must match
-   the final location.
-2. Create a support thread on the Unraid forums and put its URL in
-   `<Support>` (CA strongly prefers a forum support thread; GitHub issues are
-   tolerated but check current policy).
-3. Apply for inclusion in Community Applications by following the current CA
-   policies and submission instructions from Squid (CA's maintainer):
-   - <https://forums.unraid.net/topic/87144-ca-application-policies-notes/>
-   - <https://forums.unraid.net/forum/94-docker-containers/> (support board)
-4. Read the policies post **in full** and write the application **yourself**
-   (see warning at the top).
-
----
-
-## Updating for a new release
-
-1. Bump image tags (`1.2.0` → new version) in all three packages.
-2. Runtipi: bump `version`, increment `tipi_version`, refresh `updated_at`.
-3. Unraid: bump `<Repository>` tags.
-4. Re-test one install per store before announcing.
+1. Change the image tag in `casaos/`, `runtipi/` and `umbrel/`, and `version` in `home-assistant/openfamily/config.yaml`.
+2. Runtipi: `version`, `tipi_version` and `updated_at` in `config.json`. Umbrel: `version` and `releaseNotes` in `umbrel-app.yml`.
+3. Copy the folders to the repositories that publish them.

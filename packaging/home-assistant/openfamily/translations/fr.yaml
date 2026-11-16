@@ -1,0 +1,14 @@
+configuration:
+  registration_enabled:
+    name: Autoriser les nouveaux comptes
+    description: >-
+      Laissez activé pour créer votre compte, puis désactivez. Les personnes
+      invitées depuis la page Famille peuvent toujours créer le leur.
+  env_vars:
+    name: Autres réglages
+    description: >-
+      Tout autre réglage d'OpenFamily, par son nom : SMTP_HOST et MAIL_FROM
+      pour les e-mails, APP_PUBLIC_URL et OIDC_ISSUER_URL pour la connexion
+      unique. La liste est dans le guide d'installation du projet.
+network:
+  3000/tcp: Interface web et API

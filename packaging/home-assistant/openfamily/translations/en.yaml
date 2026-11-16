@@ -1,0 +1,14 @@
+configuration:
+  registration_enabled:
+    name: Allow new accounts
+    description: >-
+      Leave on to create your own account, then turn off. People you invite
+      from the Family page can still create theirs.
+  env_vars:
+    name: Other settings
+    description: >-
+      Any other setting of OpenFamily, by its name: SMTP_HOST and MAIL_FROM for
+      e-mails, APP_PUBLIC_URL and OIDC_ISSUER_URL for single sign-on. The list
+      is in the installation guide of the project.
+network:
+  3000/tcp: Web interface and API

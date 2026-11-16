@@ -1,0 +1,34 @@
+manifestVersion: 1
+id: nexaflow-openfamily
+name: OpenFamily
+tagline: The family organizer you host yourself
+icon: https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/icon-512.png
+category: files
+version: "2.1.0"
+port: 8480
+description: >-
+  OpenFamily keeps the whole household organized from your own server: a shared calendar with reminders, tasks and chores with a rewards system for kids, shopping lists updated live on every phone, meal planning with a recipe book, a family budget and a kiosk mode for a wall tablet.
+
+
+  It comes with an Android app that connects to your Umbrel, a documented API with personal tokens and webhooks, and integrations with Home Assistant, Gladys Assistant, Mealie, Grocy and Nextcloud. An optional AI assistant works with the provider of your choice or a local model. The interface is available in eight languages.
+
+
+  Open the app and create your account: it becomes the owner of a new family. Then invite the others from the Family page.
+
+developer: NexaFlow
+website: https://openfamily.fr
+submitter: NexaFlow
+submission: https://github.com/NexaFlowFrance/OpenFamily
+repo: https://github.com/NexaFlowFrance/OpenFamily
+support: https://github.com/NexaFlowFrance/OpenFamily/issues
+gallery:
+  - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docs/screenshots/dashboard.png
+  - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docs/screenshots/calendar.png
+  - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docs/screenshots/shopping.png
+  - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docs/screenshots/meals.png
+releaseNotes: >-
+  OpenFamily now runs as a single container: the interface, the API and the database, with nothing to configure.
+dependencies: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""

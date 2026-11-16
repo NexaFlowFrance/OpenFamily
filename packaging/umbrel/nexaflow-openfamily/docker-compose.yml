@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+
+  app_proxy:
+    environment:
+      # The format here is: <app-id>_<docker-service-name>_1
+      APP_HOST: nexaflow-openfamily_app_1
+      APP_PORT: 3000
+      # OpenFamily has its own accounts. Its Android app, its calendar feeds
+      # and the programs that use its API cannot sign in to Umbrel first.
+      PROXY_AUTH_ADD: "false"
+
+  app:
+    # The web interface, the API and PostgreSQL in one container. Its secrets
+    # are generated on the first start and kept in /data.
+    image: ghcr.io/nexaflowfrance/openfamily:2.1.0
+    restart: on-failure
+    stop_grace_period: 1m
+    volumes:
+      - ${APP_DATA_DIR}/data:/data

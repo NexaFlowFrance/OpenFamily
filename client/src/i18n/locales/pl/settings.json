@@ -1,0 +1,147 @@
+{
+  "title": "Settings",
+  "subtitle": "Manage your data and preferences.",
+  "language": {
+    "title": "Language",
+    "subtitle": "Choose the language of the app interface."
+  },
+  "profile": {
+    "title": "Profile photo",
+    "subtitle": "Choose a photo that will appear in the app menu.",
+    "change": "Change photo",
+    "choose": "Choose a photo",
+    "remove": "Remove"
+  },
+  "notif": {
+    "title": "Push notifications",
+    "subtitle": "Get reminders for your appointments directly on this device, even when the app is closed.",
+    "unsupported": "Notifications are not supported on this browser.",
+    "denied": "Permission denied. Allow notifications in your browser settings.",
+    "enable": "Enable notifications",
+    "disable": "Disable notifications",
+    "inProgress": "Working…",
+    "active": "Notifications enabled on this device."
+  },
+  "currency": {
+    "title": "Currency",
+    "subtitle": "Select the currency used to display amounts in your app."
+  },
+  "modules": {
+    "title": "Modules",
+    "subtitle": "Enable or hide optional modules to keep only the ones your family uses.",
+    "parentOnly": "Only parents can change the modules.",
+    "error": "Error while updating the modules.",
+    "names": {
+      "kiosk": "Kiosk mode",
+      "notes": "Dashboard notes",
+      "ai": "AI assistant"
+    },
+    "descriptions": {
+      "budget": "Family budget tracking, expenses and income.",
+      "rewards": "Children's pocket money and rewards.",
+      "meals": "Weekly meal planning.",
+      "recipes": "The family's recipe book.",
+      "planning": "Weekly schedules (work, school, activities).",
+      "integrations": "Connections to third-party services (Mealie, Home Assistant…).",
+      "kiosk": "Full-screen display for a shared home screen.",
+      "notes": "Sticky notes shown on the dashboard.",
+      "ai": "Smart assistant to quickly capture and organize."
+    }
+  },
+  "export": {
+    "title": "Export data",
+    "subtitle": "Download a portable JSON copy of your family data and family-wide preferences. Authentication credentials, integration secrets, notifications, and temporary security data are not included.",
+    "button": "Export",
+    "inProgress": "Exporting…"
+  },
+  "import": {
+    "title": "Import data",
+    "subtitle": "Restore an OpenFamily portable export. Existing records are kept and duplicates are skipped; family-wide preferences from the file are restored.",
+    "success": "Import successful",
+    "itemsImported_one": "item imported",
+    "itemsImported_other": "items imported",
+    "chooseFile": "Choose a file…",
+    "button": "Import",
+    "inProgress": "Importing…",
+    "invalidJson": "Invalid JSON file."
+  },
+  "entities": {
+    "family_settings": "Family preferences",
+    "account_preferences": "Account preferences",
+    "family_members": "Family members",
+    "tasks": "Tasks",
+    "recipes": "Recipes",
+    "meal_plans": "Planned meals",
+    "budget_entries": "Budget entries",
+    "budget_limits": "Budget limits",
+    "shopping_items": "Shopping items",
+    "shopping_list_templates": "Shopping templates",
+    "appointments": "Appointments",
+    "appointment_recurrence_exceptions": "Appointment exceptions",
+    "schedule_entries": "Planning entries",
+    "schedule_entry_members": "Planning participants",
+    "schedule_entry_exceptions": "Planning exceptions",
+    "reward_transactions": "Reward transactions",
+    "reward_settings": "Reward settings",
+    "reward_goals": "Savings goals",
+    "family_notes": "Family notes",
+    "recurring_expenses": "Recurring expenses",
+    "recurring_expense_logs": "Recurring expense checks",
+    "kakeibo_months": "Kakeibo months",
+    "family_posts": "Family posts",
+    "family_post_seen": "Post read status"
+  },
+  "errors": {
+    "notif": "Error while configuring notifications.",
+    "currency": "Error while updating the currency.",
+    "avatarImage": "Please choose an image.",
+    "avatarRead": "Could not read the file.",
+    "avatarInvalid": "Invalid image.",
+    "avatarCanvas": "Canvas unavailable.",
+    "avatarUpdate": "Error while updating the photo.",
+    "avatarRemove": "Error while removing the photo.",
+    "export": "Error during export.",
+    "import": "Error during import."
+  },
+  "support": {
+    "title": "Support OpenFamily",
+    "subtitle": "OpenFamily is free and open source, self-hosted on your own server. If it helps your family, you can support its development — it stays free either way.",
+    "sponsor": "Buy me a coffee",
+    "star": "Star on GitHub",
+    "sponsorGithub": "Sponsor on GitHub"
+  },
+  "regional": {
+    "title": "Week",
+    "subtitle": "Choose which day your weeks start on, in the calendar, the planning, meals and the dashboard. This setting is yours alone.",
+    "weekStart": "First day of the week",
+    "weekStartHelp": "Automatic follows the conventions of your language and region.",
+    "automatic": "Automatic ({{day}})",
+    "saveError": "Could not save your preference.",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    }
+  },
+  "signIn": {
+    "title": "Sign-in",
+    "subtitle": "How you sign in to OpenFamily, on this device and others.",
+    "ssoLinked": "Your account is linked to {{name}}.",
+    "ssoNotLinked": "Link your {{name}} account to sign in with it.",
+    "link": "Link {{name}}",
+    "unlink": "Unlink",
+    "confirmUnlink": "Unlink {{name}}? You will sign in with your password, and your other devices will be signed out.",
+    "unlinkNeedsPassword": "Your account has no password yet. Set one with “Forgot your password?” on the sign-in page to be able to unlink.",
+    "unlinkPasswordOff": "Password sign-in is turned off on this server, so single sign-on cannot be unlinked.",
+    "relinkNote": "Once unlinked, signing in with {{name}} no longer opens this account. You can link it again here.",
+    "linked": "Single sign-on is now linked.",
+    "unlinked": "Single sign-on is unlinked. Your other devices were signed out.",
+    "logoutEverywhere": "Sign out of all devices",
+    "logoutEverywhereDesc": "Lost a phone, or signed in on a shared computer? This signs you out everywhere, including here.",
+    "confirmLogoutEverywhere": "Sign out of all devices, including this one?"
+  }
+}

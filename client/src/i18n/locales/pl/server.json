@@ -1,0 +1,19 @@
+{
+  "title": "Połącz z Twoim serwerem",
+  "subtitle": "OpenFamily jest hostowane u Ciebie — wskaż aplikacji własny serwer.",
+  "urlLabel": "Adres serwera",
+  "placeholder": "http://192.168.1.10:3001",
+  "hint": "Użyj tego samego adresu, który otwierasz w przeglądarce (np. http://192.168.1.10:3001), albo swojego adresu HTTPS / Tailscale.",
+  "connect": "Połącz",
+  "connecting": "Łączenie…",
+  "errors": {
+    "invalid": "Wpisz poprawny adres zaczynający się od http:// lub https://",
+    "unreachable": "Nie udało się połączyć z tym serwerem. Sprawdź adres i czy serwer działa."
+  },
+  "settings": {
+    "title": "Serwer",
+    "connectedTo": "Połączono z {{url}}",
+    "change": "Zmień serwer",
+    "disconnect": "Rozłącz"
+  }
+}

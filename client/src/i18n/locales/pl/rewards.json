@@ -1,0 +1,86 @@
+{
+  "loading": "Loading pocket money…",
+  "title": "Pocket money",
+  "subtitle": "Chores earn points, points become pocket money",
+  "empty": "No rewards yet. Add stars to a task to get started!",
+  "streak_one": "{{count}} day in a row",
+  "streak_other": "{{count}} days in a row",
+  "pendingCount_one": "{{count}} pending",
+  "pendingCount_other": "{{count}} pending",
+  "worth": "worth {{amount}}",
+  "approvals": {
+    "title_one": "{{count}} task to approve",
+    "title_other": "{{count}} tasks to approve",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "actions": {
+    "adjust": "Adjust",
+    "redeem": "Pay out"
+  },
+  "types": {
+    "earn": "Points earned",
+    "adjust": "Adjustment",
+    "redeem": "Pocket money paid out"
+  },
+  "fields": {
+    "note": "Note (optional)"
+  },
+  "adjustDialog": {
+    "title": "Adjust {{name}}'s points",
+    "description": "Add a bonus or remove points (negative value)",
+    "points": "Points (+ or −)",
+    "notePlaceholder": "e.g. Helped put away the groceries"
+  },
+  "redeemDialog": {
+    "title": "Pay out pocket money to {{name}}",
+    "description": "Available balance: {{balance}} points",
+    "points": "Points to convert",
+    "amount": "Amount to pay out: {{amount}}",
+    "notePlaceholder": "e.g. Piggy bank, cinema trip…"
+  },
+  "goals": {
+    "add": "Add a goal",
+    "editTitle": "Edit the goal",
+    "progress": "{{current}} / {{target}}",
+    "markAchieved": "Goal achieved 🎉"
+  },
+  "goalDialog": {
+    "addTitle": "New goal for {{name}}",
+    "editTitle": "Edit {{name}}'s goal",
+    "description": "A savings goal to reach with points",
+    "emoji": "Emoji",
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g. Video game",
+    "target": "Amount to reach ({{currency}})",
+    "delete": "Delete"
+  },
+  "kid": {
+    "hello": "Hi {{name}}!",
+    "subtitle": "Here is your piggy bank",
+    "reached": "Well done, you made it! 🎉",
+    "reachedHint": "Ask a parent to confirm your goal.",
+    "missing": "You still need {{amount}}",
+    "editGoal": "Edit my goal",
+    "noGoal": "You don't have a goal yet. Pick a dream to reach!",
+    "addGoal": "Pick my goal",
+    "tasksTitle": "Your missions",
+    "allTasks": "See all",
+    "tasksEmpty": "No missions right now, well done! 🎉",
+    "pendingBadge": "Awaiting approval",
+    "historyTitle": "Your latest activity",
+    "notLinkedTitle": "Your piggy bank is waiting!",
+    "notLinkedMessage": "Ask a parent to link your account to your profile from the Family page to see your points and goals."
+  },
+  "settings": {
+    "rate": "1 point = {{value}}",
+    "title": "Value of one point",
+    "description": "Set the money value of one point",
+    "label": "Value of one point",
+    "example": "Example: {{points}} points = {{amount}}"
+  },
+  "errors": {
+    "load": "Unable to load pocket money.",
+    "action": "Unable to perform this action."
+  }
+}

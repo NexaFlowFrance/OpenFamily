@@ -1,0 +1,119 @@
+{
+  "loading": "Loading budget…",
+  "categories": {
+    "Logement": "Housing",
+    "Alimentation": "Groceries",
+    "Transport": "Transport",
+    "Santé": "Health",
+    "Loisirs": "Leisure",
+    "Abonnements": "Subscriptions",
+    "Assurance": "Insurance",
+    "Enfants": "Children",
+    "Maison": "Home",
+    "Autre": "Other",
+    "Prélèvements": "Recurring debits"
+  },
+  "readOnly": "Read-only mode. Only parents can edit the budget.",
+  "alerts": {
+    "title": "Limits reached",
+    "over": " · exceeded",
+    "warn": " (≥ 80%)"
+  },
+  "balance": {
+    "current": "Current balance",
+    "pointed_one": "{{count}} recurring item reconciled",
+    "pointed_other": "{{count}} recurring items reconciled",
+    "expenses_one": "{{count}} expense",
+    "expenses_other": "{{count}} expenses",
+    "opening": "Opening balance: {{amount}}"
+  },
+  "forecast": {
+    "title": "Forecast",
+    "subtitle": "Upcoming recurring: +{{income}} income · -{{expenses}} expenses"
+  },
+  "analytics": "Analytics & limits",
+  "charts": {
+    "expensesByCategory": "Expenses by category",
+    "noExpenses": "No expenses this month",
+    "yearEvolution": "Yearly trend",
+    "income": "Income",
+    "expenses": "Expenses"
+  },
+  "limits": {
+    "title": "Monthly limits",
+    "subtitle": "Spending tracking per category",
+    "define": "Set",
+    "none": "No limit set"
+  },
+  "sections": {
+    "recurring": "Recurring entries",
+    "expenses": "Expenses",
+    "income": "Income"
+  },
+  "recurring": {
+    "empty": "No recurring entries this month",
+    "markOn": "Mark as reconciled",
+    "markOff": "Unmark",
+    "dayPrefix": "day",
+    "frequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "none": "Does not repeat"
+    },
+    "units": {
+      "daily_one": "day",
+      "daily_other": "days",
+      "weekly_one": "week",
+      "weekly_other": "weeks",
+      "monthly_one": "month",
+      "monthly_other": "months",
+      "yearly_one": "year",
+      "yearly_other": "years"
+    }
+  },
+  "empty": {
+    "expenses": "No expenses this month",
+    "income": "No income this month"
+  },
+  "sheets": {
+    "new": "Add entry",
+    "edit": "Edit entry",
+    "limit": "Monthly limit"
+  },
+  "toggle": {
+    "expense": "Expense",
+    "income": "Income"
+  },
+  "fields": {
+    "amount": "Amount ({{currency}})",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "e.g. Groceries, paycheque, investment deposit…",
+    "date": "Date",
+    "category": "Category",
+    "limit": "Monthly limit ({{currency}})",
+    "limitHint": "Set 0 to remove tracking for this category.",
+    "startDate": "Start date",
+    "repeat": "Repeat",
+    "every": "Every",
+    "repeatUntil": "Repeat until (optional)",
+    "addToCalendar": "Add to Calendar",
+    "addToCalendarHint": "Creates an all-day Calendar Event with the same date and recurrence.",
+    "type": "Type"
+  },
+  "errors": {
+    "amountInvalid": "Invalid amount.",
+    "save": "Error while saving.",
+    "limitInvalid": "Invalid limit.",
+    "startDateRequired": "Start date required.",
+    "intervalInvalid": "Repeat interval must be between 1 and 365.",
+    "repeatUntilInvalid": "Repeat-until date cannot be before the start date.",
+    "editRecurrenceType": "To switch between one-time and recurring, delete this entry and add it again."
+  },
+  "confirm": {
+    "deleteRecurring": "Delete this recurring entry?",
+    "deleteEntry": "Delete this entry?"
+  },
+  "classic": "Classic"
+}

@@ -1,0 +1,35 @@
+{
+  "title": "Notatki rodzinne",
+  "add": "Dodaj notatkę",
+  "addTitle": "Nowa notatka na lodówkę",
+  "placeholder": "Nie zapomnij o torbie na siłownię!",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "Kolor",
+  "colors": {
+    "yellow": "Żółty",
+    "pink": "Różowy",
+    "blue": "Niebieski",
+    "green": "Zielony",
+    "orange": "Pomarańczowy"
+  },
+  "expiryLabel": "Ważność",
+  "expiry": {
+    "today": "Do dziś wieczorem",
+    "day": "24 godziny",
+    "week": "1 tydzień",
+    "never": "Bezterminowo"
+  },
+  "submit": "Przypnij notatkę",
+  "cancel": "Anuluj",
+  "delete": "Usuń tę notatkę",
+  "deleted": "Notatka zdjęta z lodówki",
+  "added": "Notatka przypięta na lodówce",
+  "emptyHint": "Zostaw krótką notatkę dla rodziny — pojawi się tutaj i na wyświetlaczu kioskowym.",
+  "by": "od {{name}}",
+  "age": {
+    "now": "przed chwilą",
+    "minutes": "{{count}} min. temu",
+    "hours": "{{count}} godz. temu",
+    "days": "{{count}} dni temu"
+  }
+}

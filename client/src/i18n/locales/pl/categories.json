@@ -1,0 +1,26 @@
+{
+  "title": "Kategorie",
+  "subtitle": "Dopasuj listy kategorii używane w Zakupach, Przepisach, Budżecie i Zadaniach. Zmiana nazwy kategorii zaktualizuje istniejące pozycje.",
+  "parentOnly": "Tylko rodzice mogą edytować kategorie.",
+  "modules": {
+    "shopping": "Zakupy",
+    "recipe": "Przepisy",
+    "budget": "Budżet",
+    "task": "Zadania"
+  },
+  "addPlaceholder": "Nowa kategoria…",
+  "add": "Dodaj",
+  "save": "Zapisz",
+  "saved": "Kategorie zapisane.",
+  "reset": "Anuluj zmiany",
+  "moveUp": "Przenieś wyżej",
+  "moveDown": "Przenieś niżej",
+  "remove": "Usuń",
+  "hintReassign": "Pozycje z usuwanej kategorii zostaną przeniesione do „{{fallback}}”.",
+  "errors": {
+    "empty": "Nazwy kategorii nie mogą być puste.",
+    "duplicate": "Zduplikowana kategoria: {{name}}",
+    "atLeastOne": "Zostaw co najmniej jedną kategorię.",
+    "save": "Nie udało się zapisać kategorii."
+  }
+}

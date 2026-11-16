@@ -1,0 +1,91 @@
+{
+  "loading": "Ładowanie zadań…",
+  "title": "Zadania",
+  "subtitle": "Zarządzaj zadaniami rodziny i śledź ich postęp",
+  "newTask": "Nowe zadanie",
+  "priorities": {
+    "Haute": "Wysoki",
+    "Moyenne": "Średni",
+    "Basse": "Niski"
+  },
+  "frequencies": {
+    "Une fois": "Jednorazowe",
+    "Quotidien": "Codzienne",
+    "Hebdomadaire": "Co tydzień",
+    "Mensuel": "Co miesiąc",
+    "Trimestriel": "Co kwartał",
+    "Quadrimestriel": "Co 4 miesiące",
+    "Annuel": "Roczne"
+  },
+  "stats": {
+    "total": "Łącznie",
+    "completed": "Wykonane",
+    "pending": "Oczekujące",
+    "completionRate": "Współczynnik wykonania"
+  },
+  "filters": {
+    "label": "Filtry:",
+    "statusAll": "Wszystkie",
+    "statusPending": "Oczekujące",
+    "statusCompleted": "Wykonane",
+    "allPriorities": "Wszystkie priorytety",
+    "allMembers": "Wszyscy członkowie",
+    "unassigned": "Nieprzydzielone",
+    "allFrequencies": "Wszystkie częstotliwości",
+    "allCategories": "Wszystkie kategorie",
+    "noCategory": "Bez kategorii"
+  },
+  "empty": {
+    "none": "Brak zadań. Utwórz swoje pierwsze zadanie!",
+    "noMatch": "Żadne zadanie nie pasuje do wybranych filtrów."
+  },
+  "due": "Termin: {{date}}",
+  "dialog": {
+    "editTitle": "Edytuj zadanie",
+    "createTitle": "Nowe zadanie",
+    "description": "Uzupełnij szczegóły zadania"
+  },
+  "form": {
+    "title": "Tytuł",
+    "titlePlaceholder": "np. Zrób zakupy",
+    "description": "Opis (opcjonalnie)",
+    "descriptionPlaceholder": "Dodatkowe szczegóły…",
+    "priority": "Priorytet",
+    "frequency": "Częstotliwość",
+    "dueDate": "Termin wykonania (opcjonalnie)",
+    "assignTo": "Przypisz do (opcjonalnie)",
+    "noMembers": "Brak dostępnych członków",
+    "points": "Punkty do zdobycia (opcjonalnie)",
+    "pointsHint": "Przypisani członkowie otrzymają te punkty po wykonaniu zadania.",
+    "category": "Kategoria (opcjonalnie)",
+    "noCategory": "Brak"
+  },
+  "approval": {
+    "pendingBadge": "Oczekuje na zatwierdzenie",
+    "approve": "Zatwierdź",
+    "reject": "Odrzuć",
+    "toastTitle": "Świetnie, zadanie wykonane!",
+    "toastDescription": "Punkty zostaną dodane, gdy rodzic zatwierdzi wykonanie."
+  },
+  "confirmDelete": "Czy na pewno chcesz usunąć to zadanie?",
+  "errors": {
+    "loadTasks": "Nie udało się wczytać zadań.",
+    "loadMembers": "Nie udało się wczytać członków.",
+    "loadStats": "Nie udało się wczytać statystyk.",
+    "saveTask": "Nie udało się zapisać tego zadania.",
+    "toggleTask": "Nie udało się zaktualizować tego zadania.",
+    "deleteTask": "Nie udało się usunąć tego zadania.",
+    "approveTask": "Nie udało się zatwierdzić tego zadania.",
+    "rejectTask": "Nie udało się odrzucić tego zadania."
+  },
+  "categories": {
+    "Cuisine": "Kuchnia",
+    "Chambre": "Sypialnia",
+    "Salle de bain": "Łazienka",
+    "Salon": "Salon",
+    "Extérieur": "Na zewnątrz",
+    "École": "Szkoła",
+    "Administratif": "Formalności",
+    "Autre": "Inne"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "items": {
+    "today": "Dziś",
+    "shopping": "Zakupy",
+    "tasks": "Zadania",
+    "rewards": "Kieszonkowe",
+    "calendar": "Umówienia",
+    "planning": "Planowanie",
+    "recipes": "Przepisy",
+    "meals": "Posiłki",
+    "budget": "Budżet",
+    "family": "Rodzina",
+    "integrations": "Integracje",
+    "settings": "Ustawienia",
+    "posts": "Posty"
+  },
+  "mobile": {
+    "home": "Start",
+    "planning": "Plan",
+    "lists": "Listy",
+    "budget": "Budżet",
+    "family": "Rodzina"
+  },
+  "quickActions": {
+    "title": "Szybkie akcje",
+    "addShopping": "Dodaj produkt do listy",
+    "addTask": "Dodaj zadanie",
+    "addAppointment": "Dodaj umówienie",
+    "addSchedule": "Dodaj wpis do planu",
+    "addRecipe": "Dodaj przepis",
+    "addMeal": "Dodaj posiłek",
+    "addExpense": "Dodaj wydatek",
+    "addMember": "Dodaj członka rodziny",
+    "addPost": "Nowy post"
+  },
+  "user": {
+    "profile": "Profil",
+    "toggleTheme": "Przełącz motyw",
+    "logout": "Wyloguj się",
+    "openMenu": "Otwórz menu"
+  },
+  "offline": "Tryb offline. Wyświetlane dane pochodzą z pamięci podręcznej. Zmiany będzie można wnoszyć po odzyskaniu połączenia.",
+  "pageTitleFallback": "Pulpit",
+  "posts": {
+    "title": "Posty rodzinne",
+    "subtitle": "Podziel się tym, co jest na sercu — zdjęciem albo linkiem — z rodziną.",
+    "newPost": "Nowy post",
+    "editPost": "Edytuj post",
+    "editing": "Edytujesz jeden ze swoich postów.",
+    "placeholder": "Co słychać?",
+    "linkPlaceholder": "Udostępnij link (opcjonalnie)",
+    "addPhoto": "Dodaj zdjęcie",
+    "post": "Opublikuj",
+    "saveChanges": "Zapisz zmiany",
+    "cancel": "Anuluj",
+    "photoPreview": "Podgląd zdjęcia",
+    "removePhoto": "Usuń zdjęcie",
+    "sharedPhoto": "Współdzielone zdjęcie",
+    "empty": "Brak postów rodzinnych.",
+    "emptySubtitle": "Bądź pierwszą osobą, która się czymś podzieli.",
+    "edited": "edytowano",
+    "edit": "Edytuj post",
+    "delete": "Usuń post",
+    "confirmDelete": "Usunąć ten post?",
+    "seen": "Obejrzane",
+    "markSeen": "Oznacz jako obejrzane",
+    "seenBy": "Obejrzało: {{names}}",
+    "notSeen": "Nikt jeszcze nie obejrzał",
+    "errors": {
+      "load": "Nie udało się wczytać postów.",
+      "save": "Nie udało się zapisać postu.",
+      "delete": "Nie udało się usunąć postu.",
+      "seen": "Nie udało się oznaczyć postu jako obejrzanego.",
+      "empty": "Najpierw dodaj trochę tekstu, zdjęcie lub link.",
+      "image": "Nie udało się użyć tego zdjęcia.",
+      "imageTooLarge": "To zdjęcie jest nadal za duże po zmniejszeniu."
+    }
+  },
+  "rail": {
+    "label": "Sekcje"
+  }
+}

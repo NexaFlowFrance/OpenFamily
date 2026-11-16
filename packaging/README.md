@@ -60,7 +60,9 @@ A community app store: `umbrel-app-store.yml` names it (`nexaflow`), and `nexafl
 
 **Try it:** push the content of `umbrel/` to a public repository, so that `umbrel-app-store.yml` is at its root, then in umbrelOS: *App Store*, the three dots, *Community App Stores*, and add the address of the repository.
 
-**Submit it:** the community store needs no approval. For the official store, follow <https://github.com/getumbrel/umbrel-apps>, which also asks for the image to be pinned by digest (`image: ...:2.1.0@sha256:...`).
+**Submit it:** the community store needs no approval. For the official store, follow <https://github.com/getumbrel/umbrel-apps>.
+
+The image is pinned by digest, as Umbrel asks (`image: ...:2.1.0@sha256:...`). The digest of a release is the one of its multi-architecture manifest: `docker buildx imagetools inspect ghcr.io/nexaflowfrance/openfamily:2.1.0` prints it.
 
 ## Home Assistant, `home-assistant/`
 
@@ -77,5 +79,5 @@ On a new release: change `version` in `config.yaml`. Home Assistant then offers 
 ## On each release
 
 1. Change the image tag in `casaos/`, `runtipi/` and `umbrel/`, and `version` in `home-assistant/openfamily/config.yaml`.
-2. Runtipi: `version`, `tipi_version` and `updated_at` in `config.json`. Umbrel: `version` and `releaseNotes` in `umbrel-app.yml`.
+2. Runtipi: `version`, `tipi_version` and `updated_at` in `config.json`. Umbrel: `version` and `releaseNotes` in `umbrel-app.yml`, and the digest after the tag in its compose file.
 3. Copy the folders to the repositories that publish them.

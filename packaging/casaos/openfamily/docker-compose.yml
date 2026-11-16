@@ -13,7 +13,7 @@ services:
     # Name of the container
     container_name: big-bear-openfamily
     # Image to be used for the container
-    image: ghcr.io/nexaflowfrance/openfamily:2.1.0
+    image: ghcr.io/nexaflowfrance/openfamily:2.2.0
     # Container restart policy
     restart: unless-stopped
     # Environment variables for the container

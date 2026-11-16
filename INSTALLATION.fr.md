@@ -67,7 +67,7 @@ docker stop openfamily && docker rm openfamily
 docker run -d --name openfamily ...   # la même commande que la première fois
 ```
 
-Pour rester sur une version de votre choix, mettez son numéro à la place de `latest`, par exemple `ghcr.io/nexaflowfrance/openfamily:2.1.0`.
+Pour rester sur une version de votre choix, mettez son numéro à la place de `latest`, par exemple `ghcr.io/nexaflowfrance/openfamily:2.2.0`.
 
 **Sauvegarder et restaurer.** Deux fichiers contiennent tout :
 
@@ -141,9 +141,9 @@ Laissez **vides**, sauf besoin précis : `VITE_API_URL`, `VITE_WS_URL` (l'applic
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:2.1.0
+    image: ghcr.io/nexaflowfrance/openfamily-server:2.2.0
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:2.1.0
+    image: ghcr.io/nexaflowfrance/openfamily-client:2.2.0
 ```
 
 ```bash

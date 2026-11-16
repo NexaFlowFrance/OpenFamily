@@ -20,7 +20,7 @@ Every definition here runs the same image, `ghcr.io/nexaflowfrance/openfamily`: 
 - **One folder to keep**: `/data`, the database and the secrets.
 - **No secret to prepare**: the key that signs sessions, the database password and the push notification keys are generated on the first start and stored in `/data/openfamily.env`.
 - **Settings are optional**: `REGISTRATION_ENABLED`, the `SMTP_*`, `OIDC_*` and other variables of [INSTALLATION.md](../INSTALLATION.md) are passed as environment variables where the catalog allows it.
-- **Versions**: the definitions name a release (`2.1.0`), which catalogs prefer to `latest`. Unraid is the exception: its users expect `latest` and the update button that goes with it.
+- **Versions**: the definitions name a release (`2.2.0`), which catalogs prefer to `latest`. Unraid is the exception: its users expect `latest` and the update button that goes with it.
 
 What was checked, and what was not: each file was validated for its format, and each compose file was started with Docker and answered on its port. **None of them was installed from the catalog software itself** (no Unraid, CasaOS, Runtipi, umbrelOS or Home Assistant OS at hand). Install it once on the real thing before submitting.
 
@@ -62,7 +62,7 @@ A community app store: `umbrel-app-store.yml` names it (`nexaflow`), and `nexafl
 
 **Submit it:** the community store needs no approval. For the official store, follow <https://github.com/getumbrel/umbrel-apps>.
 
-The image is pinned by digest, as Umbrel asks (`image: ...:2.1.0@sha256:...`). The digest of a release is the one of its multi-architecture manifest: `docker buildx imagetools inspect ghcr.io/nexaflowfrance/openfamily:2.1.0` prints it.
+The image is pinned by digest, as Umbrel asks (`image: ...:2.2.0@sha256:...`). The digest of a release is the one of its multi-architecture manifest: `docker buildx imagetools inspect ghcr.io/nexaflowfrance/openfamily:2.2.0` prints it.
 
 ## Home Assistant, `home-assistant/`
 

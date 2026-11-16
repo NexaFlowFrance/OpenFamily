@@ -2,7 +2,7 @@ services:
   openfamily:
     # The web interface, the API and PostgreSQL in one container. Its secrets
     # are generated on the first start and kept in /data.
-    image: ghcr.io/nexaflowfrance/openfamily:2.1.0
+    image: ghcr.io/nexaflowfrance/openfamily:2.2.0
     restart: unless-stopped
     environment:
       - REGISTRATION_ENABLED=${OPENFAMILY_REGISTRATION_ENABLED:-true}

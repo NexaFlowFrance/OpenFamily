@@ -132,6 +132,18 @@ can shift based on feedback — issues and discussions are welcome.
   like the apps of a home screen.
 - **The family's time zone without asking** *(v2.1)*: a new family takes the
   time zone of the browser that creates it.
+- **Birthdays** *(v2.2)*: a family member with a date of birth has a birthday
+  in the calendar every year, with the age reached, wherever the calendar is
+  shown: the app, the kiosk, a display link, the calendar feed, the API. The
+  family is told on the morning of the day.
+- **Pantry** *(v2.2)*: what is at home, by place, with use-by dates and what
+  to eat first, and one tap to the shopping list. A barcode names a product:
+  typed, read by a handheld scanner, or scanned with the camera where the
+  browser can, with Open Food Facts behind it.
+- **A door open to contributors** *(v2.2)*: a language no longer has to be
+  complete to be merged, the app shows the rest in English; guides for
+  [contributing](CONTRIBUTING.md) and [translating](TRANSLATING.md), issue
+  forms, and GitHub Discussions.
 
 ## Under consideration
 
@@ -149,9 +161,10 @@ can shift based on feedback — issues and discussions are welcome.
   Kiosk "who's where".
 - **AI assistant, next slices** — receipt photo → budget entries and dish photo →
   recipe (needs a vision-capable model), streaming responses, per-member rate limits.
-- **Barcode scanning & native pantry** — camera (PWA) + OpenFoodFacts for shopping
-  and pantry; expiry dates with "use it up" recipe suggestions; connects to Grocy
-  for those who have it, works standalone otherwise.
+- **Pantry, next steps**: "use it up" recipe suggestions from what is about to
+  expire, barcodes on the shopping list, camera scanning in the Android app
+  and on browsers without a barcode detector, a link with Grocy for those who
+  have it.
 - **Offline mode** — the PWA currently needs a network connection; the goal is
   read access to today's data (calendar, lists, meals) when offline, then queued
   writes with background sync.

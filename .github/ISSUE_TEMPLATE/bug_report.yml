@@ -28,7 +28,7 @@ body:
     attributes:
       label: Version
       description: The tag of the image you run, or the release you installed.
-      placeholder: "2.1.0"
+      placeholder: "2.2.0"
   - type: input
     id: device
     attributes:

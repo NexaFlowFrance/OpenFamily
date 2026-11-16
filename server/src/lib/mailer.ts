@@ -1,6 +1,6 @@
 import nodemailer, { type Transporter } from 'nodemailer';
 import logger from './logger';
-import { isLanguage, Language } from './languages';
+import { Language, writingLanguage } from './languages';
 
 /**
  * Transactional email.
@@ -49,10 +49,7 @@ const getTransporter = (): Transporter => {
     return transporter;
 };
 
-const normalizeLanguage = (language?: string | null): Language => {
-    const primary = language?.trim().toLowerCase().split(/[-_]/)[0];
-    return isLanguage(primary) ? primary : 'fr';
-};
+const normalizeLanguage = (language?: string | null): Language => writingLanguage(language);
 
 /** Escape characters that would break out of HTML text nodes or attributes. */
 const escapeHtml = (value: string): string =>

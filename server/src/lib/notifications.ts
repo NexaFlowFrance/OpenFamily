@@ -2,7 +2,7 @@ import { query } from '../db';
 import { sendPushToUser } from './pushService';
 import { broadcast } from './broadcaster';
 import logger from './logger';
-import { isLanguage, Language } from './languages';
+import { Language, writingLanguage } from './languages';
 
 export interface CreateNotificationInput {
     /** Recipient user ID (the actual account, not necessarily the family owner) */
@@ -28,8 +28,7 @@ export async function createLocalizedNotification(
     let lang: Language = 'fr';
     try {
         const result = await query('SELECT language FROM users WHERE id = $1', [input.userId]);
-        const saved = String(result.rows[0]?.language ?? '').toLowerCase().split(/[-_]/)[0];
-        if (isLanguage(saved)) lang = saved;
+        lang = writingLanguage(result.rows[0]?.language);
     } catch {
         // Fall back to French; delivery matters more than the language.
     }

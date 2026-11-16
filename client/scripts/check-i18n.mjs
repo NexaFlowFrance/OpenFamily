@@ -7,10 +7,34 @@ const localesRoot = path.resolve(here, '../src/i18n/locales');
 const canonicalLanguage = 'en';
 const canonicalDir = path.join(localesRoot, canonicalLanguage);
 
+// The languages that must stay complete: a missing string fails the build.
+// Any other locale folder is a translation in progress. What it lacks is shown
+// in English by the app and only counted here, so that a language can arrive
+// one string at a time (a translation platform works that way). What would
+// break the app is still refused: invalid JSON, a wrong placeholder, a key
+// that does not exist in English.
+const completeLanguages = new Set(JSON.parse(fs.readFileSync(path.resolve(here, '../src/i18n/complete-languages.json'), 'utf8')));
+
 const placeholderPattern = /\{\{\s*([^},\s]+)[^}]*\}\}/g;
 const errors = [];
 // Harmless but worth knowing: reported, never fatal.
 const warnings = [];
+// For a translation in progress: how many strings English has, and how many
+// of them the language does not have yet.
+let inProgress = false;
+let missingStrings = 0;
+
+const countStrings = (value) => {
+    if (typeof value === 'string') return 1;
+    if (Array.isArray(value)) return value.reduce((sum, item) => sum + countStrings(item), 0);
+    if (value && typeof value === 'object') return Object.values(value).reduce((sum, item) => sum + countStrings(item), 0);
+    return 0;
+};
+
+const missing = (where, what, canonicalValue) => {
+    if (inProgress) missingStrings += countStrings(canonicalValue);
+    else errors.push(`${where}: ${what}`);
+};
 
 const readJson = (file) => {
     try {
@@ -66,7 +90,7 @@ const compareNode = (canonical, translated, where) => {
             const p = pluralBase(key);
             if (p && canonicalFamilies.has(p.base)) continue;
             if (!(key in translated)) {
-                errors.push(`${where}.${key}: missing key`);
+                missing(`${where}.${key}`, 'missing key', canonical[key]);
                 continue;
             }
             compareNode(canonical[key], translated[key], `${where}.${key}`);
@@ -75,7 +99,7 @@ const compareNode = (canonical, translated, where) => {
         for (const [base, variants] of canonicalFamilies) {
             const forms = Object.keys(translated).filter((key) => key === base || pluralBase(key)?.base === base);
             if (forms.length === 0) {
-                errors.push(`${where}.${base}: missing plural forms`);
+                missing(`${where}.${base}`, 'missing plural forms', variants.map((key) => canonical[key]));
                 continue;
             }
             const allowed = new Set(variants.flatMap((key) => placeholders(canonical[key])));
@@ -112,6 +136,11 @@ const compareNode = (canonical, translated, where) => {
     }
 
     if (canonicalKind === 'string') {
+        // Left empty by a translation in progress: shown in English by the app.
+        if (inProgress && translated === '') {
+            missingStrings += 1;
+            return;
+        }
         const expected = placeholders(canonical);
         const actual = placeholders(translated);
         if (expected.join('\0') !== actual.join('\0')) {
@@ -134,8 +163,14 @@ const languages = fs.readdirSync(localesRoot, { withFileTypes: true })
     .map((entry) => entry.name)
     .sort();
 
+const progress = [];
+
 for (const language of languages) {
     if (language === canonicalLanguage) continue;
+
+    inProgress = !completeLanguages.has(language);
+    missingStrings = 0;
+    let totalStrings = 0;
 
     const localeDir = path.join(localesRoot, language);
     const localeNamespaces = fs.readdirSync(localeDir)
@@ -143,8 +178,10 @@ for (const language of languages) {
         .sort();
 
     for (const namespace of canonicalNamespaces) {
+        const canonical = readJson(path.join(canonicalDir, namespace));
+        totalStrings += countStrings(canonical);
         if (!localeNamespaces.includes(namespace)) {
-            errors.push(`${language}/${namespace}: missing namespace`);
+            missing(`${language}/${namespace}`, 'missing namespace', canonical);
         }
     }
 
@@ -163,6 +200,11 @@ for (const language of languages) {
 
         compareNode(canonical, translated, `${language}/${namespace}`);
     }
+
+    if (inProgress) {
+        const done = totalStrings - missingStrings;
+        progress.push(`${language}: ${Math.floor((done / totalStrings) * 100)}% (${done} of ${totalStrings} strings)`);
+    }
 }
 
 if (warnings.length > 0) {
@@ -174,6 +216,11 @@ if (errors.length > 0) {
     console.error(`[i18n] FAILED with ${errors.length} structural issue(s):`);
     for (const error of errors) console.error(`  - ${error}`);
     process.exit(1);
+}
+
+if (progress.length > 0) {
+    console.log('[i18n] translations in progress (the rest is shown in English):');
+    for (const line of progress) console.log(`  - ${line}`);
 }
 
 console.log(`[i18n] OK: ${languages.length} languages, ${canonicalNamespaces.length} namespaces, structure and interpolation parity verified.`);

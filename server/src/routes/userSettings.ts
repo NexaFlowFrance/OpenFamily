@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest, requireParent } from '../middleware/auth';
-import { isLanguage, LANGUAGES } from '../lib/languages';
+import { isLanguageCode } from '../lib/languages';
 import { canonicalTimeZone, forgetFamilyTimeZones, isTimeZone, serverTimeZone } from '../lib/timeZone';
 
 const router = Router();
@@ -82,13 +82,15 @@ export const parseDisabledModules = (raw: unknown): string[] => {
 
 // Update the authenticated user's preferred language (used for the UI and for
 // server-generated notifications such as appointment reminders).
-// PUT /api/auth/language - body: { "language": "fr" | "en" | "pt" | "ru" | "zh" | "es" | "ca" | "de" }
+// PUT /api/auth/language - body: { "language": "fr" } (a two or three letter code)
+// A language the interface has and the server does not yet is kept all the
+// same: what the server writes to that person is then in English.
 router.put('/language', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { language } = req.body as { language?: unknown };
 
-        if (!isLanguage(language)) {
-            return res.status(400).json({ success: false, error: `Invalid language. Supported values: ${LANGUAGES.join(', ')}` });
+        if (!isLanguageCode(language)) {
+            return res.status(400).json({ success: false, error: 'Invalid language: a two or three letter code is expected, such as "fr" or "en"' });
         }
 
         // actualUserId: the preference belongs to the logged-in member, not the family owner.

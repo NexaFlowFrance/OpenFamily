@@ -5,7 +5,7 @@ import { sendPushToUser } from './pushService';
 import logger from './logger';
 import { expandRecurringAppointments } from './appointmentRecurrence';
 import { ALL_DAY_REMINDER_HOUR, MAX_REMINDER_MINUTES, normalizeReminderMinutes } from './reminders';
-import { isLanguage, Language } from './languages';
+import { Language, writingLanguage } from './languages';
 import { dayInZone, instantInZone, isTimeZone, serverTimeZone } from './timeZone';
 
 interface Occurrence {
@@ -88,7 +88,7 @@ export function buildReminderTexts(
     minutes: number,
     now: Date
 ): { title: string; body: string } {
-    const lang = isLanguage(occurrence.language) ? occurrence.language : 'fr';
+    const lang = writingLanguage(occurrence.language);
     const start = String(occurrence.start_time);
     const where = occurrence.location ? ` · ${occurrence.location}` : '';
     const body = occurrence.is_all_day

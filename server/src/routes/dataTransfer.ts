@@ -7,7 +7,7 @@ import { withTextLines } from '../lib/recipeLines';
 import { OPENFAMILY_VERSION } from '../version';
 import { cleanContent, cleanImage, cleanLink } from '../lib/postFields';
 import { cleanImageUrl } from '../lib/recipeImage';
-import { isLanguage } from '../lib/languages';
+import { isLanguageCode } from '../lib/languages';
 
 const PORTABLE_FORMAT = 'openfamily-portable';
 const PORTABLE_VERSION = '2.0';
@@ -507,7 +507,7 @@ router.post('/import', requireParent, importBodyParser, async (req: AuthRequest,
             const assignments: string[] = [];
             const values: unknown[] = [];
 
-            if (isLanguage(ref.language)) {
+            if (isLanguageCode(ref.language)) {
                 values.push(ref.language);
                 assignments.push(`language = $${values.length}`);
             }

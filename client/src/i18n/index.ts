@@ -52,6 +52,9 @@ void i18n
         },
         interpolation: { escapeValue: false },
         returnNull: false,
+        // A string left empty by a translation in progress is shown in English,
+        // like one that is missing.
+        returnEmptyString: false,
         saveMissing: import.meta.env.DEV,
         missingKeyHandler: (_lngs: readonly string[], ns: string, key: string) => {
             if (import.meta.env.DEV) {

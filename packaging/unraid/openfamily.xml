@@ -6,7 +6,7 @@
   <Network>bridge</Network>
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
-  <Support>https://github.com/NexaFlowFrance/OpenFamily/issues</Support>
+  <Support>https://forums.unraid.net/topic/201323-support-nexaflowfrance-openfamily/</Support>
   <Project>https://openfamily.fr/</Project>
   <Overview>
   OpenFamily is a family organizer for your own server: a shared calendar with reminders, tasks and chores with a rewards system for kids, shopping lists updated live on every phone, meal planning with a recipe book, a family budget, a kiosk mode for a wall tablet and an optional AI assistant. It has an Android app, a documented API with webhooks, and integrations with Home Assistant, Gladys Assistant, Mealie, Grocy and Nextcloud. The interface is available in eight languages.[br][br]

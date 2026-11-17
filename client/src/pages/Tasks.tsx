@@ -522,8 +522,11 @@ const Tasks: React.FC = () => {
                                         )}
                                     </button>
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="flex-1">
+                                        {/* The title keeps a readable width: when the actions
+                                            do not fit beside it (a chore to approve, on a
+                                            phone), they go to the line below. */}
+                                        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+                                            <div className="min-w-[9rem] flex-1">
                                                 <h3
                                                     className={`text-body font-semibold mb-1 ${task.is_completed ? 'line-through text-muted-foreground' : ''
                                                         }`}
@@ -579,7 +582,7 @@ const Tasks: React.FC = () => {
                                                     ))}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="ml-auto flex flex-wrap items-center justify-end gap-1 sm:gap-2">
                                                 {isParent && task.pending_approval && (
                                                     <>
                                                         <Button

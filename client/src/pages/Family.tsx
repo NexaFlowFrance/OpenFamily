@@ -430,7 +430,7 @@ const Family: React.FC = () => {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-6">
                     {members.map((member) => (
                         <Card key={member.id} className="hover:shadow-lg transition-shadow">
                             <CardContent className="p-6">
@@ -738,7 +738,7 @@ const Family: React.FC = () => {
                                 </div>
                                 <p className="text-body-sm text-muted-foreground">{t('family:invite.desc')}</p>
 
-                                <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                                <div className="flex flex-wrap items-end gap-2">
                                     <div className="w-full sm:w-44">
                                         <label className="block text-label font-medium text-foreground mb-1.5">
                                             {t('family:invite.roleLabel')}
@@ -749,7 +749,7 @@ const Family: React.FC = () => {
                                             options={ACCOUNT_ROLES}
                                         />
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="min-w-[min(100%,15rem)] flex-1">
                                         <label className="block text-label font-medium text-foreground mb-1.5">
                                             {t('family:invite.emailLabel')}
                                         </label>
@@ -764,7 +764,7 @@ const Family: React.FC = () => {
                                         variant="secondary"
                                         onClick={handleGenerateInvite}
                                         disabled={inviteLinkLoading}
-                                        className="flex items-center justify-center gap-2"
+                                        className="flex w-full items-center justify-center gap-2 sm:w-auto"
                                     >
                                         {inviteEmail.trim() ? <Send className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
                                         {inviteLinkLoading

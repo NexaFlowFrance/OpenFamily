@@ -705,7 +705,7 @@ const Recipes: React.FC = () => {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))] gap-6">
                     {filteredRecipes.map((recipe: Recipe) => (
                         <Card key={recipe.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                             <div className="h-40 bg-gradient-to-br from-nexus-blue/10 to-nexus-amber/10 flex items-center justify-center">
@@ -815,7 +815,8 @@ const Recipes: React.FC = () => {
                         placeholder={t('recipes:form.descriptionPlaceholder')}
                         rows={2}
                     />
-                    <div className="grid grid-cols-3 gap-4">
+                    {/* A label that takes two lines on a phone must not push its field down. */}
+                    <div className="grid grid-cols-3 items-end gap-3 sm:gap-4">
                         <Input
                             label={t('recipes:form.prep')}
                             type="number"

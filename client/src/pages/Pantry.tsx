@@ -209,9 +209,12 @@ const Pantry: React.FC = () => {
         return { text: t('pantry:expiry.date', { date }), tone: 'bg-surface-2 text-muted-foreground' };
     };
 
-    const fields = (state: FormState, change: (next: FormState) => void, idPrefix: string) => (
+    // The fields live in a grid of two columns in a dialog, on a phone and in the
+    // narrow column the form takes from xl up; in between, the card is wide and
+    // they share twelve columns.
+    const fields = (state: FormState, change: (next: FormState) => void, idPrefix: string, wide: boolean) => (
         <>
-            <div className="col-span-2 md:col-span-4">
+            <div className={wide ? 'col-span-2 md:col-span-6 xl:col-span-2' : 'col-span-2'}>
                 <Input
                     id={`${idPrefix}-name`}
                     label={t('common:labels.name')}
@@ -222,7 +225,7 @@ const Pantry: React.FC = () => {
                     required
                 />
             </div>
-            <div className="col-span-1 md:col-span-1">
+            <div className={wide ? 'md:col-span-2 xl:col-span-1' : undefined}>
                 <Input
                     id={`${idPrefix}-quantity`}
                     label={t('pantry:form.quantity')}
@@ -231,7 +234,7 @@ const Pantry: React.FC = () => {
                     inputMode="decimal"
                 />
             </div>
-            <div className="col-span-1 md:col-span-1">
+            <div className={wide ? 'md:col-span-4 xl:col-span-1' : undefined}>
                 <Input
                     id={`${idPrefix}-unit`}
                     label={t('pantry:form.unit')}
@@ -241,7 +244,7 @@ const Pantry: React.FC = () => {
                     maxLength={50}
                 />
             </div>
-            <div className="col-span-1 md:col-span-3">
+            <div className={wide ? 'md:col-span-6 xl:col-span-1' : undefined}>
                 <label className="mb-1.5 block text-caption font-medium text-foreground">{t('pantry:form.location')}</label>
                 <Select
                     value={state.location}
@@ -249,7 +252,7 @@ const Pantry: React.FC = () => {
                     options={locationOptions}
                 />
             </div>
-            <div className="col-span-1 md:col-span-3">
+            <div className={wide ? 'md:col-span-6 xl:col-span-1' : undefined}>
                 <DatePicker
                     label={t('pantry:form.expiresOn')}
                     type="date"
@@ -289,8 +292,8 @@ const Pantry: React.FC = () => {
                     <CardTitle>{t('pantry:add.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={add} className="grid grid-cols-2 gap-3 md:grid-cols-6 md:gap-4">
-                        <div className="col-span-2 md:col-span-6">
+                    <form onSubmit={add} className="grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4 xl:grid-cols-2 xl:gap-3">
+                        <div className="col-span-2 md:col-span-12 xl:col-span-2">
                             <div className="flex items-end gap-2">
                                 <div className="min-w-0 flex-1">
                                     <Input
@@ -325,9 +328,9 @@ const Pantry: React.FC = () => {
                             {hint && <p className="mt-1.5 text-micro text-muted-foreground" role="status">{hint}</p>}
                         </div>
 
-                        {fields(form, setForm, 'pantry-add')}
+                        {fields(form, setForm, 'pantry-add', true)}
 
-                        <div className="col-span-2 flex justify-end md:col-span-6">
+                        <div className="col-span-2 flex justify-end md:col-span-12 xl:col-span-2">
                             <Button type="submit" disabled={saving || !form.name.trim()}>
                                 <Plus className="mr-1 h-4 w-4" />
                                 {t('common:actions.add')}
@@ -408,9 +411,9 @@ const Pantry: React.FC = () => {
                 title={t('pantry:edit.title')}
                 description={editing?.name ?? ''}
             >
-                <form onSubmit={saveEdit} className="grid grid-cols-2 gap-3 md:grid-cols-6 md:gap-4">
-                    {fields(editForm, setEditForm, 'pantry-edit')}
-                    <div className="col-span-2 flex justify-end gap-2 md:col-span-6">
+                <form onSubmit={saveEdit} className="grid grid-cols-2 gap-3">
+                    {fields(editForm, setEditForm, 'pantry-edit', false)}
+                    <div className="col-span-2 flex justify-end gap-2">
                         <Button type="button" variant="secondary" onClick={() => setEditing(null)}>{t('common:actions.cancel')}</Button>
                         <Button type="submit" disabled={saving || !editForm.name.trim()}>{t('common:actions.save')}</Button>
                     </div>

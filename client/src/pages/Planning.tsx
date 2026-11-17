@@ -584,7 +584,9 @@ const Planning: React.FC = () => {
             </div>
 
             <Card>
-                <CardContent className="flex flex-col gap-4 p-4 md:flex-row md:items-end md:justify-between">
+                {/* The week on one side, the two filters on the other; when both
+                    do not fit on a line, the filters go below at full width. */}
+                <CardContent className="flex flex-wrap items-end justify-between gap-4 p-4">
                     <div className="flex flex-wrap items-center gap-2">
                         <Button variant="secondary" size="sm" onClick={() => setWeekAnchor(subWeeks(weekAnchor, 1))}>
                             <ChevronLeft className="h-4 w-4" />
@@ -595,12 +597,12 @@ const Planning: React.FC = () => {
                         <Button variant="secondary" size="sm" onClick={() => setWeekAnchor(addWeeks(weekAnchor, 1))}>
                             <ChevronRight className="h-4 w-4" />
                         </Button>
-                        <span className="ml-2 text-caption text-muted-foreground">
+                        <span className="ml-2 whitespace-nowrap text-caption text-muted-foreground">
                             {format(weekStart, 'dd MMM', { locale: dateLocale() })} - {format(addDays(weekStart, 6), 'dd MMM yyyy', { locale: dateLocale() })}
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="grid w-full grid-cols-1 gap-3 sm:w-auto sm:min-w-[24rem] sm:flex-1 sm:grid-cols-2 lg:max-w-lg">
                         <Select
                             value={selectedMemberId}
                             onValueChange={setSelectedMemberId}

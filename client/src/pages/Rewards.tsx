@@ -538,7 +538,7 @@ const Rewards: React.FC = () => {
                             <ul className="space-y-2">
                                 {myTasks.map((task) => (
                                     <li key={task.id} className="flex items-center gap-3 rounded-input border border-border bg-card px-3 py-2.5">
-                                        <span className="min-w-0 flex-1 truncate font-medium">{task.title}</span>
+                                        <span className="min-w-[10rem] flex-1 truncate font-medium">{task.title}</span>
                                         {task.pending_approval && (
                                             <Badge variant="warning" className="flex items-center gap-1">
                                                 <Hourglass className="h-3 w-3" />
@@ -623,7 +623,7 @@ const Rewards: React.FC = () => {
                         <ul className="space-y-2">
                             {summary!.pending_tasks.map((task) => (
                                 <li key={task.id} className="flex flex-wrap items-center gap-3 rounded-input bg-card px-3 py-2.5 border border-border">
-                                    <span className="min-w-0 flex-1 truncate font-medium">{task.title}</span>
+                                    <span className="min-w-[10rem] flex-1 truncate font-medium">{task.title}</span>
                                     {task.assigned_to_members.map((m) => (
                                         <Badge key={m.id} variant="primary" className="flex items-center gap-1">
                                             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: m.color }} />
@@ -693,8 +693,10 @@ const Rewards: React.FC = () => {
                                         )}
                                     </div>
 
-                                    <div className="mt-4 flex items-end justify-between gap-3">
-                                        <div key={member.balance} className="animate-slide-up">
+                                    {/* In a narrow card the two buttons go under the balance
+                                        instead of crushing it. */}
+                                    <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+                                        <div key={member.balance} className="animate-slide-up whitespace-nowrap">
                                             <p className="flex items-center gap-2 font-serif text-4xl tracking-tight">
                                                 <Star className="h-7 w-7 text-amber-500 fill-current" />
                                                 {member.balance}
@@ -704,7 +706,7 @@ const Rewards: React.FC = () => {
                                             </p>
                                         </div>
                                         {isParent && (
-                                            <div className="flex items-center gap-2">
+                                            <div className="ml-auto flex items-center gap-2">
                                                 <Button variant="secondary" size="sm" onClick={() => openAdjust(member)}>
                                                     <SlidersHorizontal className="h-4 w-4 mr-1" />
                                                     {t('rewards:actions.adjust')}

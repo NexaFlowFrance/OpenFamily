@@ -19,7 +19,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
     return (
         <Card className={className}>
             <CardHeader className="flex flex-row items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0">
                     <CardTitle>{title}</CardTitle>
                     {subtitle ? <p className="mt-1 text-caption text-muted-foreground">{subtitle}</p> : null}
                 </div>

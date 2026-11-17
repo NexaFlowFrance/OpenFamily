@@ -589,7 +589,7 @@ const MealPlanning: React.FC = () => {
                     {/* Below 1024px the eight-column grid only fitted behind a
                         sideways scroll (two days visible on a phone): one card
                         per day instead, meals stacked. */}
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:hidden">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:hidden">
                         {weekDays.map((day) => (
                             <div
                                 key={day.toISOString()}
@@ -645,7 +645,7 @@ const MealPlanning: React.FC = () => {
                     </div>
 
                     {/* Weekly Grid */}
-                    <div className="hidden overflow-x-auto lg:block">
+                    <div className="hidden overflow-x-auto xl:block">
                         <div className="min-w-[800px]">
                             {/* Header */}
                             <div className="grid grid-cols-8 gap-2 mb-2">

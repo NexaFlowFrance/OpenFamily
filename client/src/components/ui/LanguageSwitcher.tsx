@@ -25,7 +25,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className })
     return (
         <div
             className={cn(
-                'inline-flex items-center rounded-input border border-border bg-card p-0.5',
+                'inline-flex flex-wrap items-center rounded-input border border-border bg-card p-0.5',
                 className
             )}
             role="group"
@@ -38,7 +38,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className })
                     onClick={() => handleChange(lng)}
                     aria-pressed={current === lng}
                     className={cn(
-                        'rounded-[6px] px-2.5 py-1 text-micro font-semibold uppercase tracking-wide transition-colors',
+                        'whitespace-nowrap rounded-[6px] px-2.5 py-1 text-micro font-semibold uppercase tracking-wide transition-colors',
                         current === lng
                             ? 'bg-primary text-primary-foreground'
                             : 'text-muted-foreground hover:text-foreground'

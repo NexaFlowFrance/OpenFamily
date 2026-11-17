@@ -564,11 +564,11 @@ const Budget: React.FC = () => {
 
             {/* Budget view switch: classic, analytics, kakeibo */}
             <div className="px-4 pt-4">
-                <div className="flex gap-1 rounded-input border border-border bg-surface-2 p-1">
+                <div className="flex flex-wrap gap-1 rounded-input border border-border bg-surface-2 p-1">
                     <button
                         type="button"
                         onClick={() => switchMode('classic')}
-                        className={`flex-1 rounded-input px-3 py-1.5 text-sm font-medium transition ${
+                        className={`flex-1 whitespace-nowrap rounded-input px-3 py-1.5 text-sm font-medium transition ${
                             mode === 'classic' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
@@ -577,7 +577,7 @@ const Budget: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => switchMode('analytics')}
-                        className={`flex-1 rounded-input px-3 py-1.5 text-sm font-medium transition ${
+                        className={`flex-1 whitespace-nowrap rounded-input px-3 py-1.5 text-sm font-medium transition ${
                             mode === 'analytics' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
@@ -586,7 +586,7 @@ const Budget: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => switchMode('kakeibo')}
-                        className={`flex-1 rounded-input px-3 py-1.5 text-sm font-medium transition ${
+                        className={`flex-1 whitespace-nowrap rounded-input px-3 py-1.5 text-sm font-medium transition ${
                             mode === 'kakeibo' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
@@ -677,9 +677,9 @@ const Budget: React.FC = () => {
                                 action={canEdit ? (
                                     <button
                                         onClick={() => openLimitSheet()}
-                                        className="flex items-center gap-1 text-sm font-medium text-primary active:scale-95 transition-transform"
+                                        className="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-medium text-primary transition-transform active:scale-95"
                                     >
-                                        <Plus className="w-4 h-4" /> {t('budget:limits.define')}
+                                        <Plus className="h-4 w-4 shrink-0" /> {t('budget:limits.define')}
                                     </button>
                                 ) : undefined}
                             >

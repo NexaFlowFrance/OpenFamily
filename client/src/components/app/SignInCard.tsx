@@ -145,7 +145,7 @@ const SignInCard: React.FC = () => {
 
                         <div className="space-y-2 border-t border-border pt-4">
                             <p className="text-micro text-muted-foreground">{t('settings:signIn.logoutEverywhereDesc')}</p>
-                            <Button variant="secondary" size="sm" disabled={busy !== null} onClick={handleLogoutEverywhere}>
+                            <Button variant="secondary" size="sm" className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-left" disabled={busy !== null} onClick={handleLogoutEverywhere}>
                                 {busy === 'logout' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
                                 {t('settings:signIn.logoutEverywhere')}
                             </Button>

@@ -33,12 +33,14 @@ export const Select: React.FC<SelectProps> = ({
         >
             <SelectPrimitive.Trigger
                 className={cn(
-                    'input-nexus flex items-center justify-between py-0 text-caption',
+                    // The chosen value stays on one line, shortened with an ellipsis
+                    // when the field is too narrow for it, like a native select.
+                    'input-nexus flex items-center justify-between gap-2 whitespace-nowrap py-0 text-caption [&>span:first-child]:min-w-0 [&>span:first-child]:truncate',
                     className
                 )}
             >
                 <SelectPrimitive.Value placeholder={placeholder} />
-                <SelectPrimitive.Icon>
+                <SelectPrimitive.Icon className="shrink-0">
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </SelectPrimitive.Icon>
             </SelectPrimitive.Trigger>

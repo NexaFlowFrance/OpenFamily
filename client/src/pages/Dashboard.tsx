@@ -497,12 +497,12 @@ const Dashboard: React.FC = () => {
 
         return (
             <section key="planning">
-                <div className="flex items-baseline justify-between mb-4">
+                <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                     <h2 className="font-serif text-h2">{t('dashboard:planning.title')}</h2>
                     <button
                         type="button"
                         onClick={() => navigate('/planning')}
-                        className="text-caption text-primary hover:underline underline-offset-4 flex items-center gap-1"
+                        className="flex items-center gap-1 whitespace-nowrap text-caption text-primary underline-offset-4 hover:underline"
                     >
                         {t('dashboard:planning.viewAll')} <ChevronRight className="w-3 h-3" />
                     </button>
@@ -570,7 +570,7 @@ const Dashboard: React.FC = () => {
                             : 'border-primary/30 bg-primary-soft/10'
                     }`}
                 >
-                    <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                         <h2 className="font-serif text-h2">
                             {t('dashboard:latestPost.title')}
                         </h2>
@@ -578,7 +578,7 @@ const Dashboard: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => navigate('/posts')}
-                            className="text-caption font-medium text-primary hover:underline"
+                            className="whitespace-nowrap text-caption font-medium text-primary hover:underline"
                         >
                             {t('dashboard:latestPost.viewAll')}
                         </button>

@@ -507,7 +507,7 @@ const ShoppingList: React.FC = () => {
                 </div>
             ) : null}
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
                 <div className="rounded-card bg-primary-soft p-3 text-primary">
                     <ShoppingBag className="h-7 w-7" />
                 </div>
@@ -532,8 +532,10 @@ const ShoppingList: React.FC = () => {
                     <CardTitle>{t('shopping:add.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={addItem} className="grid grid-cols-2 gap-3 md:grid-cols-8 md:gap-4">
-                        <div className="col-span-2 md:col-span-3">
+                    {/* From xl up this card is a narrow column: the fields go back
+                        to the two columns they have on a phone. */}
+                    <form onSubmit={addItem} className="grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4 xl:grid-cols-2 xl:gap-3">
+                        <div className="col-span-2 md:col-span-12 xl:col-span-2">
                             <Input
                                 label={t('common:labels.name')}
                                 type="text"
@@ -544,7 +546,7 @@ const ShoppingList: React.FC = () => {
                         </div>
 
                         {suggestions.length > 0 && (
-                            <div className="col-span-2 md:col-span-8">
+                            <div className="col-span-2 md:col-span-12 xl:col-span-2">
                                 <p className="mb-1.5 text-micro font-medium uppercase tracking-wide text-muted-foreground">
                                     {t('shopping:add.suggestions')}
                                 </p>
@@ -562,7 +564,7 @@ const ShoppingList: React.FC = () => {
                                 </div>
                             </div>
                         )}
-                        <div className="col-span-2 md:col-span-2">
+                        <div className="col-span-2 md:col-span-4 xl:col-span-2">
                             <label className="mb-1.5 block text-caption font-medium text-foreground">{t('shopping:add.category')}</label>
                             <select
                                 value={newItem.category}
@@ -576,7 +578,7 @@ const ShoppingList: React.FC = () => {
                                 ))}
                             </select>
                         </div>
-                        <div>
+                        <div className="md:col-span-2 xl:col-span-1">
                             <Input
                                 label={t('shopping:qty')}
                                 type="number"
@@ -587,7 +589,7 @@ const ShoppingList: React.FC = () => {
                                 placeholder={t('shopping:add.qtyPlaceholder')}
                             />
                         </div>
-                        <div>
+                        <div className="md:col-span-2 xl:col-span-1">
                             <Input
                                 label={t('common:labels.price')}
                                 type="number"
@@ -598,8 +600,8 @@ const ShoppingList: React.FC = () => {
                                 placeholder={t('shopping:add.pricePlaceholder')}
                             />
                         </div>
-                        <div className="col-span-2 flex justify-end md:col-span-8">
-                            <Button type="submit" className="w-full md:w-auto">
+                        <div className="col-span-2 flex items-end justify-end md:col-span-4 xl:col-span-2">
+                            <Button type="submit" className="w-full md:w-auto xl:w-full">
                                 <Plus className="mr-1 h-4 w-4" />
                                 {t('common:actions.add')}
                             </Button>
@@ -754,23 +756,25 @@ const ShoppingList: React.FC = () => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <Input
-                            label={t('shopping:templates.newLabel')}
-                            value={templateName}
-                            onChange={(e) => setTemplateName(e.target.value)}
-                            placeholder={t('shopping:templates.newPlaceholder')}
-                        />
-                        <div className="md:col-span-2 flex items-end gap-2">
-                            <Button variant="secondary" className="w-full md:w-auto" onClick={openTemplateDialog}>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:grid-cols-1">
+                        <div className="md:col-span-2 xl:col-span-1">
+                            <Input
+                                label={t('shopping:templates.newLabel')}
+                                value={templateName}
+                                onChange={(e) => setTemplateName(e.target.value)}
+                                placeholder={t('shopping:templates.newPlaceholder')}
+                            />
+                        </div>
+                        <div className="flex items-end gap-2">
+                            <Button variant="secondary" className="w-full" onClick={openTemplateDialog}>
                                 <Save className="mr-1 h-4 w-4" />
                                 {t('shopping:templates.create')}
                             </Button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <div className="md:col-span-2">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:grid-cols-1">
+                        <div className="md:col-span-2 xl:col-span-1">
                             <label className="mb-1.5 block text-caption font-medium text-foreground">{t('shopping:templates.existing')}</label>
                             <select
                                 value={selectedTemplateId}
@@ -820,8 +824,8 @@ const ShoppingList: React.FC = () => {
                         placeholder={t('shopping:dialog.namePlaceholder')}
                     />
                     <div>
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-label font-medium text-foreground">
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                            <span className="whitespace-nowrap text-label font-medium text-foreground">
                                 {t('shopping:dialog.itemsSelected', { selected: selectedItemIds.size, total: items.length })}
                             </span>
                             <div className="flex gap-2">

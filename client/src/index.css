@@ -78,6 +78,13 @@
     word-break: break-word;
   }
 
+  /* A page title and the label of a field wrap between words, never inside one. */
+  h1,
+  label {
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
   /* Media never forces the layout wider than its container on small screens */
   img,
   svg,
@@ -112,6 +119,18 @@
 
   .btn-nexus {
     @apply inline-flex items-center justify-center gap-2 font-semibold;
+    /* A button keeps its label on one line and is never cut in the middle of
+       a word (the body lets long strings break anywhere): the row it sits in
+       has to give it the room, by shrinking its other parts or by wrapping.
+       `whitespace-normal` on a button opts out, for a long sentence. */
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  /* Its icon keeps its size when the row is tight. */
+  .btn-nexus > svg {
+    flex-shrink: 0;
     @apply transition-all duration-fast ease-soft;
     @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
     @apply disabled:pointer-events-none disabled:opacity-50;

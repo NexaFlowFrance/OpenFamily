@@ -589,13 +589,13 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                             </p>
                         )}
 
-                        <div className="mt-4 flex gap-1 rounded-input border border-border bg-surface-2 p-1">
+                        <div className="mt-4 flex flex-wrap gap-1 rounded-input border border-border bg-surface-2 p-1">
                             {CATEGORY_MODULES.map((key) => (
                                 <button
                                     key={key}
                                     type="button"
                                     onClick={() => setModule(key)}
-                                    className={`flex-1 rounded-input px-2 py-1.5 text-caption font-medium transition ${
+                                    className={`flex-1 whitespace-nowrap rounded-input px-2 py-1.5 text-caption font-medium transition ${
                                         module === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                 >
@@ -606,22 +606,22 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
 
                         <div className="mt-3 space-y-2">
                             {rows.map((row, index) => (
-                                <div key={`${row.original ?? 'new'}-${index}`} className="flex items-center gap-2">
+                                <div key={`${row.original ?? 'new'}-${index}`} className="flex items-center gap-1 sm:gap-2">
                                     <Input
                                         value={row.value}
                                         disabled={!isParent || saving}
                                         onChange={(e) => setRows((prev) => prev.map((r, i) => (i === index ? { ...r, value: e.target.value, touched: true } : r)))}
                                         className="flex-1"
                                     />
-                                    <Button type="button" variant="ghost" size="sm" disabled={!isParent || saving || index === 0}
+                                    <Button type="button" variant="ghost" size="sm" className="px-2.5 sm:px-4" disabled={!isParent || saving || index === 0}
                                         onClick={() => move(index, -1)} aria-label={t('categories:moveUp')}>
                                         <ArrowUp className="h-4 w-4" />
                                     </Button>
-                                    <Button type="button" variant="ghost" size="sm" disabled={!isParent || saving || index === rows.length - 1}
+                                    <Button type="button" variant="ghost" size="sm" className="px-2.5 sm:px-4" disabled={!isParent || saving || index === rows.length - 1}
                                         onClick={() => move(index, 1)} aria-label={t('categories:moveDown')}>
                                         <ArrowDown className="h-4 w-4" />
                                     </Button>
-                                    <Button type="button" variant="ghost" size="sm" disabled={!isParent || saving || rows.length <= 1}
+                                    <Button type="button" variant="ghost" size="sm" className="px-2.5 sm:px-4" disabled={!isParent || saving || rows.length <= 1}
                                         onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))} aria-label={t('categories:remove')}>
                                         <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>
@@ -639,9 +639,10 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
                                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addRow(); } }}
                                     className="flex-1"
                                 />
-                                <Button type="button" variant="secondary" size="sm" disabled={saving || !newName.trim()} onClick={addRow}>
+                                {/* On a phone the button is its icon, so the field keeps its width. */}
+                                <Button type="button" variant="secondary" size="sm" className="px-3 sm:px-4" disabled={saving || !newName.trim()} onClick={addRow} aria-label={t('categories:add')}>
                                     <Plus className="h-4 w-4" />
-                                    {t('categories:add')}
+                                    <span className="hidden sm:inline">{t('categories:add')}</span>
                                 </Button>
                             </div>
                         )}

@@ -7,13 +7,13 @@
 
 # --- 1. Arreter le serveur Node ----------------------------------------------
 if (Test-Path $OFPidFile) {
-    $pid = Get-Content $OFPidFile -ErrorAction SilentlyContinue
-    if ($pid) {
+    $serverProcessId = Get-Content $OFPidFile -ErrorAction SilentlyContinue
+    if ($serverProcessId) {
         try {
-            $p = Get-Process -Id $pid -ErrorAction SilentlyContinue
+            $p = Get-Process -Id $serverProcessId -ErrorAction SilentlyContinue
             if ($p -and $p.Path -like '*node.exe') {
                 Write-Host '[OpenFamily] Arret du serveur...'
-                Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                Stop-Process -Id $serverProcessId -Force -ErrorAction SilentlyContinue
             }
         } catch { }
     }

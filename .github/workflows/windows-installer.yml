@@ -26,6 +26,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Test shutdown scripts (Windows PowerShell 5.1)
+        shell: powershell
+        run: .\installer\windows\tests\stop.Tests.ps1
+
       - name: Determine version
         id: version
         shell: bash

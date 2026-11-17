@@ -606,22 +606,23 @@ const CategoriesCard: React.FC<{ isParent: boolean }> = ({ isParent }) => {
 
                         <div className="mt-3 space-y-2">
                             {rows.map((row, index) => (
-                                <div key={`${row.original ?? 'new'}-${index}`} className="flex items-center gap-1 sm:gap-2">
+                                <div key={`${row.original ?? 'new'}-${index}`} className="flex items-center gap-0.5 sm:gap-2">
+                                    {/* On a phone the three buttons tighten so the name stays readable. */}
                                     <Input
                                         value={row.value}
                                         disabled={!isParent || saving}
                                         onChange={(e) => setRows((prev) => prev.map((r, i) => (i === index ? { ...r, value: e.target.value, touched: true } : r)))}
-                                        className="flex-1"
+                                        className="px-2 sm:px-3"
                                     />
-                                    <Button type="button" variant="ghost" size="sm" className="px-2.5 sm:px-4" disabled={!isParent || saving || index === 0}
+                                    <Button type="button" variant="ghost" size="sm" className="px-2 sm:px-4" disabled={!isParent || saving || index === 0}
                                         onClick={() => move(index, -1)} aria-label={t('categories:moveUp')}>
                                         <ArrowUp className="h-4 w-4" />
                                     </Button>
-                                    <Button type="button" variant="ghost" size="sm" className="px-2.5 sm:px-4" disabled={!isParent || saving || index === rows.length - 1}
+                                    <Button type="button" variant="ghost" size="sm" className="px-2 sm:px-4" disabled={!isParent || saving || index === rows.length - 1}
                                         onClick={() => move(index, 1)} aria-label={t('categories:moveDown')}>
                                         <ArrowDown className="h-4 w-4" />
                                     </Button>
-                                    <Button type="button" variant="ghost" size="sm" className="px-2.5 sm:px-4" disabled={!isParent || saving || rows.length <= 1}
+                                    <Button type="button" variant="ghost" size="sm" className="px-2 sm:px-4" disabled={!isParent || saving || rows.length <= 1}
                                         onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))} aria-label={t('categories:remove')}>
                                         <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>

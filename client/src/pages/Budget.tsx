@@ -1224,14 +1224,15 @@ const EntryRow: React.FC<{
                 <p className="font-medium text-base truncate">
                     {entry.description || categoryLabel(entry.category)}
                 </p>
-                <div className="flex items-center gap-2 mt-0.5">
+                {/* On a narrow phone the date goes under the category, both whole. */}
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-2">
                     {entry.description && (
                         <>
-                            <span className="text-xs text-muted-foreground">{categoryLabel(entry.category)}</span>
+                            <span className="whitespace-nowrap text-xs text-muted-foreground">{categoryLabel(entry.category)}</span>
                             <span className="text-xs text-muted-foreground">·</span>
                         </>
                     )}
-                    <span className="text-xs text-muted-foreground">{dateStr}</span>
+                    <span className="whitespace-nowrap text-xs text-muted-foreground">{dateStr}</span>
                 </div>
             </div>
             <span className={`text-base font-bold flex-shrink-0 ${entry.is_expense ? 'text-danger' : 'text-success'}`}>

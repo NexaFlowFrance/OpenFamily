@@ -836,14 +836,16 @@ const Calendar: React.FC = () => {
             {/* Calendar Header */}
             <Card>
                 <CardContent className="p-3 sm:p-6">
-                    <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
-                        <h2 className="min-w-0 text-h2 font-semibold capitalize">
+                    {/* The month stays whole: on a narrow phone the three buttons go below it. */}
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 sm:mb-6">
+                        <h2 className="whitespace-nowrap text-h2 font-semibold capitalize">
                             {format(currentDate, 'MMMM yyyy', { locale: dateLocale() })}
                         </h2>
-                        <div className="flex flex-shrink-0 gap-2">
+                        <div className="ml-auto flex flex-shrink-0 gap-2">
                             <Button
                                 variant="secondary"
                                 size="sm"
+                                className="px-2.5 sm:px-4"
                                 onClick={() => setCurrentDate(subMonths(currentDate, 1))}
                             >
                                 <ChevronLeft className="w-4 h-4" />
@@ -851,7 +853,7 @@ const Calendar: React.FC = () => {
                             <Button
                                 variant="secondary"
                                 size="sm"
-                                className="whitespace-nowrap"
+                                className="px-3 sm:px-4"
                                 onClick={() => setCurrentDate(new Date())}
                             >
                                 {t('common:actions.today')}
@@ -859,6 +861,7 @@ const Calendar: React.FC = () => {
                             <Button
                                 variant="secondary"
                                 size="sm"
+                                className="px-2.5 sm:px-4"
                                 onClick={() => setCurrentDate(addMonths(currentDate, 1))}
                             >
                                 <ChevronRight className="w-4 h-4" />

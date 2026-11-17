@@ -292,7 +292,7 @@ const Pantry: React.FC = () => {
                     <CardTitle>{t('pantry:add.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={add} className="grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4 xl:grid-cols-2 xl:gap-3">
+                    <form onSubmit={add} className="grid grid-cols-2 items-end gap-3 md:grid-cols-12 md:gap-4 xl:grid-cols-2 xl:gap-3">
                         <div className="col-span-2 md:col-span-12 xl:col-span-2">
                             <div className="flex items-end gap-2">
                                 <div className="min-w-0 flex-1">
@@ -411,7 +411,7 @@ const Pantry: React.FC = () => {
                 title={t('pantry:edit.title')}
                 description={editing?.name ?? ''}
             >
-                <form onSubmit={saveEdit} className="grid grid-cols-2 gap-3">
+                <form onSubmit={saveEdit} className="grid grid-cols-2 items-end gap-3">
                     {fields(editForm, setEditForm, 'pantry-edit', false)}
                     <div className="col-span-2 flex justify-end gap-2">
                         <Button type="button" variant="secondary" onClick={() => setEditing(null)}>{t('common:actions.cancel')}</Button>

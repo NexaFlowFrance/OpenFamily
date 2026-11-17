@@ -112,18 +112,20 @@ créez votre compte. L'image est publiée pour amd64 et arm64 (Raspberry Pi 4 et
 des NAS). Le **[guide serveur](INSTALLATION.fr.md)** couvre le HTTPS, les mises à jour et les
 sauvegardes.
 
+Pages de l'image conteneur : [GHCR](https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily) · [Docker Hub](https://hub.docker.com/r/nexaflow/openfamily).
+
 ### 📦 Depuis le catalogue d'applications de votre serveur
 
 Sur ces systèmes, OpenFamily s'installe depuis le catalogue, comme n'importe quelle application. Chaque lien explique comment l'ajouter, pas à pas (en anglais) :
 
 | Système | Comment |
 |---|---|
-| **Home Assistant** (OS ou Supervised) | [Ajouter le dépôt d'applications](https://github.com/NexaFlowFrance/home-assistant-apps) |
+| **Home Assistant** (OS ou Supervised) | [Ajouter le dépôt d'applications](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FNexaFlowFrance%2Fhome-assistant-apps) · [Guide d'installation](https://github.com/NexaFlowFrance/home-assistant-apps#readme) |
 | **Umbrel** | [Ajouter la boutique communautaire](https://github.com/NexaFlowFrance/umbrel-app-store) |
 | **CasaOS, ZimaOS** | [Ajouter la boutique d'applications](https://github.com/NexaFlowFrance/casaos-appstore) |
 | **Runtipi** | [Ajouter la boutique d'applications](https://github.com/NexaFlowFrance/runtipi-appstore) |
-| **Unraid** | [Récupérer le modèle](https://github.com/NexaFlowFrance/unraid-templates) |
-| **TrueNAS** | Dans le catalogue des applications communautaires, à OpenFamily |
+| **Unraid** | [Ouvrir dans Community Applications](https://ca.unraid.net/apps/openfamily-0zg8vge15c4pd6?q=OpenFamily) · [Guide d'installation](https://github.com/NexaFlowFrance/unraid-templates#readme) |
+| **TrueNAS** | [OpenFamily dans le catalogue communautaire](https://apps.truenas.com/catalog/openfamily_community/) |
 | **Proxmox** | Un [script](INSTALLATION.fr.md#proxmox) qui crée le conteneur |
 
 Les cinq premiers sont nouveaux. Si l'un d'eux ne fonctionne pas chez vous, [dites-le-nous](https://github.com/NexaFlowFrance/OpenFamily/issues) : cela sert à tous ceux qui viendront après.

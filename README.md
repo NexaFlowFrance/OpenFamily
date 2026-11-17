@@ -123,18 +123,20 @@ Open http://localhost:3000, or `http://<server-address>:3000` from a phone, and 
 account. The image is published for amd64 and arm64 (Raspberry Pi 4 and 5, most NAS). The
 **[server guide](INSTALLATION.md)** covers HTTPS, updates and backups.
 
+Container image pages: [GHCR](https://github.com/NexaFlowFrance/OpenFamily/pkgs/container/openfamily) · [Docker Hub](https://hub.docker.com/r/nexaflow/openfamily).
+
 ### 📦 From the app catalog of your server
 
 On these systems OpenFamily installs from the catalog, like any other app. Each link says how to add it, step by step:
 
 | System | How |
 |---|---|
-| **Home Assistant** (OS or Supervised) | [Add the app repository](https://github.com/NexaFlowFrance/home-assistant-apps) |
+| **Home Assistant** (OS or Supervised) | [Add the app repository](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FNexaFlowFrance%2Fhome-assistant-apps) · [Installation guide](https://github.com/NexaFlowFrance/home-assistant-apps#readme) |
 | **Umbrel** | [Add the community app store](https://github.com/NexaFlowFrance/umbrel-app-store) |
 | **CasaOS, ZimaOS** | [Add the app store](https://github.com/NexaFlowFrance/casaos-appstore) |
 | **Runtipi** | [Add the app store](https://github.com/NexaFlowFrance/runtipi-appstore) |
-| **Unraid** | [Get the template](https://github.com/NexaFlowFrance/unraid-templates) |
-| **TrueNAS** | In the catalog of community apps, under OpenFamily |
+| **Unraid** | [Open in Community Applications](https://ca.unraid.net/apps/openfamily-0zg8vge15c4pd6?q=OpenFamily) · [Installation guide](https://github.com/NexaFlowFrance/unraid-templates#readme) |
+| **TrueNAS** | [OpenFamily in the community catalog](https://apps.truenas.com/catalog/openfamily_community/) |
 | **Proxmox** | A [script](INSTALLATION.md#proxmox) that creates the container |
 
 The first five are new. If one does not work on your system, [tell us](https://github.com/NexaFlowFrance/OpenFamily/issues): it helps everyone after you.

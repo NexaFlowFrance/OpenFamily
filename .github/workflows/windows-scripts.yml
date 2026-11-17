@@ -1,0 +1,24 @@
+name: Windows script tests
+
+on:
+  pull_request:
+    paths:
+      - 'installer/windows/**/*.ps1'
+      - '.github/workflows/windows-scripts.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'installer/windows/**/*.ps1'
+      - '.github/workflows/windows-scripts.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-shutdown:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test shutdown scripts (Windows PowerShell 5.1)
+        shell: powershell
+        run: .\installer\windows\tests\stop.Tests.ps1

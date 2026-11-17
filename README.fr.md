@@ -12,6 +12,8 @@
   [![License: AGPL v3](https://img.shields.io/badge/License-AGPL--v3-blue.svg)](licence.md)
 </div>
 
+**Transparence du développement :** OpenFamily accepte les contributions assistées par IA. [Consulter les contributions documentées, les revues et les limites des tests](AI_USAGE.md).
+
 ---
 
 > 🎬 **[Essayez la démo en ligne](https://openfamily.fr/demo/)** : aucune inscription, rien n'est enregistré.

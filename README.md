@@ -14,6 +14,8 @@
   [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](https://github.com/NexaFlowFrance/OpenFamily)
 </div>
 
+**Development transparency:** OpenFamily accepts AI-assisted contributions. [Read the documented contributions, review records and testing limits](AI_USAGE.md).
+
 ---
 
 <div align="center">

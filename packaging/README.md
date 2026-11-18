@@ -26,7 +26,12 @@ Every definition runs the same image, `ghcr.io/nexaflowfrance/openfamily`: the w
 
 ## What was checked, and what was not
 
-Each file was validated for its format, and each compose file was started with Docker and answered on its port. **None was installed from the catalog software itself**: no Unraid, CasaOS, Runtipi, umbrelOS or Home Assistant OS at hand. The pages of the repositories say so, and ask for feedback.
+Each file was validated for its format, and each compose file was started with Docker and answered on its port. Native tests completed on 17 November 2026, using synthetic data in separate Debian 12 amd64 VMs:
+
+- **CasaOS 0.4.15**: added the ZIP/v1 source through the App Store UI, found OpenFamily, installed it from its card, and verified a test account, shopping item and live WebSocket update. After a full VM reboot, the original session and data still worked. The source also remained available after reloading the store. See the [community-store submission](https://github.com/IceWhaleTech/Awesome-CasaOS/pull/16).
+- **CapRover 1.16.0**: tested the [proposed one-click template](https://github.com/caprover/one-click-apps/pull/1371) through the dashboard's TEMPLATE workflow. Verified the HTTP port, WebSocket support, persistent volume, test account and shopping item through its native proxy. The dashboard's Save & Restart action replaced the container while preserving the original session and data.
+
+These tests used private HTTP access. ZimaOS/v2 store installation, ARM runtime, public HTTPS and backup/restore were not tested. Unraid, Runtipi, umbrelOS and Home Assistant OS installation from their own interfaces remain untested; feedback is welcome.
 
 ## On each release
 

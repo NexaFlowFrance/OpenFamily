@@ -10,6 +10,8 @@
   [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
   [![Démo](https://img.shields.io/badge/Démo-en%20ligne-DC4A60)](https://openfamily.fr/demo/)
   [![License: AGPL v3](https://img.shields.io/badge/License-AGPL--v3-blue.svg)](licence.md)
+  <br><br>
+  <a href="https://www.linuxlinks.com/openfamily-self-hosted-family-organiser/"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/badges/linuxlinks-badge-black.png"><img src="docs/badges/linuxlinks-badge-white.png" alt="Présenté sur LinuxLinks" width="180" height="60"></picture></a>
 </div>
 
 **Transparence du développement :** OpenFamily accepte les contributions assistées par IA. [Consulter les contributions documentées, les revues et les limites des tests](AI_USAGE.md).

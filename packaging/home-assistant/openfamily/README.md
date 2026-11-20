@@ -6,4 +6,6 @@ This app runs the whole of OpenFamily next to Home Assistant: the web interface,
 
 OpenFamily also talks to Home Assistant itself: its documented API, personal tokens and webhooks let your automations read the family's day or add to the shopping list.
 
+Installed and tested from the Home Assistant app store on HAOS 18.4 amd64 on 20 November 2026: account, shopping item, live updates, app settings, native backup/restore and persistence after a full VM reboot. See the [test details and limits](https://github.com/NexaFlowFrance/home-assistant-apps#tested-on-home-assistant-os). This app hosts OpenFamily; it does not install a Marketplace/HACS integration.
+
 [Website and live demo](https://openfamily.fr/) · [Source](https://github.com/NexaFlowFrance/OpenFamily)

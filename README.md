@@ -4,7 +4,7 @@
   <p><strong>The open-source, self-hosted family organizer</strong><br>
   Keep full control of your family's data: run it on your own server, or let us host it for you in France.</p>
 
-  🇬🇧 <strong>English</strong> · 🇫🇷 <a href="README.fr.md">Français</a> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a>
+  🇬🇧 <strong>English</strong> · 🇫🇷 <a href="README.fr.md">Français</a> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a> · 🇯🇵 <a href="README.ja.md">日本語</a>
 
   [![Release](https://img.shields.io/github/v/release/NexaFlowFrance/OpenFamily?color=2563eb&label=version)](https://github.com/NexaFlowFrance/OpenFamily/releases/latest)
   [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
@@ -66,7 +66,7 @@ budget, all in one place, on your own server.
 | 👥 **Shared accounts** | Invite by link, **access requests**, **ownership transfer** |
 | 🔑 **Single sign-on** | Sign in with your own OpenID Connect provider (Authentik, Keycloak, Pocket ID...), optional SSO-only servers, **sign out of all devices** |
 | 🛡️ **Roles & permissions** | **Parent / child** accounts, with a read-only budget for children |
-| 🌍 **Multilingual** | **English / French / German / Portuguese / Russian / Spanish / Catalan / Simplified Chinese** interface with automatic detection |
+| 🌍 **Multilingual** | **English / French / German / Portuguese / Russian / Spanish / Catalan / Simplified Chinese / Japanese** interface with automatic detection |
 | 📴 **Offline mode** | Browse cached data without a connection (PWA) |
 
 ## 📸 Screenshots

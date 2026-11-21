@@ -51,11 +51,12 @@ const CURRENCIES = [
     { code: 'USD', label: 'US Dollar ($)' },
     { code: 'GBP', label: 'British Pound (£)' },
     { code: 'CHF', label: 'Swiss Franc (CHF)' },
+    { code: 'PLN', label: 'Polish Złoty (zł)' },
     { code: 'CAD', label: 'Canadian Dollar ($)' },
     { code: 'AUD', label: 'Australian Dollar ($)' },
     { code: 'JPY', label: 'Japanese Yen (¥)' },
     { code: 'CNY', label: 'Chinese Yuan (¥)' },
-    { code: 'RUB', label: 'Russian Ruble (₽)' },
+    { code: 'ZWL', label: 'Zimbabwean Dollar (Z$)' },
     { code: 'INR', label: 'Indian Rupee (₹)' },
     { code: 'BRL', label: 'Brazilian Real (R$)' },
 ];

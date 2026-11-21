@@ -19,6 +19,7 @@ export const BIRTHDAY_TITLE: Record<Language, (name: string) => string> = {
     ca: (name) => `Aniversari: ${name}`,
     zh: (name) => `${name}的生日`,
     de: (name) => `Geburtstag von ${name}`,
+    ja: (name) => `${name}の誕生日`,
 };
 
 /** What the notification of the day says under its title. */
@@ -31,6 +32,7 @@ const BIRTHDAY_TODAY: Record<Language, string> = {
     ca: 'És avui!',
     zh: '就是今天！',
     de: 'Heute ist es so weit!',
+    ja: '今日です！',
 };
 
 /** The hours of the day, on the family's clocks, between which the family is told. */

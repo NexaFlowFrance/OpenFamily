@@ -1,0 +1,116 @@
+{
+  "title": "連携",
+  "subtitle": "セルフホストのアプリとつないで、レシピ・献立・買い物・カレンダーを一か所にまとめます。",
+  "connected": "接続済み",
+  "available": "利用可能",
+  "status": {
+    "error": "エラー",
+    "connected": "接続済み"
+  },
+  "lastSync": "{{date}} に同期",
+  "syncTitle": "同期",
+  "disconnectTitle": "接続を解除",
+  "confirmDisconnect": "この連携を解除しますか？",
+  "modal": {
+    "connect": "{{name}} と接続",
+    "test": "テスト",
+    "testing": "テスト中…",
+    "connecting": "接続中…",
+    "connectBtn": "接続",
+    "encrypted": "認証情報は AES-256 で暗号化され、お使いのサーバーにのみ保存されます。",
+    "error": "エラー"
+  },
+  "syncs": {
+    "recipes": "レシピ",
+    "menus": "献立",
+    "shopping": "買い物リスト",
+    "stock": "在庫",
+    "calendar": "カレンダー",
+    "appointments": "予定",
+    "photos": "写真"
+  },
+  "catalog": {
+    "mealie": {
+      "tagline": "レシピ管理",
+      "description": "セルフホストの Mealie からレシピと献立を取り込みます。",
+      "urlLabel": "インスタンス URL",
+      "urlPlaceholder": "https://mealie.mydomain.com",
+      "keyLabel": "APIキー",
+      "keyPlaceholder": "Mealie > Profile > API keys から取得"
+    },
+    "tandoor": {
+      "tagline": "レシピブック",
+      "description": "オープンソースのレシピ管理 Tandoor からレシピを取り込みます。",
+      "urlLabel": "インスタンス URL",
+      "urlPlaceholder": "https://tandoor.mydomain.com",
+      "keyLabel": "APIトークン",
+      "keyPlaceholder": "Tandoor > Settings > Tokens から取得"
+    },
+    "homeassistant": {
+      "tagline": "スマートホーム",
+      "description": "買い物リストを Home Assistant のリストと同期します。",
+      "urlLabel": "インスタンス URL",
+      "urlPlaceholder": "http://homeassistant.local:8123",
+      "tokenLabel": "長期トークン",
+      "tokenPlaceholder": "eyJ…（Profile > Security から取得）",
+      "entityLabel": "Todo エンティティ（任意、カンマ区切り）",
+      "entityPlaceholder": "todo.shopping_list, todo.groceries"
+    },
+    "grocy": {
+      "tagline": "家庭管理",
+      "description": "Grocy から買い物リストと在庫を同期します。",
+      "urlLabel": "インスタンス URL",
+      "urlPlaceholder": "https://grocy.mydomain.com",
+      "keyLabel": "APIキー",
+      "keyPlaceholder": "Grocy > Manage > API keys から取得"
+    },
+    "nextcloud": {
+      "tagline": "パーソナルクラウド",
+      "description": "Nextcloud カレンダーのイベントを予定に取り込みます。",
+      "urlLabel": "Nextcloud URL",
+      "urlPlaceholder": "https://cloud.mydomain.com",
+      "userLabel": "ユーザー名",
+      "userPlaceholder": "your.username",
+      "passwordLabel": "パスワード（またはアプリパスワード）",
+      "passwordPlaceholder": "****"
+    },
+    "immich": {
+      "tagline": "写真ライブラリ",
+      "description": "セルフホストの Immich ライブラリからランダムな写真を、キオスク表示の背景に表示します。",
+      "urlLabel": "インスタンス URL",
+      "urlPlaceholder": "https://immich.mydomain.com",
+      "keyLabel": "APIキー",
+      "keyPlaceholder": "Immich > Account settings > API keys から取得"
+    }
+  },
+  "outside": {
+    "title": "ほかにもつながります",
+    "subtitle": "相手のアプリ側、または設定からセットアップします。",
+    "items": {
+      "gladys": {
+        "name": "Gladys Assistant",
+        "desc": "オープンソースのホームアシスタント Gladys で、家族のカレンダー、買い物リスト、タスクを使えます。Gladys の連携ストアからインストールし、設定で作った API トークンを使います。"
+      },
+      "api": {
+        "name": "Home Assistant、n8n、スクリプト",
+        "desc": "ドキュメント付き API、個人用トークン、Webhook に対応します。自動化から家族の一日の予定を読み取り、リストへ追加できます。"
+      },
+      "calendars": {
+        "name": "Google Calendar、Apple Calendar、Outlook",
+        "desc": "どのカレンダーアプリからでも家族のカレンダーを購読できます。逆に、相手のカレンダーを OpenFamily でフォローすることもできます。"
+      },
+      "displays": {
+        "name": "電子ペーパーフレームと壁掛け画面",
+        "desc": "サインイン不要で家族の一日を表示するページです。電子ペーパーフレームや電子書籍リーダー、どの画面でも使えます。"
+      },
+      "ai": {
+        "name": "Ollama と AI プロバイダー",
+        "desc": "任意で使えるアシスタントです。ローカルモデル、または OpenAI 互換、Anthropic Claude、Google Gemini の API を使えます。"
+      },
+      "sso": {
+        "name": "シングルサインオン",
+        "desc": "Authentik、Keycloak、Pocket ID など、任意の OpenID Connect プロバイダーでサインインできます。サーバー側で設定します。"
+      }
+    }
+  }
+}

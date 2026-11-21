@@ -1,0 +1,119 @@
+{
+  "loading": "予算を読み込み中…",
+  "categories": {
+    "Logement": "住居",
+    "Alimentation": "食費",
+    "Transport": "交通",
+    "Santé": "健康",
+    "Loisirs": "レジャー",
+    "Abonnements": "サブスクリプション",
+    "Assurance": "保険",
+    "Enfants": "子ども",
+    "Maison": "住まい",
+    "Autre": "その他",
+    "Prélèvements": "定期引き落とし"
+  },
+  "readOnly": "閲覧専用モードです。予算を編集できるのは親だけです。",
+  "alerts": {
+    "title": "上限に到達",
+    "over": " · 超過",
+    "warn": "（80%以上）"
+  },
+  "balance": {
+    "current": "現在の残高",
+    "pointed_one": "定期項目 {{count}} 件を確認済み",
+    "pointed_other": "定期項目 {{count}} 件を確認済み",
+    "expenses_one": "支出 {{count}} 件",
+    "expenses_other": "支出 {{count}} 件",
+    "opening": "開始残高: {{amount}}"
+  },
+  "forecast": {
+    "title": "見通し",
+    "subtitle": "今後の定期項目: 収入 +{{income}} · 支出 -{{expenses}}"
+  },
+  "analytics": "分析と上限",
+  "charts": {
+    "expensesByCategory": "カテゴリ別支出",
+    "noExpenses": "今月の支出はありません",
+    "yearEvolution": "年間の推移",
+    "income": "収入",
+    "expenses": "支出"
+  },
+  "limits": {
+    "title": "月ごとの上限",
+    "subtitle": "カテゴリ別の支出を記録します",
+    "define": "設定",
+    "none": "上限なし"
+  },
+  "sections": {
+    "recurring": "定期項目",
+    "expenses": "支出",
+    "income": "収入"
+  },
+  "recurring": {
+    "empty": "今月の定期項目はありません",
+    "markOn": "確認済みにする",
+    "markOff": "確認を取り消す",
+    "dayPrefix": "日",
+    "frequency": {
+      "daily": "毎日",
+      "weekly": "毎週",
+      "monthly": "毎月",
+      "yearly": "毎年",
+      "none": "繰り返さない"
+    },
+    "units": {
+      "daily_one": "日",
+      "daily_other": "日",
+      "weekly_one": "週間",
+      "weekly_other": "週間",
+      "monthly_one": "か月",
+      "monthly_other": "か月",
+      "yearly_one": "年",
+      "yearly_other": "年"
+    }
+  },
+  "empty": {
+    "expenses": "今月の支出はありません",
+    "income": "今月の収入はありません"
+  },
+  "sheets": {
+    "new": "項目を追加",
+    "edit": "項目を編集",
+    "limit": "月ごとの上限"
+  },
+  "toggle": {
+    "expense": "支出",
+    "income": "収入"
+  },
+  "fields": {
+    "amount": "金額（{{currency}}）",
+    "description": "説明（任意）",
+    "descriptionPlaceholder": "例: 食費、給料、積立…",
+    "date": "日付",
+    "category": "カテゴリ",
+    "limit": "月ごとの上限（{{currency}}）",
+    "limitHint": "0に設定すると、このカテゴリの記録が外れます。",
+    "startDate": "開始日",
+    "repeat": "繰り返し",
+    "every": "間隔",
+    "repeatUntil": "繰り返しの終了日（任意）",
+    "addToCalendar": "カレンダーに追加",
+    "addToCalendarHint": "同じ日付と繰り返しで、終日のカレンダー予定を作成します。",
+    "type": "種類"
+  },
+  "errors": {
+    "amountInvalid": "金額が正しくありません。",
+    "save": "保存中にエラーが発生しました。",
+    "limitInvalid": "上限が正しくありません。",
+    "startDateRequired": "開始日が必要です。",
+    "intervalInvalid": "繰り返しの間隔は1から365の間にしてください。",
+    "repeatUntilInvalid": "繰り返しの終了日は開始日より前にできません。",
+    "editRecurrenceType": "単発と定期を切り替えるには、この項目を削除して追加し直してください。"
+  },
+  "confirm": {
+    "deleteRecurring": "この定期項目を削除しますか？",
+    "deleteEntry": "この項目を削除しますか？"
+  },
+  "classic": "クラシック"
+}

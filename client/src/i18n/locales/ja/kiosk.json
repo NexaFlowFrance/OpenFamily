@@ -1,0 +1,48 @@
+{
+  "exit": "終了",
+  "fullscreen": "全画面表示",
+  "exitFullscreen": "全画面表示を終了",
+  "schedule": "今日の予定",
+  "meals": "今日の献立",
+  "tasks": "今日のやること",
+  "whereabouts": "今日は誰がどこに",
+  "shopping": "買い物リスト",
+  "allDay": "終日",
+  "undo": "元に戻す",
+  "empty": {
+    "appointments": "今日の予定はありません",
+    "meals": "献立は未定です",
+    "tasks": "全部終わりました ✨",
+    "whereabouts": "今日の予定がある人はいません",
+    "shopping": "買うものはありません"
+  },
+  "displaySettings": {
+    "open": "表示設定",
+    "title": "表示設定",
+    "close": "閉じる",
+    "location": "天気の地域",
+    "searchPlaceholder": "都市を検索…",
+    "noResults": "結果なし",
+    "noLocation": "この画面に天気を表示するには、地域を選んでください。",
+    "change": "変更",
+    "temperatureUnit": "温度の単位",
+    "photoBackground": "写真の背景",
+    "photoBackgroundHint": "ライブラリの写真をランダムに背景表示します。Immich連携を接続する必要があります。",
+    "screensaver": "スクリーンセーバー",
+    "screensaverHint": "この時間画面に触れないと、写真または動く時計を表示します。一日中つけっぱなしの画面の焼き付きを防ぎます。",
+    "screensaverOff": "オフ",
+    "screensaverMinutes": "{{minutes}}分",
+    "screensaverStyle": "スクリーンセーバーに表示するもの",
+    "screensaverPhotos": "写真",
+    "screensaverClock": "動く時計",
+    "screensaverStyleHint": "写真はImmich連携から取得します。連携がない場合は時計が表示されます。"
+  },
+  "settings": {
+    "title": "キオスク表示",
+    "subtitle": "壁掛けタブレットや冷蔵庫の画面向けの、全画面・読み取り専用表示です。今日のカレンダー、献立、タスク、家族の居場所が表示されます。",
+    "open": "キオスク表示を開く"
+  },
+  "screensaver": {
+    "wake": "画面に触れると表示が戻ります"
+  }
+}

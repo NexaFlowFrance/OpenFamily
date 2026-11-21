@@ -1,0 +1,35 @@
+{
+  "title": "家族のメモ",
+  "add": "メモを追加",
+  "addTitle": "新しい冷蔵庫メモ",
+  "placeholder": "ジムバッグを忘れずに！",
+  "counter": "{{count}}/{{max}}",
+  "colorLabel": "色",
+  "colors": {
+    "yellow": "黄色",
+    "pink": "ピンク",
+    "blue": "青",
+    "green": "緑",
+    "orange": "オレンジ"
+  },
+  "expiryLabel": "表示期限",
+  "expiry": {
+    "today": "今夜まで",
+    "day": "24時間",
+    "week": "1週間",
+    "never": "期限なし"
+  },
+  "submit": "メモを貼る",
+  "cancel": "キャンセル",
+  "delete": "このメモを削除",
+  "deleted": "メモを冷蔵庫から外しました",
+  "added": "メモを冷蔵庫に貼りました",
+  "emptyHint": "家族への小さなメモを残しましょう。ここ とキオスク表示に表示されます。",
+  "by": "{{name}}より",
+  "age": {
+    "now": "たった今",
+    "minutes": "{{count}}分前",
+    "hours": "{{count}}時間前",
+    "days": "{{count}}日前"
+  }
+}

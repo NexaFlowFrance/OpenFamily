@@ -1,0 +1,1 @@
+{"empty":"通知はありません","manage":"通知を管理 →","markAll":"すべて既読にする","push":{"denied":"許可が拒否されました","noVapid":"VAPIDキーを取得できません","unsupported":"このブラウザはプッシュ通知に対応していません"},"timeAgo":{"days":"{{count}}日前","hours":"{{count}}時間前","justNow":"たった今","minutes":"{{count}}分前"},"title":"通知"}

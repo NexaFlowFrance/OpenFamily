@@ -1,0 +1,130 @@
+{
+  "loading": "家族を読み込み中…",
+  "title": "家族",
+  "subtitle": "家族のメンバーを管理します",
+  "addMember": "メンバーを追加",
+  "empty": "家族のメンバーがいません。最初のメンバーを追加しましょう",
+  "roles": {
+    "Parent": "親",
+    "Enfant": "子ども",
+    "Etudiant": "学生",
+    "Autre": "その他"
+  },
+  "colors": {
+    "coral": "コーラル",
+    "orange": "オレンジ",
+    "yellow": "イエロー",
+    "green": "グリーン",
+    "cyan": "シアン",
+    "blue": "ブルー",
+    "indigo": "インディゴ",
+    "pink": "ピンク"
+  },
+  "card": {
+    "age_one": "{{count}}歳",
+    "age_other": "{{count}}歳",
+    "health": "健康情報",
+    "allergies": "アレルギー:",
+    "medications": "服用中の薬:",
+    "emergency": "緊急連絡先"
+  },
+  "shared": {
+    "title": "共有アカウント",
+    "subtitle": "家族のデータへのアクセスを他のアカウントと共有します。",
+    "you": "（あなた）",
+    "owner": "オーナー",
+    "child": "🧒 子ども",
+    "parent": "👨 親",
+    "none": "この家族を共有している他のアカウントはまだありません。",
+    "roleParent": "親",
+    "roleChild": "子ども",
+    "roleTitle": "メンバーの役割",
+    "transferTitle": "このアカウントにオーナー権限を移す",
+    "kickTitle": "このアカウントを外す"
+  },
+  "link": {
+    "label": "連携アカウント",
+    "none": "連携アカウントなし",
+    "hint": "このプロフィールを共有アカウントに連携します。子どもアカウントでは貯金箱と目標が見られるようになります。"
+  },
+  "requests": {
+    "title": "アクセスリクエスト",
+    "accept": "承認",
+    "rejectTitle": "却下"
+  },
+  "myRequest": {
+    "pendingTitle": "保留中のリクエスト",
+    "sentTo": "{{name}}（{{email}}）に送信済み"
+  },
+  "join": {
+    "title": "家族に参加",
+    "desc": "参加したい家族のオーナーのメールアドレスを入力してください。相手に承認または却下のリクエストが届きます。",
+    "rejected": "前回のリクエストは却下されました。",
+    "emailPlaceholder": "email@example.com",
+    "sending": "送信中…",
+    "send": "リクエストを送信",
+    "emailRequired": "メールアドレスが必要です"
+  },
+  "invite": {
+    "roleLabel": "招待する役割",
+    "generate": "招待リンクを作成",
+    "generating": "作成中…",
+    "copyTitle": "コピー",
+    "title": "メンバーを招待",
+    "desc": "メールで招待を送るか、リンクを自分で共有してください。招待された人はこのリンクからアカウントを作成すると、追加のサブスクリプションなしで家族に参加できます。",
+    "emailLabel": "メールアドレス（任意）",
+    "emailPlaceholder": "member@example.com",
+    "send": "招待を送信",
+    "sent": "{{email}} に招待を送信しました。",
+    "sendFailed": "メールを送信できませんでした。下のリンクを自分で共有してください。",
+    "linkHint": "このリンクの有効期限は7日間です。家族に参加するには、このリンクからアカウントを作成する必要があります。"
+  },
+  "leave": {
+    "leaving": "退出中…",
+    "leave": "共有家族から退出"
+  },
+  "dialog": {
+    "editTitle": "メンバーを編集",
+    "addTitle": "メンバーを追加",
+    "description": "家族のメンバーの詳細を入力してください"
+  },
+  "form": {
+    "name": "名前",
+    "namePlaceholder": "例: 山田 花子",
+    "role": "役割",
+    "color": "カラー",
+    "birthdate": "生年月日（任意）",
+    "healthInfo": "健康情報",
+    "allergies": "アレルギー（カンマ区切り）",
+    "allergiesPlaceholder": "例: ピーナッツ、乳糖",
+    "medications": "服用中の薬（カンマ区切り）",
+    "medicationsPlaceholder": "例: アスピリン、インスリン",
+    "emergencyContact": "緊急連絡先",
+    "contactName": "連絡先の名前",
+    "contactNamePlaceholder": "例: 山田 太郎",
+    "contactPhone": "連絡先の電話番号",
+    "contactPhonePlaceholder": "例: 090-1234-5678",
+    "notes": "メモ（任意）",
+    "notesPlaceholder": "追加のメモ…"
+  },
+  "confirm": {
+    "kick": "このアカウントを家族から外しますか？",
+    "transfer": "家族のオーナー権限を {{name}} に移しますか？\n\nあなたは通常のメンバーになります。家族のデータはすべて保持され、新しいオーナーが管理します。この操作は取り消せません。",
+    "delete": "この家族のメンバーを削除しますか？",
+    "leave": "共有家族から退出しますか？自分のデータは手元に戻ります。"
+  },
+  "errors": {
+    "load": "家族を読み込めませんでした。",
+    "save": "このメンバーを保存できませんでした。",
+    "delete": "このメンバーを削除できませんでした。",
+    "kick": "このメンバーを外せませんでした。",
+    "role": "役割を変更できませんでした。",
+    "transfer": "オーナー権限を移せませんでした。",
+    "leave": "家族から退出できませんでした。",
+    "invite": "招待リンクを作成できませんでした。",
+    "cancelRequest": "リクエストをキャンセルできませんでした。",
+    "sendRequest": "リクエストを送信できませんでした。",
+    "approve": "リクエストを承認できませんでした。",
+    "reject": "リクエストを却下できませんでした。"
+  }
+}

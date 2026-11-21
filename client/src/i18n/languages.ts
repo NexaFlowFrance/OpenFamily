@@ -30,6 +30,9 @@ export const LANGUAGE_CONFIG: Record<string, LanguageConfig> = {
     de: {
         label: 'DE',
     },
+    ja: {
+        label: '日本語',
+    },
 };
 
 export const CONFIGURED_LANGUAGE_ORDER = Object.keys(LANGUAGE_CONFIG);

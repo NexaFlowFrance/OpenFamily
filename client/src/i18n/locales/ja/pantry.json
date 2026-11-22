@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "パントリー",
+    "count_one": "家に{{count}}品あります",
+    "count_other": "家に{{count}}品あります"
+  },
+  "soon": {
+    "banner_one": "早めに食べたいものが{{count}}品あります",
+    "banner_other": "早めに食べたいものが{{count}}品あります"
+  },
+  "add": {
+    "title": "商品を追加"
+  },
+  "edit": {
+    "title": "商品を編集"
+  },
+  "empty": "まだ何もありません。家にあるものを追加しましょう。先に食べるものから順に表示されます。",
+  "form": {
+    "namePlaceholder": "例：牛乳、米",
+    "quantity": "数量",
+    "unit": "単位",
+    "unitPlaceholder": "L、kg、パック",
+    "location": "保管場所",
+    "expiresOn": "賞味期限"
+  },
+  "locations": {
+    "fridge": "冷蔵庫",
+    "freezer": "冷凍庫",
+    "cupboard": "戸棚",
+    "other": "その他"
+  },
+  "barcode": {
+    "label": "バーコード",
+    "placeholder": "入力またはスキャン",
+    "find": "検索",
+    "invalid": "バーコードは6〜20桁の数字です。",
+    "found": "Open Food Factsで見つかりました。",
+    "known": "認識済み：すでに登録されている商品です。",
+    "unknown": "未登録のバーコードです。名前を入力すると、次回から認識されます。",
+    "unavailable": "商品データベースに接続できません。名前を入力してください。"
+  },
+  "scan": {
+    "button": "スキャン",
+    "title": "バーコードをスキャン",
+    "description": "バーコードをカメラの前にかざしてください。",
+    "unavailable": "カメラが使えません。代わりにバーコードを入力してください。"
+  },
+  "expiry": {
+    "past": "期限切れ（{{date}}）",
+    "today": "今日中に使用",
+    "soon_one": "{{count}}日以内に使用",
+    "soon_other": "{{count}}日以内に使用",
+    "date": "{{date}}まで"
+  },
+  "actions": {
+    "less": "1つ減らす",
+    "more": "1つ増やす"
+  },
+  "toShopping": {
+    "button": "買い物リストに追加",
+    "done": "{{name}}を買い物リストに追加しました"
+  },
+  "errors": {
+    "load": "パントリーを読み込めませんでした。",
+    "save": "変更を保存できませんでした。"
+  }
+}

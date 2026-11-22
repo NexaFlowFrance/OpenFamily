@@ -1,0 +1,84 @@
+{
+  "add": "追加",
+  "allMembers": "すべてのメンバー",
+  "allTypes": "すべての種類",
+  "appointments": {
+    "badge": "予定",
+    "openCalendar": "カレンダーで開く"
+  },
+  "confirmDelete": "この項目を削除しますか？",
+  "dayFallback": "{{n}}日目",
+  "dialog": {
+    "createTitle": "新しい項目",
+    "description": "項目の内容を入力し、適用する曜日を選んでください。",
+    "editTitle": "項目を編集"
+  },
+  "errors": {
+    "deleteEntry": "この項目を削除できませんでした。",
+    "loadEntries": "週間予定を読み込めませんでした。",
+    "loadMembers": "メンバーを読み込めませんでした。",
+    "memberTitleRequired": "メンバーとタイトルは必須です。",
+    "save": "この項目を保存できませんでした。",
+    "selectDay": "少なくとも1日を選択してください。",
+    "skipOccurrence": "この回を変更できませんでした",
+    "skipUnsupported": "お使いのサーバーは、回のスキップにまだ対応していません。サーバーを更新してください。",
+    "timesSame": "開始時刻と終了時刻を同じにはできません。"
+  },
+  "form": {
+    "days": "対象の曜日",
+    "end": "終了",
+    "fullWeek": "1週間すべて",
+    "location": "場所（任意）",
+    "locationPlaceholder": "例：リヨンオフィス / ジャン・ムーラン学校",
+    "member": "メンバー",
+    "nextDayHint": "翌日に終了します（+1日）",
+    "notes": "メモ（任意）",
+    "notesPlaceholder": "役立つ情報、教室、科目、移動手段…",
+    "participants": "参加者",
+    "participantsHint": "1人以上を選んでください。先頭の人の色が、この活動の色になります。",
+    "replaceConflicts": "選択した曜日の重なっている項目を置き換えます。重なりがあり、この設定がオフの場合は、その曜日はスキップされます。",
+    "selectedDay": "選択中の曜日: {{day}}",
+    "selectedDays": "{{count}}日を選択中",
+    "start": "開始",
+    "thisWeekOnlyRest": "。この項目は{{date}}の週だけに適用されます。指定しない場合は毎週繰り返されます。",
+    "thisWeekOnlyStrong": "今週のみ",
+    "title": "タイトル",
+    "titlePlaceholder": "例：勤務先 - プロダクトチーム / 数学",
+    "type": "種類",
+    "weekdays": "月〜金"
+  },
+  "loading": "週間予定を読み込み中…",
+  "newEntry": "新しい項目",
+  "nextDayShort": "+1日",
+  "noMembers": {
+    "cta": "家族のページへ",
+    "subtitle": "週間予定は家族のプロフィールをもとに作られます。",
+    "title": "まずメンバーを追加してください"
+  },
+  "notice": {
+    "restored": "元に戻しました",
+    "saved": "項目を保存しました。",
+    "savedDaysConflicts_one": "{{count}}日に保存しました。重なりが検出されました: {{days}}。",
+    "savedDaysConflicts_other": "{{count}}日に保存しました。重なりが検出されました: {{days}}。",
+    "savedDays_one": "{{count}}日に保存しました。",
+    "savedDays_other": "{{count}}日に保存しました。",
+    "skipped": "その日はスキップ済み"
+  },
+  "occurrence": {
+    "restore": "今回を元に戻す",
+    "skip": "今回はスキップ"
+  },
+  "submit": {
+    "applyToDays": "選択した曜日に適用"
+  },
+  "subtitle": "繰り返しの勤務時間と学校の時間割を、週ごとに表示します。",
+  "thisWeek": "今週",
+  "title": "週間予定",
+  "types": {
+    "activity": "活動",
+    "other": "その他",
+    "school": "学校",
+    "study": "勉強",
+    "work": "仕事"
+  }
+}

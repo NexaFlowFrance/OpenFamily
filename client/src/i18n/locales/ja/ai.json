@@ -1,0 +1,74 @@
+{
+  "magic": {
+    "open": "AIアシスタント",
+    "title": "AIアシスタント ✨",
+    "description": "追加したい内容を入力してください。あとはアシスタントが処理します。",
+    "placeholder": "木曜の夜にラザニアを追加して、ミアに体操バッグのことを知らせて…",
+    "parse": "解析",
+    "parsing": "解析中…",
+    "nothingFound": "このメモから追加できる項目が見つかりませんでした。言い方を変えてお試しください。",
+    "back": "戻る",
+    "reviewHint": "提案を確認し、不要なもののチェックを外してから確定してください。",
+    "confirm": "追加（{{count}}）",
+    "confirming": "追加中…",
+    "successTitle": "完了 ✨",
+    "successDescription": "{{count}}件の項目を追加しました。",
+    "partialTitle": "一部を追加しました",
+    "partialDescription": "{{added}}件追加、{{failed}}件失敗しました。",
+    "allFailed": "項目を追加できませんでした。もう一度お試しください。",
+    "types": {
+      "task": "タスク",
+      "appointment": "予定",
+      "shopping_item": "買い物",
+      "budget_entry": "予算"
+    }
+  },
+  "meals": {
+    "button": "献立を提案 ✨",
+    "dialogTitle": "夕食の提案",
+    "dialogDescription": "{{start}}から{{end}}の週。あなたのレシピをもとに提案します。",
+    "loading": "アシスタントが献立を作成中…",
+    "empty": "今週の夕食はすべて予定済みです。",
+    "confirm": "献立に追加（{{count}}）",
+    "successTitle": "献立を追加しました ✨",
+    "successDescription": "{{count}}件の夕食を予定しました。",
+    "partialTitle": "一部を追加しました",
+    "partialDescription": "{{added}}件追加、{{failed}}件失敗しました。"
+  },
+  "settings": {
+    "title": "AIアシスタント",
+    "subtitle": "AIモデル（ローカルまたはクラウド）に接続すると、自然な言葉で項目を追加したり、献立の提案を受けたりできます。",
+    "provider": "プロバイダー",
+    "providers": {
+      "ollama": "Ollama（ローカル）",
+      "openai": "OpenAI互換API",
+      "anthropic": "Anthropic Claude",
+      "gemini": "Google Gemini"
+    },
+    "baseUrl": "サーバーURL",
+    "apiKey": "APIキー",
+    "keyKept": "•••（保存済み）",
+    "clearKey": "保存済みのキーを削除",
+    "model": "モデル",
+    "enabled": "アシスタントを有効にする",
+    "privacy": "プライバシー：APIキーは暗号化され、あなたのサーバーにのみ保存されます。Ollamaの場合、データが家の外に出ることはありません。メモはローカルで処理されます。",
+    "parentOnly": "これらの設定を変更できるのは保護者のみです。",
+    "save": "保存",
+    "saving": "保存中…",
+    "saved": "設定を保存しました。",
+    "test": "接続をテスト",
+    "testing": "テスト中…",
+    "testSuccess": "接続に成功しました。モデルが正しく応答しています。"
+  },
+  "errors": {
+    "AI_NOT_CONFIGURED": "AIアシスタントが設定されていません。設定へ移動してください。",
+    "AI_DISABLED": "AIアシスタントは設定で無効になっています。",
+    "AI_UNREACHABLE": "AIプロバイダーに接続できません。URLとサービスが起動しているか確認してください。",
+    "AI_CONNECTION_DROPPED": "AIプロバイダーが応答前に接続を切りました。通常は、間にあるプロキシか、モデルのクラッシュが原因です。",
+    "AI_UNAUTHORIZED": "APIキーが拒否されました。設定で確認してください。",
+    "AI_MODEL_NOT_FOUND": "プロバイダーにモデルが見つかりません。名前を確認してください（例：llama3.1）。",
+    "AI_INVALID_RESPONSE": "モデルが無効な応答を返しました。再試行するか、モデルを切り替えてください。",
+    "AI_PROVIDER_ERROR": "AIプロバイダーがエラーを返しました。もう一度お試しください。",
+    "AI_NOT_ENOUGH_RECIPES": "アシスタントが献立を作成できるよう、レシピを5件以上追加してください。"
+  }
+}

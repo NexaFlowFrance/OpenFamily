@@ -1,6 +1,6 @@
 # Installer OpenFamily sur un serveur
 
-*[English version](INSTALLATION.md)*
+*[English version](INSTALLATION.md) · [日本語版](INSTALLATION.ja.md)*
 
 Ce guide va d'un serveur vide à OpenFamily en service pour votre famille, joignable depuis vos téléphones et tenu à jour. Il suppose un serveur Linux (un VPS, un mini-PC, un NAS qui fait tourner Docker, un Raspberry Pi 4/5 ou un conteneur Proxmox) et un terminal. Node.js n'est pas nécessaire sur le serveur : tout tourne dans Docker.
 

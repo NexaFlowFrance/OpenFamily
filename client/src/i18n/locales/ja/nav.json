@@ -1,0 +1,88 @@
+{
+  "items": {
+    "today": "今日",
+    "shopping": "買い物",
+    "tasks": "タスク",
+    "rewards": "おこづかい",
+    "calendar": "予定",
+    "planning": "週間予定",
+    "recipes": "レシピ",
+    "meals": "献立",
+    "pantry": "パントリー",
+    "budget": "予算",
+    "family": "家族",
+    "integrations": "連携",
+    "settings": "設定",
+    "posts": "投稿"
+  },
+  "mobile": {
+    "home": "ホーム",
+    "calendar": "カレンダー",
+    "tasks": "タスク",
+    "shopping": "買い物",
+    "more": "その他"
+  },
+  "more": {
+    "title": "その他のすべて",
+    "darkTheme": "ダークテーマ",
+    "lightTheme": "ライトテーマ"
+  },
+  "quickActions": {
+    "title": "クイックアクション",
+    "addShopping": "買い物アイテムを追加",
+    "addTask": "タスクを追加",
+    "addAppointment": "予定を追加",
+    "addSchedule": "スケジュールを追加",
+    "addRecipe": "レシピを追加",
+    "addMeal": "献立を追加",
+    "addExpense": "支出を追加",
+    "addMember": "メンバーを追加",
+    "addPost": "新規投稿"
+  },
+  "user": {
+    "profile": "プロフィール",
+    "toggleTheme": "テーマを切り替え",
+    "logout": "ログアウト",
+    "openMenu": "メニューを開く"
+  },
+  "offline": "オフラインモードです。表示されているデータはキャッシュのものです。接続が戻ると、再び変更できるようになります。",
+  "pageTitleFallback": "ダッシュボード",
+  "posts": {
+    "title": "家族の投稿",
+    "subtitle": "近況や写真、リンクを家族と共有しましょう。",
+    "newPost": "新規投稿",
+    "editPost": "投稿を編集",
+    "editing": "自分の投稿を編集中です。",
+    "placeholder": "近況を共有しましょう",
+    "linkPlaceholder": "リンクを共有（任意）",
+    "addPhoto": "写真を追加",
+    "post": "投稿",
+    "saveChanges": "変更を保存",
+    "cancel": "キャンセル",
+    "photoPreview": "写真のプレビュー",
+    "removePhoto": "写真を削除",
+    "sharedPhoto": "共有された写真",
+    "empty": "家族の投稿はまだありません。",
+    "emptySubtitle": "最初の投稿を共有しましょう。",
+    "edited": "編集済み",
+    "edit": "投稿を編集",
+    "delete": "投稿を削除",
+    "confirmDelete": "この投稿を削除しますか？",
+    "seen": "既読",
+    "markSeen": "既読にする",
+    "seenBy": "既読：{{names}}",
+    "notSeen": "まだ誰も見ていません",
+    "errors": {
+      "load": "投稿を読み込めませんでした。",
+      "save": "投稿を保存できませんでした。",
+      "delete": "投稿を削除できませんでした。",
+      "seen": "投稿を既読にできませんでした。",
+      "empty": "先にテキスト、写真、リンクのいずれかを追加してください。",
+      "image": "その写真は使えませんでした。",
+      "imageTooLarge": "その写真は、縮小してもまだ大きすぎます。"
+    }
+  },
+  "rail": {
+    "label": "セクション"
+  }
+}

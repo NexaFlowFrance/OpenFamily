@@ -49,6 +49,7 @@ const TITLE_PREFIX: Record<Language, string> = {
     ca: '⏰ Recordatori: ',
     zh: '⏰ 提醒：',
     de: '⏰ Erinnerung: ',
+    ja: '⏰ リマインド: ',
 };
 const NOW_TEXT: Record<Language, string> = {
     fr: 'Maintenant',
@@ -59,9 +60,10 @@ const NOW_TEXT: Record<Language, string> = {
     ca: 'Ara',
     zh: '现在',
     de: 'Jetzt',
+    ja: '今',
 };
 const LOCALE: Record<Language, string> = {
-    fr: 'fr-FR', en: 'en-GB', pt: 'pt-BR', ru: 'ru-RU', es: 'es-ES', ca: 'ca-ES', zh: 'zh-CN', de: 'de-DE',
+    fr: 'fr-FR', en: 'en-GB', pt: 'pt-BR', ru: 'ru-RU', es: 'es-ES', ca: 'ca-ES', zh: 'zh-CN', de: 'de-DE', ja: 'ja-JP',
 };
 
 const capitalize = (text: string) => text.charAt(0).toLocaleUpperCase() + text.slice(1);

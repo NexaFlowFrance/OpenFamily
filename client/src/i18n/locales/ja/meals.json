@@ -1,0 +1,76 @@
+{
+  "loading": "献立を読み込み中…",
+  "title": "献立プランナー",
+  "subtitle": "1週間の献立を立てます",
+  "thisWeek": "今週",
+  "weekOf": "{{start}}〜{{end}}の週",
+  "mealTypes": {
+    "Petit-déjeuner": "朝食",
+    "Déjeuner": "昼食",
+    "Dîner": "夕食",
+    "Snack": "おやつ"
+  },
+  "dialog": {
+    "editTitle": "食事を編集",
+    "addTitle": "食事を追加",
+    "descriptionFmt": "{{type}}、{{date}}"
+  },
+  "form": {
+    "mealType": "食事の種類",
+    "recipe": "レシピ（任意）",
+    "noRecipe": "レシピなし",
+    "customMeal": "または自由入力",
+    "customMealPlaceholder": "例：手作りピザ",
+    "notes": "メモ（任意）",
+    "notesPlaceholder": "追加のメモ…",
+    "recipeSearch": "レシピを検索…"
+  },
+  "shopping": {
+    "button": "買い物リストに材料を追加",
+    "dialogTitle": "買い物リストに材料を追加",
+    "dialogDescription": "{{start}}から{{end}}に予定されているレシピの材料です。不要なものはチェックを外してください。",
+    "empty": "今週はレシピのある食事が予定されていません。",
+    "selectedCount": "{{total}}件中{{selected}}件の材料を選択中",
+    "alreadyOnList": "リストに追加済み",
+    "confirm_one": "{{count}}件の材料を追加",
+    "confirm_other": "{{count}}件の材料を追加",
+    "successTitle": "材料を追加しました",
+    "successDescription_one": "買い物リストに{{count}}件追加しました。",
+    "successDescription_other": "買い物リストに{{count}}件追加しました。",
+    "partialTitle": "一部の材料を追加できませんでした",
+    "partialDescription": "{{added}}件追加、{{failed}}件失敗しました。",
+    "errorTitle": "材料を追加できませんでした",
+    "errorDescription": "買い物リストには何も追加されませんでした。もう一度お試しください。"
+  },
+  "tandoor": {
+    "button": "Tandoorからインポート",
+    "dialogTitle": "Tandoorの献立をインポート",
+    "dialogDescription": "{{start}}から{{end}}にTandoorで予定されている食事です。",
+    "loading": "Tandoorの献立を読み取り中…",
+    "empty": "今週はTandoorに食事が予定されていません。",
+    "error": "Tandoorの献立を読み取れませんでした。",
+    "mappingTitle": "食事の対応付け",
+    "mappingHelp": "Tandoorの各食事タイプに対応するOpenFamilyの食事を選んでください。",
+    "skipType": "インポートしない",
+    "previewTitle": "プレビュー",
+    "replaces": "「{{name}}」を置き換えます",
+    "keeps": "「{{name}}」は予定済みのためそのまま残します",
+    "notImported_one": "{{count}}件のTandoorの食事はインポートされません（タイプが対応していません）。",
+    "notImported_other": "{{count}}件のTandoorの食事はインポートされません（タイプが対応していません）。",
+    "overwrite": "予定済みの食事を置き換える",
+    "confirm_one": "{{count}}件の食事をインポート",
+    "confirm_other": "{{count}}件の食事をインポート",
+    "successTitle": "献立をインポートしました",
+    "successDescription_one": "{{count}}件の食事をTandoorからインポートしました。",
+    "successDescription_other": "{{count}}件の食事をTandoorからインポートしました。",
+    "keptDescription_one": "予定済みの食事{{count}}件をそのまま残しました。",
+    "keptDescription_other": "予定済みの食事{{count}}件をそのまま残しました。"
+  },
+  "confirmDelete": "この食事を削除してもよろしいですか？",
+  "errors": {
+    "loadPlans": "献立を読み込めませんでした。",
+    "loadRecipes": "レシピを読み込めませんでした。",
+    "save": "この食事を保存できませんでした。",
+    "delete": "この食事を削除できませんでした。"
+  }
+}

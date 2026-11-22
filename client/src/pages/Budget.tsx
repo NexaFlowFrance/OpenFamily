@@ -16,7 +16,7 @@ import {
 import ChartCard from '../components/app/ChartCard';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { dateLocale, intlLocale } from '../i18n/format';
+import { dateLocale, intlLocale, datePattern } from '../i18n/format';
 import { useCategories } from '../hooks/useCategories';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -552,7 +552,7 @@ const Budget: React.FC = () => {
                     <ChevronLeft className="w-5 h-5" />
                 </button>
                 <span className="text-lg font-semibold capitalize">
-                    {format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: dateLocale() })}
+                    {format(new Date(currentYear, currentMonth - 1), datePattern('MMMM yyyy'), { locale: dateLocale() })}
                 </span>
                 <button
                     onClick={() => navigateMonth(1)}
@@ -626,7 +626,7 @@ const Budget: React.FC = () => {
                             {/* Répartition par catégorie */}
                             <ChartCard
                                 title={t('budget:charts.expensesByCategory')}
-                                subtitle={format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy', { locale: dateLocale() })}
+                                subtitle={format(new Date(currentYear, currentMonth - 1), datePattern('MMMM yyyy'), { locale: dateLocale() })}
                             >
                                 {stats && stats.byCategory.length > 0 ? (
                                     <ResponsiveContainer width="100%" height={240}>
@@ -1217,7 +1217,7 @@ const EntryRow: React.FC<{
     const categoryLabel = (v: string) => t(`categories.${v}`, { defaultValue: v });
     // parseISO treats date-only strings ("yyyy-MM-dd") as local midnight,
     // avoiding the previous-day shift that new Date() (UTC midnight) causes.
-    const dateStr = format(parseISO(entry.date), 'dd MMM', { locale: dateLocale() });
+    const dateStr = format(parseISO(entry.date), datePattern('dd MMM'), { locale: dateLocale() });
     return (
         <div className="flex items-center gap-3 bg-surface-1 border border-border rounded-card p-3.5 shadow-sm">
             <div className="flex-1 min-w-0">

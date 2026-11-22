@@ -7,7 +7,7 @@ import { api } from '../lib/api';
 import { Plus, CheckSquare, Square, Trash2, Edit2, Filter, TrendingUp, Star, Hourglass, Check, X } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, DatePicker, Badge, useToast } from '../components/ui';
 import { format, parseISO } from 'date-fns';
-import { dateLocale } from '../i18n/format';
+import { dateLocale, datePattern } from '../i18n/format';
 
 interface Task {
     id: string;
@@ -564,7 +564,7 @@ const Tasks: React.FC = () => {
                                                     )}
                                                     {task.due_date && (
                                                         <Badge variant="default">
-                                                            {t('tasks:due', { date: format(parseISO(task.due_date), 'dd MMM yyyy', { locale: dateLocale() }) })}
+                                                            {t('tasks:due', { date: format(parseISO(task.due_date), datePattern('dd MMM yyyy'), { locale: dateLocale() }) })}
                                                         </Badge>
                                                     )}
                                                 {(task.assigned_to_members || []).map((member) => (

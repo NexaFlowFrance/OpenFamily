@@ -1,5 +1,5 @@
 /** The languages the server writes in: e-mails, notifications, reminders, display pages. */
-export const LANGUAGES = ['fr', 'en', 'pt', 'ru', 'es', 'ca', 'zh', 'de'] as const;
+export const LANGUAGES = ['fr', 'en', 'pt', 'ru', 'es', 'ca', 'zh', 'de', 'ja'] as const;
 
 export type Language = typeof LANGUAGES[number];
 

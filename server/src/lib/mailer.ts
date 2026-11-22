@@ -213,7 +213,7 @@ const deliver = async (to: string, content: EmailContent, kind: string): Promise
 
 const formatDate = (date: Date, lang: Language): string =>
     new Intl.DateTimeFormat(
-        lang === 'en' ? 'en-GB' : lang === 'pt' ? 'pt-BR' : lang === 'ru' ? 'ru-RU' : lang === 'es' ? 'es-ES' : lang === 'ca' ? 'ca-ES' : lang === 'zh' ? 'zh-CN' : lang === 'de' ? 'de-DE' : 'fr-FR', {
+        lang === 'en' ? 'en-GB' : lang === 'pt' ? 'pt-BR' : lang === 'ru' ? 'ru-RU' : lang === 'es' ? 'es-ES' : lang === 'ca' ? 'ca-ES' : lang === 'zh' ? 'zh-CN' : lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : 'fr-FR', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
@@ -527,6 +527,44 @@ export const sendFamilyInviteEmail = async (
                 footer: 'OpenFamily, dein Open-Source-Familienorganizer. Du erhältst diese E-Mail, weil ein OpenFamily-Mitglied diese Adresse eingeladen hat, seiner Familie beizutreten.',
             }),
         };
+    } else if (lang === 'ja') {
+        const text = [
+            `${inviterName} さんが OpenFamily の家族に招待しています。`,
+            '',
+            'OpenFamily は、家族のカレンダー、買い物リスト、タスク、献立、予算をひとつの共有スペースにまとめるアプリです。広告もトラッキングもありません。',
+            '',
+            `参加するには、このリンクを開いてアカウントを作成してください（すでにアカウントがある場合はログインしてください）: ${joinUrl}`,
+            '',
+            `この招待の有効期限は ${expires} です。${inviterName} さんに心当たりがない場合は、このメールを無視してください。`,
+            '',
+            'それでは、また。',
+            'OpenFamily チーム',
+        ].join('\n');
+        content = {
+            subject: `${inviterName} さんが OpenFamily の家族に招待しています`,
+            text,
+            html: renderEmailHtml({
+                lang: 'ja',
+                subject: `${inviterName} さんが OpenFamily の家族に招待しています`,
+                tagline: '家族の毎日を、きちんと整える。',
+                preheader: '数ステップで OpenFamily の家族に参加できます。',
+                greeting: `${name} さんからの招待`,
+                intro: `${name} さんが OpenFamily の家族スペースに招待しています。共有カレンダー、買い物リスト、タスク、献立、予算がひとつにまとまっています。広告もトラッキングもありません。`,
+                cta: { label: '家族に参加する', url: joinUrl },
+                stepsIntro: '参加の手順:',
+                stepsHtml: [
+                    '上の「家族に参加する」ボタンを押してください。',
+                    'アカウントを作成してください（すでにある場合はログイン）。家族へは自動で追加されます。',
+                    '以上です。家族で共有しているデータがすぐに表示されます。',
+                ],
+                noteText: `この招待の有効期限は ${escapeHtml(expires)} です。ボタンが動かない場合は、このリンクをブラウザに貼り付けてください: ${linkHtml}。${name} さんに心当たりがない場合は、このメールを無視してください。`,
+                service: { label: 'サービスアドレス', url: originOf(joinUrl), host },
+                supportHtml: `ご不明な点は <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}" style="color:#dc4a60;text-decoration:none;font-weight:600;">${escapeHtml(SUPPORT_EMAIL)}</a> までお問い合わせください。`,
+                signoff: 'それでは、また。',
+                team: 'OpenFamily チーム',
+                footer: 'OpenFamily はオープンソースの家族向けオーガナイザーです。このメールは、OpenFamily のメンバーがこのアドレスを家族に招待したため送信されました。',
+            }),
+        };
     } else {
         const text = [
             `${inviterName} vous invite à rejoindre sa famille sur OpenFamily.`,
@@ -820,6 +858,39 @@ export const sendPasswordResetEmail = async (
                 signoff: 'Bis bald,',
                 team: 'Dein OpenFamily-Team',
                 footer: 'OpenFamily, dein Open-Source-Familienorganizer. Du erhältst diese E-Mail, weil für dieses Konto das Zurücksetzen des Passworts angefordert wurde.',
+            }),
+        };
+    } else if (lang === 'ja') {
+        const greetingName = cleanName ? `こんにちは、${cleanName} さん` : 'こんにちは';
+        const text = [
+            `${greetingName}、`,
+            '',
+            `OpenFamily アカウント（${email}）のパスワードリセットがリクエストされました。`,
+            '',
+            `新しいパスワードを設定するには、このリンクを開いてください: ${resetUrl}`,
+            '',
+            'リンクの有効期限は60分で、使用できるのは1回だけです。心当たりがない場合は、このメールを無視してください。パスワードは変更されません。',
+            '',
+            'それでは、また。',
+            'OpenFamily チーム',
+        ].join('\n');
+        content = {
+            subject: 'OpenFamily のパスワードリセット',
+            text,
+            html: renderEmailHtml({
+                lang: 'ja',
+                subject: 'OpenFamily のパスワードリセット',
+                tagline: '家族の毎日を、きちんと整える。',
+                preheader: 'OpenFamily アカウントの新しいパスワードを設定してください。',
+                greeting: escapeHtml(greetingName),
+                intro: `OpenFamily アカウント（<span style="font-weight:700;color:#2a2028;">${escapeHtml(email)}</span>）のパスワードリセットがリクエストされました。下のボタンから新しいパスワードを設定してください。`,
+                cta: { label: '新しいパスワードを設定', url: resetUrl },
+                noteText: `リンクの有効期限は60分で、使用できるのは1回だけです。ボタンが動かない場合は、このリンクをブラウザに貼り付けてください: ${linkHtml}。心当たりがない場合は、このメールを無視してください。パスワードは変更されません。`,
+                service: { label: 'サービスアドレス', url: originOf(resetUrl), host },
+                supportHtml: `ご不明な点は <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}" style="color:#dc4a60;text-decoration:none;font-weight:600;">${escapeHtml(SUPPORT_EMAIL)}</a> までお問い合わせください。`,
+                signoff: 'それでは、また。',
+                team: 'OpenFamily チーム',
+                footer: 'OpenFamily はオープンソースの家族向けオーガナイザーです。このメールは、このアカウントのパスワードリセットがリクエストされたため送信されました。',
             }),
         };
     } else {

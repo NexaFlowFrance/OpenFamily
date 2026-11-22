@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Badge } from '../components/ui';
 import { format, parseISO } from 'date-fns';
-import { dateLocale } from '../i18n/format';
+import { dateLocale, datePattern } from '../i18n/format';
 
 interface RewardMember {
     id: string;
@@ -571,7 +571,7 @@ const Rewards: React.FC = () => {
                                             {tx.note || t(`rewards:types.${tx.type}`)}
                                         </span>
                                         <span className="shrink-0 text-micro text-muted-foreground">
-                                            {format(parseISO(tx.created_at), 'dd MMM', { locale: dateLocale() })}
+                                            {format(parseISO(tx.created_at), datePattern('dd MMM'), { locale: dateLocale() })}
                                         </span>
                                         <span className={`shrink-0 font-semibold tabular-nums ${tx.points >= 0 ? 'text-success' : 'text-danger'}`}>
                                             {tx.points >= 0 ? `+${tx.points}` : tx.points}
@@ -784,7 +784,7 @@ const Rewards: React.FC = () => {
                                                         {tx.note || t(`rewards:types.${tx.type}`)}
                                                     </span>
                                                     <span className="shrink-0 text-micro text-muted-foreground">
-                                                        {format(parseISO(tx.created_at), 'dd MMM', { locale: dateLocale() })}
+                                                        {format(parseISO(tx.created_at), datePattern('dd MMM'), { locale: dateLocale() })}
                                                     </span>
                                                     <span className={`shrink-0 font-semibold tabular-nums ${tx.points >= 0 ? 'text-success' : 'text-danger'}`}>
                                                         {tx.points >= 0 ? `+${tx.points}` : tx.points}

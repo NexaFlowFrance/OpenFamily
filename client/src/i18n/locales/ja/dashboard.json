@@ -1,0 +1,86 @@
+{
+  "aside": {
+    "budget": "今月の予算",
+    "budgetSubtitle": "今月の支出",
+    "shopping": "買い物",
+    "shoppingCount_one": "買うもの",
+    "shoppingCount_other": "買うもの",
+    "tasks": "未完了のタスク",
+    "tasksCount_one": "残りのタスク",
+    "tasksCount_other": "残りのタスク"
+  },
+  "budgetAlert": {
+    "cta": "詳細を見る",
+    "message_one": "{{count}}件のカテゴリが月の予算を超えています。",
+    "message_other": "{{count}}件のカテゴリが月の予算を超えています。",
+    "title": "予算の警告"
+  },
+  "cards": {
+    "birthdays": "誕生日",
+    "birthdaysEmpty": "今後数か月に誕生日はありません。家族のページで生年月日を追加してください。",
+    "eatSoon": "早めに食べるもの",
+    "meals": "今日の献立",
+    "mealsEmpty": "今日の献立は決まっていません。",
+    "pantryEmpty": "早めに食べるものはありません。",
+    "seeAll": "すべて",
+    "shopping": "買うもの",
+    "shoppingEmpty": "リストは空です。",
+    "tasks": "やること",
+    "tasksEmpty": "やることは残っていません。"
+  },
+  "customize": {
+    "agendaViewLabel": "予定の表示",
+    "allHidden": "すべてのブロックが非表示になっています。ホーム画面をカスタマイズして、もう一度表示してください。",
+    "button": "カスタマイズ",
+    "description": "ホーム画面に表示する内容と、その順番を選べます。この設定はあなたのアカウントだけに適用されます。",
+    "hide": "非表示",
+    "moduleDisabled": "（モジュール無効）",
+    "moveDown": "下へ移動",
+    "moveUp": "上へ移動",
+    "reset": "リセット",
+    "show": "表示",
+    "title": "ホーム画面をカスタマイズ",
+    "widgets": {
+      "agenda": "アジェンダ（予定）",
+      "notes": "家族のメモ",
+      "planning": "今週のスケジュール",
+      "quick": "クイックアクセス（買い物・予算・タスク）",
+      "stats": "主な数値"
+    },
+    "widgetsLabel": "表示するブロック"
+  },
+  "heading": {
+    "after": "をひと目で。",
+    "before": "あなたの",
+    "highlight": "1日"
+  },
+  "latestPost": {
+    "markSeen": "確認済みにする",
+    "notSeen": "まだ誰も確認していません",
+    "seen": "確認済み",
+    "seenBy": "確認済み: {{names}}",
+    "title": "家族の最新投稿",
+    "viewAll": "すべての投稿を見る"
+  },
+  "planning": {
+    "empty": "今週のスケジュールは登録されていません。",
+    "title": "今週のスケジュール",
+    "viewAll": "スケジュールを見る"
+  },
+  "stats": {
+    "appointments": "予定",
+    "monthExpenses": "今月の支出",
+    "shopping": "買い物",
+    "tasks": "タスク"
+  },
+  "today": {
+    "emptyCta": "予定を追加",
+    "emptySubtitle": "予定を追加すると、ここに表示されます。",
+    "emptyTitle": "予定がありません。",
+    "emptyWeekSubtitle": "今週の予定はありません。",
+    "title": "今日",
+    "viewDay": "日",
+    "viewWeek": "週",
+    "weekTitle": "今週"
+  }
+}

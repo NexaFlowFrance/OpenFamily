@@ -1,0 +1,91 @@
+{
+  "approval": {
+    "approve": "承認",
+    "pendingBadge": "承認待ち",
+    "reject": "却下",
+    "toastDescription": "保護者が承認すると、ポイントが加算されます。",
+    "toastTitle": "よくできました！タスクが完了しました"
+  },
+  "categories": {
+    "Administratif": "事務手続き",
+    "Autre": "その他",
+    "Chambre": "寝室",
+    "Cuisine": "キッチン",
+    "Extérieur": "屋外",
+    "Salle de bain": "浴室",
+    "Salon": "リビング",
+    "École": "学校"
+  },
+  "confirmDelete": "このタスクを削除してもよいですか？",
+  "dialog": {
+    "createTitle": "新しいタスク",
+    "description": "タスクの詳細を入力してください",
+    "editTitle": "タスクを編集"
+  },
+  "due": "期限: {{date}}",
+  "empty": {
+    "noMatch": "選択したフィルターに一致するタスクがありません。",
+    "none": "まだタスクがありません。最初のタスクを作成しましょう！"
+  },
+  "errors": {
+    "approveTask": "このタスクを承認できませんでした。",
+    "deleteTask": "このタスクを削除できませんでした。",
+    "loadMembers": "メンバーを読み込めませんでした。",
+    "loadStats": "統計を読み込めませんでした。",
+    "loadTasks": "タスクを読み込めませんでした。",
+    "rejectTask": "このタスクを却下できませんでした。",
+    "saveTask": "このタスクを保存できませんでした。",
+    "toggleTask": "このタスクを更新できませんでした。"
+  },
+  "filters": {
+    "allCategories": "すべてのカテゴリ",
+    "allFrequencies": "すべての頻度",
+    "allMembers": "すべてのメンバー",
+    "allPriorities": "すべての優先度",
+    "label": "フィルター:",
+    "noCategory": "カテゴリなし",
+    "statusAll": "すべて",
+    "statusCompleted": "完了",
+    "statusPending": "未完了",
+    "unassigned": "未割り当て"
+  },
+  "form": {
+    "assignTo": "担当（任意）",
+    "category": "カテゴリ（任意）",
+    "description": "説明（任意）",
+    "descriptionPlaceholder": "補足の詳細…",
+    "dueDate": "期限（任意）",
+    "frequency": "頻度",
+    "noCategory": "なし",
+    "noMembers": "メンバーがいません",
+    "points": "獲得ポイント（任意）",
+    "pointsHint": "タスクを完了すると、担当メンバーがこのポイントを獲得します。",
+    "priority": "優先度",
+    "title": "タイトル",
+    "titlePlaceholder": "例：買い物に行く"
+  },
+  "frequencies": {
+    "Annuel": "毎年",
+    "Hebdomadaire": "毎週",
+    "Mensuel": "毎月",
+    "Quadrimestriel": "4か月ごと",
+    "Quotidien": "毎日",
+    "Trimestriel": "3か月ごと",
+    "Une fois": "1回のみ"
+  },
+  "loading": "タスクを読み込み中…",
+  "newTask": "新しいタスク",
+  "priorities": {
+    "Basse": "低",
+    "Haute": "高",
+    "Moyenne": "中"
+  },
+  "stats": {
+    "completed": "完了",
+    "completionRate": "完了率",
+    "pending": "未完了",
+    "total": "合計"
+  },
+  "subtitle": "家族のタスクを管理し、進捗を確認できます",
+  "title": "タスク"
+}

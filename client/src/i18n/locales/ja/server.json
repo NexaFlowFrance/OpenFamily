@@ -1,0 +1,19 @@
+{
+  "connect": "接続",
+  "connecting": "接続中…",
+  "errors": {
+    "invalid": "http:// または https:// で始まる正しいURLを入力してください",
+    "unreachable": "このサーバーに接続できませんでした。アドレスと、サーバーが起動しているかを確認してください。"
+  },
+  "hint": "ブラウザで開くときと同じアドレス（例：http://192.168.1.10:3001）、またはHTTPS／Tailscaleのアドレスを使ってください。",
+  "placeholder": "http://192.168.1.10:3001",
+  "settings": {
+    "change": "サーバーを変更",
+    "connectedTo": "{{url}} に接続中",
+    "disconnect": "切断",
+    "title": "サーバー"
+  },
+  "subtitle": "OpenFamilyはセルフホスト型です。アプリを自分のサーバーに向けてください。",
+  "title": "サーバーに接続",
+  "urlLabel": "サーバーのアドレス"
+}

@@ -6,7 +6,7 @@ import { apiBase } from '../lib/serverConfig';
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash2, MapPin, Clock, CalendarPlus, Copy, Check, RefreshCw, Search, X, Cake } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge, Select, DatePicker } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
-import { dateLocale, formatTime, orderIsoWeekdays, weekStartsOn } from '../i18n/format';
+import { dateLocale, formatTime, orderIsoWeekdays, weekStartsOn, datePattern } from '../i18n/format';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCategories } from '../hooks/useCategories';
@@ -803,7 +803,7 @@ const Calendar: React.FC = () => {
                                                 </div>
                                                 <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-body-sm text-muted-foreground">
                                                     <span>
-                                                        {format(new Date(apt.start_time), 'dd MMM yyyy', { locale: dateLocale() })} {formatTime(apt.start_time)}
+                                                        {format(new Date(apt.start_time), datePattern('dd MMM yyyy'), { locale: dateLocale() })} {formatTime(apt.start_time)}
                                                     </span>
                                                     {apt.location && (
                                                         <span>{apt.location}</span>
@@ -839,7 +839,7 @@ const Calendar: React.FC = () => {
                     {/* The month stays whole: on a narrow phone the three buttons go below it. */}
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-2 sm:mb-6">
                         <h2 className="whitespace-nowrap text-h2 font-semibold capitalize">
-                            {format(currentDate, 'MMMM yyyy', { locale: dateLocale() })}
+                            {format(currentDate, datePattern('MMMM yyyy'), { locale: dateLocale() })}
                         </h2>
                         <div className="ml-auto flex flex-shrink-0 gap-2">
                             <Button
@@ -991,9 +991,9 @@ const Calendar: React.FC = () => {
                                         <div className="flex flex-wrap items-center gap-3 text-body-sm text-muted-foreground">
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />
-                                                {format(new Date(apt.start_time), 'dd MMM yyyy', { locale: dateLocale() })}
+                                                {format(new Date(apt.start_time), datePattern('dd MMM yyyy'), { locale: dateLocale() })}
                                                 {apt.end_time && !isSameDay(new Date(apt.start_time), new Date(apt.end_time)) && (
-                                                    <span> → {format(new Date(apt.end_time), 'dd MMM yyyy', { locale: dateLocale() })}</span>
+                                                    <span> → {format(new Date(apt.end_time), datePattern('dd MMM yyyy'), { locale: dateLocale() })}</span>
                                                 )}
                                             </div>
                                             {apt.kind !== 'birthday' && (
@@ -1438,7 +1438,7 @@ const Calendar: React.FC = () => {
                 }}
                 title={
                     dayAction
-                        ? format(dayAction.date, 'EEEE, MMMM d, yyyy', { locale: dateLocale() })
+                        ? format(dayAction.date, 'PPPP', { locale: dateLocale() })
                         : ''
                 }
                 description={

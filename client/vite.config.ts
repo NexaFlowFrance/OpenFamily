@@ -25,6 +25,12 @@ export default defineConfig(({ mode }) => {
                 srcDir: 'src',
                 filename: 'sw.js',
                 includeAssets: ['favicon-32x32.png', 'favicon-16x16.png', 'apple-touch-icon.png', 'OpenFamily.png'],
+                injectManifest: {
+                    // The main bundle embeds every locale eagerly and passed the
+                    // 2 MiB default precache limit once Japanese was added
+                    // (2,091.9 kB on main, 2,182.4 kB with ja).
+                    maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+                },
                 manifest: {
                     name: 'OpenFamily',
                     short_name: 'OpenFamily',

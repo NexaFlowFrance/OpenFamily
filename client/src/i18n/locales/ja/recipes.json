@@ -1,0 +1,134 @@
+{
+  "loading": "レシピを読み込み中…",
+  "title": "レシピ",
+  "subtitle": "家族のレシピ集",
+  "newRecipe": "新しいレシピ",
+  "categories": {
+    "Entrée": "前菜",
+    "Plat": "メイン",
+    "Dessert": "デザート",
+    "Snack": "軽食"
+  },
+  "difficulties": {
+    "Facile": "簡単",
+    "Moyen": "普通",
+    "Difficile": "難しい"
+  },
+  "durations": {
+    "under15": "≤ 15分",
+    "under30": "≤ 30分",
+    "under60": "≤ 1時間",
+    "over60": "> 1時間"
+  },
+  "searchPlaceholder": "レシピを検索…",
+  "allCategories": "すべてのカテゴリ",
+  "allDifficulties": "すべての難易度",
+  "anyDuration": "時間は問わない",
+  "filters": {
+    "toggle": "絞り込み",
+    "clear": "絞り込みをクリア",
+    "ingredientsPlaceholder": "冷蔵庫にある材料…（材料を入力してEnter）",
+    "ingredientsMore": "材料を追加",
+    "ingredientsHelp": "これらの材料をすべて含むレシピだけが表示されます。",
+    "removeIngredient": "{{name}}を削除"
+  },
+  "empty": {
+    "none": "レシピはまだありません。最初のレシピを作りましょう。",
+    "noMatch": "検索に合うレシピがありません。"
+  },
+  "card": {
+    "min": "{{n}}分",
+    "servings_one": "{{count}}人分",
+    "servings_other": "{{count}}人分",
+    "view": "見る"
+  },
+  "dialog": {
+    "editTitle": "レシピを編集",
+    "createTitle": "新しいレシピ",
+    "description": "レシピの内容を入力してください"
+  },
+  "form": {
+    "name": "レシピ名",
+    "namePlaceholder": "例：アップルパイ",
+    "category": "カテゴリ",
+    "difficulty": "難易度",
+    "description": "説明（任意）",
+    "descriptionPlaceholder": "レシピの短い説明…",
+    "prep": "下ごしらえ（分）",
+    "prepPlaceholder": "30",
+    "cook": "調理（分）",
+    "cookPlaceholder": "45",
+    "servings": "分量（人分）",
+    "servingsPlaceholder": "4",
+    "ingredients": "材料（1行に1つ）",
+    "ingredientsPlaceholder": "小麦粉 200g\n卵 3個\n砂糖 100g",
+    "instructions": "作り方（1行に1ステップ）",
+    "instructionsPlaceholder": "オーブンを180°Cに予熱する\n小麦粉と砂糖を混ぜる\n卵を加える",
+    "tags": "タグ（カンマ区切り）",
+    "tagsPlaceholder": "ベジタリアン, 時短, 節約",
+    "image": "画像URL（任意）",
+    "imagePlaceholder": "https://…"
+  },
+  "import": {
+    "button": "リンクから取り込む",
+    "title": "レシピを取り込む",
+    "description": "レシピページのリンク（Marmiton、750g、ブログなど）を貼ると、フォームに自動で入力します。",
+    "urlLabel": "レシピページのURL",
+    "urlPlaceholder": "https://www.marmiton.org/recettes/…",
+    "submit": "取り込む",
+    "importing": "取り込み中…",
+    "successTitle": "レシピを取り込みました",
+    "successDescription": "内容を確認して保存してください。",
+    "errors": {
+      "notFoundTitle": "レシピが見つかりません",
+      "notFound": "このページには読み取れるレシピが含まれていません。",
+      "fetchTitle": "取り込みに失敗しました",
+      "fetch": "このページを取得できませんでした。リンクを確認して、もう一度お試しください。"
+    }
+  },
+  "shopping": {
+    "button": "買い物リストに追加",
+    "title": "買い物リストに追加",
+    "description": "「{{recipe}}」の材料から、買い物リストに追加するものを選んでください。",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて解除",
+    "submit": "リストに追加",
+    "sending": "追加中…",
+    "successTitle": "買い物リストを更新しました",
+    "successDescription_one": "{{count}}件の材料をリストに追加しました。",
+    "successDescription_other": "{{count}}件の材料をリストに追加しました。",
+    "duplicates_one": "{{count}}件はすでに入っていました。",
+    "duplicates_other": "{{count}}件はすでに入っていました。",
+    "errorTitle": "追加できませんでした",
+    "error": "これらの材料を追加できませんでした。もう一度お試しください。",
+    "original": "レシピ：{{line}}",
+    "selectedCount": "{{total}}件中{{count}}件を選択中"
+  },
+  "refine": {
+    "button": "AIで整える",
+    "hint": "設定済みのAIでタイトル・材料・作り方を整えます",
+    "refining": "整えています…",
+    "successTitle": "レシピを整えました",
+    "successDescription": "セクションとステップを整理しました。内容を確認して保存してください。",
+    "notConfiguredTitle": "AIが設定されていません",
+    "notConfigured": "設定 → AIアシスタントで、AIアシスタントを有効にして設定してください。",
+    "errorTitle": "整形に失敗しました",
+    "error": "AIアシスタントから応答がありませんでした。設定を確認して、もう一度お試しください。",
+    "cost": "{{total}}トークン（入力{{in}}／出力{{out}}）"
+  },
+  "detail": {
+    "prep": "下ごしらえ：",
+    "cook": "調理：",
+    "servings": "分量：",
+    "minUnit": "分",
+    "ingredients": "材料",
+    "instructions": "作り方"
+  },
+  "confirmDelete": "このレシピを削除してもよいですか？",
+  "errors": {
+    "load": "レシピを読み込めませんでした。",
+    "save": "このレシピを保存できませんでした。",
+    "delete": "このレシピを削除できませんでした。",
+    "invalidImage": "この画像リンクは無効です。https:// で始まるWebアドレスを使うか、空欄のままにしてください。"
+  }
+}

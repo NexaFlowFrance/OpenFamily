@@ -1,0 +1,33 @@
+{
+  "mode": {
+    "classic": "クラシック",
+    "kakeibo": "家計簿"
+  },
+  "availableTitle": "使える金額",
+  "availableSub": "{{income}} 収入 − {{goal}} 貯金目標",
+  "spentSoFar": "使った金額：{{amount}}",
+  "householdIncome": "世帯収入",
+  "extraIncome": "今月の臨時収入",
+  "totalIncome": "収入合計",
+  "savingsGoal": "貯金目標",
+  "pillarsTitle": "お金はどこへ行った？",
+  "pillars": {
+    "survival": "必需品",
+    "wants": "欲しいもの",
+    "culture": "教養",
+    "extra": "臨時"
+  },
+  "pillarHint": {
+    "survival": "生活に必須",
+    "wants": "楽しみ",
+    "culture": "自己成長",
+    "extra": "予想外の出費"
+  },
+  "noExpenses": "今月の支出はまだ記録されていません。",
+  "reviewTitle": "月末の振り返り",
+  "actualSavings": "実際に貯金できた金額",
+  "goalReached": "目標達成：目標より{{amount}}多く貯金できました！",
+  "goalMissed": "目標まであと{{amount}}足りませんでした。",
+  "notesLabel": "振り返りメモ",
+  "notesPlaceholder": "うまくいったことは？来月改善できることは？"
+}

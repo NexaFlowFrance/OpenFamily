@@ -4,7 +4,7 @@
   <p><strong>Application de gestion familiale open source, auto-hébergeable</strong><br>
   Gardez le contrôle total de vos données : hébergez-la sur votre propre serveur, ou laissez-nous l'héberger pour vous en France.</p>
 
-  🇬🇧 <a href="README.md">English</a> · 🇫🇷 <strong>Français</strong> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a>
+  🇬🇧 <a href="README.md">English</a> · 🇫🇷 <strong>Français</strong> · 🇨🇳 <a href="README.zh-CN.md">简体中文</a> · 🇯🇵 <a href="README.ja.md">日本語</a>
 
   [![Release](https://img.shields.io/github/v/release/NexaFlowFrance/OpenFamily?color=2563eb&label=version)](https://github.com/NexaFlowFrance/OpenFamily/releases/latest)
   [![CI](https://img.shields.io/github/actions/workflow/status/NexaFlowFrance/OpenFamily/ci.yml?branch=main&label=CI)](https://github.com/NexaFlowFrance/OpenFamily/actions/workflows/ci.yml)
@@ -58,7 +58,7 @@ OpenFamily est une **alternative auto-hébergée à des applications comme Cozi 
 | 👥 **Comptes partagés** | Invitations par lien, demandes d'accès, transfert de propriété |
 | 🔑 **Connexion unique (SSO)** | Connexion avec votre propre fournisseur OpenID Connect (Authentik, Keycloak, Pocket ID...), serveurs 100 % SSO en option, **déconnexion de tous les appareils** |
 | 🛡️ **Rôles & permissions** | Comptes **parent / enfant**, avec un budget en lecture seule pour les enfants |
-| 🌍 **Multilingue** | Interface **français / anglais / allemand / portugais / russe / espagnol / catalan / chinois simplifié** avec détection automatique |
+| 🌍 **Multilingue** | Interface **français / anglais / allemand / portugais / russe / espagnol / catalan / chinois simplifié / japonais** avec détection automatique |
 | 📴 **Mode hors ligne** | Consultation des données en cache sans connexion (PWA) |
 
 ## 📸 Captures d'écran

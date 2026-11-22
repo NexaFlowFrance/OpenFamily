@@ -1,0 +1,86 @@
+{
+  "loading": "おこづかいを読み込み中…",
+  "title": "おこづかい",
+  "subtitle": "家事でポイントがたまり、ポイントはおこづかいになります",
+  "empty": "ごほうびはまだありません。タスクに星を付けて始めましょう！",
+  "streak_one": "{{count}}日連続",
+  "streak_other": "{{count}}日連続",
+  "pendingCount_one": "{{count}}件が承認待ち",
+  "pendingCount_other": "{{count}}件が承認待ち",
+  "worth": "{{amount}}相当",
+  "approvals": {
+    "title_one": "{{count}}件の承認待ちタスク",
+    "title_other": "{{count}}件の承認待ちタスク",
+    "approve": "承認",
+    "reject": "却下"
+  },
+  "actions": {
+    "adjust": "調整",
+    "redeem": "支払う"
+  },
+  "types": {
+    "earn": "ポイント獲得",
+    "adjust": "調整",
+    "redeem": "おこづかいの支払い"
+  },
+  "fields": {
+    "note": "メモ（任意）"
+  },
+  "adjustDialog": {
+    "title": "{{name}}のポイントを調整",
+    "description": "ボーナスを加えるか、ポイントを減らします（マイナスの値）",
+    "points": "ポイント（+または−）",
+    "notePlaceholder": "例：買い出しの片付けを手伝った"
+  },
+  "redeemDialog": {
+    "title": "{{name}}におこづかいを渡す",
+    "description": "利用可能な残高：{{balance}}ポイント",
+    "points": "換金するポイント",
+    "amount": "支払う金額：{{amount}}",
+    "notePlaceholder": "例：貯金箱、映画に行く…"
+  },
+  "goals": {
+    "add": "目標を追加",
+    "editTitle": "目標を編集",
+    "progress": "{{current}} / {{target}}",
+    "markAchieved": "目標達成 🎉"
+  },
+  "goalDialog": {
+    "addTitle": "{{name}}の新しい目標",
+    "editTitle": "{{name}}の目標を編集",
+    "description": "ポイントで達成する貯金目標です",
+    "emoji": "絵文字",
+    "titleLabel": "タイトル",
+    "titlePlaceholder": "例：ゲーム",
+    "target": "目標金額（{{currency}}）",
+    "delete": "削除"
+  },
+  "kid": {
+    "hello": "こんにちは、{{name}}！",
+    "subtitle": "あなたの貯金箱です",
+    "reached": "やったね、達成しました！ 🎉",
+    "reachedHint": "保護者に目標の確認をお願いしてください。",
+    "missing": "あと{{amount}}必要です",
+    "editGoal": "目標を編集する",
+    "noGoal": "まだ目標がありません。達成したい夢を選んでください！",
+    "addGoal": "目標を選ぶ",
+    "tasksTitle": "あなたのミッション",
+    "allTasks": "すべて見る",
+    "tasksEmpty": "今はミッションがありません。よくできました！ 🎉",
+    "pendingBadge": "承認待ち",
+    "historyTitle": "最近の活動",
+    "notLinkedTitle": "貯金箱が待っています！",
+    "notLinkedMessage": "ポイントと目標を見るには、保護者に家族ページからアカウントとプロフィールを連携してもらってください。"
+  },
+  "settings": {
+    "rate": "1ポイント = {{value}}",
+    "title": "1ポイントの価値",
+    "description": "1ポイントの金額を設定します",
+    "label": "1ポイントの価値",
+    "example": "例：{{points}}ポイント = {{amount}}"
+  },
+  "errors": {
+    "load": "おこづかいを読み込めませんでした。",
+    "action": "この操作を実行できませんでした。"
+  }
+}

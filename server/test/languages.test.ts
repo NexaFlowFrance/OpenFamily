@@ -73,7 +73,7 @@ describe('the language the server writes in', () => {
     });
 
     it('notifies them in English too', async () => {
-        const texts = Object.fromEntries(['fr', 'en', 'pt', 'ru', 'es', 'ca', 'zh', 'de']
+        const texts = Object.fromEntries(['fr', 'en', 'pt', 'ru', 'es', 'ca', 'zh', 'de', 'ja']
             .map((language) => [language, { title: `title-${language}`, message: `message-${language}` }])) as LocalizedTexts;
         const titleOf = async () => (await query(
             'SELECT title FROM notifications WHERE user_id = $1 ORDER BY created_at DESC, id DESC LIMIT 1', [parent.user.id],

@@ -5,7 +5,7 @@ import { api } from '../lib/api';
 import { Plus, ChevronLeft, ChevronRight, Edit2, Trash2, ShoppingCart, Sparkles, Loader2, UtensilsCrossed, Download } from 'lucide-react';
 import { Card, CardContent, Button, Dialog, Input, Select, Textarea, useToast } from '../components/ui';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isToday } from 'date-fns';
-import { dateLocale, weekStartsOn } from '../i18n/format';
+import { dateLocale, weekStartsOn, datePattern } from '../i18n/format';
 import { foldText } from '../lib/textSearch';
 import { useAiEnabled } from '../lib/aiStatus';
 import { useAuth } from '../contexts/AuthContext';
@@ -581,8 +581,8 @@ const MealPlanning: React.FC = () => {
                 <CardContent className="p-4 sm:p-6">
                     <h2 className="text-h2 font-semibold mb-4">
                         {t('meals:weekOf', {
-                            start: format(weekStart, 'dd MMM', { locale: dateLocale() }),
-                            end: format(weekEnd, 'dd MMM yyyy', { locale: dateLocale() }),
+                            start: format(weekStart, datePattern('dd MMM'), { locale: dateLocale() }),
+                            end: format(weekEnd, datePattern('dd MMM yyyy'), { locale: dateLocale() }),
                         })}
                     </h2>
 
@@ -596,7 +596,7 @@ const MealPlanning: React.FC = () => {
                                 className={`rounded-card border p-3 ${isToday(day) ? 'border-primary' : 'border-border'}`}
                             >
                                 <p className="mb-2 text-body-sm font-semibold first-letter:uppercase">
-                                    {format(day, 'EEEE d MMMM', { locale: dateLocale() })}
+                                    {format(day, datePattern('EEEE d MMMM'), { locale: dateLocale() })}
                                 </p>
                                 <div className="space-y-1.5">
                                     {MEAL_TYPES.map((mealType) => {
@@ -656,7 +656,7 @@ const MealPlanning: React.FC = () => {
                                             {format(day, 'EEE', { locale: dateLocale() })}
                                         </div>
                                         <div className="text-label text-muted-foreground">
-                                            {format(day, 'dd MMM', { locale: dateLocale() })}
+                                            {format(day, datePattern('dd MMM'), { locale: dateLocale() })}
                                         </div>
                                     </div>
                                 ))}
@@ -736,7 +736,7 @@ const MealPlanning: React.FC = () => {
                     selectedDate
                         ? t('meals:dialog.descriptionFmt', {
                             type: mealTypeLabel(selectedMealType),
-                            date: format(selectedDate, 'dd MMMM yyyy', { locale: dateLocale() }),
+                            date: format(selectedDate, datePattern('dd MMMM yyyy'), { locale: dateLocale() }),
                         })
                         : ''
                 }
@@ -817,8 +817,8 @@ const MealPlanning: React.FC = () => {
                 onOpenChange={setShoppingDialogOpen}
                 title={t('meals:shopping.dialogTitle')}
                 description={t('meals:shopping.dialogDescription', {
-                    start: format(weekStart, 'dd MMM', { locale: dateLocale() }),
-                    end: format(weekEnd, 'dd MMM', { locale: dateLocale() }),
+                    start: format(weekStart, datePattern('dd MMM'), { locale: dateLocale() }),
+                    end: format(weekEnd, datePattern('dd MMM'), { locale: dateLocale() }),
                 })}
             >
                 {ingredientLines.length === 0 ? (
@@ -887,8 +887,8 @@ const MealPlanning: React.FC = () => {
                 onOpenChange={setAiDialogOpen}
                 title={t('ai:meals.dialogTitle')}
                 description={t('ai:meals.dialogDescription', {
-                    start: format(weekStart, 'dd MMM', { locale: dateLocale() }),
-                    end: format(weekEnd, 'dd MMM', { locale: dateLocale() }),
+                    start: format(weekStart, datePattern('dd MMM'), { locale: dateLocale() }),
+                    end: format(weekEnd, datePattern('dd MMM'), { locale: dateLocale() }),
                 })}
             >
                 {aiLoading ? (
@@ -920,7 +920,7 @@ const MealPlanning: React.FC = () => {
                                 />
                                 <span className="min-w-0 flex-1">
                                     <span className="block text-body-sm font-medium capitalize text-foreground">
-                                        {format(new Date(`${proposal.date}T12:00:00`), 'EEEE dd MMM', { locale: dateLocale() })}
+                                        {format(new Date(`${proposal.date}T12:00:00`), datePattern('EEEE dd MMM'), { locale: dateLocale() })}
                                     </span>
                                     <span className="block text-micro text-muted-foreground">
                                         {mealTypeLabel(proposal.meal_type)} · {proposal.recipe_name}
@@ -956,8 +956,8 @@ const MealPlanning: React.FC = () => {
                 onOpenChange={setTandoorDialogOpen}
                 title={t('meals:tandoor.dialogTitle')}
                 description={t('meals:tandoor.dialogDescription', {
-                    start: format(weekStart, 'dd MMM', { locale: dateLocale() }),
-                    end: format(weekEnd, 'dd MMM', { locale: dateLocale() }),
+                    start: format(weekStart, datePattern('dd MMM'), { locale: dateLocale() }),
+                    end: format(weekEnd, datePattern('dd MMM'), { locale: dateLocale() }),
                 })}
             >
                 {tandoorLoading ? (
@@ -1003,7 +1003,7 @@ const MealPlanning: React.FC = () => {
                                 {tandoorPreview.list.map((slot) => (
                                     <div key={`${slot.date}|${slot.mealType}`} className="rounded px-1 py-1">
                                         <span className="block text-body-sm font-medium capitalize text-foreground">
-                                            {format(new Date(`${slot.date}T12:00:00`), 'EEEE dd MMM', { locale: dateLocale() })}
+                                            {format(new Date(`${slot.date}T12:00:00`), datePattern('EEEE dd MMM'), { locale: dateLocale() })}
                                             <span className="font-normal normal-case text-muted-foreground"> · {mealTypeLabel(slot.mealType)}</span>
                                         </span>
                                         <span className="block text-micro text-muted-foreground">

@@ -15,7 +15,7 @@ import { format } from 'date-fns';
 import { api } from '../../lib/api';
 import { useAiEnabled } from '../../lib/aiStatus';
 import { useAuth } from '../../contexts/AuthContext';
-import { dateLocale, formatTime } from '../../i18n/format';
+import { dateLocale, formatTime, datePattern } from '../../i18n/format';
 import { Button, Dialog, Textarea, useToast } from '../ui';
 
 // Proposal shapes mirror server/src/services/ai/assistant.ts (already validated
@@ -134,8 +134,8 @@ const ProposalCard: React.FC<{
     const Icon = meta.icon;
     const locale = dateLocale();
 
-    const formatDay = (iso: string) => format(new Date(`${iso}T12:00:00`), 'EEE dd MMM', { locale });
-    const formatDateTime = (iso: string) => `${format(new Date(iso), 'EEE dd MMM', { locale })} ${formatTime(iso)}`;
+    const formatDay = (iso: string) => format(new Date(`${iso}T12:00:00`), datePattern('EEE dd MMM'), { locale });
+    const formatDateTime = (iso: string) => `${format(new Date(iso), datePattern('EEE dd MMM'), { locale })} ${formatTime(iso)}`;
 
     const details: string[] = [];
     if (proposal.type === 'task') {

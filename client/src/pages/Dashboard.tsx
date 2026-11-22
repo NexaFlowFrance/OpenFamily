@@ -4,7 +4,7 @@ import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api } from '../lib/api';
 import { useAuth, DEFAULT_DASHBOARD_PREFS, type DashboardPrefs, type DashboardWidget } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
-import { dateLocale, formatDateTime, formatTime, intlLocale, isoWeekdayAtOffset, weekStartsOn } from '../i18n/format';
+import { dateLocale, formatDateTime, formatTime, intlLocale, isoWeekdayAtOffset, weekStartsOn, datePattern } from '../i18n/format';
 import {
     ShoppingCart, CheckSquare, Calendar, Wallet, AlertCircle, ChevronRight, Clock,
     SlidersHorizontal, Eye, EyeOff, ArrowUp, ArrowDown, CalendarDays,
@@ -345,7 +345,7 @@ const Dashboard: React.FC = () => {
                         <div key={group.date.toISOString()}>
                             {(agendaView === 'week' || !isSameDay(group.date, new Date())) && (
                                 <p className="text-micro uppercase tracking-[0.08em] text-muted-foreground mb-2 first-letter:uppercase">
-                                    {format(group.date, 'EEEE d MMMM', { locale: dateLocale() })}
+                                    {format(group.date, datePattern('EEEE d MMMM'), { locale: dateLocale() })}
                                 </p>
                             )}
                             <div className="divide-y divide-border">
@@ -517,7 +517,7 @@ const Dashboard: React.FC = () => {
                         {days.map((day) => (
                             <div key={day.dayOfWeek} className="rounded-card border border-border bg-card p-4">
                                 <p className="text-micro uppercase tracking-[0.08em] text-muted-foreground mb-3 first-letter:uppercase">
-                                    {format(day.date, 'EEEE d', { locale: dateLocale() })}
+                                    {format(day.date, datePattern('EEEE d'), { locale: dateLocale() })}
                                 </p>
                                 <ul className="space-y-2.5">
                                     {day.items.map((entry) => (
@@ -719,7 +719,7 @@ const Dashboard: React.FC = () => {
                                     </span>
                                     {task.due_date && (
                                         <span className={`shrink-0 text-micro ${late ? 'font-medium text-danger' : 'text-muted-foreground'}`}>
-                                            {isSameDay(dayOf(task.due_date), new Date()) ? t('common:actions.today') : format(dayOf(task.due_date), 'd MMM', { locale: dateLocale() })}
+                                            {isSameDay(dayOf(task.due_date), new Date()) ? t('common:actions.today') : format(dayOf(task.due_date), datePattern('d MMM'), { locale: dateLocale() })}
                                         </span>
                                     )}
                                 </li>
@@ -791,7 +791,7 @@ const Dashboard: React.FC = () => {
                                         </span>
                                     </span>
                                     <span className={`shrink-0 text-micro ${isToday ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>
-                                        {isToday ? t('common:actions.today') : format(dayOf(entry.start_time), 'd MMM', { locale: dateLocale() })}
+                                        {isToday ? t('common:actions.today') : format(dayOf(entry.start_time), datePattern('d MMM'), { locale: dateLocale() })}
                                     </span>
                                 </li>
                             );
@@ -812,7 +812,7 @@ const Dashboard: React.FC = () => {
                     <ul className="divide-y divide-border">
                         {soon.slice(0, CARD_LINES).map((item) => {
                             const days = differenceInCalendarDays(dayOf(item.expires_on as string), new Date());
-                            const date = format(dayOf(item.expires_on as string), 'd MMM', { locale: dateLocale() });
+                            const date = format(dayOf(item.expires_on as string), datePattern('d MMM'), { locale: dateLocale() });
                             const label = days < 0 ? t('pantry:expiry.past', { date })
                                 : days === 0 ? t('pantry:expiry.today')
                                 : days <= 3 ? t('pantry:expiry.soon', { count: days })

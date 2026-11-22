@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { addDays, addWeeks, format, startOfWeek, subWeeks } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { dateLocale, formatTime, offsetForIsoWeekday, orderIsoWeekdays, weekStartsOn } from '../i18n/format';
+import { dateLocale, formatTime, offsetForIsoWeekday, orderIsoWeekdays, weekStartsOn, datePattern } from '../i18n/format';
 import { api } from '../lib/api';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { Button, Card, CardContent, CardHeader, CardTitle, Dialog, Input, Select, Textarea } from '../components/ui';
@@ -598,7 +598,7 @@ const Planning: React.FC = () => {
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                         <span className="ml-2 whitespace-nowrap text-caption text-muted-foreground">
-                            {format(weekStart, 'dd MMM', { locale: dateLocale() })} - {format(addDays(weekStart, 6), 'dd MMM yyyy', { locale: dateLocale() })}
+                            {format(weekStart, datePattern('dd MMM'), { locale: dateLocale() })} - {format(addDays(weekStart, 6), datePattern('dd MMM yyyy'), { locale: dateLocale() })}
                         </span>
                     </div>
 
@@ -645,7 +645,7 @@ const Planning: React.FC = () => {
                                     <div>
                                         <CardTitle className="text-caption">{day.label}</CardTitle>
                                         <p className="text-micro text-muted-foreground">
-                                            {format(dateForHeader, 'dd/MM', { locale: dateLocale() })}
+                                            {format(dateForHeader, datePattern('dd/MM'), { locale: dateLocale() })}
                                         </p>
                                     </div>
                                     <Button
@@ -955,7 +955,7 @@ const Planning: React.FC = () => {
                             className="mt-0.5 h-4 w-4 rounded border-border"
                         />
                         <span>
-                            <strong>{t('planning:form.thisWeekOnlyStrong')}</strong>{t('planning:form.thisWeekOnlyRest', { date: format(weekStart, 'dd MMM yyyy', { locale: dateLocale() }) })}
+                            <strong>{t('planning:form.thisWeekOnlyStrong')}</strong>{t('planning:form.thisWeekOnlyRest', { date: format(weekStart, datePattern('dd MMM yyyy'), { locale: dateLocale() }) })}
                         </span>
                     </label>
 

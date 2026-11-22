@@ -6,7 +6,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle, DatePicker, Dialog, I
 import BarcodeScanner, { canScanBarcodes } from '../components/app/BarcodeScanner';
 import { useWebSocketUpdates } from '../hooks/useWebSocketUpdates';
 import { api, ApiError } from '../lib/api';
-import { dateLocale } from '../i18n/format';
+import { dateLocale, datePattern } from '../i18n/format';
 
 // The pantry: what the family has at home, where it is kept, and until when it
 // is good. What must be eaten first comes first.
@@ -202,7 +202,7 @@ const Pantry: React.FC = () => {
     const expiryLabel = (item: PantryItem): { text: string; tone: string } | null => {
         const days = daysLeft(item);
         if (days === null || !item.expires_on) return null;
-        const date = format(new Date(`${item.expires_on.slice(0, 10)}T00:00:00`), 'd MMM yyyy', { locale: dateLocale() });
+        const date = format(new Date(`${item.expires_on.slice(0, 10)}T00:00:00`), datePattern('d MMM yyyy'), { locale: dateLocale() });
         if (days < 0) return { text: t('pantry:expiry.past', { date }), tone: 'bg-danger/10 text-danger' };
         if (days === 0) return { text: t('pantry:expiry.today'), tone: 'bg-danger/10 text-danger' };
         if (days <= SOON_DAYS) return { text: t('pantry:expiry.soon', { count: days }), tone: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300' };

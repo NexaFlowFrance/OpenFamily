@@ -36,7 +36,7 @@ export class CalendarSourceError extends Error {
 }
 
 const UNTITLED: Record<string, string> = {
-    fr: 'Sans titre', en: 'Untitled', pt: 'Sem título', ru: 'Без названия', es: 'Sin título', ca: 'Sense títol', zh: '无标题', de: 'Ohne Titel',
+    fr: 'Sans titre', en: 'Untitled', pt: 'Sem título', ru: 'Без названия', es: 'Sin título', ca: 'Sense títol', zh: '无标题', de: 'Ohne Titel', ja: '無題',
 };
 export const untitledFor = (language: unknown): string =>
     UNTITLED[String(language ?? '').slice(0, 2)] ?? UNTITLED.fr;

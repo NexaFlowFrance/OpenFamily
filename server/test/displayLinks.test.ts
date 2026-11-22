@@ -286,7 +286,8 @@ describe('the options of a page', () => {
     it('keeps a real locale in one of the app\'s languages, and falls back otherwise', () => {
         expect(normalizeDisplayLocale('fr-CA')).toBe('fr-CA');
         expect(normalizeDisplayLocale('EN-us')).toBe('en-US');
-        expect(normalizeDisplayLocale('ja-JP', 'es')).toBe('es-ES');
+        expect(normalizeDisplayLocale('ja-JP', 'es')).toBe('ja-JP');
+        expect(normalizeDisplayLocale('it-IT', 'es')).toBe('es-ES');
         expect(normalizeDisplayLocale('en_US', 'pt')).toBe('pt-BR');
         expect(normalizeDisplayLocale(undefined)).toBe('en-GB');
     });

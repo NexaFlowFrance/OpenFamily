@@ -1,14 +1,36 @@
 import type { Day, Locale } from 'date-fns';
-import { enUS, fr, es, ca, de, it, ptBR, nl, ru, zhCN } from 'date-fns/locale';
+import { enUS, fr, es, ca, de, it, ja, ptBR, nl, ru, zhCN } from 'date-fns/locale';
 import i18n from './index';
 
 // date-fns locales for the languages we may ship. Adding a new app language
 // only needs an extra entry here (falls back to English otherwise).
-const DATE_LOCALES: Record<string, Locale> = { en: enUS, fr, es, ca, de, it, pt: ptBR, nl, ru, zh: zhCN };
+const DATE_LOCALES: Record<string, Locale> = { en: enUS, fr, es, ca, de, it, ja, pt: ptBR, nl, ru, zh: zhCN };
 // BCP-47 tags for Intl.* — falls back to the bare language code.
-const INTL_TAGS: Record<string, string> = { pt: 'pt-BR', en: 'en-US', fr: 'fr-FR', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES', ca: 'ca-ES', de: 'de-DE' };
+const INTL_TAGS: Record<string, string> = { pt: 'pt-BR', en: 'en-US', fr: 'fr-FR', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES', ca: 'ca-ES', de: 'de-DE', ja: 'ja-JP' };
 
 const lang = () => (i18n.language || 'en').split('-')[0];
+
+// The date patterns written in the pages put the day before the month ("23 Nov").
+// Chinese and Japanese write the year, then the month, then the day ("11月23日").
+const YEAR_MONTH_DAY: Record<string, string> = {
+    'd MMM': 'M月d日',
+    'dd MMM': 'M月d日',
+    'd MMM yyyy': 'yyyy年M月d日',
+    'dd MMM yyyy': 'yyyy年M月d日',
+    'dd MMMM yyyy': 'yyyy年M月d日',
+    'EEEE d': 'd日 EEEE',
+    'EEEE d MMMM': 'M月d日 EEEE',
+    'EEEE dd MMM': 'M月d日 EEEE',
+    'EEE dd MMM': 'M月d日 EEE',
+    'MMMM yyyy': 'yyyy年M月',
+    'dd/MM': 'M/d',
+};
+
+/** A date-fns pattern of the pages, in the order of the active language. */
+export function datePattern(pattern: string): string {
+    const active = lang();
+    return (active === 'ja' || active === 'zh') ? YEAR_MONTH_DAY[pattern] ?? pattern : pattern;
+}
 
 /** date-fns locale matching the active UI language. */
 export function dateLocale(): Locale {

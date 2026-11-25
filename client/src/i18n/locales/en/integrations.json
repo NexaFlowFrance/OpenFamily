@@ -112,5 +112,22 @@
         "desc": "Sign in with Authentik, Keycloak, Pocket ID or any OpenID Connect provider. Set up on the server."
       }
     }
+  },
+  "immichPhotos": {
+    "title": "Photos on the kiosk",
+    "hint": "Which photos the kiosk and its screensaver may show.",
+    "sources": {
+      "all": "All photos",
+      "favorites": "Favourites",
+      "albums": "Albums"
+    },
+    "noAlbums": "This Immich has no album yet.",
+    "unnamed": "Untitled album",
+    "pickOne": "Choose at least one album.",
+    "saved": "Saved.",
+    "error": "Could not be saved. Try again.",
+    "unreachable": "Immich cannot be reached right now.",
+    "gone_one": "One chosen album no longer exists in Immich.",
+    "gone_other": "{{count}} chosen albums no longer exist in Immich."
   }
 }

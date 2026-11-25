@@ -112,5 +112,22 @@
         "desc": "Inicia sessió amb Authentik, Keycloak, Pocket ID o qualsevol proveïdor OpenID Connect. Es configura al servidor."
       }
     }
+  },
+  "immichPhotos": {
+    "title": "Fotos del quiosc",
+    "hint": "Les fotos que el quiosc i el seu estalvi de pantalla poden mostrar.",
+    "sources": {
+      "all": "Totes les fotos",
+      "favorites": "Preferides",
+      "albums": "Àlbums"
+    },
+    "noAlbums": "Aquest Immich encara no té cap àlbum.",
+    "unnamed": "Àlbum sense títol",
+    "pickOne": "Tria almenys un àlbum.",
+    "saved": "Desat.",
+    "error": "No s'ha pogut desar. Torna-ho a provar.",
+    "unreachable": "Ara mateix no es pot accedir a Immich.",
+    "gone_one": "Un àlbum triat ja no existeix a Immich.",
+    "gone_other": "{{count}} àlbums triats ja no existeixen a Immich."
   }
 }

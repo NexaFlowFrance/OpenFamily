@@ -48,6 +48,68 @@ export async function testImmichConnection(baseUrl: string, apiKey: string): Pro
     }
 }
 
+// Which photos the kiosk and its screensaver may show. A family library also
+// holds screenshots, scans and private pictures: the family can keep the wall
+// display to its favourites, or to chosen albums.
+export type ImmichPhotoSource = 'all' | 'favorites' | 'albums';
+export interface ImmichPhotoChoice { source: ImmichPhotoSource; albumIds: string[] }
+
+export const IMMICH_MAX_ALBUMS = 50;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The choice kept in the integration's settings; anything unreadable means every photo. */
+export const immichPhotoChoice = (config: unknown): ImmichPhotoChoice => {
+    const raw = (config && typeof config === 'object' ? config : {}) as Record<string, unknown>;
+    const ids = Array.isArray(raw.photo_album_ids) ? raw.photo_album_ids : [];
+    const albumIds = [...new Set(ids.filter((id): id is string => typeof id === 'string' && UUID.test(id)))]
+        .slice(0, IMMICH_MAX_ALBUMS);
+    const source: ImmichPhotoSource = raw.photo_source === 'favorites' ? 'favorites'
+        : raw.photo_source === 'albums' && albumIds.length > 0 ? 'albums' : 'all';
+    return { source, albumIds: source === 'albums' ? albumIds : [] };
+};
+
+/**
+ * What a request sets, checked. Returns null when it cannot be kept: an
+ * unknown source, an id that is not one, too many albums, or "albums" with
+ * none chosen (which would show nothing).
+ */
+export const parseImmichPhotoChoice = (source: unknown, albumIds: unknown): ImmichPhotoChoice | null => {
+    if (source !== 'all' && source !== 'favorites' && source !== 'albums') return null;
+    const ids = albumIds === undefined ? [] : albumIds;
+    if (!Array.isArray(ids) || ids.length > IMMICH_MAX_ALBUMS) return null;
+    if (!ids.every((id) => typeof id === 'string' && UUID.test(id))) return null;
+    const unique = [...new Set(ids as string[])];
+    if (source === 'albums' && unique.length === 0) return null;
+    return { source, albumIds: source === 'albums' ? unique : [] };
+};
+
+/** The body of the random search for a choice. */
+export const immichRandomSearch = (choice: ImmichPhotoChoice): Record<string, unknown> => ({
+    size: 1,
+    type: 'IMAGE',
+    ...(choice.source === 'favorites' ? { isFavorite: true } : {}),
+    ...(choice.source === 'albums' ? { albumIds: choice.albumIds } : {}),
+});
+
+export interface ImmichAlbum { id: string; name: string; count: number }
+
+/** The albums the API key can see, by name. */
+export async function listImmichAlbums(baseUrl: string, encryptedCredentials: string): Promise<ImmichAlbum[]> {
+    const apiKey = decryptCredentials(encryptedCredentials).apiKey;
+    if (!apiKey) throw new Error('Cle API manquante');
+    const resp = await safeFetch(`${baseUrl}/api/albums`, { headers: { 'x-api-key': apiKey }, timeoutMs: IMMICH_TIMEOUT_MS });
+    if (!resp.ok) throw new Error(`Immich API error: ${resp.status}`);
+    const albums = await resp.json() as { id?: unknown; albumName?: unknown; assetCount?: unknown }[];
+    return (Array.isArray(albums) ? albums : [])
+        .filter((album): album is { id: string; albumName?: unknown; assetCount?: unknown } => typeof album?.id === 'string' && UUID.test(album.id))
+        .map((album) => ({
+            id: album.id,
+            name: typeof album.albumName === 'string' ? album.albumName.slice(0, 200) : '',
+            count: Number.isFinite(Number(album.assetCount)) ? Number(album.assetCount) : 0,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 /**
  * Fetches one random photo from the family's Immich instance and returns the
  * image bytes so the route can proxy them (the API key never reaches the browser).
@@ -60,7 +122,8 @@ export async function testImmichConnection(baseUrl: string, apiKey: string): Pro
  */
 export async function fetchImmichRandomPhoto(
     baseUrl: string,
-    encryptedCredentials: string
+    encryptedCredentials: string,
+    choice: ImmichPhotoChoice = { source: 'all', albumIds: [] },
 ): Promise<{ buffer: Buffer; contentType: string }> {
     const creds = decryptCredentials(encryptedCredentials);
     const apiKey = creds.apiKey;
@@ -69,7 +132,8 @@ export async function fetchImmichRandomPhoto(
     const randomResp = await safeFetch(`${baseUrl}/api/search/random`, {
         method: 'POST',
         headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ size: 1, type: 'IMAGE' }),
+        // An album that is empty or gone gives no photo: never one from outside the choice.
+        body: JSON.stringify(immichRandomSearch(choice)),
         timeoutMs: IMMICH_TIMEOUT_MS,
     });
     if (!randomResp.ok) throw new Error(`Immich API error: ${randomResp.status}`);

@@ -8,6 +8,7 @@ import { CheckCircle2, AlertCircle, RefreshCw, Unplug, Plug, X, Clock, CalendarD
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { intlLocale } from '../i18n/format';
+import ImmichPhotosPanel from '../components/app/ImmichPhotosPanel';
 
 // What connects to OpenFamily from the other side: set up in another app or
 // in Settings, not on this page. Listed here so that the page says everything
@@ -291,7 +292,8 @@ const Integrations: React.FC = () => {
                             const integ = connectedMap.get(item.id)!;
                             const syncing = syncingId === integ.id || integ.status === 'syncing';
                             return (
-                                <div key={item.id} className="flex items-center gap-4 px-5 py-4">
+                                <div key={item.id}>
+                                <div className="flex items-center gap-4 px-5 py-4">
                                     <div className="h-9 w-9 shrink-0 rounded-input flex items-center justify-center bg-surface-2 border border-border">
                                         <BrandIcon id={item.id} size={20} />
                                     </div>
@@ -338,6 +340,8 @@ const Integrations: React.FC = () => {
                                             <Unplug className="h-4 w-4" />
                                         </button>
                                     </div>
+                                </div>
+                                {item.id === 'immich' && <ImmichPhotosPanel />}
                                 </div>
                             );
                         })}

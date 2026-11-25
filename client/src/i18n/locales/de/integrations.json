@@ -112,5 +112,22 @@
         "desc": "Anmeldung mit Authentik, Keycloak, Pocket ID oder jedem OpenID-Connect-Anbieter. Wird auf dem Server eingerichtet."
       }
     }
+  },
+  "immichPhotos": {
+    "title": "Fotos im Kiosk",
+    "hint": "Welche Fotos der Kiosk und sein Bildschirmschoner zeigen dürfen.",
+    "sources": {
+      "all": "Alle Fotos",
+      "favorites": "Favoriten",
+      "albums": "Alben"
+    },
+    "noAlbums": "Dieses Immich hat noch kein Album.",
+    "unnamed": "Album ohne Titel",
+    "pickOne": "Wähle mindestens ein Album.",
+    "saved": "Gespeichert.",
+    "error": "Speichern nicht möglich. Versuche es erneut.",
+    "unreachable": "Immich ist gerade nicht erreichbar.",
+    "gone_one": "Ein gewähltes Album gibt es in Immich nicht mehr.",
+    "gone_other": "{{count}} gewählte Alben gibt es in Immich nicht mehr."
   }
 }

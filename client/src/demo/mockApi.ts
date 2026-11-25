@@ -789,6 +789,8 @@ async function route(method: string, path: string, q: Record<string, string>, bo
     if (path === '/api/integrations/test') return { success: true, message: 'Connection successful (demo).' };
     if (path === '/api/integrations' && method === 'POST') return ok(create('integrations', { display_name: body.type, base_url: body.base_url, status: 'connected', last_synced_at: new Date().toISOString(), last_error: null, ...body }));
     if (seg[1] === 'integrations' && seg[3] === 'sync') return ok({});
+    if (path === '/api/integrations/immich/albums') return ok({ albums: [{ id: '11111111-1111-4111-8111-111111111111', name: 'Holidays', count: 42 }, { id: '22222222-2222-4222-8222-222222222222', name: 'Family', count: 128 }], source: 'all', albumIds: [] });
+    if (path === '/api/integrations/immich/photos' && method === 'PUT') return ok({ source: body.source ?? 'all', albumIds: body.albumIds ?? [] });
     if (seg[1] === 'integrations' && seg.length === 3 && method === 'DELETE') { remove('integrations', seg[2]); return ok({}); }
 
     // ── Invites (read-only-ish in demo) ─────────────────────────────────────────

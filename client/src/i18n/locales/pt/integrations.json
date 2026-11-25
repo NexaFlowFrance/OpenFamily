@@ -112,5 +112,22 @@
         "desc": "Entre com Authentik, Keycloak, Pocket ID ou qualquer provedor OpenID Connect. Configura-se no servidor."
       }
     }
+  },
+  "immichPhotos": {
+    "title": "Fotos do quiosque",
+    "hint": "As fotos que o quiosque e o protetor de tela podem mostrar.",
+    "sources": {
+      "all": "Todas as fotos",
+      "favorites": "Favoritos",
+      "albums": "Álbuns"
+    },
+    "noAlbums": "Este Immich ainda não tem álbum.",
+    "unnamed": "Álbum sem título",
+    "pickOne": "Escolha pelo menos um álbum.",
+    "saved": "Salvo.",
+    "error": "Não foi possível salvar. Tente de novo.",
+    "unreachable": "Não é possível acessar o Immich no momento.",
+    "gone_one": "Um álbum escolhido não existe mais no Immich.",
+    "gone_other": "{{count}} álbuns escolhidos não existem mais no Immich."
   }
 }

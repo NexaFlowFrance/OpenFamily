@@ -10,7 +10,9 @@ import {
 } from '../services/integrations/homeassistant';
 import { testGrocyConnection, syncGrocy } from '../services/integrations/grocy';
 import { testNextcloudConnection, syncNextcloud } from '../services/integrations/nextcloud';
-import { testImmichConnection, syncImmich, fetchImmichRandomPhoto } from '../services/integrations/immich';
+import {
+    testImmichConnection, syncImmich, fetchImmichRandomPhoto, listImmichAlbums, immichPhotoChoice, parseImmichPhotoChoice,
+} from '../services/integrations/immich';
 import { broadcast } from '../lib/broadcaster';
 
 const router = Router();
@@ -35,11 +37,11 @@ router.get('/', async (req: AuthRequest, res) => {
 router.get('/immich/photo', async (req: AuthRequest, res) => {
     try {
         const result = await query(
-            `SELECT base_url, encrypted_credentials FROM integrations
+            `SELECT base_url, encrypted_credentials, config FROM integrations
              WHERE family_id = $1 AND type = 'immich'`,
             [req.userId]
         );
-        const integ = result.rows[0] as { base_url: string; encrypted_credentials: string | null } | undefined;
+        const integ = result.rows[0] as { base_url: string; encrypted_credentials: string | null; config: unknown } | undefined;
         if (!integ || !integ.encrypted_credentials) {
             return res.status(404).json({ success: false, error: 'Aucune integration Immich configuree' });
         }
@@ -47,7 +49,7 @@ router.get('/immich/photo', async (req: AuthRequest, res) => {
         // Re-validate the stored URL at use time (DNS answers can change).
         await assertSafeIntegrationUrl(integ.base_url);
 
-        const photo = await fetchImmichRandomPhoto(integ.base_url, integ.encrypted_credentials);
+        const photo = await fetchImmichRandomPhoto(integ.base_url, integ.encrypted_credentials, immichPhotoChoice(integ.config));
         res.set('Content-Type', photo.contentType);
         res.set('Cache-Control', 'no-store');
         res.send(photo.buffer);
@@ -56,6 +58,53 @@ router.get('/immich/photo', async (req: AuthRequest, res) => {
             return res.status(400).json({ success: false, error: e.message });
         }
         res.status(502).json({ success: false, error: 'Immich indisponible' });
+    }
+});
+
+// GET /api/integrations/immich/albums - the albums to choose from, and the
+// current choice of photos for the kiosk.
+router.get('/immich/albums', requireParent, async (req: AuthRequest, res) => {
+    try {
+        const result = await query(
+            `SELECT base_url, encrypted_credentials, config FROM integrations
+             WHERE family_id = $1 AND type = 'immich'`,
+            [req.userId]
+        );
+        const integ = result.rows[0] as { base_url: string; encrypted_credentials: string | null; config: unknown } | undefined;
+        if (!integ || !integ.encrypted_credentials) {
+            return res.status(404).json({ success: false, error: 'Aucune integration Immich configuree' });
+        }
+        await assertSafeIntegrationUrl(integ.base_url);
+        const albums = await listImmichAlbums(integ.base_url, integ.encrypted_credentials);
+        res.json({ success: true, data: { albums, ...immichPhotoChoice(integ.config) } });
+    } catch (e) {
+        if (e instanceof UnsafeUrlError) {
+            return res.status(400).json({ success: false, error: e.message });
+        }
+        res.status(502).json({ success: false, error: 'Immich indisponible' });
+    }
+});
+
+// PUT /api/integrations/immich/photos - which photos the kiosk may show:
+// all of them, the favourites, or chosen albums.
+router.put('/immich/photos', requireParent, async (req: AuthRequest, res) => {
+    const body = (req.body ?? {}) as { source?: unknown; albumIds?: unknown };
+    const choice = parseImmichPhotoChoice(body.source, body.albumIds);
+    if (!choice) return res.status(400).json({ success: false, error: 'invalid_photo_choice' });
+    try {
+        const result = await query(
+            `UPDATE integrations
+             SET config = COALESCE(config, '{}'::jsonb) || $2::jsonb, updated_at = NOW()
+             WHERE family_id = $1 AND type = 'immich'
+             RETURNING config`,
+            [req.userId, JSON.stringify({ photo_source: choice.source, photo_album_ids: choice.albumIds })]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Aucune integration Immich configuree' });
+        }
+        res.json({ success: true, data: immichPhotoChoice(result.rows[0].config) });
+    } catch {
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });
 
@@ -272,7 +321,10 @@ router.post('/', requireParent, async (req: AuthRequest, res) => {
                display_name = EXCLUDED.display_name,
                base_url = EXCLUDED.base_url,
                encrypted_credentials = COALESCE(EXCLUDED.encrypted_credentials, integrations.encrypted_credentials),
-               config = EXCLUDED.config,
+               -- Connecting Immich again (a new key) keeps the choice of photos.
+               config = CASE WHEN EXCLUDED.type = 'immich'
+                             THEN COALESCE(integrations.config, '{}'::jsonb) || EXCLUDED.config
+                             ELSE EXCLUDED.config END,
                status = 'connected',
                last_error = NULL,
                updated_at = NOW()

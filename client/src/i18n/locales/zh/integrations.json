@@ -112,5 +112,21 @@
         "desc": "使用 Authentik、Keycloak、Pocket ID 或任何 OpenID Connect 服务登录。在服务器上配置。"
       }
     }
+  },
+  "immichPhotos": {
+    "title": "信息屏上的照片",
+    "hint": "信息屏及其屏幕保护可以显示哪些照片。",
+    "sources": {
+      "all": "全部照片",
+      "favorites": "收藏",
+      "albums": "相册"
+    },
+    "noAlbums": "这个 Immich 还没有相册。",
+    "unnamed": "未命名相册",
+    "pickOne": "请至少选择一个相册。",
+    "saved": "已保存。",
+    "error": "保存失败，请重试。",
+    "unreachable": "目前无法连接 Immich。",
+    "gone_other": "有 {{count}} 个已选相册在 Immich 中已不存在。"
   }
 }

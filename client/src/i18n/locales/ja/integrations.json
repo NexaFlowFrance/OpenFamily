@@ -112,5 +112,21 @@
         "desc": "Authentik、Keycloak、Pocket ID など、任意の OpenID Connect プロバイダーでサインインできます。サーバー側で設定します。"
       }
     }
+  },
+  "immichPhotos": {
+    "title": "キオスクの写真",
+    "hint": "キオスクとスクリーンセーバーに表示する写真を選びます。",
+    "sources": {
+      "all": "すべての写真",
+      "favorites": "お気に入り",
+      "albums": "アルバム"
+    },
+    "noAlbums": "この Immich にはまだアルバムがありません。",
+    "unnamed": "無題のアルバム",
+    "pickOne": "アルバムを1つ以上選んでください。",
+    "saved": "保存しました。",
+    "error": "保存できませんでした。もう一度お試しください。",
+    "unreachable": "現在 Immich に接続できません。",
+    "gone_other": "選択したアルバムのうち {{count}} 件は Immich に存在しません。"
   }
 }

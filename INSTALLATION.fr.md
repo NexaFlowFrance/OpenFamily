@@ -260,6 +260,8 @@ Vos proches peuvent se connecter avec un fournisseur OpenID Connect que vous uti
 
 3. Lancez `docker compose up -d` et ouvrez la page de connexion : elle propose **Continuer avec ...**. Sinon, le journal du serveur contient une ligne `auth.oidc_disabled` qui indique ce qui manque.
 
+**Dans l'application Android.** Le même bouton s'y trouve. Il ouvre le fournisseur dans le navigateur du téléphone, et le téléphone revient dans l'application une fois connecté. Il n'y a rien de plus à déclarer chez le fournisseur : l'URI de redirection reste celle indiquée plus haut. Il faut un serveur et une application tous deux plus récents que la 2.2.0.
+
 Le serveur doit joindre le fournisseur en HTTPS. Gardez le secret du client uniquement dans `.env` ; pour le changer, créez le nouveau chez le fournisseur, mettez `.env` à jour, lancez `docker compose up -d`, puis révoquez l'ancien.
 
 **Qui peut entrer.** À la première connexion par SSO :

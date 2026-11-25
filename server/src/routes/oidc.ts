@@ -14,6 +14,7 @@ import {
 } from '../lib/oidcProvider';
 import { OidcClaims, resolveIdentity } from '../lib/oidcResolve';
 import logger from '../lib/logger';
+import { NATIVE_CALLBACK, nativeReturnPage } from '../lib/nativeReturn';
 
 /**
  * Single sign-on through the configured OpenID Connect provider.
@@ -35,6 +36,7 @@ const router = Router();
 
 const FLOW_TTL_SECONDS = 10 * 60;
 const HANDOFF_TTL_SECONDS = 60;
+const NATIVE_HANDOFF_TTL_SECONDS = 5 * 60;
 const CHALLENGE_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 const HANDOFF_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 
@@ -62,8 +64,8 @@ const KNOWN_PROVIDER_ERRORS = new Set([
 ]);
 
 router.post('/start', startRateLimiter, async (req: Request, res: Response) => {
-    const { clientChallenge, inviteToken, link } = (req.body ?? {}) as {
-        clientChallenge?: unknown; inviteToken?: unknown; link?: unknown;
+    const { clientChallenge, inviteToken, link, native } = (req.body ?? {}) as {
+        clientChallenge?: unknown; inviteToken?: unknown; link?: unknown; native?: unknown;
     };
     if (typeof clientChallenge !== 'string' || !CHALLENGE_PATTERN.test(clientChallenge)) {
         return res.status(400).json({ success: false, error: 'invalid_request' });
@@ -90,10 +92,10 @@ router.post('/start', startRateLimiter, async (req: Request, res: Response) => {
         await query('DELETE FROM oidc_flows WHERE expires_at < NOW()');
         // Expiry times are computed by the database, the same clock that checks them.
         await query(
-            `INSERT INTO oidc_flows (state_hash, code_verifier, nonce, client_challenge, mode, link_user_id, invite_token, expires_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW() + make_interval(secs => $8))`,
+            `INSERT INTO oidc_flows (state_hash, code_verifier, nonce, client_challenge, mode, link_user_id, invite_token, expires_at, native)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW() + make_interval(secs => $8), $9)`,
             [sha256Hex(state), codeVerifier, nonce, clientChallenge, linkUserId ? 'link' : 'login', linkUserId,
-                linkUserId ? null : invite, FLOW_TTL_SECONDS],
+                linkUserId ? null : invite, FLOW_TTL_SECONDS, native === true],
         );
 
         const authorizationUrl = client.buildAuthorizationUrl(config, {
@@ -119,22 +121,32 @@ router.get('/callback', callbackRateLimiter, async (req: Request, res: Response)
     const settings = getAuthConfig().oidc;
     if (!settings) return res.status(404).end();
 
-    const backToApp = (fragment: string) => res.redirect(302, `${settings.appUrl}/auth/callback#${fragment}`);
+    // A sign-in started by the Android app goes back to the app, through a
+    // link of its own scheme. Only the flow says so: nothing in the request
+    // can send the code anywhere else. The code is useless without the secret
+    // the app kept, so another app claiming the scheme gains nothing.
+    let native = false;
+    const backToApp = (fragment: string) => (native
+        ? res.status(200).type('html')
+            .setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'")
+            .send(nativeReturnPage(`${NATIVE_CALLBACK}#${fragment}`, req.headers['accept-language']))
+        : res.redirect(302, `${settings.appUrl}/auth/callback#${fragment}`));
     const fail = (code: string) => backToApp(`error=${code}`);
 
     const state = typeof req.query.state === 'string' ? req.query.state : '';
     if (!state) return fail('invalid_request');
 
     // Claim the flow: a state works once, and only before it expires.
-    let flow: { id: string; code_verifier: string; nonce: string } | undefined;
+    let flow: { id: string; code_verifier: string; nonce: string; native: boolean } | undefined;
     try {
         const claimed = await query(
             `UPDATE oidc_flows SET state_hash = NULL
              WHERE state_hash = $1 AND expires_at > NOW() AND handoff_hash IS NULL
-             RETURNING id, code_verifier, nonce`,
+             RETURNING id, code_verifier, nonce, native`,
             [sha256Hex(state)],
         );
         flow = claimed.rows[0];
+        native = flow?.native === true;
     } catch (error) {
         logger.error('auth.oidc_callback_failed', { error: describeOidcError(error) });
         return fail('sign_in_failed');
@@ -193,7 +205,8 @@ router.get('/callback', callbackRateLimiter, async (req: Request, res: Response)
         const handoff = crypto.randomBytes(32).toString('base64url');
         await query(
             'UPDATE oidc_flows SET claims = $1, handoff_hash = $2, expires_at = NOW() + make_interval(secs => $3) WHERE id = $4',
-            [JSON.stringify(claims), sha256Hex(handoff), HANDOFF_TTL_SECONDS, flow.id],
+            // In the app the person may have to tap a button to come back: more time.
+            [JSON.stringify(claims), sha256Hex(handoff), native ? NATIVE_HANDOFF_TTL_SECONDS : HANDOFF_TTL_SECONDS, flow.id],
         );
         return backToApp(`code=${handoff}`);
     } catch (error) {

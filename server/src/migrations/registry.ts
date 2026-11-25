@@ -355,4 +355,13 @@ export const coreMigrations: readonly Migration[] = [
             'CREATE INDEX idx_pantry_items_user ON pantry_items(user_id)',
         ],
     },
+    {
+        // Single sign-on from the Android app: the sign-in happens in the
+        // phone's browser, and the callback has to hand the one-time code back
+        // to the app (a link of its own scheme) instead of the web address.
+        id: 'core/0015-oidc-native',
+        statements: [
+            'ALTER TABLE oidc_flows ADD COLUMN native BOOLEAN NOT NULL DEFAULT false',
+        ],
+    },
 ];

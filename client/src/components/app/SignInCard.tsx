@@ -4,7 +4,6 @@ import { AlertCircle, CheckCircle, KeyRound, Loader2, LogOut } from 'lucide-reac
 import { Card, CardContent, Button } from '../ui';
 import { api, AuthServerConfig } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
-import { isNative } from '../../lib/serverConfig';
 import { onPageRestored, ssoSupported, startSso } from '../../lib/sso';
 
 interface SignInState {
@@ -43,7 +42,7 @@ const SignInCard: React.FC = () => {
         }
     }, [t]);
 
-    const ssoOffered = Boolean(config?.oidc.enabled) && ssoSupported() && !isNative();
+    const ssoOffered = Boolean(config?.oidc.enabled) && ssoSupported();
     // Unlinking leaves the password as the only way in.
     const canUnlink = Boolean(state?.hasPassword) && Boolean(config?.passwordLogin);
 

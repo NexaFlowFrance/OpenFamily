@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { api, AuthServerConfig } from '../lib/api';
-import { isNative } from '../lib/serverConfig';
 import { onPageRestored, ssoSupported, startSso } from '../lib/sso';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -26,8 +25,7 @@ const Login: React.FC = () => {
         oidc: { enabled: false, name: null, signup: false },
     });
     const registrationEnabled = authConfig.passwordSignup;
-    // SSO in the Android app needs the system browser (a later release).
-    const ssoAvailable = authConfig.oidc.enabled && ssoSupported() && !isNative();
+    const ssoAvailable = authConfig.oidc.enabled && ssoSupported();
     const [ssoLoading, setSsoLoading] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');

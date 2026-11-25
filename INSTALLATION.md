@@ -260,6 +260,8 @@ People can sign in with an OpenID Connect provider you already run: Authentik, K
 
 3. Run `docker compose up -d` and open the sign-in page: it shows **Continue with ...**. If it does not, the server log has an `auth.oidc_disabled` line saying what is missing.
 
+**In the Android app.** The same button is there. It opens the provider in the phone's browser, and the phone comes back to the app once signed in. There is nothing more to register at the provider: the redirect URI stays the one above. This needs a server and an app that are both newer than 2.2.0.
+
 The server must reach the provider over HTTPS. Keep the client secret in `.env` only; to change it, set the new one at the provider, update `.env`, run `docker compose up -d`, then revoke the old one.
 
 **Who gets in.** The first time someone signs in with SSO:

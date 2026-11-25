@@ -63,7 +63,7 @@ function App() {
 
     // The identity provider sends the browser back here, signed in or not.
     if (location.pathname === '/auth/callback') {
-        return <SsoCallback onDone={(path) => navigate(path, { replace: true })} />;
+        return <SsoCallback key={location.search} onDone={(path) => navigate(path, { replace: true })} />;
     }
 
     if (!isAuthenticated) {

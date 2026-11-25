@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
-import { takePendingSso } from '../lib/sso';
+import { takeNativeSsoReturn, takePendingSso } from '../lib/sso';
+import { isNative } from '../lib/serverConfig';
 
 // Error codes the server can return, each with its own message. Anything else
 // gets the generic one.
@@ -33,8 +34,11 @@ const SsoCallback: React.FC<{ onDone: (path: string) => void }> = ({ onDone }) =
         if (started.current) return;
         started.current = true;
 
-        const fragment = new URLSearchParams(window.location.hash.slice(1));
-        window.history.replaceState(null, '', window.location.pathname);
+        // On the web the code is in the address, and is taken out of it at once.
+        // In the Android app the hash is the route: the code came by a link.
+        const native = isNative();
+        const fragment = new URLSearchParams(native ? takeNativeSsoReturn() : window.location.hash.slice(1));
+        if (!native) window.history.replaceState(null, '', window.location.pathname);
         const pending = takePendingSso();
         if (pending?.mode === 'link') setBackPath('/settings');
 

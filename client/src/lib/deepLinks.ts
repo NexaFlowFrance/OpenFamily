@@ -9,6 +9,7 @@
 // app's own routes.
 import { App as CapacitorApp } from '@capacitor/app';
 import { isNative } from './serverConfig';
+import { deliverNativeSsoReturn } from './sso';
 
 /** Routes we accept from an external link, with the query param each carries. */
 const HANDLED_ROUTES: Record<string, string> = {
@@ -21,6 +22,16 @@ const HANDLED_ROUTES: Record<string, string> = {
  * Returns null when the URL is not one we handle.
  */
 export const toInAppRoute = (url: string): string | null => {
+    // The end of a single sign-on started in the app: the server sends the
+    // phone's browser to openfamily://auth/callback#code=... The fragment is
+    // kept aside (the hash is the app's route) and the callback page opened.
+    // The time makes a second attempt a new page, not the one already shown.
+    const sso = /^openfamily:\/\/auth\/callback\/?(?:#(.*))?$/.exec(url);
+    if (sso) {
+        deliverNativeSsoReturn(sso[1] ?? '');
+        return `/auth/callback?t=${Date.now()}`;
+    }
+
     let parsed: URL;
     try {
         parsed = new URL(url);

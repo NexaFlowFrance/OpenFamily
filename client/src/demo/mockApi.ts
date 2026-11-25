@@ -573,7 +573,18 @@ async function route(method: string, path: string, q: Record<string, string>, bo
     };
 
     if (path === '/api/planning' && method === 'GET') {
-        return ok((store.planning as Json[]).map(withParticipants));
+        // Like the server: an entry every N weeks is only in the weeks it falls on.
+        const inWeek = (entry: Json): boolean => {
+            const weeks = Number(entry.repeat_weeks) || 1;
+            if (!q.week_start || entry.specific_date || weeks <= 1 || typeof entry.repeat_from !== 'string') return true;
+            const start = new Date(`${q.week_start.slice(0, 10)}T00:00:00Z`);
+            const day = new Date(start.getTime() + ((Number(entry.day_of_week) - (start.getUTCDay() || 7) + 7) % 7) * 86400000);
+            const from = new Date(`${entry.repeat_from.slice(0, 10)}T00:00:00Z`);
+            from.setUTCDate(from.getUTCDate() + ((Number(entry.day_of_week) - (from.getUTCDay() || 7) + 7) % 7));
+            const days = Math.round((day.getTime() - from.getTime()) / 86400000);
+            return days >= 0 && days % (7 * weeks) === 0;
+        };
+        return ok((store.planning as Json[]).filter(inWeek).map(withParticipants));
     }
     if (path === '/api/planning' && method === 'POST') {
         return ok(withParticipants(create('planning', body)));

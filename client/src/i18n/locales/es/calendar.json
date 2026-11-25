@@ -48,7 +48,11 @@
     "addToBudgetHint": "Crea un movimiento de presupuesto con la misma fecha y recurrencia.",
     "budgetAmount": "Importe del presupuesto ({{currency}})",
     "budgetCategory": "Categoría del presupuesto",
-    "budgetLinked": "Vinculado al presupuesto: los cambios de fecha y recurrencia se aplican también allí. Eliminar este evento conserva el movimiento del presupuesto."
+    "budgetLinked": "Vinculado al presupuesto: los cambios de fecha y recurrencia se aplican también allí. Eliminar este evento conserva el movimiento del presupuesto.",
+    "repeatOn": "Estos días",
+    "repeatWeekdays": "De lunes a viernes",
+    "repeatWeekend": "Fin de semana",
+    "repeatOnHint": "Sin elegir día, se repite el día de la semana de su fecha."
   },
   "feed": {
     "title": "Exportar calendario (iCal)",

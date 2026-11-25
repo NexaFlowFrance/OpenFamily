@@ -47,7 +47,11 @@
     "notes": "Notes (optional)",
     "notesPlaceholder": "Useful info, room, subject, transport…",
     "participants": "Participants",
-    "participantsHint": "Pick one or more people. The first one gives the activity its colour."
+    "participantsHint": "Pick one or more people. The first one gives the activity its colour.",
+    "repeatEvery": "Repeat every",
+    "repeatWeeks_one": "week",
+    "repeatWeeks_other": "weeks",
+    "repeatHint": "Counted from the week of {{date}}."
   },
   "submit": {
     "applyToDays": "Apply to selected days"
@@ -80,5 +84,7 @@
   "appointments": {
     "badge": "APPT",
     "openCalendar": "Open in the calendar"
-  }
+  },
+  "everyWeeks_one": "Every week",
+  "everyWeeks_other": "Every {{count}} weeks"
 }

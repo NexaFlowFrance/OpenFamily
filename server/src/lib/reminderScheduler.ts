@@ -124,7 +124,7 @@ export async function checkReminders(now: Date = new Date()): Promise<void> {
     try {
         const { rows } = await query(
             `SELECT a.id, a.user_id, a.title, a.start_time, a.end_time, a.location, a.is_all_day,
-                    a.reminder_minutes, a.recurrence_frequency, a.recurrence_interval, a.recurrence_until,
+                    a.reminder_minutes, a.recurrence_frequency, a.recurrence_interval, a.recurrence_until, a.recurrence_weekdays,
                     COALESCE(u.language, 'fr') AS language, u.timezone AS timezone
              FROM appointments a
              JOIN users u ON u.id = a.user_id

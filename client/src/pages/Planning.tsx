@@ -56,6 +56,9 @@ interface PlanningEntry {
     start_time: string;
     end_time: string;
     specific_date?: string | null;
+    /** Every N weeks (1: every week), counted from repeat_from. */
+    repeat_weeks?: number;
+    repeat_from?: string | null;
     location?: string;
     notes?: string;
 }
@@ -121,6 +124,7 @@ const Planning: React.FC = () => {
     const [selectedDays, setSelectedDays] = useState<number[]>([1]);
     const [replaceConflicts, setReplaceConflicts] = useState(false);
     const [thisWeekOnly, setThisWeekOnly] = useState(false);
+    const [repeatWeeks, setRepeatWeeks] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
@@ -269,6 +273,7 @@ const Planning: React.FC = () => {
         setSelectedDays([dayOfWeek]);
         setReplaceConflicts(false);
         setThisWeekOnly(false);
+        setRepeatWeeks(1);
         const first = familyMembers[0];
         setFormData({
             family_member_ids: first ? [first.id] : [],
@@ -294,6 +299,7 @@ const Planning: React.FC = () => {
         setNotice('');
         setReplaceConflicts(false);
         setThisWeekOnly(Boolean(entry.specific_date));
+        setRepeatWeeks(entry.repeat_weeks && entry.repeat_weeks > 1 ? entry.repeat_weeks : 1);
         setEditingEntry(entry);
         setSelectedDays([entry.day_of_week]);
         setFormData({
@@ -390,8 +396,19 @@ const Planning: React.FC = () => {
             return;
         }
 
+        // Every N weeks counts from the week shown; an entry already on that
+        // rhythm keeps the week it started on.
+        const everyWeeks = thisWeekOnly ? 1 : repeatWeeks;
+        const repeatFrom = everyWeeks > 1
+            ? (editingEntry?.repeat_from && editingEntry.repeat_weeks === everyWeeks
+                ? editingEntry.repeat_from
+                : format(weekStart, 'yyyy-MM-dd'))
+            : null;
+
         const basePayload = {
             family_member_ids: formData.family_member_ids,
+            repeat_weeks: everyWeeks,
+            repeat_from: repeatFrom,
             // Also sent on its own because the Android app updates from the store
             // while the server it points at updates on its owner's schedule. A
             // server that predates participants reads only this field and records
@@ -706,6 +723,11 @@ const Planning: React.FC = () => {
                                                     <p className={`mt-1 break-words text-caption font-medium leading-snug text-foreground ${skipped ? 'line-through' : ''}`}>
                                                         {entry.title}
                                                     </p>
+                                                    {(entry.repeat_weeks ?? 1) > 1 && (
+                                                        <p className="text-micro text-muted-foreground">
+                                                            {t('planning:everyWeeks', { count: entry.repeat_weeks })}
+                                                        </p>
+                                                    )}
                                                     {/* Participants, then actions: 32px targets, usable with a finger */}
                                                     {/* Who, in full; the buttons go under the names
                                                         when a narrow column has no room for both. */}
@@ -958,6 +980,29 @@ const Planning: React.FC = () => {
                             <strong>{t('planning:form.thisWeekOnlyStrong')}</strong>{t('planning:form.thisWeekOnlyRest', { date: format(weekStart, datePattern('dd MMM yyyy'), { locale: dateLocale() }) })}
                         </span>
                     </label>
+
+                    {!thisWeekOnly && (
+                        <div className="rounded-input border border-border bg-surface-2/50 px-3 py-2">
+                            <label htmlFor="planning-repeat-weeks" className="flex flex-wrap items-center gap-2 text-caption text-foreground">
+                                <span>{t('planning:form.repeatEvery')}</span>
+                                <input
+                                    id="planning-repeat-weeks"
+                                    type="number"
+                                    min={1}
+                                    max={52}
+                                    value={repeatWeeks}
+                                    onChange={(e) => setRepeatWeeks(Math.max(1, Math.min(52, Math.round(Number(e.target.value)) || 1)))}
+                                    className="input-nexus w-20 py-0 text-center text-caption"
+                                />
+                                <span>{t('planning:form.repeatWeeks', { count: repeatWeeks })}</span>
+                            </label>
+                            {repeatWeeks > 1 && (
+                                <p className="mt-1 text-micro text-muted-foreground">
+                                    {t('planning:form.repeatHint', { date: format(weekStart, datePattern('dd MMM yyyy'), { locale: dateLocale() }) })}
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     {selectedDays.length > 1 ? (
                         <label className="flex items-start gap-2 rounded-input border border-border bg-surface-2/50 px-3 py-2 text-caption text-muted-foreground">

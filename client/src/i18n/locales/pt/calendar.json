@@ -48,7 +48,11 @@
     "addToBudgetHint": "Cria um lançamento no orçamento com a mesma data e recorrência.",
     "budgetAmount": "Valor ({{currency}})",
     "budgetCategory": "Categoria do orçamento",
-    "budgetLinked": "Vinculado ao orçamento: mudanças de data e recorrência são aplicadas lá também. Excluir este evento mantém o lançamento."
+    "budgetLinked": "Vinculado ao orçamento: mudanças de data e recorrência são aplicadas lá também. Excluir este evento mantém o lançamento.",
+    "repeatOn": "Nestes dias",
+    "repeatWeekdays": "De segunda a sexta",
+    "repeatWeekend": "Fim de semana",
+    "repeatOnHint": "Sem dia escolhido, repete no dia da semana da sua data."
   },
   "feed": {
     "title": "Exportar calendário (iCal / Google)",

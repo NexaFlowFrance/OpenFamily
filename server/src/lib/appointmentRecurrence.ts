@@ -33,6 +33,35 @@ export const normalizeRecurrenceInterval = (value: unknown): number => {
     return interval;
 };
 
+/**
+ * The weekdays of a weekly series (ISO: Monday = 1 ... Sunday = 7), sorted and
+ * each once. Null when the series simply repeats on the weekday it starts on.
+ */
+export const normalizeRecurrenceWeekdays = (value: unknown): number[] | null => {
+    if (!Array.isArray(value)) return null;
+    const days = [...new Set(value.map(Number).filter((day) => Number.isInteger(day) && day >= 1 && day <= 7))]
+        .sort((a, b) => a - b);
+    return days.length > 0 ? days : null;
+};
+
+/**
+ * Where each weekday of a weekly series starts. Weeks run from Monday and are
+ * counted from the week of the first occurrence, as calendars do (RFC 5545):
+ * "every two weeks on Monday and Wednesday", starting on a Wednesday, is that
+ * Wednesday, then the Monday and Wednesday two weeks later. A weekday that
+ * comes before the start in its first week begins one interval later.
+ */
+export const weeklySeriesStarts = (base: Date, interval: number, weekdays: number[] | null): Date[] => {
+    if (!weekdays) return [base];
+    const baseWeekday = ((base.getUTCDay() + 6) % 7) + 1;
+    return weekdays.map((weekday) => {
+        const start = new Date(base.getTime());
+        start.setUTCDate(start.getUTCDate() + (weekday - baseWeekday));
+        if (start.getTime() < base.getTime()) start.setUTCDate(start.getUTCDate() + interval * 7);
+        return start;
+    });
+};
+
 export const parseNaiveDateTime = (value: string): Date | null => {
     const match = value.match(
         /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/
@@ -221,8 +250,14 @@ export const expandRecurringAppointments = (
         // Look back by the event duration so an occurrence beginning before
         // the requested range but ending inside it is still included.
         const searchStart = new Date(rangeStart.getTime() - durationMs);
+        // A weekly series on several weekdays is one series per weekday.
+        const seriesStarts = frequency === 'weekly'
+            ? weeklySeriesStarts(baseStart, interval, normalizeRecurrenceWeekdays(appointment.recurrence_weekdays))
+            : [baseStart];
+
+        for (const seriesStart of seriesStarts) {
         let occurrenceIndex = estimateOccurrenceIndex(
-            baseStart,
+            seriesStart,
             searchStart,
             frequency,
             interval
@@ -232,7 +267,7 @@ export const expandRecurringAppointments = (
         // potentially huge loop for old daily/weekly recurring events.
         for (let safety = 0; safety < 10000; safety++, occurrenceIndex++) {
             const occurrenceStart = getOccurrenceDate(
-                baseStart,
+                seriesStart,
                 frequency,
                 interval,
                 occurrenceIndex
@@ -304,6 +339,7 @@ export const expandRecurringAppointments = (
                             ? formatNaiveDateTime(occurrenceEnd)
                             : null,
             });
+        }
         }
     }
 

@@ -27,6 +27,59 @@ const normalizeTime = (value: unknown): string | null => {
     return `${match[1]}:${match[2]}:${match[3] || '00'}`;
 };
 
+/**
+ * "Every N weeks". An entry repeats every week (1) or every N weeks from the
+ * date of its first occurrence, repeat_from. An entry of one date
+ * (specific_date) does not repeat.
+ */
+const MAX_REPEAT_WEEKS = 52;
+const parseRepeatWeeks = (value: unknown): number => {
+    const weeks = Number(value);
+    return Number.isInteger(weeks) && weeks >= 1 && weeks <= MAX_REPEAT_WEEKS ? weeks : 1;
+};
+
+/** The date, in the seven days starting on `from`, that falls on an ISO weekday. */
+const dateOnWeekday = (from: unknown, dayOfWeek: number): string | null => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(from ?? ''));
+    if (!match) return null;
+    const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    if (Number.isNaN(date.getTime())) return null;
+    const startIso = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + ((dayOfWeek - startIso + 7) % 7));
+    return date.toISOString().slice(0, 10);
+};
+
+const dateOnly = (value: unknown): string | null =>
+    value ? (typeof value === 'string' ? value.slice(0, 10) : (value as Date).toISOString().slice(0, 10)) : null;
+
+/**
+ * SQL: does the entry `se` happen in the week that starts on the date in
+ * parameter `week`? The day it would happen is the one of that week on its
+ * weekday.
+ */
+const happensInWeek = (week: string): string => {
+    const day = `(${week}::date + ((se.day_of_week - EXTRACT(ISODOW FROM ${week}::date)::int + 7) % 7))`;
+    return `(se.specific_date IS NOT NULL OR se.repeat_weeks = 1
+             OR (${day} >= se.repeat_from AND (${day} - se.repeat_from) % (7 * se.repeat_weeks) = 0))`;
+};
+
+/**
+ * SQL: can the entry `se` and the one being saved fall on the same day?
+ * Parameters: its single date (or null), its number of weeks, its first date.
+ * Two entries every other week on alternate weeks never meet: that is what
+ * "one week in two" is for.
+ */
+const SHARES_A_DAY = `CASE
+    WHEN $7::date IS NOT NULL THEN
+        se.specific_date = $7::date
+        OR (se.specific_date IS NULL AND (se.repeat_weeks = 1
+            OR ($7::date >= se.repeat_from AND ($7::date - se.repeat_from) % (7 * se.repeat_weeks) = 0)))
+    ELSE
+        se.specific_date IS NULL
+        AND ($8::int = 1 OR se.repeat_weeks = 1
+             OR (se.repeat_from - $9::date) % (7 * gcd($8::int, se.repeat_weeks)) = 0)
+    END`;
+
 const parseDayOfWeek = (value: unknown): number | null => {
     const parsed = typeof value === 'number' ? value : Number(value);
     if (!Number.isInteger(parsed) || parsed < 1 || parsed > 7) {
@@ -110,7 +163,9 @@ const ensureNoOverlap = async (
     startTime: string,
     endTime: string,
     specificDate: string | null,
-    excludeId?: string
+    excludeId?: string,
+    repeatWeeks = 1,
+    repeatFrom: string | null = null,
 ) => {
     const result = await query(
         `SELECT se.id
@@ -132,13 +187,9 @@ const ensureNoOverlap = async (
                END
            )
            AND ($6::uuid IS NULL OR se.id <> $6::uuid)
-           AND (
-               CASE WHEN $7::date IS NULL THEN se.specific_date IS NULL
-               ELSE se.specific_date IS NULL OR se.specific_date = $7::date
-               END
-           )
+           AND (${SHARES_A_DAY})
          LIMIT 1`,
-        [userId, memberIds, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
+        [userId, memberIds, dayOfWeek, endTime, startTime, excludeId || null, specificDate, repeatWeeks, repeatFrom]
     );
 
     if (result.rows.length > 0) {
@@ -194,6 +245,9 @@ const mapEntryRow = (row: any) => ({
     start_time: row.start_time,
     end_time: row.end_time,
     specific_date: row.specific_date ? (typeof row.specific_date === 'string' ? row.specific_date.slice(0, 10) : row.specific_date.toISOString().slice(0, 10)) : null,
+    // Every N weeks (1: every week), counted from the date of the first one.
+    repeat_weeks: Number(row.repeat_weeks ?? 1),
+    repeat_from: dateOnly(row.repeat_from),
     location: row.location,
     notes: row.notes,
     created_at: row.created_at,
@@ -247,6 +301,8 @@ router.get('/', async (req: AuthRequest, res) => {
         if (week_start && typeof week_start === 'string') {
             params.push(week_start);
             queryText += ` AND (se.specific_date IS NULL OR (se.specific_date >= $${params.length}::date AND se.specific_date < $${params.length}::date + INTERVAL '7 days'))`;
+            // An entry every N weeks is only in the weeks it falls on.
+            queryText += ` AND ${happensInWeek(`$${params.length}`)}`;
         }
 
         queryText += ' ORDER BY se.day_of_week ASC, se.start_time ASC';
@@ -296,14 +352,19 @@ router.post('/', async (req: AuthRequest, res) => {
         }
 
         const specificDate = toNullIfEmpty(req.body.specific_date) as string | null;
+        // Every N weeks, from the first date on that weekday. Without a date to
+        // count from, or for an entry of one date, it is every week.
+        const repeatFrom = specificDate ? null : dateOnWeekday(req.body.repeat_from, parsedDay);
+        const repeatWeeks = repeatFrom ? parseRepeatWeeks(req.body.repeat_weeks) : 1;
 
         await ensureMembersBelongToUser(participantIds, req.userId!);
-        await ensureNoOverlap(req.userId!, participantIds, parsedDay, startTime, endTime, specificDate);
+        await ensureNoOverlap(req.userId!, participantIds, parsedDay, startTime, endTime, specificDate, undefined, repeatWeeks, repeatFrom);
 
         const inserted = await query(
             `INSERT INTO schedule_entries (
-                user_id, family_member_id, schedule_type, title, day_of_week, start_time, end_time, specific_date, location, notes
-            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+                user_id, family_member_id, schedule_type, title, day_of_week, start_time, end_time, specific_date, location, notes,
+                repeat_weeks, repeat_from
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
             RETURNING id`,
             [
                 req.userId,
@@ -316,6 +377,8 @@ router.post('/', async (req: AuthRequest, res) => {
                 specificDate,
                 toNullIfEmpty(location),
                 toNullIfEmpty(notes),
+                repeatWeeks,
+                repeatWeeks > 1 ? repeatFrom : null,
             ]
         );
 
@@ -357,6 +420,8 @@ router.post('/bulk', async (req: AuthRequest, res) => {
             replace_conflicts,
             source_entry_id,
             week_start,
+            repeat_weeks,
+            repeat_from,
         } = req.body;
 
         const participantIds = parseParticipantIds(req.body);
@@ -406,7 +471,10 @@ router.post('/bulk', async (req: AuthRequest, res) => {
         let createdCount = 0;
         let updatedCount = 0;
 
-        const findOverlaps = async (dayOfWeek: number, specificDate: string | null, excludeId?: string) => {
+        const findOverlaps = async (
+            dayOfWeek: number, specificDate: string | null, excludeId: string | undefined,
+            repeatWeeks: number, repeatFrom: string | null,
+        ) => {
             const conflict = await client.query(
                 `SELECT se.id
                  FROM schedule_entries se
@@ -429,12 +497,8 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                        END
                    )
                    AND ($6::uuid IS NULL OR se.id <> $6::uuid)
-                   AND (
-                       CASE WHEN $7::date IS NULL THEN se.specific_date IS NULL
-                       ELSE se.specific_date IS NULL OR se.specific_date = $7::date
-                       END
-                   )`,
-                [req.userId, participantIds, dayOfWeek, endTime, startTime, excludeId || null, specificDate]
+                   AND (${SHARES_A_DAY})`,
+                [req.userId, participantIds, dayOfWeek, endTime, startTime, excludeId || null, specificDate, repeatWeeks, repeatFrom]
             );
             return conflict.rows.map((row) => row.id as string);
         };
@@ -455,7 +519,11 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                 })()
                 : null;
 
-            const overlapIds = await findOverlaps(dayOfWeek, specificDate, excludeId);
+            // Every N weeks: each day counts from its own date in the first week.
+            const repeatFrom = specificDate ? null : dateOnWeekday(repeat_from, dayOfWeek);
+            const repeatWeeks = repeatFrom ? parseRepeatWeeks(repeat_weeks) : 1;
+
+            const overlapIds = await findOverlaps(dayOfWeek, specificDate, excludeId, repeatWeeks, repeatFrom);
 
             if (overlapIds.length > 0 && !replaceConflicts) {
                 conflicts.push({ day_of_week: dayOfWeek, conflict_ids: overlapIds });
@@ -483,7 +551,9 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                          end_time = $6,
                          specific_date = $7,
                          location = $8,
-                         notes = $9
+                         notes = $9,
+                         repeat_weeks = $12,
+                         repeat_from = $13
                      WHERE id = $10 AND user_id = $11`,
                     [
                         memberId,
@@ -497,6 +567,8 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                         toNullIfEmpty(notes),
                         sourceEntry.id,
                         req.userId,
+                        repeatWeeks,
+                        repeatWeeks > 1 ? repeatFrom : null,
                     ]
                 );
                 await replaceParticipants(txQuery, sourceEntry.id, participantIds);
@@ -507,8 +579,9 @@ router.post('/bulk', async (req: AuthRequest, res) => {
 
             const inserted = await client.query(
                 `INSERT INTO schedule_entries (
-                    user_id, family_member_id, schedule_type, title, day_of_week, start_time, end_time, specific_date, location, notes
-                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+                    user_id, family_member_id, schedule_type, title, day_of_week, start_time, end_time, specific_date, location, notes,
+                    repeat_weeks, repeat_from
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
                 RETURNING id`,
                 [
                     req.userId,
@@ -521,6 +594,8 @@ router.post('/bulk', async (req: AuthRequest, res) => {
                     specificDate,
                     toNullIfEmpty(location),
                     toNullIfEmpty(notes),
+                    repeatWeeks,
+                    repeatWeeks > 1 ? repeatFrom : null,
                 ]
             );
 
@@ -642,8 +717,16 @@ router.put('/:id', async (req: AuthRequest, res) => {
             ? toNullIfEmpty(req.body.specific_date) as string | null
             : (current.specific_date ? (typeof current.specific_date === 'string' ? current.specific_date.slice(0, 10) : current.specific_date.toISOString().slice(0, 10)) : null);
 
+        // Every N weeks: kept as it is unless the caller says otherwise. A new
+        // count needs a date to count from; an entry of one date does not repeat.
+        const askedFrom = req.body.repeat_from !== undefined ? req.body.repeat_from : dateOnly(current.repeat_from);
+        const repeatFrom = specificDate ? null : dateOnWeekday(askedFrom, parsedDay);
+        const repeatWeeks = repeatFrom
+            ? parseRepeatWeeks(req.body.repeat_weeks !== undefined ? req.body.repeat_weeks : current.repeat_weeks)
+            : 1;
+
         await ensureMembersBelongToUser(participantIds, req.userId!);
-        await ensureNoOverlap(req.userId!, participantIds, parsedDay, startTime, endTime, specificDate, id);
+        await ensureNoOverlap(req.userId!, participantIds, parsedDay, startTime, endTime, specificDate, id, repeatWeeks, repeatFrom);
 
         await query(
             `UPDATE schedule_entries
@@ -655,7 +738,9 @@ router.put('/:id', async (req: AuthRequest, res) => {
                  end_time = $6,
                  specific_date = $7,
                  location = $8,
-                 notes = $9
+                 notes = $9,
+                 repeat_weeks = $12,
+                 repeat_from = $13
              WHERE id = $10 AND user_id = $11`,
             [
                 memberId,
@@ -669,6 +754,8 @@ router.put('/:id', async (req: AuthRequest, res) => {
                 req.body.notes !== undefined ? toNullIfEmpty(req.body.notes) : current.notes,
                 id,
                 req.userId,
+                repeatWeeks,
+                repeatWeeks > 1 ? repeatFrom : null,
             ]
         );
 

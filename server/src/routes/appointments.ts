@@ -13,6 +13,7 @@ import {
     formatNaiveDateTime,
     formatDateOnly,
     expandRecurringAppointments,
+    normalizeRecurrenceWeekdays,
 } from '../lib/appointmentRecurrence';
 import { normalizeReminderMinutes, applyLegacyReminderFlags, legacyReminderFlags } from '../lib/reminders';
 
@@ -229,6 +230,7 @@ router.post('/', async (req: AuthRequest, res) => {
             recurrence_frequency,
             recurrence_interval,
             recurrence_until,
+            recurrence_weekdays,
             color,
             is_all_day,
         } = req.body;
@@ -272,11 +274,11 @@ router.post('/', async (req: AuthRequest, res) => {
                 user_id, title, description, start_time, end_time, location,
                 family_member_ids, reminder_30min, reminder_1hour, notes,
                 recurrence_frequency, recurrence_interval, recurrence_until, color,
-                is_all_day, reminder_minutes
+                is_all_day, reminder_minutes, recurrence_weekdays
             )
             VALUES (
                 $1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10,
-                $11, $12, $13, $14, $15, $16::integer[]
+                $11, $12, $13, $14, $15, $16::integer[], $17::integer[]
             ) RETURNING *`,
             [
                 req.userId,
@@ -295,6 +297,8 @@ router.post('/', async (req: AuthRequest, res) => {
                 normalizeAppointmentColor(color),
                 Boolean(is_all_day),
                 reminderMinutes,
+                // Chosen weekdays only mean something for a weekly series.
+                recurrenceFrequency === 'weekly' ? normalizeRecurrenceWeekdays(recurrence_weekdays) : null,
             ]
         );
 
@@ -340,6 +344,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
             recurrence_frequency,
             recurrence_interval,
             recurrence_until,
+            recurrence_weekdays,
             color,
             is_all_day,
         } = body;
@@ -420,6 +425,14 @@ router.put('/:id', async (req: AuthRequest, res) => {
                 pushUpdate('recurrence_interval', 1);
                 pushUpdate('recurrence_until', null);
             }
+            // Weekdays belong to a weekly series: any other frequency drops them.
+            if (frequency !== 'weekly') {
+                pushUpdate('recurrence_weekdays', null);
+            }
+        }
+
+        if (recurrence_weekdays !== undefined && (recurrence_frequency === undefined || recurrence_frequency === 'weekly')) {
+            pushUpdate('recurrence_weekdays', normalizeRecurrenceWeekdays(recurrence_weekdays));
         }
 
         if (recurrence_interval !== undefined && recurrence_frequency !== 'none') {

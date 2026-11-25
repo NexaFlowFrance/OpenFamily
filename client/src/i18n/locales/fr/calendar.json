@@ -48,7 +48,11 @@
     "addToBudgetHint": "Crée une écriture budgétaire avec la même date et la même récurrence.",
     "budgetAmount": "Montant ({{currency}})",
     "budgetCategory": "Catégorie du budget",
-    "budgetLinked": "Lié au budget : les changements de date et de récurrence y sont reportés. Supprimer cet événement conserve l’écriture budgétaire."
+    "budgetLinked": "Lié au budget : les changements de date et de récurrence y sont reportés. Supprimer cet événement conserve l’écriture budgétaire.",
+    "repeatOn": "Ces jours-là",
+    "repeatWeekdays": "Du lundi au vendredi",
+    "repeatWeekend": "Week-end",
+    "repeatOnHint": "Sans jour choisi, il se répète le jour de la semaine de sa date."
   },
   "feed": {
     "title": "Exporter le calendrier (iCal)",

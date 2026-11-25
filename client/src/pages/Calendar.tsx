@@ -7,6 +7,7 @@ import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Trash
 import { Card, CardContent, Button, Dialog, Input, Textarea, Badge, Select, DatePicker } from '../components/ui';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
 import { dateLocale, formatTime, orderIsoWeekdays, weekStartsOn, datePattern } from '../i18n/format';
+import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCategories } from '../hooks/useCategories';
@@ -24,6 +25,8 @@ interface Appointment {
     recurrence_frequency?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
     recurrence_interval?: number;
     recurrence_until?: string;
+    /** A weekly series on chosen weekdays, Monday = 1. */
+    recurrence_weekdays?: number[] | null;
     title: string;
     description?: string;
     start_time: string;
@@ -198,6 +201,7 @@ const Calendar: React.FC = () => {
         recurrence_frequency: 'none' as 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly',
         recurrence_interval: 1,
         recurrence_until: '',
+        recurrence_weekdays: [] as number[],
     });
 
     const [recurrenceScopeAction, setRecurrenceScopeAction] = useState<{
@@ -464,6 +468,7 @@ const Calendar: React.FC = () => {
                     delete payload.recurrence_frequency;
                     delete payload.recurrence_interval;
                     delete payload.recurrence_until;
+                    delete payload.recurrence_weekdays;
 
                     await api.put(
                         `/api/appointments/${appointment.id}/occurrences/${appointment.occurrence_date}`,
@@ -547,6 +552,7 @@ const Calendar: React.FC = () => {
             recurrence_until: appointment.recurrence_until
                 ? appointment.recurrence_until.slice(0, 10)
                 : '',
+            recurrence_weekdays: appointment.recurrence_weekdays ?? [],
         });
         setDialogOpen(true);
     };
@@ -597,6 +603,7 @@ const Calendar: React.FC = () => {
             recurrence_frequency: 'none',
             recurrence_interval: 1,
             recurrence_until: '',
+            recurrence_weekdays: [],
         });
     };
 
@@ -1196,6 +1203,7 @@ const Calendar: React.FC = () => {
                                             recurrence_frequency: value as 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly',
                                             recurrence_interval: 1,
                                             recurrence_until: value === 'none' ? '' : prev.recurrence_until,
+                                            recurrence_weekdays: value === 'weekly' ? prev.recurrence_weekdays : [],
                                         }))
                                     }
                                     options={[
@@ -1241,6 +1249,54 @@ const Calendar: React.FC = () => {
                                             </span>
                                         </div>
                                     </div>
+
+                                    {formData.recurrence_frequency === 'weekly' && (
+                                        <div className="sm:col-span-2">
+                                            <p className="mb-1.5 text-label font-medium text-foreground">{t('calendar:form.repeatOn')}</p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {orderIsoWeekdays([1, 2, 3, 4, 5, 6, 7]).map((isoDay) => {
+                                                    const chosen = formData.recurrence_weekdays.includes(isoDay);
+                                                    return (
+                                                        <button
+                                                            key={isoDay}
+                                                            type="button"
+                                                            role="checkbox"
+                                                            aria-checked={chosen}
+                                                            onClick={() => setFormData((prev) => ({
+                                                                ...prev,
+                                                                recurrence_weekdays: chosen
+                                                                    ? prev.recurrence_weekdays.filter((d) => d !== isoDay)
+                                                                    : [...prev.recurrence_weekdays, isoDay].sort((a, b) => a - b),
+                                                            }))}
+                                                            className={cn(
+                                                                'min-h-9 min-w-11 whitespace-nowrap rounded-pill border px-3 py-1 text-caption transition-colors',
+                                                                chosen
+                                                                    ? 'border-primary bg-primary-soft text-primary'
+                                                                    : 'border-border bg-card text-foreground hover:border-border-strong',
+                                                            )}
+                                                        >
+                                                            {weekDaysRaw[isoDay - 1]}
+                                                        </button>
+                                                    );
+                                                })}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData((prev) => ({ ...prev, recurrence_weekdays: [1, 2, 3, 4, 5] }))}
+                                                    className="min-h-9 whitespace-nowrap rounded-pill px-3 py-1 text-caption text-primary hover:underline"
+                                                >
+                                                    {t('calendar:form.repeatWeekdays')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData((prev) => ({ ...prev, recurrence_weekdays: [6, 7] }))}
+                                                    className="min-h-9 whitespace-nowrap rounded-pill px-3 py-1 text-caption text-primary hover:underline"
+                                                >
+                                                    {t('calendar:form.repeatWeekend')}
+                                                </button>
+                                            </div>
+                                            <p className="mt-1.5 text-micro text-muted-foreground">{t('calendar:form.repeatOnHint')}</p>
+                                        </div>
+                                    )}
 
                                     <DatePicker
                                         label={t('calendar:form.repeatUntil')}

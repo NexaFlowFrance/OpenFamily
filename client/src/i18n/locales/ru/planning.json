@@ -47,7 +47,13 @@
     "notes": "Заметки (необязательно)",
     "notesPlaceholder": "Полезные сведения: кабинет, предмет, транспорт…",
     "participants": "Участники",
-    "participantsHint": "Выберите одного или нескольких человек. Цвет занятия определяется по первому участнику."
+    "participantsHint": "Выберите одного или нескольких человек. Цвет занятия определяется по первому участнику.",
+    "repeatEvery": "Повторять каждые",
+    "repeatWeeks_one": "неделю",
+    "repeatWeeks_few": "недели",
+    "repeatWeeks_many": "недель",
+    "repeatWeeks_other": "недели",
+    "repeatHint": "Отсчёт с недели {{date}}."
   },
   "submit": {
     "applyToDays": "Применить к выбранным дням"
@@ -84,5 +90,9 @@
   "appointments": {
     "badge": "СОБЫТИЕ",
     "openCalendar": "Открыть в календаре"
-  }
+  },
+  "everyWeeks_one": "Каждую неделю",
+  "everyWeeks_few": "Каждые {{count}} недели",
+  "everyWeeks_many": "Каждые {{count}} недель",
+  "everyWeeks_other": "Каждые {{count}} недели"
 }

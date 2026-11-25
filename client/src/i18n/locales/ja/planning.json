@@ -45,7 +45,10 @@
     "title": "タイトル",
     "titlePlaceholder": "例：勤務先 - プロダクトチーム / 数学",
     "type": "種類",
-    "weekdays": "月〜金"
+    "weekdays": "月〜金",
+    "repeatEvery": "繰り返しの間隔",
+    "repeatWeeks_other": "週間ごと",
+    "repeatHint": "{{date}} の週から数えます。"
   },
   "loading": "週間予定を読み込み中…",
   "newEntry": "新しい項目",
@@ -80,5 +83,6 @@
     "school": "学校",
     "study": "勉強",
     "work": "仕事"
-  }
+  },
+  "everyWeeks_other": "{{count}} 週間ごと"
 }

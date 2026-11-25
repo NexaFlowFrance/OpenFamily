@@ -48,7 +48,11 @@
     "addToBudgetHint": "Erstellt einen Budgetposten mit demselben Datum und derselben Wiederholung.",
     "budgetAmount": "Budgetbetrag ({{currency}})",
     "budgetCategory": "Budgetkategorie",
-    "budgetLinked": "Mit dem Budget verknüpft: Änderungen an Datum und Wiederholung werden auch dort übernommen. Beim Löschen dieses Termins bleibt der Budgetposten erhalten."
+    "budgetLinked": "Mit dem Budget verknüpft: Änderungen an Datum und Wiederholung werden auch dort übernommen. Beim Löschen dieses Termins bleibt der Budgetposten erhalten.",
+    "repeatOn": "An diesen Tagen",
+    "repeatWeekdays": "Montag bis Freitag",
+    "repeatWeekend": "Wochenende",
+    "repeatOnHint": "Ohne gewählten Tag wiederholt er sich am Wochentag seines Datums."
   },
   "feed": {
     "title": "Kalender exportieren (iCal)",

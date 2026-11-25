@@ -47,7 +47,11 @@
     "notes": "Notizen (optional)",
     "notesPlaceholder": "Nützliche Infos, Raum, Fach, Anfahrt…",
     "participants": "Teilnehmende",
-    "participantsHint": "Wähle eine oder mehrere Personen. Die erste bestimmt die Farbe der Aktivität."
+    "participantsHint": "Wähle eine oder mehrere Personen. Die erste bestimmt die Farbe der Aktivität.",
+    "repeatEvery": "Wiederholen alle",
+    "repeatWeeks_one": "Woche",
+    "repeatWeeks_other": "Wochen",
+    "repeatHint": "Gezählt ab der Woche vom {{date}}."
   },
   "submit": {
     "applyToDays": "Auf ausgewählte Tage anwenden"
@@ -80,5 +84,7 @@
   "appointments": {
     "badge": "TERMIN",
     "openCalendar": "Im Kalender öffnen"
-  }
+  },
+  "everyWeeks_one": "Jede Woche",
+  "everyWeeks_other": "Alle {{count}} Wochen"
 }

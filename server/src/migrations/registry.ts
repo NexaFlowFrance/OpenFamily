@@ -364,4 +364,22 @@ export const coreMigrations: readonly Migration[] = [
             'ALTER TABLE oidc_flows ADD COLUMN native BOOLEAN NOT NULL DEFAULT false',
         ],
     },
+    {
+        // Weekly planning, every N weeks: an entry repeats every week (1) or
+        // every repeat_weeks weeks, counted from repeat_from, the date of its
+        // first occurrence. An entry of one date (specific_date) ignores both.
+        id: 'core/0016-planning-repeat-weeks',
+        statements: [
+            'ALTER TABLE schedule_entries ADD COLUMN repeat_weeks INTEGER NOT NULL DEFAULT 1 CHECK (repeat_weeks BETWEEN 1 AND 52)',
+            'ALTER TABLE schedule_entries ADD COLUMN repeat_from DATE',
+        ],
+    },
+    {
+        // A weekly appointment on chosen weekdays (Monday to Friday, the
+        // weekend...): ISO weekdays, 1 = Monday. Null: the weekday it starts on.
+        id: 'core/0017-appointment-weekdays',
+        statements: [
+            'ALTER TABLE appointments ADD COLUMN recurrence_weekdays INTEGER[]',
+        ],
+    },
 ];

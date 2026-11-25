@@ -48,7 +48,11 @@
     "addToBudgetHint": "Crea un moviment del pressupost amb la mateixa data i recurrència.",
     "budgetAmount": "Import del pressupost ({{currency}})",
     "budgetCategory": "Categoria del pressupost",
-    "budgetLinked": "Enllaçat amb el pressupost: els canvis de data i recurrència també s’hi aplicaran. Si suprimeixes aquest esdeveniment, es conservarà el moviment del pressupost."
+    "budgetLinked": "Enllaçat amb el pressupost: els canvis de data i recurrència també s’hi aplicaran. Si suprimeixes aquest esdeveniment, es conservarà el moviment del pressupost.",
+    "repeatOn": "Aquests dies",
+    "repeatWeekdays": "De dilluns a divendres",
+    "repeatWeekend": "Cap de setmana",
+    "repeatOnHint": "Sense cap dia triat, es repeteix el dia de la setmana de la seva data."
   },
   "feed": {
     "title": "exportar calendari (iCal)",

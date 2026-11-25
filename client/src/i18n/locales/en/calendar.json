@@ -48,7 +48,11 @@
     "addToBudgetHint": "Creates a budget item with the same date and recurrence.",
     "budgetAmount": "Budget amount ({{currency}})",
     "budgetCategory": "Budget category",
-    "budgetLinked": "Linked to the budget: changes to the date and recurrence are applied there too. Deleting this event keeps the budget item."
+    "budgetLinked": "Linked to the budget: changes to the date and recurrence are applied there too. Deleting this event keeps the budget item.",
+    "repeatOn": "On these days",
+    "repeatWeekdays": "Monday to Friday",
+    "repeatWeekend": "Weekend",
+    "repeatOnHint": "Without a day chosen, it repeats on the weekday of its date."
   },
   "feed": {
     "title": "Export calendar (iCal)",

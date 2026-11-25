@@ -47,7 +47,11 @@
     "notes": "Notes (opcional)",
     "notesPlaceholder": "Informació útil, aula, assignatura, transport…",
     "participants": "Participants",
-    "participantsHint": "Tria una persona o més. El color de l'activitat serà el de la primera."
+    "participantsHint": "Tria una persona o més. El color de l'activitat serà el de la primera.",
+    "repeatEvery": "Repeteix cada",
+    "repeatWeeks_one": "setmana",
+    "repeatWeeks_other": "setmanes",
+    "repeatHint": "Comptat a partir de la setmana del {{date}}."
   },
   "submit": {
     "applyToDays": "Aplica als dies seleccionats"
@@ -80,5 +84,7 @@
   "appointments": {
     "badge": "APPT",
     "openCalendar": "Obre al calendari"
-  }
+  },
+  "everyWeeks_one": "Cada setmana",
+  "everyWeeks_other": "Cada {{count}} setmanes"
 }

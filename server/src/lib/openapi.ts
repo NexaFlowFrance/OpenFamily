@@ -450,6 +450,7 @@ export const buildOpenApiDocument = (): Record<string, unknown> => ({
                     recurrence_frequency: { type: 'string' },
                     recurrence_interval: { type: 'integer', minimum: 1 },
                     recurrence_until: nullable('string', { format: 'date' }),
+                    recurrence_weekdays: nullable('array', { items: { type: 'integer', minimum: 1, maximum: 7 }, description: 'For a weekly series: the weekdays it falls on, Monday = 1. Null: the weekday it starts on.' }),
                 },
             },
             MealPlan: {
@@ -505,6 +506,9 @@ export const buildOpenApiDocument = (): Record<string, unknown> => ({
                     family_member_name: { type: 'string' },
                     family_member_color: { type: 'string' },
                     location: nullable('string'),
+                    specific_date: nullable('string', { format: 'date', description: 'Set for an entry of one date only.' }),
+                    repeat_weeks: { type: 'integer', minimum: 1, maximum: 52, description: 'Every N weeks. 1 is every week.' },
+                    repeat_from: nullable('string', { format: 'date', description: 'The date of the first occurrence, when repeat_weeks is more than 1.' }),
                 },
             },
             Note: {

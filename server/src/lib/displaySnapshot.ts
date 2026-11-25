@@ -124,6 +124,8 @@ export const loadDisplaySnapshot = async (userId: string, now: Date = new Date()
                  JOIN family_members fm ON fm.id = se.family_member_id
                  WHERE se.user_id = $1 AND se.day_of_week = $2
                    AND (se.specific_date IS NULL OR se.specific_date = $3::date)
+                   AND (se.specific_date IS NOT NULL OR se.repeat_weeks = 1
+                        OR ($3::date >= se.repeat_from AND ($3::date - se.repeat_from) % (7 * se.repeat_weeks) = 0))
                    AND NOT EXISTS (
                        SELECT 1 FROM schedule_entry_exceptions e
                        WHERE e.entry_id = se.id AND e.excluded_date = $3::date

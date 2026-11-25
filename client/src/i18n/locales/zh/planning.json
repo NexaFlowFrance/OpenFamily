@@ -47,7 +47,10 @@
     "notes": "备注（可选）",
     "notesPlaceholder": "实用信息、教室、科目、交通等……",
     "participants": "参与者",
-    "participantsHint": "可选择一位或多位成员。第一位决定该活动的颜色。"
+    "participantsHint": "可选择一位或多位成员。第一位决定该活动的颜色。",
+    "repeatEvery": "重复间隔",
+    "repeatWeeks_other": "周",
+    "repeatHint": "从 {{date}} 所在的那一周开始计算。"
   },
   "submit": {
     "applyToDays": "应用到所选日期"
@@ -80,5 +83,6 @@
   "appointments": {
     "badge": "预约",
     "openCalendar": "在日历中打开"
-  }
+  },
+  "everyWeeks_other": "每 {{count}} 周"
 }

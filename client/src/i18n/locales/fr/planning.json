@@ -47,7 +47,11 @@
     "notes": "Notes (facultatif)",
     "notesPlaceholder": "Informations utiles, salle, matière, transport…",
     "participants": "Participants",
-    "participantsHint": "Choisissez une ou plusieurs personnes. La première donne la couleur de l'activité."
+    "participantsHint": "Choisissez une ou plusieurs personnes. La première donne la couleur de l'activité.",
+    "repeatEvery": "Répéter toutes les",
+    "repeatWeeks_one": "semaine",
+    "repeatWeeks_other": "semaines",
+    "repeatHint": "Compté à partir de la semaine du {{date}}."
   },
   "submit": {
     "applyToDays": "Appliquer aux jours sélectionnés"
@@ -80,5 +84,7 @@
   "appointments": {
     "badge": "RDV",
     "openCalendar": "Ouvrir dans le calendrier"
-  }
+  },
+  "everyWeeks_one": "Chaque semaine",
+  "everyWeeks_other": "Toutes les {{count}} semaines"
 }

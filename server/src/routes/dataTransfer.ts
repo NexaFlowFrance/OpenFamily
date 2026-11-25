@@ -69,12 +69,12 @@ const IMPORT_COLUMNS: Record<string, ReadonlySet<string>> = {
         'id', 'title', 'description', 'start_time', 'end_time', 'location',
         'family_member_ids', 'reminder_30min', 'reminder_1hour', 'reminder_minutes', 'notes',
         'caldav_uid', 'recurrence_frequency', 'recurrence_interval',
-        'recurrence_until', 'color', 'is_all_day', 'created_at', 'updated_at',
+        'recurrence_until', 'recurrence_weekdays', 'color', 'is_all_day', 'created_at', 'updated_at',
     ]),
     schedule_entries: new Set([
         'id', 'family_member_id', 'schedule_type', 'title', 'day_of_week',
         'start_time', 'end_time', 'specific_date', 'location', 'notes',
-        'created_at', 'updated_at',
+        'repeat_weeks', 'repeat_from', 'created_at', 'updated_at',
     ]),
     reward_transactions: new Set([
         'id', 'member_id', 'task_id', 'points', 'type', 'note', 'created_at',

@@ -48,7 +48,11 @@
     "addToBudgetHint": "同じ日付と繰り返しで予算項目を作成します。",
     "budgetAmount": "予算額（{{currency}}）",
     "budgetCategory": "予算カテゴリ",
-    "budgetLinked": "予算と連携しています：日付と繰り返しの変更は予算にも反映されます。この予定を削除しても予算項目は残ります。"
+    "budgetLinked": "予算と連携しています：日付と繰り返しの変更は予算にも反映されます。この予定を削除しても予算項目は残ります。",
+    "repeatOn": "繰り返す曜日",
+    "repeatWeekdays": "月曜から金曜",
+    "repeatWeekend": "週末",
+    "repeatOnHint": "曜日を選ばない場合は、日付と同じ曜日に繰り返します。"
   },
   "feed": {
     "title": "カレンダーを書き出し（iCal）",

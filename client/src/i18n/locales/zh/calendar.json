@@ -48,7 +48,11 @@
     "addToBudgetHint": "使用相同日期和重复规则创建一笔预算记录。",
     "budgetAmount": "金额（{{currency}}）",
     "budgetCategory": "预算类别",
-    "budgetLinked": "已关联到预算：日期和重复规则的更改会同步到预算。删除此日程不会删除预算记录。"
+    "budgetLinked": "已关联到预算：日期和重复规则的更改会同步到预算。删除此日程不会删除预算记录。",
+    "repeatOn": "在这些日子",
+    "repeatWeekdays": "周一至周五",
+    "repeatWeekend": "周末",
+    "repeatOnHint": "未选择日期时，按其日期所在的星期几重复。"
   },
   "feed": {
     "title": "导出日历（iCal）",

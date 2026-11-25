@@ -47,7 +47,11 @@
     "notes": "Notas (opcional)",
     "notesPlaceholder": "Información útil, aula, asignatura, transporte…",
     "participants": "Participantes",
-    "participantsHint": "Elige una o más personas. La primera da color a la actividad."
+    "participantsHint": "Elige una o más personas. La primera da color a la actividad.",
+    "repeatEvery": "Repetir cada",
+    "repeatWeeks_one": "semana",
+    "repeatWeeks_other": "semanas",
+    "repeatHint": "Contado desde la semana del {{date}}."
   },
   "submit": {
     "applyToDays": "Aplicar a los días seleccionados"
@@ -80,5 +84,7 @@
   "appointments": {
     "badge": "EVENTO",
     "openCalendar": "Abrir en el calendario"
-  }
+  },
+  "everyWeeks_one": "Cada semana",
+  "everyWeeks_other": "Cada {{count}} semanas"
 }

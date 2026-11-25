@@ -47,7 +47,11 @@
     "notes": "Observações (opcional)",
     "notesPlaceholder": "Informações úteis, sala, transporte…",
     "participants": "Participantes",
-    "participantsHint": "Escolha uma ou mais pessoas. A primeira define a cor da atividade."
+    "participantsHint": "Escolha uma ou mais pessoas. A primeira define a cor da atividade.",
+    "repeatEvery": "Repetir a cada",
+    "repeatWeeks_one": "semana",
+    "repeatWeeks_other": "semanas",
+    "repeatHint": "Contado a partir da semana de {{date}}."
   },
   "submit": {
     "applyToDays": "Aplicar aos dias selecionados"
@@ -80,5 +84,7 @@
   "appointments": {
     "badge": "COMPR",
     "openCalendar": "Abrir nos compromissos"
-  }
+  },
+  "everyWeeks_one": "Toda semana",
+  "everyWeeks_other": "A cada {{count}} semanas"
 }

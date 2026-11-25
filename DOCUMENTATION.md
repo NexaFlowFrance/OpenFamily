@@ -73,6 +73,7 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 - **Rappels automatiques** configurables (30 min avant, 1h avant)
 - Association à un membre de la famille
 - Notes complémentaires par événement
+- **Répétition** : chaque jour, semaine, mois ou année, ou tous les N (toutes les deux semaines, tous les dix jours). Une répétition hebdomadaire peut tomber sur des jours choisis : du lundi au vendredi, le week-end, ou les jours de votre choix.
 - **Anniversaires** : chaque membre dont la date de naissance est renseignée sur la page Famille a son anniversaire dans le calendrier, chaque année, avec l'âge atteint. Il n'y a rien à saisir. Les anniversaires apparaissent aussi dans le kiosque, les liens d'affichage et le flux iCal, et toute la famille reçoit une notification le matin du jour même. Une personne née un 29 février est fêtée le 28 les années sans 29. Pour quelqu'un qui n'est pas dans la famille (grands-parents, amis), créez un rendez-vous répété chaque année.
 
 ### 🗓️ Planning hebdomadaire
@@ -80,6 +81,7 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 - Support de deux types : emploi du temps **professionnel** et **scolaire**
 - Créneaux horaires par jour de la semaine (lundi → dimanche)
 - Indication du lieu pour chaque créneau
+- Un créneau revient chaque semaine, une seule semaine, ou **toutes les N semaines** à partir de la semaine affichée. Deux créneaux une semaine sur deux, en alternance, peuvent occuper la même heure (garde alternée, équipes).
 
 ### 🍳 Bibliothèque de recettes
 - Ajout de recettes avec ingrédients, instructions pas à pas et photo

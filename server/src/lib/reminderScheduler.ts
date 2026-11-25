@@ -7,6 +7,7 @@ import { expandRecurringAppointments } from './appointmentRecurrence';
 import { ALL_DAY_REMINDER_HOUR, MAX_REMINDER_MINUTES, normalizeReminderMinutes } from './reminders';
 import { Language, writingLanguage } from './languages';
 import { checkBirthdays } from './birthdays';
+import { checkRecurringTasks } from './taskRecurrence';
 import { dayInZone, instantInZone, isTimeZone, serverTimeZone } from './timeZone';
 
 interface Occurrence {
@@ -225,6 +226,11 @@ export function startReminderScheduler(): void {
     // Birthdays: a notice on the morning of the day, on each family's clocks.
     cron.schedule('*/10 * * * *', () => {
         void checkBirthdays();
+    }, { timezone: tz });
+    // Recurring tasks: done ones are opened again when their next day comes,
+    // for the screens that do not read the task list (kiosk, display links).
+    cron.schedule('*/5 * * * *', () => {
+        void checkRecurringTasks();
     }, { timezone: tz });
 
     logger.info('reminder.scheduler_started', { timezone: tz });

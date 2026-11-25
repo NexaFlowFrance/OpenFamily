@@ -60,6 +60,9 @@ OpenFamily centralise l'ensemble de l'organisation d'un foyer en un seul outil. 
 ### ✅ Gestion des tâches
 - Création de tâches avec titre, description et date d'échéance
 - **Tâches récurrentes** : quotidiennes, hebdomadaires, mensuelles ou annuelles
+  - Une tâche récurrente cochée redevient à faire d'elle-même : le lendemain pour une tâche quotidienne, le lundi suivant pour une hebdomadaire, le premier du mois suivant pour une mensuelle. Les points déjà gagnés sont conservés, et la tâche peut en rapporter de nouveau.
+  - Avec une date d'échéance, la tâche suit cette date : elle revient le lendemain de l'échéance, et l'échéance passe à la suivante (même jour de la semaine, même jour du mois).
+  - Une tâche cochée par un enfant et en attente de validation attend le parent.
 - **3 niveaux de priorité** : Basse, Moyenne, Haute
 - **Assignation** à un membre de la famille
 - Suivi de l'avancement et statistiques de complétion

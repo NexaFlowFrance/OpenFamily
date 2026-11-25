@@ -4,6 +4,7 @@ import { authMiddleware, AuthRequest, isParentAccount, requireParent } from '../
 import { toNullIfEmpty } from '../lib/normalize';
 import { broadcast } from '../lib/broadcaster';
 import { getFamilyCategories } from './categories';
+import { reopenRecurringTasks } from '../lib/taskRecurrence';
 
 /**
  * A task's category: empty means none; anything else must be one of the
@@ -72,6 +73,9 @@ const enrichTasksWithMembers = async (tasks: any[], userId: string) => {
 // Get all tasks
 router.get('/', async (req: AuthRequest, res) => {
     try {
+        // A recurring chore done yesterday is to do again today: the scheduler
+        // opens it within minutes, the list opens it at once.
+        await reopenRecurringTasks(new Date(), req.userId!);
         const result = await query(
             'SELECT * FROM tasks WHERE user_id = $1 ORDER BY due_date ASC NULLS LAST, created_at DESC',
             [req.userId]

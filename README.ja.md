@@ -200,9 +200,9 @@ npm run smoke:api
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:2.2.0
+    image: ghcr.io/nexaflowfrance/openfamily-server:2.3.0
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:2.2.0
+    image: ghcr.io/nexaflowfrance/openfamily-client:2.3.0
 ```
 
 そのうえで `--build` なしで `docker compose pull server client && docker compose up -d` を実行します。イメージ名には `-server` / `-client` の接尾辞が必要です。`REGISTRATION_ENABLED` のような設定はサーバーが起動時に読むため、公開イメージの再ビルドは要りません。

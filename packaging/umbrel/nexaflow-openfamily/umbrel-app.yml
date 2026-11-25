@@ -4,7 +4,7 @@ name: OpenFamily
 tagline: The family organizer you host yourself
 icon: https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/client/public/icon-512.png
 category: files
-version: "2.2.0"
+version: "2.3.0"
 port: 8480
 description: >-
   OpenFamily keeps the whole household organized from your own server: a shared calendar with reminders, tasks and chores with a rewards system for kids, shopping lists updated live on every phone, meal planning with a recipe book, a family budget and a kiosk mode for a wall tablet.
@@ -27,7 +27,7 @@ gallery:
   - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docs/screenshots/shopping.png
   - https://raw.githubusercontent.com/NexaFlowFrance/OpenFamily/main/docs/screenshots/meals.png
 releaseNotes: >-
-  Birthdays appear in the calendar from the family's dates of birth, and a new pantry keeps track of what is at home, with use-by dates and barcodes.
+  A new look with a navigation bar you place where you like, a calmer dark theme and a short setup on first launch. Recurring tasks come back by themselves, planning entries can repeat every N weeks, and the interface is available in Japanese.
 dependencies: []
 path: ""
 defaultUsername: ""

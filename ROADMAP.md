@@ -144,11 +144,29 @@ can shift based on feedback: issues and discussions are welcome.
   complete to be merged, the app shows the rest in English; guides for
   [contributing](CONTRIBUTING.md) and [translating](TRANSLATING.md), issue
   forms, and GitHub Discussions.
+- **A new look, and yours to adjust** *(v2.3)*: a navigation bar at the bottom,
+  on the left or on the right, or the sidebar; a neutral dark theme; a home
+  page that shows tasks, meals, shopping, birthdays and the pantry; an accent
+  colour, corner style and text size per device; a short setup on first
+  launch; pages that use the width of the screen.
+- **In the app catalog of home servers** *(v2.3)*: Home Assistant, Umbrel,
+  CasaOS and ZimaOS, Runtipi and Unraid install OpenFamily from a repository
+  each.
+- **Recurring tasks that come back** *(v2.3)*: a daily, weekly or monthly task
+  is to do again at its next occurrence, and earns its points again.
+- **More ways to repeat** *(v2.3)*: a planning entry every N weeks, with
+  alternate weeks sharing an hour; a weekly appointment on chosen weekdays.
+- **Single sign-on in the Android app** *(v2.3)*: the sign-in happens in the
+  phone's browser and comes back to the app.
+- **Immich albums on the kiosk** *(v2.3)*: all photos, the favourites, or
+  chosen albums.
+- **Japanese** *(v2.3)*: the interface, the server's texts and the guides,
+  contributed by Hyd3-14; dates in Chinese and Japanese order.
 
 ## Under consideration
 
 - **More languages**: the interface is available in English, French, German,
-  Portuguese, Russian, Spanish, Catalan and Simplified Chinese. The i18n
+  Portuguese, Russian, Spanish, Catalan, Simplified Chinese and Japanese. The i18n
   infrastructure is in place (namespaced JSON locales); the goal is to add
   Italian, Dutch and more, ideally through a community translation workflow
   (e.g. Weblate). Contributions welcome.

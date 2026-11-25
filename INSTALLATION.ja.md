@@ -68,7 +68,7 @@ docker stop openfamily && docker rm openfamily
 docker run -d --name openfamily ...   # the same command as the first time
 ```
 
-使いたいバージョンに留めるには、`latest` の代わりにその番号を使ってください。例: `ghcr.io/nexaflowfrance/openfamily:2.2.0`。
+使いたいバージョンに留めるには、`latest` の代わりにその番号を使ってください。例: `ghcr.io/nexaflowfrance/openfamily:2.3.0`。
 
 **バックアップと復元。** 2つのファイルにすべてが入っています。
 
@@ -142,9 +142,9 @@ nano .env
 ```yaml
 services:
   server:
-    image: ghcr.io/nexaflowfrance/openfamily-server:2.2.0
+    image: ghcr.io/nexaflowfrance/openfamily-server:2.3.0
   client:
-    image: ghcr.io/nexaflowfrance/openfamily-client:2.2.0
+    image: ghcr.io/nexaflowfrance/openfamily-client:2.3.0
 ```
 
 ```bash

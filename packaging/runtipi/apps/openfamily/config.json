@@ -7,8 +7,8 @@
   "port": 8480,
   "categories": ["utilities"],
   "description": "OpenFamily is a family organizer for your home server. It brings the whole household together in one app: a shared calendar, tasks and chores with a rewards system for kids, shopping lists, meal planning with a recipe book and recipe import, a family budget, a wall-mounted kiosk mode and an optional AI assistant. Android app, documented API with webhooks, interface in eight languages.",
-  "tipi_version": 4,
-  "version": "2.2.0",
+  "tipi_version": 5,
+  "version": "2.3.0",
   "source": "https://github.com/NexaFlowFrance/OpenFamily",
   "website": "https://openfamily.fr/",
   "exposable": true,
@@ -67,5 +67,5 @@
     }
   ],
   "created_at": 1781308800000,
-  "updated_at": 1794787200000
+  "updated_at": 1795564800000
 }

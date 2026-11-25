@@ -7,7 +7,7 @@ name: openfamily
 services:
   openfamily:
     container_name: openfamily
-    image: ghcr.io/nexaflowfrance/openfamily:2.2.0
+    image: ghcr.io/nexaflowfrance/openfamily:2.3.0
     restart: unless-stopped
     environment:
       # true lets anyone who reaches the app create an account. Set it to

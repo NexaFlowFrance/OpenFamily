@@ -22,7 +22,7 @@ Every definition runs the same image, `ghcr.io/nexaflowfrance/openfamily`: the w
 - **One folder to keep**: `/data`, the database and the secrets.
 - **No secret to prepare**: the key that signs sessions, the database password and the push notification keys are generated on the first start and stored in `/data/openfamily.env`.
 - **Settings are optional**: `REGISTRATION_ENABLED`, the `SMTP_*`, `OIDC_*` and other variables of [INSTALLATION.md](../INSTALLATION.md) are passed as environment variables where the catalog allows it. Home Assistant hands its two settings over in `/data/options.json`, which the image reads at start.
-- **Versions**: the definitions name a release (`2.2.0`), which catalogs prefer to `latest`. Unraid is the exception: its users expect `latest` and the update button that goes with it. Umbrel wants the image named by tag and digest (`image: ...:2.2.0@sha256:...`); `docker buildx imagetools inspect ghcr.io/nexaflowfrance/openfamily:2.2.0` prints the digest of a release.
+- **Versions**: the definitions name a release (`2.3.0`), which catalogs prefer to `latest`. Unraid is the exception: its users expect `latest` and the update button that goes with it. Umbrel wants the image named by tag and digest (`image: ...:2.2.0@sha256:...`); `docker buildx imagetools inspect ghcr.io/nexaflowfrance/openfamily:2.2.0` prints the digest of a release.
 
 ## What was checked, and what was not
 
